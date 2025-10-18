@@ -1,3 +1,5 @@
+import "package:dotted_border/dotted_border.dart";
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -54,6 +56,14 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     }
   }
 
+  void _onUncategorizedSelected() {
+    // Clear all selected collections when uncategorized is selected
+    final collectionIdsCopy = Set<int>.from(widget.selectedCollectionIds);
+    for (final id in collectionIdsCopy) {
+      widget.onToggleCollection(id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -62,70 +72,36 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.addToCollection,
-          style: textTheme.h3.copyWith(
-            color: colorScheme.textBase,
-          ),
+        TitleBarTitleWidget(
+          title: context.l10n.addToCollection,
         ),
-        const SizedBox(height: 12),
-        _availableCollections.isEmpty
-            ? InkWell(
-                onTap: _createNewCollection,
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: colorScheme.strokeMuted,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        size: 16,
-                        color: colorScheme.textMuted,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        context.l10n.newCollection,
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            : Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  // Collection chips
-                  for (final collection in _availableCollections)
-                    _buildCollectionChip(
-                      collection: collection,
-                      isSelected:
-                          widget.selectedCollectionIds.contains(collection.id),
-                      onTap: () => widget.onToggleCollection(collection.id),
-                      colorScheme: colorScheme,
-                      textTheme: textTheme,
-                    ),
-                  // "New collection" chip
-                  _buildNewCollectionChip(
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                  ),
-                ],
+        const SizedBox(height: 24),
+        Wrap(
+          spacing: 8,
+          runSpacing: 12,
+          children: [
+            _buildUncategorizedChip(
+              context.l10n.uncategorized,
+              widget.selectedCollectionIds.isEmpty,
+              _onUncategorizedSelected,
+              colorScheme,
+              textTheme,
+            ),
+            for (final collection in _availableCollections)
+              _buildCollectionChip(
+                collection: collection,
+                isSelected:
+                    widget.selectedCollectionIds.contains(collection.id),
+                onTap: () => widget.onToggleCollection(collection.id),
+                colorScheme: colorScheme,
+                textTheme: textTheme,
               ),
+            _buildNewCollectionChip(
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -139,19 +115,16 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
   }) {
     final collectionName = collection.name ?? context.l10n.unnamedCollection;
 
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 18,
-          vertical: 14,
-        ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? colorScheme.primary300.withOpacity(0.15)
+              ? colorScheme.primary700.withValues(alpha: 0.2)
               : colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
           border: Border.all(
             color: isSelected ? colorScheme.primary700 : Colors.transparent,
             width: 1,
@@ -160,8 +133,39 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
         child: Text(
           collectionName,
           style: textTheme.small.copyWith(
-            color: isSelected ? colorScheme.primary700 : colorScheme.textMuted,
-            fontWeight: FontWeight.w500,
+            color: isSelected ? colorScheme.primary700 : colorScheme.textBase,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUncategorizedChip(
+    String name,
+    bool isSelected,
+    VoidCallback onTap,
+    colorScheme,
+    textTheme,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorScheme.primary700.withValues(alpha: 0.2)
+              : colorScheme.fillFaint,
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary700 : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          name,
+          style: textTheme.small.copyWith(
+            color: isSelected ? colorScheme.primary700 : colorScheme.textBase,
           ),
         ),
       ),
@@ -172,33 +176,30 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     required colorScheme,
     required textTheme,
   }) {
-    return InkWell(
-      onTap: _createNewCollection,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: colorScheme.strokeMuted,
-            width: 1,
-          ),
+    return GestureDetector(
+      onTap: () async {
+        await _createNewCollection();
+      },
+      child: DottedBorder(
+        options: const RoundedRectDottedBorderOptions(
+          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          strokeWidth: 1,
+          color: Color(0xFF6B6B6B),
+          dashPattern: [5, 5],
+          radius: Radius.circular(24),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.add,
-              size: 16,
+              Icons.add_rounded,
+              size: 18,
               color: colorScheme.textMuted,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               context.l10n.newCollection,
-              style: textTheme.small.copyWith(
+              style: textTheme.body.copyWith(
                 color: colorScheme.textMuted,
                 fontWeight: FontWeight.w500,
               ),

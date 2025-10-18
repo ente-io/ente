@@ -44,10 +44,20 @@ class InformationPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-            child: TitleBarTitleWidget(
-              title: "Save Information",
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const TitleBarTitleWidget(
+                  title: "Save Information",
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "Save important information that can be shared and passed down to loved ones.",
+                  style: textTheme.smallMuted,
+                ),
+              ],
             ),
           ),
           SingleChildScrollView(

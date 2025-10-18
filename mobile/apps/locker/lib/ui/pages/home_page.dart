@@ -20,6 +20,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/collection_flex_grid_view.dart";
 import "package:locker/ui/collections/section_title.dart";
+import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
@@ -730,7 +731,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       valueListenable: _isFabOpen,
       builder: (context, isFabOpen, child) {
         final colorScheme = getEnteColorScheme(context);
-        final textTheme = getEnteTextTheme(context);
 
         return Stack(
           children: [
@@ -746,127 +746,67 @@ class _HomePageState extends UploaderPageState<HomePage>
             Positioned(
               right: 64,
               bottom: 64,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (isFabOpen)
-                    SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 1),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: _animationController,
-                          curve: Curves.easeOutCubic,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _animationController,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
+                child: FadeTransition(
+                  opacity: _animation,
+                  child: Container(
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: colorScheme.backdropBase,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: colorScheme.strokeFaint),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 15,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
-                      child: FadeTransition(
-                        opacity: _animation,
-                        child: Container(
-                          width: 200,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: colorScheme.strokeFaint),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 15,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Material(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(15),
-                                  topRight: Radius.circular(15),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    _toggleFab();
-                                    _showInformationDialog();
-                                  },
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(15),
-                                    topRight: Radius.circular(15),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 16,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        HugeIcon(
-                                          icon: HugeIcons.strokeRoundedFile01,
-                                          color: colorScheme.primary700,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            context.l10n.saveInformation,
-                                            style: textTheme.body,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: colorScheme.strokeFaint,
-                              ),
-                              Material(
-                                borderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(15),
-                                  bottomRight: Radius.circular(15),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    _toggleFab();
-                                    addFile();
-                                  },
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 16,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        HugeIcon(
-                                          icon:
-                                              HugeIcons.strokeRoundedFileUpload,
-                                          color: colorScheme.primary700,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Text(
-                                            context.l10n.saveDocument,
-                                            style: textTheme.body,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
-                ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        MenuItemWidget(
+                          label: context.l10n.saveInformation,
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedFile01,
+                            color: colorScheme.primary700,
+                            size: 20,
+                          ),
+                          isFirst: true,
+                          isLast: false,
+                          onTap: () {
+                            _toggleFab();
+                            _showInformationDialog();
+                          },
+                        ),
+                        MenuItemWidget(
+                          label: context.l10n.saveDocument,
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedFileUpload,
+                            color: colorScheme.primary700,
+                            size: 20,
+                          ),
+                          isFirst: false,
+                          isLast: true,
+                          onTap: () {
+                            _toggleFab();
+                            addFile();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(

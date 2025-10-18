@@ -86,12 +86,15 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     try {
       final collections = await CollectionService.instance.getCollections();
       setState(() {
-        _availableCollections = collections;
+        // Filter out uncategorized collection (it will be shown separately)
+        _availableCollections = collections
+            .where((c) => c.type != CollectionType.uncategorized)
+            .toList();
         // Pre-select a default collection if available
-        if (collections.isNotEmpty) {
-          final defaultCollection = collections.firstWhere(
+        if (_availableCollections.isNotEmpty) {
+          final defaultCollection = _availableCollections.firstWhere(
             (c) => c.name == context.l10n.informationCollectionName,
-            orElse: () => collections.first,
+            orElse: () => _availableCollections.first,
           );
           _selectedCollectionIds = {defaultCollection.id};
         }

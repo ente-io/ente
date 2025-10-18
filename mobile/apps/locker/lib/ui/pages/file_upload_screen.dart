@@ -223,7 +223,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             height: 60,
             child: _buildFileIcon(fileName),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 6),
           Flexible(
             child: Text(
               fileName,
@@ -309,9 +309,11 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary300 : colorScheme.fillFaint,
+          color: isSelected
+              ? colorScheme.primary700.withValues(alpha: 0.2)
+              : colorScheme.fillFaint,
           borderRadius: const BorderRadius.all(Radius.circular(24.0)),
           border: Border.all(
             color: isSelected ? colorScheme.primary700 : Colors.transparent,
@@ -344,7 +346,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
       },
       child: DottedBorder(
         options: const RoundedRectDottedBorderOptions(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           strokeWidth: 1,
           color: Color(0xFF6B6B6B),
           dashPattern: [5, 5],
