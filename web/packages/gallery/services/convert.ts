@@ -9,10 +9,6 @@ import { heicToJPEG } from "ente-media/heic-convert";
 import { detectFileTypeInfo } from "../utils/detect-type";
 import { convertToMP4 } from "./ffmpeg";
 
-// Note: For Safari detection, we reuse the existing HEIC support probe below.
-// As of 2025, only Safari supports HEIC natively, so `isHEICSupported()` is a
-// practical proxy for Safari engines where stricter blob MIME handling applies.
-
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
  * browser (likely) knows how to render (in an img tag, or on the canvas).
@@ -200,6 +196,9 @@ export const playableVideoURL = async (
     // Prefer extension-based lookup first (fast, no sniff). Fallback to
     // content detection only if extension is unknown.
     let typedBlob: Blob = videoBlob;
+    // Note: We use isHEICSupported() as a Safari proxy. As of 2025, Safari is
+    // the only browser with native HEIC support, so gating here effectively
+    // targets Safari engines where stricter blob MIME handling applies.
     if (await isHEICSupported()) {
         const ext = lowercaseExtension(videoFileName);
         const known = KnownFileTypeInfos.find((f) => f.extension === ext);
@@ -211,8 +210,13 @@ export const playableVideoURL = async (
                 const detected = await detectFileTypeInfo(
                     new File([videoBlob], videoFileName),
                 );
-                if (detected?.mimeType && detected.mimeType !== videoBlob.type) {
-                    typedBlob = new Blob([videoBlob], { type: detected.mimeType });
+                if (
+                    detected.mimeType &&
+                    detected.mimeType !== videoBlob.type
+                ) {
+                    typedBlob = new Blob([videoBlob], {
+                        type: detected.mimeType,
+                    });
                 }
             } catch {
                 // Best-effort only; fall back to original blob on detection failure.
