@@ -98,9 +98,9 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         if (scrollInfo is UserScrollNotification && scrollInfo.depth == 0) {
           if (widget.selectedFiles.files.isNotEmpty &&
               _sheetController.isAttached &&
-              _sheetController.size > 0.20) {
+              _sheetController.size > 0.25) {
             _sheetController.animateTo(
-              0.20,
+              0.25,
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
             );

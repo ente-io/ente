@@ -55,11 +55,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
   String _searchQuery = "";
   final _selectedAlbum = SelectedAlbums();
   late final ScrollController _scrollController;
-
-  bool _isCollapsed = false;
-  bool _hasCollapsedOnce = false;
-  bool _hasAlbumsSelected = false;
-  Timer? _selectionTimer;
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
 
   @override
   void initState() {
@@ -79,22 +76,14 @@ class _CollectionListPageState extends State<CollectionListPage> {
   }
 
   void _onSelectionChanged() {
-    final hasSelection = _selectedAlbum.albums.isNotEmpty;
-
-    if (hasSelection && !_hasAlbumsSelected) {
-      setState(() {
-        _isCollapsed = false;
-        _hasAlbumsSelected = true;
-      });
-
-      _selectionTimer?.cancel();
-      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
-    } else if (!hasSelection && _hasAlbumsSelected) {
-      setState(() {
-        _hasAlbumsSelected = false;
-        _isCollapsed = false;
-      });
-      _selectionTimer?.cancel();
+    if (_selectedAlbum.albums.isNotEmpty) {
+      if (_sheetController.isAttached) {
+        _sheetController.animateTo(
+          0.35,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
@@ -103,7 +92,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
     _collectionUpdatesSubscription.cancel();
     _scrollController.dispose();
     _selectedAlbum.removeListener(_onSelectionChanged);
-    _selectionTimer?.cancel();
     super.dispose();
   }
 
@@ -123,20 +111,15 @@ class _CollectionListPageState extends State<CollectionListPage> {
             NotificationListener<ScrollNotification>(
               onNotification: (scrollInfo) {
                 if (scrollInfo is UserScrollNotification &&
-                    _hasAlbumsSelected) {
-                  final shouldAllowCollapse =
-                      _selectionTimer == null || !_selectionTimer!.isActive;
-
-                  if (shouldAllowCollapse &&
-                      (!_hasCollapsedOnce || !_isCollapsed) &&
-                      (scrollInfo.direction == ScrollDirection.forward ||
-                          scrollInfo.direction == ScrollDirection.reverse)) {
-                    if (mounted && _hasAlbumsSelected) {
-                      setState(() {
-                        _isCollapsed = true;
-                        _hasCollapsedOnce = true;
-                      });
-                    }
+                    scrollInfo.depth == 0) {
+                  if (_selectedAlbum.albums.isNotEmpty &&
+                      _sheetController.isAttached &&
+                      _sheetController.size > 0.20) {
+                    _sheetController.animateTo(
+                      0.20,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
                   }
                 }
                 return false;
@@ -179,16 +162,23 @@ class _CollectionListPageState extends State<CollectionListPage> {
                 ),
               ),
             ),
-            AlbumSelectionOverlayBar(
-              _selectedAlbum,
-              widget.sectionType,
-              collections!,
-              showSelectAllButton: true,
-              isCollapsed: _isCollapsed,
-              onExpand: () {
-                setState(() {
-                  _isCollapsed = false;
-                });
+            DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: 0.35,
+              minChildSize: 0.20,
+              maxChildSize: 0.35,
+              snap: true,
+              snapSizes: const [0.20, 0.35],
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: AlbumSelectionOverlayBar(
+                    _selectedAlbum,
+                    widget.sectionType,
+                    collections!,
+                    showSelectAllButton: true,
+                  ),
+                );
               },
             ),
           ],

@@ -51,6 +51,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   late StreamSubscription<FavoritesServiceInitCompleteEvent>
       _favoritesServiceInitCompleteEvent;
   late StreamSubscription<AlbumSortOrderChangeEvent> _albumSortOrderChangeEvent;
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
 
   String _loadReason = "init";
   final _scrollController = ScrollController();
@@ -59,11 +61,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     executionInterval: const Duration(seconds: 5),
     leading: true,
   );
-
-  bool _isCollapsed = false;
-  bool _hasCollapsedOnce = false;
-  bool _hasAlbumsSelected = false;
-  Timer? _selectionTimer;
 
   static const int _kOnEnteItemLimitCount = 12;
   @override
@@ -107,22 +104,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
   }
 
   void _onSelectionChanged() {
-    final hasSelection = widget.selectedAlbums?.albums.isNotEmpty ?? false;
-
-    if (hasSelection && !_hasAlbumsSelected) {
-      setState(() {
-        _isCollapsed = false;
-        _hasAlbumsSelected = true;
-      });
-
-      _selectionTimer?.cancel();
-      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
-    } else if (!hasSelection && _hasAlbumsSelected) {
-      setState(() {
-        _hasAlbumsSelected = false;
-        _isCollapsed = false;
-      });
-      _selectionTimer?.cancel();
+    if (widget.selectedAlbums!.albums.isNotEmpty) {
+      if (_sheetController.isAttached) {
+        _sheetController.animateTo(
+          0.40,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
@@ -159,20 +148,15 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
       children: [
         NotificationListener<ScrollNotification>(
           onNotification: (scrollInfo) {
-            if (scrollInfo is UserScrollNotification && _hasAlbumsSelected) {
-              final shouldAllowCollapse =
-                  _selectionTimer == null || !_selectionTimer!.isActive;
-
-              if (shouldAllowCollapse &&
-                  (!_hasCollapsedOnce || !_isCollapsed) &&
-                  (scrollInfo.direction == ScrollDirection.forward ||
-                      scrollInfo.direction == ScrollDirection.reverse)) {
-                if (mounted && _hasAlbumsSelected) {
-                  setState(() {
-                    _isCollapsed = true;
-                    _hasCollapsedOnce = true;
-                  });
-                }
+            if (scrollInfo is UserScrollNotification && scrollInfo.depth == 0) {
+              if (widget.selectedAlbums!.albums.isNotEmpty &&
+                  _sheetController.isAttached &&
+                  _sheetController.size > 0.20) {
+                _sheetController.animateTo(
+                  0.20,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
               }
             }
             return false;
@@ -274,16 +258,23 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
             ],
           ),
         ),
-        AlbumSelectionOverlayBar(
-          widget.selectedAlbums!,
-          UISectionType.homeCollections,
-          collections,
-          showSelectAllButton: false,
-          isCollapsed: _isCollapsed,
-          onExpand: () {
-            setState(() {
-              _isCollapsed = false;
-            });
+        DraggableScrollableSheet(
+          controller: _sheetController,
+          initialChildSize: 0.40,
+          minChildSize: 0.25,
+          maxChildSize: 0.40,
+          snap: true,
+          snapSizes: const [0.25, 0.40],
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: AlbumSelectionOverlayBar(
+                widget.selectedAlbums!,
+                UISectionType.homeCollections,
+                collections,
+                showSelectAllButton: false,
+              ),
+            );
           },
         ),
       ],
@@ -300,7 +291,6 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _debouncer.cancelDebounceTimer();
     _albumSortOrderChangeEvent.cancel();
     widget.selectedAlbums?.removeListener(_onSelectionChanged);
-    _selectionTimer?.cancel();
     super.dispose();
   }
 

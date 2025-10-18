@@ -10,12 +10,10 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
   final VoidCallback? onCancel;
   final Color? backgroundColor;
   final UISectionType sectionType;
-  final bool isCollapsed;
 
   const AlbumBottomActionBarWidget(
     this.selectedAlbums,
     this.sectionType, {
-    this.isCollapsed = false,
     super.key,
     this.backgroundColor,
     this.onCancel,
@@ -49,7 +47,6 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
           AlbumSelectionActionWidget(
             selectedAlbums,
             sectionType,
-            isCollapsed: isCollapsed,
           ),
         ],
       ),

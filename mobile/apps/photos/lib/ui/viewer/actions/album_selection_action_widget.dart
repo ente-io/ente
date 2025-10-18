@@ -27,12 +27,10 @@ import "package:smooth_page_indicator/smooth_page_indicator.dart";
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
   final UISectionType sectionType;
-  final bool isCollapsed;
 
   const AlbumSelectionActionWidget(
     this.selectedAlbums,
     this.sectionType, {
-    this.isCollapsed = false,
     super.key,
   });
 
@@ -233,89 +231,80 @@ class _AlbumSelectionActionWidgetState
               ),
 
               // Second Row
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: widget.isCollapsed
-                    ? const SizedBox.shrink()
-                    : Column(
-                        children: [
-                          if (groupedOtherItems.isNotEmpty) ...[
-                            const SizedBox(height: 24),
-                            Container(
-                              width: double.infinity,
-                              height: 74,
-                              decoration: BoxDecoration(
-                                color: getEnteColorScheme(context)
-                                    .backgroundElevated2,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: PageView.builder(
-                                controller: _pageController,
-                                itemCount: groupedOtherItems.length,
-                                onPageChanged: (index) {
-                                  if (index >= groupedOtherItems.length &&
-                                      groupedOtherItems.isNotEmpty) {
-                                    _pageController.animateToPage(
-                                      groupedOtherItems.length - 1,
-                                      duration:
-                                          const Duration(milliseconds: 100),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  }
-                                },
-                                itemBuilder: (context, pageIndex) {
-                                  if (pageIndex >= groupedOtherItems.length) {
-                                    return const SizedBox();
-                                  }
-
-                                  final currentGroup =
-                                      groupedOtherItems[pageIndex];
-
-                                  return Row(
-                                    children: currentGroup.map((item) {
-                                      return Expanded(
-                                        child: AnimatedSwitcher(
-                                          duration: const Duration(
-                                            milliseconds: 100,
-                                          ),
-                                          transitionBuilder: (
-                                            Widget child,
-                                            Animation<double> animation,
-                                          ) {
-                                            return FadeTransition(
-                                              opacity: animation,
-                                              child: child,
-                                            );
-                                          },
-                                          child: KeyedSubtree(
-                                            key: ValueKey(
-                                              item.hashCode,
-                                            ),
-                                            child: item,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            if (groupedOtherItems.length > 1)
-                              SmoothPageIndicator(
-                                controller: _pageController,
-                                count: groupedOtherItems.length,
-                                effect: const WormEffect(
-                                  dotHeight: 6,
-                                  dotWidth: 6,
-                                  spacing: 6,
-                                  activeDotColor: Colors.white,
-                                ),
-                              ),
-                          ],
-                        ],
+              Column(
+                children: [
+                  if (groupedOtherItems.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Container(
+                      width: double.infinity,
+                      height: 74,
+                      decoration: BoxDecoration(
+                        color: getEnteColorScheme(context).backgroundElevated2,
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: groupedOtherItems.length,
+                        onPageChanged: (index) {
+                          if (index >= groupedOtherItems.length &&
+                              groupedOtherItems.isNotEmpty) {
+                            _pageController.animateToPage(
+                              groupedOtherItems.length - 1,
+                              duration: const Duration(milliseconds: 100),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                        itemBuilder: (context, pageIndex) {
+                          if (pageIndex >= groupedOtherItems.length) {
+                            return const SizedBox();
+                          }
+
+                          final currentGroup = groupedOtherItems[pageIndex];
+
+                          return Row(
+                            children: currentGroup.map((item) {
+                              return Expanded(
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(
+                                    milliseconds: 100,
+                                  ),
+                                  transitionBuilder: (
+                                    Widget child,
+                                    Animation<double> animation,
+                                  ) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                  child: KeyedSubtree(
+                                    key: ValueKey(
+                                      item.hashCode,
+                                    ),
+                                    child: item,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (groupedOtherItems.length > 1)
+                      SmoothPageIndicator(
+                        controller: _pageController,
+                        count: groupedOtherItems.length,
+                        effect: const WormEffect(
+                          dotHeight: 6,
+                          dotWidth: 6,
+                          spacing: 6,
+                          activeDotColor: Colors.white,
+                        ),
+                      ),
+                  ],
+                ],
               ),
             ],
           ),

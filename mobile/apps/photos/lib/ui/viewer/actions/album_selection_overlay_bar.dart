@@ -16,8 +16,6 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
   final UISectionType sectionType;
   final bool showSelectAllButton;
   final VoidCallback? onCancel;
-  final bool isCollapsed;
-  final VoidCallback? onExpand;
 
   const AlbumSelectionOverlayBar(
     this.selectedAlbums,
@@ -27,9 +25,7 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
     this.onClose,
     this.onCancel,
     this.backgroundColor,
-    this.isCollapsed = false,
     this.showSelectAllButton = false,
-    this.onExpand,
   });
 
   @override
@@ -54,74 +50,66 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        if (details.primaryDelta! < -10) {
-          widget.onExpand?.call();
-        }
-      },
-      child: ValueListenableBuilder(
-        valueListenable: _hasSelectedAlbumsNotifier,
-        builder: (context, value, child) {
-          return AnimatedSize(
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeInOutCubic,
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              width: double.infinity,
-              child: _hasSelectedAlbumsNotifier.value
-                  ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            if (widget.showSelectAllButton)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 12),
-                                child: SelectAllAlbumsButton(
-                                  widget.selectedAlbums,
-                                  widget.collections,
-                                  backgroundColor: widget.backgroundColor,
-                                ),
-                              ),
-                            const Spacer(),
+    return ValueListenableBuilder(
+      valueListenable: _hasSelectedAlbumsNotifier,
+      builder: (context, value, child) {
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOutCubic,
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: double.infinity,
+            child: _hasSelectedAlbumsNotifier.value
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        children: [
+                          if (widget.showSelectAllButton)
                             Padding(
-                              padding: const EdgeInsets.only(right: 12.0),
-                              child: AlbumActionBarWidget(
-                                selectedAlbums: widget.selectedAlbums,
-                                onCancel: () {
-                                  if (widget.selectedAlbums.albums.isNotEmpty) {
-                                    widget.selectedAlbums.clearAll();
-                                  }
-                                },
+                              padding: const EdgeInsets.only(left: 12),
+                              child: SelectAllAlbumsButton(
+                                widget.selectedAlbums,
+                                widget.collections,
+                                backgroundColor: widget.backgroundColor,
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          decoration:
-                              BoxDecoration(boxShadow: shadowFloatFaintLight),
-                          child: AlbumBottomActionBarWidget(
-                            widget.selectedAlbums,
-                            widget.sectionType,
-                            isCollapsed: widget.isCollapsed,
-                            onCancel: () {
-                              if (widget.selectedAlbums.albums.isNotEmpty) {
-                                widget.selectedAlbums.clearAll();
-                              }
-                            },
-                            backgroundColor: widget.backgroundColor,
+                          const Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12.0),
+                            child: AlbumActionBarWidget(
+                              selectedAlbums: widget.selectedAlbums,
+                              onCancel: () {
+                                if (widget.selectedAlbums.albums.isNotEmpty) {
+                                  widget.selectedAlbums.clearAll();
+                                }
+                              },
+                            ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration:
+                            BoxDecoration(boxShadow: shadowFloatFaintLight),
+                        child: AlbumBottomActionBarWidget(
+                          widget.selectedAlbums,
+                          widget.sectionType,
+                          onCancel: () {
+                            if (widget.selectedAlbums.albums.isNotEmpty) {
+                              widget.selectedAlbums.clearAll();
+                            }
+                          },
+                          backgroundColor: widget.backgroundColor,
                         ),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          );
-        },
-      ),
+                      ),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
+        );
+      },
     );
   }
 
