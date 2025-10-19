@@ -626,54 +626,58 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
-
+    _recentFiles.clear();
     // Show empty state only if both collections and recent files are empty
     if (_displayedCollections.isEmpty && _recentFiles.isEmpty) {
       final colorScheme = getEnteColorScheme(context);
       final textTheme = getEnteTextTheme(context);
 
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Center(
-          child: SizedBox(
-            width: double.infinity,
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: DottedBorder(
+            options: const RoundedRectDottedBorderOptions(
+              strokeWidth: 1,
+              color: Color(0xFF6B6B6B),
+              dashPattern: [5, 5],
+              radius: Radius.circular(24),
+            ),
             child: Container(
+              width: double.infinity,
               decoration: BoxDecoration(
                 color: colorScheme.backdropBase,
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: DottedBorder(
-                options: RoundedRectDottedBorderOptions(
-                  strokeWidth: 2,
-                  color: colorScheme.fillMuted,
-                  dashPattern: const [6, 6],
-                  radius: const Radius.circular(24),
-                  padding: const EdgeInsets.all(48),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/empty_state.png',
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Upload a File',
-                        style: textTheme.h3Bold,
-                      ),
-                      const SizedBox(height: 4),
-                      GestureDetector(
-                        onTap: addFile,
-                        child: Text(
-                          'Click here to upload',
-                          style: textTheme.small,
-                        ),
-                      ),
-                    ],
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 42,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/empty_state.png',
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Upload a File',
+                    style: textTheme.h3Bold.copyWith(
+                      color: colorScheme.textBase,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: addFile,
+                    child: Text(
+                      'Click here to upload',
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.primary700,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
