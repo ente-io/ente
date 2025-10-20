@@ -1,7 +1,10 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "آدرس ایمیل خود را وارد کنید",
+  "enterYourNewEmailAddress": "ایمیل جدید خود را وارد کنید",
   "accountWelcomeBack": "خوش آمدید!",
+  "emailAlreadyRegistered": "ایمیل قبلاً ثبت شده است.",
+  "emailNotRegistered": "ایمیل ثبت نشده است.",
   "email": "ایمیل",
   "cancel": "لغو",
   "verify": "تایید",
@@ -31,6 +34,7 @@
   "password": "رمز عبور",
   "confirmPassword": "تایید رمز عبور",
   "activeSessions": "دستگاه‌های فعال",
+  "ocrLoadingIndicatorLabel": "در حال شناسایی متن",
   "oops": "اوه",
   "somethingWentWrongPleaseTryAgain": "مشکلی پیش آمده، لطفا دوباره تلاش کنید",
   "thisWillLogYouOutOfThisDevice": "این کار شما را از این دستگاه خارج می‌کند!",
