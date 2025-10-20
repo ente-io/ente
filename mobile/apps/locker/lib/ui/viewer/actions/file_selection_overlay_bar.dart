@@ -42,17 +42,16 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Card(
-            borderOnForeground: true,
-            margin: EdgeInsets.zero,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.backdropBase,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
+              border: Border(top: BorderSide(color: colorScheme.strokeFaint)),
             ),
-            elevation: 4,
-            surfaceTintColor: colorScheme.backdropBase,
+            margin: EdgeInsets.zero,
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
               child: Column(
@@ -83,25 +82,25 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: colorScheme.backgroundBase,
+                                color: colorScheme.backgroundElevated2,
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                                vertical: 8.0,
+                                horizontal: 16.0,
+                                vertical: 14.0,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     buttonText,
-                                    style: textTheme.small,
+                                    style: textTheme.body,
                                   ),
                                   const SizedBox(width: 6),
                                   Icon(
                                     iconData,
-                                    color: Colors.grey,
-                                    size: 16,
+                                    color: getEnteColorScheme(context).textBase,
+                                    size: 20,
                                   ),
                                 ],
                               ),
@@ -123,25 +122,25 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: colorScheme.backgroundBase,
+                                color: colorScheme.backgroundElevated2,
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                                vertical: 8.0,
+                                horizontal: 16.0,
+                                vertical: 14.0,
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     countText,
-                                    style: textTheme.small,
+                                    style: textTheme.body,
                                   ),
                                   const SizedBox(width: 6),
-                                  const Icon(
+                                  Icon(
                                     Icons.close,
-                                    color: Colors.grey,
-                                    size: 16,
+                                    color: getEnteColorScheme(context).textBase,
+                                    size: 20,
                                   ),
                                 ],
                               ),
@@ -163,7 +162,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _buildActionButtons() {
-    final colorScheme = getEnteColorScheme(context);
     return ListenableBuilder(
       listenable: widget.selectedFiles,
       builder: (context, child) {
@@ -172,43 +170,51 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           return const SizedBox.shrink();
         }
 
-        final actions = _getActionsForSelection(selectedFiles);
+        final actionRows = _getActionsForSelection(selectedFiles);
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            color: colorScheme.backgroundBase,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: actions,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int i = 0; i < actionRows.length; i++) ...[
+                Row(
+                  children: [
+                    for (int j = 0; j < actionRows[i].length; j++) ...[
+                      Expanded(child: actionRows[i][j]),
+                      if (i == 0 && j < actionRows[i].length - 1)
+                        const SizedBox(width: 12),
+                    ],
+                  ],
+                ),
+                if (i < actionRows.length - 1) const SizedBox(height: 12),
+              ],
+            ],
           ),
         );
       },
     );
   }
 
-  List<Widget> _getActionsForSelection(Set<EnteFile> selectedFiles) {
+  List<List<Widget>> _getActionsForSelection(Set<EnteFile> selectedFiles) {
     final isSingleSelection = selectedFiles.length == 1;
     final file = isSingleSelection ? selectedFiles.first : null;
-    final actions = <Widget>[];
 
     if (isSingleSelection) {
-      actions.addAll([
+      final firstRow = <Widget>[
+        SelectionActionButton(
+          icon: Icons.download_outlined,
+          label: "Download",
+          onTap: () {
+            _downloadFile(context, file!);
+          },
+        ),
         SelectionActionButton(
           icon: Icons.share_outlined,
           label: context.l10n.share,
           onTap: () {
             _shareLink(context, file!);
-          },
-        ),
-        SelectionActionButton(
-          icon: Icons.edit_outlined,
-          label: context.l10n.edit,
-          onTap: () {
-            _showEditDialog(context, file!);
           },
         ),
         SelectionActionButton(
@@ -219,20 +225,49 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           },
           isDestructive: true,
         ),
-      ]);
-    } else {
-      actions.addAll([
+      ];
+
+      // Second row: Edit, Important
+      final secondRow = <Widget>[
         SelectionActionButton(
-          icon: Icons.delete_outline,
-          label: context.l10n.delete,
+          icon: Icons.edit_outlined,
+          label: context.l10n.edit,
+          isTopLeftRounded: true,
+          isTopRightRounded: false,
+          isBottomLeftRounded: true,
+          isBottomRightRounded: false,
           onTap: () {
-            _deleteMultipleFile(context, selectedFiles.toList());
+            _showEditDialog(context, file!);
           },
-          isDestructive: true,
         ),
-      ]);
+        SelectionActionButton(
+          icon: Icons.star_outline,
+          label: "Important",
+          isTopLeftRounded: false,
+          isTopRightRounded: true,
+          isBottomLeftRounded: false,
+          isBottomRightRounded: true,
+          onTap: () {
+            _toggleImportant(context, file!);
+          },
+        ),
+      ];
+
+      return [firstRow, secondRow];
+    } else {
+      return [
+        [
+          SelectionActionButton(
+            icon: Icons.delete_outline,
+            label: context.l10n.delete,
+            onTap: () {
+              _deleteMultipleFile(context, selectedFiles.toList());
+            },
+            isDestructive: true,
+          ),
+        ],
+      ];
     }
-    return actions;
   }
 
   Future<void> _shareLink(BuildContext context, EnteFile file) async {
@@ -430,5 +465,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         context.l10n.failedToDeleteFile(e.toString()),
       );
     }
+  }
+
+  Future<void> _downloadFile(BuildContext context, EnteFile file) async {
+    // TODO: Implemexnt file download functionality
+    SnackBarUtils.showInfoSnackBar(
+      context,
+      "Download functionality coming soon",
+    );
+  }
+
+  Future<void> _toggleImportant(BuildContext context, EnteFile file) async {
+    // TODO: Implement toggle important/star functionality
+    SnackBarUtils.showInfoSnackBar(
+      context,
+      "Mark as important functionality coming soon",
+    );
   }
 }

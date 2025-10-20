@@ -108,6 +108,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             const SizedBox(height: 24),
             Expanded(
               child: SingleChildScrollView(
+                controller: ScrollController(),
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,16 +116,14 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                     if (_files.isNotEmpty) ...[
                       Container(
                         decoration: BoxDecoration(
-                          color: colorScheme.fillFaint,
+                          color: colorScheme.strokeFainter,
                           borderRadius: BorderRadius.circular(24),
                         ),
                         padding: const EdgeInsets.all(12),
                         child: Container(
                           constraints: BoxConstraints(
-                            maxHeight: _files.length > 5
-                                ? 420 // Show exactly 5 items (84 * 5)
-                                : _files.length *
-                                    84.0, // Actual height for fewer items
+                            maxHeight:
+                                _files.length > 5 ? 360 : _files.length * 84.0,
                           ),
                           child: ListView.separated(
                             shrinkWrap: true,
@@ -238,7 +237,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: colorScheme.backdropBase,
         borderRadius: const BorderRadius.all(Radius.circular(16)),
       ),
       child: Row(
@@ -260,8 +259,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 padding: const EdgeInsets.only(right: 12),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: colorScheme.backdropBase,
+                    shape: BoxShape.circle,
+                    color: colorScheme.backgroundElevated,
                   ),
                   padding: const EdgeInsets.all(8),
                   child: HugeIcon(
