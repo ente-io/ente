@@ -34,7 +34,7 @@ class CollectionSharingService {
     };
 
     try {
-      final response = await _enteDio.post('/collection/share', data: params);
+      final response = await _enteDio.post('/collections/share', data: params);
       final sharees = <User>[];
       for (final user in response.data["sharees"]) {
         sharees.add(User.fromMap(user));
