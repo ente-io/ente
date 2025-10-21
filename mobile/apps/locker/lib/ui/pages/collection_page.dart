@@ -228,17 +228,15 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           ),
         ),
         backgroundColor: colorScheme.backgroundBase,
-        body: _buildBody(colorScheme, textTheme),
-        bottomNavigationBar: ListenableBuilder(
-          listenable: _selectedFiles,
-          builder: (context, _) {
-            return _selectedFiles.hasSelections
-                ? FileSelectionOverlayBar(
-                    files: _displayedFiles,
-                    selectedFiles: _selectedFiles,
-                  )
-                : const SizedBox.shrink();
-          },
+        body: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            _buildBody(colorScheme, textTheme),
+            FileSelectionOverlayBar(
+              files: _displayedFiles,
+              selectedFiles: _selectedFiles,
+            ),
+          ],
         ),
       ),
     );
