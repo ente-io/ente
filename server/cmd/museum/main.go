@@ -608,7 +608,6 @@ func main() {
 	publicCollectionAPI.GET("/multipart-upload-urls", publicCollectionHandler.GetMultipartUploadURLs)
 	publicCollectionAPI.POST("/file", publicCollectionHandler.CreateFile)
 	publicCollectionAPI.POST("/verify-password", publicCollectionHandler.VerifyPassword)
-	publicCollectionAPI.POST("/report-abuse", publicCollectionHandler.ReportAbuse)
 
 	castAPI := server.Group("/cast")
 

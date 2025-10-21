@@ -31,7 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
+var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/verify-password"}
 
 // CollectionLinkMiddleware intercepts and authenticates incoming requests
 type CollectionLinkMiddleware struct {
