@@ -61,11 +61,9 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     const fullScreen = useMediaQuery("(max-width: 428px)");
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        if (!open) {
-            setSearchTerm("");
-        }
-    }, [open]);
+    const handleExited = () => {
+        setSearchTerm("");
+    };
 
     const onCollectionClick = (collectionID: number) => {
         onSelectCollectionID(collectionID);
@@ -86,6 +84,7 @@ export const AllAlbums: React.FC<AllAlbums> = ({
         <AllAlbumsDialog
             {...{ open, onClose, fullScreen }}
             slots={{ transition: SlideUpTransition }}
+            slotProps={{ transition: { onExited: handleExited } }}
             fullWidth
         >
             <Title
