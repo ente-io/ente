@@ -245,28 +245,15 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             return
         }
 
-        // Keep rotation handling simple - preferredTransform works fine!
         let preferredTransform = videoTrack.preferredTransform
         let naturalSize = videoTrack.naturalSize
 
-        let cropX = x
-        let cropY = y
-        let cropWidth = width
-        let cropHeight = height
-
-        // Collect debug info to return to Flutter
-        var debugInfo: [String: Any] = [
-            "videoNaturalSize": "\(Int(naturalSize.width))x\(Int(naturalSize.height))",
-            "preferredTransform": [
-                "a": preferredTransform.a,
-                "b": preferredTransform.b,
-                "c": preferredTransform.c,
-                "d": preferredTransform.d,
-                "tx": preferredTransform.tx,
-                "ty": preferredTransform.ty
-            ],
-            "inputCrop": ["x": cropX, "y": cropY, "w": cropWidth, "h": cropHeight]
-        ]
+        let cropRectDisplay = CGRect(
+            x: CGFloat(x),
+            y: CGFloat(y),
+            width: CGFloat(width),
+            height: CGFloat(height)
+        )
 
         let composition = AVMutableComposition()
         guard let compositionVideoTrack = composition.addMutableTrack(
@@ -318,36 +305,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             y: -preferredBounds.minY
         )
 
-        if orientationAdjustment.tx != 0 || orientationAdjustment.ty != 0 {
-            debugInfo["orientationAdjustment"] = [
-                "x": orientationAdjustment.tx,
-                "y": orientationAdjustment.ty
-            ]
-        }
-
-        let orientation = videoOrientation(from: preferredTransform)
-        let orientationDegrees: Int
-        switch orientation {
-        case .up:
-            orientationDegrees = 90
-        case .down:
-            orientationDegrees = 270
-        case .left:
-            orientationDegrees = 180
-        default:
-            orientationDegrees = 0
-        }
-        debugInfo["orientationDegrees"] = orientationDegrees
-
         let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
-        debugInfo["orientationTransform"] = [
-            "a": orientationTransform.a,
-            "b": orientationTransform.b,
-            "c": orientationTransform.c,
-            "d": orientationTransform.d,
-            "tx": orientationTransform.tx,
-            "ty": orientationTransform.ty
-        ]
 
         guard orientationTransform.isNearlyInvertible else {
             result(flutterError("CROP_ERROR", message: "Invalid orientation transform"))
@@ -355,18 +313,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         }
         let orientationInverse = orientationTransform.inverted()
 
-        let displayCropRect = CGRect(
-            x: CGFloat(cropX),
-            y: CGFloat(cropY),
-            width: CGFloat(cropWidth),
-            height: CGFloat(cropHeight)
-        )
-
         let displayCorners = [
-            displayCropRect.origin,
-            CGPoint(x: displayCropRect.maxX, y: displayCropRect.minY),
-            CGPoint(x: displayCropRect.minX, y: displayCropRect.maxY),
-            CGPoint(x: displayCropRect.maxX, y: displayCropRect.maxY)
+            cropRectDisplay.origin,
+            CGPoint(x: cropRectDisplay.maxX, y: cropRectDisplay.minY),
+            CGPoint(x: cropRectDisplay.minX, y: cropRectDisplay.maxY),
+            CGPoint(x: cropRectDisplay.maxX, y: cropRectDisplay.maxY)
         ]
 
         let fileCorners = displayCorners.map { $0.applying(orientationInverse) }
@@ -383,21 +334,10 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             height: fileMaxY - fileMinY
         )
 
-        debugInfo["fileSpaceCrop"] = [
-            "x": Double(fileCropRect.origin.x),
-            "y": Double(fileCropRect.origin.y),
-            "w": Double(fileCropRect.size.width),
-            "h": Double(fileCropRect.size.height)
-        ]
-
         let cropTranslation = CGAffineTransform(
             translationX: -fileCropRect.origin.x,
             y: -fileCropRect.origin.y
         )
-        debugInfo["fileCropTranslation"] = [
-            "x": cropTranslation.tx,
-            "y": cropTranslation.ty
-        ]
 
         var transform = cropTranslation.concatenating(orientationTransform)
 
@@ -408,48 +348,18 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let maxX = transformedCorners.map { $0.x }.max() ?? 0
         let maxY = transformedCorners.map { $0.y }.max() ?? 0
 
-        debugInfo["postTransformBounds"] = [
-            "minX": Double(minX),
-            "minY": Double(minY),
-            "maxX": Double(maxX),
-            "maxY": Double(maxY)
-        ]
-
         let correctionTransform = CGAffineTransform(
             translationX: -minX,
             y: -minY
         )
         transform = transform.concatenating(correctionTransform)
 
-        if correctionTransform.tx != 0 || correctionTransform.ty != 0 {
-            debugInfo["boundsCorrection"] = [
-                "x": correctionTransform.tx,
-                "y": correctionTransform.ty
-            ]
-        }
-
-        let outputWidth = (maxX - minX).rounded()
-        let outputHeight = (maxY - minY).rounded()
+        let outputWidth = max((maxX - minX).rounded(), CGFloat(1))
+        let outputHeight = max((maxY - minY).rounded(), CGFloat(1))
         let renderSize = CGSize(width: outputWidth, height: outputHeight)
-
-        debugInfo["computedRenderSize"] = [
-            "width": Double(outputWidth),
-            "height": Double(outputHeight)
-        ]
-
-        debugInfo["renderSize"] = "\(Int(renderSize.width))x\(Int(renderSize.height))"
 
         layerInstruction.setTransform(transform, at: .zero)
         videoComposition.renderSize = renderSize
-
-        debugInfo["finalTransform"] = [
-            "a": transform.a,
-            "b": transform.b,
-            "c": transform.c,
-            "d": transform.d,
-            "tx": transform.tx,
-            "ty": transform.ty
-        ]
 
         instruction.layerInstructions = [layerInstruction]
         videoComposition.instructions = [instruction]
@@ -476,8 +386,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 case .completed:
                     result([
                         "outputPath": outputPath,
-                        "isReEncoded": true,
-                        "debugInfo": debugInfo
+                        "isReEncoded": true
                     ])
                 case .failed:
                     result(self.flutterError("CROP_ERROR", message: "Failed to crop video", error: exportSession.error))
@@ -540,32 +449,13 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let preferredTransform = videoTrack.preferredTransform
         var finalTransform = preferredTransform
         var renderSize = naturalSize
-        var debugInfo: [String: Any] = [:]
-        var cropBlockEntered = false
-        var debugInfoCountAfterPopulate = 0
 
         if let cropX = args["cropX"] as? Int,
            let cropY = args["cropY"] as? Int,
            let cropWidth = args["cropWidth"] as? Int,
            let cropHeight = args["cropHeight"] as? Int {
-            cropBlockEntered = true
             isReEncoded = true
 
-            // Collect debug info
-            debugInfo["operation"] = "processVideo"
-            debugInfo["videoNaturalSize"] = "\(Int(naturalSize.width))x\(Int(naturalSize.height))"
-            debugInfo["preferredTransform"] = [
-                "a": preferredTransform.a,
-                "b": preferredTransform.b,
-                "c": preferredTransform.c,
-                "d": preferredTransform.d,
-                "tx": preferredTransform.tx,
-                "ty": preferredTransform.ty
-            ]
-            debugInfo["inputCrop"] = ["x": cropX, "y": cropY, "w": cropWidth, "h": cropHeight]
-            debugInfoCountAfterPopulate = debugInfo.count
-
-            // Normalize rotation degrees to [0, 360)
             let requestedRotation = args["rotateDegrees"] as? Int ?? 0
             let normalizedRotation = ((requestedRotation % 360) + 360) % 360
 
@@ -576,36 +466,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 y: -preferredBounds.minY
             )
 
-            if orientationAdjustment.tx != 0 || orientationAdjustment.ty != 0 {
-                debugInfo["orientationAdjustment"] = [
-                    "x": orientationAdjustment.tx,
-                    "y": orientationAdjustment.ty
-                ]
-            }
-
-            let orientation = videoOrientation(from: preferredTransform)
-            let orientationDegrees: Int
-            switch orientation {
-            case .up:
-                orientationDegrees = 90
-            case .down:
-                orientationDegrees = 270
-            case .left:
-                orientationDegrees = 180
-            default:
-                orientationDegrees = 0
-            }
-            debugInfo["orientationDegrees"] = orientationDegrees
-
             let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
-            debugInfo["orientationTransform"] = [
-                "a": orientationTransform.a,
-                "b": orientationTransform.b,
-                "c": orientationTransform.c,
-                "d": orientationTransform.d,
-                "tx": orientationTransform.tx,
-                "ty": orientationTransform.ty
-            ]
 
             guard orientationTransform.isNearlyInvertible else {
                 result(flutterError("PROCESS_ERROR", message: "Invalid orientation transform during crop"))
@@ -613,7 +474,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             }
             let orientationInverse = orientationTransform.inverted()
 
-            let displayCropRect = CGRect(
+            let cropRectDisplay = CGRect(
                 x: CGFloat(cropX),
                 y: CGFloat(cropY),
                 width: CGFloat(cropWidth),
@@ -621,10 +482,10 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             )
 
             let displayCorners = [
-                displayCropRect.origin,
-                CGPoint(x: displayCropRect.maxX, y: displayCropRect.minY),
-                CGPoint(x: displayCropRect.minX, y: displayCropRect.maxY),
-                CGPoint(x: displayCropRect.maxX, y: displayCropRect.maxY)
+                cropRectDisplay.origin,
+                CGPoint(x: cropRectDisplay.maxX, y: cropRectDisplay.minY),
+                CGPoint(x: cropRectDisplay.minX, y: cropRectDisplay.maxY),
+                CGPoint(x: cropRectDisplay.maxX, y: cropRectDisplay.maxY)
             ]
 
             let fileCorners = displayCorners.map { $0.applying(orientationInverse) }
@@ -641,22 +502,10 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 height: fileMaxY - fileMinY
             )
 
-            debugInfo["fileSpaceCrop"] = [
-                "x": Double(fileCropRect.origin.x),
-                "y": Double(fileCropRect.origin.y),
-                "w": Double(fileCropRect.size.width),
-                "h": Double(fileCropRect.size.height)
-            ]
-
             let cropTranslation = CGAffineTransform(
                 translationX: -fileCropRect.origin.x,
                 y: -fileCropRect.origin.y
             )
-
-            debugInfo["fileCropTranslation"] = [
-                "x": cropTranslation.tx,
-                "y": cropTranslation.ty
-            ]
 
             var transform = cropTranslation.concatenating(orientationTransform)
 
@@ -667,10 +516,6 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 let clockwiseRadians = -radians
                 let rotationTransform = CGAffineTransform(rotationAngle: clockwiseRadians)
                 transform = transform.concatenating(rotationTransform)
-                debugInfo["rotationDegrees"] = normalizedRotation
-            } else if requestedRotation != 0 {
-                // Preserve debug info if non-multiple of 360 was requested
-                debugInfo["rotationDegrees"] = requestedRotation
             }
 
             let transformedCorners = fileCorners.map { $0.applying(transform) }
@@ -680,47 +525,17 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             let maxX = transformedCorners.map { $0.x }.max() ?? 0
             let maxY = transformedCorners.map { $0.y }.max() ?? 0
 
-            debugInfo["postRotationBounds"] = [
-                "minX": Double(minX),
-                "minY": Double(minY),
-                "maxX": Double(maxX),
-                "maxY": Double(maxY)
-            ]
-
             let correctionTransform = CGAffineTransform(
                 translationX: -minX,
                 y: -minY
             )
             transform = transform.concatenating(correctionTransform)
 
-            if correctionTransform.tx != 0 || correctionTransform.ty != 0 {
-                debugInfo["rotationCorrectionTranslation"] = [
-                    "x": correctionTransform.tx,
-                    "y": correctionTransform.ty
-                ]
-            }
-
-            let outputWidth = (maxX - minX).rounded()
-            let outputHeight = (maxY - minY).rounded()
+            let outputWidth = max((maxX - minX).rounded(), CGFloat(1))
+            let outputHeight = max((maxY - minY).rounded(), CGFloat(1))
             renderSize = CGSize(width: outputWidth, height: outputHeight)
 
-            debugInfo["computedRenderSize"] = [
-                "width": Double(outputWidth),
-                "height": Double(outputHeight)
-            ]
-
             finalTransform = transform
-
-            debugInfo["finalTransformBeforeComposition"] = [
-                "a": transform.a,
-                "b": transform.b,
-                "c": transform.c,
-                "d": transform.d,
-                "tx": transform.tx,
-                "ty": transform.ty
-            ]
-
-            debugInfo["renderSize"] = "\(Int(renderSize.width))x\(Int(renderSize.height))"
 
         } else if let rotateDegrees = args["rotateDegrees"] as? Int, rotateDegrees != 0 {
             isReEncoded = true
@@ -802,31 +617,16 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             exportSession.timeRange = timeRange
         }
 
-        // Add final renderSize to debugInfo
-        var debugInfoCountBeforeExport = debugInfo.count
-        if !debugInfo.isEmpty {
-            debugInfo["renderSize"] = "\(Int(renderSize.width))x\(Int(renderSize.height))"
-        }
-
         startProgressReporting()
         exportSession.exportAsynchronously {
             DispatchQueue.main.async {
                 self.stopProgressReporting()
                 switch exportSession.status {
                 case .completed:
-                    var resultDict: [String: Any] = [
+                    result([
                         "outputPath": outputPath,
-                        "isReEncoded": isReEncoded,
-                        // Diagnostic info to track debugInfo lifecycle
-                        "_diagnostic_cropBlockEntered": cropBlockEntered,
-                        "_diagnostic_debugInfoCountAfterPopulate": debugInfoCountAfterPopulate,
-                        "_diagnostic_debugInfoCountBeforeExport": debugInfoCountBeforeExport,
-                        "_diagnostic_debugInfoCountInCompletion": debugInfo.count
-                    ]
-                    if !debugInfo.isEmpty {
-                        resultDict["debugInfo"] = debugInfo
-                    }
-                    result(resultDict)
+                        "isReEncoded": isReEncoded
+                    ])
                 case .failed:
                     result(self.flutterError("PROCESS_ERROR", message: "Failed to process video", error: exportSession.error))
                 case .cancelled:
@@ -848,67 +648,6 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             return track.minFrameDuration
         }
         return CMTime(value: 1, timescale: 30)
-    }
-
-    // Telegram's TGVideoOrientationForAsset - detect orientation from transform matrix
-    // From TGPhotoEditorUtils.m:618-647
-    private func videoOrientation(from transform: CGAffineTransform) -> UIImage.Orientation {
-        let a = transform.a
-        let b = transform.b
-        let c = transform.c
-        let d = transform.d
-
-        // Telegram's exact detection logic
-        if a == -1 && d == -1 {
-            return .left  // 180° rotation
-        } else if a == 1 && d == 1 {
-            return .right  // 0° (no rotation)
-        } else if b == -1 && c == 1 {
-            return .down  // 270° CW
-        } else {
-            // Default case (b == 1, c == -1) or other variants
-            return .up  // 90° CW
-        }
-    }
-
-    // Telegram's TGVideoTransformForOrientation - builds complete transform
-    // This replaces preferredTransform with explicit transform for each orientation
-    private func buildTransformForOrientation(_ orientation: UIImage.Orientation,
-                                             videoSize: CGSize,
-                                             cropRect: CGRect) -> CGAffineTransform {
-        var transform = CGAffineTransform.identity
-
-        // Telegram's exact logic from TGPhotoEditorUtils.m:737-765
-        switch orientation {
-        case .up:  // 90° CW rotation
-            // translate(size.height - crop.x, 0 - crop.y) + rotate(90°)
-            transform = CGAffineTransform(translationX: videoSize.height - cropRect.origin.x,
-                                         y: -cropRect.origin.y)
-            transform = transform.rotated(by: .pi / 2)
-
-        case .down:  // 270° CW rotation
-            // translate(0 - crop.x, size.width - crop.y) + rotate(-90°)
-            transform = CGAffineTransform(translationX: -cropRect.origin.x,
-                                         y: videoSize.width - cropRect.origin.y)
-            transform = transform.rotated(by: -.pi / 2)
-
-        case .right:  // 0° (no rotation)
-            // translate(0 - crop.x, 0 - crop.y) + rotate(0°)
-            transform = CGAffineTransform(translationX: -cropRect.origin.x,
-                                         y: -cropRect.origin.y)
-
-        case .left:  // 180° rotation
-            // translate(size.width - crop.x, size.height - crop.y) + rotate(180°)
-            transform = CGAffineTransform(translationX: videoSize.width - cropRect.origin.x,
-                                         y: videoSize.height - cropRect.origin.y)
-            transform = transform.rotated(by: .pi)
-
-        default:
-            transform = CGAffineTransform(translationX: -cropRect.origin.x,
-                                         y: -cropRect.origin.y)
-        }
-
-        return transform
     }
 
     private func flutterError(_ code: String, message: String, error: Error? = nil, details: Any? = nil) -> FlutterError {
