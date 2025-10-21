@@ -6,8 +6,8 @@ import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import "package:ente_ui/utils/dialog_util.dart";
-
 import "package:ente_utils/navigation_util.dart";
+
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
@@ -174,6 +174,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           "Cannot share collection of type $collectionViewType",
         );
       }
+
       if (Configuration.instance.getUserID() == collection.owner.id) {
         unawaited(
           routeToPage(
@@ -190,6 +191,16 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             AlbumParticipantsPage(collection),
           ),
         );
+
+        // TODO :Show new bottom sheet UI
+        // await showModalBottomSheet(
+        //   context: context,
+        //   backgroundColor: Colors.transparent,
+        //   isScrollControlled: true,
+        //   builder: (context) => ShareCollectionBottomSheet(
+        //     collection: collection,
+        //   ),
+        // );
       }
     } catch (e, s) {
       _logger.severe(e, s);
