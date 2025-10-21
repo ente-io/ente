@@ -626,7 +626,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
-    _recentFiles.clear();
     // Show empty state only if both collections and recent files are empty
     if (_displayedCollections.isEmpty && _recentFiles.isEmpty) {
       final colorScheme = getEnteColorScheme(context);
