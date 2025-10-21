@@ -126,6 +126,7 @@ class MediaRef {
 enum WrappedCardType {
   statsTotals,
   statsVelocity,
+  statsHeatmap,
   busiestDay,
   longestStreak,
   longestGap,

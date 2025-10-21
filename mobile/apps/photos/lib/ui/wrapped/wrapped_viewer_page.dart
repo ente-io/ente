@@ -1,10 +1,13 @@
 import "dart:async";
+import "dart:math" as math;
 import "dart:typed_data";
 import "dart:ui" as ui;
 
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:logging/logging.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
@@ -12,6 +15,7 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -426,77 +430,20 @@ class _StoryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _CardHeader(
-                  label: _labelForCardType(card.type),
-                  colorScheme: colorScheme,
-                  textTheme: textTheme,
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: _StoryCardBody(
-                    card: card,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                  ),
-                ),
-              ],
+            child: _CardContent(
+              card: card,
+              colorScheme: colorScheme,
+              textTheme: textTheme,
             ),
           ),
         ),
       ),
     );
   }
-
-  String _labelForCardType(WrappedCardType type) {
-    switch (type) {
-      case WrappedCardType.statsTotals:
-        return "Totals";
-      case WrappedCardType.statsVelocity:
-        return "Rhythm";
-      case WrappedCardType.busiestDay:
-        return "Biggest day";
-      case WrappedCardType.longestStreak:
-        return "Streak";
-      case WrappedCardType.longestGap:
-        return "Break";
-      default:
-        return "Stats";
-    }
-  }
 }
 
-class _CardHeader extends StatelessWidget {
-  const _CardHeader({
-    required this.label,
-    required this.colorScheme,
-    required this.textTheme,
-  });
-
-  final String label;
-  final EnteColorScheme colorScheme;
-  final EnteTextTheme textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: textTheme.tinyMuted,
-      ),
-    );
-  }
-}
-
-class _StoryCardBody extends StatelessWidget {
-  const _StoryCardBody({
+class _CardContent extends StatelessWidget {
+  const _CardContent({
     required this.card,
     required this.colorScheme,
     required this.textTheme,
@@ -504,6 +451,343 @@ class _StoryCardBody extends StatelessWidget {
 
   final WrappedCard card;
   final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (card.type) {
+      case WrappedCardType.statsTotals:
+        return _TotalsCardContent(
+          card: card,
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+        );
+      case WrappedCardType.statsVelocity:
+        return _RhythmCardContent(
+          card: card,
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+        );
+      case WrappedCardType.busiestDay:
+        return _BusiestDayCardContent(
+          card: card,
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+        );
+      case WrappedCardType.statsHeatmap:
+        return _HeatmapCardContent(
+          card: card,
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+        );
+      default:
+        return _GenericCardContent(
+          card: card,
+          textTheme: textTheme,
+        );
+    }
+  }
+}
+
+class _TotalsCardContent extends StatelessWidget {
+  const _TotalsCardContent({
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final String? firstCaptureLine = card.meta["firstCaptureLine"] as String?;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _HeroMediaCollage(
+          media: card.media,
+          colorScheme: colorScheme,
+        ),
+        const SizedBox(height: 24),
+        Text(
+          card.title,
+          style: textTheme.h2Bold,
+        ),
+        if (card.subtitle != null && card.subtitle!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              card.subtitle!,
+              style: textTheme.bodyMuted,
+            ),
+          ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _DetailChips(
+            chips: chips,
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+        ],
+        if (firstCaptureLine != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            firstCaptureLine,
+            style: textTheme.smallMuted,
+          ),
+        ],
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _RhythmCardContent extends StatelessWidget {
+  const _RhythmCardContent({
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          card.title,
+          style: textTheme.h2Bold,
+        ),
+        if (card.subtitle != null && card.subtitle!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              card.subtitle!,
+              style: textTheme.bodyMuted,
+            ),
+          ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          _DetailChips(
+            chips: chips,
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+        ],
+        if (card.media.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          _MediaRow(
+            media: card.media.take(3).toList(growable: false),
+            colorScheme: colorScheme,
+          ),
+        ],
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _BusiestDayCardContent extends StatelessWidget {
+  const _BusiestDayCardContent({
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          card.title,
+          style: textTheme.h2Bold,
+        ),
+        if (card.subtitle != null && card.subtitle!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              card.subtitle!,
+              style: textTheme.bodyMuted,
+            ),
+          ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          _DetailChips(
+            chips: chips,
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+        ],
+        const SizedBox(height: 22),
+        _MediaGrid(
+          media: card.media.take(6).toList(growable: false),
+          colorScheme: colorScheme,
+        ),
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _HeatmapCardContent extends StatelessWidget {
+  const _HeatmapCardContent({
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<dynamic> rawQuarters =
+        card.meta["quarters"] as List<dynamic>? ?? const <dynamic>[];
+    final List<_QuarterBlock> quarters = rawQuarters
+        .map(
+          (dynamic entry) => _QuarterBlock.fromJson(
+            (entry as Map).cast<String, Object?>(),
+          ),
+        )
+        .where((_QuarterBlock block) => block.grid.isNotEmpty)
+        .toList(growable: false);
+    final List<String> weekdayLabels =
+        (card.meta["weekdayLabels"] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<String>()
+            .toList(growable: false);
+    final int maxCount = (card.meta["maxCount"] as num?)?.toInt() ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          card.title,
+          style: textTheme.h2Bold,
+        ),
+        if (card.subtitle != null && card.subtitle!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              card.subtitle!,
+              style: textTheme.bodyMuted,
+            ),
+          ),
+        const SizedBox(height: 18),
+        if (quarters.isEmpty)
+          _MediaPlaceholder(
+            height: 180,
+            colorScheme: colorScheme,
+          )
+        else
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              final double maxWidth = constraints.maxWidth;
+              final int columns =
+                  quarters.length <= 1 ? 1 : (maxWidth >= 280 ? 2 : 1);
+              final double spacing = columns > 1 ? 18 : 0;
+              final double itemWidth = columns > 1
+                  ? (maxWidth - ((columns - 1) * spacing)) / columns
+                  : maxWidth;
+              final int maxColumnCount = quarters
+                  .map(
+                    (_QuarterBlock block) =>
+                        block.grid.isNotEmpty ? block.grid.first.length : 0,
+                  )
+                  .fold(0, math.max);
+              const double labelColumnWidth = 20;
+              const double cellSpacing = 1.5;
+              const double fallbackCellSize = 6;
+              const double maxCellWidth = 18;
+              const double maxCellHeight = 12;
+
+              double computeCellWidth(double availableWidth) {
+                if (maxColumnCount <= 0) {
+                  return fallbackCellSize;
+                }
+                final double usable = math.max(
+                  0,
+                  availableWidth -
+                      cellSpacing * math.max(0, maxColumnCount - 1),
+                );
+                final double raw = usable / math.max(1, maxColumnCount);
+                return raw.clamp(fallbackCellSize, maxCellWidth);
+              }
+
+              final double cellWidthWithLabels =
+                  computeCellWidth(itemWidth - labelColumnWidth);
+              final double cellWidthWithoutLabels = computeCellWidth(itemWidth);
+              final double cellWidth =
+                  math.min(cellWidthWithLabels, cellWidthWithoutLabels);
+              final double cellHeight = math.min(
+                maxCellHeight,
+                cellWidth.clamp(fallbackCellSize, maxCellHeight),
+              );
+              return Wrap(
+                spacing: spacing,
+                runSpacing: 18,
+                children: <Widget>[
+                  for (final (int index, _QuarterBlock block)
+                      in quarters.indexed)
+                    SizedBox(
+                      width: itemWidth,
+                      child: _QuarterHeatmap(
+                        block: block,
+                        weekdayLabels: weekdayLabels,
+                        maxCount: maxCount,
+                        colorScheme: colorScheme,
+                        textTheme: textTheme,
+                        showDayLabels: columns == 1 || index % columns == 0,
+                        maxColumns: maxColumnCount,
+                        cellWidth: cellWidth,
+                        cellHeight: cellHeight,
+                        cellSpacing: cellSpacing,
+                        labelColumnWidth: labelColumnWidth,
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _DetailChips(
+            chips: chips,
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+        ],
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _GenericCardContent extends StatelessWidget {
+  const _GenericCardContent({
+    required this.card,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
   final EnteTextTheme textTheme;
 
   @override
@@ -523,54 +807,548 @@ class _StoryCardBody extends StatelessWidget {
               style: textTheme.bodyMuted,
             ),
           ),
-        const SizedBox(height: 24),
-        _StoryMediaStrip(
-          card: card,
-          colorScheme: colorScheme,
-          textTheme: textTheme,
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _QuarterBlock {
+  _QuarterBlock({
+    required this.label,
+    required this.grid,
+    required this.columnLabels,
+  });
+
+  final String label;
+  final List<List<int>> grid;
+  final List<String> columnLabels;
+
+  static _QuarterBlock fromJson(Map<String, Object?> json) {
+    final List<List<int>> grid =
+        (json["grid"] as List<dynamic>? ?? const <dynamic>[])
+            .map(
+              (dynamic row) => (row as List<dynamic>)
+                  .map((dynamic value) => (value as num).toInt())
+                  .toList(growable: false),
+            )
+            .toList(growable: false);
+    final List<String> columnLabels =
+        (json["columnLabels"] as List<dynamic>? ?? const <dynamic>[])
+            .whereType<String>()
+            .toList(growable: false);
+    return _QuarterBlock(
+      label: json["label"] as String? ?? "",
+      grid: grid,
+      columnLabels: columnLabels,
+    );
+  }
+}
+
+class _QuarterHeatmap extends StatelessWidget {
+  const _QuarterHeatmap({
+    required this.block,
+    required this.weekdayLabels,
+    required this.maxCount,
+    required this.colorScheme,
+    required this.textTheme,
+    required this.showDayLabels,
+    required this.maxColumns,
+    required this.cellWidth,
+    required this.cellHeight,
+    required this.cellSpacing,
+    required this.labelColumnWidth,
+  });
+
+  final _QuarterBlock block;
+  final List<String> weekdayLabels;
+  final int maxCount;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+  final bool showDayLabels;
+  final int maxColumns;
+  final double cellWidth;
+  final double cellHeight;
+  final double cellSpacing;
+  final double labelColumnWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final int columnCount = block.grid.isEmpty ? 0 : block.grid.first.length;
+    if (columnCount == 0 || maxColumns <= 0) {
+      return _MediaPlaceholder(
+        height: 120,
+        colorScheme: colorScheme,
+      );
+    }
+
+    final TextStyle axisStyle =
+        textTheme.tinyMuted.copyWith(fontSize: 8.5, height: 1.15);
+    final List<String> headerLabels = List<String>.generate(
+      maxColumns,
+      (int index) =>
+          index < block.columnLabels.length ? block.columnLabels[index] : "",
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          block.label,
+          style: textTheme.smallBold,
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            if (showDayLabels) SizedBox(width: labelColumnWidth),
+            for (int columnIndex = 0;
+                columnIndex < headerLabels.length;
+                columnIndex += 1) ...[
+              SizedBox(
+                width: cellWidth,
+                child: Text(
+                  headerLabels[columnIndex],
+                  style: axisStyle,
+                  textAlign: TextAlign.center,
+                  softWrap: false,
+                  overflow: TextOverflow.fade,
+                ),
+              ),
+              SizedBox(
+                width: columnIndex == headerLabels.length - 1 ? 0 : cellSpacing,
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        Column(
+          children: List<Widget>.generate(weekdayLabels.length, (int dayIndex) {
+            final List<int> row = block.grid.length > dayIndex
+                ? block.grid[dayIndex]
+                : const <int>[];
+            final String dayLabel =
+                dayIndex < weekdayLabels.length ? weekdayLabels[dayIndex] : "";
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: dayIndex == weekdayLabels.length - 1 ? 0 : cellSpacing,
+              ),
+              child: Row(
+                children: [
+                  if (showDayLabels)
+                    SizedBox(
+                      width: labelColumnWidth,
+                      child: Text(
+                        dayLabel,
+                        style: axisStyle,
+                      ),
+                    ),
+                  for (int columnIndex = 0;
+                      columnIndex < maxColumns;
+                      columnIndex += 1) ...[
+                    _HeatmapCell(
+                      value: columnIndex < row.length ? row[columnIndex] : -1,
+                      width: cellWidth,
+                      height: cellHeight,
+                      colorScheme: colorScheme,
+                      maxCount: maxCount,
+                    ),
+                    SizedBox(
+                      width: columnIndex == maxColumns - 1 ? 0 : cellSpacing,
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }),
         ),
       ],
     );
   }
 }
 
-class _StoryMediaStrip extends StatelessWidget {
-  const _StoryMediaStrip({
-    required this.card,
+class _HeatmapCell extends StatelessWidget {
+  const _HeatmapCell({
+    required this.value,
+    required this.width,
+    required this.height,
+    required this.colorScheme,
+    required this.maxCount,
+  });
+
+  final int value;
+  final double width;
+  final double height;
+  final EnteColorScheme colorScheme;
+  final int maxCount;
+
+  @override
+  Widget build(BuildContext context) {
+    if (value < 0) {
+      return SizedBox(width: width, height: height);
+    }
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: _heatmapColorForValue(value, maxCount, colorScheme),
+        borderRadius: BorderRadius.circular(3),
+      ),
+    );
+  }
+}
+
+class _DetailChips extends StatelessWidget {
+  const _DetailChips({
+    required this.chips,
     required this.colorScheme,
     required this.textTheme,
   });
 
-  final WrappedCard card;
+  final List<String> chips;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
 
   @override
   Widget build(BuildContext context) {
-    if (card.media.isEmpty) {
+    if (chips.isEmpty) {
       return const SizedBox.shrink();
     }
     return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: card.media.take(6).map((MediaRef ref) {
-        return Container(
-          width: 64,
-          height: 64,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: colorScheme.primary400.withValues(alpha: 0.16),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Text(
-            "#${ref.uploadedFileID}",
-            style: textTheme.tinyMuted,
-            textAlign: TextAlign.center,
-          ),
-        );
-      }).toList(),
+      spacing: 10,
+      runSpacing: 8,
+      children: chips
+          .map(
+            (String chip) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.fillFaint,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                chip,
+                style: textTheme.smallMuted,
+              ),
+            ),
+          )
+          .toList(growable: false),
     );
   }
+}
+
+class _HeroMediaCollage extends StatelessWidget {
+  const _HeroMediaCollage({
+    required this.media,
+    required this.colorScheme,
+  });
+
+  final List<MediaRef> media;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (media.isEmpty) {
+      return _MediaPlaceholder(
+        height: 220,
+        colorScheme: colorScheme,
+        borderRadius: 24,
+      );
+    }
+
+    final List<MediaRef> trimmed = media.take(3).toList(growable: false);
+    final MediaRef primary = trimmed.first;
+    final List<MediaRef> side = trimmed.skip(1).toList(growable: false);
+
+    return SizedBox(
+      height: 220,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: _MediaTile(
+              mediaRef: primary,
+              borderRadius: 24,
+              aspectRatio: 3 / 4,
+            ),
+          ),
+          if (side.isNotEmpty) ...[
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                children: List<Widget>.generate(
+                  2,
+                  (int index) {
+                    final MediaRef? ref =
+                        index < side.length ? side[index] : null;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: index == 0 ? 12 : 0,
+                        ),
+                        child: ref != null
+                            ? _MediaTile(
+                                mediaRef: ref,
+                                borderRadius: 20,
+                              )
+                            : _MediaPlaceholder(
+                                colorScheme: colorScheme,
+                                borderRadius: 20,
+                              ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _MediaRow extends StatelessWidget {
+  const _MediaRow({
+    required this.media,
+    required this.colorScheme,
+  });
+
+  final List<MediaRef> media;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 96,
+      child: Row(
+        children: [
+          for (final (int index, MediaRef ref) in media.indexed) ...[
+            Expanded(
+              child: Padding(
+                padding:
+                    EdgeInsets.only(right: index == media.length - 1 ? 0 : 12),
+                child: _MediaTile(
+                  mediaRef: ref,
+                  borderRadius: 18,
+                ),
+              ),
+            ),
+          ],
+          if (media.isEmpty)
+            Expanded(
+              child: _MediaPlaceholder(
+                colorScheme: colorScheme,
+                borderRadius: 18,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MediaGrid extends StatelessWidget {
+  const _MediaGrid({
+    required this.media,
+    required this.colorScheme,
+  });
+
+  final List<MediaRef> media;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (media.isEmpty) {
+      return _MediaPlaceholder(
+        height: 200,
+        colorScheme: colorScheme,
+      );
+    }
+    return AspectRatio(
+      aspectRatio: 2 / 3,
+      child: Column(
+        children: List<Widget>.generate(3, (int row) {
+          return Expanded(
+            child: Row(
+              children: List<Widget>.generate(2, (int column) {
+                final int index = row * 2 + column;
+                final MediaRef? ref =
+                    index < media.length ? media[index] : null;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: column == 1 ? 0 : 10,
+                      bottom: row == 2 ? 0 : 10,
+                    ),
+                    child: ref != null
+                        ? _MediaTile(
+                            mediaRef: ref,
+                            borderRadius: 16,
+                          )
+                        : _MediaPlaceholder(
+                            colorScheme: colorScheme,
+                            borderRadius: 16,
+                          ),
+                  ),
+                );
+              }),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+class _MediaTile extends StatelessWidget {
+  const _MediaTile({
+    required this.mediaRef,
+    required this.borderRadius,
+    this.aspectRatio,
+  });
+
+  final MediaRef mediaRef;
+  final double borderRadius;
+  final double? aspectRatio;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget content = ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: SizedBox.expand(
+        child: _MediaThumb(
+          ref: mediaRef,
+        ),
+      ),
+    );
+    if (aspectRatio != null) {
+      content = AspectRatio(
+        aspectRatio: aspectRatio!,
+        child: content,
+      );
+    }
+    return content;
+  }
+}
+
+class _MediaPlaceholder extends StatelessWidget {
+  const _MediaPlaceholder({
+    required this.colorScheme,
+    this.height,
+    this.borderRadius = 20,
+  });
+
+  final EnteColorScheme colorScheme;
+  final double? height;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget child = Container(
+      decoration: BoxDecoration(
+        color: colorScheme.primary400.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+    );
+    if (height != null) {
+      return SizedBox(
+        height: height,
+        child: child,
+      );
+    }
+    return child;
+  }
+}
+
+class _MediaThumb extends StatefulWidget {
+  const _MediaThumb({required this.ref});
+
+  final MediaRef ref;
+
+  @override
+  State<_MediaThumb> createState() => _MediaThumbState();
+}
+
+class _MediaThumbState extends State<_MediaThumb> {
+  late Future<EnteFile?> _fileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileFuture = FilesDB.instance.getAnyUploadedFile(
+      widget.ref.uploadedFileID,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _MediaThumb oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ref.uploadedFileID != widget.ref.uploadedFileID) {
+      _fileFuture = FilesDB.instance.getAnyUploadedFile(
+        widget.ref.uploadedFileID,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return FutureBuilder<EnteFile?>(
+      future: _fileFuture,
+      builder: (BuildContext context, AsyncSnapshot<EnteFile?> snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Container(
+            color: colorScheme.fillFaint,
+          );
+        }
+        final EnteFile? file = snapshot.data;
+        if (file == null) {
+          return Container(
+            color: colorScheme.fillFaint,
+          );
+        }
+        return ThumbnailWidget(
+          file,
+          fit: BoxFit.cover,
+          rawThumbnail: true,
+          shouldShowSyncStatus: false,
+          shouldShowArchiveStatus: false,
+          shouldShowPinIcon: false,
+          shouldShowOwnerAvatar: false,
+          shouldShowFavoriteIcon: false,
+          shouldShowVideoDuration: false,
+          shouldShowVideoOverlayIcon: false,
+        );
+      },
+    );
+  }
+}
+
+Color _heatmapColorForValue(
+  int value,
+  int maxValue,
+  EnteColorScheme scheme,
+) {
+  if (value <= 0 || maxValue <= 0) {
+    return scheme.fillFaint;
+  }
+  final double t = (value / maxValue).clamp(0.0, 1.0);
+  return Color.lerp(
+        scheme.primary400.withValues(alpha: 0.25),
+        scheme.primary500,
+        t,
+      ) ??
+      scheme.primary500;
+}
+
+List<String> _stringListFromMeta(
+  Map<String, Object?> meta,
+  String key,
+) {
+  final Object? raw = meta[key];
+  if (raw is List) {
+    return raw.whereType<String>().toList(growable: false);
+  }
+  return const <String>[];
 }
 
 class _StoryProgressBar extends StatelessWidget {
