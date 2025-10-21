@@ -126,11 +126,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         CollectionSummary[]
     >([]);
 
-    useEffect(() => {
-        if (!open) {
-            setSearchTerm("");
-        }
-    }, [open]);
+    const handleExited = () => {
+        setSearchTerm("");
+    };
 
     useEffect(() => {
         if (!attributes || !open) {
@@ -219,6 +217,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                         "@media (min-width: 491px)": { height: "100%" },
                     },
                 },
+                transition: { onExited: handleExited },
             }}
         >
             <DialogTitle>
