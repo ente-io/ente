@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	mathRand "math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -121,7 +122,7 @@ func (c *UserController) CreateSrpSession(context *gin.Context, req ente.CreateS
 	srpAuthEntity, err := c.UserAuthRepo.GetSRPAuthEntityBySRPUserID(context, req.SRPUserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return fCreateSession(req.SRPUserID.String(), req.SRPA)
+			return c.fCreateSession(req.SRPUserID.String(), req.SRPA)
 		}
 		return nil, stacktrace.Propagate(err, "failed to get srp auth entity")
 	}
@@ -152,7 +153,10 @@ func (c *UserController) VerifySRPSession(context *gin.Context, req ente.VerifyS
 	srpAuthEntity, err := c.UserAuthRepo.GetSRPAuthEntityBySRPUserID(context, req.SRPUserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "missing session, return invalid password")
+			// For non-existent users, try to verify against the fake session
+			// This will always fail but maintains consistent timing and error responses
+			_, verifyErr := c.verifySRPSession(context, "fake-verifier", req.SessionID, req.SRPM1)
+			return nil, verifyErr
 		}
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -235,8 +239,24 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 	}
 	srpSession, err := c.UserAuthRepo.GetSrpSessionEntity(ctx, sessionID)
 	if err != nil {
+		// Session not found - return invalid password to avoid revealing non-existence
+		if errors.Is(err, sql.ErrNoRows) {
+			// Add small delay to simulate processing
+			time.Sleep(time.Duration(10+mathRand.Intn(20)) * time.Millisecond)
+			return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "session not found")
+		}
 		return nil, stacktrace.Propagate(err, "")
 	}
+
+	// Handle fake sessions - always fail with invalid password
+	if srpSession.IsFake {
+		// Simulate realistic timing for fake session verification
+		time.Sleep(time.Duration(20+mathRand.Intn(30)) * time.Millisecond)
+		// Increment attempt count for fake sessions too
+		_ = c.UserAuthRepo.IncrementSrpSessionAttemptCount(ctx, sessionID)
+		return nil, stacktrace.Propagate(ente.ErrInvalidPassword, "fake session verification")
+	}
+
 	if srpSession.IsVerified {
 		return nil, stacktrace.Propagate(&ente.ApiError{
 			Code:           "SESSION_ALREADY_VERIFIED",
@@ -324,21 +344,50 @@ func fSrpAttributes(email string, hashKey []byte) (*ente.GetSRPAttributesRespons
 	}, nil
 }
 
-func fCreateSession(srpUserID string, srpA string) (*ente.CreateSRPSessionResponse, error) {
+func (c *UserController) fCreateSession(srpUserID string, srpA string) (*ente.CreateSRPSessionResponse, error) {
 	srpABytes := convertStringToBytes(srpA)
 	if len(srpABytes) != 512 {
 		return nil, ente.NewBadRequestWithMessage("Invalid length for srpA")
 	}
-	time.Sleep(20 * time.Millisecond)
-	// generate 512 bytes of random data
-	srpBBytes := make([]byte, 512)
-	_, err := rand.Read(srpBBytes)
+
+	// Simulate realistic timing with variable delay (30-80ms)
+	// This matches the timing variance of real SRP operations
+	baseDelay := 30
+	variableDelay := mathRand.Intn(50)
+	time.Sleep(time.Duration(baseDelay+variableDelay) * time.Millisecond)
+
+	// Generate realistic fake SRP data
+	serverSecret := make([]byte, 64) // Same size as real srp.GenKey()
+	_, err := rand.Read(serverSecret)
 	if err != nil {
-		return nil, stacktrace.Propagate(err, "failed to generate random bytes")
+		return nil, stacktrace.Propagate(err, "failed to generate server secret")
+	}
+
+	// Generate fake SRP B value (512 bytes like real)
+	srpBBytes := make([]byte, 512)
+	_, err = rand.Read(srpBBytes)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to generate srpB bytes")
+	}
+
+	// Parse srpUserID as UUID
+	userUUID, err := uuid.Parse(srpUserID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to parse srpUserID")
+	}
+
+	// Store the fake session in the database (adds natural DB timing variance)
+	sessionID, err := c.UserAuthRepo.AddFakeSRPSession(userUUID, convertBytesToString(serverSecret), srpA)
+	if err != nil {
+		// If storage fails, still return a response to avoid revealing system errors
+		return &ente.CreateSRPSessionResponse{
+			SessionID: uuid.New(),
+			SRPB:      convertBytesToString(srpBBytes),
+		}, nil
 	}
 
 	return &ente.CreateSRPSessionResponse{
-		SessionID: uuid.New(),
-		SRPB:      convertBytesToString(srpBBytes[:512]),
+		SessionID: sessionID,
+		SRPB:      convertBytesToString(srpBBytes),
 	}, nil
 }
