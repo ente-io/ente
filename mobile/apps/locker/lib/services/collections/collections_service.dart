@@ -127,20 +127,9 @@ class CollectionService {
       final collection = await _apiClient.create(name, type);
       _logger.info("Created collection: ${collection.name}");
 
-      // Cache the collection immediately
+      // Cache in memory
       _collectionIDToCollections[collection.id] = collection;
-
-      // Add to local database
-      await _db.updateCollections([collection]);
-
-      // Update sync time to the collection's updation time
-      if (collection.updationTime > _db.getSyncTime()) {
-        await _db.setSyncTime(collection.updationTime);
-      }
-      Bus.instance.fire(CollectionsUpdatedEvent());
-
-      // Note: We don't call sync() here as the collection is already saved locally
-      // The next periodic sync will fetch any additional updates
+      await sync();
 
       return collection;
     } catch (e) {

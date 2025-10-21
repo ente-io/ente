@@ -2,18 +2,23 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
 class SelectionActionButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? hugeIcon;
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
 
   const SelectionActionButton({
     super.key,
-    required this.icon,
+    this.icon,
+    this.hugeIcon,
     required this.label,
     required this.onTap,
     this.isDestructive = false,
-  });
+  }) : assert(
+          icon != null || hugeIcon != null,
+          'Either icon or hugeIcon must be provided',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +41,12 @@ class SelectionActionButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            hugeIcon ??
+                Icon(
+                  icon!,
+                  color: color,
+                  size: 24,
+                ),
             const SizedBox(height: 8),
             Text(
               label,

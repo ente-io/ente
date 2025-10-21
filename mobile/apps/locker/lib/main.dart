@@ -25,6 +25,7 @@ import 'package:locker/services/collections/collections_api_client.dart';
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import "package:locker/services/files/links/links_client.dart";
 import "package:locker/services/files/links/links_service.dart";
@@ -169,6 +170,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await LockScreenSettings.instance.init(Configuration.instance);
   await CollectionApiClient.instance.init();
   await CollectionService.instance.init();
+  await FavoritesService.instance.init();
   await LinksClient.instance.init();
   await LinksService.instance.init();
   await ServiceLocator.instance.init(
