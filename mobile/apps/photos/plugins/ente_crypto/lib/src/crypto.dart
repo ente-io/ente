@@ -263,6 +263,113 @@ Uint8List chachaDecryptData(Map<String, dynamic> args) {
   return pullResult.m;
 }
 
+Future<void> chachaVerifyFile(Map<String, dynamic> args) async {
+  try {
+    // Step 1: Decrypt the file key using collection key
+    final encryptedKey = Sodium.base642bin(args["encFileKey"]);
+    final nonce = Sodium.base642bin(args["encFileNonce"]);
+    final fileKey = Sodium.cryptoSecretboxOpenEasy(
+      encryptedKey,
+      nonce,
+      args["parentCollectionKey"],
+    );
+
+    // Step 2: Verify file can be decrypted
+    final header = Sodium.base642bin(args["encFileHeaders"]);
+    final encFile = File(args["encFilePath"]);
+
+    if (!await encFile.exists()) {
+      throw Exception(
+        "$kVerificationErrorTag: Encrypted file does not exist at path: ${args["encFilePath"]}",
+      );
+    }
+
+    final encFileLength = await encFile.length();
+    if (encFileLength == 0) {
+      throw Exception("$kVerificationErrorTag: Encrypted file is empty");
+    }
+
+    final inputFile = encFile.openSync(mode: FileMode.read);
+
+    try {
+      // Initialize decryption
+      final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+        header,
+        fileKey,
+      );
+
+      // Determine number of chunks to verify
+      // -1 means verify entire file
+      final int chunkLimit = args["chunkLimit"] ?? 1;
+      final bool verifyEntireFile = chunkLimit == -1;
+      final chunksToVerify = verifyEntireFile
+          ? 999999999
+          : chunkLimit; // Large number for entire file
+
+      var bytesRead = 0;
+      var chunksVerified = 0;
+
+      while (chunksVerified < chunksToVerify) {
+        // Calculate chunk size
+        final remainingBytes = encFileLength - bytesRead;
+        if (remainingBytes <= 0) {
+          break; // No more data to verify
+        }
+
+        final chunkSize = remainingBytes < decryptionChunkSize
+            ? remainingBytes
+            : decryptionChunkSize;
+
+        // Read chunk
+        final buffer = await inputFile.read(chunkSize);
+        if (buffer.isEmpty) {
+          break; // End of file
+        }
+
+        bytesRead += buffer.length;
+        chunksVerified++;
+
+        // Attempt to decrypt - this will throw if decryption fails
+        try {
+          final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+            pullState,
+            buffer,
+            null,
+          );
+
+          // If this was the final tag, we've verified the entire file
+          if (pullResult.tag ==
+              Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+            break;
+          }
+        } catch (e) {
+          // Crypto error during pull operation
+          throw Exception(
+            "$kVerificationErrorTag: Decryption verification failed at chunk $chunksVerified. "
+            "File cannot be decrypted with the provided keys. "
+            "This may indicate corruption during encryption or incorrect keys.",
+          );
+        }
+      }
+    } finally {
+      inputFile.closeSync();
+    }
+  } catch (e) {
+    // If it's already tagged, just rethrow
+    if (e.toString().contains(kVerificationErrorTag)) {
+      rethrow;
+    }
+    // For key decryption errors
+    if (e.toString().contains("crypto_secretbox_open_easy")) {
+      throw Exception(
+        "$kVerificationErrorTag: Failed to decrypt file key. Invalid collection key or corrupted key data.",
+      );
+    }
+    // For other unexpected errors
+    throw Exception("$kVerificationErrorTag: Verification failed: $e");
+  }
+}
+
 class CryptoUtil {
   // Note: workers are turned on during app startup.
   static final Computer _computer = Computer.shared();
@@ -460,6 +567,31 @@ class CryptoUtil {
     });
   }
 
+  static Future<void> decryptVerify(
+    String encFilePath,
+    String encFileHeaders,
+    String encFileKey,
+    String encFileNonce,
+    Uint8List parentCollectionKey, {
+    int chunkLimit = -1,
+  }) {
+    final args = <String, dynamic>{
+      "encFilePath": encFilePath,
+      "encFileHeaders": encFileHeaders,
+      "encFileKey": encFileKey,
+      "encFileNonce": encFileNonce,
+      "parentCollectionKey": parentCollectionKey,
+      "chunkLimit": chunkLimit,
+    };
+    return _computer
+        .compute(
+          chachaVerifyFile,
+          param: args,
+          taskName: "decryptVerify",
+        )
+        .unwrapExceptionInComputer();
+  }
+
   // Generates and returns a 256-bit key.
   static Uint8List generateKey() {
     return Sodium.cryptoSecretboxKeygen();
@@ -626,7 +758,10 @@ class CryptoUtil {
   ///
   /// Each chunk adds 17 bytes (Sodium.cryptoSecretstreamXchacha20poly1305Abytes) overhead.
   /// For a 4MB chunk size, the encrypted size is 4MB + 17 bytes per chunk.
-  static bool validateStreamEncryptionSizes(int plainTextSize, int cipherTextSize) {
+  static bool validateStreamEncryptionSizes(
+    int plainTextSize,
+    int cipherTextSize,
+  ) {
     if (plainTextSize <= 0 || cipherTextSize <= 0) {
       return false;
     }
@@ -637,7 +772,8 @@ class CryptoUtil {
     final int fullChunks = plainTextSize ~/ encryptionChunkSize;
     final int lastChunkSize = plainTextSize % encryptionChunkSize;
 
-    int expectedCipherTextSize = fullChunks * (encryptionChunkSize + chunkOverhead);
+    int expectedCipherTextSize =
+        fullChunks * (encryptionChunkSize + chunkOverhead);
     if (lastChunkSize > 0) {
       expectedCipherTextSize += lastChunkSize + chunkOverhead;
     }

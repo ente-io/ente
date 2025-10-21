@@ -897,6 +897,16 @@ class FileUploader {
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
+        // Verify that the encrypted file can be decrypted before uploading
+        // For updates, we need to verify with the existing file key
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
         remoteFile = await _updateFile(
           file,
           fileObjectKey,
@@ -929,6 +939,15 @@ class FileUploader {
             fileAttributes.key!,
           );
         }
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          encryptedKey,
+          keyDecryptionNonce,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
+
         remoteFile = await _uploadFile(
           file,
           collectionID,
