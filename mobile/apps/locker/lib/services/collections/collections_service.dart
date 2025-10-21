@@ -126,8 +126,22 @@ class CollectionService {
     try {
       final collection = await _apiClient.create(name, type);
       _logger.info("Created collection: ${collection.name}");
-      // Let sync update the local state
-      await sync();
+
+      // Cache the collection immediately
+      _collectionIDToCollections[collection.id] = collection;
+
+      // Add to local database
+      await _db.updateCollections([collection]);
+
+      // Update sync time to the collection's updation time
+      if (collection.updationTime > _db.getSyncTime()) {
+        await _db.setSyncTime(collection.updationTime);
+      }
+      Bus.instance.fire(CollectionsUpdatedEvent());
+
+      // Note: We don't call sync() here as the collection is already saved locally
+      // The next periodic sync will fetch any additional updates
+
       return collection;
     } catch (e) {
       _logger.severe("Failed to create collection: $e");
@@ -137,6 +151,21 @@ class CollectionService {
 
   Future<List<Collection>> getCollections() async {
     return _db.getCollections();
+  }
+
+  Future<Collection?> getCollectionByID(int collectionID) async {
+    if (_collectionIDToCollections.containsKey(collectionID)) {
+      return _collectionIDToCollections[collectionID];
+    }
+
+    final collections = await _db.getCollections();
+    for (final collection in collections) {
+      if (collection.id == collectionID) {
+        _collectionIDToCollections[collectionID] = collection;
+        return collection;
+      }
+    }
+    return null;
   }
 
   Future<SharedCollections> getSharedCollections() async {
@@ -214,8 +243,15 @@ class CollectionService {
     try {
       await _apiClient.addToCollection(collection, [file]);
       _logger.info("Added file ${file.title} to collection ${collection.name}");
+
+      // Update local database immediately
+      await _db.addFilesToCollection(collection, [file]);
+
+      // Fire event to update UI
+      Bus.instance.fire(CollectionsUpdatedEvent());
+
       if (runSync) {
-        // Let sync update the local state
+        // Also sync to ensure we have the latest state from server
         await sync();
       }
     } catch (e) {
@@ -229,7 +265,14 @@ class CollectionService {
       final List<TrashRequest> requests = [];
       requests.add(TrashRequest(file.uploadedFileID!, collection.id));
       await _apiClient.trash(requests);
-      // Let sync update the local state
+
+      // Update local database immediately
+      await _db.deleteFilesFromCollection(collection, [file]);
+
+      // Fire event to update UI
+      Bus.instance.fire(CollectionsUpdatedEvent());
+
+      // Also sync to ensure we have the latest state
       await sync();
       await TrashService.instance.syncTrash();
     } catch (e) {
@@ -280,7 +323,7 @@ class CollectionService {
     }
   }
 
-  Future<Collection> _getOrCreateImportantCollection() async {
+  Future<Collection> getOrCreateImportantCollection() async {
     final collections = await getCollections();
     for (final collection in collections) {
       if (collection.type == CollectionType.favorites) {
@@ -323,7 +366,7 @@ class CollectionService {
       await getOrCreateUncategorizedCollection();
 
       // Create important (favorites) collection if it doesn't exist
-      await _getOrCreateImportantCollection();
+      await getOrCreateImportantCollection();
 
       // Create Documents collection if it doesn't exist
       await _getOrCreateDocumentsCollection();
