@@ -1,3 +1,4 @@
+- Neeraj: Decrypt local chunk before reporting upload & log sha1 on decryption errors
 - Neeraj: Asserts for url reuse and plain vs enc size mismatch
 - Ashil: (i) Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
 - Laurens: Show empty persons and fallback for face thumbnail issues
