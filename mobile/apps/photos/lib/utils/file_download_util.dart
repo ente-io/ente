@@ -81,11 +81,8 @@ Future<File?> downloadAndDecryptPublicFile(
       _logger.info('$logPrefix file saved at $decryptedFilePath');
     } catch (e, s) {
       fakeProgress?.stop();
-      _logger.severe(
-        "Critical: $logPrefix failed to decrypt  v:${file.metadataVersion}, viaMob:${(file.deviceFolder ?? '') != ''}",
-        e,
-        s,
-      );
+      final metadata = _getFileMetadataForLogging(file, encryptedFilePath);
+      _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       return null;
     }
     return File(decryptedFilePath);
@@ -188,11 +185,8 @@ Future<File?> downloadAndDecrypt(
           .info('$logPrefix decryption completed (genID ${file.generatedID})');
     } catch (e, s) {
       fakeProgress?.stop();
-      _logger.severe(
-        "Critical: $logPrefix failed to decrypt  v:${file.metadataVersion}, viaMob:${(file.deviceFolder ?? '') != ''}",
-        e,
-        s,
-      );
+      final metadata = _getFileMetadataForLogging(file, encryptedFilePath);
+      _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       return null;
     }
     await encryptedFile.delete();
@@ -201,6 +195,21 @@ Future<File?> downloadAndDecrypt(
     _logger.severe("$logPrefix failed to download or decrypt", e, s);
     return null;
   }
+}
+
+String _getFileMetadataForLogging(EnteFile file, String encFilePath) {
+  final buffer = StringBuffer();
+  if (File(encFilePath).existsSync()) {
+    buffer.write('encFileSha1: ${computeSha1(encFilePath)}, ');
+  } else {
+    buffer.write('encFileSha1: file not found, ');
+  }
+  buffer.write('metadataVersion: ${file.metadataVersion}, ');
+  buffer.write(
+    'fileSize: ${file.fileSize != null ? file.fileSize! : "null"}, ',
+  );
+  buffer.write('viaMobile: ${(file.deviceFolder ?? "") != ""}');
+  return buffer.toString();
 }
 
 Future<void> downloadToGallery(EnteFile file) async {
