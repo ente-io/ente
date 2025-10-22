@@ -1,1 +1,1 @@
-photos,photography,family,privacy,cloud,backup,videos,photo,encryption,storage,album,alternative
+фатаграфія,фота,фотаздымкі,фоткі,сям'я,прыватнасць,воблака,рэзервовае капіяванне,рэзервовае капіраванне,фатаграфія,шыфраванне,сховішча,альбом,альтэрнатыва
