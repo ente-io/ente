@@ -136,10 +136,10 @@ class _FileEditDialogState extends State<FileEditDialog> {
           children: [
             Row(
               children: [
-                Icon(
-                  FileIconUtils.getFileIcon(_fileName),
-                  color: FileIconUtils.getFileIconColor(_fileName),
+                FileIconUtils.getFileIcon(
+                  _fileName,
                   size: 24,
+                  showBackground: false,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -154,7 +154,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Title',
+              context.l10n.title,
               style: textTheme.small.copyWith(
                 color: colorScheme.textBase,
               ),

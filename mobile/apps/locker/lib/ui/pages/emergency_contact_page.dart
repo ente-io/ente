@@ -84,6 +84,7 @@ class _EmergencyContactPageState
         labelText: context.l10n.contactName,
         hintText: context.l10n.contactNameHint,
         controller: _nameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterContactName;
@@ -91,11 +92,12 @@ class _EmergencyContactPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.contactDetails,
         hintText: context.l10n.contactDetailsHint,
         controller: _contactDetailsController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterContactDetails;
@@ -103,11 +105,12 @@ class _EmergencyContactPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.contactNotes,
         hintText: context.l10n.contactNotesHint,
         controller: _notesController,
+        shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
       const SizedBox(height: 24),
@@ -121,13 +124,13 @@ class _EmergencyContactPageState
         label: context.l10n.contactName,
         value: _nameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.contactDetails,
         value: _contactDetailsController.text,
       ),
       if (_notesController.text.isNotEmpty) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.contactNotes,
           value: _notesController.text,

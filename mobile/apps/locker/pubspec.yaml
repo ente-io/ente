@@ -54,6 +54,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter 
   flutter_svg: ^2.2.1
+  hugeicons: ^1.1.1
   intl: ^0.20.2
   io: ^1.0.5
   listen_sharing_intent: ^1.9.2

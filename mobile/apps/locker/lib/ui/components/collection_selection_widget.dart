@@ -1,5 +1,8 @@
+import "package:dotted_border/dotted_border.dart";
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/utils/collection_actions.dart';
 
@@ -53,6 +56,14 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     }
   }
 
+  void _onUncategorizedSelected() {
+    // Clear all selected collections when uncategorized is selected
+    final collectionIdsCopy = Set<int>.from(widget.selectedCollectionIds);
+    for (final id in collectionIdsCopy) {
+      widget.onToggleCollection(id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -61,188 +72,141 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Collections',
-          style: textTheme.small.copyWith(
-            color: colorScheme.textBase,
-          ),
+        TitleBarTitleWidget(
+          title: context.l10n.addToCollection,
         ),
-        const SizedBox(height: 8),
-        Container(
-          height: 150,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colorScheme.strokeFaint),
-          ),
-          child: _availableCollections.isEmpty
-              ? Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: colorScheme.fillFaint,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'No collections available',
-                          style: textTheme.body.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        InkWell(
-                          onTap: _createNewCollection,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary300.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: colorScheme.primary500,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.add,
-                                  size: 16,
-                                  color: colorScheme.primary700,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Create collection',
-                                  style: textTheme.small.copyWith(
-                                    color: colorScheme.primary700,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Scrollbar(
-                  thumbVisibility: true,
-                  thickness: 6,
-                  radius: const Radius.circular(3),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 3.5,
-                      crossAxisSpacing: 6,
-                      mainAxisSpacing: 6,
-                    ),
-                    padding: const EdgeInsets.all(6),
-                    itemCount: _availableCollections.length +
-                        1, // +1 for "Create New" option
-                    itemBuilder: (context, index) {
-                      if (index < _availableCollections.length) {
-                        final collection = _availableCollections[index];
-                        final isSelected = widget.selectedCollectionIds
-                            .contains(collection.id);
-                        final collectionName =
-                            collection.name ?? 'Unnamed Collection';
-
-                        return InkWell(
-                          onTap: () => widget.onToggleCollection(collection.id),
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? colorScheme.primary300.withOpacity(0.3)
-                                  : colorScheme.fillFaint,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isSelected
-                                    ? colorScheme.primary500
-                                    : colorScheme.strokeFaint,
-                                width: isSelected ? 2 : 1,
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                collectionName,
-                                style: textTheme.small.copyWith(
-                                  color: isSelected
-                                      ? colorScheme.primary500
-                                      : colorScheme.textBase,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return InkWell(
-                        onTap: _createNewCollection,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.backgroundElevated,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: colorScheme.strokeFaint.withOpacity(0.5),
-                              width: 1,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add_outlined,
-                                  size: 14,
-                                  color: colorScheme.textBase,
-                                ),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    'Collection',
-                                    style: textTheme.small.copyWith(
-                                      color: colorScheme.textBase,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+        const SizedBox(height: 24),
+        Wrap(
+          spacing: 8,
+          runSpacing: 12,
+          children: [
+            _buildUncategorizedChip(
+              context.l10n.uncategorized,
+              widget.selectedCollectionIds.isEmpty,
+              _onUncategorizedSelected,
+              colorScheme,
+              textTheme,
+            ),
+            for (final collection in _availableCollections)
+              _buildCollectionChip(
+                collection: collection,
+                isSelected:
+                    widget.selectedCollectionIds.contains(collection.id),
+                onTap: () => widget.onToggleCollection(collection.id),
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
+            _buildNewCollectionChip(
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            ),
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCollectionChip({
+    required Collection collection,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required colorScheme,
+    required textTheme,
+  }) {
+    final collectionName = collection.name ?? context.l10n.unnamedCollection;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorScheme.primary700.withValues(alpha: 0.2)
+              : colorScheme.fillFaint,
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary700 : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          collectionName,
+          style: textTheme.small.copyWith(
+            color: isSelected ? colorScheme.primary700 : colorScheme.textBase,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUncategorizedChip(
+    String name,
+    bool isSelected,
+    VoidCallback onTap,
+    colorScheme,
+    textTheme,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorScheme.primary700.withValues(alpha: 0.2)
+              : colorScheme.fillFaint,
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
+          border: Border.all(
+            color: isSelected ? colorScheme.primary700 : Colors.transparent,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          name,
+          style: textTheme.small.copyWith(
+            color: isSelected ? colorScheme.primary700 : colorScheme.textBase,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewCollectionChip({
+    required colorScheme,
+    required textTheme,
+  }) {
+    return GestureDetector(
+      onTap: () async {
+        await _createNewCollection();
+      },
+      child: DottedBorder(
+        options: const RoundedRectDottedBorderOptions(
+          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          strokeWidth: 1,
+          color: Color(0xFF6B6B6B),
+          dashPattern: [5, 5],
+          radius: Radius.circular(24),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.add_rounded,
+              size: 18,
+              color: colorScheme.textMuted,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              context.l10n.newCollection,
+              style: textTheme.body.copyWith(
+                color: colorScheme.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

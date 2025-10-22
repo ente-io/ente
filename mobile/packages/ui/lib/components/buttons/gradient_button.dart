@@ -1,81 +1,55 @@
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class GradientButton extends StatelessWidget {
-  final Function? onTap;
-
-  // text is ignored if child is specified
+  final VoidCallback? onTap;
   final String text;
-
-  // nullable
-  final IconData? iconData;
-
-  // padding between the text and icon
+  final HugeIcon? hugeIcon;
   final double paddingValue;
 
   const GradientButton({
     super.key,
     this.onTap,
     this.text = '',
-    this.iconData,
-    this.paddingValue = 0.0,
+    this.hugeIcon,
+    this.paddingValue = 6.0,
   });
+
+  static const TextStyle _textStyle = TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 18,
+  );
 
   @override
   Widget build(BuildContext context) {
-    Widget buttonContent;
-    if (iconData == null) {
-      buttonContent = Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter-SemiBold',
-          fontSize: 18,
-        ),
-      );
-    } else {
-      buttonContent = Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            iconData,
-            size: 20,
-            color: Colors.white,
+    final Widget textWidget = Text(text, style: _textStyle);
+
+    final Widget content = (hugeIcon != null)
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              hugeIcon!,
+              Padding(padding: EdgeInsets.symmetric(horizontal: paddingValue)),
+              if (text.isNotEmpty) textWidget,
+            ],
+          )
+        : textWidget;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Material(
+        color: getEnteColorScheme(context).primary700,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            height: 56,
+            child: Center(child: content),
           ),
-          const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
-          Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Inter-SemiBold',
-              fontSize: 18,
-            ),
-          ),
-        ],
-      );
-    }
-    return InkWell(
-      onTap: onTap as void Function()?,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: Container(
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: const Alignment(0.1, -0.9),
-              end: const Alignment(-0.6, 0.9),
-              colors: onTap != null
-                  ? getEnteColorScheme(context).gradientButtonBgColors
-                  : [
-                      getEnteColorScheme(context).fillMuted,
-                      getEnteColorScheme(context).fillMuted,
-                    ],
-            ), 
-          ),
-          child: Center(child: buttonContent),
         ),
       ),
     );

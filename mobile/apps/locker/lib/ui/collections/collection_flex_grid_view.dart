@@ -2,6 +2,7 @@ import "dart:math";
 
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
@@ -31,6 +32,9 @@ class _CollectionFlexGridViewWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
@@ -42,7 +46,7 @@ class _CollectionFlexGridViewWidgetState
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
+          childAspectRatio: 1.5,
         ),
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {
@@ -54,52 +58,54 @@ class _CollectionFlexGridViewWidgetState
             onTap: () => _navigateToCollection(collection),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
+                borderRadius: BorderRadius.circular(20),
+                color: colorScheme.backdropBase,
               ),
               padding: const EdgeInsets.all(12),
-              child: Stack(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      FutureBuilder<int>(
-                        future:
-                            CollectionService.instance.getFileCount(collection),
-                        builder: (context, snapshot) {
-                          final fileCount = snapshot.data ?? 0;
-                          return Text(
-                            context.l10n.items(fileCount),
-                            style: getEnteTextTheme(context).small.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                            textAlign: TextAlign.left,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
+                  Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: colorScheme.backgroundElevated,
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    padding: const EdgeInsets.all(8.0),
+                    child: collection.type == CollectionType.favorites
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedStar,
+                            color: colorScheme.primary700,
+                          )
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedWallet05,
+                            color: colorScheme.textBase,
+                          ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    collectionName,
+                    style: textTheme.bodyBold,
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  const SizedBox(height: 4),
+                  FutureBuilder<int>(
+                    future: CollectionService.instance.getFileCount(collection),
+                    builder: (context, snapshot) {
+                      final fileCount = snapshot.data ?? 0;
+                      return Text(
+                        context.l10n.items(fileCount),
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
+                        textAlign: TextAlign.left,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

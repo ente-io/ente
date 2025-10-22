@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import "package:dotted_border/dotted_border.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
 import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -18,17 +20,167 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/collection_flex_grid_view.dart";
 import "package:locker/ui/collections/section_title.dart";
+import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
-import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/information_page.dart';
 import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
-import 'package:locker/utils/collection_actions.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
+
+class CustomLockerAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final bool isSearchActive;
+  final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final VoidCallback onSearchFocused;
+  final VoidCallback onClearSearch;
+  final ValueChanged<String>? onSearchChanged;
+
+  const CustomLockerAppBar({
+    super.key,
+    required this.scaffoldKey,
+    required this.isSearchActive,
+    required this.searchController,
+    required this.searchFocusNode,
+    required this.onSearchFocused,
+    required this.onClearSearch,
+    this.onSearchChanged,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(156);
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final hasQuery = searchController.text.isNotEmpty;
+    final showClearIcon = isSearchActive || hasQuery;
+    final clearIconColor = colorScheme.primary700;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.primary700,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      scaffoldKey.currentState!.openDrawer();
+                    },
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedMenu01,
+                      color: Colors.white,
+                    ),
+                  ),
+                  GestureDetector(
+                    onLongPress: () {
+                      sendLogs(
+                        context,
+                        'vishnu@ente.io',
+                        subject: context.l10n.lockerLogs,
+                        body: 'Debug logs for Locker app.\n\n',
+                      );
+                    },
+                    child: Text(
+                      context.l10n.locker,
+                      style: textTheme.h3Bold.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: TextField(
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: searchController,
+                  focusNode: searchFocusNode,
+                  onTap: onSearchFocused,
+                  onChanged: onSearchChanged,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: context.l10n.searchHint,
+                    hintStyle: TextStyle(
+                      color: colorScheme.primary700,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 8),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: colorScheme.primary700,
+                        size: 20,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 24,
+                    ),
+                    suffixIcon: showClearIcon
+                        ? IconButton(
+                            onPressed: onClearSearch,
+                            splashRadius: 20,
+                            padding: const EdgeInsets.only(right: 16, left: 8),
+                            icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: clearIconColor,
+                              size: 20,
+                            ),
+                          )
+                        : null,
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: colorScheme.primary700,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class HomePage extends UploaderPage {
   final String? initialSearchQuery;
@@ -46,6 +198,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     scaffoldKey: scaffoldKey,
   );
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final _searchFocusNode = FocusNode();
   bool _isLoading = true;
   bool _isSettingsOpen = false;
 
@@ -65,11 +218,7 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   @override
   void onFileUploadComplete() {
-    // No-op: CollectionService.sync() already fires CollectionsUpdatedEvent
-    // which triggers a single refresh. Avoid calling _loadCollections here to
-    // prevent duplicate reloads / UI blinking when uploading to multiple
-    // collections.
-    return;
+    _loadCollections();
   }
 
   @override
@@ -188,6 +337,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   void dispose() {
     _animationController.dispose();
     _isFabOpen.dispose();
+    _searchFocusNode.dispose();
     disposeSharing();
     super.dispose();
   }
@@ -357,16 +507,35 @@ class _HomePageState extends UploaderPageState<HomePage>
     _recentFiles = uniqueFiles;
   }
 
-  void _navigateToCollection(Collection collection) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CollectionPage(collection: collection),
-      ),
+  void _handleSearchChange(String query) {
+    // Trigger search by activating search with the current query
+    activateSearchWithQuery(query);
+  }
+
+  void _handleSearchFocused() {
+    // Activate search when TextField is tapped/focused
+    if (!isSearchActive) {
+      activateSearchWithQuery('');
+    }
+  }
+
+  void _handleClearSearch() {
+    // Clear text and unfocus to properly dismiss search
+    searchController.clear();
+    _searchFocusNode.unfocus();
+    // Simulate ESC key to deactivate search state
+    // ignore: prefer_const_constructors
+    final escapeEvent = KeyDownEvent(
+      physicalKey: PhysicalKeyboardKey.escape,
+      logicalKey: LogicalKeyboardKey.escape,
+      timeStamp: const Duration(seconds: 0),
     );
+    handleKeyEvent(escapeEvent);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return PopScope(
       onPopInvokedWithResult: (_, result) async {
         if (_isSettingsOpen) {
@@ -382,35 +551,22 @@ class _HomePageState extends UploaderPageState<HomePage>
         onKeyEvent: handleKeyEvent,
         child: Scaffold(
           key: scaffoldKey,
+          backgroundColor: colorScheme.backgroundBase,
           drawer: Drawer(
             width: 428,
+            backgroundColor: colorScheme.backgroundBase,
             child: _settingsPage,
           ),
           drawerEnableOpenDragGesture: !Platform.isAndroid,
           onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-          appBar: AppBar(
-            leading: buildSearchLeading(),
-            title: GestureDetector(
-              onLongPress: () {
-                sendLogs(
-                  context,
-                  'vishnu@ente.io',
-                  subject: 'Locker logs',
-                  body: 'Debug logs for Locker app.\n\n',
-                );
-              },
-              child: const Text(
-                'Locker',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            elevation: 0,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-            actions: [
-              buildSearchAction(),
-              ...buildSearchActions(),
-            ],
+          appBar: CustomLockerAppBar(
+            scaffoldKey: scaffoldKey,
+            isSearchActive: isSearchActive,
+            searchController: searchController,
+            searchFocusNode: _searchFocusNode,
+            onSearchFocused: _handleSearchFocused,
+            onClearSearch: _handleClearSearch,
+            onSearchChanged: _handleSearchChange,
           ),
           body: _buildBody(),
           floatingActionButton:
@@ -462,6 +618,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     if (isSearchActive) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
         child: SearchResultView(
           collections: _filteredCollections,
           files: _filteredFiles,
@@ -470,46 +627,58 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
+    // Show empty state only if both collections and recent files are empty
+    if (_displayedCollections.isEmpty && _recentFiles.isEmpty) {
+      final colorScheme = getEnteColorScheme(context);
+      final textTheme = getEnteTextTheme(context);
 
-    if (_displayedCollections.isEmpty) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 200,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.folder_outlined,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.noCollectionsFound,
-                  style: getEnteTextTheme(context).large.copyWith(
-                        color: Colors.grey,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.createYourFirstCollection,
-                  style: getEnteTextTheme(context).body.copyWith(
-                        color: Colors.grey,
-                      ),
-                ),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: GradientButton(
-                    onTap: _createCollection,
-                    text: context.l10n.createCollection,
-                    iconData: Icons.add,
-                    paddingValue: 8.0,
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: DottedBorder(
+            options: const RoundedRectDottedBorderOptions(
+              strokeWidth: 1,
+              color: Color(0xFF6B6B6B),
+              dashPattern: [5, 5],
+              radius: Radius.circular(24),
+            ),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: colorScheme.backdropBase,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 42,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/empty_state.png',
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Text(
+                    'Upload a File',
+                    style: textTheme.h3Bold.copyWith(
+                      color: colorScheme.textBase,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: addFile,
+                    child: Text(
+                      'Click here to upload',
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.primary700,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -555,62 +724,18 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildRecentsSection() {
-    if (_recentFiles.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                Icons.description_outlined,
-                size: 48,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                context.l10n.nothingYet,
-                style: getEnteTextTheme(context).body.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.uploadYourFirstDocument,
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Colors.grey[500],
-                    ),
-              ),
-              const SizedBox(height: 24),
-              GradientButton(
-                onTap: addFile,
-                text: context.l10n.uploadDocument,
-                iconData: Icons.file_upload,
-                paddingValue: 8.0,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
     return RecentsSectionWidget(
       collections: _filterOutUncategorized(_collections),
       recentFiles: _recentFiles,
     );
   }
 
-  Future<void> _createCollection() async {
-    final createdCollection = await CollectionActions.createCollection(context);
-
-    if (createdCollection != null) {
-      await _loadCollections();
-      _navigateToCollection(createdCollection);
-    }
-  }
-
   Widget _buildMultiOptionFab() {
     return ValueListenableBuilder<bool>(
       valueListenable: _isFabOpen,
       builder: (context, isFabOpen, child) {
+        final colorScheme = getEnteColorScheme(context);
+
         return Stack(
           children: [
             if (isFabOpen)
@@ -623,119 +748,86 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ),
               ),
             Positioned(
-              right: 0,
-              bottom: 0,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  if (isFabOpen) ...[
-                    ScaleTransition(
-                      scale: _animation,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _toggleFab();
-                                _showInformationDialog();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getEnteColorScheme(context).fillBase,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  context.l10n.saveInformation,
-                                  style:
-                                      getEnteTextTheme(context).small.copyWith(
-                                            color: getEnteColorScheme(context)
-                                                .backgroundBase,
-                                          ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            FloatingActionButton(
-                              heroTag: "information",
-                              mini: true,
-                              onPressed: () {
-                                _toggleFab();
-                                _showInformationDialog();
-                              },
-                              backgroundColor:
-                                  getEnteColorScheme(context).fillBase,
-                              child: const Icon(Icons.edit_document),
-                            ),
-                          ],
+              right: 64,
+              bottom: 64,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 1),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(
+                    parent: _animationController,
+                    curve: Curves.easeOutCubic,
+                  ),
+                ),
+                child: FadeTransition(
+                  opacity: _animation,
+                  child: Container(
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: colorScheme.backdropBase,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: colorScheme.strokeFaint),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 15,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
+                      ],
                     ),
-                    if (_collections.isNotEmpty)
-                      ScaleTransition(
-                        scale: _animation,
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  _toggleFab();
-                                  addFile();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: getEnteColorScheme(context).fillBase,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    context.l10n.uploadDocumentTooltip,
-                                    style: getEnteTextTheme(context)
-                                        .small
-                                        .copyWith(
-                                          color: getEnteColorScheme(context)
-                                              .backgroundBase,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              FloatingActionButton(
-                                heroTag: "addFile",
-                                mini: true,
-                                onPressed: () {
-                                  _toggleFab();
-                                  addFile();
-                                },
-                                backgroundColor:
-                                    getEnteColorScheme(context).fillBase,
-                                child: const Icon(Icons.file_upload),
-                              ),
-                            ],
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        MenuItemWidget(
+                          label: context.l10n.saveInformation,
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedFile01,
+                            color: colorScheme.primary700,
+                            size: 20,
                           ),
+                          isFirst: true,
+                          isLast: false,
+                          onTap: () {
+                            _toggleFab();
+                            _showInformationDialog();
+                          },
                         ),
-                      ),
-                  ],
-                  FloatingActionButton(
-                    onPressed: _toggleFab,
-                    child: AnimatedRotation(
-                      turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
-                      duration: const Duration(milliseconds: 300),
-                      child: const Icon(Icons.add),
+                        MenuItemWidget(
+                          label: context.l10n.saveDocument,
+                          icon: HugeIcon(
+                            icon: HugeIcons.strokeRoundedFileUpload,
+                            color: colorScheme.primary700,
+                            size: 20,
+                          ),
+                          isFirst: false,
+                          isLast: true,
+                          onTap: () {
+                            _toggleFab();
+                            addFile();
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                ],
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 16,
+              child: FloatingActionButton(
+                onPressed: _toggleFab,
+                shape: const CircleBorder(),
+                backgroundColor: colorScheme.primary700,
+                child: AnimatedRotation(
+                  turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
+                  duration: const Duration(milliseconds: 300),
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],
@@ -759,6 +851,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     required List<Collection> collections,
     required UISectionType viewType,
   }) {
+    final colorScheme = getEnteColorScheme(context);
     return [
       SectionOptions(
         onTap: () {
@@ -771,11 +864,12 @@ class _HomePageState extends UploaderPageState<HomePage>
             ),
           );
         },
+        body: context.l10n.items(collections.length),
         SectionTitle(title: title),
         trailingWidget: IconButtonWidget(
           icon: Icons.chevron_right,
           iconButtonType: IconButtonType.secondary,
-          iconColor: getEnteColorScheme(context).blurStrokePressed,
+          iconColor: colorScheme.textBase,
         ),
       ),
       const SizedBox(height: 24),
