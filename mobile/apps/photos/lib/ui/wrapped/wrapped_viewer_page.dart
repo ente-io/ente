@@ -990,13 +990,12 @@ class _HeatmapCell extends StatelessWidget {
     }
     if (value == kWrappedHeatmapPaddedValue) {
       final Color base = colorScheme.fillFaint;
-      final double placeholderOpacity =
-          (base.opacity * 0.4).clamp(0.0, 1.0).toDouble();
+      final double placeholderAlpha = (base.a * 0.4).clamp(0.0, 1.0).toDouble();
       return Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: base.withOpacity(placeholderOpacity),
+          color: base.withValues(alpha: placeholderAlpha),
           borderRadius: BorderRadius.circular(3),
         ),
       );
