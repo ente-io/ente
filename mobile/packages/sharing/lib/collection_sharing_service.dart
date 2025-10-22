@@ -76,7 +76,7 @@ class CollectionSharingService {
   ) async {
     try {
       final response = await _enteDio.post(
-        '/collection/share-url',
+        '/collections/share-url',
         data: {
           'collectionID': collectionID,
           'enableCollect': enableCollect,

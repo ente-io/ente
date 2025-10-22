@@ -59,6 +59,9 @@ class CustomLockerAppBar extends StatelessWidget
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final hasQuery = searchController.text.isNotEmpty;
+    final showClearIcon = isSearchActive || hasQuery;
+    final clearIconColor = colorScheme.primary700;
 
     return Container(
       decoration: BoxDecoration(
@@ -147,24 +150,21 @@ class CustomLockerAppBar extends StatelessWidget
                       minWidth: 44,
                       minHeight: 24,
                     ),
-                    suffixIcon:
-                        (isSearchActive || searchController.text.isNotEmpty)
-                            ? GestureDetector(
-                                onTap: onClearSearch,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(right: 16, left: 8),
-                                  child: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedCancel01,
-                                    color: colorScheme.textBase,
-                                    size: 20,
-                                  ),
-                                ),
-                              )
-                            : null,
+                    suffixIcon: showClearIcon
+                        ? IconButton(
+                            onPressed: onClearSearch,
+                            splashRadius: 20,
+                            padding: const EdgeInsets.only(right: 16, left: 8),
+                            icon: HugeIcon(
+                              icon: HugeIcons.strokeRoundedCancel01,
+                              color: clearIconColor,
+                              size: 20,
+                            ),
+                          )
+                        : null,
                     suffixIconConstraints: const BoxConstraints(
                       minWidth: 44,
-                      minHeight: 24,
+                      minHeight: 44,
                     ),
                   ),
                   style: TextStyle(
@@ -618,6 +618,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     if (isSearchActive) {
       return SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 24.0),
         child: SearchResultView(
           collections: _filteredCollections,
           files: _filteredFiles,

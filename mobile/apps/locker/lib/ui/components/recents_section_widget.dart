@@ -94,7 +94,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   Widget _buildRecentsHeader() {
     final colorScheme = getEnteColorScheme(context);
     return SectionOptions(
-      onTap: () {},
       body: context.l10n.items(_displayedFiles.length),
       SectionTitle(title: context.l10n.recents),
       trailingWidget: GestureDetector(

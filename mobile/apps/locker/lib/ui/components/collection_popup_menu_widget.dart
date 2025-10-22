@@ -37,6 +37,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       color: colorScheme.backdropBase,
       surfaceTintColor: Colors.transparent,
       elevation: 15,
+      offset: const Offset(-24, 24),
       shadowColor: Colors.black.withValues(alpha: 0.08),
       child: child ??
           HugeIcon(

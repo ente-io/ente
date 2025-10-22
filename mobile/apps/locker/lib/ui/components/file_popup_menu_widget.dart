@@ -38,6 +38,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
+      offset: const Offset(-24, 24),
       color: colorScheme.backdropBase,
       surfaceTintColor: Colors.transparent,
       padding: EdgeInsets.zero,

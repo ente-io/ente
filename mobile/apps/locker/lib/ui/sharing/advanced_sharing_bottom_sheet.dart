@@ -1,13 +1,20 @@
+import "dart:convert";
+
+import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
+import "package:ente_utils/navigation_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
+import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
 
 /// A bottom sheet widget for advanced sharing options.
@@ -46,6 +53,13 @@ class _AdvancedSharingBottomSheetState
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final shareText = context.l10n.shareWithPeopleSectionTitle(_shareeCount);
+
+    final isDownloadEnabled =
+        widget.collection.publicURLs.firstOrNull?.enableDownload ?? true;
+    final isCollectEnabled =
+        widget.collection.publicURLs.firstOrNull?.enableCollect ?? false;
+    final isPasswordEnabled =
+        widget.collection.publicURLs.firstOrNull?.passwordEnabled ?? false;
 
     return Container(
       decoration: BoxDecoration(
@@ -117,9 +131,7 @@ class _AdvancedSharingBottomSheetState
                         leadingSpace: leadingSpace,
                         trailingWidget: ToggleSwitchWidget(
                           value: () => _shareeCount > 0 || _hasPublicLink,
-                          onChanged: () async {
-                            // No action - just display current state
-                          },
+                          onChanged: () async {},
                         ),
                         isGestureDetectorDisabled: true,
                       ),
@@ -131,15 +143,22 @@ class _AdvancedSharingBottomSheetState
                         menuItemColor: colorScheme.backgroundElevated2,
                         leadingSpace: leadingSpace,
                         trailingWidget: ToggleSwitchWidget(
-                          value: () => _publicUrl?.enableDownload ?? true,
+                          value: () => isDownloadEnabled,
                           onChanged: _publicUrl != null
                               ? () async {
                                   await _updatePublicUrlSettings(
                                     {
-                                      'enableDownload':
-                                          !_publicUrl!.enableDownload,
+                                      'enableDownload': !isDownloadEnabled,
                                     },
                                   );
+                                  if (isDownloadEnabled) {
+                                    // ignore: unawaited_futures
+                                    showErrorDialog(
+                                      context,
+                                      "Please note",
+                                      "Viewers can still take screenshots or save a copy of your photos using external tools",
+                                    );
+                                  }
                                 }
                               : () async {},
                         ),
@@ -173,25 +192,6 @@ class _AdvancedSharingBottomSheetState
                       ),
                       if (_hasPublicLink && _publicUrl != null) ...[
                         const SizedBox(height: 8),
-
-                        MenuItemWidget(
-                          captionedTextWidget: const CaptionedTextWidget(
-                            title: "Allow downloads",
-                          ),
-                          menuItemColor: colorScheme.backgroundElevated2,
-                          leadingSpace: leadingSpace,
-                          trailingWidget: ToggleSwitchWidget(
-                            value: () => _publicUrl!.enableDownload,
-                            onChanged: () async {
-                              await _updatePublicUrlSettings(
-                                {'enableDownload': !_publicUrl!.enableDownload},
-                              );
-                            },
-                          ),
-                          isGestureDetectorDisabled: true,
-                        ),
-                        const SizedBox(height: 8),
-
                         MenuItemWidget(
                           captionedTextWidget: const CaptionedTextWidget(
                             title: "Allow uploads",
@@ -199,18 +199,16 @@ class _AdvancedSharingBottomSheetState
                           menuItemColor: colorScheme.backgroundElevated2,
                           leadingSpace: leadingSpace,
                           trailingWidget: ToggleSwitchWidget(
-                            value: () => _publicUrl!.enableCollect,
+                            value: () => isCollectEnabled,
                             onChanged: () async {
                               await _updatePublicUrlSettings(
-                                {'enableCollect': !_publicUrl!.enableCollect},
+                                {'enableCollect': !isCollectEnabled},
                               );
                             },
                           ),
                           isGestureDetectorDisabled: true,
                         ),
                         const SizedBox(height: 8),
-
-                        // Password lock
                         MenuItemWidget(
                           captionedTextWidget: const CaptionedTextWidget(
                             title: "Password lock",
@@ -218,9 +216,9 @@ class _AdvancedSharingBottomSheetState
                           menuItemColor: colorScheme.backgroundElevated2,
                           leadingSpace: leadingSpace,
                           trailingWidget: ToggleSwitchWidget(
-                            value: () => _publicUrl!.passwordEnabled,
+                            value: () => isPasswordEnabled,
                             onChanged: () async {
-                              if (!_publicUrl!.passwordEnabled) {
+                              if (!isPasswordEnabled) {
                                 await _showPasswordDialog();
                               } else {
                                 await _updatePublicUrlSettings(
@@ -231,15 +229,13 @@ class _AdvancedSharingBottomSheetState
                           ),
                           isGestureDetectorDisabled: true,
                         ),
-
                         const SizedBox(height: 8),
-
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: "Device limit",
                             subTitle: _publicUrl!.deviceLimit == 0
                                 ? "None"
-                                : "${_publicUrl!.deviceLimit} devices",
+                                : "${_publicUrl!.deviceLimit}",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
                           leadingSpace: leadingSpace,
@@ -249,17 +245,22 @@ class _AdvancedSharingBottomSheetState
                             size: 24,
                           ),
                           onTap: () async {
-                            // TODO: Navigate to device limit picker
+                            await routeToPage(
+                              context,
+                              DeviceLimitPickerPage(widget.collection),
+                            ).then((value) {
+                              setState(() {});
+                            });
                           },
                         ),
                         const SizedBox(height: 8),
-
-                        // Link Expiry
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: "Link Expiry",
                             subTitle: _publicUrl!.hasExpiry
-                                ? (_publicUrl!.isExpired ? "Expired" : "Active")
+                                ? (_publicUrl!.isExpired
+                                    ? "Expired"
+                                    : "Enabled")
                                 : "Never",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
@@ -270,7 +271,12 @@ class _AdvancedSharingBottomSheetState
                             size: 24,
                           ),
                           onTap: () async {
-                            // TODO: Navigate to link expiry picker
+                            await routeToPage(
+                              context,
+                              LinkExpiryPickerPage(widget.collection),
+                            ).then((value) {
+                              setState(() {});
+                            });
                           },
                         ),
                       ],
@@ -297,50 +303,10 @@ class _AdvancedSharingBottomSheetState
   }
 
   Future<void> _disablePublicLink() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Disable public link"),
-        content: const Text(
-          "Are you sure you want to disable the public link? People with this link will no longer be able to access your collection.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text("Disable"),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      try {
-        await CollectionActions.disableUrl(
-          context,
-          widget.collection,
-        );
-        if (mounted) {
-          setState(() {});
-        }
-      } catch (e) {
-        if (mounted) {
-          await showGenericErrorDialog(context: context, error: e);
-        }
-      }
-    }
-  }
-
-  Future<void> _updatePublicUrlSettings(
-    Map<String, dynamic> updates,
-  ) async {
     try {
-      await CollectionApiClient.instance.updateShareUrl(
+      await CollectionActions.disableUrl(
+        context,
         widget.collection,
-        updates,
       );
       if (mounted) {
         setState(() {});
@@ -352,77 +318,64 @@ class _AdvancedSharingBottomSheetState
     }
   }
 
-  Future<void> _showPasswordDialog() async {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final passwordController = TextEditingController();
+  Future<void> _updatePublicUrlSettings(
+    Map<String, dynamic> updates, {
+    bool showProgressDialog = true,
+  }) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(context, "Please wait...")
+        : null;
+    await dialog?.show();
+    try {
+      await CollectionApiClient.instance.updateShareUrl(
+        widget.collection,
+        updates,
+      );
+      await dialog?.hide();
+      showShortToast(context, "Collection updated");
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        await dialog?.hide();
+        await showGenericErrorDialog(context: context, error: e);
+        rethrow;
+      }
+    }
+  }
 
-    await showDialog(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        backgroundColor: colorScheme.backgroundElevated,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Set password",
-                style: textTheme.h3,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  hintText: "Enter password",
-                  hintStyle: textTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                  filled: true,
-                  fillColor: colorScheme.backgroundElevated2,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                obscureText: true,
-                autofocus: true,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    child: Text(
-                      "Cancel",
-                      style: textTheme.body,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final password = passwordController.text.trim();
-                      if (password.isNotEmpty) {
-                        Navigator.pop(dialogContext);
-                        // TODO: Implement password encryption and update
-                        await _updatePublicUrlSettings({
-                          'passwordEnabled': true,
-                        });
-                      }
-                    },
-                    child: const Text("Set"),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+  Future<void> _showPasswordDialog() async {
+    await showTextInputDialog(
+      context,
+      title: context.l10n.setAPassword,
+      submitButtonLabel: context.l10n.lockButtonLabel,
+      hintText: context.l10n.enterPassword,
+      isPasswordInput: true,
+      alwaysShowSuccessState: true,
+      onSubmit: (String password) async {
+        if (password.trim().isNotEmpty) {
+          final propToUpdate = await _getEncryptedPassword(password);
+          await _updatePublicUrlSettings(
+            propToUpdate,
+            showProgressDialog: false,
+          );
+        }
+      },
     );
+  }
+
+  Future<Map<String, dynamic>> _getEncryptedPassword(String pass) async {
+    final kekSalt = CryptoUtil.getSaltToDeriveKey();
+    final result = await CryptoUtil.deriveInteractiveKey(
+      utf8.encode(pass),
+      kekSalt,
+    );
+    return {
+      'passHash': CryptoUtil.bin2base64(result.key),
+      'nonce': CryptoUtil.bin2base64(kekSalt),
+      'memLimit': result.memLimit,
+      'opsLimit': result.opsLimit,
+    };
   }
 }

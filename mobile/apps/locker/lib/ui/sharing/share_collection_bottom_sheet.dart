@@ -237,15 +237,6 @@ class _ShareCollectionBottomSheetState
     EnteColorScheme colorScheme,
     EnteTextTheme textTheme,
   ) {
-    if (_shareeCount == 0) {
-      return Text(
-        context.l10n.shareWithPeopleSectionTitle(0),
-        style: textTheme.body.copyWith(
-          color: colorScheme.textBase,
-        ),
-      );
-    }
-
     return SizedBox(
       height: 44,
       child: AlbumSharesIcons(
@@ -518,6 +509,10 @@ class _ShareCollectionBottomSheetState
     EnteTextTheme textTheme,
   ) {
     final publicUrl = _publicUrl;
+
+    final isCollectEnabled =
+        widget.collection.publicURLs.firstOrNull?.enableCollect ?? false;
+
     if (publicUrl == null) {
       return const SizedBox.shrink();
     }
@@ -564,11 +559,12 @@ class _ShareCollectionBottomSheetState
         const SizedBox(height: 8),
         _buildToggleRow(
           label: "Allow uploads",
-          value: publicUrl.enableCollect,
+          value: isCollectEnabled,
           onChanged: _isOwner
               ? () async {
                   await _updatePublicUrlSettings(
-                    {'enableCollect': !publicUrl.enableCollect},
+                    {'enableCollect': !isCollectEnabled},
+                    showProgressDialog: true,
                   );
                 }
               : null,
@@ -878,6 +874,7 @@ class _ShareCollectionBottomSheetState
     );
 
     if (result && mounted) {
+      user.role = newRole.toString();
       setState(() {});
     }
   }
@@ -917,19 +914,28 @@ class _ShareCollectionBottomSheetState
   }
 
   Future<void> _updatePublicUrlSettings(
-    Map<String, dynamic> updates,
-  ) async {
+    Map<String, dynamic> updates, {
+    bool showProgressDialog = true,
+  }) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(context, "Please wait...")
+        : null;
+    await dialog?.show();
     try {
       await CollectionApiClient.instance.updateShareUrl(
         widget.collection,
         updates,
       );
+      await dialog?.hide();
+      showShortToast(context, "Collection updated");
       if (mounted) {
         setState(() {});
       }
     } catch (e) {
       if (mounted) {
+        await dialog?.hide();
         await showGenericErrorDialog(context: context, error: e);
+        rethrow;
       }
     }
   }
