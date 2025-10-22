@@ -179,7 +179,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
       }
     }
     enteFile.modificationTime = enteFile.creationTime;
-    enteFile.metadataVersion = EnteFile.kCurrentMetadataVersion;
+    enteFile.metadataVersion = -1;
     localFiles.add(enteFile);
   }
   return localFiles;

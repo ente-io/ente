@@ -747,17 +747,11 @@ class FileUploader {
       final encryptedFile = File(encryptedFilePath);
 
       final EncryptionResult fileAttributes = multiPartFileEncResult ??
-          (flagService.internalUser
-              ? await CryptoUtil.encryptFileV2(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                )
-              : await CryptoUtil.encryptFile(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                ));
+          await CryptoUtil.encryptFile(
+            mediaUploadData.sourceFile!.path,
+            encryptedFilePath,
+            key: key,
+          );
 
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
@@ -866,9 +860,7 @@ class FileUploader {
         null,
         mediaUploadData.exifData,
       );
-      file.metadataVersion = flagService.internalUser
-          ? EnteFile.kMetadataSimplifiedEncVersion
-          : EnteFile.kCurrentMetadataVersion;
+      file.metadataVersion = EnteFile.kCurrentMetadataVersion;
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
 

@@ -106,7 +106,7 @@ class EnteFile {
       'modificationTime',
     );
     file.fileSubType = asset.subtype;
-    file.metadataVersion = kCurrentMetadataVersion;
+    file.metadataVersion = -1;
     return file;
   }
 
