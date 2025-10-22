@@ -900,7 +900,7 @@ class _QuarterHeatmap extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            if (showDayLabels) SizedBox(width: labelColumnWidth),
+            SizedBox(width: labelColumnWidth),
             for (int columnIndex = 0;
                 columnIndex < headerLabels.length;
                 columnIndex += 1) ...[
@@ -934,14 +934,19 @@ class _QuarterHeatmap extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (showDayLabels)
-                    SizedBox(
-                      width: labelColumnWidth,
+                  SizedBox(
+                    width: labelColumnWidth,
+                    child: Visibility(
+                      visible: showDayLabels,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
                       child: Text(
                         dayLabel,
                         style: axisStyle,
                       ),
                     ),
+                  ),
                   for (int columnIndex = 0;
                       columnIndex < maxColumns;
                       columnIndex += 1) ...[
@@ -983,8 +988,21 @@ class _HeatmapCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (value < 0) {
+    if (value == kWrappedHeatmapFutureValue) {
       return SizedBox(width: width, height: height);
+    }
+    if (value == kWrappedHeatmapPaddedValue) {
+      final Color base = colorScheme.fillFaint;
+      final double placeholderOpacity =
+          (base.opacity * 0.4).clamp(0.0, 1.0).toDouble();
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: base.withOpacity(placeholderOpacity),
+          borderRadius: BorderRadius.circular(3),
+        ),
+      );
     }
     return Container(
       width: width,
