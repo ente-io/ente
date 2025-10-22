@@ -611,6 +611,15 @@ class GalleryState extends State<Gallery> {
       return widget.loadingWidget;
     }
 
+    // Check if width changed due to orientation change and update gallery groups
+    if (galleryGroups.widthAvailable != widthAvailable) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _updateGalleryGroups();
+        }
+      });
+    }
+
     final shouldEnableSwipeSelection =
         flagService.internalUser && widget.limitSelectionToOne == false;
 
