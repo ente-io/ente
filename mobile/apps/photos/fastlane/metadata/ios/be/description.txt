@@ -1,12 +1,12 @@
 Ente is a simple app to automatically backup and organize your photos and videos.
 
-If you've been looking for a privacy-friendly alternative to preserve your memories, you've come to the right place. With Ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+Вы знаходзіцеся ў правільным месцы, калі шукаеце альтэрнатыву з ухілам на прыватнасць для захоўвання сваіх успамінаў. З Ente, яны захоўваюцца з дапамогай скразнога шыфравання (E2EE). This means that only you can view them.
 
-We have apps across all platforms, and your photos will seamlessly sync between all your devices in an end-to-end encrypted (e2ee) manner.
+Нашы праграмы з'яўляюцца кросплатформеннымі і вашы фатаграфіі будуць сінхранізавацца паміж усімі вашымі прыладамі з дапамогай скразнога шыфравання (E2EE).
 
-Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+Ente also makes it simple to share your albums with your loved ones. Вы можаце або дзяліцца імі з іншымі карыстальнікамі Ente праз скразное шыфраванне, або рабіць гэта праз агульнадаступныя спасылкі.
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+Вашы зашыфраваныя даныя захоўваюцца ў некалькіх месцах, уключаючы бамбасховішча ў Парыжы. We take posterity seriously and make it easy to ensure that your memories outlive you.
 
 We are here to make the safest photos app ever, come join our journey!
 
@@ -24,10 +24,10 @@ FEATURES
 - and a LOT more!
 
 PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+Мы не прапануем пажыццёвыя тарыфныя планы з бясплатным абслугоўваннем, бо для нас важна заставацца ўстойлівымі і вытрымаць выпрабаванне часам. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
 
 SUPPORT
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+We take pride in offering human support. Вы можаце напісаць нам на адрас team@ente.io і чакаць адказу ад нашай каманды на працягу 24 гадзін, калі вы абслугоўваецеся на платным тарыфным плане.
 
 TERMS
 https://ente.io/terms

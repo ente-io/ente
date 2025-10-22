@@ -48,14 +48,19 @@ extension SuperLogRecord on LogRecord {
 
     if (error != null) {
       if (error is DioException) {
-        final String? id = (error as DioException)
-            .requestOptions
-            .headers['x-request-id'] as String?;
+        final e = error as DioException;
+        final String? id = e.requestOptions.headers['x-request-id'] as String?;
         if (id != null) {
-          msg += "\n⤷ id: $id";
+          msg += "\n⤷ id: $id ";
         }
+        if (e.response?.data != null) {
+          msg += "\n⤷ type: ${e.type}\n⤷ error: ${e.response?.data}";
+        } else {
+          msg += "\n⤷ type: ${e.type}\n⤷ error: $error";
+        }
+      } else {
+        msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
       }
-      msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
     }
     if (stackTrace != null) {
       msg += "\n⤷ trace: $stackTrace";

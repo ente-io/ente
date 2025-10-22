@@ -235,6 +235,7 @@
     "search_results": "搜索结果",
     "no_results": "未找到任何结果",
     "search_hint": "搜索相册、日期、描述，...",
+    "albums_search_hint": "",
     "album": "相册",
     "date": "日期",
     "description": "说明",
