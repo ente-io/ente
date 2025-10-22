@@ -690,7 +690,7 @@ class FileUploader {
       );
 
       Uint8List? key;
-      final EncryptionResult? multiPartFileEncResult = hasExistingMultiPart
+      final FileEncryptResult? multiPartFileEncResult = hasExistingMultiPart
           ? await _multiPartUploader.getEncryptionResult(
               lockKey,
               mediaUploadData.hashData!.fileHash!,
@@ -746,12 +746,35 @@ class FileUploader {
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
 
-      final EncryptionResult fileAttributes = multiPartFileEncResult ??
-          await CryptoUtil.encryptFile(
-            mediaUploadData.sourceFile!.path,
-            encryptedFilePath,
-            key: key,
-          );
+      // Calculate the number of parts to determine if we need MD5
+      // Use source length to estimate encrypted size for part count decision
+      final estimatedEncSize = CryptoUtil.estimateEncryptedSize(sourceLength);
+      final estimatedCount =
+          _multiPartUploader.calculatePartCount(estimatedEncSize);
+
+      FileEncryptResult? fileAttributes = multiPartFileEncResult;
+      String? fileMd5;
+      List<String>? partMd5s;
+
+      if (fileAttributes == null) {
+        final result = flagService.internalUser
+            ? (await CryptoUtil.encryptFileWithMD5(
+                mediaUploadData.sourceFile!.path,
+                encryptedFilePath,
+                key: key,
+                multiPartChunkSizeInBytes: (estimatedCount > 1)
+                    ? _multiPartUploader.multipartPartSizeForUpload
+                    : null,
+              ))
+            : (await CryptoUtil.encryptFile(
+                mediaUploadData.sourceFile!.path,
+                encryptedFilePath,
+                key: key,
+              ));
+        fileAttributes = result;
+        fileMd5 = result.fileMd5;
+        partMd5s = result.partMd5s;
+      }
 
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
@@ -771,7 +794,7 @@ class FileUploader {
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
         thumbnailData!,
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
@@ -807,8 +830,12 @@ class FileUploader {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] File URL obtained, uploading actual file (size: ${formatBytes(encFileSize)})...",
         );
-        fileObjectKey =
-            await _putFile(fileUploadURL, encryptedFile, encFileSize);
+        fileObjectKey = await _putFile(
+          fileUploadURL,
+          encryptedFile,
+          encFileSize,
+          contentMd5: fileMd5,
+        );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Actual file uploaded successfully!",
         );
@@ -836,13 +863,17 @@ class FileUploader {
             fileUploadURLs,
             encFileName,
             encFileSize,
-            fileAttributes.key!,
-            fileAttributes.header!,
+            fileAttributes.key,
+            fileAttributes.header,
+            fileMd5: fileMd5,
+            partMd5s: partMd5s,
           );
           fileObjectKey = await _multiPartUploader.putMultipartFile(
             fileUploadURLs,
             encryptedFile,
             encFileSize,
+            fileMd5: fileMd5,
+            partMd5s: partMd5s,
           );
         }
         // in case of multipart, upload the thumbnail towards the end to avoid
@@ -866,10 +897,9 @@ class FileUploader {
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+      final fileDecryptionHeader = CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -928,7 +958,7 @@ class FileUploader {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,
-            fileAttributes.key!,
+            fileAttributes.key,
           );
         }
         await CryptoUtil.decryptVerify(
@@ -995,6 +1025,7 @@ class FileUploader {
       }
       if ((isMultipartUpload || hasExistingMultiPart) &&
           isPutOrMultiPartError(e)) {
+          
         await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
       }
       rethrow;
@@ -1041,7 +1072,9 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartFileMissingError || e is MultiPartError) {
+    if (e is MultiPartFileMissingError ||
+        e is MultiPartError ||
+        e is BadMD5DigestError) {
       return true;
     }
     if (e is DioException) {
@@ -1298,7 +1331,7 @@ class FileUploader {
     int collectionID,
     String encryptedKey,
     String keyDecryptionNonce,
-    EncryptionResult fileAttributes,
+    FileEncryptResult fileAttributes,
     String fileObjectKey,
     String fileDecryptionHeader,
     int fileSize,
@@ -1553,19 +1586,25 @@ class FileUploader {
     UploadURL uploadURL,
     File file,
     int fileSize, {
+    String? contentMd5,
     int attempt = 1,
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
     final fileName = basename(file.path);
     int bytesSent = 0;
     try {
+      final Map<String, dynamic> headers = {
+        Headers.contentLengthHeader: fileSize,
+      };
+      if (contentMd5 != null) {
+        headers['Content-MD5'] = contentMd5;
+      }
+
       await _dio.put(
         uploadURL.url,
         data: file.openRead(),
         options: Options(
-          headers: {
-            Headers.contentLengthHeader: fileSize,
-          },
+          headers: headers,
         ),
         onSendProgress: (sent, total) {
           bytesSent = sent;
@@ -1588,6 +1627,7 @@ class FileUploader {
           newUploadURL,
           file,
           fileSize,
+          contentMd5: contentMd5,
           attempt: attempt + 1,
         );
       } else {

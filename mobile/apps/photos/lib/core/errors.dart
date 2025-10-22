@@ -142,3 +142,11 @@ class InvalidDateTimeError implements Exception {
         '(id: $assetId, title: ${assetTitle ?? "unknown"}) - $originalError';
   }
 }
+
+class BadMD5DigestError implements Exception {
+  final String message;
+  BadMD5DigestError(this.message);
+
+  @override
+  String toString() => message;
+}

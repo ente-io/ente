@@ -38,6 +38,7 @@ extension FutureErrorHandling<T> on Future<T> {
 const kPartialReadErrorTag = 'PartialRead';
 const kStreamPullError = 'crypto_secretstream_xchacha20poly1305_pull';
 const kVerificationErrorTag = 'VerificationError';
+const kBitFlipErrorTag = 'BitFlipDetected';
 
 // Exception counterpart for upstream handling via catchError chains
 class PartialReadException implements Exception {
@@ -61,4 +62,12 @@ class VerificationError implements Exception {
     }
     return 'VerificationError: $message';
   }
+}
+
+class BitFlipError implements Exception {
+  final String message;
+  BitFlipError(this.message);
+
+  @override
+  String toString() => 'BitFlipError: $message';
 }

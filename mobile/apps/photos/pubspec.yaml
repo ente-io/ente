@@ -39,6 +39,7 @@ dependencies:
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
+  convert: ^3.1.1
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   dart_ui_isolate: ^1.1.1
