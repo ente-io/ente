@@ -2,6 +2,14 @@ import "dart:convert";
 
 import "package:flutter/foundation.dart" show immutable;
 
+/// Sentinel value used in heatmap grids when a day should be hidden but space
+/// must still be reserved (e.g. future dates).
+const int kWrappedHeatmapFutureValue = -2;
+
+/// Sentinel value used when a day is outside the display window but we still
+/// want to render a faint placeholder (e.g. padded weeks).
+const int kWrappedHeatmapPaddedValue = -1;
+
 @immutable
 class WrappedResult {
   WrappedResult({

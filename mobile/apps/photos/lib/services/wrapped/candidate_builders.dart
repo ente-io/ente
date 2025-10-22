@@ -749,16 +749,16 @@ class _QuarterHeatmapData {
             index < snapshot.heatmapWeekStartDates.length;
         index += 1) {
       final DateTime weekStart = snapshot.heatmapWeekStartDates[index];
-      if (weekStart.isAfter(lastVisibleDay)) {
-        continue;
-      }
       final int quarterIndex = ((weekStart.month - 1) ~/ 3).clamp(0, 3);
       final List<int> counts = snapshot.heatmapRows[index];
       final List<int> sanitized = List<int>.filled(7, 0);
+      final DateTime yearStart = DateTime(snapshot.year, 1, 1);
       for (int dayOffset = 0; dayOffset < 7; dayOffset += 1) {
         final DateTime day = weekStart.add(Duration(days: dayOffset));
         if (day.isAfter(lastVisibleDay)) {
-          sanitized[dayOffset] = -1;
+          sanitized[dayOffset] = kWrappedHeatmapFutureValue;
+        } else if (day.isBefore(yearStart)) {
+          sanitized[dayOffset] = kWrappedHeatmapPaddedValue;
         } else {
           sanitized[dayOffset] =
               dayOffset < counts.length ? counts[dayOffset] : 0;
