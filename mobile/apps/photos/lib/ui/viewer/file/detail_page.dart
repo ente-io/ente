@@ -308,10 +308,12 @@ class _BodyState extends State<_Body> {
               });
             }
           },
-          playbackCallback: (isPlaying) {
+          playbackCallback: (shouldEnable, reason) {
             Future.delayed(Duration.zero, () {
-              InheritedDetailPageState.of(context)
-                  .toggleFullScreen(shouldEnable: isPlaying);
+              InheritedDetailPageState.of(context).requestFullScreen(
+                shouldEnable: shouldEnable,
+                reason: reason,
+              );
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
@@ -319,7 +321,7 @@ class _BodyState extends State<_Body> {
         return GestureDetector(
           onTap: () {
             file.fileType != FileType.video
-                ? InheritedDetailPageState.of(context).toggleFullScreen()
+                ? InheritedDetailPageState.of(context).toggleFullScreenByUser()
                 : null;
           },
           child: fileContent,

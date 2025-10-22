@@ -1,6 +1,16 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
+enum FullScreenRequestReason {
+  userInteraction,
+  playbackStateChange,
+}
+
+typedef FullScreenRequestCallback = void Function(
+  bool shouldEnable,
+  FullScreenRequestReason reason,
+);
+
 class InheritedDetailPageState extends InheritedWidget {
   final enableFullScreenNotifier = ValueNotifier(false);
   InheritedDetailPageState({
@@ -14,12 +24,29 @@ class InheritedDetailPageState extends InheritedWidget {
   static InheritedDetailPageState? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<InheritedDetailPageState>();
 
-  void toggleFullScreen({bool? shouldEnable}) {
-    if (shouldEnable != null) {
-      if (enableFullScreenNotifier.value == shouldEnable) return;
+  void toggleFullScreenByUser() {
+    _applyFullScreenState(!enableFullScreenNotifier.value);
+  }
+
+  void requestFullScreen({
+    required bool shouldEnable,
+    required FullScreenRequestReason reason,
+  }) {
+    if (!shouldEnable && reason != FullScreenRequestReason.userInteraction) {
+      return;
     }
-    enableFullScreenNotifier.value = !enableFullScreenNotifier.value;
-    if (enableFullScreenNotifier.value) {
+    if (enableFullScreenNotifier.value == shouldEnable) {
+      return;
+    }
+    _applyFullScreenState(shouldEnable);
+  }
+
+  void _applyFullScreenState(bool shouldEnable) {
+    if (enableFullScreenNotifier.value == shouldEnable) {
+      return;
+    }
+    enableFullScreenNotifier.value = shouldEnable;
+    if (shouldEnable) {
       Future.delayed(const Duration(milliseconds: 200), () {
         SystemChrome.setEnabledSystemUIMode(
           SystemUiMode.manual,

@@ -22,6 +22,7 @@ import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -41,7 +42,7 @@ import "package:visibility_detector/visibility_detector.dart";
 class VideoWidgetNative extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
   final bool isFromMemories;
   final void Function()? onStreamChange;
   final PlaylistData? playlistData;
@@ -306,20 +307,28 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                             : () {
                                 _showControls.value = !_showControls.value;
                                 if (widget.playbackCallback != null) {
-                                  widget
-                                      .playbackCallback!(!_showControls.value);
+                                  widget.playbackCallback!(
+                                    !_showControls.value,
+                                    FullScreenRequestReason.userInteraction,
+                                  );
                                 }
                                 _elTooltipController.hide();
                               },
                         onLongPress: () {
                           if (widget.isFromMemories) {
-                            widget.playbackCallback?.call(false);
+                            widget.playbackCallback?.call(
+                              false,
+                              FullScreenRequestReason.userInteraction,
+                            );
                             _controller?.pause();
                           }
                         },
                         onLongPressUp: () {
                           if (widget.isFromMemories) {
-                            widget.playbackCallback?.call(true);
+                            widget.playbackCallback?.call(
+                              true,
+                              FullScreenRequestReason.userInteraction,
+                            );
                             _controller?.play();
                           }
                         },
@@ -506,7 +515,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
           }
           _showControls.value = false;
           if (widget.playbackCallback != null) {
-            widget.playbackCallback!(true);
+            widget.playbackCallback!(
+              true,
+              FullScreenRequestReason.playbackStateChange,
+            );
           }
         }
       });
@@ -533,14 +545,20 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             }
             _showControls.value = false;
             if (widget.playbackCallback != null) {
-              widget.playbackCallback!(true);
+              widget.playbackCallback!(
+                true,
+                FullScreenRequestReason.playbackStateChange,
+              );
             }
           }
         });
       }
     } else {
       if (widget.playbackCallback != null && mounted) {
-        widget.playbackCallback!(false);
+        widget.playbackCallback!(
+          false,
+          FullScreenRequestReason.playbackStateChange,
+        );
       }
     }
 
