@@ -756,7 +756,6 @@ class _HeatmapCardContent extends StatelessWidget {
                         colorScheme: colorScheme,
                         textTheme: textTheme,
                         showDayLabels: columns == 1 || index % columns == 0,
-                        maxColumns: maxColumnCount,
                         cellWidth: cellWidth,
                         cellHeight: cellHeight,
                         cellSpacing: cellSpacing,
@@ -853,7 +852,6 @@ class _QuarterHeatmap extends StatelessWidget {
     required this.colorScheme,
     required this.textTheme,
     required this.showDayLabels,
-    required this.maxColumns,
     required this.cellWidth,
     required this.cellHeight,
     required this.cellSpacing,
@@ -866,7 +864,6 @@ class _QuarterHeatmap extends StatelessWidget {
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
   final bool showDayLabels;
-  final int maxColumns;
   final double cellWidth;
   final double cellHeight;
   final double cellSpacing;
@@ -875,7 +872,7 @@ class _QuarterHeatmap extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int columnCount = block.grid.isEmpty ? 0 : block.grid.first.length;
-    if (columnCount == 0 || maxColumns <= 0) {
+    if (columnCount == 0) {
       return _MediaPlaceholder(
         height: 120,
         colorScheme: colorScheme,
@@ -885,7 +882,7 @@ class _QuarterHeatmap extends StatelessWidget {
     final TextStyle axisStyle =
         textTheme.tinyMuted.copyWith(fontSize: 8.5, height: 1.15);
     final List<String> headerLabels = List<String>.generate(
-      maxColumns,
+      columnCount,
       (int index) =>
           index < block.columnLabels.length ? block.columnLabels[index] : "",
     );
@@ -948,7 +945,7 @@ class _QuarterHeatmap extends StatelessWidget {
                     ),
                   ),
                   for (int columnIndex = 0;
-                      columnIndex < maxColumns;
+                      columnIndex < columnCount;
                       columnIndex += 1) ...[
                     _HeatmapCell(
                       value: columnIndex < row.length ? row[columnIndex] : -1,
@@ -958,7 +955,7 @@ class _QuarterHeatmap extends StatelessWidget {
                       maxCount: maxCount,
                     ),
                     SizedBox(
-                      width: columnIndex == maxColumns - 1 ? 0 : cellSpacing,
+                      width: columnIndex == columnCount - 1 ? 0 : cellSpacing,
                     ),
                   ],
                 ],
