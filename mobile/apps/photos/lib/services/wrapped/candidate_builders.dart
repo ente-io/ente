@@ -21,11 +21,14 @@ class WrappedEngineContext {
     required this.year,
     required this.now,
     required List<EnteFile> files,
-  }) : files = List<EnteFile>.unmodifiable(files);
+    WrappedPeopleContext? people,
+  })  : files = List<EnteFile>.unmodifiable(files),
+        people = people ?? WrappedPeopleContext.empty();
 
   final int year;
   final DateTime now;
   final List<EnteFile> files;
+  final WrappedPeopleContext people;
 }
 
 /// Contract for producing Wrapped candidate cards for a specific domain.

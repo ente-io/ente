@@ -1,6 +1,205 @@
 import "dart:convert";
 
 import "package:flutter/foundation.dart" show immutable;
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
+
+@immutable
+class WrappedPeopleContext {
+  WrappedPeopleContext({
+    required List<WrappedPeopleFile> files,
+    required Map<String, WrappedPersonEntry> persons,
+    required Map<String, int> personFirstCaptureMicros,
+  })  : files = List<WrappedPeopleFile>.unmodifiable(files),
+        persons = Map<String, WrappedPersonEntry>.unmodifiable(persons),
+        personFirstCaptureMicros =
+            Map<String, int>.unmodifiable(personFirstCaptureMicros);
+
+  factory WrappedPeopleContext.empty() {
+    return WrappedPeopleContext(
+      files: const <WrappedPeopleFile>[],
+      persons: const <String, WrappedPersonEntry>{},
+      personFirstCaptureMicros: const <String, int>{},
+    );
+  }
+
+  final List<WrappedPeopleFile> files;
+  final Map<String, WrappedPersonEntry> persons;
+  final Map<String, int> personFirstCaptureMicros;
+
+  bool get hasPeople => files.isNotEmpty && persons.isNotEmpty;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      "files": files.map((WrappedPeopleFile file) => file.toJson()).toList(),
+      "persons": persons.map(
+        (String key, WrappedPersonEntry value) => MapEntry(
+          key,
+          value.toJson(),
+        ),
+      ),
+      "firstCaptureMicros": personFirstCaptureMicros,
+    };
+  }
+
+  static WrappedPeopleContext fromJson(Map<String, Object?> json) {
+    final List<dynamic> rawFiles = json["files"] as List<dynamic>? ?? const [];
+    final Map<String, Object?> rawPersons =
+        (json["persons"] as Map?)?.cast<String, Object?>() ??
+            <String, Object?>{};
+    final Map<String, WrappedPersonEntry> persons =
+        <String, WrappedPersonEntry>{
+      for (final MapEntry<String, Object?> entry in rawPersons.entries)
+        entry.key: WrappedPersonEntry.fromJson(
+          (entry.value as Map).cast<String, Object?>(),
+        ),
+    };
+    final Map<String, int> firstCaptureMicros =
+        (json["firstCaptureMicros"] as Map?)?.map(
+              (Object? key, Object? value) => MapEntry(
+                key?.toString() ?? "",
+                (value as num).toInt(),
+              ),
+            ) ??
+            <String, int>{};
+    return WrappedPeopleContext(
+      files: rawFiles
+          .map(
+            (dynamic entry) => WrappedPeopleFile.fromJson(
+              (entry as Map).cast<String, Object?>(),
+            ),
+          )
+          .toList(growable: false),
+      persons: persons,
+      personFirstCaptureMicros: firstCaptureMicros,
+    );
+  }
+}
+
+@immutable
+class WrappedPeopleFile {
+  WrappedPeopleFile({
+    required this.uploadedFileID,
+    required this.captureMicros,
+    required List<WrappedFaceRef> faces,
+  }) : faces = List<WrappedFaceRef>.unmodifiable(faces);
+
+  final int uploadedFileID;
+  final int captureMicros;
+  final List<WrappedFaceRef> faces;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      "uploadedFileID": uploadedFileID,
+      "captureMicros": captureMicros,
+      "faces": faces.map((WrappedFaceRef ref) => ref.toJson()).toList(),
+    };
+  }
+
+  static WrappedPeopleFile fromJson(Map<String, Object?> json) {
+    final List<dynamic> rawFaces =
+        json["faces"] as List<dynamic>? ?? const <dynamic>[];
+    return WrappedPeopleFile(
+      uploadedFileID: json["uploadedFileID"] as int? ?? 0,
+      captureMicros: json["captureMicros"] as int? ?? 0,
+      faces: rawFaces
+          .map(
+            (dynamic entry) => WrappedFaceRef.fromJson(
+              (entry as Map).cast<String, Object?>(),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+@immutable
+class WrappedFaceRef {
+  const WrappedFaceRef({
+    required this.faceID,
+    required this.score,
+    required this.blur,
+    this.personID,
+    this.clusterID,
+  });
+
+  final String faceID;
+  final double score;
+  final double blur;
+  final String? personID;
+  final String? clusterID;
+
+  bool get isHighQuality =>
+      score > kMinimumQualityFaceScore && blur >= kLaplacianHardThreshold;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      "faceID": faceID,
+      "score": score,
+      "blur": blur,
+      "personID": personID,
+      "clusterID": clusterID,
+    };
+  }
+
+  static WrappedFaceRef fromJson(Map<String, Object?> json) {
+    return WrappedFaceRef(
+      faceID: json["faceID"] as String? ?? "",
+      score: (json["score"] as num?)?.toDouble() ?? 0.0,
+      blur: (json["blur"] as num?)?.toDouble() ?? 0.0,
+      personID: json["personID"] as String?,
+      clusterID: json["clusterID"] as String?,
+    );
+  }
+}
+
+@immutable
+class WrappedPersonEntry {
+  WrappedPersonEntry({
+    required this.personID,
+    required this.displayName,
+    required this.isHidden,
+    required Map<String, int> clusterFaceCounts,
+  }) : clusterFaceCounts = Map<String, int>.unmodifiable(clusterFaceCounts);
+
+  final String personID;
+  final String displayName;
+  final bool isHidden;
+  final Map<String, int> clusterFaceCounts;
+
+  int get totalClusterFaceCount {
+    int sum = 0;
+    for (final int value in clusterFaceCounts.values) {
+      sum += value;
+    }
+    return sum;
+  }
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      "personID": personID,
+      "displayName": displayName,
+      "isHidden": isHidden,
+      "clusterFaceCounts": clusterFaceCounts,
+    };
+  }
+
+  static WrappedPersonEntry fromJson(Map<String, Object?> json) {
+    final Map<String, int> clusterFaceCounts =
+        (json["clusterFaceCounts"] as Map?)?.map(
+              (Object? key, Object? value) => MapEntry(
+                key?.toString() ?? "",
+                (value as num).toInt(),
+              ),
+            ) ??
+            <String, int>{};
+    return WrappedPersonEntry(
+      personID: json["personID"] as String? ?? "",
+      displayName: json["displayName"] as String? ?? "",
+      isHidden: json["isHidden"] as bool? ?? false,
+      clusterFaceCounts: clusterFaceCounts,
+    );
+  }
+}
 
 /// Sentinel value used in heatmap grids when a day should be hidden but space
 /// must still be reserved (e.g. future dates).
