@@ -20,6 +20,10 @@ class MenuItemWidget extends StatefulWidget {
   // leadIconSize deafult value is 20.
   final double leadingIconSize;
 
+  /// Width of the reserved leading space when no icon/widget is supplied.
+  /// When provided, this space takes precedence over the leading icon/widget.
+  final double? leadingSpace;
+
   /// trailing icon can be passed without size as default size set by
   /// flutter is what this component expects
   final IconData? trailingIcon;
@@ -68,6 +72,7 @@ class MenuItemWidget extends StatefulWidget {
     this.leadingIconColor,
     this.leadingIconSize = 20.0,
     this.leadingIconWidget,
+    this.leadingSpace,
     this.trailingIcon,
     this.trailingIconColor,
     this.trailingWidget,
@@ -164,6 +169,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     final topBorderRadius = widget.isTopBorderRadiusRemoved
         ? const Radius.circular(0)
         : circularRadius;
+    final leadingSection = _buildLeadingSection();
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
@@ -180,17 +186,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          widget.alignCaptionedTextToLeft && widget.leadingIcon == null
-              ? const SizedBox.shrink()
-              : LeadingWidget(
-                  leadingIconSize: widget.leadingIconSize,
-                  leadingIcon: widget.leadingIcon,
-                  leadingIconColor: widget.leadingIconColor,
-                  leadingIconWidget: widget.leadingIconWidget,
-                ),
-          widget.leadingIcon == null
-              ? const SizedBox(width: 52)
-              : const SizedBox(width: 12),
+          if (leadingSection != null) leadingSection,
           widget.captionedTextWidget,
           if (widget.expandableController != null)
             ExpansionTrailingIcon(
@@ -211,6 +207,28 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget? _buildLeadingSection() {
+    final hasLeadingIcon =
+        widget.leadingIcon != null || widget.leadingIconWidget != null;
+    final shouldUseLeadingSpace =
+        widget.leadingSpace != null && widget.leadingSpace! > 0;
+
+    if (shouldUseLeadingSpace) {
+      return SizedBox(width: widget.leadingSpace);
+    }
+
+    if (!hasLeadingIcon) {
+      return widget.alignCaptionedTextToLeft ? null : const SizedBox.shrink();
+    }
+
+    return LeadingWidget(
+      leadingIconSize: widget.leadingIconSize,
+      leadingIcon: widget.leadingIcon,
+      leadingIconColor: widget.leadingIconColor,
+      leadingIconWidget: widget.leadingIconWidget,
     );
   }
 

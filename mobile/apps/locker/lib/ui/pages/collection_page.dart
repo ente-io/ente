@@ -6,8 +6,6 @@ import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import "package:ente_ui/utils/dialog_util.dart";
-import "package:ente_utils/navigation_util.dart";
-
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
@@ -24,9 +22,7 @@ import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
-import "package:locker/ui/sharing/album_participants_page.dart";
-import "package:locker/ui/sharing/manage_links_widget.dart";
-import "package:locker/ui/sharing/share_collection_page.dart";
+import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
 import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_actions.dart';
 import "package:logging/logging.dart";
@@ -175,33 +171,14 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         );
       }
 
-      if (Configuration.instance.getUserID() == collection.owner.id) {
-        unawaited(
-          routeToPage(
-            context,
-            (isQuickLink && (collection.hasLink))
-                ? ManageSharedLinkWidget(collection: collection)
-                : ShareCollectionPage(collection: collection),
-          ),
-        );
-      } else {
-        unawaited(
-          routeToPage(
-            context,
-            AlbumParticipantsPage(collection),
-          ),
-        );
-
-        // TODO :Show new bottom sheet UI
-        // await showModalBottomSheet(
-        //   context: context,
-        //   backgroundColor: Colors.transparent,
-        //   isScrollControlled: true,
-        //   builder: (context) => ShareCollectionBottomSheet(
-        //     collection: collection,
-        //   ),
-        // );
-      }
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: getEnteColorScheme(context).backgroundBase,
+        isScrollControlled: true,
+        builder: (context) => ShareCollectionBottomSheet(
+          collection: collection,
+        ),
+      );
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
