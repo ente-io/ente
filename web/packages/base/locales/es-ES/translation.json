@@ -46,6 +46,7 @@
     "new_album": "Nuevo álbum",
     "create_albums": "Crear álbumes",
     "album_name": "Nombre del álbum",
+    "album_created": "",
     "close": "Cerrar",
     "yes": "Sí",
     "no": "No",
