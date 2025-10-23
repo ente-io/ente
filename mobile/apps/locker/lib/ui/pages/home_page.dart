@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import "package:dotted_border/dotted_border.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/buttons/icon_button_widget.dart";
@@ -20,6 +19,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/collection_flex_grid_view.dart";
 import "package:locker/ui/collections/section_title.dart";
+import "package:locker/ui/components/home_empty_state_widget.dart";
 import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -627,60 +627,11 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
-    // Show empty state only if both collections and recent files are empty
-    if (_displayedCollections.isEmpty && _recentFiles.isEmpty) {
-      final colorScheme = getEnteColorScheme(context);
-      final textTheme = getEnteTextTheme(context);
-
+    if (_displayedCollections.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: DottedBorder(
-            options: const RoundedRectDottedBorderOptions(
-              strokeWidth: 1,
-              color: Color(0xFF6B6B6B),
-              dashPattern: [5, 5],
-              radius: Radius.circular(24),
-            ),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorScheme.backdropBase,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 42,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/empty_state.png',
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Upload a File',
-                    style: textTheme.h3Bold.copyWith(
-                      color: colorScheme.textBase,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: addFile,
-                    child: Text(
-                      'Click here to upload',
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.primary700,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          child: HomeEmptyStateWidget(onTap: addFile),
         ),
       );
     }
@@ -724,6 +675,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildRecentsSection() {
+    if (_recentFiles.isEmpty) {
+      return HomeEmptyStateWidget(
+        onTap: addFile,
+      );
+    }
     return RecentsSectionWidget(
       collections: _filterOutUncategorized(_collections),
       recentFiles: _recentFiles,
