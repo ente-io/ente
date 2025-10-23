@@ -36,7 +36,7 @@ class TextDetectionOverlayButton extends StatefulWidget {
 
 class _TextDetectionOverlayButtonState
     extends State<TextDetectionOverlayButton> {
-  static const double _buttonSize = 32.0;
+  static const double _buttonSize = 40.0;
   static const double _barSlotExtent = 48.0;
   static final Map<String, _DetectionResult> _cache = {};
   final Logger _logger = Logger("TextDetectionOverlayButton");
