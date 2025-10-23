@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import "package:crypto/crypto.dart";
 import "package:dio/dio.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -380,4 +381,11 @@ Set<int> filesToUploadedFileIDs(List<EnteFile> files) {
     }
   }
   return uploadedFileIDs;
+}
+
+Future<String> computeSha1(String filePath) async {
+  final file = File(filePath);
+  final input = file.openRead();
+  final hash = await sha1.bind(input).first;
+  return hash.toString();
 }

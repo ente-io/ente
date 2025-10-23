@@ -72,6 +72,9 @@ class FileUploader {
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
+  // Track used upload URLs to detect race conditions
+  final Map<String, DateTime> _usedUploadURLs = {};
+
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
 
   // Maintains the count of files in the current upload session.
@@ -265,6 +268,8 @@ class FileUploader {
 
   void clearCachedUploadURLs() {
     _uploadURLs.clear();
+    _usedUploadURLs.clear();
+    _logger.info("Cleared upload URL cache and usage tracking");
   }
 
   void removeFromQueueWhere(
@@ -657,6 +662,7 @@ class FileUploader {
                 collectionID,
               )
             : null;
+    final sourceLength = await mediaUploadData.sourceFile!.length();
     final bool hasExistingMultiPart = existingMultipartEncFileName != null;
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
@@ -741,17 +747,11 @@ class FileUploader {
       final encryptedFile = File(encryptedFilePath);
 
       final EncryptionResult fileAttributes = multiPartFileEncResult ??
-          (flagService.internalUser
-              ? await CryptoUtil.encryptFileV2(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                )
-              : await CryptoUtil.encryptFile(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                ));
+          await CryptoUtil.encryptFile(
+            mediaUploadData.sourceFile!.path,
+            encryptedFilePath,
+            key: key,
+          );
 
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
@@ -761,6 +761,12 @@ class FileUploader {
         thumbnailData = mediaUploadData.thumbnail;
       }
       encFileSize = await encryptedFile.length();
+      if (!CryptoUtil.validateStreamEncryptionSizes(
+        sourceLength,
+        encFileSize,
+      )) {
+        throw EncSizeMismatchError("source $sourceLength, enc $encFileSize");
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
@@ -854,9 +860,7 @@ class FileUploader {
         null,
         mediaUploadData.exifData,
       );
-      file.metadataVersion = flagService.internalUser
-          ? EnteFile.kMetadataSimplifiedEncVersion
-          : EnteFile.kCurrentMetadataVersion;
+      file.metadataVersion = EnteFile.kCurrentMetadataVersion;
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
 
@@ -885,6 +889,16 @@ class FileUploader {
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
+        // Verify that the encrypted file can be decrypted before uploading
+        // For updates, we need to verify with the existing file key
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
         remoteFile = await _updateFile(
           file,
           fileObjectKey,
@@ -917,6 +931,15 @@ class FileUploader {
             fileAttributes.key!,
           );
         }
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          encryptedKey,
+          keyDecryptionNonce,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
+
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -1438,11 +1461,32 @@ class FileUploader {
       );
     }
     try {
-      final url = _uploadURLs.removeFirst();
+      final uploadURL = _uploadURLs.removeFirst();
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Returning upload URL. Remaining URLs in queue: ${_uploadURLs.length}",
       );
-      return url;
+
+      // Atomic check-and-set to prevent race conditions in parallel uploads
+      final now = DateTime.now();
+      final existingTimestamp =
+          _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
+
+      if (existingTimestamp != now) {
+        throw DuplicateUploadURLError(
+          firstUsedAt: existingTimestamp,
+          duplicateUsedAt: now,
+        );
+      }
+      // Clean up old entries to prevent memory growth (only when > 5000 entries)
+      if (_usedUploadURLs.length > 5000) {
+        final oneHourAgo = now.subtract(const Duration(hours: 1));
+        _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
+        _logger.info(
+          "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
+        );
+      }
+
+      return uploadURL;
     } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");

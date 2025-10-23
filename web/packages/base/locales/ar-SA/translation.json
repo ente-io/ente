@@ -235,6 +235,7 @@
     "search_results": "نتائج البحث",
     "no_results": "لا توجد نتائج",
     "search_hint": "البحث عن الألبومات، التواريخ، والأوصاف...",
+    "albums_search_hint": "",
     "album": "ألبوم",
     "date": "تاريخ",
     "description": "وصف",

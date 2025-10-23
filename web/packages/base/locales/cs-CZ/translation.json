@@ -235,6 +235,7 @@
     "search_results": "Výsledky hledání",
     "no_results": "Nebyly nalezeny žádné výsledky",
     "search_hint": "Hledat alba, data, popisy, ...",
+    "albums_search_hint": "",
     "album": "Album",
     "date": "Datum",
     "description": "Popis",

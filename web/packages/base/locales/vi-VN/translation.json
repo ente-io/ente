@@ -235,6 +235,7 @@
     "search_results": "Kết quả tìm kiếm",
     "no_results": "Không tìm thấy kết quả",
     "search_hint": "Tìm album, ngày chụp, mô tả,...",
+    "albums_search_hint": "",
     "album": "Album",
     "date": "Ngày",
     "description": "Mô tả",

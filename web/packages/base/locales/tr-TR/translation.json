@@ -235,6 +235,7 @@
     "search_results": "Arama sonuçları",
     "no_results": "Hiçbir sonuç bulunamadı",
     "search_hint": "Albüm, tarih, açıklama ara, ...",
+    "albums_search_hint": "",
     "album": "Albüm",
     "date": "Tarih",
     "description": "Açıklama",

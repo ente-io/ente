@@ -34,6 +34,16 @@
   "password": "Hasło",
   "confirmPassword": "Powtórz hasło",
   "activeSessions": "Aktywne sesje",
+  "ocrProcessingOverlayMessage": "Wykrywanie tekstu...",
+  "ocrLoadingIndicatorLabel": "Wykrywanie Tekstu",
+  "ocrSelectionHint": "Przesuń palcem lub dwukrotnie dotknij, aby zaznaczyć, to co potrzebujesz",
+  "ocrNoTextDetected": "Nie wykryto tekstu",
+  "ocrRetryButtonLabel": "Spróbuj ponownie",
+  "ocrModelsNetworkRequiredError": "Wymagane połączenie sieciowe do pobrania modeli OCR przy pierwszym użyciu",
+  "ocrModelsPrepareFailed": "Nie udało się przygotować modeli OCR",
+  "ocrImageNotFoundError": "Nie znaleziono pliku obrazu",
+  "ocrImageDecodeFailedError": "Nie udało się odczytać pliku obrazu",
+  "ocrGenericDetectError": "Nie udało się wykryć tekstu w zdjęciu",
   "oops": "Ups",
   "somethingWentWrongPleaseTryAgain": "Coś poszło nie tak, spróbuj ponownie",
   "thisWillLogYouOutOfThisDevice": "To wyloguje Cię z tego urządzenia!",
@@ -186,6 +196,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Zezwól na dołączanie do albumu",
   "allowAddPhotosDescription": "Pozwól osobom z linkiem na dodawania zdjęć do udostępnionego albumu.",
   "passwordLock": "Blokada hasłem",
   "canNotOpenTitle": "Nie można otworzyć tego albumu",
@@ -198,6 +209,7 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Układ albumu",
   "linkExpiry": "Wygaśnięcie linku",
   "linkExpired": "Wygasł",
   "linkEnabled": "Aktywny",
@@ -237,7 +249,9 @@
   "shareWithNonenteUsers": "Udostępnij użytkownikom bez konta Ente",
   "createPublicLink": "Utwórz publiczny link",
   "sendLink": "Wyślij link",
+  "sendQrCode": "Wyślij kod QR",
   "copyLink": "Skopiuj link",
+  "copyEmbedHtml": "Kopiuj osadzony HTML",
   "linkHasExpired": "Link wygasł",
   "publicLinkEnabled": "Publiczny link włączony",
   "shareALink": "Udostępnij link",
@@ -1169,6 +1183,7 @@
     "description": "Label for the map view"
   },
   "maps": "Mapy",
+  "mapsPrivacyNotice": "Przybliżone współrzędne zostaną przesłane do stron trzecich dbających o prywatność, takich jak OpenStreetMap, w celu wyświetlenia mapy i lokalizacji.",
   "enableMaps": "Włącz mapy",
   "quickLinks": "Szybkie linki",
   "selectItemsToAdd": "Wybierz elementy do dodania",
@@ -1822,7 +1837,9 @@
   "similarImages": "Podobne zdjęcia",
   "findSimilarImages": "Znajdź podobne zdjęcia",
   "noSimilarImagesFound": "Nie znaleziono podobnych zdjęć",
+  "yourPhotosLookUnique": "Twoje zdjęcia wyglądają na unikalne",
   "reviewAndRemoveSimilarImages": "Przejrzyj i usuń podobne zdjęcia",
+  "selectionOptions": "Opcje zaznaczania",
   "selectSimilar": "Wybierz podobne",
   "selectSimilarImagesTitle": "Wybierz podobne zdjęcia",
   "chooseSimilarImagesToSelect": "Wybierz zdjęcia na podstawie ich podobieństwa wizualnego",
@@ -1846,5 +1863,9 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - "
+  "deletingDash": "Usuwanie - ",
+  "cLTitle1": "Widok mapy dla Twoich podróży",
+  "cLTitle2": "Osadź albumy",
+  "cLDesc2": "Osadź swoje albumy na swojej własnej stronie internetowej, blogu, portfolio fotograficznym. Ente zajmuje się hostingiem!",
+  "cLDesc3": "Widżety ekranu głównego obsługują teraz albumy, które zostały Ci udostępnione."
 }
