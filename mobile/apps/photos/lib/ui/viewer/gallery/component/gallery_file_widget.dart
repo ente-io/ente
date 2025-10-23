@@ -224,7 +224,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     if (widget.selectedFiles!.files.isNotEmpty) {
       _routeToDetailPage(file, context);
     } else {
-      HapticFeedback.lightImpact();
       _toggleFileSelection(file);
       // Notify SwipeSelectableFileWidget if it exists
       _handleLongPressForSwipe();
