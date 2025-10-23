@@ -18,6 +18,7 @@ import "package:photos/module/download/task.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -31,7 +32,7 @@ import "package:photos/utils/file_util.dart";
 class VideoWidgetMediaKit extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
   final File? preview;

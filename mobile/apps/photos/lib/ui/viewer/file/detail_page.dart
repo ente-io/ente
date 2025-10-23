@@ -68,17 +68,33 @@ class DetailPageConfiguration {
   }
 }
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final DetailPageConfiguration config;
 
   const DetailPage(this.config, {super.key});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  final _enableFullScreenNotifier = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _enableFullScreenNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Separating body to a different widget to avoid
     // unnecessary reinitialization of the InheritedDetailPageState
     // when the body is rebuilt, which can reset state stored in it.
-    return InheritedDetailPageState(child: _Body(config));
+    return InheritedDetailPageState(
+      enableFullScreenNotifier: _enableFullScreenNotifier,
+      child: _Body(widget.config),
+    );
   }
 }
 
@@ -308,10 +324,12 @@ class _BodyState extends State<_Body> {
               });
             }
           },
-          playbackCallback: (isPlaying) {
+          playbackCallback: (shouldEnable, reason) {
             Future.delayed(Duration.zero, () {
-              InheritedDetailPageState.of(context)
-                  .toggleFullScreen(shouldEnable: isPlaying);
+              InheritedDetailPageState.of(context).requestFullScreen(
+                shouldEnable: shouldEnable,
+                reason: reason,
+              );
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
@@ -319,7 +337,7 @@ class _BodyState extends State<_Body> {
         return GestureDetector(
           onTap: () {
             file.fileType != FileType.video
-                ? InheritedDetailPageState.of(context).toggleFullScreen()
+                ? InheritedDetailPageState.of(context).toggleFullScreenByUser()
                 : null;
           },
           child: fileContent,

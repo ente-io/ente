@@ -12,6 +12,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/video_preview_service.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -22,7 +23,7 @@ import "package:photos/utils/standalone/data.dart";
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final String? tagPrefix;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
   final Function({required int memoryDuration})? onFinalFileLoad;
   final bool isFromMemories;
 
@@ -94,7 +95,10 @@ class _VideoWidgetState extends State<VideoWidget> {
     if (!isPreviewLoadable) {
       return;
     }
-    widget.playbackCallback?.call(false);
+    widget.playbackCallback?.call(
+      false,
+      FullScreenRequestReason.playbackStateChange,
+    );
     final data = await VideoPreviewService.instance
         .getPlaylist(widget.file)
         .onError((error, stackTrace) {

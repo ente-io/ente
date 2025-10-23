@@ -1,3 +1,4 @@
+- Ashil: Fix full screen state getting disabled when swiping to video
 - Ashil: Remove long-press icon to switch to media kit player 
 - Neeraj & Laurens: fix OCR iOS issues and remove feature flag
 - Ashil: Update gallery layout when screen orientation in changed
