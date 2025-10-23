@@ -46,6 +46,7 @@
     "new_album": "Naujas albumas",
     "create_albums": "Kurti albumus",
     "album_name": "Albumo pavadinimas",
+    "album_created": "",
     "close": "Užverti",
     "yes": "Taip",
     "no": "Ne",
