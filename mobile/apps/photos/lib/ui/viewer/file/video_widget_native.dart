@@ -1,9 +1,7 @@
 import "dart:async";
 import "dart:io";
 
-import "package:el_tooltip/el_tooltip.dart";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:native_video_player/native_video_player.dart";
 import "package:photos/core/constants.dart";
@@ -84,7 +82,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   final _debouncer = Debouncer(
     const Duration(milliseconds: 2000),
   );
-  final _elTooltipController = ElTooltipController();
   StreamSubscription<PlaybackEvent>? _subscription;
   StreamSubscription<StreamSwitchedEvent>? _streamSwitchedSubscription;
   StreamSubscription<DownloadTask>? downloadTaskSubscription;
@@ -247,7 +244,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     _isSeeking.removeListener(_seekListener);
     _isSeeking.dispose();
     _debouncer.cancelDebounceTimer();
-    _elTooltipController.dispose();
     _captionUpdatedSubscription.cancel();
     EnteWakeLockService.instance
         .updateWakeLock(enable: false, wakeLockFor: WakeLockFor.videoPlayback);
@@ -309,7 +305,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                   widget
                                       .playbackCallback!(!_showControls.value);
                                 }
-                                _elTooltipController.hide();
                               },
                         onLongPress: () {
                           if (widget.isFromMemories) {
@@ -327,25 +322,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                           constraints: const BoxConstraints.expand(),
                         ),
                       ),
-                      Platform.isAndroid
-                          ? Positioned(
-                              bottom: verticalMargin,
-                              right: 0,
-                              child: SafeArea(
-                                child: GestureDetector(
-                                  onLongPress: () {
-                                    Bus.instance.fire(UseMediaKitForVideo());
-                                    HapticFeedback.vibrate();
-                                  },
-                                  child: Container(
-                                    width: 100,
-                                    height: 180,
-                                    color: Colors.transparent,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
                       widget.isFromMemories
                           ? const SizedBox.shrink()
                           : Positioned.fill(
@@ -396,14 +372,6 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      _VideoDescriptionAndSwitchToMediaKitButton(
-                                        file: widget.file,
-                                        showControls: _showControls,
-                                        elTooltipController:
-                                            _elTooltipController,
-                                        controller: _controller,
-                                        selectedPreview: widget.selectedPreview,
-                                      ),
                                       ValueListenableBuilder(
                                         valueListenable: _showControls,
                                         builder: (context, value, _) {
@@ -871,107 +839,5 @@ class _SeekBarAndDuration extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
-  final EnteFile file;
-  final ValueNotifier<bool> showControls;
-  final ElTooltipController elTooltipController;
-  final NativeVideoPlayerController? controller;
-  final bool selectedPreview;
-
-  const _VideoDescriptionAndSwitchToMediaKitButton({
-    required this.file,
-    required this.showControls,
-    required this.elTooltipController,
-    required this.controller,
-    required this.selectedPreview,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Platform.isAndroid && !selectedPreview
-        ? Align(
-            alignment: Alignment.centerRight,
-            child: ValueListenableBuilder(
-              valueListenable: showControls,
-              builder: (context, value, _) {
-                return IgnorePointer(
-                  ignoring: !value,
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInQuad,
-                    opacity: value ? 1 : 0,
-                    child: ElTooltip(
-                      padding: const EdgeInsets.all(12),
-                      distance: 4,
-                      controller: elTooltipController,
-                      content: GestureDetector(
-                        onLongPress: () {
-                          Bus.instance.fire(
-                            UseMediaKitForVideo(),
-                          );
-                          HapticFeedback.vibrate();
-                          elTooltipController.hide();
-                        },
-                        child: Text(
-                          AppLocalizations.of(context).useDifferentPlayerInfo,
-                        ),
-                      ),
-                      position: ElTooltipPosition.topEnd,
-                      color: backgroundElevatedDark,
-                      appearAnimationDuration: const Duration(
-                        milliseconds: 200,
-                      ),
-                      disappearAnimationDuration: const Duration(
-                        milliseconds: 200,
-                      ),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (elTooltipController.value ==
-                              ElTooltipStatus.hidden) {
-                            elTooltipController.show();
-                          } else {
-                            elTooltipController.hide();
-                          }
-                          controller?.pause();
-                        },
-                        behavior: HitTestBehavior.translucent,
-                        onLongPress: () {
-                          Bus.instance.fire(
-                            UseMediaKitForVideo(),
-                          );
-                          HapticFeedback.vibrate();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 0, 4),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            child: Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                Icon(
-                                  Icons.play_arrow_outlined,
-                                  size: 24,
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                                Icon(
-                                  Icons.question_mark_rounded,
-                                  size: 10,
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          )
-        : const SizedBox.shrink();
   }
 }

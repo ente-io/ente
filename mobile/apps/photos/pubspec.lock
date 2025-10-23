@@ -517,14 +517,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.9"
-  el_tooltip:
-    dependency: "direct main"
-    description:
-      name: el_tooltip
-      sha256: "0860b00e9390a31dd98369dc16d3b6fa2668fc52df712bd00e86d8931787fc17"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.1"
   email_validator:
     dependency: "direct main"
     description:
