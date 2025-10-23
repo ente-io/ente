@@ -32,7 +32,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
   void _initializeSelectedValue() {
     final currentRatio = widget.controller.preferredCropAspectRatio;
     if (currentRatio == null) {
-      _selectedCropValue = null;
+      _selectedCropValue = CropValue.free;
       return;
     }
 
