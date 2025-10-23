@@ -127,6 +127,7 @@ class LocalSyncService {
           toTime: syncStartTime,
         );
       }
+      await _backfillLocalIdsForUploadedFiles(ownerID);
       if (!hasCompletedFirstImport()) {
         await _prefs.setBool(kHasCompletedFirstImportKey, true);
         await _refreshDeviceFolderCountAndCover(isFirstSync: true);
@@ -378,6 +379,17 @@ class LocalSyncService {
       unawaited(syncAll());
     } else {
       unawaited(sync().then((value) => _refreshDeviceFolderCountAndCover()));
+    }
+  }
+
+  Future<void> _backfillLocalIdsForUploadedFiles(int ownerID) async {
+    final Map<int, String> uploadIdToLocalId =
+        await _db.getUploadedIDsNeedingLocalID(ownerID);
+    if (uploadIdToLocalId.isEmpty) {
+      return;
+    }
+    for (final entry in uploadIdToLocalId.entries) {
+      await _db.updateLocalIDForUploaded(entry.key, entry.value);
     }
   }
 }
