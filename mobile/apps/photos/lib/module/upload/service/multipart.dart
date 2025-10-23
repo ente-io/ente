@@ -6,11 +6,13 @@ import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/core/errors.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/utils/file_util.dart";
 
 class MultiPartUploader {
   final Dio _enteDio;
@@ -26,7 +28,7 @@ class MultiPartUploader {
     this._featureFlagService,
   );
 
-  Future<EncryptionResult> getEncryptionResult(
+  Future<FileEncryptResult> getEncryptionResult(
     String localId,
     String fileHash,
     int collectionID,
@@ -45,13 +47,24 @@ class MultiPartUploader {
 
     final encryptKeyNonce = CryptoUtil.base642bin(result.keyNonce);
 
-    return EncryptionResult(
+    // Get the full multipart info to access MD5 data
+    final multipartInfo = await _db.getCachedLinks(
+      localId,
+      fileHash,
+      collectionID,
+      encFileName,
+    );
+
+    return FileEncryptResult(
       key: CryptoUtil.decryptSync(
         encryptedFileKey,
         collectionKey,
         encryptKeyNonce,
       ),
       header: fileNonce,
+      fileMd5: multipartInfo.fileMd5,
+      partMd5s: multipartInfo.partMd5s,
+      partSize: multipartInfo.partSize,
     );
   }
 
@@ -91,8 +104,10 @@ class MultiPartUploader {
     String encryptedFileName,
     int fileSize,
     Uint8List fileKey,
-    Uint8List fileNonce,
-  ) async {
+    Uint8List fileNonce, {
+    String? fileMd5,
+    List<String>? partMd5s,
+  }) async {
     final collectionKey =
         CollectionsService.instance.getCollectionKey(collectionID);
 
@@ -112,6 +127,8 @@ class MultiPartUploader {
       CryptoUtil.bin2base64(fileNonce),
       CryptoUtil.bin2base64(encryptedResult.nonce!),
       partSize: multipartPartSizeForUpload,
+      fileMd5: fileMd5,
+      partMd5s: partMd5s,
     );
   }
 
@@ -184,11 +201,18 @@ class MultiPartUploader {
   Future<String> putMultipartFile(
     MultipartUploadURLs urls,
     File encryptedFile,
-    int fileSize,
-  ) async {
+    int fileSize, {
+    String? fileMd5,
+    List<String>? partMd5s,
+  }) async {
     // upload individual parts and get their etags
     final etags = await _uploadParts(
-      MultipartInfo(urls: urls, encFileSize: fileSize),
+      MultipartInfo(
+        urls: urls,
+        encFileSize: fileSize,
+        fileMd5: fileMd5,
+        partMd5s: partMd5s,
+      ),
       encryptedFile,
     );
 
@@ -206,6 +230,7 @@ class MultiPartUploader {
     final partUploadStatus = partInfo.partUploadStatus;
     final partsLength = partsURLs.length;
     final etags = partInfo.partETags ?? <int, String>{};
+    final partMd5s = partInfo.partMd5s;
 
     int i = 0;
     final partSize = partInfo.partSize ?? multipartPartSizeForUpload;
@@ -237,30 +262,56 @@ class MultiPartUploader {
           'Forced exception to test multipart upload retry mechanism.',
         );
       }
-      final response = await _s3Dio.put(
-        partURL,
-        data: encryptedFile.openRead(
-          i * partSize,
-          isLastPart ? null : (i + 1) * partSize,
-        ),
-        options: Options(
-          headers: {
-            Headers.contentLengthHeader: fileSize,
-            Headers.contentTypeHeader: "application/octet-stream",
-          },
-        ),
-      );
 
-      final eTag = response.headers.value("etag");
+      final headers = {
+        Headers.contentLengthHeader: fileSize,
+        Headers.contentTypeHeader: "application/octet-stream",
+      };
 
-      if (eTag?.isEmpty ?? true) {
-        throw Exception('ETAG_MISSING');
+      // Add MD5 header if available for this part
+      if (partMd5s != null && i < partMd5s.length) {
+        headers['Content-MD5'] = partMd5s[i];
+      } else if (kDebugMode) {
+        AssertionError('Part MD5s not available for part ${i + 1}');
       }
 
-      etags[i] = eTag!;
+      try {
+        final response = await _s3Dio.put(
+          partURL,
+          data: encryptedFile.openRead(
+            i * partSize,
+            isLastPart ? null : (i + 1) * partSize,
+          ),
+          options: Options(
+            headers: headers,
+          ),
+        );
 
-      await _db.updatePartStatus(partInfo.urls.objectKey, i, eTag);
-      i++;
+        final eTag = response.headers.value("etag");
+
+        if (eTag?.isEmpty ?? true) {
+          throw Exception('ETAG_MISSING');
+        }
+
+        etags[i] = eTag!;
+
+        await _db.updatePartStatus(partInfo.urls.objectKey, i, eTag);
+        i++;
+      } on DioException catch (e) {
+        if (e.response?.statusCode == 400 &&
+                e.response?.data.toString().contains('BadDigest') == true ||
+            e.response?.data.toString().contains('InvalidDigest') == true) {
+          final recomputedMD5 = await computeMd5(
+            encryptedFile.path,
+            start: i * partSize,
+            end: isLastPart ? null : (i + 1) * partSize,
+          );
+          throw BadMD5DigestError(
+            "Failed for part ${i + 1} ${e.response?.data}, sent: ${partMd5s?[i]}, computed: $recomputedMD5",
+          );
+        }
+        rethrow;
+      }
     }
 
     await _db.updateTrackUploadStatus(

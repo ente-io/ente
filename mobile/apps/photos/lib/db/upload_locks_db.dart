@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
@@ -35,6 +36,8 @@ class UploadLocksDB {
     columnPartSize: "part_size",
     columnLastAttemptedAt: "last_attempted_at",
     columnCreatedAt: "created_at",
+    columnFileMd5: "file_md5",
+    columnPartMd5s: "part_md5s",
   );
 
   static const _partsTable = (
@@ -67,7 +70,20 @@ class UploadLocksDB {
 
   static final migrationScripts = [
     ..._createTrackUploadsTable(),
+    ..._addMD5Columns(),
   ];
+  static List<String> _addMD5Columns() {
+    return [
+      '''
+               ALTER TABLE ${_trackUploadTable.table}
+               ADD COLUMN  ${_trackUploadTable.columnFileMd5} TEXT;
+               ''',
+      '''
+               ALTER TABLE ${_trackUploadTable.table}
+               ADD COLUMN ${_trackUploadTable.columnPartMd5s} TEXT;
+               ''',
+    ];
+  }
 
   final dbConfig = MigrationConfig(
     initializationScript: initializationScript,
@@ -121,7 +137,7 @@ class UploadLocksDB {
                   ${_trackUploadTable.columnStatus} TEXT DEFAULT '${MultipartStatus.pending.name}' NOT NULL,
                   ${_trackUploadTable.columnPartSize} INTEGER NOT NULL,
                   ${_trackUploadTable.columnLastAttemptedAt} INTEGER NOT NULL,
-                  ${_trackUploadTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
+                  ${_trackUploadTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL,
                 )
                 ''',
       '''
@@ -329,6 +345,14 @@ class UploadLocksDB {
       partsURLs: partsURLs,
     );
 
+    // Retrieve MD5 data
+    final String? fileMd5 = row[_trackUploadTable.columnFileMd5] as String?;
+    List<String>? partMd5s;
+    if (row[_trackUploadTable.columnPartMd5s] != null) {
+      final partMd5sJson = row[_trackUploadTable.columnPartMd5s] as String;
+      partMd5s = List<String>.from(jsonDecode(partMd5sJson));
+    }
+
     return MultipartInfo(
       urls: urls,
       status: MultipartStatus.values
@@ -337,6 +361,8 @@ class UploadLocksDB {
       partETags: partETags,
       encFileSize: encFileSize,
       partSize: row[_trackUploadTable.columnPartSize] as int,
+      fileMd5: fileMd5,
+      partMd5s: partMd5s,
     );
   }
 
@@ -435,6 +461,8 @@ class UploadLocksDB {
     String fileNonce,
     String keyNonce, {
     required int partSize,
+    String? fileMd5,
+    List<String>? partMd5s,
   }) async {
     final db = await database;
     final objectKey = urls.objectKey;
@@ -455,6 +483,9 @@ class UploadLocksDB {
         _trackUploadTable.columnPartSize: partSize,
         _trackUploadTable.columnLastAttemptedAt:
             DateTime.now().millisecondsSinceEpoch,
+        if (fileMd5 != null) _trackUploadTable.columnFileMd5: fileMd5,
+        if (partMd5s != null)
+          _trackUploadTable.columnPartMd5s: jsonEncode(partMd5s),
       },
     );
 

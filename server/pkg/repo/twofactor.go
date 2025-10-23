@@ -146,3 +146,31 @@ func (repo *TwoFactorRepository) RecordWrongAttempt(sessionID string) error {
 	}
 	return nil
 }
+
+// TryRecordUsedOTPCode atomically tries to record an OTP code as used
+// Returns true if the code was newly recorded, false if it already existed (replay attack)
+func (repo *TwoFactorRepository) TryRecordUsedOTPCode(userID int64, codeHash string) (bool, error) {
+	result, err := repo.DB.Exec(`INSERT INTO two_factor_used_codes(user_id, code_hash, used_at)
+		VALUES($1, $2, $3) ON CONFLICT (user_id, code_hash) DO NOTHING`,
+		userID, codeHash, time.Microseconds())
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed to record used OTP code")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed to get rows affected")
+	}
+
+	return rowsAffected > 0, nil
+}
+
+// RemoveExpiredUsedOTPCodes removes OTP codes older than the specified duration
+func (repo *TwoFactorRepository) RemoveExpiredUsedOTPCodes(expirationMicroseconds int64) error {
+	cutoffTime := time.Microseconds() - expirationMicroseconds
+	_, err := repo.DB.Exec(`DELETE FROM two_factor_used_codes WHERE used_at < $1`, cutoffTime)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to remove expired used OTP codes")
+	}
+	return nil
+}

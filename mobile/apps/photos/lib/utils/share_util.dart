@@ -50,12 +50,26 @@ Future<void> share(
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
-    paths.removeWhere((element) => element == null);
-    final xFiles = <XFile>[];
-    for (String? path in paths) {
-      if (path == null) continue;
-      xFiles.add(XFile(path));
+    final resolvedPaths = <String>[];
+    for (var i = 0; i < paths.length; i++) {
+      final path = paths[i];
+      if (path == null) {
+        _logger.warning(
+          "share missing local path for file $i/${files.length} "
+          "(remote: ${files[i].isRemoteFile})",
+        );
+        continue;
+      }
+      resolvedPaths.add(path);
     }
+    if (resolvedPaths.isEmpty) {
+      _logger.severe(
+        "share aborted: unable to resolve any files "
+        "(requested: ${files.length}, remote: $remoteFileCount)",
+      );
+      throw ArgumentError("No files resolved for system share");
+    }
+    final xFiles = resolvedPaths.map((path) => XFile(path)).toList();
     await SharePlus.instance.share(
       ShareParams(
         files: xFiles,
@@ -64,7 +78,8 @@ Future<void> share(
     );
   } catch (e, s) {
     _logger.severe(
-      "failed to fetch files for system share ${files.length}",
+      "failed to complete system share ${files.length} "
+      "(remote: $remoteFileCount)",
       e,
       s,
     );
@@ -179,7 +194,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
       }
     }
     enteFile.modificationTime = enteFile.creationTime;
-    enteFile.metadataVersion = EnteFile.kCurrentMetadataVersion;
+    enteFile.metadataVersion = -1;
     localFiles.add(enteFile);
   }
   return localFiles;

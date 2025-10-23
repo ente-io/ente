@@ -235,6 +235,7 @@
     "search_results": "Paieškos rezultatai",
     "no_results": "Rezultatų nerasta.",
     "search_hint": "Ieškokite albumų, datų ir aprašymų...",
+    "albums_search_hint": "",
     "album": "Albumas",
     "date": "Data",
     "description": "Aprašymas",

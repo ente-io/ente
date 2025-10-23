@@ -55,9 +55,12 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void initState() {
     super.initState();
+    // Automatic error fallback: switch to MediaKit when native player fails
     useMediaKitForVideoSubscription =
         Bus.instance.on<UseMediaKitForVideo>().listen((event) {
-      _logger.info("Switching to MediaKit for video playback");
+      _logger.info(
+        "Automatically switching to MediaKit due to native player error",
+      );
       setState(() {
         useNativeVideoPlayer = false;
       });
