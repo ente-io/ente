@@ -84,6 +84,114 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                           startTimeMs: Int, endTimeMs: Int, result: @escaping FlutterResult) {
         let asset = AVAsset(url: URL(fileURLWithPath: inputPath))
 
+        let startTime = CMTime(value: CMTimeValue(startTimeMs), timescale: 1000)
+        let endTime = CMTime(value: CMTimeValue(endTimeMs), timescale: 1000)
+        let timeRange = CMTimeRange(start: startTime, end: endTime)
+
+        // Check if video has metadata rotation
+        var needsReEncoding = false
+        var videoComposition: AVMutableVideoComposition?
+
+        if let videoTrack = asset.tracks(withMediaType: .video).first {
+            let preferredTransform = videoTrack.preferredTransform
+            // Check if the transform is not identity (has rotation/orientation)
+            if !preferredTransform.isIdentity {
+                needsReEncoding = true
+
+                // Create composition to apply the preferred transform
+                let composition = AVMutableComposition()
+                guard let compositionVideoTrack = composition.addMutableTrack(
+                    withMediaType: .video,
+                    preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                    result(flutterError("COMPOSITION_ERROR", message: "Failed to create composition track"))
+                    return
+                }
+
+                var compositionAudioTrack: AVMutableCompositionTrack?
+                if let audioTrack = asset.tracks(withMediaType: .audio).first {
+                    compositionAudioTrack = composition.addMutableTrack(
+                        withMediaType: .audio,
+                        preferredTrackID: kCMPersistentTrackID_Invalid)
+                }
+
+                do {
+                    try compositionVideoTrack.insertTimeRange(timeRange, of: videoTrack, at: .zero)
+
+                    if let audioTrack = asset.tracks(withMediaType: .audio).first,
+                       let compAudioTrack = compositionAudioTrack {
+                        try compAudioTrack.insertTimeRange(timeRange, of: audioTrack, at: .zero)
+                    }
+                } catch {
+                    result(flutterError("INSERT_ERROR", message: "Failed to insert track", error: error))
+                    return
+                }
+
+                // Create video composition with the preferred transform
+                let videoComp = AVMutableVideoComposition()
+                videoComp.frameDuration = frameDuration(for: videoTrack)
+
+                let naturalSize = videoTrack.naturalSize
+                let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+                let preferredBounds = naturalBounds.applying(preferredTransform)
+                let orientationAdjustment = CGAffineTransform(
+                    translationX: -preferredBounds.minX,
+                    y: -preferredBounds.minY
+                )
+
+                let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
+                let renderSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+
+                videoComp.renderSize = renderSize
+
+                let instruction = AVMutableVideoCompositionInstruction()
+                instruction.timeRange = CMTimeRange(start: .zero, duration: composition.duration)
+
+                let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionVideoTrack)
+                layerInstruction.setTransform(orientationTransform, at: .zero)
+
+                instruction.layerInstructions = [layerInstruction]
+                videoComp.instructions = [instruction]
+
+                videoComposition = videoComp
+
+                // Use composition for export
+                let presetName = AVAssetExportPresetHighestQuality
+                guard let exportSession = AVAssetExportSession(asset: composition, presetName: presetName) else {
+                    result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
+                    return
+                }
+
+                currentExportSession = exportSession
+                exportSession.videoComposition = videoComposition
+                exportSession.outputURL = URL(fileURLWithPath: outputPath)
+                exportSession.outputFileType = .mp4
+                exportSession.shouldOptimizeForNetworkUse = true
+
+                startProgressReporting()
+                exportSession.exportAsynchronously {
+                    DispatchQueue.main.async {
+                        self.stopProgressReporting()
+                        switch exportSession.status {
+                        case .completed:
+                            result([
+                                "outputPath": outputPath,
+                                "isReEncoded": true
+                            ])
+                        case .failed:
+                            result(self.flutterError("TRIM_ERROR", message: "Failed to trim video", error: exportSession.error))
+                        case .cancelled:
+                            result(self.flutterError("CANCELLED", message: "Export cancelled"))
+                        default:
+                            result(self.flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
+                        }
+                        self.currentExportSession = nil
+                    }
+                }
+                return
+            }
+        }
+
+        // Use passthrough if no rotation needed
         guard let exportSession = AVAssetExportSession(asset: asset,
                                                        presetName: AVAssetExportPresetPassthrough) else {
             result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
@@ -91,10 +199,6 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         }
 
         currentExportSession = exportSession
-
-        let startTime = CMTime(value: CMTimeValue(startTimeMs), timescale: 1000)
-        let endTime = CMTime(value: CMTimeValue(endTimeMs), timescale: 1000)
-        let timeRange = CMTimeRange(start: startTime, end: endTime)
 
         exportSession.timeRange = timeRange
         exportSession.outputURL = URL(fileURLWithPath: outputPath)
@@ -450,6 +554,9 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         var finalTransform = preferredTransform
         var renderSize = naturalSize
 
+        // Check if video has metadata rotation even if no explicit transformations requested
+        let hasMetadataRotation = !preferredTransform.isIdentity
+
         if let cropX = args["cropX"] as? Int,
            let cropY = args["cropY"] as? Int,
            let cropWidth = args["cropWidth"] as? Int,
@@ -579,6 +686,20 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             transform = transform.concatenating(CGAffineTransform(translationX: additionalTranslateX, y: additionalTranslateY))
 
             finalTransform = transform
+        } else if hasMetadataRotation {
+            // If no explicit transformations but video has metadata rotation, apply it
+            isReEncoded = true
+
+            let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+            let preferredBounds = naturalBounds.applying(preferredTransform)
+            let orientationAdjustment = CGAffineTransform(
+                translationX: -preferredBounds.minX,
+                y: -preferredBounds.minY
+            )
+
+            let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
+            renderSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+            finalTransform = orientationTransform
         }
 
         if isReEncoded {
