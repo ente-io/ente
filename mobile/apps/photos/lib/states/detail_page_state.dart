@@ -12,10 +12,13 @@ typedef FullScreenRequestCallback = void Function(
 );
 
 class InheritedDetailPageState extends InheritedWidget {
-  final enableFullScreenNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> enableFullScreenNotifier;
+  // Cannot be const because we accept a ValueNotifier instance at runtime
+  // ignore: prefer_const_constructors_in_immutables
   InheritedDetailPageState({
     super.key,
     required super.child,
+    required this.enableFullScreenNotifier,
   });
 
   static InheritedDetailPageState of(BuildContext context) =>
