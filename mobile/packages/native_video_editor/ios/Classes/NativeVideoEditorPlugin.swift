@@ -84,6 +84,108 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                           startTimeMs: Int, endTimeMs: Int, result: @escaping FlutterResult) {
         let asset = AVAsset(url: URL(fileURLWithPath: inputPath))
 
+        let startTime = CMTime(value: CMTimeValue(startTimeMs), timescale: 1000)
+        let endTime = CMTime(value: CMTimeValue(endTimeMs), timescale: 1000)
+        let timeRange = CMTimeRange(start: startTime, end: endTime)
+
+        // Check if video has metadata rotation
+        if let videoTrack = asset.tracks(withMediaType: .video).first {
+            let preferredTransform = videoTrack.preferredTransform
+            // Check if the transform is not identity (has rotation/orientation)
+            if !preferredTransform.isIdentity {
+
+                // Create composition to apply the preferred transform
+                let composition = AVMutableComposition()
+                guard let compositionVideoTrack = composition.addMutableTrack(
+                    withMediaType: .video,
+                    preferredTrackID: kCMPersistentTrackID_Invalid) else {
+                    result(flutterError("COMPOSITION_ERROR", message: "Failed to create composition track"))
+                    return
+                }
+
+                var compositionAudioTrack: AVMutableCompositionTrack?
+                if let audioTrack = asset.tracks(withMediaType: .audio).first {
+                    compositionAudioTrack = composition.addMutableTrack(
+                        withMediaType: .audio,
+                        preferredTrackID: kCMPersistentTrackID_Invalid)
+                }
+
+                do {
+                    try compositionVideoTrack.insertTimeRange(timeRange, of: videoTrack, at: .zero)
+
+                    if let audioTrack = asset.tracks(withMediaType: .audio).first,
+                       let compAudioTrack = compositionAudioTrack {
+                        try compAudioTrack.insertTimeRange(timeRange, of: audioTrack, at: .zero)
+                    }
+                } catch {
+                    result(flutterError("INSERT_ERROR", message: "Failed to insert track", error: error))
+                    return
+                }
+
+                // Create video composition with the preferred transform
+                let videoComp = AVMutableVideoComposition()
+                videoComp.frameDuration = frameDuration(for: videoTrack)
+
+                let naturalSize = videoTrack.naturalSize
+                let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+                let preferredBounds = naturalBounds.applying(preferredTransform)
+                let orientationAdjustment = CGAffineTransform(
+                    translationX: -preferredBounds.minX,
+                    y: -preferredBounds.minY
+                )
+
+                let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
+                let renderSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+
+                videoComp.renderSize = renderSize
+
+                let instruction = AVMutableVideoCompositionInstruction()
+                instruction.timeRange = CMTimeRange(start: .zero, duration: composition.duration)
+
+                let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionVideoTrack)
+                layerInstruction.setTransform(orientationTransform, at: .zero)
+
+                instruction.layerInstructions = [layerInstruction]
+                videoComp.instructions = [instruction]
+
+                // Use composition for export
+                let presetName = AVAssetExportPresetHighestQuality
+                guard let exportSession = AVAssetExportSession(asset: composition, presetName: presetName) else {
+                    result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
+                    return
+                }
+
+                currentExportSession = exportSession
+                exportSession.videoComposition = videoComp
+                exportSession.outputURL = URL(fileURLWithPath: outputPath)
+                exportSession.outputFileType = .mp4
+                exportSession.shouldOptimizeForNetworkUse = true
+
+                startProgressReporting()
+                exportSession.exportAsynchronously {
+                    DispatchQueue.main.async {
+                        self.stopProgressReporting()
+                        switch exportSession.status {
+                        case .completed:
+                            result([
+                                "outputPath": outputPath,
+                                "isReEncoded": true
+                            ])
+                        case .failed:
+                            result(self.flutterError("TRIM_ERROR", message: "Failed to trim video", error: exportSession.error))
+                        case .cancelled:
+                            result(self.flutterError("CANCELLED", message: "Export cancelled"))
+                        default:
+                            result(self.flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
+                        }
+                        self.currentExportSession = nil
+                    }
+                }
+                return
+            }
+        }
+
+        // Use passthrough if no rotation needed
         guard let exportSession = AVAssetExportSession(asset: asset,
                                                        presetName: AVAssetExportPresetPassthrough) else {
             result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
@@ -91,10 +193,6 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         }
 
         currentExportSession = exportSession
-
-        let startTime = CMTime(value: CMTimeValue(startTimeMs), timescale: 1000)
-        let endTime = CMTime(value: CMTimeValue(endTimeMs), timescale: 1000)
-        let timeRange = CMTimeRange(start: startTime, end: endTime)
 
         exportSession.timeRange = timeRange
         exportSession.outputURL = URL(fileURLWithPath: outputPath)
@@ -169,25 +267,55 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         videoComposition.frameDuration = frameDuration(for: videoTrack)
 
         let naturalSize = videoTrack.naturalSize
-        var renderSize = naturalSize
-        var transform = CGAffineTransform.identity
+        let preferredTransform = videoTrack.preferredTransform
 
-        switch degrees {
-        case 90:
-            transform = CGAffineTransform(rotationAngle: .pi / 2)
-                .translatedBy(x: 0, y: -naturalSize.width)
-            renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
-        case 180:
-            transform = CGAffineTransform(rotationAngle: .pi)
-                .translatedBy(x: -naturalSize.width, y: -naturalSize.height)
-        case 270:
-            transform = CGAffineTransform(rotationAngle: -.pi / 2)
-                .translatedBy(x: -naturalSize.height, y: 0)
-            renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
-        default:
-            result(flutterError("INVALID_DEGREES", message: "Degrees must be 90, 180, or 270"))
-            return
+        // Apply orientation adjustment to handle existing metadata rotation properly
+        let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+        let preferredBounds = naturalBounds.applying(preferredTransform)
+        let orientationAdjustment = CGAffineTransform(
+            translationX: -preferredBounds.minX,
+            y: -preferredBounds.minY
+        )
+        let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
+
+        // Calculate oriented size for render calculations
+        var orientedSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+
+        var transform = orientationTransform
+
+        // iOS CGAffineTransform rotates counter-clockwise for positive angles
+        // To match Android behavior (positive = clockwise), we negate the radians
+        let radians = CGFloat(degrees) * .pi / 180
+        let clockwiseRadians = -radians
+
+        // Rotate around the center of the oriented video
+        let centerX = orientedSize.width / 2
+        let centerY = orientedSize.height / 2
+
+        transform = transform.translatedBy(x: centerX, y: centerY)
+        transform = transform.rotated(by: clockwiseRadians)
+        transform = transform.translatedBy(x: -centerX, y: -centerY)
+
+        // Set renderSize based on rotation
+        var renderSize: CGSize
+        if abs(degrees) == 90 || abs(degrees) == 270 {
+            renderSize = CGSize(width: orientedSize.height, height: orientedSize.width)
+        } else {
+            renderSize = orientedSize
         }
+
+        // Use bounds testing to calculate the necessary translation to center the video
+        let testRect = CGRect(origin: .zero, size: orientedSize)
+        let finalBounds = testRect.applying(transform)
+
+        // Center the video in the renderSize
+        let targetMinX: CGFloat = (renderSize.width - finalBounds.width) / 2
+        let additionalTranslateX = targetMinX - finalBounds.minX
+
+        let targetMinY: CGFloat = (renderSize.height - finalBounds.height) / 2
+        let additionalTranslateY = targetMinY - finalBounds.minY
+
+        transform = transform.concatenating(CGAffineTransform(translationX: additionalTranslateX, y: additionalTranslateY))
 
         videoComposition.renderSize = renderSize
 
@@ -450,6 +578,9 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         var finalTransform = preferredTransform
         var renderSize = naturalSize
 
+        // Check if video has metadata rotation even if no explicit transformations requested
+        let hasMetadataRotation = !preferredTransform.isIdentity
+
         if let cropX = args["cropX"] as? Int,
            let cropY = args["cropY"] as? Int,
            let cropWidth = args["cropWidth"] as? Int,
@@ -540,10 +671,19 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         } else if let rotateDegrees = args["rotateDegrees"] as? Int, rotateDegrees != 0 {
             isReEncoded = true
 
-            var orientedSize = naturalSize.applying(preferredTransform)
-            orientedSize = CGSize(width: abs(orientedSize.width), height: abs(orientedSize.height))
+            // Apply orientation adjustment to handle existing metadata rotation properly
+            let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+            let preferredBounds = naturalBounds.applying(preferredTransform)
+            let orientationAdjustment = CGAffineTransform(
+                translationX: -preferredBounds.minX,
+                y: -preferredBounds.minY
+            )
+            let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
 
-            var transform = preferredTransform
+            // Calculate oriented size for render calculations
+            var orientedSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+
+            var transform = orientationTransform
 
             // iOS CGAffineTransform rotates counter-clockwise for positive angles
             // To match Android behavior (positive = clockwise), we negate the radians
@@ -579,6 +719,20 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             transform = transform.concatenating(CGAffineTransform(translationX: additionalTranslateX, y: additionalTranslateY))
 
             finalTransform = transform
+        } else if hasMetadataRotation {
+            // If no explicit transformations but video has metadata rotation, apply it
+            isReEncoded = true
+
+            let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+            let preferredBounds = naturalBounds.applying(preferredTransform)
+            let orientationAdjustment = CGAffineTransform(
+                translationX: -preferredBounds.minX,
+                y: -preferredBounds.minY
+            )
+
+            let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
+            renderSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+            finalTransform = orientationTransform
         }
 
         if isReEncoded {

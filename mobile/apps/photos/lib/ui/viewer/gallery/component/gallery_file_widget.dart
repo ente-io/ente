@@ -6,7 +6,6 @@ import "package:photos/core/constants.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
@@ -63,8 +62,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   @override
   Widget build(BuildContext context) {
     // Check if swipe selection should be enabled
-    final shouldEnableSwipeSelection =
-        flagService.internalUser && !widget.limitSelectionToOne;
+    final shouldEnableSwipeSelection = !widget.limitSelectionToOne;
 
     final Widget fileContent = _buildFileContent(context);
 
@@ -226,7 +224,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     if (widget.selectedFiles!.files.isNotEmpty) {
       _routeToDetailPage(file, context);
     } else {
-      HapticFeedback.lightImpact();
       _toggleFileSelection(file);
       // Notify SwipeSelectableFileWidget if it exists
       _handleLongPressForSwipe();
