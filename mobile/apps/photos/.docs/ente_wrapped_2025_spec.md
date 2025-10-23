@@ -47,13 +47,12 @@ Success signals (local, privacy‑friendly)
 
 Wrapped assembles a diverse subset of the following, tuned per user:
 
-1. Stats & Rhythm
+1. Stats & Rhythm (should not include shared files, only files owned by the user)
 
 - Totals: photos, videos, storage captured.
+- Velocity: avg/day; busiest month; longest streak
+- Busiest day;
 - GitHub like contribution-graph based on photo capture dates
-- Velocity: avg/day; busiest month; contribution heatmap (compact).
-- Busiest day; longest streak; longest gap.
-- All of this should not include shared files, only files owned by the user. 
 
 2. People
 
@@ -65,7 +64,7 @@ Wrapped assembles a diverse subset of the following, tuned per user:
 
 4. Aesthetics & Scenes
 
-- Year‑in‑color palette; monochrome moments; panoramas; biggest shot; “Top 9 wow”.
+- Year‑in‑color palette; monochrome moments; “Top 9 wow”.
 
 5. Technique & Habits
 
