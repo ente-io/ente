@@ -297,8 +297,7 @@ class GalleryState extends State<Gallery> {
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
 
-    if (widget.galleryType == GalleryType.homepage &&
-        flagService.internalUser) {
+    if (widget.galleryType == GalleryType.homepage) {
       _swipeActiveNotifier.addListener(() {
         Bus.instance.fire(
           HomepageSwipeToSelectInProgressEvent(
@@ -480,9 +479,7 @@ class GalleryState extends State<Gallery> {
   }
 
   void _updateSwipeHelper() {
-    if (widget.selectedFiles != null &&
-        _allFilesWithDummies.isNotEmpty &&
-        flagService.internalUser) {
+    if (widget.selectedFiles != null && _allFilesWithDummies.isNotEmpty) {
       // Dispose existing helper if present
       _swipeHelper?.dispose();
       // Use allFilesWithDummies to match the rendered grid structure.
@@ -567,7 +564,9 @@ class GalleryState extends State<Gallery> {
             ?.setScrollController(_scrollController);
       }
     });
+
     final widthAvailable = MediaQuery.sizeOf(context).width;
+    final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;
 
     if (groupHeaderExtent == null) {
       final photoGridSize = localSettings.getPhotoGridSize();
@@ -619,9 +618,6 @@ class GalleryState extends State<Gallery> {
         }
       });
     }
-
-    final shouldEnableSwipeSelection =
-        flagService.internalUser && widget.limitSelectionToOne == false;
 
     return SwipeSelectionWrapper(
       isEnabled: shouldEnableSwipeSelection,
