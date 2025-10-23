@@ -89,14 +89,10 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let timeRange = CMTimeRange(start: startTime, end: endTime)
 
         // Check if video has metadata rotation
-        var needsReEncoding = false
-        var videoComposition: AVMutableVideoComposition?
-
         if let videoTrack = asset.tracks(withMediaType: .video).first {
             let preferredTransform = videoTrack.preferredTransform
             // Check if the transform is not identity (has rotation/orientation)
             if !preferredTransform.isIdentity {
-                needsReEncoding = true
 
                 // Create composition to apply the preferred transform
                 let composition = AVMutableComposition()
@@ -152,8 +148,6 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 instruction.layerInstructions = [layerInstruction]
                 videoComp.instructions = [instruction]
 
-                videoComposition = videoComp
-
                 // Use composition for export
                 let presetName = AVAssetExportPresetHighestQuality
                 guard let exportSession = AVAssetExportSession(asset: composition, presetName: presetName) else {
@@ -162,7 +156,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 }
 
                 currentExportSession = exportSession
-                exportSession.videoComposition = videoComposition
+                exportSession.videoComposition = videoComp
                 exportSession.outputURL = URL(fileURLWithPath: outputPath)
                 exportSession.outputFileType = .mp4
                 exportSession.shouldOptimizeForNetworkUse = true
