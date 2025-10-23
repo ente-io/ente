@@ -76,6 +76,39 @@ class WrappedPeopleContext {
 }
 
 @immutable
+class WrappedCity {
+  const WrappedCity({
+    required this.name,
+    required this.country,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  final String name;
+  final String country;
+  final double latitude;
+  final double longitude;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      "name": name,
+      "country": country,
+      "latitude": latitude,
+      "longitude": longitude,
+    };
+  }
+
+  static WrappedCity fromJson(Map<String, Object?> json) {
+    return WrappedCity(
+      name: json["name"] as String? ?? "",
+      country: json["country"] as String? ?? "",
+      latitude: (json["latitude"] as num?)?.toDouble() ?? 0.0,
+      longitude: (json["longitude"] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+@immutable
 class WrappedAestheticsContext {
   WrappedAestheticsContext({
     required Map<int, List<double>> clipEmbeddings,

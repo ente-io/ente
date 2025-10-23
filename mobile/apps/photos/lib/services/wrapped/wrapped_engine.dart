@@ -6,6 +6,8 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
+import "package:photos/service_locator.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -40,6 +42,25 @@ class WrappedEngine {
       year: year,
       yearFiles: collected.yearFiles,
     );
+    List<WrappedCity> cities = const <WrappedCity>[];
+    try {
+      final List<City> loadedCities = await locationService.getCities();
+      cities = <WrappedCity>[
+        for (final City city in loadedCities)
+          WrappedCity(
+            name: city.city,
+            country: city.country,
+            latitude: city.lat,
+            longitude: city.lng,
+          ),
+      ];
+    } catch (error, stackTrace) {
+      _engineLogger.warning(
+        "Failed to load cities for Wrapped $year places context",
+        error,
+        stackTrace,
+      );
+    }
 
     return await Computer.shared().compute(
       _wrappedComputeIsolate,
@@ -49,6 +70,7 @@ class WrappedEngine {
         "files": collected.yearFiles,
         "people": peopleContext.toJson(),
         "aesthetics": aestheticsContext.toJson(),
+        "cities": cities.map((WrappedCity city) => city.toJson()).toList(),
       },
       taskName: "wrapped_compute_$year",
     ) as WrappedResult;
@@ -317,6 +339,14 @@ Future<WrappedResult> _wrappedComputeIsolate(
           <String, Object?>{};
   final WrappedAestheticsContext aesthetics =
       WrappedAestheticsContext.fromJson(aestheticsRaw);
+  final List<dynamic> rawCities =
+      args["cities"] as List<dynamic>? ?? const <dynamic>[];
+  final List<WrappedCity> cities = rawCities
+      .map(
+        (dynamic entry) =>
+            WrappedCity.fromJson((entry as Map).cast<String, Object?>()),
+      )
+      .toList(growable: false);
 
   _computeLogger.fine(
     "Wrapped compute isolate running for $year with ${files.length} media items",
@@ -328,6 +358,7 @@ Future<WrappedResult> _wrappedComputeIsolate(
     files: files,
     people: people,
     aesthetics: aesthetics,
+    cities: cities,
   );
   final List<WrappedCard> cards = <WrappedCard>[];
   for (final WrappedCandidateBuilder builder in wrappedCandidateBuilders) {
