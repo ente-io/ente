@@ -269,11 +269,19 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let naturalSize = videoTrack.naturalSize
         let preferredTransform = videoTrack.preferredTransform
 
-        // Calculate oriented size by applying preferredTransform to handle existing metadata rotation
-        var orientedSize = naturalSize.applying(preferredTransform)
-        orientedSize = CGSize(width: abs(orientedSize.width), height: abs(orientedSize.height))
+        // Apply orientation adjustment to handle existing metadata rotation properly
+        let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+        let preferredBounds = naturalBounds.applying(preferredTransform)
+        let orientationAdjustment = CGAffineTransform(
+            translationX: -preferredBounds.minX,
+            y: -preferredBounds.minY
+        )
+        let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
 
-        var transform = preferredTransform
+        // Calculate oriented size for render calculations
+        var orientedSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+
+        var transform = orientationTransform
 
         // iOS CGAffineTransform rotates counter-clockwise for positive angles
         // To match Android behavior (positive = clockwise), we negate the radians
@@ -663,10 +671,19 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         } else if let rotateDegrees = args["rotateDegrees"] as? Int, rotateDegrees != 0 {
             isReEncoded = true
 
-            var orientedSize = naturalSize.applying(preferredTransform)
-            orientedSize = CGSize(width: abs(orientedSize.width), height: abs(orientedSize.height))
+            // Apply orientation adjustment to handle existing metadata rotation properly
+            let naturalBounds = CGRect(origin: .zero, size: naturalSize)
+            let preferredBounds = naturalBounds.applying(preferredTransform)
+            let orientationAdjustment = CGAffineTransform(
+                translationX: -preferredBounds.minX,
+                y: -preferredBounds.minY
+            )
+            let orientationTransform = preferredTransform.concatenating(orientationAdjustment)
 
-            var transform = preferredTransform
+            // Calculate oriented size for render calculations
+            var orientedSize = CGSize(width: abs(preferredBounds.width), height: abs(preferredBounds.height))
+
+            var transform = orientationTransform
 
             // iOS CGAffineTransform rotates counter-clockwise for positive angles
             // To match Android behavior (positive = clockwise), we negate the radians
