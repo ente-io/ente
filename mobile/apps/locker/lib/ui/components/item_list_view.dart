@@ -361,36 +361,28 @@ class _FileListItem extends _ListItem {
 
 class FileListViewHelpers {
   static Widget createSearchEmptyState({
+    required BuildContext context,
     required String searchQuery,
     String? message,
   }) {
     return Center(
-      child: Padding(
+      child: Container(
+        decoration: BoxDecoration(
+          color: getEnteColorScheme(context).backdropBase,
+          borderRadius: BorderRadius.circular(12),
+        ),
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey,
+            Text(
+              "Oops!",
+              style: getEnteTextTheme(context).largeBold,
             ),
             const SizedBox(height: 16),
             Text(
-              message ?? 'No results found for "$searchQuery"',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Try adjusting your search query',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+              'Your search query do not match any results. Try searching something else',
+              style: getEnteTextTheme(context).bodyMuted,
               textAlign: TextAlign.center,
             ),
           ],
