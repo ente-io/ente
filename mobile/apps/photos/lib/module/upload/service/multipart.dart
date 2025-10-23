@@ -1,8 +1,5 @@
-import "dart:convert";
 import "dart:io";
 
-import "package:convert/convert.dart";
-import "package:crypto/crypto.dart";
 import "package:dio/dio.dart";
 import "package:ente_crypto/ente_crypto.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
@@ -15,6 +12,7 @@ import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/utils/file_util.dart";
 
 class MultiPartUploader {
   final Dio _enteDio;
@@ -303,13 +301,13 @@ class MultiPartUploader {
         if (e.response?.statusCode == 400 &&
                 e.response?.data.toString().contains('BadDigest') == true ||
             e.response?.data.toString().contains('InvalidDigest') == true) {
-          final comput = await computePartMd5(
-            encryptedFile,
-            i * partSize,
-            isLastPart ? null : (i + 1) * partSize,
+          final recomputedMD5 = await computeMd5(
+            encryptedFile.path,
+            start: i * partSize,
+            end: isLastPart ? null : (i + 1) * partSize,
           );
           throw BadMD5DigestError(
-            "Failed for part ${i + 1} ${e.response?.data}, sent: ${partMd5s?[i]}, computed: $comput, \n all part MD5s: $partMd5s",
+            "Failed for part ${i + 1} ${e.response?.data}, sent: ${partMd5s?[i]}, computed: $recomputedMD5",
           );
         }
         rethrow;
@@ -322,14 +320,6 @@ class MultiPartUploader {
     );
 
     return etags;
-  }
-
-  Future<String> computePartMd5(File file, int start, int? end) async {
-    final output = AccumulatorSink<Digest>();
-    final input = md5.startChunkedConversion(output);
-    await file.openRead(start, end).forEach(input.add);
-    input.close();
-    return base64Encode(output.events.single.bytes);
   }
 
   Future<void> _completeMultipartUpload(

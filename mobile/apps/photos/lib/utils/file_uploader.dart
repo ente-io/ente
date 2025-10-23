@@ -944,7 +944,7 @@ class FileUploader {
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
-          fileAttributes.key!,
+          fileAttributes.key,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
         final encryptedKey =
@@ -1025,7 +1025,6 @@ class FileUploader {
       }
       if ((isMultipartUpload || hasExistingMultiPart) &&
           isPutOrMultiPartError(e)) {
-          
         await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
       }
       rethrow;
@@ -1616,7 +1615,15 @@ class FileUploader {
 
       return uploadURL.objectKey;
     } on DioException catch (e) {
-      if (e.message?.startsWith("HttpException: Content size") ?? false) {
+      if (e.response?.statusCode == 400 &&
+              e.response?.data.toString().contains('BadDigest') == true ||
+          e.response?.data.toString().contains('InvalidDigest') == true) {
+        final String recomputedMd5 = await computeMd5(file.path);
+        throw BadMD5DigestError(
+          "Failed ${e.response?.data}, sent: $contentMd5, computed: $recomputedMd5",
+        );
+      } else if (e.message?.startsWith("HttpException: Content size") ??
+          false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info(
