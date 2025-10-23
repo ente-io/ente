@@ -1,9 +1,11 @@
 import "dart:math" as math;
+import "dart:typed_data";
 
 import "package:flutter/foundation.dart" show immutable;
 import "package:intl/intl.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/utils/standalone/data.dart";
 
@@ -22,13 +24,16 @@ class WrappedEngineContext {
     required this.now,
     required List<EnteFile> files,
     WrappedPeopleContext? people,
+    WrappedAestheticsContext? aesthetics,
   })  : files = List<EnteFile>.unmodifiable(files),
-        people = people ?? WrappedPeopleContext.empty();
+        people = people ?? WrappedPeopleContext.empty(),
+        aesthetics = aesthetics ?? WrappedAestheticsContext.empty();
 
   final int year;
   final DateTime now;
   final List<EnteFile> files;
   final WrappedPeopleContext people;
+  final WrappedAestheticsContext aesthetics;
 }
 
 /// Contract for producing Wrapped candidate cards for a specific domain.

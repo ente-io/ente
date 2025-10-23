@@ -76,6 +76,94 @@ class WrappedPeopleContext {
 }
 
 @immutable
+class WrappedAestheticsContext {
+  WrappedAestheticsContext({
+    required Map<int, List<double>> clipEmbeddings,
+    required Map<String, List<double>> textEmbeddings,
+  })  : clipEmbeddings =
+            Map<int, List<double>>.unmodifiable(_dedupeLists(clipEmbeddings)),
+        textEmbeddings = Map<String, List<double>>.unmodifiable(
+          _dedupeLists(textEmbeddings),
+        );
+
+  factory WrappedAestheticsContext.empty() {
+    return WrappedAestheticsContext(
+      clipEmbeddings: const <int, List<double>>{},
+      textEmbeddings: const <String, List<double>>{},
+    );
+  }
+
+  final Map<int, List<double>> clipEmbeddings;
+  final Map<String, List<double>> textEmbeddings;
+
+  bool get hasEmbeddings => clipEmbeddings.isNotEmpty;
+
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
+      "clipEmbeddings": clipEmbeddings.map(
+        (int key, List<double> value) => MapEntry(
+          key.toString(),
+          value,
+        ),
+      ),
+      "textEmbeddings": textEmbeddings,
+    };
+  }
+
+  static WrappedAestheticsContext fromJson(Map<String, Object?> json) {
+    final Map<String, Object?> rawClip =
+        (json["clipEmbeddings"] as Map?)?.cast<String, Object?>() ??
+            <String, Object?>{};
+    final Map<int, List<double>> clipEmbeddings = <int, List<double>>{
+      for (final MapEntry<String, Object?> entry in rawClip.entries)
+        int.tryParse(entry.key) ?? 0: _castToDoubleList(entry.value),
+    }..removeWhere((int key, List<double> value) => key <= 0 || value.isEmpty);
+
+    final Map<String, Object?> rawText =
+        (json["textEmbeddings"] as Map?)?.cast<String, Object?>() ??
+            <String, Object?>{};
+    final Map<String, List<double>> textEmbeddings = <String, List<double>>{
+      for (final MapEntry<String, Object?> entry in rawText.entries)
+        entry.key: _castToDoubleList(entry.value),
+    }..removeWhere((String key, List<double> value) => value.isEmpty);
+
+    if (clipEmbeddings.isEmpty && textEmbeddings.isEmpty) {
+      return WrappedAestheticsContext.empty();
+    }
+
+    return WrappedAestheticsContext(
+      clipEmbeddings: clipEmbeddings,
+      textEmbeddings: textEmbeddings,
+    );
+  }
+
+  static Map<K, List<double>> _dedupeLists<K>(
+    Map<K, List<double>> source,
+  ) {
+    final Map<K, List<double>> result = <K, List<double>>{};
+    source.forEach((K key, List<double> value) {
+      result[key] = List<double>.from(value, growable: false);
+    });
+    return result;
+  }
+
+  static List<double> _castToDoubleList(Object? source) {
+    if (source is List<double>) {
+      return List<double>.from(source, growable: false);
+    }
+    if (source is List) {
+      return List<double>.from(
+        source.map((Object? e) {
+          if (e is num) return e.toDouble();
+          return 0.0;
+        }),
+      );
+    }
+    return const <double>[];
+  }
+}
+
+@immutable
 class WrappedPeopleFile {
   WrappedPeopleFile({
     required this.uploadedFileID,
@@ -347,7 +435,7 @@ enum WrappedCardType {
   thenAndNow,
   yearInColor,
   monochrome,
-  panoramas,
+  blurryFaces,
   biggestShot,
   top9Wow,
   favorites,

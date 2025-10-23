@@ -5,9 +5,11 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/text_embeddings_cache_service.dart";
 import "package:photos/services/wrapped/candidate_builders.dart";
 import "package:photos/services/wrapped/models.dart";
 
@@ -33,6 +35,11 @@ class WrappedEngine {
       yearFiles: collected.yearFiles,
       fileByUploadedId: collected.fileByUploadedId,
     );
+    final WrappedAestheticsContext aestheticsContext =
+        await _collectAestheticsContext(
+      year: year,
+      yearFiles: collected.yearFiles,
+    );
 
     return await Computer.shared().compute(
       _wrappedComputeIsolate,
@@ -41,6 +48,7 @@ class WrappedEngine {
         "now": now,
         "files": collected.yearFiles,
         "people": peopleContext.toJson(),
+        "aesthetics": aestheticsContext.toJson(),
       },
       taskName: "wrapped_compute_$year",
     ) as WrappedResult;
@@ -231,6 +239,67 @@ class WrappedEngine {
       personFirstCaptureMicros: personFirstCaptureMicros,
     );
   }
+
+  static Future<WrappedAestheticsContext> _collectAestheticsContext({
+    required int year,
+    required List<EnteFile> yearFiles,
+  }) async {
+    if (yearFiles.isEmpty) {
+      return WrappedAestheticsContext.empty();
+    }
+
+    final Set<int> yearFileIDs = <int>{
+      for (final EnteFile file in yearFiles)
+        if (file.uploadedFileID != null) file.uploadedFileID!,
+    };
+    if (yearFileIDs.isEmpty) {
+      return WrappedAestheticsContext.empty();
+    }
+
+    final Map<int, List<double>> clipEmbeddings = <int, List<double>>{};
+    try {
+      final List<EmbeddingVector> vectors =
+          await MLDataDB.instance.getAllClipVectors();
+      for (final EmbeddingVector vector in vectors) {
+        final int fileID = vector.fileID;
+        if (!yearFileIDs.contains(fileID) || vector.isEmpty) {
+          continue;
+        }
+        clipEmbeddings[fileID] = vector.vector.toList(growable: false);
+      }
+    } catch (error, stackTrace) {
+      _engineLogger.warning(
+        "Failed to collect CLIP embeddings for Wrapped $year",
+        error,
+        stackTrace,
+      );
+    }
+
+    if (clipEmbeddings.isEmpty) {
+      return WrappedAestheticsContext.empty();
+    }
+
+    final Set<String> queries = AestheticsCandidateBuilder.requiredTextQueries;
+    final Map<String, List<double>> textEmbeddings = <String, List<double>>{};
+    for (final String query in queries) {
+      try {
+        final List<double> embedding =
+            await TextEmbeddingsCacheService.instance.getEmbedding(query);
+        textEmbeddings[query] = List<double>.from(embedding, growable: false);
+      } catch (error, stackTrace) {
+        _engineLogger.warning(
+          "Failed to compute text embedding for Wrapped query \"$query\"",
+          error,
+          stackTrace,
+        );
+      }
+    }
+
+    return WrappedAestheticsContext(
+      clipEmbeddings: clipEmbeddings,
+      textEmbeddings: textEmbeddings,
+    );
+  }
 }
 
 Future<WrappedResult> _wrappedComputeIsolate(
@@ -243,6 +312,11 @@ Future<WrappedResult> _wrappedComputeIsolate(
   final Map<String, Object?> peopleRaw =
       (args["people"] as Map?)?.cast<String, Object?>() ?? <String, Object?>{};
   final WrappedPeopleContext people = WrappedPeopleContext.fromJson(peopleRaw);
+  final Map<String, Object?> aestheticsRaw =
+      (args["aesthetics"] as Map?)?.cast<String, Object?>() ??
+          <String, Object?>{};
+  final WrappedAestheticsContext aesthetics =
+      WrappedAestheticsContext.fromJson(aestheticsRaw);
 
   _computeLogger.fine(
     "Wrapped compute isolate running for $year with ${files.length} media items",
@@ -253,6 +327,7 @@ Future<WrappedResult> _wrappedComputeIsolate(
     now: now,
     files: files,
     people: people,
+    aesthetics: aesthetics,
   );
   final List<WrappedCard> cards = <WrappedCard>[];
   for (final WrappedCandidateBuilder builder in wrappedCandidateBuilders) {
