@@ -36,6 +36,8 @@ class MultipartInfo {
   final int encFileSize;
   final MultipartUploadURLs urls;
   final MultipartStatus status;
+  final String? fileMd5;
+  final List<String>? partMd5s;
 
   MultipartInfo({
     this.partUploadStatus,
@@ -44,6 +46,8 @@ class MultipartInfo {
     this.status = MultipartStatus.pending,
     required this.encFileSize,
     required this.urls,
+    this.fileMd5,
+    this.partMd5s,
   });
 }
 
