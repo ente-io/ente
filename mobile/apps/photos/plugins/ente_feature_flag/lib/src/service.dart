@@ -66,9 +66,6 @@ class FlagService {
 
   String get embedUrl => flags.embedUrl;
 
-  bool get textDetection =>
-      internalUser && (Platform.isIOS || Platform.isAndroid);
-
   bool get addToAlbumFeature => internalUser;
 
   bool get widgetSharedAlbums => internalUser;

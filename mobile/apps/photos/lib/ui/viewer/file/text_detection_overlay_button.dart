@@ -8,7 +8,6 @@ import "package:mobile_ocr/mobile_ocr.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/file/trash_file.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/file/text_detection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -163,9 +162,6 @@ class _TextDetectionOverlayButtonState
   }
 
   bool _isFileEligible(EnteFile file) {
-    if (!flagService.textDetection) {
-      return false;
-    }
     return file.fileType == FileType.image ||
         file.fileType == FileType.livePhoto;
   }
