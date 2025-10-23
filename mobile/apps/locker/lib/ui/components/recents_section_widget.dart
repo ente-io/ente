@@ -719,7 +719,8 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
             color:
                 isSelected ? colorScheme.primary700 : colorScheme.backdropBase,
@@ -779,31 +780,33 @@ class _FilterClearButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = colorScheme.warning500;
+    final backgroundColor = accentColor.withOpacity(0.12);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
-          color: colorScheme.fillFaint,
-          border: Border.all(
-            color: colorScheme.strokeMuted,
-            width: 1,
-          ),
+          color: backgroundColor,
           borderRadius: const BorderRadius.all(Radius.circular(24.0)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.clear_all,
-              size: 14,
-              color: colorScheme.textMuted,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              size: 16,
+              color: accentColor,
             ),
             const SizedBox(width: 4),
             Text(
               context.l10n.clear,
-              style: textTheme.miniMuted,
+              style: textTheme.small.copyWith(
+                color: accentColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

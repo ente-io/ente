@@ -284,7 +284,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             collectionViewType == CollectionViewType.quickLink) {
           items.add(
             PopupMenuItem<String>(
-              value: 'rename',
+              value: 'edit',
               height: 0,
               padding: EdgeInsets.zero,
               child: MenuItemWidget(

@@ -1,6 +1,4 @@
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
-import 'package:ente_ui/components/text_input_widget.dart';
+import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -8,7 +6,6 @@ import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import 'package:locker/utils/file_icon_utils.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
 
 class FileEditDialogResult {
@@ -66,7 +63,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
   @override
   void dispose() {
     _titleController.dispose();
-    _captionController.dispose();
     super.dispose();
   }
 
@@ -122,96 +118,121 @@ class _FileEditDialogState extends State<FileEditDialog> {
     final textTheme = getEnteTextTheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backgroundElevated,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Container(
-        width: 400,
-        constraints: const BoxConstraints(maxHeight: 600),
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                FileIconUtils.getFileIcon(
-                  _fileName,
-                  size: 24,
-                  showBackground: false,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _fileName,
-                    style: textTheme.largeBold,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+      backgroundColor: colorScheme.backgroundBase,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backdropBase,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Rename your document",
+                          style: textTheme.largeBold,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _fileName,
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              context.l10n.title,
-              style: textTheme.small.copyWith(
-                color: colorScheme.textBase,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextInputWidget(
-              hintText: context.l10n.fileTitle,
-              initialValue: _titleController.text,
-              onChange: (value) => _titleController.text = value,
-              maxLength: 200,
-              textCapitalization: TextCapitalization.words,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.note,
-              style: textTheme.small.copyWith(
-                color: colorScheme.textBase,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextInputWidget(
-              hintText: context.l10n.optionalNote,
-              initialValue: _captionController.text,
-              onChange: (value) => _captionController.text = value,
-              maxLength: 500,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 16),
-            CollectionSelectionWidget(
-              collections: _availableCollections,
-              selectedCollectionIds: _selectedCollectionIds,
-              onToggleCollection: _toggleCollection,
-              onCollectionsUpdated: _onCollectionsUpdated,
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.secondary,
-                    labelText: context.l10n.cancel,
+                  GestureDetector(
                     onTap: _onCancel,
+                    child: Container(
+                      height: 36,
+                      width: 36,
+                      decoration: BoxDecoration(
+                        color: colorScheme.backdropBase,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.primary,
-                    labelText: context.l10n.save,
-                    onTap: _onSave,
-                    isDisabled: _selectedCollectionIds.isEmpty,
+                ],
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  hintText: "Enter a new name for your document",
+                  hintStyle: textTheme.body.copyWith(
+                    color: colorScheme.textMuted,
                   ),
+                  filled: true,
+                  fillColor: colorScheme.fillFaint,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: colorScheme.strokeFaint,
+                    ),
+                  ),
+                  counterText: "",
                 ),
-              ],
-            ),
-          ],
+                maxLength: 200,
+                style: textTheme.body.copyWith(
+                  color: colorScheme.textBase,
+                ),
+              ),
+              const SizedBox(height: 24),
+              CollectionSelectionWidget(
+                collections: _availableCollections,
+                selectedCollectionIds: _selectedCollectionIds,
+                onToggleCollection: _toggleCollection,
+                onCollectionsUpdated: _onCollectionsUpdated,
+                titleWidget: Text(
+                  "Move to collection",
+                  style: textTheme.largeBold,
+                ),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: GradientButton(
+                  onTap: () async {
+                    await _onSave();
+                  },
+                  text: context.l10n.save,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -225,7 +246,6 @@ Future<FileEditDialogResult?> showFileEditDialog(
 }) async {
   return showDialog<FileEditDialogResult>(
     context: context,
-    barrierColor: getEnteColorScheme(context).backdropBase,
     builder: (context) => FileEditDialog(
       file: file,
       collections: collections,

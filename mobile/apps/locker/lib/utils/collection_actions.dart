@@ -77,7 +77,7 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    await showTextInputDialog(
+    await showInputDialogSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',

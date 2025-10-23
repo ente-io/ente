@@ -11,6 +11,7 @@ class CollectionSelectionWidget extends StatefulWidget {
   final Set<int> selectedCollectionIds;
   final Function(int) onToggleCollection;
   final Function(List<Collection>)? onCollectionsUpdated;
+  final Widget? titleWidget;
 
   const CollectionSelectionWidget({
     super.key,
@@ -18,6 +19,7 @@ class CollectionSelectionWidget extends StatefulWidget {
     required this.selectedCollectionIds,
     required this.onToggleCollection,
     this.onCollectionsUpdated,
+    this.titleWidget,
   });
 
   @override
@@ -72,9 +74,10 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TitleBarTitleWidget(
-          title: context.l10n.addToCollection,
-        ),
+        widget.titleWidget ??
+            TitleBarTitleWidget(
+              title: context.l10n.addToCollection,
+            ),
         const SizedBox(height: 24),
         Wrap(
           spacing: 8,
