@@ -66,25 +66,27 @@ Wrapped assembles a diverse subset of the following, tuned per user:
 
 - Year‑in‑color palette; monochrome moments; “Top 9 wow”.
 
-5. Technique & Habits
-
-- New device; live/motion photos rate; front vs rear; bursts; hour‑of‑day.
-
-6. Curation & Collaboration
-
-- Favorites count; albums created; share activity highlights.
-
-7. Narrative Finale
-
-- Top 3 events (time+place clusters) and a “Best of 25” micro‑reel.
-
-8. Badge
+5. Badge
 
 - A single, fun persona badge; exportable as a share card.
 
 Cards are short, legible, and visually anchored by 1–9 photos. Avoid textual overload.
 A standard card has one image with a fun descriptive text about the statistic. If we don't know what image to take then we can just use a colourful one and blurhash it. And if we know what image to use and
 more images are appropriate then we can add more. But the basic card is one image and a nice text.
+
+### Additional optional cards
+
+1. Technique & Habits
+
+- New device; live/motion photos rate; front vs rear; bursts; hour‑of‑day.
+
+2. Curation & Collaboration
+
+- Favorites count; albums created; share activity highlights.
+
+3. Narrative Finale
+
+- Top 3 events (time+place clusters) and a “Best of 25” micro‑reel.
 
 ## Eligibility & Fallbacks
 
@@ -232,7 +234,7 @@ Phase 0 — UI skeleton & flags
   - Viewer: autoplay story, progress bar, tap left/right to nav, pause on touch.
   - Viewer implementation: prefer a `PageView`-style carousel with timer-driven autoplay (or equivalent) that updates the resume index on every page change and clears state once the run completes.
   - There should be basic animations for moving the text and images to make it more interesting
-  - Share action per card: export a designed PNG (portrait 1080×1920; square optional later) 
+  - Share action per card: export a designed PNG (portrait 1080×1920; square optional later)
 - Resume state
   - Persist last viewed card index in `LocalSettings` (e.g., key `wrapped_2025_resume_index`).
   - Viewer reads this on open, updates it on page change; clear on completion.
