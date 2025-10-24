@@ -1864,8 +1864,12 @@
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
   "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Widok mapy dla Twoich podróży",
-  "cLTitle2": "Osadź albumy",
-  "cLDesc2": "Osadź swoje albumy na swojej własnej stronie internetowej, blogu, portfolio fotograficznym. Ente zajmuje się hostingiem!",
-  "cLDesc3": "Widżety ekranu głównego obsługują teraz albumy, które zostały Ci udostępnione."
+  "cLTitle1": "OCR! Wybierz tekst na zdjęciach",
+  "cLDesc1": "Ente wykryje, czy zdjęcie lub zrzut ekranu zawiera tekst i pokaże przycisk do wejścia w tryb wyboru tekstu. Każda linia tekstu może być wybrana indywidualnie.",
+  "cLTitle2": "Przesuń, aby wybrać",
+  "cLDesc2": "Użyj gestu przesunięcia, aby szybko wybierać zdjęcia w swojej galerii. Działa świetnie jedną ręką, bez konieczności podnoszenia palca!",
+  "cLTitle3": "Nowe wspomnienia",
+  "cLDesc3": "\"Rozbrykane dzieci\", \"Zimowe przygody\", \"Neonowe noce\" i więcej.",
+  "cLTitle4": "Galeria pozioma i więcej",
+  "cLDesc4": "Obsługa układu poziomego w głównej galerii. Pokazuj osoby bez powiązanych zdjęć zamiast je filtrować. Poprawione wykrywanie proporcji wideo przy udostępnianiu z zewnętrznych aplikacji."
 }

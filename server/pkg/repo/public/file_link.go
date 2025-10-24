@@ -77,7 +77,7 @@ func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID
 		fileID)
 
 	ret := ente.FileLinkRow{}
-	err := row.Scan(&ret.LinkID, &ret.FileID, ret.OwnerID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
+	err := row.Scan(&ret.LinkID, &ret.FileID, &ret.OwnerID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
 		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -135,13 +135,13 @@ func (pcr *FileLinkRepository) DisableLinksForUser(ctx context.Context, userID i
 
 func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessToken string) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
-		`SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit
+		`SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit,
        created_at, updated_at
-		from public_file_tokens 
+		from public_file_tokens
 		where access_token = $1
 `, accessToken)
 	var result = ente.FileLinkRow{}
-	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
+	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.ValidTill, &result.DeviceLimit, &result.EnableDownload, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ente.ErrNotFound
@@ -199,7 +199,7 @@ func (pcr *FileLinkRepository) RecordAccessHistory(ctx context.Context, shareID 
 func (pcr *FileLinkRepository) AccessedInPast(ctx context.Context, shareID string, ip string, ua string) (bool, error) {
 	row := pcr.DB.QueryRowContext(ctx, `select id from public_file_tokens_access_history where id =$1 and ip = $2 and user_agent = $3`,
 		shareID, ip, ua)
-	var tempID int64
+	var tempID string
 	err := row.Scan(&tempID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
