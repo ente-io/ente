@@ -1,13 +1,5 @@
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-// File type icons
-import ArticleIcon from "@mui/icons-material/Article";
-import AudioFileIcon from "@mui/icons-material/AudioFile";
-import CodeIcon from "@mui/icons-material/Code";
-import FolderZipIcon from "@mui/icons-material/FolderZip";
 import ImageIcon from "@mui/icons-material/Image";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import VideoFileIcon from "@mui/icons-material/VideoFile";
 import bs58 from "bs58";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
@@ -17,6 +9,7 @@ import {
     fromHex,
     toB64,
 } from "ente-base/crypto";
+import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 // Configure the server URL for file-link APIs
@@ -38,130 +31,6 @@ const formatFileSize = (bytes: number): string => {
 
     // Round to nearest integer for all units
     return `${Math.round(size)} ${sizes[i]}`;
-};
-
-// Get file extension from filename
-const getFileExtension = (fileName: string): string => {
-    const lastDotIndex = fileName.lastIndexOf(".");
-    if (lastDotIndex === -1 || lastDotIndex === fileName.length - 1) {
-        return "";
-    }
-    return fileName.substring(lastDotIndex + 1).toLowerCase();
-};
-
-// Get appropriate icon component based on file extension
-const getFileIcon = (fileName: string, size = 48) => {
-    const extension = getFileExtension(fileName);
-
-    // Image formats
-    const imageExtensions = [
-        "jpg",
-        "jpeg",
-        "png",
-        "gif",
-        "bmp",
-        "svg",
-        "webp",
-        "ico",
-        "heic",
-        "heif",
-        "raw",
-        "tiff",
-        "tif",
-    ];
-    // Video formats
-    const videoExtensions = [
-        "mp4",
-        "avi",
-        "mov",
-        "wmv",
-        "flv",
-        "mkv",
-        "webm",
-        "m4v",
-        "mpg",
-        "mpeg",
-        "3gp",
-    ];
-    // Audio formats
-    const audioExtensions = [
-        "mp3",
-        "wav",
-        "flac",
-        "aac",
-        "ogg",
-        "wma",
-        "m4a",
-        "opus",
-        "aiff",
-    ];
-    // Document formats
-    const documentExtensions = ["doc", "docx", "odt", "rtf", "tex", "wpd"];
-    // Code formats
-    const codeExtensions = [
-        "js",
-        "jsx",
-        "ts",
-        "tsx",
-        "html",
-        "css",
-        "scss",
-        "json",
-        "xml",
-        "py",
-        "java",
-        "c",
-        "cpp",
-        "h",
-        "cs",
-        "php",
-        "rb",
-        "go",
-        "rs",
-        "kt",
-        "swift",
-        "sh",
-        "yaml",
-        "yml",
-        "toml",
-        "ini",
-        "cfg",
-        "conf",
-    ];
-    // Archive formats
-    const archiveExtensions = [
-        "zip",
-        "rar",
-        "7z",
-        "tar",
-        "gz",
-        "bz2",
-        "xz",
-        "iso",
-    ];
-
-    // All icons are gray (#757575)
-    const iconColor = "#757575";
-
-    if (imageExtensions.includes(extension)) {
-        return <ImageIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else if (videoExtensions.includes(extension)) {
-        return <VideoFileIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else if (audioExtensions.includes(extension)) {
-        return <AudioFileIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else if (extension === "pdf") {
-        return <PictureAsPdfIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else if (documentExtensions.includes(extension) || extension === "txt") {
-        return <ArticleIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else if (codeExtensions.includes(extension)) {
-        return <CodeIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else if (archiveExtensions.includes(extension)) {
-        return <FolderZipIcon sx={{ fontSize: size, color: iconColor }} />;
-    } else {
-        return (
-            <InsertDriveFileIcon sx={{ fontSize: size, color: iconColor }} />
-        );
-    }
 };
 
 // Response from file-link/info API
@@ -374,6 +243,7 @@ const decryptFileInfo = async (
             metadata.title ||
             metadata.name ||
             "Unknown file";
+
         // Use fileSize from info field first, then fall back to metadata or other sources
         const fileSize =
             fileSizeFromInfo ||
@@ -497,6 +367,7 @@ const downloadFile = async (
 };
 
 const FilePage: React.FC = () => {
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -506,14 +377,20 @@ const FilePage: React.FC = () => {
     useEffect(() => {
         const loadFileInfo = async () => {
             try {
+                // Get the token from the URL path parameter
+                const { token } = router.query;
+
+                if (!token || typeof token !== "string") {
+                    setError("Invalid file link. Missing access token.");
+                    setLoading(false);
+                    return;
+                }
+
                 const currentURL = new URL(window.location.href);
-                const token = currentURL.searchParams.get("t");
                 const key = await extractFileKeyFromURL(currentURL);
 
-                if (!token || !key) {
-                    setError(
-                        "Invalid file link. Missing access token or file key.",
-                    );
+                if (!key) {
+                    setError("Invalid file link. Missing file key.");
                     setLoading(false);
                     return;
                 }
@@ -537,8 +414,11 @@ const FilePage: React.FC = () => {
             }
         };
 
-        void loadFileInfo();
-    }, []);
+        // Only load when router is ready
+        if (router.isReady) {
+            void loadFileInfo();
+        }
+    }, [router.isReady, router.query]);
 
     const handleDownload = async () => {
         if (!accessToken || !fileInfo?.fileKey) return;
@@ -565,7 +445,7 @@ const FilePage: React.FC = () => {
         <Box
             sx={{
                 minHeight: "100vh",
-                bgcolor: "#F8F8F8",
+                bgcolor: "#FFF",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -663,7 +543,7 @@ const FilePage: React.FC = () => {
                                     justifyContent: "center",
                                 }}
                             >
-                                {getFileIcon(fileInfo.fileName, 48)}
+                                <ImageIcon sx={{ fontSize: 48, color: "#757575" }} />
                             </Box>
 
                             {/* File Name */}
@@ -722,7 +602,7 @@ const FilePage: React.FC = () => {
                                         color: "white",
                                         opacity: 0.7,
                                     },
-                                    borderRadius: "20px",
+                                    borderRadius: "22px",
                                     textTransform: "none",
                                 }}
                             >
