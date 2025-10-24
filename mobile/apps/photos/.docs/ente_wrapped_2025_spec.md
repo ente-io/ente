@@ -184,22 +184,118 @@ Defer (red)
 
 ## Badge System (share‑first)
 
-Assign exactly one persona using mutually exclusive rules, with tie‑breakers:
+Assign exactly one persona with clear, brag‑friendly copy with a nice metric. Selection is deterministic and privacy‑preserving (local compute only). Every user must get a badge; if no persona passes thresholds, we award a universal fallback.
 
-- Traveler: ≥ 6 new cities or ≥ 2 new countries; trips present
-- People Person: top person appears in ≥ 25% of 2025 photos and group photos ≥ 35%
-- Pet Parent: pet photos ≥ 5% of 2025; CLIP cat/dog high confidence
-- Foodie: food photos ≥ 5% and ≥ 50 photos total
-- Golden Hour Hunter: golden/blue hour ≥ 30% of 2025 captures (approx)
-- Night Owl: ≥ 20% photos between 22:00–02:00
-- Curator: favorites ratio ≥ 10% and ≥ 100 favorites in 2025
-- Panorama Pro: ≥ 30 panoramas or ≥ 2% panoramas
-- Marathoner: longest streak ≥ 30 days
-- Minimalist Shooter: total photos low but high favorites ratio (e.g., <1k photos, >15% favorites)
-- Sports photographer: many burst photos
-- Group photographer: relatively many photos shared with other people and/or many other people in photos
+Core personas (this year only)
 
-Badge card shows badge name, short line of copy, and 1–4 representative thumbnails. Always exportable.
+- Consistency Champ
+
+  - Signal: longest streak and active‑days ratio.
+  - Gate: daysWithCaptures >= 15.
+  - Score: 0.6 _ min(1, longestStreakDays/14) + 0.4 _ min(1, (daysWithCaptures/elapsedDays)/0.5).
+  - Copy: "You kept the lens alive — {longestStreakDays} days straight."
+  - Brag chips: "Active days: {daysWithCaptures}".
+
+- Group Photographer
+
+  - Signal: share of group moments (>=3 faces) within all face moments.
+  - Gate: totalFaceMoments >= 20 and groupMoments >= 12.
+  - Score: min(1, (groupMoments/totalFaceMoments)/0.55).
+  - Copy: "{groupPercent}% with the crew — memories shared."
+  - Brag chips: "Group moments: {groupMoments}".
+
+- Portrait Pro
+
+  - Signal: share of solo moments within all face moments.
+  - Gate: totalFaceMoments >= 20 and soloMoments >= 12.
+  - Score: min(1, (soloMoments/totalFaceMoments)/0.60).
+  - Copy: "{soloPercent}% one‑on‑one — portrait season."
+  - Brag chips: "Solo portraits: {soloMoments}".
+
+- People Person
+
+  - Signal: coverage of people overall (face moments relative to all captures). Avoids repeating "X starred" card.
+  - Gate: totalCount >= 80 and totalFaceMoments >= 16.
+  - Score: min(1, (totalFaceMoments/totalCount)/0.50).
+  - Copy: "People in {peopleShare}% of your memories."
+  - Brag chips: "Moments with people: {totalFaceMoments}".
+
+- Globetrotter
+
+  - Signal: this‑year place breadth: unique cities and countries seen in 2025 (from city/spot clustering + city list).
+  - Gate: geoCount >= 40 and (uniqueCities >= 3 or uniqueCountries >= 2).
+  - Score: 0.6 _ min(1, uniqueCities/5) + 0.4 _ min(1, uniqueCountries/3).
+  - Copy: "You roamed {uniqueCities} cities across {uniqueCountries} countries."
+  - Brag chips: "Geotagged: {geoShare}%".
+  - Note: strictly 2025 captures; not "new" across lifetime.
+
+- Time‑of‑Day Champ (Night Owl or Early Bird)
+
+  - Signal: dominance of late‑night (20:00–04:59) or early‑morning (05:00–09:59) captures.
+  - Gate: totalCount >= 60; chosen bucket share sufficient.
+  - Score: min(1, dominantShare/0.35); require score >= 0.50.
+  - Copy (Night Owl): "{nightShare}% after dark — best work under the stars."
+  - Copy (Early Bird): "{morningShare}% at first light — early magic."
+
+- Pet Parent
+
+  - Signal: CLIP text embedding for pets (cat/dog) across the year.
+  - Gate: petShare >= 10% and petCount >= 6.
+  - Score: min(1, petShare/0.25).
+  - Copy: "{petCount} pet portraits — {topPetGuess} stole the spotlight."
+  - Brag chips: "Pets in {petShare}% of your shots."
+
+- Minimalist Shooter
+
+  - Signal: lower volume but steady intent (active days).
+  - Gate: totalCount <= 150 and daysWithCaptures >= 12.
+  - Score: 0.6 _ min(1, 150/max(1,totalCount)) + 0.4 _ min(1, (daysWithCaptures/elapsedDays)/0.5).
+  - Copy: "Quality over quantity — {totalCount} thoughtful frames."
+  - Brag chips: "Active days: {daysWithCaptures}".
+
+- Curator
+
+  - Signal: favorites behavior (from FavoritesService).
+  - Gate: favoritesCount >= 60 or favoriteShare >= 20%.
+  - Score: 0.5 _ min(1, favoritesCount/150) + 0.5 _ min(1, favoriteShare/0.3).
+  - Copy: "You starred {favoritesCount} favorites."
+  - Brag chips: "Keeps: {favoriteShare}%".
+
+- Local Legend
+  - Signal: repeated visits to a single spot (do not name the spot).
+  - Gate: topSpotDistinctDays >= 3 and topSpotShare >= 15%.
+  - Score: 0.7 _ min(1, topSpotShare/0.25) + 0.3 _ min(1, topSpotDistinctDays/6).
+  - Copy: "Your regular hangout — {topSpotCount} memories across {topSpotDistinctDays} days."
+  - Brag chips: "Most‑visited share: {topSpotShare}%".
+  - De‑dup: suppress if a "Most Visited Spot" card is already in the story.
+
+De‑prioritized / fallback personas
+
+- Moment Maker
+
+  - Gate: totalCount >= 100.
+  - Score: 0.5 _ min(1, totalCount/800) + 0.5 _ min(1, averagePerDay/4).
+  - Use only if none of the core personas pass their gates; copy: "You bottled {totalCount} memories — unstoppable."
+
+- Live Mover
+  - Gate: livePhotoCount >= 10.
+  - Score: min(1, (livePhotoCount/max(1,photoCount))/0.30).
+  - Use only if none of the core personas pass their gates; copy: "{liveShare}% of your photos move — stories in motion."
+
+Universal fallback (guarantee)
+
+- Memory Keeper
+  - Always available if no other badge qualifies.
+  - Copy: "You kept your memories safe — your {year}, preserved with heart."
+
+Selection and UX rules
+
+- Selection: compute all candidates; filter by gates; pick highest score.
+- Tie‑breakers: (1) higher score, (2) larger underlying sample size for that signal, (3) deterministic seed (year + totalCount) for stable results.
+- Uniqueness: badge copy must not duplicate earlier cards (e.g., People Person uses people coverage, not "X starred").
+- This‑year only: all stats computed from the target year (2025).
+- Debug builds: show all badge candidates sorted by score with a small score label and a "why" note; first item equals the chosen badge. Production shows only the chosen badge.
+- Visuals: prototype with gradient backgrounds and simple glyphs; share card always exportable (portrait and square).
 
 ## Card Design System
 
