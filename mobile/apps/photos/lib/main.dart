@@ -128,6 +128,28 @@ Future<void> runBackgroundTask(
   TimeLogger tlog, {
   String mode = 'normal',
 }) async {
+  // Check if foreground is recently active to avoid conflicts
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.reload();
+
+  final now = DateTime.now().microsecondsSinceEpoch;
+  final lastFGBeat = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
+
+  // If FG was active in last 30 seconds, skip BG work
+  if (now - lastFGBeat < 30000000) {
+    _logger.info(
+      "[BG TASK] Foreground recently active (last beat: ${DateTime.fromMicrosecondsSinceEpoch(lastFGBeat)}), skipping background work",
+    );
+    return;
+  }
+
+  _logger.info(
+    "[BG TASK] No recent foreground activity, proceeding with background work",
+  );
+
+  // Mark BG as active
+  await prefs.setInt(kLastBGTaskHeartBeatTime, now);
+
   await _runMinimally(taskId, tlog);
 }
 
@@ -412,18 +434,28 @@ Future<bool> _isRunningInForeground() async {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final bool isRunningInFG = await _isRunningInForeground(); // hb
   final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (await _isRunningInForeground()) {
+  if (isRunningInFG) {
     _logger.info(
-      "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
+      "Background push received when app is alive and runningInFG: $isRunningInFG inForeground: $isInForeground",
     );
     if (PushService.shouldSync(message)) {
-      await _sync('firebaseBgSyncActiveProcess');
+      // FG is active, let it handle the sync
+      _logger.info("Foreground is active, skipping background sync from push");
+      // Could optionally trigger a sync event that FG can handle
     }
   } else {
-    // App is dead
+    // App is dead or FG is not active
     runWithLogs(
       () async {
-        _logger.info("Background push received");
+        _logger.info("Background push received, no active foreground");
+
+        // Mark BG as active before starting
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(
+          kLastBGTaskHeartBeatTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
+
         await _init(true, via: 'firebasePush');
         if (PushService.shouldSync(message)) {
           await _sync('firebaseBgSyncNoActiveProcess');
