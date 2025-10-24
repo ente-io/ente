@@ -19,6 +19,15 @@ func (repo *UserAuthRepository) AddSRPSession(srpUserID uuid.UUID, serverKey str
 	return id, stacktrace.Propagate(err, "")
 }
 
+// AddFakeSRPSession inserts a fake SRPSession for user enumeration protection
+func (repo *UserAuthRepository) AddFakeSRPSession(srpUserID uuid.UUID, serverKey string, srpA string) (uuid.UUID, error) {
+	id := uuid.New()
+	_, err := repo.DB.Exec(`
+	INSERT INTO srp_sessions(id, srp_user_id, server_key, srp_a, is_fake)
+	 VALUES($1, $2 , $3, $4, true)`, id, srpUserID, serverKey, srpA)
+	return id, stacktrace.Propagate(err, "")
+}
+
 func (repo *UserAuthRepository) GetUnverifiedSessionsInLastHour(srpUserID uuid.UUID) (int64, error) {
 	var count int64
 	err := repo.DB.QueryRow(`SELECT COUNT(*) FROM srp_sessions WHERE srp_user_id = $1 AND has_verified = false AND created_at > (now_utc_micro_seconds() - (60::BIGINT * 60 * 1000 * 1000))`, srpUserID).Scan(&count)
@@ -153,8 +162,8 @@ func (repo *UserAuthRepository) InsertOrUpdateSRPAuthAndKeyAttr(ctx context.Cont
 // GetSrpSessionEntity ...
 func (repo *UserAuthRepository) GetSrpSessionEntity(ctx context.Context, sessionID uuid.UUID) (*ente.SRPSessionEntity, error) {
 	result := ente.SRPSessionEntity{}
-	row := repo.DB.QueryRowContext(ctx, `SELECT id, srp_user_id, server_key, srp_a, has_verified, attempt_count FROM srp_sessions WHERE id = $1`, sessionID)
-	err := row.Scan(&result.ID, &result.SRPUserID, &result.ServerKey, &result.SRP_A, &result.IsVerified, &result.AttemptCount)
+	row := repo.DB.QueryRowContext(ctx, `SELECT id, srp_user_id, server_key, srp_a, has_verified, attempt_count, COALESCE(is_fake, false) FROM srp_sessions WHERE id = $1`, sessionID)
+	err := row.Scan(&result.ID, &result.SRPUserID, &result.ServerKey, &result.SRP_A, &result.IsVerified, &result.AttemptCount, &result.IsFake)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -171,6 +180,23 @@ func (repo *UserAuthRepository) IncrementSrpSessionAttemptCount(ctx context.Cont
 func (repo *UserAuthRepository) SetSrpSessionVerified(ctx context.Context, sessionID uuid.UUID) error {
 	_, err := repo.DB.ExecContext(ctx, `UPDATE srp_sessions SET has_verified = true WHERE id = $1`, sessionID)
 	return stacktrace.Propagate(err, "")
+}
+
+// CleanupOldFakeSessions removes fake sessions older than the specified duration
+func (repo *UserAuthRepository) CleanupOldFakeSessions(ctx context.Context) (int64, error) {
+	// Delete fake sessions older than specified microseconds
+	result, err := repo.DB.ExecContext(ctx, `
+		DELETE FROM srp_sessions
+		WHERE is_fake = true
+		AND created_at < (now_utc_micro_seconds() - (24::BIGINT * 60 * 60 * 1000 * 1000))`)
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to cleanup old fake sessions")
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "failed to get rows affected")
+	}
+	return rowsAffected, nil
 }
 
 // GetSRPAttributes returns the srp attributes of a user
