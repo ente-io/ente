@@ -29,7 +29,9 @@ class _DetailChips extends StatelessWidget {
               ),
               child: Text(
                 chip,
-                style: textTheme.smallMuted,
+                style: textTheme.smallMuted.copyWith(
+                  color: textTheme.smallMuted.color ?? colorScheme.fillMuted,
+                ),
               ),
             ),
           )

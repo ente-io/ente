@@ -1,8 +1,8 @@
 import "dart:async";
 import "dart:math" as math;
-import "dart:typed_data";
 import "dart:ui" as ui;
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:logging/logging.dart";
@@ -26,6 +26,7 @@ part "cards/places_card_content.dart";
 part "cards/aesthetics_card_content.dart";
 part "cards/curation_card_content.dart";
 part "cards/narrative_card_content.dart";
+part "cards/badge_card_content.dart";
 part "cards/shared_widgets.dart";
 
 /// Basic viewer for the stats-only Ente Wrapped experience.
@@ -59,7 +60,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   void initState() {
     super.initState();
     _state = widget.initialState;
-    _cards = _state.result?.cards ?? const <WrappedCard>[];
+    _cards = _buildCards(_state.result?.cards);
     final int initialPage = _initialPageForState(_state);
     _currentIndex = initialPage;
     _pageController = PageController(initialPage: initialPage);
@@ -86,7 +87,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   int _initialPageForState(WrappedEntryState state) {
-    final int cardCount = state.result?.cards.length ?? 0;
+    final int cardCount = _cards.length;
     if (cardCount <= 1) {
       return 0;
     }
@@ -99,9 +100,9 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     setState(() {
       _state = next;
-      _cards = next.result?.cards ?? const <WrappedCard>[];
+      _cards = _buildCards(next.result?.cards);
     });
-    final int newCardCount = next.result?.cards.length ?? 0;
+    final int newCardCount = _cards.length;
     if (newCardCount == 0) {
       Navigator.of(context).maybePop();
       return;
@@ -117,6 +118,54 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     } else {
       _configureForCurrentCard(restartProgress: false);
     }
+  }
+
+  List<WrappedCard> _buildCards(List<WrappedCard>? source) {
+    if (source == null || source.isEmpty) {
+      return <WrappedCard>[];
+    }
+    final List<WrappedCard> cards = List<WrappedCard>.from(source);
+    if (kReleaseMode) {
+      return cards;
+    }
+
+    WrappedCard? badgeCard;
+    for (final WrappedCard card in cards) {
+      if (card.type == WrappedCardType.badge) {
+        badgeCard = card;
+        break;
+      }
+    }
+    if (badgeCard == null) {
+      return cards;
+    }
+
+    final Object? rawCandidates = badgeCard.meta["candidates"];
+    if (rawCandidates is! List || rawCandidates.isEmpty) {
+      return cards;
+    }
+
+    final List<Map<String, Object?>> candidates = rawCandidates
+        .whereType<Map>()
+        .map((Map<dynamic, dynamic> entry) => entry.cast<String, Object?>())
+        .toList(growable: false);
+    if (candidates.isEmpty) {
+      return cards;
+    }
+
+    cards.add(
+      WrappedCard(
+        type: WrappedCardType.badgeDebug,
+        title: "Badge candidates (debug)",
+        meta: <String, Object?>{
+          "candidates": candidates,
+          "badgeKey": badgeCard.meta["badgeKey"],
+          "displayDurationMillis": 12000,
+        },
+      ),
+    );
+
+    return cards;
   }
 
   void _handleProgressStatus(AnimationStatus status) {
@@ -244,7 +293,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   @override
   Widget build(BuildContext context) {
     final WrappedResult? result = _state.result;
-    final int cardCount = result?.cards.length ?? 0;
+    final int cardCount = _cards.length;
     if (result == null || cardCount == 0) {
       scheduleMicrotask(() {
         if (mounted) {
@@ -316,7 +365,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                             onPageChanged: _handlePageChanged,
                             itemCount: cardCount,
                             itemBuilder: (BuildContext context, int index) {
-                              final WrappedCard card = result.cards[index];
+                              final WrappedCard card = _cards[index];
                               return _StoryCard(
                                 card: card,
                                 colorScheme: enteColorScheme,

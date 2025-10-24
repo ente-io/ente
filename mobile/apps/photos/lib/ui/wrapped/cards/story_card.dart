@@ -13,6 +13,8 @@ final List<_CardContentBuilder> _cardContentBuilders = <_CardContentBuilder>[
   buildAestheticsCardContent,
   buildCurationCardContent,
   buildNarrativeCardContent,
+  buildBadgeCardContent,
+  buildBadgeDebugCardContent,
 ];
 
 class _StoryCard extends StatelessWidget {
@@ -30,16 +32,20 @@ class _StoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isBadge = card.type == WrappedCardType.badge;
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: isActive ? 1.0 : 0.6,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         child: Material(
-          color: colorScheme.backgroundElevated,
+          color: isBadge ? Colors.transparent : colorScheme.backgroundElevated,
           borderRadius: BorderRadius.circular(24),
+          clipBehavior: Clip.antiAlias,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+            padding: isBadge
+                ? EdgeInsets.zero
+                : const EdgeInsets.fromLTRB(24, 28, 24, 32),
             child: _CardContent(
               card: card,
               colorScheme: colorScheme,

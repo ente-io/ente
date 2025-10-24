@@ -16,6 +16,7 @@ part "builders/places_candidate_builder.dart";
 part "builders/aesthetics_candidate_builder.dart";
 part "builders/curation_candidate_builder.dart";
 part "builders/narrative_candidate_builder.dart";
+part "builders/badge_selector.dart";
 
 /// Provides basic context details for candidate builders.
 @immutable
@@ -27,11 +28,15 @@ class WrappedEngineContext {
     WrappedPeopleContext? people,
     WrappedAestheticsContext? aesthetics,
     List<WrappedCity>? cities,
+    Set<int>? favoriteUploadedFileIDs,
   })  : files = List<EnteFile>.unmodifiable(files),
         people = people ?? WrappedPeopleContext.empty(),
         aesthetics = aesthetics ?? WrappedAestheticsContext.empty(),
         cities = List<WrappedCity>.unmodifiable(
           cities ?? const <WrappedCity>[],
+        ),
+        favoriteUploadedFileIDs = Set<int>.unmodifiable(
+          favoriteUploadedFileIDs ?? const <int>{},
         );
 
   final int year;
@@ -40,6 +45,7 @@ class WrappedEngineContext {
   final WrappedPeopleContext people;
   final WrappedAestheticsContext aesthetics;
   final List<WrappedCity> cities;
+  final Set<int> favoriteUploadedFileIDs;
 }
 
 /// Contract for producing Wrapped candidate cards for a specific domain.

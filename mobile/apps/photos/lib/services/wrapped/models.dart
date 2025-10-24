@@ -476,4 +476,5 @@ enum WrappedCardType {
   topEvents,
   bestOf25,
   badge,
+  badgeDebug,
 }

@@ -7,6 +7,7 @@ import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/favorites_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -71,6 +72,8 @@ class WrappedEngine {
         "people": peopleContext.toJson(),
         "aesthetics": aestheticsContext.toJson(),
         "cities": cities.map((WrappedCity city) => city.toJson()).toList(),
+        "favoriteUploadedIDs":
+            collected.favoriteUploadedIds.toList(growable: false),
       },
       taskName: "wrapped_compute_$year",
     ) as WrappedResult;
@@ -112,10 +115,36 @@ class WrappedEngine {
       },
     );
 
+    final Set<int> favoriteUploadedIds = _collectFavoriteUploadedIDs(filtered);
+
     return _CollectedFiles(
       yearFiles: filtered,
       fileByUploadedId: fileByUploadedId,
+      favoriteUploadedIds: favoriteUploadedIds,
     );
+  }
+
+  static Set<int> _collectFavoriteUploadedIDs(List<EnteFile> files) {
+    final FavoritesService favoritesService = FavoritesService.instance;
+    final Set<int> favorites = <int>{};
+    for (final EnteFile file in files) {
+      final int? uploadedID = file.uploadedFileID;
+      if (uploadedID == null) {
+        continue;
+      }
+      try {
+        if (favoritesService.isFavoriteCache(file)) {
+          favorites.add(uploadedID);
+        }
+      } catch (error, stackTrace) {
+        _engineLogger.warning(
+          "Failed to determine favorites status for ${file.uploadedFileID}",
+          error,
+          stackTrace,
+        );
+      }
+    }
+    return favorites;
   }
 
   static Future<WrappedPeopleContext> _collectPeopleContext({
@@ -301,7 +330,10 @@ class WrappedEngine {
       return WrappedAestheticsContext.empty();
     }
 
-    final Set<String> queries = AestheticsCandidateBuilder.requiredTextQueries;
+    final Set<String> queries = <String>{
+      ...AestheticsCandidateBuilder.requiredTextQueries,
+      ...WrappedBadgeSelector.requiredTextQueries,
+    };
     final Map<String, List<double>> textEmbeddings = <String, List<double>>{};
     for (final String query in queries) {
       try {
@@ -347,6 +379,12 @@ Future<WrappedResult> _wrappedComputeIsolate(
             WrappedCity.fromJson((entry as Map).cast<String, Object?>()),
       )
       .toList(growable: false);
+  final List<dynamic> favoriteRaw =
+      args["favoriteUploadedIDs"] as List<dynamic>? ?? const <dynamic>[];
+  final Set<int> favoriteUploadedIds = <int>{
+    for (final dynamic entry in favoriteRaw)
+      if (entry is num && entry.toInt() > 0) entry.toInt(),
+  };
 
   _computeLogger.fine(
     "Wrapped compute isolate running for $year with ${files.length} media items",
@@ -359,6 +397,7 @@ Future<WrappedResult> _wrappedComputeIsolate(
     people: people,
     aesthetics: aesthetics,
     cities: cities,
+    favoriteUploadedFileIDs: favoriteUploadedIds,
   );
   final List<WrappedCard> cards = <WrappedCard>[];
   for (final WrappedCandidateBuilder builder in wrappedCandidateBuilders) {
@@ -370,23 +409,19 @@ Future<WrappedResult> _wrappedComputeIsolate(
     cards.addAll(builtCards);
   }
 
-  if (cards.isEmpty) {
-    cards.add(
-      WrappedCard(
-        type: WrappedCardType.badge,
-        title: "Wrapped $year is on its way",
-        subtitle: "Full story coming soon.",
-        meta: <String, Object?>{
-          "generatedAt": now.toIso8601String(),
-          "isStub": true,
-        },
-      ),
-    );
-  }
+  final WrappedBadgeSelection badgeSelection = WrappedBadgeSelector.select(
+    context: context,
+    existingCards: cards,
+  );
+  final List<WrappedCard> finalCards = <WrappedCard>[
+    ...cards,
+    badgeSelection.card,
+  ];
 
   return WrappedResult(
-    cards: cards,
+    cards: finalCards,
     year: year,
+    badgeKey: badgeSelection.badgeKey,
   );
 }
 
@@ -394,9 +429,12 @@ class _CollectedFiles {
   _CollectedFiles({
     required List<EnteFile> yearFiles,
     required Map<int, EnteFile> fileByUploadedId,
+    required Set<int> favoriteUploadedIds,
   })  : yearFiles = List<EnteFile>.unmodifiable(yearFiles),
-        fileByUploadedId = Map<int, EnteFile>.unmodifiable(fileByUploadedId);
+        fileByUploadedId = Map<int, EnteFile>.unmodifiable(fileByUploadedId),
+        favoriteUploadedIds = Set<int>.unmodifiable(favoriteUploadedIds);
 
   final List<EnteFile> yearFiles;
   final Map<int, EnteFile> fileByUploadedId;
+  final Set<int> favoriteUploadedIds;
 }
