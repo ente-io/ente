@@ -183,13 +183,12 @@ func (repo *UserAuthRepository) SetSrpSessionVerified(ctx context.Context, sessi
 }
 
 // CleanupOldFakeSessions removes fake sessions older than the specified duration
-func (repo *UserAuthRepository) CleanupOldFakeSessions(ctx context.Context, olderThan int64) (int64, error) {
+func (repo *UserAuthRepository) CleanupOldFakeSessions(ctx context.Context) (int64, error) {
 	// Delete fake sessions older than specified microseconds
 	result, err := repo.DB.ExecContext(ctx, `
 		DELETE FROM srp_sessions
 		WHERE is_fake = true
-		AND created_at < (now_utc_micro_seconds() - $1)`,
-		olderThan)
+		AND created_at < (now_utc_micro_seconds() - (24::BIGINT * 60 * 60 * 1000 * 1000))`)
 	if err != nil {
 		return 0, stacktrace.Propagate(err, "failed to cleanup old fake sessions")
 	}

@@ -965,16 +965,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 		_ = userAuthRepo.RemoveExpiredOTTs()
 	})
 
-	schedule(c, "@every 10m", func() {
-		// Clean up fake SRP sessions older than 1 hour (3600 seconds = 3600000000 microseconds)
-		deleted, err := userAuthRepo.CleanupOldFakeSessions(context.Background(), 3600000000)
-		if err != nil {
-			log.WithError(err).Error("Failed to cleanup old fake SRP sessions")
-		} else if deleted > 0 {
-			log.WithField("count", deleted).Info("Cleaned up old fake SRP sessions")
-		}
-	})
-
 	schedule(c, "@every 24h", func() {
 		_ = userAuthRepo.RemoveDeletedTokens(timeUtil.MicrosecondsBeforeDays(30))
 		_ = castDb.DeleteOldSessions(context.Background(), timeUtil.MicrosecondsBeforeDays(7))
@@ -1055,6 +1045,12 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	scheduleAndRun(c, "@every 24h", func() {
 		emailNotificationCtrl.NudgePaidSubscriberForFamily()
+		deleted, err := userAuthRepo.CleanupOldFakeSessions(context.Background())
+		if err != nil {
+			log.WithError(err).Error("Failed to cleanup old fake SRP sessions")
+		} else if deleted > 0 {
+			log.WithField("count", deleted).Info("Cleaned up old fake SRP sessions")
+		}
 	})
 
 	schedule(c, "@every 1m", func() {
