@@ -129,16 +129,12 @@ Future<void> runBackgroundTask(
   String mode = 'normal',
 }) async {
   // Check if foreground is recently active to avoid conflicts
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.reload();
-
-  final now = DateTime.now().microsecondsSinceEpoch;
-  final lastFGBeat = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
+  final isRunningInFG = await _isRunningInForeground();
 
   // If FG was active in last 30 seconds, skip BG work
-  if (now - lastFGBeat < 30000000) {
+  if (isRunningInFG) {
     _logger.info(
-      "[BG TASK] Foreground recently active (last beat: ${DateTime.fromMicrosecondsSinceEpoch(lastFGBeat)}), skipping background work",
+      "[BG TASK] Foreground recently active, skipping background work",
     );
     return;
   }
@@ -148,7 +144,6 @@ Future<void> runBackgroundTask(
   );
 
   // Mark BG as active
-  await prefs.setInt(kLastBGTaskHeartBeatTime, now);
 
   await _runMinimally(taskId, tlog);
 }
@@ -157,6 +152,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   try {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _scheduleHeartBeat(prefs, true);
 
     _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
