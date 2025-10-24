@@ -88,10 +88,12 @@ func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *i
 
 func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
-	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,
-	})
+	}
+	input.ResponseContentDisposition = aws.String("attachment")
+	r, _ := s3Client.GetObjectRequest(input)
 	url, err := r.Presign(PreSignedRequestValidityDuration)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")

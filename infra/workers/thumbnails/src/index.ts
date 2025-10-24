@@ -80,5 +80,48 @@ const handleGET = async (request: Request) => {
 
     response = new Response(response.body, response);
     response.headers.set("Access-Control-Allow-Origin", "*");
+    hardenResponseHeaders(response.headers);
     return response;
+};
+
+const hardenResponseHeaders = (headers: Headers) => {
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("Content-Security-Policy", "sandbox allow-downloads");
+    headers.set("X-Frame-Options", "DENY");
+    headers.set("Referrer-Policy", "no-referrer");
+
+    const contentType = headers.get("Content-Type");
+    if (contentType && isHTMLLikeContentType(contentType)) {
+        enforceAttachmentDisposition(headers);
+    }
+};
+
+const isHTMLLikeContentType = (contentType: string) => {
+    const normalized = contentType.split(";")[0]?.trim().toLowerCase();
+    if (!normalized) return false;
+    return (
+        normalized === "text/html" ||
+        normalized === "application/xhtml+xml" ||
+        normalized === "image/svg+xml" ||
+        normalized === "text/xml" ||
+        normalized === "application/xml"
+    );
+};
+
+const enforceAttachmentDisposition = (headers: Headers) => {
+    const contentDisposition = headers.get("Content-Disposition");
+    if (contentDisposition && /attachment/i.test(contentDisposition)) {
+        return;
+    }
+
+    const filenameParams = contentDisposition
+        ?.split(";")
+        .map((part) => part.trim())
+        .filter((part, index) => {
+            if (index === 0) return false;
+            return /^filename/i.test(part);
+        });
+
+    const disposition = ["attachment", ...(filenameParams ?? [])].join("; ");
+    headers.set("Content-Disposition", disposition);
 };
