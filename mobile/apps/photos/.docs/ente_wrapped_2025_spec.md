@@ -184,7 +184,7 @@ Defer (red)
 
 ## Badge System (share‑first)
 
-Assign exactly one persona with clear, brag‑friendly copy with a nice metric. Selection is deterministic and privacy‑preserving (local compute only). Every user must get a badge; if no persona passes thresholds, we award a universal fallback.
+Assign exactly one persona with clear, brag‑friendly copy with a nice metric that tempts the user to share. Each badge should ideally be unique and not too similar to the previous cards. Every user must get a badge; if no persona passes thresholds, we award a universal fallback.
 
 Core personas (this year only)
 
