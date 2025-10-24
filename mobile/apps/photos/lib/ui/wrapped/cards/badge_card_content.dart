@@ -266,6 +266,30 @@ class _BadgeDebugCardContent extends StatelessWidget {
     if (candidates.isEmpty) {
       return const SizedBox.shrink();
     }
+    candidates.sort((Map<String, Object?> a, Map<String, Object?> b) {
+      final bool eligibleA = a["eligible"] as bool? ?? false;
+      final bool eligibleB = b["eligible"] as bool? ?? false;
+      if (eligibleA != eligibleB) {
+        return eligibleB ? 1 : -1;
+      }
+      final double scoreA =
+          (a["score"] as num?)?.toDouble() ?? double.negativeInfinity;
+      final double scoreB =
+          (b["score"] as num?)?.toDouble() ?? double.negativeInfinity;
+      final int scoreCompare = scoreB.compareTo(scoreA);
+      if (scoreCompare != 0) {
+        return scoreCompare;
+      }
+      final int tierA = a["tier"] as int? ?? 0;
+      final int tierB = b["tier"] as int? ?? 0;
+      final int tierCompare = tierA.compareTo(tierB);
+      if (tierCompare != 0) {
+        return tierCompare;
+      }
+      final String keyA = a["key"] as String? ?? "";
+      final String keyB = b["key"] as String? ?? "";
+      return keyA.compareTo(keyB);
+    });
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
