@@ -305,7 +305,8 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         }
 
         // Use bounds testing to calculate the necessary translation to center the video
-        let testRect = CGRect(origin: .zero, size: orientedSize)
+        // Use naturalSize here because transform expects input in natural/file coordinate space
+        let testRect = CGRect(origin: .zero, size: naturalSize)
         let finalBounds = testRect.applying(transform)
 
         // Center the video in the renderSize
@@ -706,7 +707,8 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             }
 
             // Use bounds testing to calculate the necessary translation to center the video
-            let testRect = CGRect(origin: .zero, size: orientedSize)
+            // Use naturalSize here because transform expects input in natural/file coordinate space
+            let testRect = CGRect(origin: .zero, size: naturalSize)
             let finalBounds = testRect.applying(transform)
 
             // Center the video in the renderSize
