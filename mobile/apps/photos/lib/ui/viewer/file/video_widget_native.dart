@@ -621,9 +621,13 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     return Stack(
       key: const ValueKey("video_loading"),
       children: [
-        _getThumbnail(),
         Container(
-          color: Colors.black12,
+          color: Colors.black,
+          constraints: const BoxConstraints.expand(),
+          child: _getThumbnail(),
+        ),
+        Container(
+          color: Colors.black.withValues(alpha: 0.3),
           constraints: const BoxConstraints.expand(),
         ),
         Center(
@@ -678,14 +682,11 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
   }
 
   Widget _getThumbnail() {
-    return Container(
-      color: Colors.black,
-      constraints: const BoxConstraints.expand(),
-      child: ThumbnailWidget(
-        widget.file,
-        fit: BoxFit.contain,
-        shouldShowVideoOverlayIcon: false,
-      ),
+    return ThumbnailWidget(
+      widget.file,
+      fit: BoxFit.contain,
+      shouldShowVideoOverlayIcon: false,
+      rawThumbnail: true,
     );
   }
 
