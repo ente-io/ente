@@ -1,5 +1,5 @@
-import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import bs58 from "bs58";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
@@ -402,7 +402,16 @@ const FilePage: React.FC = () => {
 
                 // Decrypt file info
                 const decryptedInfo = await decryptFileInfo(encryptedInfo, key);
-                setFileInfo(decryptedInfo);
+
+                // Check if decryption failed (invalid key)
+                if (decryptedInfo.fileName === "Unknown file" ||
+                    decryptedInfo.fileName === "Encrypted file" ||
+                    decryptedInfo.fileName === "Error: No file data") {
+                    setError("File not found");
+                    setFileInfo(null);
+                } else {
+                    setFileInfo(decryptedInfo);
+                }
             } catch (err) {
                 setError(
                     err instanceof Error
@@ -487,7 +496,7 @@ const FilePage: React.FC = () => {
                             justifyContent: "center",
                         }}
                     >
-                        <CircularProgress color="primary" size={48} />
+                        <CircularProgress sx={{ color: "#1071FF" }} size={32} />
                     </Box>
                 )}
 
@@ -543,7 +552,9 @@ const FilePage: React.FC = () => {
                                     justifyContent: "center",
                                 }}
                             >
-                                <ImageIcon sx={{ fontSize: 48, color: "#757575" }} />
+                                <ImageIcon
+                                    sx={{ fontSize: 48, color: "#757575" }}
+                                />
                             </Box>
 
                             {/* File Name */}
