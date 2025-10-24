@@ -33,6 +33,9 @@ class FavoritesService {
     _db = CollectionDB.instance;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) {
+      _logger.info(
+        "CollectionsUpdatedEvent received in FavoritesService: ${event.source}",
+      );
       // When collections are updated, refresh our cache
       _warmUpCache();
     });

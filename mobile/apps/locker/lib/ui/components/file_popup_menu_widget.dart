@@ -281,14 +281,21 @@ class FilePopupMenuWidget extends StatelessWidget {
         await dialog.show();
 
         try {
-          final List<Future<void>> apiCalls = [];
+          final addFutures = <Future<void>>[];
           for (final collection in collectionsToAdd) {
-            apiCalls.add(
-              CollectionService.instance.addToCollection(collection, file),
+            addFutures.add(
+              CollectionService.instance.addToCollection(
+                collection,
+                file,
+                runSync: false,
+              ),
             );
           }
-          await Future.wait(apiCalls);
-          apiCalls.clear();
+          if (addFutures.isNotEmpty) {
+            await Future.wait(addFutures);
+          }
+
+          final List<Future<void>> apiCalls = [];
 
           for (final collection in collectionsToRemove) {
             apiCalls.add(

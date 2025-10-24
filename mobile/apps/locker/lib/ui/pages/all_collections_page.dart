@@ -153,20 +153,15 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           ),
         ),
       ),
-      body: _buildBody(),
-      bottomNavigationBar: widget.selectedCollections != null
-          ? ListenableBuilder(
-              listenable: widget.selectedCollections!,
-              builder: (context, _) {
-                return widget.selectedCollections!.hasSelections
-                    ? CollectionSelectionOverlayBar(
-                        collection: _sortedCollections,
-                        selectedCollections: widget.selectedCollections!,
-                      )
-                    : const SizedBox.shrink();
-              },
-            )
-          : null,
+      body: Stack(
+        children: [
+          _buildBody(),
+          CollectionSelectionOverlayBar(
+            collection: _sortedCollections,
+            selectedCollections: widget.selectedCollections!,
+          ),
+        ],
+      ),
     );
   }
 

@@ -178,7 +178,9 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       context,
       collection,
       onSuccess: () {
-        Bus.instance.fire(CollectionsUpdatedEvent());
+        Bus.instance.fire(
+          CollectionsUpdatedEvent("rename_collection"),
+        );
       },
     );
   }
@@ -188,7 +190,9 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       context,
       collection,
       onSuccess: () {
-        Bus.instance.fire(CollectionsUpdatedEvent());
+        Bus.instance.fire(
+          CollectionsUpdatedEvent("delete_collection"),
+        );
       },
     );
   }
@@ -198,7 +202,9 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       context,
       collection,
       onSuccess: () {
-        Bus.instance.fire(CollectionsUpdatedEvent());
+        Bus.instance.fire(
+          CollectionsUpdatedEvent("leave_collection"),
+        );
       },
     );
   }

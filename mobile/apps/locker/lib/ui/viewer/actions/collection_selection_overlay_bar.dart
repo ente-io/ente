@@ -25,141 +25,173 @@ class CollectionSelectionOverlayBar extends StatefulWidget {
 class _CollectionSelectionOverlayBarState
     extends State<CollectionSelectionOverlayBar> {
   @override
+  void initState() {
+    super.initState();
+    widget.selectedCollections.addListener(_onSelectionChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.selectedCollections.removeListener(_onSelectionChanged);
+    super.dispose();
+  }
+
+  void _onSelectionChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final hasSelection = widget.selectedCollections.collections.isNotEmpty;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.4,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Card(
-            margin: EdgeInsets.zero,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            elevation: 4,
-            surfaceTintColor: colorScheme.backdropBase,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      ListenableBuilder(
-                        listenable: widget.selectedCollections,
-                        builder: (context, child) {
-                          final isAllSelected =
-                              widget.selectedCollections.count ==
-                                  widget.collection.length;
-                          final buttonText = isAllSelected
-                              ? context.l10n.deselectAll
-                              : context.l10n.selectAll;
-                          final iconData = isAllSelected
-                              ? Icons.remove_circle_outline
-                              : Icons.check_circle_outline_outlined;
-
-                          return InkWell(
-                            onTap: () {
-                              if (isAllSelected) {
-                                widget.selectedCollections.clearAll();
-                              } else {
-                                widget.selectedCollections
-                                    .select(widget.collection.toSet());
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: colorScheme.backgroundBase,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                                vertical: 8.0,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    buttonText,
-                                    style: textTheme.small,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    iconData,
-                                    color: colorScheme.textBase,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+    return IgnorePointer(
+      ignoring: !hasSelection,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubic,
+          offset: hasSelection ? Offset.zero : const Offset(0, 1),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 250),
+            opacity: hasSelection ? 1.0 : 0.0,
+            curve: Curves.easeInOut,
+            child: hasSelection
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.backdropBase,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
                       ),
-                      const Spacer(),
-                      ListenableBuilder(
-                        listenable: widget.selectedCollections,
-                        builder: (context, child) {
-                          final count = widget.selectedCollections.count;
-                          final countText =
-                              count == 1 ? '1 selected' : '$count selected';
-
-                          return InkWell(
-                            onTap: () {
-                              widget.selectedCollections.clearAll();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: colorScheme.backgroundBase,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                                vertical: 8.0,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    countText,
-                                    style: textTheme.small,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Icon(
-                                    Icons.close,
-                                    size: 16,
-                                    color: colorScheme.textBase,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                      border: Border(
+                        top: BorderSide(color: colorScheme.strokeFaint),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  _buildActionButtons(),
-                ],
-              ),
-            ),
+                    ),
+                    child: Padding(
+                      padding:
+                          EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            children: [
+                              ListenableBuilder(
+                                listenable: widget.selectedCollections,
+                                builder: (context, child) {
+                                  final isAllSelected =
+                                      widget.selectedCollections.count ==
+                                          widget.collection.length;
+                                  final buttonText = isAllSelected
+                                      ? context.l10n.deselectAll
+                                      : context.l10n.selectAll;
+                                  final iconData = isAllSelected
+                                      ? Icons.remove_circle_outline
+                                      : Icons.check_circle_outline_outlined;
+
+                                  return InkWell(
+                                    onTap: () {
+                                      if (isAllSelected) {
+                                        widget.selectedCollections.clearAll();
+                                      } else {
+                                        widget.selectedCollections.select(
+                                          widget.collection.toSet(),
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.backgroundElevated2,
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                        vertical: 14.0,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            buttonText,
+                                            style: textTheme.body,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Icon(
+                                            iconData,
+                                            color: getEnteColorScheme(context)
+                                                .textBase,
+                                            size: 20,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const Spacer(),
+                              ListenableBuilder(
+                                listenable: widget.selectedCollections,
+                                builder: (context, child) {
+                                  final count =
+                                      widget.selectedCollections.count;
+                                  final countText = count == 1
+                                      ? '1 selected'
+                                      : '$count selected';
+
+                                  return InkWell(
+                                    onTap: () {
+                                      widget.selectedCollections.clearAll();
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.backgroundElevated2,
+                                        borderRadius: BorderRadius.circular(50),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0,
+                                        vertical: 14.0,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            countText,
+                                            style: textTheme.body,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Icon(
+                                            Icons.close,
+                                            color: getEnteColorScheme(context)
+                                                .textBase,
+                                            size: 20,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          _buildActionButtons(),
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildActionButtons() {
-    final colorScheme = getEnteColorScheme(context);
     return ListenableBuilder(
       listenable: widget.selectedCollections,
       builder: (context, child) {
@@ -170,20 +202,42 @@ class _CollectionSelectionOverlayBarState
 
         final actions = _getActionsForSelection(selectedCollections);
 
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            color: colorScheme.backgroundBase,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: actions,
-          ),
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                child: child,
+              ),
+            );
+          },
+          child: actions.length > 1
+              ? Row(
+                  key: const ValueKey('multi_action'),
+                  children: _buildActionRow(actions),
+                )
+              : Row(
+                  key: const ValueKey('single_action'),
+                  children: [Expanded(child: actions.first)],
+                ),
         );
       },
     );
+  }
+
+  List<Widget> _buildActionRow(List<Widget> actions) {
+    final children = <Widget>[];
+    for (var i = 0; i < actions.length; i++) {
+      children.add(Expanded(child: actions[i]));
+      if (i != actions.length - 1) {
+        children.add(const SizedBox(width: 12));
+      }
+    }
+    return children;
   }
 
   List<Widget> _getActionsForSelection(

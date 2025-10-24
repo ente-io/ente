@@ -58,6 +58,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
 
   @override
   void onFileUploadComplete() {
+    _logger.info(
+      "File upload completed from CollectionPage (${widget.collection.id}), refreshing collection data",
+    );
     CollectionService.instance.getCollections().then((collections) {
       setState(() {
         _initializeData(collections.where((c) => c.id == _collection.id).first);
@@ -108,6 +111,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     _initializeData(widget.collection);
     _collectionUpdateSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      _logger.info(
+        "CollectionsUpdatedEvent received on CollectionPage (${widget.collection.id}): ${event.source}",
+      );
       if (!mounted) return;
 
       try {
