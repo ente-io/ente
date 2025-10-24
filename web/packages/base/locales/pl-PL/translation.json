@@ -46,6 +46,7 @@
     "new_album": "Nowy album",
     "create_albums": "Utwórz albumy",
     "album_name": "Nazwa albumu",
+    "album_created": "",
     "close": "Zamknij",
     "yes": "Tak",
     "no": "Nie",
@@ -324,8 +325,8 @@
     "thumbnail_generation_failed_hint": "Te pliki zostały przesłane, ale niestety nie mogliśmy dla nich wygenerować miniatur.",
     "unsupported_files": "Nieobsługiwane pliki",
     "unsupported_files_hint": "Ente nie obsługuje jeszcze tych formatów plików",
-    "zero_size_files": "",
-    "zero_size_files_hint": "",
+    "zero_size_files": "Puste pliki",
+    "zero_size_files_hint": "Te pliki nie zostały przesłane, ponieważ mają zero bajtów",
     "blocked_uploads": "Zablokowane przesłania",
     "blocked_uploads_hint": "Twoja przeglądarka lub dodatek uniemożliwia Ente z używania <code>eTags</code> do przesyłania dużych plików.",
     "large_files": "Duże pliki",
@@ -432,7 +433,7 @@
         "year": "Po 1 roku"
     },
     "copy_link": "Skopiuj link",
-    "copy_embed_html": "",
+    "copy_embed_html": "Kopiuj osadzony HTML",
     "done": "Gotowe",
     "share_link_section_title": "Lub udostępnij link",
     "remove_link": "Usuń link",
@@ -701,6 +702,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": "",
-    "maps_privacy_notice": ""
+    "album_layout": "Układ albumu",
+    "maps_privacy_notice": "Przybliżone współrzędne zostaną przesłane do stron trzecich dbających o prywatność, takich jak OpenStreetMap, w celu wyświetlenia mapy i lokalizacji."
 }

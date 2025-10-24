@@ -1,4 +1,5 @@
 // TODO: Audit this file.
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import {
@@ -8,6 +9,8 @@ import {
     DialogTitle,
     Divider,
     InputAdornment,
+    Paper,
+    Snackbar,
     Stack,
     styled,
     TextField,
@@ -15,17 +18,22 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { FilledIconButton } from "ente-base/components/mui";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
+import { useModalVisibility } from "ente-base/components/utils/modal";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
 import {
     ItemCard,
     LargeTileButton,
+    LargeTileCreateNewButton,
     LargeTileTextOverlay,
 } from "ente-new/photos/components/Tiles";
+import { createAlbum } from "ente-new/photos/services/collection";
 import type {
     CollectionsSortBy,
     CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
+import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -44,6 +52,7 @@ interface AllAlbums {
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
+    onRemotePull: () => Promise<void>;
 }
 
 /**
@@ -57,19 +66,49 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     collectionsSortBy,
     onChangeCollectionsSortBy,
     isInHiddenSection,
+    onRemotePull,
 }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
     const [searchTerm, setSearchTerm] = useState("");
+    const { showNotification } = usePhotosAppContext();
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
+    const [albumCreatedToast, setAlbumCreatedToast] = useState<{
+        open: boolean;
+        albumId?: number;
+        albumName?: string;
+    }>({ open: false });
 
-    useEffect(() => {
-        if (!open) {
-            setSearchTerm("");
-        }
-    }, [open]);
+    const handleExited = () => {
+        setSearchTerm("");
+    };
 
     const onCollectionClick = (collectionID: number) => {
         onSelectCollectionID(collectionID);
         onClose();
+    };
+
+    const handleCreateAlbum = (albumName: string) => {
+        onClose();
+
+        void (async () => {
+            try {
+                const newAlbum = await createAlbum(albumName);
+                await onRemotePull();
+
+                // Show custom toast with both buttons
+                setAlbumCreatedToast({
+                    open: true,
+                    albumId: newAlbum.id,
+                    albumName: albumName,
+                });
+            } catch {
+                showNotification({
+                    color: "critical",
+                    title: t("generic_error_retry"),
+                });
+            }
+        })();
     };
 
     const filteredCollectionSummaries = useMemo(() => {
@@ -82,31 +121,112 @@ export const AllAlbums: React.FC<AllAlbums> = ({
         );
     }, [collectionSummaries, searchTerm]);
 
+    const showCreateButton = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return true;
+        }
+        const searchLower = searchTerm.toLowerCase();
+        const createText = t("new_album").toLowerCase();
+        return createText.includes(searchLower);
+    }, [searchTerm]);
+
     return (
-        <AllAlbumsDialog
-            {...{ open, onClose, fullScreen }}
-            slots={{ transition: SlideUpTransition }}
-            fullWidth
-        >
-            <Title
-                {...{
-                    isInHiddenSection,
-                    onClose,
-                    collectionsSortBy,
-                    onChangeCollectionsSortBy,
-                }}
-                collectionCount={filteredCollectionSummaries.length}
-                totalCount={collectionSummaries.length}
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
+        <>
+            <AllAlbumsDialog
+                {...{ open, onClose, fullScreen }}
+                slots={{ transition: SlideUpTransition }}
+                slotProps={{ transition: { onExited: handleExited } }}
+                fullWidth
+            >
+                <Title
+                    {...{
+                        isInHiddenSection,
+                        onClose,
+                        collectionsSortBy,
+                        onChangeCollectionsSortBy,
+                    }}
+                    collectionCount={filteredCollectionSummaries.length}
+                    totalCount={collectionSummaries.length}
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                />
+                <Divider />
+                <AllAlbumsContent
+                    collectionSummaries={filteredCollectionSummaries}
+                    onCollectionClick={onCollectionClick}
+                    hasSearchQuery={!!searchTerm.trim()}
+                    showCreateButton={showCreateButton}
+                    onCreateAlbum={showAlbumNameInput}
+                />
+            </AllAlbumsDialog>
+            <SingleInputDialog
+                {...albumNameInputVisibilityProps}
+                title={t("new_album")}
+                label={t("album_name")}
+                submitButtonTitle={t("create")}
+                onSubmit={handleCreateAlbum}
             />
-            <Divider />
-            <AllAlbumsContent
-                collectionSummaries={filteredCollectionSummaries}
-                onCollectionClick={onCollectionClick}
-                hasSearchQuery={!!searchTerm.trim()}
-            />
-        </AllAlbumsDialog>
+            {/* Custom toast for album created notification */}
+            <Snackbar
+                open={albumCreatedToast.open}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+                <Paper sx={{ width: "min(360px, 100svw)" }}>
+                    <DialogTitle>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Box>
+                                <Typography variant="h3">
+                                    {t("album_created")}
+                                </Typography>
+                                <Typography
+                                    variant="body"
+                                    sx={{
+                                        fontWeight: "regular",
+                                        color: "text.muted",
+                                        marginTop: "4px",
+                                    }}
+                                >
+                                    {albumCreatedToast.albumName &&
+                                    albumCreatedToast.albumName.length > 16
+                                        ? albumCreatedToast.albumName.substring(
+                                              0,
+                                              16,
+                                          ) + "..."
+                                        : albumCreatedToast.albumName}
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" sx={{ gap: 1 }}>
+                                <FilledIconButton
+                                    onClick={() => {
+                                        if (albumCreatedToast.albumId) {
+                                            onSelectCollectionID(
+                                                albumCreatedToast.albumId,
+                                            );
+                                        }
+                                        setAlbumCreatedToast({ open: false });
+                                    }}
+                                >
+                                    <ArrowForwardIcon />
+                                </FilledIconButton>
+                                <FilledIconButton
+                                    onClick={() =>
+                                        setAlbumCreatedToast({ open: false })
+                                    }
+                                >
+                                    <CloseIcon />
+                                </FilledIconButton>
+                            </Stack>
+                        </Stack>
+                    </DialogTitle>
+                </Paper>
+            </Snackbar>
+        </>
     );
 };
 
@@ -262,8 +382,9 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
 const CollectionRowItemSize = 154;
 
 interface ItemData {
-    collectionRowList: CollectionSummary[][];
-    onCollectionClick: (id?: number) => void;
+    collectionRowList: (CollectionSummary | "create")[][];
+    onCollectionClick: (id: number) => void;
+    onCreateAlbum: () => void;
 }
 
 // This helper function memoizes incoming props,
@@ -271,13 +392,13 @@ interface ItemData {
 // This is only needed since we are passing multiple props with a wrapper object.
 // If we were only passing a single, stable value (e.g. items),
 // We could just pass the value directly.
-const createItemData = memoize((collectionRowList, onCollectionClick) => ({
-    // TODO:
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    collectionRowList,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    onCollectionClick,
-}));
+const createItemData = memoize(
+    (
+        collectionRowList: (CollectionSummary | "create")[][],
+        onCollectionClick: (id: number) => void,
+        onCreateAlbum: () => void,
+    ) => ({ collectionRowList, onCollectionClick, onCreateAlbum }),
+);
 
 //If list items are expensive to render,
 // Consider using React.memo or shouldComponentUpdate to avoid unnecessary re-renders.
@@ -290,19 +411,28 @@ const AlbumsRow = React.memo(
         style,
         isScrolling,
     }: ListChildComponentProps<ItemData>) => {
-        const { collectionRowList, onCollectionClick } = data;
+        const { collectionRowList, onCollectionClick, onCreateAlbum } = data;
         const collectionRow = collectionRowList[index]!;
         return (
             <div style={style}>
                 <Stack direction="row" sx={{ p: 2, gap: 0.5 }}>
-                    {collectionRow.map((item) => (
-                        <AlbumCard
-                            isScrolling={isScrolling}
-                            onCollectionClick={onCollectionClick}
-                            collectionSummary={item}
-                            key={item.id}
-                        />
-                    ))}
+                    {collectionRow.map((item) =>
+                        item === "create" ? (
+                            <LargeTileCreateNewButton
+                                key="create"
+                                onClick={onCreateAlbum}
+                            >
+                                {t("new_album")}
+                            </LargeTileCreateNewButton>
+                        ) : (
+                            <AlbumCard
+                                isScrolling={isScrolling}
+                                onCollectionClick={onCollectionClick}
+                                collectionSummary={item}
+                                key={item.id}
+                            />
+                        ),
+                    )}
                 </Stack>
             </div>
         );
@@ -314,12 +444,16 @@ interface AllAlbumsContentProps {
     collectionSummaries: CollectionSummary[];
     onCollectionClick: (id: number) => void;
     hasSearchQuery: boolean;
+    showCreateButton: boolean;
+    onCreateAlbum: () => void;
 }
 
 const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     collectionSummaries,
     onCollectionClick,
     hasSearchQuery,
+    showCreateButton,
+    onCreateAlbum,
 }) => {
     const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
 
@@ -327,7 +461,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     const shouldRefresh = useRef(false);
 
     const [collectionRowList, setCollectionRowList] = useState<
-        CollectionSummary[][]
+        (CollectionSummary | "create")[][]
     >([]);
 
     const columns = isTwoColumn ? 2 : 3;
@@ -340,10 +474,25 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
             }
             refreshInProgress.current = true;
 
-            const collectionRowList: CollectionSummary[][] = [];
+            const collectionRowList: (CollectionSummary | "create")[][] = [];
             let index = 0;
+
+            // Add create button as first item in first row if needed
+            if (showCreateButton) {
+                const firstRow: (CollectionSummary | "create")[] = ["create"];
+                for (
+                    let i = 1;
+                    i < columns && index < collectionSummaries.length;
+                    i++
+                ) {
+                    firstRow.push(collectionSummaries[index++]!);
+                }
+                collectionRowList.push(firstRow);
+            }
+
+            // Add remaining collections
             while (index < collectionSummaries.length) {
-                const collectionRow: CollectionSummary[] = [];
+                const collectionRow: (CollectionSummary | "create")[] = [];
                 for (
                     let i = 0;
                     i < columns && index < collectionSummaries.length;
@@ -361,15 +510,23 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
             }
         };
         main();
-    }, [collectionSummaries, columns]);
+    }, [collectionSummaries, columns, showCreateButton]);
 
     // Bundle additional data to list items using the "itemData" prop.
     // It will be accessible to item renderers as props.data.
     // Memoize this data to avoid bypassing shouldComponentUpdate().
-    const itemData = createItemData(collectionRowList, onCollectionClick);
+    const itemData = createItemData(
+        collectionRowList,
+        onCollectionClick,
+        onCreateAlbum,
+    );
 
     // Show "no results" message if there's a search query but no results
-    if (hasSearchQuery && collectionSummaries.length === 0) {
+    if (
+        hasSearchQuery &&
+        collectionSummaries.length === 0 &&
+        !showCreateButton
+    ) {
         return (
             <DialogContent sx={{ height: "80svh" }}>
                 <Box

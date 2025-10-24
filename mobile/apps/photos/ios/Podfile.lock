@@ -140,6 +140,8 @@ PODS:
     - Flutter
   - media_kit_video (0.0.1):
     - Flutter
+  - mobile_ocr (0.0.1):
+    - Flutter
   - motion_sensors (0.0.1):
     - Flutter
   - motionphoto (0.0.1):
@@ -151,6 +153,8 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+  - native_video_editor (0.0.1):
+    - Flutter
   - native_video_player (4.0.0):
     - Flutter
   - objective_c (0.0.1):
@@ -228,8 +232,6 @@ PODS:
     - sqlite3/rtree
   - system_info_plus (0.0.1):
     - Flutter
-  - text_detector (0.0.1):
-    - Flutter
   - thermal (0.0.1):
     - Flutter
   - ua_client_hints (1.4.1):
@@ -282,9 +284,11 @@ DEPENDENCIES:
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
   - media_kit_libs_ios_video (from `.symlinks/plugins/media_kit_libs_ios_video/ios`)
   - media_kit_video (from `.symlinks/plugins/media_kit_video/ios`)
+  - mobile_ocr (from `.symlinks/plugins/mobile_ocr/ios`)
   - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
+  - native_video_editor (from `.symlinks/plugins/native_video_editor/ios`)
   - native_video_player (from `.symlinks/plugins/native_video_player/ios`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
@@ -303,7 +307,6 @@ DEPENDENCIES:
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
-  - text_detector (from `.symlinks/plugins/text_detector/ios`)
   - thermal (from `.symlinks/plugins/thermal/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -398,12 +401,16 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/media_kit_libs_ios_video/ios"
   media_kit_video:
     :path: ".symlinks/plugins/media_kit_video/ios"
+  mobile_ocr:
+    :path: ".symlinks/plugins/mobile_ocr/ios"
   motion_sensors:
     :path: ".symlinks/plugins/motion_sensors/ios"
   motionphoto:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
+  native_video_editor:
+    :path: ".symlinks/plugins/native_video_editor/ios"
   native_video_player:
     :path: ".symlinks/plugins/native_video_player/ios"
   objective_c:
@@ -440,8 +447,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   system_info_plus:
     :path: ".symlinks/plugins/system_info_plus/ios"
-  text_detector:
-    :path: ".symlinks/plugins/text_detector/ios"
   thermal:
     :path: ".symlinks/plugins/thermal/ios"
   ua_client_hints:
@@ -502,10 +507,12 @@ SPEC CHECKSUMS:
   media_extension: 6618f07abd762cdbfaadf1b0c56a287e820f0c84
   media_kit_libs_ios_video: a5fe24bc7875ccd6378a0978c13185e1344651c1
   media_kit_video: 5da63f157170e5bf303bf85453b7ef6971218a2e
+  mobile_ocr: 2bba4e291977aa2d48a2464295df9cbba5693cfc
   motion_sensors: 03f55b7c637a7e365a0b5f9697a449f9059d5d91
   motionphoto: 8b65ce50c7d7ff3c767534fc3768b2eed9ac24e4
   move_to_background: cd3091014529ec7829e342ad2d75c0a11f4378a5
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  native_video_editor: edcc94eaa32977d1c5e8cbb881fdd9390572a8a6
   native_video_player: 29ab24a926804ac8c4a57eb6d744c7d927c2bc3e
   objective_c: 77e887b5ba1827970907e10e832eec1683f3431d
   onnxruntime: e7c2ae44385191eaad5ae64c935a72debaddc997
@@ -532,7 +539,6 @@ SPEC CHECKSUMS:
   sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
   sqlite3_flutter_libs: 2c48c4ee7217fd653251975e43412250d5bcbbe2
   system_info_plus: 5393c8da281d899950d751713575fbf91c7709aa
-  text_detector: 9e0c982ff0812fadd2c3d7ef805a8fd8f34841fe
   thermal: a9261044101ae8f532fa29cab4e8270b51b3f55c
   ua_client_hints: aeabd123262c087f0ce151ef96fa3ab77bfc8b38
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe

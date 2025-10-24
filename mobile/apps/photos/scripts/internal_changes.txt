@@ -1,5 +1,10 @@
+- Ashil: Fix full screen state getting disabled when swiping to video
+- Ashil: Remove long-press icon to switch to media kit player 
+- Neeraj & Laurens: fix OCR iOS issues and remove feature flag
+- Ashil: Update gallery layout when screen orientation in changed
+- Neeraj: Decrypt local chunk before reporting upload & log sha1 on decryption errors
 - Neeraj: Asserts for url reuse and plain vs enc size mismatch
-- Ashil: (i) Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
+- Ashil: Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
 - Laurens: Show empty persons and fallback for face thumbnail issues
 - Prateek: (i) Add native video editor to boost performance
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
@@ -8,7 +13,7 @@
 - Prateek: Add logging for background task execution
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking
 - Laurens: (i) OCR UX improvements based on feedback
-- Ashil: (i) Swipe to select
+- Ashil: Swipe to select
 - Laurens: Improve clip memories
 - Laurens: Add OCR capability for Android devices (behind feature flag)
 - Neeraj: Add auth.ente.io to iOS associated domains for password AutoFill
