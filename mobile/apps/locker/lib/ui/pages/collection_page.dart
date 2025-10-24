@@ -16,6 +16,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
@@ -402,9 +403,14 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           child: _displayedFiles.isEmpty
-              ? SizedBox(
-                  height: 400,
-                  child: _buildEmptyState(textTheme),
+              ? const Center(
+                  child: EmptyStateWidget(
+                    assetPath: 'assets/empty_state.png',
+                    title: "Nothing to see here",
+                    subtitle:
+                        "Upload files to this collection to see them here",
+                    showBorder: false,
+                  ),
                 )
               : ItemListView(
                   key: ValueKey(_displayedFiles.length),
@@ -413,44 +419,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 ),
         ),
       ],
-    );
-  }
-
-  Widget _buildEmptyState(EnteTextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.all(32.0),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSearchActive ? Icons.search_off : Icons.folder_off,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isSearchActive
-                  ? context.l10n.noFilesFoundForQuery(searchQuery)
-                  : context.l10n.noFilesFound,
-              style: textTheme.large.copyWith(
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (isSearchActive) ...[
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.tryAdjustingYourSearchQuery,
-                style: textTheme.body.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 
