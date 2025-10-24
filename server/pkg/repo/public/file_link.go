@@ -199,7 +199,7 @@ func (pcr *FileLinkRepository) RecordAccessHistory(ctx context.Context, shareID 
 func (pcr *FileLinkRepository) AccessedInPast(ctx context.Context, shareID string, ip string, ua string) (bool, error) {
 	row := pcr.DB.QueryRowContext(ctx, `select id from public_file_tokens_access_history where id =$1 and ip = $2 and user_agent = $3`,
 		shareID, ip, ua)
-	var tempID int64
+	var tempID string
 	err := row.Scan(&tempID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return false, nil
