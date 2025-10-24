@@ -22,7 +22,7 @@ class MemoryHomeWidgetService {
   static const String MEMORY_STATUS_KEY = "memoryStatusKey.widget";
   static const String MEMORY_CHANGED_KEY = "memoryChanged.widget";
   static const String TOTAL_MEMORIES_KEY = "totalMemories";
-  static const int MAX_MEMORIES_LIMIT = 50;
+  static const int MAX_MEMORIES_LIMIT = 20;
 
   // Singleton pattern
   static final MemoryHomeWidgetService instance =

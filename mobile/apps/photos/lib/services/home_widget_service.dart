@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart' as hw;
@@ -9,10 +11,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
+import 'package:photos/services/widget_image_isolate.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import "package:synchronized/synchronized.dart";
 
@@ -33,8 +39,12 @@ enum WidgetStatus {
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {
   // Constants
-  static const double THUMBNAIL_SIZE = 512.0;
+  // Target max dimension for widget images
+  static const double WIDGET_IMAGE_SIZE = 1280.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
+  static const String WIDGET_CACHE_DIR = 'cache';
+  static const int WIDGET_CACHE_MAX_FILES = 60;
+  static const Duration _cacheMaintenanceInterval = Duration(minutes: 10);
 
   // URI schemes for different widget types
   static const String MEMORY_WIDGET_SCHEME = 'memorywidget';
@@ -55,6 +65,8 @@ class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
   final computeLock = Lock();
   bool _isAppGroupSet = false;
+  DateTime? _lastCacheMaintenance;
+  Future<void>? _cacheMaintenanceFuture;
 
   Future<void> setAppGroup({String id = iOSGroupIDMemory}) async {
     if (!Platform.isIOS || _isAppGroupSet) return;
@@ -101,13 +113,22 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    final result = await _captureFile(file, key, title, mainKey);
-    if (!result) {
+    final cacheKey = _cacheKeyForFile(file);
+    if (cacheKey == null) {
+      _logger.warning(
+        'Skipping widget render for ${file.displayName} due to missing uploadedFileID',
+      );
+      return null;
+    }
+
+    final Size? capturedSize =
+        await _captureFile(file, key, title, mainKey, cacheKey);
+    if (capturedSize == null) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
     }
 
-    return const Size(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+    return capturedSize;
   }
 
   Future<int> countHomeWidgets(
@@ -130,39 +151,39 @@ class HomeWidgetService {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
-  Future<bool> _captureFile(
+  Future<Size?> _captureFile(
     EnteFile file,
     String key,
     String title,
     String? mainKey,
+    String cacheKey,
   ) async {
     try {
-      // Get thumbnail data
-      final thumbnail = await getThumbnail(file);
-      if (thumbnail == null) {
-        _logger.warning("Failed to get thumbnail for file ${file.displayName}");
-        return false;
-      }
-
-      // Get appropriate directory for widget assets
       final String widgetDirectory = await _getWidgetStorageDirectory();
+      final String baseDir = '$widgetDirectory/$WIDGET_DIRECTORY';
+      final String cacheDir = '$baseDir/$WIDGET_CACHE_DIR';
+      await Directory(cacheDir).create(recursive: true);
 
-      // Save thumbnail to file
-      final String thumbnailPath =
-          '$widgetDirectory/$WIDGET_DIRECTORY/$key.png';
-      final File thumbnailFile = File(thumbnailPath);
-
-      if (!await thumbnailFile.exists()) {
-        await thumbnailFile.create(recursive: true);
+      final imageInfo =
+          await _ensureCachedWidgetImage(file, cacheDir, cacheKey);
+      if (imageInfo == null) {
+        _logger
+            .warning("Failed to get image for widget for ${file.displayName}");
+        return null;
       }
 
-      await thumbnailFile.writeAsBytes(thumbnail);
-      await setData(key, thumbnailPath);
+      await setData(key, imageInfo.path);
 
       // Format date for display
-      final subText = await SmartMemoriesService.getDateFormattedLocale(
+      final String baseSubText =
+          await SmartMemoriesService.getDateFormattedLocale(
         creationTime: file.creationTime!,
       );
+      final int widthPx = imageInfo.size.width.round();
+      final int heightPx = imageInfo.size.height.round();
+      final String subText = flagService.internalUser
+          ? '$baseSubText, ${widthPx}x${heightPx}px'
+          : baseSubText;
 
       // Create metadata
       final Map<String, dynamic> metadata = {
@@ -175,11 +196,174 @@ class HomeWidgetService {
       // Save metadata in platform-specific format
       await _saveWidgetMetadata(key, metadata);
 
-      return true;
+      return imageInfo.size;
     } catch (error, stackTrace) {
       _logger.severe("Failed to save the thumbnail", error, stackTrace);
-      return false;
+      return null;
     }
+  }
+
+  String? _cacheKeyForFile(EnteFile file) {
+    final uploadedId = file.uploadedFileID;
+    if (uploadedId == null) return null;
+
+    final rawSig = (file.hash != null && file.hash!.isNotEmpty)
+        ? file.hash!
+        : (file.modificationTime ?? file.updationTime ?? 0).toString();
+    final contentSig = _sanitizeFilename(rawSig);
+    return 'u_${uploadedId}_$contentSig';
+  }
+
+  Future<File?> _resolveWidgetSource(EnteFile file) async {
+    if (file.fileType == FileType.video) {
+      return null;
+    }
+    if (file.isRemoteFile) {
+      final File? remoteFile = await getFile(file);
+      if (remoteFile == null) {
+        _logger.warning(
+          'Failed to fetch full-resolution file for widget ${file.displayName}',
+        );
+      }
+      return remoteFile;
+    }
+    return getFile(file);
+  }
+
+  String _sanitizeFilename(String input) {
+    // Allow only alnum, dot, underscore, dash; replace others (including '/') with '_'
+    return input.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+  }
+
+  Future<void> _enforceCacheBudget(String cacheDirPath) async {
+    try {
+      final dir = Directory(cacheDirPath);
+      if (!await dir.exists()) return;
+      final entries = await dir
+          .list()
+          .where((entity) => entity is File)
+          .cast<File>()
+          .toList();
+      if (entries.isEmpty) return;
+
+      final files = entries;
+
+      if (files.length <= WIDGET_CACHE_MAX_FILES) {
+        return;
+      }
+
+      // Sort by last modified ascending (oldest first)
+      files.sort(
+        (a, b) => a.statSync().modified.compareTo(b.statSync().modified),
+      );
+
+      final int filesToDelete = files.length - WIDGET_CACHE_MAX_FILES;
+      for (var i = 0; i < filesToDelete; i++) {
+        final file = files[i];
+        try {
+          await file.delete();
+        } catch (_) {
+          // Best-effort deletion; ignore failures.
+        }
+      }
+    } catch (e, s) {
+      _logger.warning('Failed to enforce widget cache budget', e, s);
+    }
+  }
+
+  Future<({String path, Size size})?> _ensureCachedWidgetImage(
+    EnteFile file,
+    String cacheDir,
+    String cacheKey,
+  ) async {
+    final String highResPath = '$cacheDir/$cacheKey.jpg';
+    final String fallbackPath = '$cacheDir/${cacheKey}_thumb.jpg';
+    final File highResFile = File(highResPath);
+    final File thumbnailFile = File(fallbackPath);
+
+    if (await highResFile.exists()) {
+      final ({int width, int height})? dims =
+          await WidgetImageIsolate.instance.readImageDimensions(highResPath);
+      final size = dims != null
+          ? Size(dims.width.toDouble(), dims.height.toDouble())
+          : const Size.square(WIDGET_IMAGE_SIZE);
+      return (path: highResPath, size: size);
+    }
+
+    ({int width, int height})? dims;
+    for (int attempt = 0; attempt < 3; attempt++) {
+      final File? source = await _resolveWidgetSource(file);
+      if (source == null) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        continue;
+      }
+
+      dims = await WidgetImageIsolate.instance.generateWidgetImage(
+        sourcePath: source.path,
+        cachePath: highResPath,
+        targetShortSide: WIDGET_IMAGE_SIZE,
+        quality: 80,
+      );
+
+      if (dims != null) {
+        if (await thumbnailFile.exists()) {
+          try {
+            await thumbnailFile.delete();
+          } catch (_) {
+            // Ignore cleanup errors.
+          }
+        }
+        _scheduleCacheMaintenance(cacheDir);
+        final size = Size(
+          dims.width.toDouble(),
+          dims.height.toDouble(),
+        );
+        return (path: highResPath, size: size);
+      }
+
+      await Future.delayed(const Duration(milliseconds: 200));
+    }
+
+    ({int width, int height})? fallbackDims;
+    if (await thumbnailFile.exists()) {
+      fallbackDims =
+          await WidgetImageIsolate.instance.readImageDimensions(fallbackPath);
+    } else {
+      final Uint8List? fallbackBytes = await getThumbnail(file);
+      if (fallbackBytes == null) {
+        return null;
+      }
+      await thumbnailFile.writeAsBytes(fallbackBytes, flush: true);
+      fallbackDims = (
+        width: thumbnailLargeSize,
+        height: thumbnailLargeSize,
+      );
+    }
+
+    _scheduleCacheMaintenance(cacheDir);
+
+    final Size fallbackSize = fallbackDims != null
+        ? Size(
+            fallbackDims.width.toDouble(),
+            fallbackDims.height.toDouble(),
+          )
+        : Size.square(thumbnailLargeSize.toDouble());
+    return (path: fallbackPath, size: fallbackSize);
+  }
+
+  void _scheduleCacheMaintenance(String cacheDir) {
+    if (_cacheMaintenanceFuture != null) {
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastCacheMaintenance != null &&
+        now.difference(_lastCacheMaintenance!) < _cacheMaintenanceInterval) {
+      return;
+    }
+    _cacheMaintenanceFuture = _enforceCacheBudget(cacheDir).whenComplete(() {
+      _lastCacheMaintenance = DateTime.now();
+      _cacheMaintenanceFuture = null;
+    });
   }
 
   Future<void> _saveWidgetMetadata(
@@ -219,6 +403,8 @@ class HomeWidgetService {
       await setAppGroup();
     }
 
+    await clearWidgetCache();
+
     await Future.wait([
       AlbumHomeWidgetService.instance.clearWidget(),
       PeopleHomeWidgetService.instance.clearWidget(),
@@ -234,6 +420,32 @@ class HomeWidgetService {
       _logger.info("Widget directory cleared successfully");
     } catch (e) {
       _logger.severe("Failed to clear widget directory", e);
+    }
+  }
+
+  Future<void> clearWidgetCache() async {
+    final Future<void>? pendingCleanup = _cacheMaintenanceFuture;
+    if (pendingCleanup != null) {
+      try {
+        await pendingCleanup;
+      } catch (_) {
+        // ignore cleanup errors; we are about to delete the cache anyway
+      }
+    }
+    _cacheMaintenanceFuture = null;
+    _lastCacheMaintenance = null;
+
+    try {
+      final String widgetParent = await _getWidgetStorageDirectory();
+      final String cachePath =
+          '$widgetParent/$WIDGET_DIRECTORY/$WIDGET_CACHE_DIR';
+      final Directory cacheDir = Directory(cachePath);
+      if (await cacheDir.exists()) {
+        await cacheDir.delete(recursive: true);
+        _logger.info("Widget cache cleared successfully");
+      }
+    } catch (e, s) {
+      _logger.warning("Failed to clear widget cache directory", e, s);
     }
   }
 
