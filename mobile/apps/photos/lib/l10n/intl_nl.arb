@@ -1931,8 +1931,14 @@
   "related": "Gerelateerd",
   "hoorayyyy": "Hoeraaaa!",
   "nothingToTidyUpHere": "Niks op te schonen hier",
-  "cLTitle1": "Kaartweergave voor je reizen",
-  "cLDesc1": "Kies tussen gegroepeerde, doorlopende, of reis- (kaartgebaseerde) weergave wanneer je albums deelt. Ente zorgt voor de hosting!",
+  "cLTitle1": "OCR! Selecteer tekst in foto's",
+  "cLDesc1": "Ente detecteert of een foto of screenshot tekst bevat en toont een knop om de tekstselectiemodus te activeren. Elke regel tekst kan individueel worden geselecteerd.",
+  "cLTitle2": "Veeg om te selecteren",
+  "cLDesc2": "Gebruik het veeggebaar om snel foto's in je galerij te selecteren. Werkt perfect met één hand, zonder je vinger op te tillen!",
+  "cLTitle3": "Nieuwe herinneringen",
+  "cLDesc3": "\"Spelende kinderen\", \"Winteravonturen\", \"Neonnachten\", en meer.",
+  "cLTitle4": "Landschapsgalerij en meer",
+  "cLDesc4": "Ondersteuning voor landschapsweergave in de hoofdgalerij. Toon personen zonder gekoppelde foto's in plaats van ze uit te filteren. Verbeterde video-aspectdetectie bij delen vanuit externe apps.",
   "closeBy": "Vergelijkbaar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
