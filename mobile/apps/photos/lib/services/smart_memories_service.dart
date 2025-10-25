@@ -27,6 +27,7 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/models/memories/time_memory.dart";
 import "package:photos/models/memories/trip_memory.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
@@ -185,9 +186,20 @@ class SmartMemoriesService {
     final allFilesFromSearchService = Set<EnteFile>.from(
       await SearchService.instance.getAllFilesForSearch(),
     );
+    final archivedOrHiddenCollectionIDs =
+        CollectionsService.instance.archivedOrHiddenCollectionIds();
     final Set<EnteFile> allFiles = {};
     for (final file in allFilesFromSearchService) {
       if (file.uploadedFileID != null && file.creationTime != null) {
+        if (file.magicMetadata.visibility == archiveVisibility ||
+            file.magicMetadata.visibility == hiddenVisibility) {
+          continue;
+        }
+        final collectionID = file.collectionID;
+        if (collectionID != null &&
+            archivedOrHiddenCollectionIDs.contains(collectionID)) {
+          continue;
+        }
         allFiles.add(file);
       }
     }
@@ -1691,7 +1703,9 @@ class SmartMemoriesService {
       'document',
     };
 
-    final excludedCollectionIDs = <int>{};
+    final excludedCollectionIDs = Set<int>.from(
+      CollectionsService.instance.archivedOrHiddenCollectionIds(),
+    );
     collectionLoop:
     for (final collection in collections) {
       final collectionName = collection.displayName.toLowerCase();
