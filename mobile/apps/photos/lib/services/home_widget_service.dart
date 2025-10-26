@@ -5,23 +5,25 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart' as paint;
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:home_widget/home_widget.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:synchronized/synchronized.dart';
+
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
-import 'package:photos/utils/thumbnail_util.dart';
 import 'package:photos/utils/file_util.dart';
-import "package:synchronized/synchronized.dart";
-import 'package:flutter/painting.dart' as paint;
+import 'package:photos/utils/thumbnail_util.dart';
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -237,7 +239,7 @@ class HomeWidgetService {
   ) async {
     try {
       late final ImageProvider imageProvider;
-      final double size = THUMBNAIL_SIZE_V2;
+      const double size = THUMBNAIL_SIZE_V2;
 
       // For local files (images, videos, live photos), use PhotoManager's high-res thumbnails
       if (!file.isRemoteFile) {
