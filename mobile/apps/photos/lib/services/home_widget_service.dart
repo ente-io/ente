@@ -256,7 +256,9 @@ class HomeWidgetService {
           return false;
         }
 
-        imageProvider = FileImage(imageFile);
+        // Read bytes into memory for widget rendering
+        final Uint8List imageBytes = await imageFile.readAsBytes();
+        imageProvider = MemoryImage(imageBytes);
       }
       // Remote videos/live photos fall back to V1 (avoid large downloads)
       else {
