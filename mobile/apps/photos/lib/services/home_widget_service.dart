@@ -21,6 +21,7 @@ import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import 'package:photos/utils/file_util.dart';
 import "package:synchronized/synchronized.dart";
+import 'package:flutter/painting.dart' as paint;
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -36,18 +37,15 @@ enum WidgetStatus {
 }
 
 // Top-level function for isolate to read and validate image file
-// Uses ui.instantiateImageCodec which works in isolates without PaintingBinding
+// Uses the same pattern as image_ml_util.dart decodeImageFromData
 Future<Uint8List> _readAndValidateImageInIsolate(String filePath) async {
   final file = File(filePath);
   final Uint8List imageBytes = await file.readAsBytes();
 
   // Decode to validate the image can be decoded
-  // Use ui.instantiateImageCodec instead of paint.decodeImageFromList
-  // because PaintingBinding is not available in compute isolates
-  final ui.Codec codec = await ui.instantiateImageCodec(imageBytes);
-  final ui.FrameInfo frameInfo = await codec.getNextFrame();
-  frameInfo.image.dispose();
-  codec.dispose();
+  // Same approach as utils/image_ml_util.dart which uses this in isolates
+  final ui.Image decodedImage = await paint.decodeImageFromList(imageBytes);
+  decodedImage.dispose();
 
   // Return bytes for use with MemoryImage
   return imageBytes;
