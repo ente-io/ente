@@ -227,52 +227,11 @@ class HomeWidgetService {
   ) async {
     try {
       late final ImageProvider imageProvider;
-      late final double size;
+      final double size = THUMBNAIL_SIZE_V2;
 
-      // For images, use full file decoding for highest quality
-      if (file.fileType == FileType.image) {
-        // Get full image file
-        final File? imageFile = file.isRemoteFile
-            ? await getFileFromServer(file)
-            : await getFile(file);
-
-        if (imageFile == null) {
-          _logger.warning("Failed to get file for V2 widget ${file.displayName}");
-          return false;
-        }
-
-        // Read image bytes and decode to get dimensions
-        final Uint8List imageBytes = await imageFile.readAsBytes();
-
-        // Decode image in isolate to avoid UI jank
-        final ui.Image decodedImage = await compute(
-          _decodeImageInIsolate,
-          imageBytes,
-        );
-
-        final width = decodedImage.width.toDouble();
-        final height = decodedImage.height.toDouble();
-        final minDimension = width < height ? width : height;
-        size = minDimension < THUMBNAIL_SIZE_V2 ? minDimension : THUMBNAIL_SIZE_V2;
-
-        // Clean up decoded image
-        decodedImage.dispose();
-
-        // Create image provider from file
-        imageProvider = FileImage(imageFile);
-      }
-      // For videos and live photos, use high-res thumbnails (local only)
-      else if (file.fileType == FileType.video || file.fileType == FileType.livePhoto) {
-        // Only local files can get high-res thumbnails from PhotoManager
-        // Remote files would require downloading full video, which is too expensive
-        if (file.isRemoteFile) {
-          _logger.info(
-            "Skipping V2 for remote ${file.fileType} file: ${file.displayName}",
-          );
-          return false;
-        }
-
-        // Request high-quality thumbnail from PhotoManager (1024px instead of 512px)
+      // For local files (images, videos, live photos), use PhotoManager's high-res thumbnails
+      if (!file.isRemoteFile) {
+        // Request 1024px thumbnail from PhotoManager (efficient for all file types)
         final Uint8List? thumbnail = await getThumbnailFromLocal(
           file,
           size: THUMBNAIL_SIZE_V2.toInt(),
@@ -285,13 +244,25 @@ class HomeWidgetService {
           return false;
         }
 
-        // PhotoManager already returns thumbnail at requested size
+        // PhotoManager returns thumbnails at requested size
         imageProvider = MemoryImage(thumbnail);
-        size = THUMBNAIL_SIZE_V2;
       }
-      // Other file types fall back to V1
+      // For remote images, download full file for best quality
+      else if (file.fileType == FileType.image) {
+        final File? imageFile = await getFileFromServer(file);
+
+        if (imageFile == null) {
+          _logger.warning("Failed to get file for V2 widget ${file.displayName}");
+          return false;
+        }
+
+        imageProvider = FileImage(imageFile);
+      }
+      // Remote videos/live photos fall back to V1 (avoid large downloads)
       else {
-        _logger.info("Skipping V2 for file type: ${file.fileType}");
+        _logger.info(
+          "Skipping V2 for remote ${file.fileType} file: ${file.displayName}",
+        );
         return false;
       }
 
