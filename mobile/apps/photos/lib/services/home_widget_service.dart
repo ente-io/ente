@@ -226,70 +226,74 @@ class HomeWidgetService {
     String? mainKey,
   ) async {
     try {
+      late final ImageProvider imageProvider;
+      late final double size;
+
       // For images, use full file decoding for highest quality
       if (file.fileType == FileType.image) {
-        return await _captureImageV2(file, key, title, mainKey);
-      }
+        // Get full image file
+        final File? imageFile = file.isRemoteFile
+            ? await getFileFromServer(file)
+            : await getFile(file);
 
+        if (imageFile == null) {
+          _logger.warning("Failed to get file for V2 widget ${file.displayName}");
+          return false;
+        }
+
+        // Read image bytes and decode to get dimensions
+        final Uint8List imageBytes = await imageFile.readAsBytes();
+
+        // Decode image in isolate to avoid UI jank
+        final ui.Image decodedImage = await compute(
+          _decodeImageInIsolate,
+          imageBytes,
+        );
+
+        final width = decodedImage.width.toDouble();
+        final height = decodedImage.height.toDouble();
+        final minDimension = width < height ? width : height;
+        size = minDimension < THUMBNAIL_SIZE_V2 ? minDimension : THUMBNAIL_SIZE_V2;
+
+        // Clean up decoded image
+        decodedImage.dispose();
+
+        // Create image provider from file
+        imageProvider = FileImage(imageFile);
+      }
       // For videos and live photos, use high-res thumbnails (local only)
-      if (file.fileType == FileType.video || file.fileType == FileType.livePhoto) {
+      else if (file.fileType == FileType.video || file.fileType == FileType.livePhoto) {
         // Only local files can get high-res thumbnails from PhotoManager
         // Remote files would require downloading full video, which is too expensive
-        if (!file.isRemoteFile) {
-          return await _captureVideoOrLivePhotoV2(file, key, title, mainKey);
-        } else {
+        if (file.isRemoteFile) {
           _logger.info(
             "Skipping V2 for remote ${file.fileType} file: ${file.displayName}",
           );
           return false;
         }
+
+        // Request high-quality thumbnail from PhotoManager (1024px instead of 512px)
+        final Uint8List? thumbnail = await getThumbnailFromLocal(
+          file,
+          size: THUMBNAIL_SIZE_V2.toInt(),
+        );
+
+        if (thumbnail == null) {
+          _logger.warning(
+            "Failed to get high-res thumbnail for V2 widget ${file.displayName}",
+          );
+          return false;
+        }
+
+        // PhotoManager already returns thumbnail at requested size
+        imageProvider = MemoryImage(thumbnail);
+        size = THUMBNAIL_SIZE_V2;
       }
-
       // Other file types fall back to V1
-      _logger.info("Skipping V2 for file type: ${file.fileType}");
-      return false;
-    } catch (error, stackTrace) {
-      _logger.severe("Failed to save V2 widget", error, stackTrace);
-      return false;
-    }
-  }
-
-  Future<bool> _captureImageV2(
-    EnteFile file,
-    String key,
-    String title,
-    String? mainKey,
-  ) async {
-    try {
-      // Get full image file or high quality version
-      final File? imageFile = file.isRemoteFile
-          ? await getFileFromServer(file)
-          : await getFile(file);
-
-      if (imageFile == null) {
-        _logger.warning("Failed to get file for V2 widget ${file.displayName}");
+      else {
+        _logger.info("Skipping V2 for file type: ${file.fileType}");
         return false;
       }
-
-      // Read image bytes and decode to get dimensions
-      final Uint8List imageBytes = await imageFile.readAsBytes();
-
-      // Decode image in isolate to avoid UI jank
-      final ui.Image decodedImage = await compute(
-        _decodeImageInIsolate,
-        imageBytes,
-      );
-
-      final width = decodedImage.width.toDouble();
-      final height = decodedImage.height.toDouble();
-      final minDimension = width < height ? width : height;
-      final size = minDimension < THUMBNAIL_SIZE_V2 ? minDimension : THUMBNAIL_SIZE_V2;
-
-      // Clean up decoded image
-      decodedImage.dispose();
-
-      // Create image provider from file
-      final imageProvider = FileImage(imageFile);
 
       // Create widget with image
       final widget = ClipRRect(
@@ -332,76 +336,7 @@ class HomeWidgetService {
 
       return true;
     } catch (error, stackTrace) {
-      _logger.severe("Failed to save image V2", error, stackTrace);
-      return false;
-    }
-  }
-
-  Future<bool> _captureVideoOrLivePhotoV2(
-    EnteFile file,
-    String key,
-    String title,
-    String? mainKey,
-  ) async {
-    try {
-      // Request high-quality thumbnail from PhotoManager (1024px instead of 512px)
-      final Uint8List? thumbnail = await getThumbnailFromLocal(
-        file,
-        size: THUMBNAIL_SIZE_V2.toInt(),
-      );
-
-      if (thumbnail == null) {
-        _logger.warning(
-          "Failed to get high-res thumbnail for V2 widget ${file.displayName}",
-        );
-        return false;
-      }
-
-      // PhotoManager already returns thumbnail at requested size, no need to decode for dimensions
-      final imageProvider = MemoryImage(thumbnail);
-
-      // Create widget with image
-      final widget = ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: Container(
-          width: THUMBNAIL_SIZE_V2,
-          height: THUMBNAIL_SIZE_V2,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      );
-
-      // Render widget using home_widget package
-      await hw.HomeWidget.renderFlutterWidget(
-        widget,
-        logicalSize: const Size(THUMBNAIL_SIZE_V2, THUMBNAIL_SIZE_V2),
-        key: key,
-      );
-
-      // Format date for display
-      final subText = await SmartMemoriesService.getDateFormattedLocale(
-        creationTime: file.creationTime!,
-      );
-
-      // Create metadata
-      final Map<String, dynamic> metadata = {
-        "title": title,
-        "subText": subText,
-        "generatedId": file.generatedID!,
-        if (mainKey != null) "mainKey": mainKey,
-      };
-
-      // Save metadata in platform-specific format
-      await _saveWidgetMetadata(key, metadata);
-
-      return true;
-    } catch (error, stackTrace) {
-      _logger.severe("Failed to save video/live photo V2", error, stackTrace);
+      _logger.severe("Failed to save V2 widget", error, stackTrace);
       return false;
     }
   }
