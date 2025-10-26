@@ -41,6 +41,19 @@ Future<ui.Image> _decodeImageInIsolate(Uint8List imageBytes) async {
   return await paint.decodeImageFromList(imageBytes);
 }
 
+// Top-level function for isolate to read and validate image file
+Future<Uint8List> _readAndValidateImageInIsolate(String filePath) async {
+  final file = File(filePath);
+  final Uint8List imageBytes = await file.readAsBytes();
+
+  // Decode to validate the image can be decoded
+  final ui.Image decodedImage = await paint.decodeImageFromList(imageBytes);
+  decodedImage.dispose();
+
+  // Return bytes for use with MemoryImage
+  return imageBytes;
+}
+
 /// Service to manage home screen widgets across the application
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {
@@ -256,17 +269,11 @@ class HomeWidgetService {
           return false;
         }
 
-        // Read bytes into memory
-        final Uint8List imageBytes = await imageFile.readAsBytes();
-
-        // Decode in isolate to validate and avoid blocking main thread
-        final ui.Image decodedImage = await compute(
-          _decodeImageInIsolate,
-          imageBytes,
+        // Read and validate in isolate to avoid blocking main thread
+        final Uint8List imageBytes = await compute(
+          _readAndValidateImageInIsolate,
+          imageFile.path,
         );
-
-        // Clean up decoded image (we just needed it for validation)
-        decodedImage.dispose();
 
         imageProvider = MemoryImage(imageBytes);
       }
