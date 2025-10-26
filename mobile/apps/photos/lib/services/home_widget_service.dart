@@ -256,8 +256,18 @@ class HomeWidgetService {
           return false;
         }
 
-        // Read bytes into memory for widget rendering
+        // Read bytes into memory
         final Uint8List imageBytes = await imageFile.readAsBytes();
+
+        // Decode in isolate to validate and avoid blocking main thread
+        final ui.Image decodedImage = await compute(
+          _decodeImageInIsolate,
+          imageBytes,
+        );
+
+        // Clean up decoded image (we just needed it for validation)
+        decodedImage.dispose();
+
         imageProvider = MemoryImage(imageBytes);
       }
       // Remote videos/live photos fall back to V1 (avoid large downloads)
