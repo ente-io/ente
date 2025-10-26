@@ -357,29 +357,15 @@ class HomeWidgetService {
         return false;
       }
 
-      // Decode thumbnail to get dimensions
-      final ui.Image decodedImage = await compute(
-        _decodeImageInIsolate,
-        thumbnail,
-      );
-
-      final width = decodedImage.width.toDouble();
-      final height = decodedImage.height.toDouble();
-      final minDimension = width < height ? width : height;
-      final size = minDimension < THUMBNAIL_SIZE_V2 ? minDimension : THUMBNAIL_SIZE_V2;
-
-      // Clean up decoded image
-      decodedImage.dispose();
-
-      // Create image provider from thumbnail bytes
+      // PhotoManager already returns thumbnail at requested size, no need to decode for dimensions
       final imageProvider = MemoryImage(thumbnail);
 
       // Create widget with image
       final widget = ClipRRect(
         borderRadius: BorderRadius.circular(32),
         child: Container(
-          width: size,
-          height: size,
+          width: THUMBNAIL_SIZE_V2,
+          height: THUMBNAIL_SIZE_V2,
           decoration: BoxDecoration(
             color: Colors.black,
             image: DecorationImage(
@@ -393,7 +379,7 @@ class HomeWidgetService {
       // Render widget using home_widget package
       await hw.HomeWidget.renderFlutterWidget(
         widget,
-        logicalSize: Size(size, size),
+        logicalSize: const Size(THUMBNAIL_SIZE_V2, THUMBNAIL_SIZE_V2),
         key: key,
       );
 
