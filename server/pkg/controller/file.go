@@ -25,6 +25,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo"
@@ -410,7 +411,7 @@ func (c *FileController) getSignedURLForType(ctx *gin.Context, fileID int64, obj
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	return c.getHotDcSignedUrl(s3Object.ObjectKey)
+	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
 }
 
 // ignore lint unused inspection
@@ -429,10 +430,10 @@ func (c *FileController) getWasabiSignedUrlIfAvailable(fileID int64, objType ent
 	}
 	for _, dc := range dcs {
 		if dc == c.S3Config.GetHotWasabiDC() {
-			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc)
+			return c.getPreSignedURLForDC(s3Object.ObjectKey, dc, objType)
 		}
 	}
-	return c.getHotDcSignedUrl(s3Object.ObjectKey)
+	return c.getHotDcSignedUrl(s3Object.ObjectKey, objType)
 }
 
 // Trash deletes file and move them to trash
@@ -802,21 +803,31 @@ func (c *FileController) cleanupDeletedFile(qItem repo.QueueItem) {
 	ctxLogger.Info("Successfully deleted item")
 }
 
-func (c *FileController) getHotDcSignedUrl(objectKey string) (string, error) {
+func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.ObjectType) (string, error) {
 	s3Client := c.S3Config.GetHotS3Client()
-	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetHotBucket(),
 		Key:    &objectKey,
-	})
+	}
+	input.ResponseContentDisposition = aws.String("attachment")
+	if objType == ente.FILE || objType == ente.THUMBNAIL {
+		input.ResponseContentType = aws.String("application/octet-stream")
+	}
+	r, _ := s3Client.GetObjectRequest(input)
 	return r.Presign(PreSignedRequestValidityDuration)
 }
 
-func (c *FileController) getPreSignedURLForDC(objectKey string, dc string) (string, error) {
+func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objType ente.ObjectType) (string, error) {
 	s3Client := c.S3Config.GetS3Client(dc)
-	r, _ := s3Client.GetObjectRequest(&s3.GetObjectInput{
+	input := &s3.GetObjectInput{
 		Bucket: c.S3Config.GetBucket(dc),
 		Key:    &objectKey,
-	})
+	}
+	input.ResponseContentDisposition = aws.String("attachment")
+	if objType == ente.FILE || objType == ente.THUMBNAIL {
+		input.ResponseContentType = aws.String("application/octet-stream")
+	}
+	r, _ := s3Client.GetObjectRequest(input)
 	return r.Presign(PreSignedRequestValidityDuration)
 }
 
