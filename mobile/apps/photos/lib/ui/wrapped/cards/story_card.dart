@@ -17,6 +17,30 @@ final List<_CardContentBuilder> _cardContentBuilders = <_CardContentBuilder>[
   buildBadgeDebugCardContent,
 ];
 
+// Boost saturation so blurred backgrounds stay vibrant while we overlay gradients.
+const List<double> _kSaturationBoostMatrix = <double>[
+  1.27559,
+  -0.25032,
+  -0.02527,
+  0,
+  0,
+  -0.07441,
+  1.09968,
+  -0.02527,
+  0,
+  0,
+  -0.07441,
+  -0.25032,
+  1.32473,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+];
+
 class _StoryCard extends StatelessWidget {
   const _StoryCard({
     required this.card,
@@ -65,9 +89,11 @@ class _StoryCard extends StatelessWidget {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              colorScheme.backgroundElevated.withOpacity(0.82),
-                              colorScheme.backgroundElevated.withOpacity(0.6),
+                              colorScheme.backgroundElevated.withOpacity(0.45),
+                              colorScheme.backgroundElevated.withOpacity(0.2),
+                              colorScheme.backgroundElevated.withOpacity(0.08),
                             ],
+                            stops: const <double>[0.0, 0.6, 1.0],
                           ),
                         ),
                       ),
@@ -170,19 +196,22 @@ class _BlurredMediaBackgroundState extends State<_BlurredMediaBackground> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ImageFiltered(
-                imageFilter: ui.ImageFilter.blur(sigmaX: 36, sigmaY: 36),
-                child: ThumbnailWidget(
-                  file,
-                  fit: BoxFit.cover,
-                  rawThumbnail: true,
-                  shouldShowSyncStatus: false,
-                  shouldShowArchiveStatus: false,
-                  shouldShowPinIcon: false,
-                  shouldShowOwnerAvatar: false,
-                  shouldShowFavoriteIcon: false,
-                  shouldShowVideoDuration: false,
-                  shouldShowVideoOverlayIcon: false,
+              ColorFiltered(
+                colorFilter: const ColorFilter.matrix(_kSaturationBoostMatrix),
+                child: ImageFiltered(
+                  imageFilter: ui.ImageFilter.blur(sigmaX: 36, sigmaY: 36),
+                  child: ThumbnailWidget(
+                    file,
+                    fit: BoxFit.cover,
+                    rawThumbnail: true,
+                    shouldShowSyncStatus: false,
+                    shouldShowArchiveStatus: false,
+                    shouldShowPinIcon: false,
+                    shouldShowOwnerAvatar: false,
+                    shouldShowFavoriteIcon: false,
+                    shouldShowVideoDuration: false,
+                    shouldShowVideoOverlayIcon: false,
+                  ),
                 ),
               ),
             ],
