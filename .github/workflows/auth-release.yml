@@ -203,9 +203,11 @@ jobs:
                   make innoinstall
                   flutter_distributor package --platform=windows --targets=exe --skip-clean
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+              shell: bash
 
             - name: Retain Windows EXE and DLLs
               run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
+              shell: bash
 
             - name: Sign files with Trusted Signing
               uses: azure/trusted-signing-action@v0
@@ -226,9 +228,11 @@ jobs:
 
             - name: Zip Windows EXE and DLLs
               run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
+              shell: bash
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows
+              shell: bash
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
