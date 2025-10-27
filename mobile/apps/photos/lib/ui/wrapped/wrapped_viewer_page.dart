@@ -274,15 +274,15 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   void _handleTapDown(TapDownDetails details, BoxConstraints constraints) {
     final double dx = details.localPosition.dx;
     final double width = constraints.maxWidth;
-    final double leftZone = width / 3;
-    final double rightZone = width * 2 / 3;
-    if (dx < leftZone) {
+    final double leftZoneBoundary = width * 0.25;
+    final double rightZoneBoundary = width * 0.75;
+    if (dx < leftZoneBoundary) {
       if (_progressController.value > 0.1) {
         _configureForCurrentCard(restartProgress: true);
       } else {
         unawaited(_goToIndex(_currentIndex - 1));
       }
-    } else if (dx > rightZone) {
+    } else if (dx > rightZoneBoundary) {
       unawaited(_goToIndex(_currentIndex + 1));
     } else {
       _togglePause();
