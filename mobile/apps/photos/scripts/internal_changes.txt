@@ -1,4 +1,4 @@
-- Prateek: Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
+- Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
 - Ashil: Fix full screen state getting disabled when swiping to video
 - Ashil: Remove long-press icon to switch to media kit player 
 - Neeraj & Laurens: fix OCR iOS issues and remove feature flag
