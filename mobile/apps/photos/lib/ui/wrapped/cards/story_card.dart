@@ -39,21 +39,156 @@ class _StoryCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         child: Material(
-          color: isBadge ? Colors.transparent : colorScheme.backgroundElevated,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: isBadge
-                ? EdgeInsets.zero
-                : const EdgeInsets.fromLTRB(24, 28, 24, 32),
-            child: _CardContent(
-              card: card,
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-            ),
-          ),
+          child: isBadge
+              ? Padding(
+                  padding: EdgeInsets.zero,
+                  child: _CardContent(
+                    card: card,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                  ),
+                )
+              : Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _StoryCardBackground(
+                      card: card,
+                      colorScheme: colorScheme,
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              colorScheme.backgroundElevated.withOpacity(0.82),
+                              colorScheme.backgroundElevated.withOpacity(0.6),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+                      child: _CardContent(
+                        card: card,
+                        colorScheme: colorScheme,
+                        textTheme: textTheme,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
+    );
+  }
+}
+
+class _StoryCardBackground extends StatelessWidget {
+  const _StoryCardBackground({
+    required this.card,
+    required this.colorScheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (card.media.isEmpty) {
+      return Container(color: colorScheme.backgroundElevated);
+    }
+    final MediaRef primary = card.media.first;
+    if (primary.uploadedFileID <= 0) {
+      return Container(color: colorScheme.backgroundElevated);
+    }
+    return _BlurredMediaBackground(
+      mediaRef: primary,
+      colorScheme: colorScheme,
+    );
+  }
+}
+
+class _BlurredMediaBackground extends StatefulWidget {
+  const _BlurredMediaBackground({
+    required this.mediaRef,
+    required this.colorScheme,
+  });
+
+  final MediaRef mediaRef;
+  final EnteColorScheme colorScheme;
+
+  @override
+  State<_BlurredMediaBackground> createState() =>
+      _BlurredMediaBackgroundState();
+}
+
+class _BlurredMediaBackgroundState extends State<_BlurredMediaBackground> {
+  late Future<EnteFile?> _fileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _fileFuture = _loadFile();
+  }
+
+  @override
+  void didUpdateWidget(covariant _BlurredMediaBackground oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.mediaRef.uploadedFileID != widget.mediaRef.uploadedFileID) {
+      _fileFuture = _loadFile();
+    }
+  }
+
+  Future<EnteFile?> _loadFile() {
+    return FilesDB.instance.getAnyUploadedFile(
+      widget.mediaRef.uploadedFileID,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<EnteFile?>(
+      future: _fileFuture,
+      builder: (BuildContext context, AsyncSnapshot<EnteFile?> snapshot) {
+        if (!snapshot.hasData) {
+          return Container(
+            color: widget.colorScheme.backgroundElevated,
+          );
+        }
+        final EnteFile? file = snapshot.data;
+        if (file == null) {
+          return Container(
+            color: widget.colorScheme.backgroundElevated,
+          );
+        }
+        return ClipRect(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 36, sigmaY: 36),
+                child: ThumbnailWidget(
+                  file,
+                  fit: BoxFit.cover,
+                  rawThumbnail: true,
+                  shouldShowSyncStatus: false,
+                  shouldShowArchiveStatus: false,
+                  shouldShowPinIcon: false,
+                  shouldShowOwnerAvatar: false,
+                  shouldShowFavoriteIcon: false,
+                  shouldShowVideoDuration: false,
+                  shouldShowVideoOverlayIcon: false,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
