@@ -1,3 +1,4 @@
+- Laurens: remove archived photos from memories
 - Neeraj: Fix thumbnail bg in native video player widget
 - Ashil: Fix full screen state getting disabled when swiping to video
 - Ashil: Remove long-press icon to switch to media kit player 
