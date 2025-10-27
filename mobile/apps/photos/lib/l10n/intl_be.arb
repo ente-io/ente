@@ -237,7 +237,7 @@
   "after1Month": "Праз 1 месяц",
   "after1Year": "Праз 1 год",
   "manageParticipants": "Кіраванне",
-  "albumParticipantsCount": "{count, plural, =0 {Няма ўдзельнікаў} =1 {{count} удзельнік} other {{count} удзельнікаў}}",
+  "albumParticipantsCount": "{count, plural, =0 {Няма ўдзельнікаў} =1 {1 удзельнік} few {{count} удзельнікі} many {{count} удзельнікаў} other {{count} удзельнікаў}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -260,7 +260,7 @@
   "publicLinkEnabled": "Публічная спасылка ўключана",
   "shareALink": "Абагуліць спасылку",
   "sharedAlbumSectionDescription": "Стварайце абагуленыя і сумесныя альбомы з іншымі карыстальнікамі Ente, уключаючы карыстальнікаў з бясплатным тарыфным планам.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Абагуліць з іншымі} =1 {Абагулена з 1 чалавекам} other {Абагулена з {numberOfPeople} людзьмі}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Абагуліць з пэўнымі людзьмі} =1 {Абагулена з 1 чалавекам} other {Абагулена з {numberOfPeople} людзьмі}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -301,7 +301,7 @@
   "unavailableReferralCode": "На жаль, гэты код ужо недаступны.",
   "codeChangeLimitReached": "На жаль, вы дасягнулі абмежавання па колькасці змяненняў кода.",
   "onlyFamilyAdminCanChangeCode": "Напішыце {familyAdminEmail}, каб змяніць код.",
-  "storageInGB": "{storageAmountInGB} Гб",
+  "storageInGB": "{storageAmountInGB} ГБ",
   "claimed": "Атрымана",
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
@@ -319,7 +319,7 @@
   "referralStep3": "3. Вы абодва атрымаеце {storageInGB} ГБ* бясплатнага сховішча",
   "referralsAreCurrentlyPaused": "Рэфералы ў цяперашні момант прыпынены",
   "youCanAtMaxDoubleYourStorage": "* Вы можаце павялічыць сховішча максімум у два разы",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сям'я атрымала {storageAmountInGb} ГБ} false {Вы атрымалі {storageAmountInGb} ГБ} other {Вы атрымалі {storageAmountInGb} ГБ!}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сям'я атрымала {storageAmountInGb} ГБ} false {Вы атрымалі {storageAmountInGb} ГБ} other {У дадзены момант вы атрымалі {storageAmountInGb} ГБ!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {
@@ -390,7 +390,7 @@
   "deleteFromBoth": "Выдаліць і ў Ente, і на вашай прыладзе",
   "newAlbum": "Новы альбом",
   "albums": "Альбомы",
-  "memoryCount": "{count, plural, =0{няма ўспамінаў} one{{formattedCount} успамін} other{{formattedCount} успамінаў}}",
+  "memoryCount": "{count, plural, =0{няма ўспамінаў} one{{formattedCount} успамін} few {{formattedCount} успаміны} many {{formattedCount} успамінаў} other{{formattedCount} успамінаў}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -405,7 +405,7 @@
       }
     }
   },
-  "selectedPhotos": "Выбрана {count}",
+  "selectedPhotos": "Выбрана: {count}",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
     "type": "text",
@@ -416,7 +416,7 @@
       }
     }
   },
-  "selectedPhotosWithYours": "{count} выбрана ({yourCount} вашы)",
+  "selectedPhotosWithYours": "Выбрана: {count} ({yourCount} вашы)",
   "@selectedPhotosWithYours": {
     "description": "Display the number of selected photos, including the number of selected photos owned by the user",
     "type": "text",
@@ -477,9 +477,9 @@
   "selectAll": "Абраць усё",
   "skip": "Прапусціць",
   "updatingFolderSelection": "Абнаўленне выбару папкі...",
-  "itemCount": "{count, plural, one{{count} элемент} few{{count} элемента} other{{count} элементаў}}",
-  "deleteItemCount": "{count, plural, =1 {Выдаліць {count} элемент} few{Выдаліць {count} элемента} other {Выдаліць {count} элементаў}}",
-  "duplicateItemsGroup": "{count} файлаў, кожны {formattedSize}",
+  "itemCount": "{count, plural, one{{count} элемент} few{{count} элементы} other{{count} элементаў}}",
+  "deleteItemCount": "{count, plural, =1 {Выдаліць {count} элемент} few{Выдаліць {count} элементы} other {Выдаліць {count} элементаў}}",
+  "duplicateItemsGroup": "Файлаў: {count}; кожны з іх па {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
     "type": "text",
@@ -503,7 +503,7 @@
   "backupVideos": "Рэзервовае капіяванне відэа",
   "disableAutoLock": "Адключыць аўтаблакіроўку",
   "deviceLockExplanation": "Адключыць блакіроўку экрана, калі Ente знаходзіцца на пярэднім плане і выконваецца рэзервовае капіяванне. У большасці выпадкаў гэта не патрабуецца, але можа дапамагчы з вялікімі запампоўваннямі і пры першапачатковым імпартаванні вялікіх бібліятэк.",
-  "about": "Пра праграму",
+  "about": "Аб праграме",
   "weAreOpenSource": "Праграма мае адкрыты зыходны код!",
   "privacy": "Прыватнасць",
   "terms": "Умовы",
@@ -537,13 +537,13 @@
   "backup": "Рэзервовая копія",
   "freeUpDeviceSpace": "Вызваленне месца на прыладзе",
   "freeUpDeviceSpaceDesc": "Вызваліце месца на вашай прыладзе, ачысціўшы файлы, якія ўжо адрэзерваваны.",
-  "allClear": "✨ Усё ачышчана",
+  "allClear": "✨ Усё лаканічна",
   "noDeviceThatCanBeDeleted": "На гэтай прыладзе няма файлаў для выдалення",
   "removeDuplicates": "Выдаліць дублікаты",
   "removeDuplicatesDesc": "Пераглядзіце і выдаліце файлы-дублікаты.",
   "viewLargeFiles": "Вялікія файлы",
   "viewLargeFilesDesc": "Праглядзіце файлы, якія займаюць найбольш месца на прыладзе.",
-  "noDuplicates": "✨ Няма дублікатаў",
+  "noDuplicates": "✨ Без дублікатаў",
   "youveNoDuplicateFilesThatCanBeCleared": "У вас няма дубліраваных файлаў, якія можна ачысціць",
   "success": "Паспяхова",
   "rateUs": "Ацаніце нас",
@@ -560,7 +560,7 @@
     }
   },
   "remindToEmptyEnteTrash": "Таксама ачысціце сметніцу, каб вызваліць месца",
-  "sparkleSuccess": "✨ Паспяхова",
+  "sparkleSuccess": "✨ Поспех",
   "duplicateFileCountWithStorageSaved": "Вы выдалілі {count, plural, one{{count} дублікат} few{{count} дубліката} other{{count} дублікатаў}}, вызваліўшы ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
@@ -581,7 +581,7 @@
   "notifications": "Апавяшчэнні",
   "sharedPhotoNotifications": "Новыя абагульненыя фота",
   "sharedPhotoNotificationsExplanation": "Атрымліваць апавяшчэнні, калі хтосьці дадае фота ў абагульнены альбом, да якога вы належыце",
-  "advanced": "Пашыраныя",
+  "advanced": "Дадаткова",
   "general": "Асноўныя",
   "security": "Бяспека",
   "authToViewYourRecoveryKey": "Прайдзіце аўтэнтыфікацыю, каб паглядзець свае ключы аднаўлення",
@@ -812,11 +812,11 @@
   "share": "Абагуліць",
   "unhideToAlbum": "Паказаць альбом",
   "restoreToAlbum": "Аднавіць у альбом",
-  "moveItem": "{count, plural, =1 {Move item} other {Move items}}",
+  "moveItem": "{count, plural, =1 {Перамясціць элемент} other {Перамясціць элементы}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {Add item} other {Add items}}",
+  "addItem": "{count, plural, =1 {Дадаць элемент} other {Дадаць элементы}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -830,7 +830,7 @@
   "unhidingFilesToAlbum": "Паказ файлаў у альбоме",
   "canNotUploadToAlbumsOwnedByOthers": "Нельга запампоўваць у альбомы, якія належаць іншым",
   "uploadingFilesToAlbum": "Запампоўванне файлаў у альбом...",
-  "addedSuccessfullyTo": "Паспяхова дадзена ў {albumName}",
+  "addedSuccessfullyTo": "Паспяхова дададзена ў {albumName}",
   "movedSuccessfullyTo": "Паспяхова перамешчана ў {albumName}",
   "thisAlbumAlreadyHDACollaborativeLink": "У гэтага альбома ўжо ёсць сумесную спасылку",
   "collaborativeLinkCreatedFor": "Сумесная спасылка створана для {albumName}",
@@ -844,7 +844,7 @@
   "referFriendsAnd2xYourPlan": "Запрасіце сяброў і падвойце свой тарыфны план",
   "shareAlbumHint": "Адкрыйце альбом і націсніце кнопку абагульвання ў верхнім правым куце.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "На элементах паказваецца колькасць дзён, якія засталіся да іх незваротнага выдалення",
-  "trashDaysLeft": "{count, plural, =0 {Хутка} =1 {1 дзень}  other {{count} дні/дзён}}",
+  "trashDaysLeft": "{count, plural, =0 {Неўзабаве} =1{1 дзень} few {{count} дні} other{{count} дзён}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -918,8 +918,47 @@
   "unlock": "Разблакіраваць",
   "freeUpSpace": "Вызваліць прастору",
   "freeUpSpaceSaving": "{count, plural, =1 {Яго можна выдаліць з прылады, каб вызваліць {formattedSize}} other {Іх можна выдаліць з прылады, каб вызваліць {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {Для 1 файла ў} other {Для {formattedNumber} файлаў у}} гэтым альбоме была створана рэзервовая копія",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {Для 1 файла} other {Для {formattedNumber} файлаў}} на гэтай прыладзе была створана рэзервовая копія",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Вы ўсё яшчэ можаце атрымаць доступ да {count, plural, =1 {яго ў} other {іх у}} Ente, пакуль у вас актыўная падпіска",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
   },
   "freeUpAmount": "Вызваліць {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Гэта электронная пошта ўжо выкарыстоўваецца",
@@ -1382,6 +1421,26 @@
   "enableMachineLearningBanner": "Уключыць машыннае навучанне для магічнага пошуку і распазнавання твару",
   "searchDiscoverEmptySection": "Відарысы будуць паказаны тут пасля завяршэння апрацоўкі і сінхранізацыі",
   "searchPersonsEmptySection": "Людзі будуць паказаны тут пасля завяршэння апрацоўкі і сінхранізацыі",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Дададзены 0 праглядальнікаў} =1 {Дададзены 1 праглядальнік} few {Дададзены {count} праглядальнікі} many {Дададзены {count} праглядальнікаў} other {Дададзены {count} праглядальнікаў}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Дададзены 0 суаўтараў} =1 {Дададзены 1 суаўтар} few {Дададзены {count} суаўтары} many {Дададзены {count} суаўтараў} other {Дададзены {count} суаўтараў}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
   "accountIsAlreadyConfigured": "Уліковы запіс ужо сканфігурыраваны.",
   "sessionIdMismatch": "Неадпаведнасць ідэнтыфікатара сеанса",
   "@sessionIdMismatch": {
@@ -1447,6 +1506,15 @@
   },
   "currentlyRunning": "цяпер выконваецца",
   "ignored": "ігнаруецца",
+  "photosCount": "{count, plural, =0 {0 фатаграфій} =1 {1 фатаграфія} few {{count} фатаграфіі} many {{count} фатаграфій} other {{count} фатаграфій}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Файл",
   "searchSectionsLengthMismatch": "Неадпаведнасць даўжыні раздзелаў: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1476,7 +1544,7 @@
   "openAlbumInBrowser": "Адкрыць альбом у браўзеры",
   "openAlbumInBrowserTitle": "Скарыстайцеся вэб-праграмай, каб дадаць фатаграфіі ў гэты альбом",
   "allow": "Дазволіць",
-  "allowAppToOpenSharedAlbumLinks": "Дазволіць праграма адкрываць спасылкі на агульныя альбомы",
+  "allowAppToOpenSharedAlbumLinks": "Дазволіць праграме адкрываць спасылкі на агульныя альбомы",
   "seePublicAlbumLinksInApp": "Праглядаць публічныя спасылкі на альбомы ў праграме",
   "emergencyContacts": "Экстранныя кантакты",
   "acceptTrustInvite": "Прыняць запрашэнне",
@@ -1538,7 +1606,6 @@
   },
   "legacyInvite": "{email} запрасіў вас стаць давераным кантактам",
   "authToManageLegacy": "Прайдзіце аўтэнтыфікацыю, каб кіраваць сваімі даверанымі кантактамі",
-  "useDifferentPlayerInfo": "Узніклі праблема з прайграваннем гэтага відэа? Націсніце і ўтрымлівайце тут, каб паспрабаваць іншы плэер.",
   "hideSharedItemsFromHomeGallery": "Схаваць абагулены элементы з асноўнай галерэі",
   "gallery": "Галерэя",
   "joinAlbum": "Далучыцца да альбома",
@@ -1636,11 +1703,21 @@
   "moveSelectedPhotosToOneDate": "Перанесці выбраныя фатаграфіі ў адну дату",
   "shiftDatesAndTime": "Перанос даты і часу",
   "photosKeepRelativeTimeDifference": "Фатаграфіі захоўваюць адносную розніцу ў часе",
+  "photocountPhotos": "{count, plural, =0 {Няма фатаграфій} =1 {1 фатаграфія} few {{count} фатаграфіі} many {{count} фатаграфій} other {{count} фатаграфій}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "appIcon": "Значок праграмы",
   "notThisPerson": "Не гэта асоба?",
   "selectedItemsWillBeRemovedFromThisPerson": "Выбраныя элементы будуць выдалены ў гэтай асобы, але не выдалены з вашай бібліятэкі.",
   "throughTheYears": "{dateFormat} праз гады",
   "thisWeekThroughTheYears": "Гэты тыдзень праз гады",
+  "thisWeekXYearsAgo": "{count, plural, =1 {На гэтым тыдні {count} год таму} few {На гэтым тыдні {count} гады таму} many {На гэтым тыдні {count} гадоў таму} other {На гэтым тыдні {count} гадоў таму}}",
   "youAndThem": "Вы і {name}",
   "admiringThem": "Любуючыся {name}",
   "embracingThem": "Абдымаючы {name}",
@@ -1711,7 +1788,7 @@
   "thePersonGroupsWillNotBeDisplayed": "Групы асоб больш не будуць паказвацца ў раздзеле людзей. Фатаграфіі застануцца некранутымі.",
   "thePersonWillNotBeDisplayed": "Асобы больш не будуць паказвацца ў раздзеле людзей. Фатаграфіі застануцца некранутымі.",
   "areYouSureYouWantToMergeThem": "Вы сапраўды хочаце іх аб'яднаць?",
-  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Усе групы без назвы будуць аб'яднаны з выбранай асобай. Гэта можна адмяніць у аглядзе гісторыі прапаноў для гэтай асобы.",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Усе групы, у якіх адсутнічае назва, будуць аб'яднаны з выбранай асобай. Гэта можна адрабіць у аглядзе гісторыі прапаноў для гэтай асобы.",
   "yesIgnore": "Так, ігнараваць",
   "same": "Пакінуць папярэдні",
   "different": "Змяніць",
@@ -1728,7 +1805,7 @@
   "autoAddPeople": "Аўтаматычнае дадаванне людзей",
   "autoAddToAlbum": "Аўтаматычнае дадаванне альбома",
   "shouldRemoveFilesSmartAlbumsDesc": "Ці варта выдаляць файлы, звязаны з чалавекам, які раней быў выбраны ў інтэлектуальных альбомах?",
-  "addingPhotos": "Даданне фатаграфій",
+  "addingPhotos": "Дадаванне фатаграфій",
   "gettingReady": "Ідзе падрыхтоўка",
   "addSomePhotosDesc1": "Дадайце некалькі фатаграфій або выберыце ",
   "addSomePhotosDesc2": "знаёмыя твары",
@@ -1750,6 +1827,15 @@
   "font": "Шрыфт",
   "background": "Фон",
   "align": "Выраўноўванне",
+  "addedToAlbums": "{count, plural, =1{Паспяхова дададзена ў 1 альбом} few{Паспяхова дададзена ў {count} альбомы} other{Паспяхова дададзена ў {count} альбомаў}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "videosProcessed": "Відэа было апрацавана",
   "totalVideos": "Усяго відэа",
   "skippedVideos": "Прапушчаныя відэа",
@@ -1768,6 +1854,14 @@
   "findSimilarImages": "Знайсці падобныя відарысы",
   "noSimilarImagesFound": "Падобныя відарысы не знойдзены",
   "yourPhotosLookUnique": "Вашы фатаграфіі выглядаюць унікальнымі",
+  "similarGroupsFound": "{count, plural, =1{Знойдзена {count} група} few{Знойдзена {count} групы} other{Знойдзена {count} груп}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewAndRemoveSimilarImages": "Прагляд і выдаленне падобных відарысаў",
   "deletePhotosWithSize": "Выдаліць {count} фатаграфій ({size})",
   "@deletePhotosWithSize": {
@@ -1854,13 +1948,49 @@
   "hoorayyyy": "Ураааа!",
   "nothingToTidyUpHere": "У гэтым месцы адсутнічаюць элементы для ўпарадкоўвання",
   "deletingDash": "Выдаленне - ",
-  "cLTitle1": "Выгляд карты для вашага падарожжа",
-  "cLDesc1": "Выбірайце паміж згрупаванай, бесперапыннай або маршрутнай (на аснове карты) пры абагульванні альбомаў. Ente паклапоціцца аб захоўванні!",
-  "cLTitle2": "Убудаваныя альбомы",
-  "cLDesc2": "Убудоўвайце свае альбомы ва ўласны вэб-сайт, блог або ў партфоліа. Ente паклапоціцца аб захоўванні!",
-  "cLDesc5": "Абагуляйце публічныя спасылкі з выкарыстаннем QR-кода. Наладзьце падключэнне да альбомаў з дапамогай спасылак, якія вы абагульваеце.",
+  "cLTitle1": "OCR! Вылучыце тэкст на фатаграфіях",
+  "cLDesc1": "Ente вызначыць, ці ёсць тэкст на фатаграфіі ці скрыншоце, і пакажа вам кнопку для пераходу ў рэжым вылучэння тэксту. Кожны радок тэксту можна будзе вылучыць асобна.",
+  "cLTitle2": "Правядзіце пальцам, каб выбраць",
+  "cLDesc2": "Выкарыстоўвайце правядзення пальцам, каб хутка выбіраць фатаграфіі ў галерэі. Выдатна працуе адной рукой, не трэба падымаць палец!",
+  "cLTitle3": "Новыя ўспаміны",
+  "cLDesc3": "«Гуллівыя дзеці», «Зімовыя прыгоды», «Неонавыя ночы» і многае іншае.",
+  "cLTitle4": "Галерэя пейзажаў і іншае",
+  "cLDesc4": "Падтрымка альбомнай арыентацыі ў галоўнай галерэі праграмы. Паказваць людзей без звязаных з імі фатаграфій замест іх фільтрацыі. Палепшана выяўленне аспекту відэа пры абмене са знешнімі праграмамі.",
   "closeBy": "Закрыць",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "peopleAutoAddDesc": "Аўтаматычна дадаваць фатаграфіі выбраных людзей у гэты альбом",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
+  },
+  "festivities": "Святочны настрой",
+  "snowAdventures": "Зімовыя прыгоды",
+  "waterfalls": "Пагоня за вадаспадамі",
+  "wildlife": "У дзікай прыродзе",
+  "flowers": "Квітнеючая прыгажосць",
+  "nightLights": "Неонавая ноч",
+  "architecture": "Дызайн значкоў",
+  "autumnColors": "Восеньскае хараство",
+  "desertDreams": "Мара пустыні",
+  "stargazing": "Пад зоркамі",
+  "lakeside": "Цішыня ў возера",
+  "rainyDays": "Адчуванне дажджлівага дня",
+  "sportsAction": "Гульня",
+  "streetArt": "Гісторыі вулічнага мастацтва",
+  "familyMoments": "Час сям'і",
+  "fireworks": "Фінал з феерверкам",
+  "historicSites": "Адгалоскі гісторыі",
+  "tropicalParadise": "Трапічныя ўцёкі",
+  "forestTrails": "Прагулкі па лесе",
+  "citySunsets": "Закатнае ззянне горада",
+  "colorfulMarkets": "Яркі рынак",
+  "cozyCafes": "Утульны куток у кавярні",
+  "vintageVibes": "Вінтажны сталь",
+  "aerialViews": "Паветраная перспектыва",
+  "artisticPortraits": "Майстэрскі партрэт",
+  "streetFood": "Вулічна ежа",
+  "riverCruises": "Від на раку",
+  "playfulKids": "Гарэзлівыя дзеці",
+  "coastalCliffs": "Скалы ля мора"
 }
