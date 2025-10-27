@@ -86,9 +86,6 @@ const ChangelogContent: React.FC = () => {
                     "Share public albums with your custom domain. Choose from new layouts including grouped, continuous, and trip views. Album management is now faster with ability to quickly create a new album and search functionality in selection dialogs.",
                 )}
             </Typography>
-            <Typography sx={{ color: "text.muted" }}>
-                {ut("Czech translations are now available.")}
-            </Typography>
         </Stack>
     );
 };
