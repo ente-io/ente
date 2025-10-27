@@ -109,10 +109,16 @@ class TestFileConfig {
   final List<TrimConfig> trimOptions;
   final List<String> cropOptions;
   final List<int> rotateOptions;
-  /// Timestamp (in seconds) to extract thumbnail for crop visual comparison.
-  /// Default is 0 (start of video). Use a different value if video has
-  /// black frames or unclear visuals at the start.
+
+  /// Timestamp (in seconds) to extract thumbnail from SOURCE video for crop comparison.
+  /// Actual timestamp used: trimStart + cropCompareAtSeconds
+  /// Default is 0 (at trim start). Use a different value if video has
+  /// black frames or unclear visuals at the trim start.
   final int cropCompareAtSeconds;
+
+  /// Timestamp (in seconds) to extract thumbnail from EXPORTED video for crop comparison.
+  /// Default is 0 (start of exported video).
+  final int exportedVideoThumbnailAtSeconds;
 
   TestFileConfig({
     required this.fileIds,
@@ -121,6 +127,7 @@ class TestFileConfig {
     required this.cropOptions,
     required this.rotateOptions,
     this.cropCompareAtSeconds = 0,
+    this.exportedVideoThumbnailAtSeconds = 0,
   });
 
   int get totalIterationsPerFile =>
@@ -142,8 +149,10 @@ class TestFileConfig {
 /// - trimOptions: [TrimConfigs.noTrim, TrimConfigs.fromSeconds(1), TrimConfigs.fromSeconds(15), ...]
 /// - cropOptions: ["None", "1:1", "16:9", "9:16", "3:4", "4:3"]
 /// - rotateOptions: [0, 90, 180, 270]
-/// - cropCompareAtSeconds: 0 (default) - Timestamp for thumbnail comparison.
-///   Use different value if video has black frames at start.
+/// - cropCompareAtSeconds: 0 (default) - Offset from trim start for SOURCE video thumbnail.
+///   Actual timestamp: trimStart + cropCompareAtSeconds
+/// - exportedVideoThumbnailAtSeconds: 0 (default) - Timestamp for EXPORTED video thumbnail.
+///   Use different values if videos have black frames or unclear visuals.
 ///
 /// EXAMPLES:
 /// // Single file, full test
@@ -170,14 +179,18 @@ class TestFileConfig {
 ///   rotateOptions: [0],
 /// )
 ///
-/// // With custom thumbnail compare timestamp (video has black frames at start)
+/// // With custom thumbnail timestamps (videos have black frames at start)
 /// TestFileConfig(
 ///   fileIds: [456],
-///   trimOptions: [TrimConfigs.noTrim],
+///   trimOptions: [TrimConfigs.fromSeconds(10)], // Trim to 10s
 ///   cropOptions: ["1:1", "16:9"],
 ///   rotateOptions: [0],
-///   cropCompareAtSeconds: 2, // Compare at 2 seconds
+///   cropCompareAtSeconds: 2, // Source: trimStart + 2s
+///   exportedVideoThumbnailAtSeconds: 5, // Exported: at 5s
 /// )
+/// // In this example:
+/// // - Source thumbnail extracted at: trimStart (0) + 2 = 2nd second
+/// // - Exported thumbnail extracted at: 5th second of exported video
 ///
 /// RUN:
 /// flutter drive --driver=test_driver/integration_test.dart \
@@ -334,6 +347,7 @@ void main() {
                     cropOption: cropOption,
                     rotateOption: rotateOption,
                     cropCompareAtSeconds: config.cropCompareAtSeconds,
+                    exportedVideoThumbnailAtSeconds: config.exportedVideoThumbnailAtSeconds,
                     description: description,
                     logger: logger,
                   );
@@ -452,6 +466,7 @@ Future<IterationResult> _processVideoIteration({
   required String cropOption,
   required int rotateOption,
   required int cropCompareAtSeconds,
+  required int exportedVideoThumbnailAtSeconds,
   required String description,
   required Logger logger,
 }) async {
@@ -731,6 +746,7 @@ Future<IterationResult> _processVideoIteration({
             cropOption: cropOption,
             rotateOption: rotateOption,
             trimStartSeconds: cropCompareAtSeconds,
+            exportedVideoThumbnailAtSeconds: exportedVideoThumbnailAtSeconds,
             fileId: sourceFile.generatedID.toString(),
             description: description,
             logger: logger,
@@ -801,6 +817,7 @@ Future<CropValidationFailure?> _validateCropVisually({
   required String cropOption,
   required int rotateOption,
   required int trimStartSeconds,
+  required int exportedVideoThumbnailAtSeconds,
   required String fileId,
   required String description,
   required Logger logger,
@@ -818,7 +835,7 @@ Future<CropValidationFailure?> _validateCropVisually({
     video: exportedVideoPath,
     thumbnailPath: Directory.systemTemp.path,
     imageFormat: ImageFormat.PNG,
-    timeMs: 0, // Start of edited video
+    timeMs: exportedVideoThumbnailAtSeconds * 1000,
     quality: 100,
   );
 
