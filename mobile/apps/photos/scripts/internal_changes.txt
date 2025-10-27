@@ -1,23 +1,7 @@
 - Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
 - Laurens: remove archived photos from memories
+- Neeraj: (i) Safeguards for Bitflip errors (md5, immedidate decryption)
 - Neeraj: Fix thumbnail bg in native video player widget
-- Ashil: Fix full screen state getting disabled when swiping to video
-- Ashil: Remove long-press icon to switch to media kit player 
-- Neeraj & Laurens: fix OCR iOS issues and remove feature flag
-- Ashil: Update gallery layout when screen orientation in changed
-- Neeraj: Decrypt local chunk before reporting upload & log sha1 on decryption errors
-- Neeraj: Asserts for url reuse and plain vs enc size mismatch
-- Ashil: Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
-- Laurens: Show empty persons and fallback for face thumbnail issues
 - Prateek: (i) Add native video editor to boost performance
-- Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
-- Neeraj: [CustomerIssue] Handle corrupt asset timestamps with detailed error reporting
-- Neeraj: Fix video aspect ratio when shared from external apps
-- Prateek: Add logging for background task execution
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking
-- Laurens: (i) OCR UX improvements based on feedback
-- Ashil: Swipe to select
-- Laurens: Improve clip memories
-- Laurens: Add OCR capability for Android devices (behind feature flag)
-- Neeraj: Add auth.ente.io to iOS associated domains for password AutoFill
-- Neeraj: Fix storage viewer not refreshing after clearing cache
+
