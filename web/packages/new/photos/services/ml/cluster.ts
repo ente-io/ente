@@ -384,9 +384,17 @@ export const reconcileClusters = async (
                         ...cgroup,
                         data: {
                             ...cgroup.data,
-                            assigned: cgroup.data.assigned.map(
-                                ({ id }) => clusterByID.get(id)!,
-                            ),
+                            // Map assigned cluster IDs to latest cluster objects.
+                            // If any referenced cluster is missing, throw to avoid
+                            // silently losing data or writing nulls to remote.
+                            assigned: cgroup.data.assigned.map(({ id }) => {
+                                const c = clusterByID.get(id);
+                                if (!c)
+                                    throw new Error(
+                                        `reconcileClusters: missing cluster ${id} for cgroup ${cgroup.id}`,
+                                    );
+                                return c;
+                            }),
                         },
                     };
                 }
