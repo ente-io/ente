@@ -150,7 +150,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
     return _FilterChipsRow(
       chips: chipModels,
-      showClearButton: _hasActiveFilters,
+      showClearButton: false,
       onClearTapped: _clearAllFilters,
     );
   }
