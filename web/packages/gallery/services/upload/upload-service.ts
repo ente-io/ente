@@ -44,13 +44,14 @@ import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
 import {
     areChecksumProtectedUploadsEnabled,
+    type LivePhotoAssets,
     type UploadableUploadItem,
     type UploadItem,
     type UploadPathPrefix,
     type UploadResult,
 } from ".";
-import { type LivePhotoAssets } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
+import { computeMd5Base64 } from "./md5";
 import { matchJSONMetadata, type ParsedMetadataJSON } from "./metadata-json";
 import {
     completeMultipartUpload,
@@ -76,7 +77,6 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
-import { computeMd5Base64 } from "./md5";
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -221,7 +221,11 @@ class UploadService {
 
     async fetchMultipartUploadURLs(
         uploadPartCount: number,
-        metadata?: { contentLength: number; partLength: number; partMd5s: string[] },
+        metadata?: {
+            contentLength: number;
+            partLength: number;
+            partMd5s: string[];
+        },
     ) {
         if (this.publicAlbumsCredentials) {
             return fetchPublicAlbumsMultipartUploadURLs(
@@ -1713,9 +1717,7 @@ const uploadToBucket = async (
             thumbnailUploadURL.url,
             thumbnail.encryptedData,
             requestRetrier,
-            {
-                contentMd5: thumbnailMd5,
-            },
+            { contentMd5: thumbnailMd5 },
         );
     }
 
@@ -1821,12 +1823,18 @@ const uploadStreamUsingMultipart = async (
 
         const percentPerPart = maxPercent / uploadPartCount;
         const completedParts: MultipartCompletedPart[] = [];
-        for (const [index, partUploadURL] of multipartUploadURLs.partURLs.entries()) {
+        for (const [
+            index,
+            partUploadURL,
+        ] of multipartUploadURLs.partURLs.entries()) {
             abortIfCancelled();
 
             const partNumber = index + 1;
             const partData = parts[index];
             const checksum = partMd5s[index];
+            if (!partData || !checksum) {
+                throw new Error("Multipart checksum part mismatch");
+            }
 
             const eTag = !isCFUploadProxyDisabled
                 ? await putFilePartViaWorker(

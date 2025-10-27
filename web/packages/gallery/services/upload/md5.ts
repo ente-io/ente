@@ -6,10 +6,10 @@
  */
 
 const shifts = new Uint8Array([
-    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
-    5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
-    4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-    6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 5, 9, 14, 20, 5,
+    9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11,
+    16, 23, 4, 11, 16, 23, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10,
+    15, 21,
 ]);
 
 const constants = (() => {
@@ -37,8 +37,8 @@ const bytesToBase64 = (bytes: Uint8Array) => {
         return Buffer.from(bytes).toString("base64");
     }
     let binary = "";
-    for (let i = 0; i < bytes.length; i++) {
-        binary += String.fromCharCode(bytes[i]);
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
     }
     return btoa(binary);
 };
@@ -46,14 +46,19 @@ const bytesToBase64 = (bytes: Uint8Array) => {
 export const computeMd5Base64 = (data: Uint8Array): string => {
     const originalLengthBits = data.length * 8;
     const paddedLength =
-        ((data.length + 8) >>> 6 << 4) + 16; /* (n + 64) rounded up to multiple of 64 bytes, expressed in 32-bit words */
+        (((data.length + 8) >>> 6) << 4) +
+        16; /* (n + 64) rounded up to multiple of 64 bytes, expressed in 32-bit words */
     const words = new Uint32Array(paddedLength);
 
-    for (let i = 0; i < data.length; i++) {
-        words[i >> 2] |= data[i] << ((i % 4) * 8);
+    for (const [i, value] of data.entries()) {
+        const wordIndex = i >> 2;
+        const existing = words[wordIndex] ?? 0;
+        words[wordIndex] = existing | (value << ((i % 4) * 8));
     }
 
-    words[data.length >> 2] |= 0x80 << ((data.length % 4) * 8);
+    const paddingIndex = data.length >> 2;
+    const paddingExisting = words[paddingIndex] ?? 0;
+    words[paddingIndex] = paddingExisting | (0x80 << ((data.length % 4) * 8));
     words[paddedLength - 2] = originalLengthBits & 0xffffffff;
     words[paddedLength - 1] = (originalLengthBits / 0x100000000) | 0;
 
@@ -89,9 +94,11 @@ export const computeMd5Base64 = (data: Uint8Array): string => {
             const temp = D;
             D = C;
             C = B;
-            const sum =
-                (A + f + constants[j] + words[i + g]) >>> 0;
-            B = (B + leftRotate(sum, shifts[j])) >>> 0;
+            const word = words[i + g] ?? 0;
+            const constant = constants[j] ?? 0;
+            const shift = shifts[j] ?? 0;
+            const sum = (A + f + constant + word) >>> 0;
+            B = (B + leftRotate(sum, shift)) >>> 0;
             A = temp;
         }
 

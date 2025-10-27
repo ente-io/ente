@@ -498,9 +498,7 @@ export const areChecksumProtectedUploadsEnabled = () =>
 /**
  * Update the in-memory value controlling checksum protected uploads.
  */
-export const updateChecksumProtectedUploadsEnabled = (
-    enabled: boolean,
-) => {
+export const updateChecksumProtectedUploadsEnabled = (enabled: boolean) => {
     _state.checksumProtectedUploadsEnabled = enabled;
 };
 

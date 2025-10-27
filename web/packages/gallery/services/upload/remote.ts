@@ -60,16 +60,16 @@ export const fetchUploadURLWithMetadata = async ({
     contentLength: number;
     contentMd5: string;
 }) => {
-    const headers = await authenticatedRequestHeaders();
-    headers["Content-Type"] = "application/json";
-    const res = await fetch(await apiURL("/files/upload-url", { ts: Date.now() }), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-            contentLength,
-            contentMD5: contentMd5,
-        }),
-    });
+    const headers = new Headers(await authenticatedRequestHeaders());
+    headers.set("Content-Type", "application/json");
+    const res = await fetch(
+        await apiURL("/files/upload-url", { ts: Date.now() }),
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ contentLength, contentMD5: contentMd5 }),
+        },
+    );
     ensureOk(res);
     return ObjectUploadURL.parse(await res.json());
 };
@@ -83,17 +83,16 @@ export const fetchMultipartUploadURLsWithMetadata = async ({
     partLength: number;
     partMd5s: string[];
 }) => {
-    const headers = await authenticatedRequestHeaders();
-    headers["Content-Type"] = "application/json";
-    const res = await fetch(await apiURL("/files/multipart-upload-url", { ts: Date.now() }), {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-            contentLength,
-            partLength,
-            partMd5s,
-        }),
-    });
+    const headers = new Headers(await authenticatedRequestHeaders());
+    headers.set("Content-Type", "application/json");
+    const res = await fetch(
+        await apiURL("/files/multipart-upload-url", { ts: Date.now() }),
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ contentLength, partLength, partMd5s }),
+        },
+    );
     ensureOk(res);
     return MultipartUploadURLs.parse(await res.json());
 };

@@ -9,7 +9,6 @@ import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
 import {
-    areChecksumProtectedUploadsEnabled,
     markUploadedAndObtainProcessableItem,
     shouldDisableCFUploadProxy,
     type ClusteredUploadItem,
