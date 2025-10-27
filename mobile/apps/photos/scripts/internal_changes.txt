@@ -1,3 +1,4 @@
+- Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
 - Laurens: remove archived photos from memories
 - Neeraj: Fix thumbnail bg in native video player widget
 - Ashil: Fix full screen state getting disabled when swiping to video
