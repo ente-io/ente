@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart' as paint;
@@ -39,8 +40,11 @@ enum WidgetStatus {
 }
 
 // Top-level function for isolate to read and validate image file
-// Uses the same pattern as image_ml_util.dart decodeImageFromData
-Future<Uint8List> _readAndValidateImageInIsolate(String filePath) async {
+// Uses the same pattern as exif_util.dart for Computer.shared usage
+Future<Uint8List> _readAndValidateImageInIsolate(
+  Map<String, dynamic> params,
+) async {
+  final filePath = params['filePath'] as String;
   final file = File(filePath);
   final Uint8List imageBytes = await file.readAsBytes();
 
@@ -264,14 +268,16 @@ class HomeWidgetService {
         final File? imageFile = await getFileFromServer(file);
 
         if (imageFile == null) {
-          _logger.warning("Failed to get file for V2 widget ${file.displayName}");
+          _logger
+              .warning("Failed to get file for V2 widget ${file.displayName}");
           return false;
         }
 
         // Read and validate in isolate to avoid blocking main thread
-        final Uint8List imageBytes = await compute(
+        final Uint8List imageBytes = await Computer.shared().compute(
           _readAndValidateImageInIsolate,
-          imageFile.path,
+          param: {'filePath': imageFile.path},
+          taskName: 'readAndValidateImage',
         );
 
         imageProvider = MemoryImage(imageBytes);
