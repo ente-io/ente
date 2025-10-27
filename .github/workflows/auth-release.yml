@@ -36,7 +36,25 @@ permissions:
 
 jobs:
     build-linux-latest:
-        runs-on: ubuntu-22.04
+        name: Build Linux (${{ matrix.architecture }})
+        runs-on: ${{ matrix.runner }}
+        strategy:
+            matrix:
+                include:
+                    - runner: ubuntu-22.04
+                      architecture: x86_64
+                      appimage_arch: x86_64
+                      library_path: /usr/lib/x86_64-linux-gnu
+                      artifact_suffix: x86_64
+                      linux_checksum: sha256sum-linux
+                      build_android: true
+                    - runner: ubuntu-24.04-arm
+                      architecture: arm64
+                      appimage_arch: aarch64
+                      library_path: /usr/lib/aarch64-linux-gnu
+                      artifact_suffix: arm64
+                      linux_checksum: sha256sum-linux-arm64
+                      build_android: false
 
         defaults:
             run:
@@ -61,6 +79,7 @@ jobs:
                   cache: true
 
             - name: Setup keys
+              if: matrix.build_android
               uses: timheuer/base64-to-file@v1
               with:
                   fileName: "keystore/ente_auth_key.jks"
@@ -70,6 +89,7 @@ jobs:
               run: mkdir artifacts
 
             - name: Build independent APK
+              if: matrix.build_android
               run: |
                   flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
                   mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.ref_name }}.apk
@@ -81,7 +101,7 @@ jobs:
 
             - name: Build PlayStore AAB
               # disable this step if release tag contains nightly or beta
-              if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
+              if: matrix.build_android && startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
               run: |
                   flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
               env:
@@ -94,11 +114,11 @@ jobs:
               run: |
                   sudo apt-get update -y
                   sudo apt-get install -y libsecret-1-dev libsodium-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5 xz-utils libarchive-tools libcurl4-openssl-dev
-                  sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
+                  sudo updatedb --localpaths='${{ matrix.library_path }}'
 
             - name: Install appimagetool
               run: |
-                  wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+                  wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${{ matrix.appimage_arch }}.AppImage"
                   chmod +x appimagetool
                   mv appimagetool /usr/local/bin/
 
@@ -108,18 +128,21 @@ jobs:
                   dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
                   # RPM
                   flutter_distributor package --platform=linux --targets=rpm --skip-clean
-                  mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
+                  mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-${{ matrix.artifact_suffix }}.rpm
                   # APPIMAGE
                   flutter_distributor package --platform=linux --targets=appimage --skip-clean
-                  mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
+                  mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-${{ matrix.artifact_suffix }}.AppImage
                   # DEB
                   flutter_distributor package --platform=linux --targets=deb --skip-clean
-                  mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-x86_64.deb
+                  mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-${{ matrix.artifact_suffix }}.deb
 
             - name: Generate checksums
               run: |
-                sha256sum artifacts/ente-auth-*.apk >> artifacts/sha256sum-apk
-                sha256sum artifacts/ente-auth-*.deb artifacts/ente-auth-*.rpm artifacts/ente-auth-*.AppImage >> artifacts/sha256sum-linux
+                sha256sum artifacts/ente-${{ github.ref_name }}-${{ matrix.artifact_suffix }}.deb artifacts/ente-${{ github.ref_name }}-${{ matrix.artifact_suffix }}.rpm artifacts/ente-${{ github.ref_name }}-${{ matrix.artifact_suffix }}.AppImage > artifacts/${{ matrix.linux_checksum }}
+
+            - name: Generate APK checksums
+              if: matrix.build_android
+              run: sha256sum artifacts/ente-${{ github.ref_name }}.apk > artifacts/sha256sum-apk
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
@@ -131,7 +154,7 @@ jobs:
 
             - name: Upload AAB to PlayStore
               # disable this step if release tag contains nightly or beta
-              if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
+              if: matrix.build_android && startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
               uses: r0adkll/upload-google-play@v1
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
