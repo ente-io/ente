@@ -810,7 +810,7 @@ func (c *FileController) getHotDcSignedUrl(objectKey string, objType ente.Object
 		Key:    &objectKey,
 	}
 	input.ResponseContentDisposition = aws.String("attachment")
-	if objType == ente.FILE {
+	if objType == ente.FILE || objType == ente.THUMBNAIL {
 		input.ResponseContentType = aws.String("application/octet-stream")
 	}
 	r, _ := s3Client.GetObjectRequest(input)
@@ -824,7 +824,7 @@ func (c *FileController) getPreSignedURLForDC(objectKey string, dc string, objTy
 		Key:    &objectKey,
 	}
 	input.ResponseContentDisposition = aws.String("attachment")
-	if objType == ente.FILE {
+	if objType == ente.FILE || objType == ente.THUMBNAIL {
 		input.ResponseContentType = aws.String("application/octet-stream")
 	}
 	r, _ := s3Client.GetObjectRequest(input)
