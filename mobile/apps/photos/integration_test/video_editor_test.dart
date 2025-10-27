@@ -745,7 +745,7 @@ Future<IterationResult> _processVideoIteration({
             exportedVideoPath: exportedFile.path,
             cropOption: cropOption,
             rotateOption: rotateOption,
-            trimStartSeconds: cropCompareAtSeconds,
+            sourceVideoThumbnailAtSeconds: cropCompareAtSeconds,
             exportedVideoThumbnailAtSeconds: exportedVideoThumbnailAtSeconds,
             fileId: sourceFile.generatedID.toString(),
             description: description,
@@ -816,7 +816,7 @@ Future<CropValidationFailure?> _validateCropVisually({
   required String exportedVideoPath,
   required String cropOption,
   required int rotateOption,
-  required int trimStartSeconds,
+  required int sourceVideoThumbnailAtSeconds,
   required int exportedVideoThumbnailAtSeconds,
   required String fileId,
   required String description,
@@ -827,7 +827,7 @@ Future<CropValidationFailure?> _validateCropVisually({
     video: sourceVideoPath,
     thumbnailPath: Directory.systemTemp.path,
     imageFormat: ImageFormat.PNG,
-    timeMs: trimStartSeconds * 1000,
+    timeMs: sourceVideoThumbnailAtSeconds * 1000,
     quality: 100,
   );
 
