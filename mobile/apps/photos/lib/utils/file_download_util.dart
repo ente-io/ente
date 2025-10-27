@@ -81,7 +81,8 @@ Future<File?> downloadAndDecryptPublicFile(
       _logger.info('$logPrefix file saved at $decryptedFilePath');
     } catch (e, s) {
       fakeProgress?.stop();
-      final metadata = _getFileMetadataForLogging(file, encryptedFilePath);
+      final metadata =
+          await _getFileMetadataForLogging(file, encryptedFilePath);
       _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       return null;
     }
@@ -185,7 +186,8 @@ Future<File?> downloadAndDecrypt(
           .info('$logPrefix decryption completed (genID ${file.generatedID})');
     } catch (e, s) {
       fakeProgress?.stop();
-      final metadata = _getFileMetadataForLogging(file, encryptedFilePath);
+      final metadata =
+          await _getFileMetadataForLogging(file, encryptedFilePath);
       _logger.severe("Critical: $logPrefix failed to decrypt, $metadata", e, s);
       return null;
     }
@@ -197,10 +199,13 @@ Future<File?> downloadAndDecrypt(
   }
 }
 
-String _getFileMetadataForLogging(EnteFile file, String encFilePath) {
+Future<String> _getFileMetadataForLogging(
+  EnteFile file,
+  String encFilePath,
+) async {
   final buffer = StringBuffer();
   if (File(encFilePath).existsSync()) {
-    buffer.write('encFileSha1: ${computeSha1(encFilePath)}, ');
+    buffer.write('encFileSha1: ${await computeSha1(encFilePath)}, ');
   } else {
     buffer.write('encFileSha1: file not found, ');
   }
