@@ -1,10 +1,12 @@
 # CHANGELOG
 
-## v1.7.15 (Unreleased)
+## v1.7.15
 
-- Custom domains.
 - Support Czech translations.
-- .
+- Custom domain support for public album sharing.
+- New layouts for public albums - grouped, continuous and trip.
+- Quicker way to create new albums.
+- Search functionality for album selection dialogs.
 
 ## v1.7.14
 
