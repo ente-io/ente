@@ -198,6 +198,7 @@ class CollectionActions {
       title: context.l10n.areYouSure,
       body: context.l10n.deleteCollectionDialogBody(collectionName),
       deleteButtonLabel: context.l10n.yesDeleteCollections(1),
+      assetPath: "assets/collection_delete_icon.png",
     );
 
     if (result?.action != ButtonAction.first && context.mounted) {

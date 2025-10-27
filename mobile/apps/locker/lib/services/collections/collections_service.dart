@@ -110,7 +110,7 @@ class CollectionService {
     }
     await Future.wait(fileFutures);
     if (updatedCollections.isNotEmpty) {
-      Bus.instance.fire(CollectionsUpdatedEvent());
+      Bus.instance.fire(CollectionsUpdatedEvent('sync'));
     }
   }
 
@@ -237,7 +237,7 @@ class CollectionService {
       await _db.addFilesToCollection(collection, [file]);
 
       // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent());
+      Bus.instance.fire(CollectionsUpdatedEvent('add_to_collection'));
 
       if (runSync) {
         // Also sync to ensure we have the latest state from server
@@ -259,7 +259,7 @@ class CollectionService {
       await _db.deleteFilesFromCollection(collection, [file]);
 
       // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent());
+      Bus.instance.fire(CollectionsUpdatedEvent('trash_file'));
 
       // Also sync to ensure we have the latest state
       await sync();

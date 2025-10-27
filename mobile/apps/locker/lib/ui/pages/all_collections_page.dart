@@ -10,6 +10,7 @@ import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/trash/trash_service.dart';
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/trash_page.dart';
@@ -205,20 +206,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.folder_open,
-                size: 64,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                context.l10n.noCollectionsFound,
-                style: textTheme.large.copyWith(
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
+              const EmptyStateWidget(
+                assetPath: 'assets/empty_state.png',
+                title: "No collection found",
+                subtitle: "",
+                showBorder: false,
               ),
               const SizedBox(height: 20),
               if (_uncategorizedCollection != null && showUncategorized)

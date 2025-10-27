@@ -9,6 +9,7 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
   required String title,
   required String body,
   required String deleteButtonLabel,
+  required String assetPath,
 }) {
   return showModalBottomSheet<ButtonResult>(
     context: context,
@@ -19,6 +20,7 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
         title: title,
         body: body,
         deleteButtonLabel: deleteButtonLabel,
+        assetPath: assetPath,
       );
     },
   );
@@ -28,11 +30,13 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
   final String title;
   final String body;
   final String deleteButtonLabel;
+  final String assetPath;
 
   const _DeleteConfirmationBottomSheet({
     required this.title,
     required this.body,
     required this.deleteButtonLabel,
+    required this.assetPath,
   });
 
   @override
@@ -77,7 +81,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Image.asset('assets/delete_icon.png'),
+              Image.asset(assetPath),
               const SizedBox(height: 24),
               Text(
                 title,

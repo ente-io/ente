@@ -195,8 +195,9 @@ class FilePopupMenuWidget extends StatelessWidget {
     final result = await showDeleteConfirmationDialog(
       context,
       title: context.l10n.areYouSure,
-      body: context.l10n.deleteMultipleCollectionsDialogBody(1),
+      body: context.l10n.deleteMultipleFilesDialogBody(1),
       deleteButtonLabel: context.l10n.yesDeleteFiles(1),
+      assetPath: "assets/file_delete_icon.png",
     );
 
     if (result?.action == ButtonAction.first && context.mounted) {

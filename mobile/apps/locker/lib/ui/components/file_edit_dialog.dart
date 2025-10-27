@@ -2,7 +2,6 @@ import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
-import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
@@ -49,15 +48,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
     _titleController.text = widget.file.displayName;
 
     _captionController.text = widget.file.caption ?? '';
-
-    CollectionService.instance
-        .getCollectionsForFile(widget.file)
-        .then((fileCollections) {
-      for (final collection in fileCollections) {
-        _selectedCollectionIds.add(collection.id);
-      }
-      setState(() {});
-    });
   }
 
   @override
@@ -119,7 +109,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
     return Dialog(
       backgroundColor: colorScheme.backgroundBase,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
         child: Container(
@@ -134,7 +123,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,8 +157,8 @@ class _FileEditDialogState extends State<FileEditDialog> {
                       height: 36,
                       width: 36,
                       decoration: BoxDecoration(
-                        color: colorScheme.backdropBase,
-                        borderRadius: BorderRadius.circular(18),
+                        shape: BoxShape.circle,
+                        color: colorScheme.backgroundElevated,
                       ),
                       child: const Icon(
                         Icons.close_rounded,
