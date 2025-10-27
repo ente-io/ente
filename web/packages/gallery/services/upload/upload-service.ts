@@ -42,11 +42,12 @@ import {
 import { addToCollection } from "ente-new/photos/services/collection";
 import { mergeUint8Arrays } from "ente-utils/array";
 import { ensureInteger, ensureNumber } from "ente-utils/ensure";
-import type {
-    UploadableUploadItem,
-    UploadItem,
-    UploadPathPrefix,
-    UploadResult,
+import {
+    areChecksumProtectedUploadsEnabled,
+    type UploadableUploadItem,
+    type UploadItem,
+    type UploadPathPrefix,
+    type UploadResult,
 } from ".";
 import { type LivePhotoAssets } from ".";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
@@ -55,9 +56,11 @@ import {
     completeMultipartUpload,
     completeMultipartUploadViaWorker,
     fetchMultipartUploadURLs,
+    fetchMultipartUploadURLsWithMetadata,
     fetchPublicAlbumsMultipartUploadURLs,
     fetchPublicAlbumsUploadURLs,
     fetchUploadURLs,
+    fetchUploadURLWithMetadata,
     postEnteFile,
     postPublicAlbumsEnteFile,
     putFile,
@@ -73,6 +76,7 @@ import {
     generateThumbnailNative,
     generateThumbnailWeb,
 } from "./thumbnail";
+import { computeMd5Base64 } from "./md5";
 
 /**
  * A readable stream for a file, and its associated size and last modified time.
@@ -141,6 +145,13 @@ class UploadService {
 
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
+        if (
+            areChecksumProtectedUploadsEnabled() &&
+            !this.publicAlbumsCredentials
+        ) {
+            this.uploadURLs = [];
+            return;
+        }
         await this.refillUploadURLs(); /* prefetch */
     }
 
@@ -148,7 +159,19 @@ class UploadService {
         this.pendingUploadCount--;
     }
 
-    async getUploadURL() {
+    async getUploadURL(metadata?: {
+        contentLength: number;
+        contentMd5: string;
+    }) {
+        if (
+            areChecksumProtectedUploadsEnabled() &&
+            !this.publicAlbumsCredentials &&
+            metadata &&
+            metadata.contentLength >= 0 &&
+            metadata.contentMd5
+        ) {
+            return fetchUploadURLWithMetadata(metadata);
+        }
         if (this.uploadURLs.length == 0 && this.pendingUploadCount) {
             await this.refillUploadURLs();
         }
@@ -196,15 +219,32 @@ class UploadService {
         urls.forEach((u) => this.uploadURLs.push(u));
     }
 
-    async fetchMultipartUploadURLs(uploadPartCount: number) {
-        return this.publicAlbumsCredentials
-            ? fetchPublicAlbumsMultipartUploadURLs(
-                  uploadPartCount,
-                  this.publicAlbumsCredentials,
-              )
-            : fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
-                  throw translateURLFetchErrorIfNeeded(e);
-              });
+    async fetchMultipartUploadURLs(
+        uploadPartCount: number,
+        metadata?: { contentLength: number; partLength: number; partMd5s: string[] },
+    ) {
+        if (this.publicAlbumsCredentials) {
+            return fetchPublicAlbumsMultipartUploadURLs(
+                uploadPartCount,
+                this.publicAlbumsCredentials,
+            );
+        }
+        if (
+            metadata &&
+            areChecksumProtectedUploadsEnabled() &&
+            metadata.contentLength > 0 &&
+            metadata.partLength > 0 &&
+            metadata.partMd5s.length > 0
+        ) {
+            return fetchMultipartUploadURLsWithMetadata(metadata).catch(
+                (e: unknown) => {
+                    throw translateURLFetchErrorIfNeeded(e);
+                },
+            );
+        }
+        return fetchMultipartUploadURLs(uploadPartCount).catch((e: unknown) => {
+            throw translateURLFetchErrorIfNeeded(e);
+        });
     }
 }
 
@@ -1588,6 +1628,7 @@ const uploadToBucket = async (
 > => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
+    const checksumEnabled = areChecksumProtectedUploadsEnabled();
 
     const { localID, file, thumbnail, metadata, pubMagicMetadata } =
         encryptedFilePieces;
@@ -1619,6 +1660,7 @@ const uploadToBucket = async (
                 uploadContext,
                 requestRetrier,
                 maxPercent,
+                checksumEnabled,
             ));
     } else {
         const data =
@@ -1627,28 +1669,53 @@ const uploadToBucket = async (
                 : await readEntireStream(encryptedData.stream);
         fileSize = data.length;
 
-        const fileUploadURL = await uploadService.getUploadURL();
+        const fileMd5 = checksumEnabled ? computeMd5Base64(data) : undefined;
+        const fileUploadURL = await uploadService.getUploadURL(
+            checksumEnabled
+                ? { contentLength: data.length, contentMd5: fileMd5! }
+                : undefined,
+        );
         fileObjectKey = fileUploadURL.objectKey;
-        if (!isCFUploadProxyDisabled) {
-            await putFileViaWorker(fileUploadURL.url, data, requestRetrier);
+        const shouldUseWorker = !isCFUploadProxyDisabled;
+        if (shouldUseWorker) {
+            await putFileViaWorker(fileUploadURL.url, data, requestRetrier, {
+                contentMd5: fileMd5,
+            });
         } else {
-            await putFile(fileUploadURL.url, data, requestRetrier);
+            await putFile(fileUploadURL.url, data, requestRetrier, {
+                contentMd5: fileMd5,
+            });
         }
         updateUploadProgress(localID, maxPercent);
     }
 
-    const thumbnailUploadURL = await uploadService.getUploadURL();
-    if (!isCFUploadProxyDisabled) {
+    const thumbnailMd5 = checksumEnabled
+        ? computeMd5Base64(thumbnail.encryptedData)
+        : undefined;
+    const thumbnailUploadURL = await uploadService.getUploadURL(
+        checksumEnabled
+            ? {
+                  contentLength: thumbnail.encryptedData.length,
+                  contentMd5: thumbnailMd5!,
+              }
+            : undefined,
+    );
+    const shouldUseWorkerForThumbnail = !isCFUploadProxyDisabled;
+    if (shouldUseWorkerForThumbnail) {
         await putFileViaWorker(
             thumbnailUploadURL.url,
             thumbnail.encryptedData,
             requestRetrier,
+            { contentMd5: thumbnailMd5 },
         );
     } else {
         await putFile(
             thumbnailUploadURL.url,
             thumbnail.encryptedData,
             requestRetrier,
+            {
+                contentMd5: thumbnailMd5,
+            },
         );
     }
 
@@ -1708,22 +1775,98 @@ const uploadStreamUsingMultipart = async (
     uploadContext: UploadContext,
     requestRetrier: HTTPRequestRetrier,
     maxPercent: number,
+    checksumEnabled: boolean,
 ) => {
     const { isCFUploadProxyDisabled, abortIfCancelled, updateUploadProgress } =
         uploadContext;
 
-    const uploadPartCount = Math.ceil(
+    const { stream } = dataStream;
+    const streamReader = stream.getReader();
+
+    let uploadPartCount = Math.ceil(
         dataStream.chunkCount / multipartChunksPerPart,
     );
+
+    if (checksumEnabled && !uploadContext.publicAlbumsCredentials) {
+        const parts: Uint8Array[] = [];
+        const partMd5s: string[] = [];
+        let fileSize = 0;
+        while (true) {
+            abortIfCancelled();
+            const partData = await nextMultipartUploadPart(streamReader);
+            if (partData.length === 0) break;
+            parts.push(partData);
+            fileSize += partData.length;
+            partMd5s.push(computeMd5Base64(partData));
+        }
+        const { done } = await streamReader.read();
+        if (!done) throw new Error("More chunks than expected");
+
+        uploadPartCount = parts.length;
+        if (uploadPartCount == 0) {
+            throw new Error("Multipart upload produced no parts");
+        }
+        const firstPartLength = parts[0]?.length ?? 0;
+        if (firstPartLength == 0) {
+            throw new Error("Multipart part length missing");
+        }
+        const partLength = firstPartLength;
+
+        const multipartUploadURLs =
+            await uploadService.fetchMultipartUploadURLs(uploadPartCount, {
+                contentLength: fileSize,
+                partLength,
+                partMd5s,
+            });
+
+        const percentPerPart = maxPercent / uploadPartCount;
+        const completedParts: MultipartCompletedPart[] = [];
+        for (const [index, partUploadURL] of multipartUploadURLs.partURLs.entries()) {
+            abortIfCancelled();
+
+            const partNumber = index + 1;
+            const partData = parts[index];
+            const checksum = partMd5s[index];
+
+            const eTag = !isCFUploadProxyDisabled
+                ? await putFilePartViaWorker(
+                      partUploadURL,
+                      partData,
+                      requestRetrier,
+                      { contentMd5: checksum },
+                  )
+                : await putFilePart(partUploadURL, partData, requestRetrier, {
+                      contentMd5: checksum,
+                  });
+            if (!eTag) throw new Error(eTagMissingErrorMessage);
+
+            updateUploadProgress(fileLocalID, percentPerPart * partNumber);
+            completedParts.push({ partNumber, eTag });
+            parts[index] = new Uint8Array(0); // release memory
+        }
+
+        const completionURL = multipartUploadURLs.completeURL;
+        if (!isCFUploadProxyDisabled) {
+            await completeMultipartUploadViaWorker(
+                completionURL,
+                completedParts,
+                requestRetrier,
+            );
+        } else {
+            await completeMultipartUpload(
+                completionURL,
+                completedParts,
+                requestRetrier,
+            );
+        }
+
+        return { objectKey: multipartUploadURLs.objectKey, fileSize };
+    }
 
     const multipartUploadURLs =
         await uploadService.fetchMultipartUploadURLs(uploadPartCount);
 
-    const { stream } = dataStream;
-
-    const streamReader = stream.getReader();
     const percentPerPart = maxPercent / uploadPartCount;
-
     let fileSize = 0;
     const completedParts: MultipartCompletedPart[] = [];
     for (const [
