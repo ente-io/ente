@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_collections.dart';
+import 'package:locker/models/ui_section_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/trash/trash_service.dart';
@@ -17,12 +18,6 @@ import 'package:locker/ui/pages/trash_page.dart';
 import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
-
-enum UISectionType {
-  incomingCollections,
-  outgoingCollections,
-  homeCollections,
-}
 
 class AllCollectionsPage extends StatefulWidget {
   final UISectionType viewType;
@@ -160,6 +155,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           CollectionSelectionOverlayBar(
             collection: _sortedCollections,
             selectedCollections: widget.selectedCollections!,
+            viewType: widget.viewType,
           ),
         ],
       ),

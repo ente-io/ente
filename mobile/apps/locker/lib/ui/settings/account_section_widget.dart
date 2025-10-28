@@ -42,6 +42,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changeEmail,
           makeTextBold: true,
         ),
+        leadingSpace: 52, 
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance

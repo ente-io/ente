@@ -1,19 +1,27 @@
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_utils/navigation_util.dart";
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
+import "package:locker/models/ui_section_type.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/collections/models/collection_view_type.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
-import "package:locker/ui/sharing/add_participant_page.dart";
+import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
 import "package:locker/utils/collection_actions.dart";
+import "package:logging/logging.dart";
 
 class CollectionSelectionOverlayBar extends StatefulWidget {
   final SelectedCollections selectedCollections;
   final List<Collection> collection;
+  final UISectionType viewType;
   const CollectionSelectionOverlayBar({
     required this.selectedCollections,
     required this.collection,
+    this.viewType = UISectionType.homeCollections,
     super.key,
   });
 
@@ -24,6 +32,8 @@ class CollectionSelectionOverlayBar extends StatefulWidget {
 
 class _CollectionSelectionOverlayBarState
     extends State<CollectionSelectionOverlayBar> {
+  static final _logger = Logger('CollectionSelectionOverlayBar');
+
   @override
   void initState() {
     super.initState();
@@ -246,58 +256,144 @@ class _CollectionSelectionOverlayBarState
     final isSingleSelection = selectedCollections.length == 1;
     final collection = isSingleSelection ? selectedCollections.first : null;
     final actions = <Widget>[];
+    final viewType = widget.viewType;
 
-    if (isSingleSelection) {
-      actions.addAll([
+    if (viewType == UISectionType.homeCollections ||
+        viewType == UISectionType.outgoingCollections) {
+      if (isSingleSelection) {
+        actions.addAll([
+          SelectionActionButton(
+            icon: Icons.share_outlined,
+            label: context.l10n.share,
+            onTap: () => _shareCollection(collection!),
+          ),
+          SelectionActionButton(
+            icon: Icons.edit_outlined,
+            label: context.l10n.edit,
+            onTap: () {
+              _editCollection(collection!);
+            },
+          ),
+          SelectionActionButton(
+            icon: Icons.delete_outline,
+            label: context.l10n.delete,
+            onTap: () {
+              _deleteCollection(collection!);
+            },
+            isDestructive: true,
+          ),
+        ]);
+      } else {
+        actions.addAll([
+          SelectionActionButton(
+            icon: Icons.delete_outline,
+            label: context.l10n.delete,
+            onTap: () {
+              _deleteMultipleCollections(
+                widget.selectedCollections.collections,
+              );
+            },
+            isDestructive: true,
+          ),
+        ]);
+      }
+    } else {
+      actions.add(
         SelectionActionButton(
           icon: Icons.share_outlined,
           label: context.l10n.share,
-          onTap: _shareCollection,
+          onTap: _leaveCollection,
         ),
-        SelectionActionButton(
-          icon: Icons.edit_outlined,
-          label: context.l10n.edit,
-          onTap: () {
-            CollectionActions.editCollection(
-              context,
-              collection!,
-            );
-          },
-        ),
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          label: context.l10n.delete,
-          onTap: () {
-            CollectionActions.deleteCollection(context, collection!);
-          },
-          isDestructive: true,
-        ),
-      ]);
-    } else {
-      actions.addAll([
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          label: context.l10n.delete,
-          onTap: () {
-            CollectionActions.deleteMultipleCollections(
-              context,
-              selectedCollections.toList(),
-            );
-          },
-          isDestructive: true,
-        ),
-      ]);
+      );
     }
+
     return actions;
   }
 
-  Future<void> _shareCollection() async {
-    await routeToPage(
+  Future<void> _editCollection(Collection collection) async {
+    try {
+      await CollectionActions.editCollection(
+        context,
+        collection,
+      );
+      widget.selectedCollections.clearAll();
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+
+    widget.selectedCollections.clearAll();
+  }
+
+  Future<void> _deleteCollection(Collection collection) async {
+    try {
+      await CollectionActions.deleteCollection(context, collection);
+      widget.selectedCollections.clearAll();
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+
+    widget.selectedCollections.clearAll();
+  }
+
+  Future<void> _deleteMultipleCollections(
+    Set<Collection> collections,
+  ) async {
+    try {
+      await CollectionActions.deleteMultipleCollections(
+        context,
+        collections.toList(),
+      );
+      widget.selectedCollections.clearAll();
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+
+    widget.selectedCollections.clearAll();
+  }
+
+  Future<void> _shareCollection(Collection collection) async {
+    final collectionViewType = getCollectionViewType(
+      collection,
+      Configuration.instance.getUserID()!,
+    );
+    try {
+      if ((collectionViewType != CollectionViewType.ownedCollection &&
+          collectionViewType != CollectionViewType.sharedCollection &&
+          collectionViewType != CollectionViewType.hiddenOwnedCollection &&
+          collectionViewType != CollectionViewType.favorite)) {
+        throw Exception(
+          "Cannot share collection of type $collectionViewType",
+        );
+      }
+
+      await showModalBottomSheet(
+        context: context,
+        backgroundColor: getEnteColorScheme(context).backgroundBase,
+        isScrollControlled: true,
+        builder: (context) => ShareCollectionBottomSheet(
+          collection: collection,
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+
+    widget.selectedCollections.clearAll();
+  }
+
+  Future<void> _leaveCollection() async {
+    await CollectionActions.leaveMultipleCollection(
       context,
-      AddParticipantPage(
-        widget.selectedCollections.collections.toList(),
-        const [ActionTypesToShow.addViewer, ActionTypesToShow.addCollaborator],
-      ),
+      widget.selectedCollections.collections.toList(),
+      onSuccess: () {
+        Bus.instance.fire(
+          CollectionsUpdatedEvent("leave_collection"),
+        );
+      },
     );
     widget.selectedCollections.clearAll();
   }

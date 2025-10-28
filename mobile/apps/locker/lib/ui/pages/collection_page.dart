@@ -319,7 +319,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                   color: colorScheme.warning500,
                   size: 20,
                 ),
-                isDelete: true,
+                isWarning: true,
                 label: context.l10n.delete,
                 isFirst: itemIndex == 0,
                 isLast: itemIndex == totalItems - 1,

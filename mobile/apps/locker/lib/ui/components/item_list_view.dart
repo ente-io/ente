@@ -20,7 +20,8 @@ import 'package:locker/utils/collection_sort_util.dart';
 class OverflowMenuAction {
   final String id;
   final String label;
-  final IconData icon;
+  final Widget icon;
+  final bool isWarning;
   final void Function(
     BuildContext context,
     EnteFile? file,
@@ -32,6 +33,7 @@ class OverflowMenuAction {
     required this.label,
     required this.icon,
     required this.onTap,
+    this.isWarning = false,
   });
 }
 

@@ -63,14 +63,11 @@ class CollectionPopupMenuWidget extends StatelessWidget {
             padding: EdgeInsets.zero,
             height: 0,
             child: MenuItemWidget(
-              icon: Icon(
-                action.icon,
-                color: colorScheme.textBase,
-                size: 20,
-              ),
+              icon: action.icon,
               label: action.label,
               isFirst: i == 0,
               isLast: i == overflowActions!.length - 1,
+              isWarning: action.isWarning,
             ),
           ),
         );
@@ -120,7 +117,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
             label: context.l10n.delete,
             isFirst: false,
             isLast: true,
-            isDelete: true,
+            isWarning: true,
           ),
         ),
       );
@@ -141,7 +138,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
             label: context.l10n.leaveCollection,
             isFirst: true,
             isLast: true,
-            isDelete: true,
+            isWarning: true,
           ),
         ),
       );

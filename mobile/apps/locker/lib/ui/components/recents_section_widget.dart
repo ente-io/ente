@@ -10,8 +10,10 @@ import 'package:locker/models/info/info_item.dart';
 import 'package:locker/models/item_view_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/files/download/service_locator.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/section_title.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 
 class RecentsSectionWidget extends StatefulWidget {
@@ -41,7 +43,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   final Map<int, List<Collection>> _fileCollectionsCache = {};
   final Map<int, Future<List<Collection>>> _fileCollectionsRequests = {};
   final Map<int, InfoType?> _fileInfoTypeCache = {};
-  ItemViewType _viewType = ItemViewType.listView;
+  ItemViewType? _viewType;
 
   @override
   void initState() {
@@ -49,6 +51,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     _originalCollectionOrder = List.from(widget.collections);
     _availableCollections = List.from(widget.collections);
     _availableInfoTypes = _computeAvailableInfoTypes(widget.recentFiles);
+    _viewType = localSettings.itemViewType();
   }
 
   @override
@@ -99,6 +102,11 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       trailingWidget: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
+          localSettings.setItemViewType(
+            _viewType == ItemViewType.listView
+                ? ItemViewType.gridView
+                : ItemViewType.listView,
+          );
           setState(() {
             _viewType = _viewType == ItemViewType.listView
                 ? ItemViewType.gridView
@@ -157,32 +165,16 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
   Widget _buildRecentsTable() {
     if (_displayedFiles.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                Icons.folder_off,
-                size: 48,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No items match the selected filters',
-                style: getEnteTextTheme(context).body.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-            ],
-          ),
-        ),
+      return const EmptyStateWidget(
+        assetPath: "assets/empty_state.png",
+        title: "Oops",
+        subtitle: "No items match the selected filters",
       );
     }
 
     return ItemListView(
       files: _displayedFiles,
-      viewType: _viewType,
+      viewType: _viewType ?? ItemViewType.listView,
     );
   }
 
@@ -732,9 +724,7 @@ class _FilterChip extends StatelessWidget {
               Text(
                 label,
                 style: textTheme.small.copyWith(
-                  color: isSelected
-                      ? colorScheme.backgroundBase
-                      : colorScheme.textBase,
+                  color: isSelected ? colorScheme.backgroundBase : Colors.white,
                 ),
               ),
               AnimatedSwitcher(

@@ -6,7 +6,6 @@ class MenuItemWidget extends StatelessWidget {
   final String label;
   final bool isFirst;
   final bool isLast;
-  final bool isDelete;
   final bool isWarning;
   final VoidCallback? onTap;
 
@@ -16,7 +15,6 @@ class MenuItemWidget extends StatelessWidget {
     required this.label,
     this.isFirst = false,
     this.isLast = false,
-    this.isDelete = false,
     this.isWarning = false,
     this.onTap,
   });
@@ -57,7 +55,7 @@ class MenuItemWidget extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: (isDelete || isWarning)
+                style: isWarning
                     ? textTheme.body.copyWith(color: colorScheme.warning500)
                     : textTheme.body,
               ),

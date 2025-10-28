@@ -7,6 +7,7 @@ import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_in_event.dart";
 import 'package:ente_network/network.dart';
+import "package:locker/events/collections_updated_event.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
@@ -255,6 +256,7 @@ class TrashService {
         data: params,
       );
       await _trashDB.delete(files.map((e) => e.uploadedFileID!).toList());
+      Bus.instance.fire(CollectionsUpdatedEvent("file_restore"));
       // Force reload home gallery to pull in the restored files
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
