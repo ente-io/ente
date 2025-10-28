@@ -9,18 +9,10 @@ import {
     fromHex,
     toB64,
 } from "ente-base/crypto";
+import { apiOrigin } from "ente-base/origins";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-// Configure the server URL for file-link APIs
-// TODO: Make this configurable via environment variables or settings
-const FILE_LINK_SERVER = "https://f302453e6289.ngrok-free.app";
-
-// Toggle to use mock data when server is down
-// Set to false when server is back online
-const USE_MOCK_DATA = true;
-
-// Format file size in human-readable format
 const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
 
@@ -29,11 +21,9 @@ const formatFileSize = (bytes: number): string => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     const size = bytes / Math.pow(k, i);
 
-    // Round to nearest integer for all units
     return `${Math.round(size)} ${sizes[i]}`;
 };
 
-// Response from file-link/info API
 interface FileLinkInfo {
     file?: {
         id?: number;
@@ -64,7 +54,6 @@ interface FileLinkInfo {
         uploadedTime?: number;
     };
     ownerName?: string;
-    [key: string]: any; // Allow additional fields
 }
 
 interface DecryptedFileInfo {
@@ -100,48 +89,9 @@ const extractFileKeyFromURL = async (url: URL): Promise<string | null> => {
     }
 };
 
-// Mock response for when the server is down
-const MOCK_FILE_INFO: FileLinkInfo = {
-    file: {
-        id: 10003111,
-        ownerID: 1580559962386481,
-        collectionID: 0,
-        encryptedKey: "",
-        keyDecryptionNonce: "",
-        file: { decryptionHeader: "4p9rGKcAEjTHzO9nx4exD0ZgNoSUPuRn", size: 0 },
-        thumbnail: {
-            decryptionHeader: "50NerzzFpFlxPU0VpLCyR19nc62vA91J",
-            size: 0,
-        },
-        metadata: {
-            encryptedData:
-                "4MgRhMb/L+yKqOloFnbNg///j+ekVIJRqp6hRJTDRf91FrNSykztXsh4wHBhZdQHYnNRjywg81Qitc/RwPkM9YlQ9xDsPP4uStDzwPyAhZ3O9mWBtvh2vM4bgWu2LA5bt8N+fKzdWD52K8WOpMD6JpSLnUbUjzFAI4C1XPkzr/IW3pQ+i6X3Qzz5POdncvMJC0sdhx7yEwXbvFnnAtaFuqUWYE3fOIL46iSzkQQL1zg+X79iCIOEOFv6Pe6iiIoX9eTBUxAhj5ZuteJCi2G119FoAR4wYpXBOA==",
-            decryptionHeader: "/huO35Q51hB1GH6l1S7wpdAq/ktmfkLd",
-            size: 0,
-        },
-        isDeleted: false,
-        updationTime: 0,
-        pubMagicMetadata: {
-            version: 1,
-            count: 1,
-            data: "aQYjzEDhzI3BWUFUoaRiWLoxaTWdWq0nSlgXwjSyvqvR",
-            header: "iJumCO2/t1NOZrHuvsXwGNN6+BcYyzND",
-        },
-        info: { fileSize: 184302, thumbSize: 1909 },
-    },
-};
-
 // Fetch file info from the server
 const fetchFileInfo = async (accessToken: string): Promise<FileLinkInfo> => {
-    // Use mock data when server is down
-    if (USE_MOCK_DATA) {
-        // Simulate network delay (0.5 to 1.5 seconds)
-        const delay = 800;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        return MOCK_FILE_INFO;
-    }
-
-    const url = `${FILE_LINK_SERVER}/file-link/info?accessToken=${accessToken}`;
+    const url = `${await apiOrigin()}/file-link/info?accessToken=${accessToken}`;
 
     const response = await fetch(url, {
         headers: { "X-Auth-Access-Token": accessToken },
@@ -309,7 +259,7 @@ const downloadFile = async (
     fileNonce?: string,
 ) => {
     try {
-        const url = `${FILE_LINK_SERVER}/file-link/file?accessToken=${accessToken}`;
+        const url = `${await apiOrigin()}/file-link/file?accessToken=${accessToken}`;
 
         // Fetch the encrypted file from the server
         const response = await fetch(url, {
@@ -404,9 +354,11 @@ const FilePage: React.FC = () => {
                 const decryptedInfo = await decryptFileInfo(encryptedInfo, key);
 
                 // Check if decryption failed (invalid key)
-                if (decryptedInfo.fileName === "Unknown file" ||
+                if (
+                    decryptedInfo.fileName === "Unknown file" ||
                     decryptedInfo.fileName === "Encrypted file" ||
-                    decryptedInfo.fileName === "Error: No file data") {
+                    decryptedInfo.fileName === "Error: No file data"
+                ) {
                     setError("File not found");
                     setFileInfo(null);
                 } else {
