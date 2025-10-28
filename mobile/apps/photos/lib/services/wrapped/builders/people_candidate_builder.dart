@@ -21,22 +21,24 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
 
     final List<WrappedCard> cards = <WrappedCard>[];
 
-    final WrappedCard? topPersonCard = _buildTopPersonCard(dataset);
+    final WrappedCard? topPersonCard = _buildTopPersonCard(context, dataset);
     if (topPersonCard != null) {
       cards.add(topPersonCard);
     }
 
-    final WrappedCard? topThreeCard = _buildTopThreePeopleCard(dataset);
+    final WrappedCard? topThreeCard =
+        _buildTopThreePeopleCard(context, dataset);
     if (topThreeCard != null) {
       cards.add(topThreeCard);
     }
 
-    final WrappedCard? groupVsSoloCard = _buildGroupVsSoloCard(dataset);
+    final WrappedCard? groupVsSoloCard =
+        _buildGroupVsSoloCard(context, dataset);
     if (groupVsSoloCard != null) {
       cards.add(groupVsSoloCard);
     }
 
-    final WrappedCard? newFacesCard = _buildNewFacesCard(dataset);
+    final WrappedCard? newFacesCard = _buildNewFacesCard(context, dataset);
     if (newFacesCard != null) {
       cards.add(newFacesCard);
     }
@@ -44,7 +46,10 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     return cards;
   }
 
-  WrappedCard? _buildTopPersonCard(_PeopleDataset dataset) {
+  WrappedCard? _buildTopPersonCard(
+    WrappedEngineContext context,
+    _PeopleDataset dataset,
+  ) {
     final _PersonStats? topPerson = dataset.topNamedPerson;
     if (topPerson == null || topPerson.faceCount < _kMinFacesForTopPerson) {
       return null;
@@ -70,8 +75,13 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         ? "${numberFormat.format(uniqueMoments)} moments with $mention."
         : "One unforgettable moment with $mention.";
 
-    final List<MediaRef> media =
-        topPerson.topMediaFileIDs(3).map(MediaRef.new).toList(growable: false);
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: topPerson.topMediaFileIDs(6),
+      maxCount: 3,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 30),
+    );
 
     final Map<String, Object?> meta = <String, Object?>{
       "personId": topPerson.personEntry.personID,
@@ -88,11 +98,22 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       title: "${topPerson.displayNameForTitle} starred in your ${dataset.year}",
       subtitle: subtitle,
       media: media,
-      meta: meta,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
-  WrappedCard? _buildTopThreePeopleCard(_PeopleDataset dataset) {
+  WrappedCard? _buildTopThreePeopleCard(
+    WrappedEngineContext context,
+    _PeopleDataset dataset,
+  ) {
     if (dataset.topNamedPeople.length < 3) {
       return null;
     }
@@ -110,12 +131,18 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       ],
     );
 
-    final List<MediaRef> media = topThree
-        .map((_PersonStats stats) => stats.topMediaFileIDs(1))
+    final List<int> candidateIds = topThree
+        .map((_PersonStats stats) => stats.topMediaFileIDs(3))
         .expand((List<int> ids) => ids)
-        .where((int id) => id > 0)
-        .map(MediaRef.new)
         .toList(growable: false);
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: candidateIds,
+      maxCount: 3,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 21),
+    );
 
     final Map<String, Object?> meta = <String, Object?>{
       "personIds": topThree
@@ -129,12 +156,23 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       type: WrappedCardType.topThreePeople,
       title: "Your top crew",
       subtitle: "${_formatNameList(names)} lit up your ${dataset.year}.",
-      media: media.take(3).toList(growable: false),
-      meta: meta,
+      media: media,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
-  WrappedCard? _buildGroupVsSoloCard(_PeopleDataset dataset) {
+  WrappedCard? _buildGroupVsSoloCard(
+    WrappedEngineContext context,
+    _PeopleDataset dataset,
+  ) {
     if (!dataset.hasFaceMoments) {
       return null;
     }
@@ -170,10 +208,18 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         "${numberFormat.format(dataset.soloMoments)} solo portraits",
     ]);
 
-    final List<MediaRef> media = <int>[
-      ...dataset.groupSampleFileIDs(2),
-      ...dataset.soloSampleFileIDs(1),
-    ].where((int id) => id > 0).map(MediaRef.new).toList(growable: false);
+    final List<int> candidateIds = <int>[
+      ...dataset.groupSampleFileIDs(4),
+      ...dataset.soloSampleFileIDs(2),
+    ]..removeWhere((int id) => id <= 0);
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: candidateIds,
+      maxCount: 3,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 45),
+    );
 
     final Map<String, Object?> meta = <String, Object?>{
       "groupShots": dataset.groupMoments,
@@ -194,11 +240,22 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
           ? "You balanced time with friends and quiet moments."
           : subtitleParts.join(" · "),
       media: media,
-      meta: meta,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
-  WrappedCard? _buildNewFacesCard(_PeopleDataset dataset) {
+  WrappedCard? _buildNewFacesCard(
+    WrappedEngineContext context,
+    _PeopleDataset dataset,
+  ) {
     final List<_PersonStats> newPeople = dataset.topPeople.where(
       (_PersonStats stats) {
         final int? firstSeenYear = stats.firstSeenYear;
@@ -237,12 +294,18 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         "Spotlight: ${_formatNameList(highlightNames)}",
     ]);
 
-    final List<MediaRef> media = highlights
-        .map((_PersonStats stats) => stats.topMediaFileIDs(1))
+    final List<int> candidateIds = highlights
+        .map((_PersonStats stats) => stats.topMediaFileIDs(3))
         .expand((List<int> ids) => ids)
-        .where((int id) => id > 0)
-        .map(MediaRef.new)
         .toList(growable: false);
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: candidateIds,
+      maxCount: 3,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 30),
+    );
 
     final Map<String, Object?> meta = <String, Object?>{
       "newPersonCount": count,
@@ -258,7 +321,15 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
           ? "Fresh connections defined your ${dataset.year}."
           : subtitleNames,
       media: media,
-      meta: meta,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 }

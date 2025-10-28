@@ -38,8 +38,64 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
       return const <WrappedCard>[];
     }
 
-    final List<MediaRef> heroMedia =
-        galleryGroups.first.map(MediaRef.new).toList(growable: false);
+    final List<int> uploadedIds = favoriteFiles
+        .map((EnteFile file) => file.uploadedFileID)
+        .whereType<int>()
+        .toList(growable: false);
+    if (uploadedIds.length < _kMinFavoritesForCard) {
+      return const <WrappedCard>[];
+    }
+
+    final Set<int> seenHeroIds = <int>{};
+    final List<int> heroCandidates = <int>[];
+    const int baseLimit = _kGalleryGroupSize * _kMaxGalleryGroups;
+    final int extendedLimit = math.min(
+      uploadedIds.length,
+      baseLimit * 4,
+    );
+
+    for (final List<int> group in galleryGroups) {
+      for (final int id in group) {
+        if (id <= 0 || !seenHeroIds.add(id)) {
+          continue;
+        }
+        heroCandidates.add(id);
+        if (heroCandidates.length >= extendedLimit) {
+          break;
+        }
+      }
+      if (heroCandidates.length >= extendedLimit) {
+        break;
+      }
+    }
+
+    if (heroCandidates.length < extendedLimit) {
+      for (final int id in uploadedIds) {
+        if (heroCandidates.length >= extendedLimit) {
+          break;
+        }
+        if (id <= 0 || !seenHeroIds.add(id)) {
+          continue;
+        }
+        heroCandidates.add(id);
+      }
+    }
+
+    if (heroCandidates.length < _kGalleryGroupSize) {
+      return const <WrappedCard>[];
+    }
+
+    final List<MediaRef> heroMedia = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: heroCandidates,
+      maxCount: math.min(_kGalleryGroupSize, heroCandidates.length),
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 30),
+    );
+
+    if (heroMedia.length < _kGalleryGroupSize) {
+      return const <WrappedCard>[];
+    }
 
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final int favoritesCount = favoriteFiles.length;

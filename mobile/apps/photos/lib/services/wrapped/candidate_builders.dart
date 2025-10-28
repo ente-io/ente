@@ -3,6 +3,8 @@ import "dart:typed_data";
 
 import "package:flutter/foundation.dart" show immutable;
 import "package:intl/intl.dart";
+import "package:ml_linalg/dtype.dart";
+import "package:ml_linalg/vector.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";
@@ -17,6 +19,7 @@ part "builders/aesthetics_candidate_builder.dart";
 part "builders/curation_candidate_builder.dart";
 part "builders/narrative_candidate_builder.dart";
 part "builders/badge_selector.dart";
+part "builders/media_selector.dart";
 
 /// Provides basic context details for candidate builders.
 @immutable

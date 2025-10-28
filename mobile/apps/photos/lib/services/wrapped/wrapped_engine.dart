@@ -333,6 +333,7 @@ class WrappedEngine {
     final Set<String> queries = <String>{
       ...AestheticsCandidateBuilder.requiredTextQueries,
       ...WrappedBadgeSelector.requiredTextQueries,
+      ...WrappedMediaSelector.requiredTextQueries,
     };
     final Map<String, List<double>> textEmbeddings = <String, List<double>>{};
     for (final String query in queries) {

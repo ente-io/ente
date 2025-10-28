@@ -15,8 +15,10 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
   static const int _kMinBlurryFiles = 3;
   static const int _kMinColorBuckets = 2;
   static const int _kMinColorMatchesPerBucket = 10;
-  static const int _kMinMonochromeMedia = 4;
-  static const int _kTopWowTarget = 4;
+  static const int _kMinMonochromeMedia = 6;
+  static const int _kTopWowMediaCount = 6;
+  static const int _kTopWowCandidateMultiplier = 4;
+  static const int _kTopWowMinIntersection = 3;
 
   static const List<_ColorSpec> _colorSpecs = <_ColorSpec>[
     _ColorSpec(
@@ -91,22 +93,22 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final List<WrappedCard> cards = <WrappedCard>[];
 
-    final WrappedCard? blurryCard = _buildBlurryFacesCard(snapshot);
+    final WrappedCard? blurryCard = _buildBlurryFacesCard(context, snapshot);
     if (blurryCard != null) {
       cards.add(blurryCard);
     }
 
-    final WrappedCard? colorCard = _buildYearInColorCard(snapshot);
+    final WrappedCard? colorCard = _buildYearInColorCard(context, snapshot);
     if (colorCard != null) {
       cards.add(colorCard);
     }
 
-    final WrappedCard? monochromeCard = _buildMonochromeCard(snapshot);
+    final WrappedCard? monochromeCard = _buildMonochromeCard(context, snapshot);
     if (monochromeCard != null) {
       cards.add(monochromeCard);
     }
 
-    final WrappedCard? wowCard = _buildTopWowCard(snapshot);
+    final WrappedCard? wowCard = _buildTopWowCard(context, snapshot);
     if (wowCard != null) {
       cards.add(wowCard);
     }
@@ -114,20 +116,49 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     return cards;
   }
 
-  WrappedCard? _buildBlurryFacesCard(_AestheticsSnapshot snapshot) {
+  WrappedCard? _buildBlurryFacesCard(
+    WrappedEngineContext context,
+    _AestheticsSnapshot snapshot,
+  ) {
     final List<_BlurryCandidate> candidates = snapshot.blurryCandidates;
     if (candidates.length < _kMinBlurryFiles) {
       return null;
     }
 
-    final List<_BlurryCandidate> selected =
-        candidates.take(_kMaxMediaPerCard).toList(growable: false);
-    final List<MediaRef> mediaRefs = selected
-        .map((candidate) => MediaRef(candidate.uploadedFileID))
+    final Map<int, double> scoreHints = <int, double>{
+      for (final _BlurryCandidate candidate in candidates)
+        candidate.uploadedFileID: candidate.faceScore,
+    };
+
+    final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs:
+          candidates.map((c) => c.uploadedFileID).toList(growable: false),
+      maxCount: math.min(_kMaxMediaPerCard, candidates.length),
+      scoreHints: scoreHints,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 21),
+    );
+
+    if (mediaRefs.isEmpty) {
+      return null;
+    }
+
+    final Map<int, _BlurryCandidate> candidateById = <int, _BlurryCandidate>{
+      for (final _BlurryCandidate candidate in candidates)
+        candidate.uploadedFileID: candidate,
+    };
+    final List<_BlurryCandidate> selectedCandidates = mediaRefs
+        .map((MediaRef ref) => candidateById[ref.uploadedFileID])
+        .whereType<_BlurryCandidate>()
         .toList(growable: false);
 
+    if (selectedCandidates.isEmpty) {
+      return null;
+    }
+
     final Set<String> nameSet = <String>{
-      for (final _BlurryCandidate candidate in selected)
+      for (final _BlurryCandidate candidate in selectedCandidates)
         ...candidate.personNames,
     }..removeWhere((String name) => name.isEmpty);
 
@@ -138,17 +169,19 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     ];
 
     final double averageBlur = _average(
-      selected.map((candidate) => candidate.blurScore).toList(growable: false),
+      selectedCandidates
+          .map((candidate) => candidate.blurScore)
+          .toList(growable: false),
     );
     final double averageScore = _average(
-      selected.map((candidate) => candidate.faceScore).toList(growable: false),
+      selectedCandidates
+          .map((candidate) => candidate.faceScore)
+          .toList(growable: false),
     );
 
     final Map<String, Object?> meta = <String, Object?>{
       "totalCandidates": candidates.length,
       "detailChips": detailChips,
-      "uploadedFileIDs":
-          selected.map((candidate) => candidate.uploadedFileID).toList(),
       if (nameSet.isNotEmpty) "personNames": nameSet.toList(growable: false),
       "averageBlur": averageBlur,
       "averageFaceScore": averageScore,
@@ -159,11 +192,21 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       title: "Perfectly imperfect moments",
       subtitle: _buildBlurrySubtitle(nameSet),
       media: mediaRefs,
-      meta: meta,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            "uploadedFileIDs": mediaRefs
+                .map((MediaRef ref) => ref.uploadedFileID)
+                .toList(growable: false),
+          },
+        ),
     );
   }
 
-  WrappedCard? _buildYearInColorCard(_AestheticsSnapshot snapshot) {
+  WrappedCard? _buildYearInColorCard(
+    WrappedEngineContext context,
+    _AestheticsSnapshot snapshot,
+  ) {
     final List<_ColorBucket> eligibleBuckets =
         snapshot.colorBuckets.where((bucket) {
       return bucket.matches.length >= _kMinColorMatchesPerBucket;
@@ -190,19 +233,41 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     List<_ClipMatch> heroMatches = chosenBucket.matches
         .where((match) => match.score >= _kDisplayThreshold)
         .take(_kMaxMatchesPerQuery)
-        .toList(growable: false);
+        .toList();
+    if (heroMatches.length < _kMaxMediaPerCard) {
+      final Set<int> seen =
+          heroMatches.map((match) => match.uploadedFileID).toSet();
+      for (final _ClipMatch match in chosenBucket.matches) {
+        if (seen.length >= _kMaxMediaPerCard) {
+          break;
+        }
+        if (seen.add(match.uploadedFileID)) {
+          heroMatches.add(match);
+        }
+      }
+    }
     if (heroMatches.isEmpty) {
       heroMatches = chosenBucket.matches
           .take(_kMaxMatchesPerQuery)
           .toList(growable: false);
     }
 
-    final List<MediaRef> media = heroMatches
-        .take(_kMaxMediaPerCard)
-        .map((match) => MediaRef(match.uploadedFileID))
-        .toList(growable: false);
+    final Map<int, double> scoreHints = <int, double>{
+      for (final _ClipMatch match in heroMatches)
+        match.uploadedFileID: match.score,
+    };
 
-    if (media.isEmpty) {
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs:
+          heroMatches.map((match) => match.uploadedFileID),
+      maxCount: math.min(_kMaxMediaPerCard, heroMatches.length),
+      scoreHints: scoreHints,
+      minimumSpacing: const Duration(days: 30),
+      enforceDistinctness: false,
+    );
+
+    if (media.length < _kMaxMediaPerCard) {
       return null;
     }
 
@@ -221,7 +286,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
           "query": chosenBucket.spec.query,
           "count": chosenBucket.matches.length,
           "uploadedFileIDs":
-              heroMatches.map((match) => match.uploadedFileID).toList(),
+              media.map((MediaRef ref) => ref.uploadedFileID).toList(),
         },
       ],
       "detailChips": detailChips,
@@ -239,7 +304,10 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     );
   }
 
-  WrappedCard? _buildMonochromeCard(_AestheticsSnapshot snapshot) {
+  WrappedCard? _buildMonochromeCard(
+    WrappedEngineContext context,
+    _AestheticsSnapshot snapshot,
+  ) {
     final List<_ClipMatch> matches = snapshot.monochromeMatches;
     if (matches.length < _kMinMonochromeMedia) {
       return null;
@@ -247,23 +315,46 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final List<_ClipMatch> heroes = matches
         .where((match) => match.score >= _kMonochromeDisplayThreshold)
-        .take(_kMaxMediaPerCard)
-        .toList(growable: false);
+        .toList();
 
-    if (heroes.length < _kMinMonochromeMedia) {
-      return null;
+    if (heroes.length < _kMaxMediaPerCard) {
+      final Set<int> seen = heroes.map((match) => match.uploadedFileID).toSet();
+      for (final _ClipMatch match in matches) {
+        if (seen.length >= _kMaxMediaPerCard) {
+          break;
+        }
+        if (seen.add(match.uploadedFileID)) {
+          heroes.add(match);
+        }
+      }
     }
 
-    final List<MediaRef> media = heroes
-        .map((match) => MediaRef(match.uploadedFileID))
-        .toList(growable: false);
+    final Map<int, double> scoreHints = <int, double>{
+      for (final _ClipMatch match in heroes) match.uploadedFileID: match.score,
+    };
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs:
+          heroes.map((match) => match.uploadedFileID).toList(growable: false),
+      maxCount: math.min(_kMaxMediaPerCard, heroes.length),
+      scoreHints: scoreHints,
+      minimumSpacing: const Duration(days: 21),
+      enforceDistinctness: false,
+    );
+
+    if (media.length < _kMaxMediaPerCard) {
+      return null;
+    }
 
     final Map<String, Object?> meta = <String, Object?>{
       "matchCount": matches.length,
       "detailChips": <String>[
         "${matches.length} black-and-white frames",
       ],
-      "uploadedFileIDs": heroes.map((match) => match.uploadedFileID).toList(),
+      "uploadedFileIDs": media
+          .map((MediaRef ref) => ref.uploadedFileID)
+          .toList(growable: false),
     };
 
     return WrappedCard(
@@ -275,24 +366,78 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     );
   }
 
-  WrappedCard? _buildTopWowCard(_AestheticsSnapshot snapshot) {
-    final List<_ClipMatch> wowMatches = snapshot.topWowMatches;
-    if (wowMatches.length < _kTopWowTarget) {
+  WrappedCard? _buildTopWowCard(
+    WrappedEngineContext context,
+    _AestheticsSnapshot snapshot,
+  ) {
+    final List<_ClipMatch> intersection = snapshot.topWowMatches;
+    if (intersection.length < _kTopWowMinIntersection) {
       return null;
     }
 
-    final List<_ClipMatch> heroes =
-        wowMatches.take(_kTopWowTarget).toList(growable: false);
-    final List<MediaRef> media = heroes
-        .map((match) => MediaRef(match.uploadedFileID))
-        .toList(growable: false);
+    const int desiredCount = _kTopWowMediaCount;
+    final Map<int, _ClipMatch> candidateMap = <int, _ClipMatch>{
+      for (final _ClipMatch match in intersection) match.uploadedFileID: match,
+    };
+
+    if (candidateMap.length < desiredCount) {
+      for (final String query in AestheticsCandidateBuilder._kWowQueries) {
+        final List<_ClipMatch> queryMatches =
+            snapshot.matchesForQuery(query).toList(growable: false);
+        for (final _ClipMatch match in queryMatches) {
+          candidateMap.putIfAbsent(match.uploadedFileID, () => match);
+          if (candidateMap.length >=
+              desiredCount * _kTopWowCandidateMultiplier) {
+            break;
+          }
+        }
+        if (candidateMap.length >= desiredCount * _kTopWowCandidateMultiplier) {
+          break;
+        }
+      }
+    }
+
+    final List<_ClipMatch> candidates =
+        candidateMap.values.toList(growable: false)
+          ..sort(
+            (_ClipMatch a, _ClipMatch b) => b.score.compareTo(a.score),
+          );
+
+    if (candidates.length < desiredCount) {
+      return null;
+    }
+
+    final Set<int> intersectionIds =
+        intersection.map((match) => match.uploadedFileID).toSet();
+    final Map<int, double> scoreHints = <int, double>{
+      for (final _ClipMatch match in candidates)
+        match.uploadedFileID: match.score *
+            (intersectionIds.contains(match.uploadedFileID) ? 1.5 : 1.0),
+    };
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: candidates
+          .map((match) => match.uploadedFileID)
+          .toList(growable: false),
+      maxCount: desiredCount,
+      scoreHints: scoreHints,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 21),
+    );
+
+    if (media.length < desiredCount) {
+      return null;
+    }
 
     final Map<String, Object?> meta = <String, Object?>{
       "queries": AestheticsCandidateBuilder._kWowQueries,
       "detailChips": <String>[
-        "${wowMatches.length} CLIP-approved stunners",
+        "${media.length} CLIP-approved stunners",
       ],
-      "uploadedFileIDs": heroes.map((match) => match.uploadedFileID).toList(),
+      "uploadedFileIDs": media
+          .map((MediaRef ref) => ref.uploadedFileID)
+          .toList(growable: false),
     };
 
     return WrappedCard(
@@ -394,6 +539,11 @@ class _AestheticsSnapshot {
 
   List<_ClipMatch> get topWowMatches {
     return _cachedTopWowMatches ??= _computeTopWow();
+  }
+
+  List<_ClipMatch> matchesForQuery(String query) {
+    final List<_ClipMatch> matches = _matchesForQuery(query);
+    return List<_ClipMatch>.from(matches, growable: false);
   }
 
   factory _AestheticsSnapshot.fromContext(

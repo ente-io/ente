@@ -14,14 +14,14 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     }
 
     final List<WrappedCard> cards = <WrappedCard>[];
-    cards.add(_buildTotalsCard(snapshot));
+    cards.add(_buildTotalsCard(context, snapshot));
 
-    final WrappedCard? rhythmCard = _buildRhythmCard(snapshot);
+    final WrappedCard? rhythmCard = _buildRhythmCard(context, snapshot);
     if (rhythmCard != null) {
       cards.add(rhythmCard);
     }
 
-    final WrappedCard? busiestDayCard = _buildBusiestDayCard(snapshot);
+    final WrappedCard? busiestDayCard = _buildBusiestDayCard(context, snapshot);
     if (busiestDayCard != null) {
       cards.add(busiestDayCard);
     }
@@ -31,7 +31,10 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     return cards;
   }
 
-  WrappedCard _buildTotalsCard(_StatsSnapshot snapshot) {
+  WrappedCard _buildTotalsCard(
+    WrappedEngineContext context,
+    _StatsSnapshot snapshot,
+  ) {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateFormat fullDateFormat = DateFormat("MMMM d");
 
@@ -70,6 +73,15 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
         snapshot.busiestDayMediaUploadedIDs,
         snapshot.lastCaptureUploadedIDs,
       ],
+      selectionTarget: 6,
+    );
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: heroIds,
+      maxCount: 6,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 45),
     );
 
     final String? firstCaptureLine = snapshot.firstCaptureDay != null
@@ -98,12 +110,23 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       type: WrappedCardType.statsTotals,
       title: title,
       subtitle: subtitle,
-      media: heroIds.map(MediaRef.new).toList(growable: false),
-      meta: meta,
+      media: media,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
-  WrappedCard? _buildRhythmCard(_StatsSnapshot snapshot) {
+  WrappedCard? _buildRhythmCard(
+    WrappedEngineContext context,
+    _StatsSnapshot snapshot,
+  ) {
     if (snapshot.elapsedDays <= 0) {
       return null;
     }
@@ -147,6 +170,15 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
         snapshot.busiestMonthHighlightUploadedIDs,
         snapshot.breakReturnUploadedIDs,
       ],
+      selectionTarget: 6,
+    );
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: rhythmIds,
+      maxCount: 6,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 21),
     );
 
     final Map<String, Object?> meta = <String, Object?>{
@@ -180,12 +212,23 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       type: WrappedCardType.statsVelocity,
       title: title,
       subtitle: subtitleParts.join(" · "),
-      media: rhythmIds.map(MediaRef.new).toList(growable: false),
-      meta: meta,
+      media: media,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
-  WrappedCard? _buildBusiestDayCard(_StatsSnapshot snapshot) {
+  WrappedCard? _buildBusiestDayCard(
+    WrappedEngineContext context,
+    _StatsSnapshot snapshot,
+  ) {
     if (snapshot.busiestDay == null || snapshot.busiestDayCount == 0) {
       return null;
     }
@@ -195,10 +238,12 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateTime day = snapshot.busiestDay!;
 
-    final List<MediaRef> mediaRefs = snapshot.busiestDayMediaUploadedIDs
-        .take(6)
-        .map(MediaRef.new)
-        .toList(growable: false);
+    final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: snapshot.busiestDayMediaUploadedIDs,
+      maxCount: 6,
+      preferNamedPeople: true,
+    );
 
     final Map<String, Object?> meta = <String, Object?>{
       "date": day.toIso8601String(),
@@ -209,7 +254,9 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
         weekdayFormat.format(day),
       ],
       if (mediaRefs.isNotEmpty)
-        "uploadedFileIDs": snapshot.busiestDayMediaUploadedIDs,
+        "uploadedFileIDs": mediaRefs
+            .map((MediaRef ref) => ref.uploadedFileID)
+            .toList(growable: false),
     };
 
     return WrappedCard(
@@ -255,16 +302,20 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     ];
   }
 
-  List<int> _collectUniqueIds(List<List<int>> sources) {
+  List<int> _collectUniqueIds(
+    List<List<int>> sources, {
+    required int selectionTarget,
+  }) {
     final Set<int> seen = <int>{};
     final List<int> result = <int>[];
+    final int poolTarget = math.max(selectionTarget * 4, selectionTarget + 6);
     for (final List<int> source in sources) {
       for (final int id in source) {
         if (id <= 0) continue;
         if (seen.add(id)) {
           result.add(id);
         }
-        if (result.length >= 6) {
+        if (result.length >= poolTarget) {
           return result;
         }
       }

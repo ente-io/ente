@@ -11,6 +11,8 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
   static const double _kMaxCityLabelDistanceKm = 120.0;
   static const int _kTopCityMediaCount = 4;
   static const int _kSpotMediaCount = 6;
+  static const int _kSelectionPoolMultiplier = 5;
+  static const int _kSelectionPoolMinimum = 18;
 
   @override
   String get debugLabel => "places";
@@ -83,6 +85,14 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: mediaIds,
+      maxCount: _kTopCityMediaCount,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 45),
+    );
+
     final Map<String, Object?> meta = <String, Object?>{
       "year": context.year,
       "totalGeotaggedCount": dataset.totalCount,
@@ -111,8 +121,16 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       type: WrappedCardType.topCities,
       title: title,
       subtitle: subtitle,
-      media: mediaIds.map(MediaRef.new).toList(growable: false),
-      meta: meta,
+      media: media,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
@@ -146,8 +164,6 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    const String title = "Your favorite spot";
-
     final String subtitle;
     if (cluster.distinctDays <= 0) {
       subtitle =
@@ -159,6 +175,14 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       subtitle =
           "You made ${numberFormat.format(cluster.totalCount)} memories here across ${numberFormat.format(cluster.distinctDays)} different days.";
     }
+
+    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+      context: context,
+      candidateUploadedFileIDs: mediaIds,
+      maxCount: _kSpotMediaCount,
+      preferNamedPeople: true,
+      minimumSpacing: const Duration(days: 30),
+    );
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": context.year,
@@ -182,10 +206,18 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.mostVisitedSpot,
-      title: title,
+      title: "Your favorite spot",
       subtitle: subtitle,
-      media: mediaIds.map(MediaRef.new).toList(growable: false),
-      meta: meta,
+      media: media,
+      meta: meta
+        ..addAll(
+          <String, Object?>{
+            if (media.isNotEmpty)
+              "uploadedFileIDs": media
+                  .map((MediaRef ref) => ref.uploadedFileID)
+                  .toList(growable: false),
+          },
+        ),
     );
   }
 
@@ -207,9 +239,24 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
   }) {
     final Set<int> seen = exclude != null ? Set<int>.from(exclude) : <int>{};
     final List<int> collected = <int>[];
+    if (clusters.isEmpty || maxCount <= 0) {
+      return collected;
+    }
+
+    final int candidateLimit = math.max(
+      maxCount,
+      math.max(maxCount * _kSelectionPoolMultiplier, _kSelectionPoolMinimum),
+    );
     for (final _PlaceClusterSummary cluster in clusters) {
+      final int perClusterLimit = math.min(
+        cluster.totalCount,
+        math.max(
+          maxCount,
+          (candidateLimit / clusters.length).ceil(),
+        ),
+      );
       final List<int> clusterIds = cluster.sampleMediaIds(
-        maxCount,
+        perClusterLimit,
         preferDistinctDays: preferDistinctDays,
       );
       for (final int id in clusterIds) {
@@ -218,7 +265,7 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
         }
         collected.add(id);
         seen.add(id);
-        if (collected.length >= maxCount) {
+        if (collected.length >= candidateLimit) {
           return collected;
         }
       }
