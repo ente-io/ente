@@ -50,6 +50,8 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
+  bool get enteWrapped => internalUser;
+
   bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
