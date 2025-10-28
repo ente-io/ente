@@ -200,8 +200,9 @@ jobs:
                   flutter config --enable-windows-desktop
                   # dart pub global activate flutter_distributor
                   dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  make innoinstall
+                  choco install innosetup -y
                   flutter_distributor package --platform=windows --targets=exe --skip-clean
+                  shopt -s globstar
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
               shell: bash
 
