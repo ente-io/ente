@@ -75,10 +75,13 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         ? "${numberFormat.format(uniqueMoments)} moments with $mention."
         : "One unforgettable moment with $mention.";
 
+    final List<int> candidateIds = topPerson.topMediaFileIDs(6);
+    final Map<int, double> scoreHints = topPerson.mediaScoreHints();
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: topPerson.topMediaFileIDs(6),
+      candidateUploadedFileIDs: candidateIds,
       maxCount: 3,
+      scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
     );
@@ -136,10 +139,23 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         .expand((List<int> ids) => ids)
         .toList(growable: false);
 
+    final Map<int, double> scoreHints = <int, double>{};
+    for (final _PersonStats stats in topThree) {
+      final Map<int, double> personHints = stats.mediaScoreHints();
+      for (final MapEntry<int, double> entry in personHints.entries) {
+        scoreHints.update(
+          entry.key,
+          (double value) => value + entry.value,
+          ifAbsent: () => entry.value,
+        );
+      }
+    }
+
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
       maxCount: 3,
+      scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
     );
@@ -299,10 +315,23 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         .expand((List<int> ids) => ids)
         .toList(growable: false);
 
+    final Map<int, double> scoreHints = <int, double>{};
+    for (final _PersonStats stats in highlights) {
+      final Map<int, double> personHints = stats.mediaScoreHints();
+      for (final MapEntry<int, double> entry in personHints.entries) {
+        scoreHints.update(
+          entry.key,
+          (double value) => value + entry.value,
+          ifAbsent: () => entry.value,
+        );
+      }
+    }
+
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
       maxCount: 3,
+      scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
     );
@@ -339,6 +368,7 @@ class _PeopleDataset {
     required this.year,
     required List<_PersonStats> topPeople,
     required List<_PersonStats> topNamedPeople,
+    required this.selfPersonID,
     required this.totalNamedFaceCount,
     required this.totalFaceMoments,
     required this.groupMoments,
@@ -354,6 +384,7 @@ class _PeopleDataset {
   final int year;
   final List<_PersonStats> _topPeople;
   final List<_PersonStats> _topNamedPeople;
+  final String? selfPersonID;
   final int totalNamedFaceCount;
   final int totalFaceMoments;
   final int groupMoments;
@@ -398,6 +429,7 @@ class _PeopleDataset {
       return _PeopleDataset._empty(year);
     }
 
+    final String? selfPersonID = context.selfPersonID;
     final Map<String, _PersonStats> personStats = <String, _PersonStats>{};
     final Map<String, int> firstSeenYear = <String, int>{
       for (final MapEntry<String, int> entry
@@ -420,6 +452,10 @@ class _PeopleDataset {
         continue;
       }
       final List<WrappedFaceRef> faces = file.faces;
+      final bool includesSelf = selfPersonID != null &&
+          faces.any(
+            (WrappedFaceRef face) => face.personID == selfPersonID,
+          );
       final int highQualityCount =
           faces.where((WrappedFaceRef face) => face.isHighQuality).length;
       final int effectiveCount =
@@ -456,8 +492,11 @@ class _PeopleDataset {
         if (personID == null) {
           continue;
         }
+        if (selfPersonID != null && personID == selfPersonID) {
+          continue;
+        }
         final WrappedPersonEntry? personEntry = context.persons[personID];
-        if (personEntry == null || personEntry.isHidden) {
+        if (personEntry == null || personEntry.isHidden || personEntry.isMe) {
           continue;
         }
         totalNamedFaceCount += 1;
@@ -465,7 +504,11 @@ class _PeopleDataset {
           personID,
           () => _PersonStats(personEntry),
         );
-        stats.addFace(file, face);
+        stats.addFace(
+          file: file,
+          face: face,
+          includesSelf: includesSelf,
+        );
       }
     }
 
@@ -507,6 +550,7 @@ class _PeopleDataset {
       year: year,
       topPeople: orderedPeople,
       topNamedPeople: orderedNamedPeople,
+      selfPersonID: selfPersonID,
       totalNamedFaceCount: totalNamedFaceCount,
       totalFaceMoments: totalFaceMoments,
       groupMoments: groupMoments,
@@ -522,6 +566,7 @@ class _PeopleDataset {
       year: year,
       topPeople: const <_PersonStats>[],
       topNamedPeople: const <_PersonStats>[],
+      selfPersonID: null,
       totalNamedFaceCount: 0,
       totalFaceMoments: 0,
       groupMoments: 0,
@@ -552,19 +597,28 @@ class _PersonStats {
   String get mentionForSentence =>
       hasName ? personEntry.displayName.trim() : "someone special";
 
-  void addFace(WrappedPeopleFile file, WrappedFaceRef face) {
+  void addFace({
+    required WrappedPeopleFile file,
+    required WrappedFaceRef face,
+    required bool includesSelf,
+  }) {
     faceCount += 1;
     if (face.isHighQuality) {
       highQualityFaces += 1;
     }
-    final _PersonCapture capture = _captures.putIfAbsent(
-      file.uploadedFileID,
-      () => _PersonCapture(
+    _PersonCapture? capture = _captures[file.uploadedFileID];
+    if (capture == null) {
+      capture = _PersonCapture(
         fileID: file.uploadedFileID,
         captureMicros: file.captureMicros,
-      ),
+        includesSelf: includesSelf,
+      );
+      _captures[file.uploadedFileID] = capture;
+    }
+    capture.registerFace(
+      face,
+      includesSelf: includesSelf,
     );
-    capture.registerFace(face);
   }
 
   List<int> topMediaFileIDs(int count) {
@@ -572,6 +626,9 @@ class _PersonStats {
         _captures.values.toList(growable: false)
           ..sort(
             (_PersonCapture a, _PersonCapture b) {
+              if (a.includesSelf != b.includesSelf) {
+                return a.includesSelf ? -1 : 1;
+              }
               if (b.highQualityFaces != a.highQualityFaces) {
                 return b.highQualityFaces.compareTo(a.highQualityFaces);
               }
@@ -587,20 +644,41 @@ class _PersonStats {
         .take(count)
         .toList(growable: false);
   }
+
+  Map<int, double> mediaScoreHints({double withSelfBoost = 0.25}) {
+    if (withSelfBoost <= 0) {
+      return <int, double>{};
+    }
+    final Map<int, double> hints = <int, double>{};
+    for (final _PersonCapture capture in _captures.values) {
+      if (capture.includesSelf && capture.fileID > 0) {
+        hints[capture.fileID] = (hints[capture.fileID] ?? 0) + withSelfBoost;
+      }
+    }
+    return hints;
+  }
 }
 
 class _PersonCapture {
   _PersonCapture({
     required this.fileID,
     required this.captureMicros,
+    this.includesSelf = false,
   });
 
   final int fileID;
   final int captureMicros;
   double? bestScore;
   int highQualityFaces = 0;
+  bool includesSelf;
 
-  void registerFace(WrappedFaceRef face) {
+  void registerFace(
+    WrappedFaceRef face, {
+    required bool includesSelf,
+  }) {
+    if (includesSelf) {
+      this.includesSelf = true;
+    }
     if (bestScore == null || face.score > bestScore!) {
       bestScore = face.score;
     }

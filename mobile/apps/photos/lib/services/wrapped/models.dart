@@ -9,6 +9,7 @@ class WrappedPeopleContext {
     required List<WrappedPeopleFile> files,
     required Map<String, WrappedPersonEntry> persons,
     required Map<String, int> personFirstCaptureMicros,
+    this.selfPersonID,
   })  : files = List<WrappedPeopleFile>.unmodifiable(files),
         persons = Map<String, WrappedPersonEntry>.unmodifiable(persons),
         personFirstCaptureMicros =
@@ -19,12 +20,14 @@ class WrappedPeopleContext {
       files: const <WrappedPeopleFile>[],
       persons: const <String, WrappedPersonEntry>{},
       personFirstCaptureMicros: const <String, int>{},
+      selfPersonID: null,
     );
   }
 
   final List<WrappedPeopleFile> files;
   final Map<String, WrappedPersonEntry> persons;
   final Map<String, int> personFirstCaptureMicros;
+  final String? selfPersonID;
 
   bool get hasPeople => files.isNotEmpty && persons.isNotEmpty;
 
@@ -38,6 +41,7 @@ class WrappedPeopleContext {
         ),
       ),
       "firstCaptureMicros": personFirstCaptureMicros,
+      "selfPersonID": selfPersonID,
     };
   }
 
@@ -71,6 +75,7 @@ class WrappedPeopleContext {
           .toList(growable: false),
       persons: persons,
       personFirstCaptureMicros: firstCaptureMicros,
+      selfPersonID: json["selfPersonID"] as String?,
     );
   }
 }
@@ -280,12 +285,14 @@ class WrappedPersonEntry {
     required this.displayName,
     required this.isHidden,
     required Map<String, int> clusterFaceCounts,
+    this.isMe = false,
   }) : clusterFaceCounts = Map<String, int>.unmodifiable(clusterFaceCounts);
 
   final String personID;
   final String displayName;
   final bool isHidden;
   final Map<String, int> clusterFaceCounts;
+  final bool isMe;
 
   int get totalClusterFaceCount {
     int sum = 0;
@@ -301,6 +308,7 @@ class WrappedPersonEntry {
       "displayName": displayName,
       "isHidden": isHidden,
       "clusterFaceCounts": clusterFaceCounts,
+      "isMe": isMe,
     };
   }
 
@@ -318,6 +326,7 @@ class WrappedPersonEntry {
       displayName: json["displayName"] as String? ?? "",
       isHidden: json["isHidden"] as bool? ?? false,
       clusterFaceCounts: clusterFaceCounts,
+      isMe: json["isMe"] as bool? ?? false,
     );
   }
 }

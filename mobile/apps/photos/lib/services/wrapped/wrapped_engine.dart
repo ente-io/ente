@@ -1,5 +1,6 @@
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -197,6 +198,9 @@ class WrappedEngine {
     final Map<String, int> personFirstCaptureMicros = <String, int>{};
     final Map<String, String> faceIdToPerson = <String, String>{};
     final Map<String, String> faceIdToCluster = <String, String>{};
+    final String? normalizedUserEmail =
+        Configuration.instance.getEmail()?.trim().toLowerCase();
+    String? selfPersonID;
 
     if (PersonService.isInitialized) {
       try {
@@ -234,11 +238,20 @@ class WrappedEngine {
           if (clusterFaceCounts.isEmpty) {
             continue;
           }
+          final String? normalizedPersonEmail =
+              data.email?.trim().toLowerCase();
+          final bool isMe = normalizedUserEmail != null &&
+              normalizedPersonEmail != null &&
+              normalizedPersonEmail == normalizedUserEmail;
+          if (isMe) {
+            selfPersonID = person.remoteID;
+          }
           personEntries[person.remoteID] = WrappedPersonEntry(
             personID: person.remoteID,
             displayName: data.name,
             isHidden: data.isHidden,
             clusterFaceCounts: clusterFaceCounts,
+            isMe: isMe,
           );
           if (earliestMicros != null) {
             personFirstCaptureMicros[person.remoteID] = earliestMicros;
@@ -294,6 +307,7 @@ class WrappedEngine {
       files: peopleFiles,
       persons: personEntries,
       personFirstCaptureMicros: personFirstCaptureMicros,
+      selfPersonID: selfPersonID,
     );
   }
 
