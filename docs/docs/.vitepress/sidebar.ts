@@ -220,6 +220,7 @@ export const sidebar = [
             },
             {
                 text: "FAQ",
+                link: "/photos/faq/",
                 collapsed: true,
                 items: [
                     {
@@ -245,6 +246,10 @@ export const sidebar = [
                     {
                         text: "Search and Discovery",
                         link: "/photos/faq/search-and-discovery",
+                    },
+                    {
+                        text: "Security and Privacy",
+                        link: "/photos/faq/security-and-privacy",
                     },
                     {
                         text: "Sharing and Collaboration",
