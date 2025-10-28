@@ -157,12 +157,9 @@ Open `Settings > Preferences > Machine learning`, enable "Face recognition", and
 
 Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning).
 
-### Does Detect Text let me search photos by the words inside them? {#detect-text-search}
+### Can I search my library by text that appears inside images? {#search-text-in-images}
 
-No. The **Detect Text** button performs OCR on the fly for the photo you have open. It does not build a searchable index across your library, so you cannot search for arbitrary words that appear in images.
-
-- Search results still rely on metadata, descriptions, and machine learning indexes (face recognition and magic search).
-- Magic search may sometimes surface images that contain prominent text because of CLIP embeddings, but this is not guaranteed and is not a substitute for full OCR indexing.
+Only partially. Ente does not maintain a full OCR index of your photos, so search cannot guarantee matches for arbitrary words. Text-related hits today come from metadata or from magic search (CLIP embeddings); magic search can surface photos with very apparent text, but doesn't offer a dedicated OCR search.
 
 ### Can I merge or de-merge persons recognized by the app? {#merge-persons}
 
