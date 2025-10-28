@@ -803,6 +803,12 @@ class FileUploader {
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
       encThumbSize = await encryptedThumbnailFile.length();
+      String? thumbnailMd5;
+      if (flagService.internalUser) {
+        thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
+      }
+      final bool useChecksumThumbnailUpload =
+          flagService.internalUser && thumbnailMd5?.isNotEmpty == true;
 
       // Calculate the number of parts for the file.
       final count = _multiPartUploader.calculatePartCount(encFileSize);
@@ -814,7 +820,10 @@ class FileUploader {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Non-multipart upload: Getting thumbnail upload URL...",
         );
-        final thumbnailUploadURL = await _getUploadURL();
+        final thumbnailUploadURL = await _getUploadURL(
+          contentLength: useChecksumThumbnailUpload ? encThumbSize : null,
+          contentMd5: useChecksumThumbnailUpload ? thumbnailMd5 : null,
+        );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Thumbnail URL obtained, uploading thumbnail (size: ${formatBytes(encThumbSize)})...",
         );
@@ -822,11 +831,17 @@ class FileUploader {
           thumbnailUploadURL,
           encryptedThumbnailFile,
           encThumbSize,
+          contentMd5: thumbnailMd5,
         );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Thumbnail uploaded successfully! Now getting file upload URL...",
         );
-        final fileUploadURL = await _getUploadURL();
+        final useChecksumUpload =
+            flagService.internalUser && fileMd5?.isNotEmpty == true;
+        final fileUploadURL = await _getUploadURL(
+          contentLength: useChecksumUpload ? encFileSize : null,
+          contentMd5: useChecksumUpload ? fileMd5 : null,
+        );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] File URL obtained, uploading actual file (size: ${formatBytes(encFileSize)})...",
         );
@@ -853,8 +868,15 @@ class FileUploader {
             existingMultipartEncFileName,
           );
         } else {
+          final multipartPartLength = fileAttributes.partSize ??
+              _multiPartUploader.multipartPartSizeForUpload;
           final fileUploadURLs =
-              await _multiPartUploader.getMultipartUploadURLs(count);
+              await _multiPartUploader.getMultipartUploadURLs(
+            count: count,
+            contentLength: encFileSize,
+            partLength: multipartPartLength,
+            partMd5s: flagService.internalUser ? partMd5s : null,
+          );
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
             lockKey,
@@ -880,11 +902,15 @@ class FileUploader {
         // re-uploading the thumbnail in case of failure.
         // In regular upload, always upload the thumbnail first to keep existing behaviour
         //
-        final thumbnailUploadURL = await _getUploadURL();
+        final thumbnailUploadURL = await _getUploadURL(
+          contentLength: useChecksumThumbnailUpload ? encThumbSize : null,
+          contentMd5: useChecksumThumbnailUpload ? thumbnailMd5 : null,
+        );
         thumbnailObjectKey = await _putFile(
           thumbnailUploadURL,
           encryptedThumbnailFile,
           encThumbSize,
+          contentMd5: thumbnailMd5,
         );
       }
       final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
@@ -1477,7 +1503,45 @@ class FileUploader {
     }
   }
 
-  Future<UploadURL> _getUploadURL() async {
+  Future<UploadURL> _getUploadURL({
+    int? contentLength,
+    String? contentMd5,
+  }) async {
+    final bool useSingleEndpoint = flagService.internalUser &&
+        contentLength != null &&
+        contentMd5 != null &&
+        contentMd5.isNotEmpty;
+
+    final uploadURL = useSingleEndpoint
+        ? await _requestChecksumProtectedUploadURL(
+            contentLength: contentLength,
+            contentMd5: contentMd5,
+          )
+        : await _getLegacyUploadURL();
+
+    return _registerUploadURLUsage(uploadURL);
+  }
+
+  Future<UploadURL> _requestChecksumProtectedUploadURL({
+    required int contentLength,
+    required String contentMd5,
+  }) async {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Requesting single upload URL with checksum metadata (size: ${formatBytes(contentLength)})",
+    );
+    final response = await _enteDio.post(
+      "/files/upload-url",
+      data: {
+        "contentLength": contentLength,
+        "contentMD5": contentMd5,
+      },
+    );
+    return UploadURL.fromMap(
+      (response.data as Map).cast<String, dynamic>(),
+    );
+  }
+
+  Future<UploadURL> _getLegacyUploadURL() async {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _getUploadURL() called. URL queue size: ${_uploadURLs.length}, Upload queue size: ${_queue.length}",
     );
@@ -1497,36 +1561,39 @@ class FileUploader {
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Returning upload URL. Remaining URLs in queue: ${_uploadURLs.length}",
       );
-
-      // Atomic check-and-set to prevent race conditions in parallel uploads
-      final now = DateTime.now();
-      final existingTimestamp =
-          _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
-
-      if (existingTimestamp != now) {
-        throw DuplicateUploadURLError(
-          firstUsedAt: existingTimestamp,
-          duplicateUsedAt: now,
-        );
-      }
-      // Clean up old entries to prevent memory growth (only when > 5000 entries)
-      if (_usedUploadURLs.length > 5000) {
-        final oneHourAgo = now.subtract(const Duration(hours: 1));
-        _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
-        _logger.info(
-          "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
-        );
-      }
-
       return uploadURL;
     } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
-        return _getUploadURL();
+        return _getLegacyUploadURL();
       } else {
         rethrow;
       }
     }
+  }
+
+  UploadURL _registerUploadURLUsage(UploadURL uploadURL) {
+    // Atomic check-and-set to prevent race conditions in parallel uploads
+    final now = DateTime.now();
+    final existingTimestamp =
+        _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
+
+    if (existingTimestamp != now) {
+      throw DuplicateUploadURLError(
+        firstUsedAt: existingTimestamp,
+        duplicateUsedAt: now,
+      );
+    }
+    // Clean up old entries to prevent memory growth (only when > 5000 entries)
+    if (_usedUploadURLs.length > 5000) {
+      final oneHourAgo = now.subtract(const Duration(hours: 1));
+      _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
+      _logger.info(
+        "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
+      );
+    }
+
+    return uploadURL;
   }
 
   Future<void>? _uploadURLFetchInProgress;

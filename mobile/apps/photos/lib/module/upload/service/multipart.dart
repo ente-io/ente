@@ -81,15 +81,36 @@ class MultiPartUploader {
     return partCount;
   }
 
-  Future<MultipartUploadURLs> getMultipartUploadURLs(int count) async {
+  Future<MultipartUploadURLs> getMultipartUploadURLs({
+    required int count,
+    required int contentLength,
+    required int partLength,
+    List<String>? partMd5s,
+  }) async {
     try {
+      if (flagService.internalUser && partMd5s != null && partMd5s.isNotEmpty) {
+        final response = await _enteDio.post(
+          "/files/multipart-upload-url",
+          data: {
+            "contentLength": contentLength,
+            "partLength": partLength,
+            "partMd5s": partMd5s,
+          },
+        );
+        return MultipartUploadURLs.fromMap(
+          (response.data as Map).cast<String, dynamic>(),
+        );
+      }
+
       final response = await _enteDio.get(
         "/files/multipart-upload-urls",
         queryParameters: {
           "count": count,
         },
       );
-      return MultipartUploadURLs.fromMap(response.data);
+      return MultipartUploadURLs.fromMap(
+        (response.data as Map).cast<String, dynamic>(),
+      );
     } on Exception catch (e) {
       _logger.severe('failed to get multipart url', e);
       rethrow;

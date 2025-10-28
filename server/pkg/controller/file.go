@@ -2,7 +2,10 @@ package controller
 
 import (
 	"context"
+	"crypto/md5"
 	"database/sql"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -64,6 +67,12 @@ const MaxFileSize = int64(1024 * 1024 * 1024 * 10)
 
 // MaxUploadURLsLimit indicates the max number of upload urls which can be request in one go
 const MaxUploadURLsLimit = 50
+
+const (
+	minMultipartPartSize  = int64(5 * 1024 * 1024)
+	maxMultipartPartSize  = int64(5 * 1024 * 1024 * 1024)
+	maxMultipartPartCount = 10000
+)
 const (
 	DeletedObjectQueueLock = "deleted_objects_queue_lock"
 )
@@ -308,7 +317,7 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 	for i := 0; i < count; i++ {
 		objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
 		objectKeys = append(objectKeys, objectKey)
-		url, err := c.getObjectURL(s3Client, dc, bucket, objectKey)
+		url, err := c.getObjectURL(s3Client, dc, bucket, objectKey, nil, nil)
 		if err != nil {
 			return urls, stacktrace.Propagate(err, "")
 		}
@@ -316,6 +325,34 @@ func (c *FileController) GetUploadURLs(ctx context.Context, userID int64, count 
 	}
 	log.Print("Returning objectKeys: " + strings.Join(objectKeys, ", "))
 	return urls, nil
+}
+
+// GetUploadURLWithMetadata returns a single presigned URL that enforces checksum & length
+func (c *FileController) GetUploadURLWithMetadata(ctx context.Context, userID int64, req ente.UploadURLRequest, app ente.App) (ente.UploadURL, error) {
+	if req.ContentLength <= 0 {
+		return ente.UploadURL{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength must be greater than 0")
+	}
+	if req.ContentLength > MaxFileSize {
+		return ente.UploadURL{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength exceeds max file size %d", MaxFileSize)
+	}
+	checksum, err := normalizeMD5String(req.ContentMD5)
+	if err != nil {
+		return ente.UploadURL{}, err
+	}
+	if err := c.UsageCtrl.CanUploadFile(ctx, userID, &req.ContentLength, app); err != nil {
+		return ente.UploadURL{}, stacktrace.Propagate(err, "")
+	}
+	s3Client := c.S3Config.GetHotS3Client()
+	dc := c.S3Config.GetHotDataCenter()
+	bucket := c.S3Config.GetHotBucket()
+	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+	length := req.ContentLength
+	checksumCopy := checksum
+	url, err := c.getObjectURL(s3Client, dc, bucket, objectKey, &length, &checksumCopy)
+	if err != nil {
+		return ente.UploadURL{}, stacktrace.Propagate(err, "")
+	}
+	return url, nil
 }
 
 // GetFileURL verifies permissions and returns a presigned url to the requested file
@@ -973,11 +1010,18 @@ func (c *FileController) deleteObjectVersionFromHotStorage(objectKey string, ver
 	return nil
 }
 
-func (c *FileController) getObjectURL(s3Client *s3.S3, dc string, bucket *string, objectKey string) (ente.UploadURL, error) {
-	r, _ := s3Client.PutObjectRequest(&s3.PutObjectInput{
+func (c *FileController) getObjectURL(s3Client *s3.S3, dc string, bucket *string, objectKey string, contentLength *int64, contentMD5 *string) (ente.UploadURL, error) {
+	input := &s3.PutObjectInput{
 		Bucket: bucket,
 		Key:    &objectKey,
-	})
+	}
+	if contentLength != nil {
+		input.ContentLength = contentLength
+	}
+	if contentMD5 != nil {
+		input.ContentMD5 = contentMD5
+	}
+	r, _ := s3Client.PutObjectRequest(input)
 	url, err := r.Presign(PreSignedRequestValidityDuration)
 	if err != nil {
 		return ente.UploadURL{}, stacktrace.Propagate(err, "")
@@ -1013,7 +1057,7 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
 	urls := make([]string, 0)
 	for i := 0; i < count; i++ {
-		url, err := c.getPartURL(*s3Client, objectKey, int64(i+1), r.UploadId)
+		url, err := c.getPartURL(*s3Client, objectKey, int64(i+1), r.UploadId, nil, nil)
 		if err != nil {
 			return multipartUploadURLs, stacktrace.Propagate(err, "")
 		}
@@ -1034,16 +1078,156 @@ func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int6
 	return multipartUploadURLs, nil
 }
 
-func (c *FileController) getPartURL(s3Client s3.S3, objectKey string, partNumber int64, uploadID *string) (string, error) {
-	r, _ := s3Client.UploadPartRequest(&s3.UploadPartInput{
+// GetMultipartUploadURLWithMetadata enforces content length & per-part checksum requirements
+func (c *FileController) GetMultipartUploadURLWithMetadata(ctx context.Context, userID int64, req ente.MultipartUploadURLRequest, app ente.App) (ente.MultipartUploadURLs, error) {
+	if req.ContentLength <= 0 {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength must be greater than 0")
+	}
+	if req.ContentLength > MaxFileSize {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "contentLength exceeds max file size %d", MaxFileSize)
+	}
+	if len(req.PartMD5s) == 0 {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "partMd5s must not be empty")
+	}
+	if err := validateMultipartPartLength(req.ContentLength, req.PartLength); err != nil {
+		return ente.MultipartUploadURLs{}, err
+	}
+	partCount := calculateMultipartPartCount(req.ContentLength, req.PartLength)
+	if partCount > maxMultipartPartCount {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "multipart upload cannot exceed %d parts", maxMultipartPartCount)
+	}
+	if len(req.PartMD5s) != partCount {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "partMd5s size (%d) does not match computed part count (%d)", len(req.PartMD5s), partCount)
+	}
+	normalizedChecksums := make([]string, partCount)
+	for i, checksum := range req.PartMD5s {
+		normalized, err := normalizeMD5String(checksum)
+		if err != nil {
+			return ente.MultipartUploadURLs{}, err
+		}
+		normalizedChecksums[i] = normalized
+	}
+	partLengths := computePartLengths(req.ContentLength, req.PartLength, partCount)
+	if err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app); err != nil {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
+	}
+	s3Client := c.S3Config.GetHotS3Client()
+	dc := c.S3Config.GetHotDataCenter()
+	bucket := c.S3Config.GetHotBucket()
+	objectKey := strconv.FormatInt(userID, 10) + "/" + uuid.NewString()
+	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: bucket,
+		Key:    &objectKey,
+	})
+	if err != nil {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
+	}
+	if err := c.ObjectCleanupCtrl.AddMultipartTempObjectKey(objectKey, *r.UploadId, dc); err != nil {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
+	}
+	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
+	urls := make([]string, 0, partCount)
+	for i := 0; i < partCount; i++ {
+		partNumber := int64(i + 1)
+		length := partLengths[i]
+		lengthCopy := length
+		checksumCopy := normalizedChecksums[i]
+		url, err := c.getPartURL(*s3Client, objectKey, partNumber, r.UploadId, &lengthCopy, &checksumCopy)
+		if err != nil {
+			return multipartUploadURLs, stacktrace.Propagate(err, "")
+		}
+		urls = append(urls, url)
+	}
+	multipartUploadURLs.PartURLs = urls
+	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
+		Bucket:   c.S3Config.GetHotBucket(),
+		Key:      &objectKey,
+		UploadId: r.UploadId,
+	})
+	url, err := r2.Presign(PreSignedRequestValidityDuration)
+	if err != nil {
+		return multipartUploadURLs, stacktrace.Propagate(err, "")
+	}
+	multipartUploadURLs.CompleteURL = url
+	return multipartUploadURLs, nil
+}
+
+func (c *FileController) getPartURL(s3Client s3.S3, objectKey string, partNumber int64, uploadID *string, contentLength *int64, contentMD5 *string) (string, error) {
+	input := &s3.UploadPartInput{
 		Bucket:     c.S3Config.GetHotBucket(),
 		Key:        &objectKey,
 		UploadId:   uploadID,
 		PartNumber: &partNumber,
-	})
+	}
+	if contentLength != nil {
+		input.ContentLength = contentLength
+	}
+	if contentMD5 != nil {
+		input.ContentMD5 = contentMD5
+	}
+	r, _ := s3Client.UploadPartRequest(input)
 	url, err := r.Presign(PreSignedPartUploadRequestDuration)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
 	return url, nil
+}
+
+func normalizeMD5String(value string) (string, error) {
+	trimmed := strings.TrimSpace(value)
+	if trimmed == "" {
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "contentMD5 must not be empty")
+	}
+	decoded, err := base64.StdEncoding.DecodeString(trimmed)
+	if err != nil {
+		decoded, err = hex.DecodeString(trimmed)
+		if err != nil {
+			return "", stacktrace.Propagate(ente.ErrBadRequest, "contentMD5 must be base64 or hex encoded")
+		}
+	}
+	if len(decoded) != md5.Size {
+		return "", stacktrace.Propagate(ente.ErrBadRequest, "contentMD5 must be exactly 16 bytes")
+	}
+	return base64.StdEncoding.EncodeToString(decoded), nil
+}
+
+func calculateMultipartPartCount(contentLength int64, partLength int64) int {
+	if partLength <= 0 {
+		return 0
+	}
+	count := int(contentLength / partLength)
+	if contentLength%partLength != 0 {
+		count++
+	}
+	if count == 0 {
+		count = 1
+	}
+	return count
+}
+
+func computePartLengths(contentLength int64, partLength int64, partCount int) []int64 {
+	lengths := make([]int64, partCount)
+	remaining := contentLength
+	for i := 0; i < partCount; i++ {
+		length := partLength
+		if remaining < partLength || i == partCount-1 {
+			length = remaining
+		}
+		lengths[i] = length
+		remaining -= length
+	}
+	return lengths
+}
+
+func validateMultipartPartLength(contentLength int64, partLength int64) error {
+	if partLength <= 0 {
+		return stacktrace.Propagate(ente.ErrBadRequest, "partLength must be greater than 0")
+	}
+	if partLength > maxMultipartPartSize {
+		return stacktrace.Propagate(ente.ErrBadRequest, "partLength exceeds 5GB limit")
+	}
+	if contentLength > partLength && partLength < minMultipartPartSize {
+		return stacktrace.Propagate(ente.ErrBadRequest, "partLength must be at least 5MB when more than one part is required")
+	}
+	return nil
 }
