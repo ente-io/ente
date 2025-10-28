@@ -1,4 +1,3 @@
-import ImageIcon from "@mui/icons-material/Image";
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import bs58 from "bs58";
 import { EnteLogo } from "ente-base/components/EnteLogo";
@@ -12,6 +11,7 @@ import {
 import { apiOrigin } from "ente-base/origins";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { getLockerFileIcon } from "../utils/file-type";
 
 const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return "0 Bytes";
@@ -65,6 +65,7 @@ interface DecryptedFileInfo {
     fileDecryptionHeader?: string;
     fileNonce?: string;
     fileKey?: string;
+    lockerType?: string; // Locker file type from pubMagicMetadata.info
 }
 
 // Extract file key from URL hash (similar to extractCollectionKeyFromShareURL)
@@ -145,6 +146,8 @@ const decryptFileInfo = async (
 
         // Get file size from info field
         const fileSizeFromInfo = file.info?.fileSize || 0;
+        console.log("file.info:", file.info);
+        console.log("fileSizeFromInfo:", fileSizeFromInfo);
 
         // Extract nested encrypted metadata and decryption header
         const encryptedMetadata =
@@ -183,9 +186,45 @@ const decryptFileInfo = async (
                 fileKey,
             );
             metadata = decryptedMetadata as any;
+            console.log("Decrypted metadata:", metadata);
         } catch (err) {
             metadata = {};
         }
+
+        // Try to decrypt pubMagicMetadata if it exists
+        let pubMagicMetadata: any = null;
+        if (file.pubMagicMetadata?.data && file.pubMagicMetadata?.header) {
+            try {
+                const decryptedPubMagicMetadata = await decryptMetadataJSON(
+                    {
+                        encryptedData: file.pubMagicMetadata.data,
+                        decryptionHeader: file.pubMagicMetadata.header,
+                    },
+                    fileKey,
+                );
+                pubMagicMetadata = decryptedPubMagicMetadata;
+            } catch (err) {
+                // Failed to decrypt pubMagicMetadata
+            }
+        }
+
+        // Extract and parse info from pubMagicMetadata
+        console.log("pubMagicMetadata:", pubMagicMetadata);
+        console.log("pubMagicMetadata?.info:", pubMagicMetadata?.info);
+
+        // Check if info is a JSON string that needs parsing
+        let infoObject = pubMagicMetadata?.info;
+        if (typeof infoObject === "string") {
+            try {
+                infoObject = JSON.parse(infoObject);
+                console.log("Parsed info object:", infoObject);
+            } catch (e) {
+                console.log("Failed to parse info as JSON");
+            }
+        }
+
+        const lockerType = infoObject?.type;
+        console.log("Extracted lockerType:", lockerType);
 
         // Extract file info from decrypted metadata
         const fileName =
@@ -194,8 +233,13 @@ const decryptFileInfo = async (
             metadata.name ||
             "Unknown file";
 
+        // Check if there's file size in pubMagicMetadata.info.data
+        const pubMagicFileSize = infoObject?.data?.size;
+        console.log("pubMagicFileSize:", pubMagicFileSize);
+
         // Use fileSize from info field first, then fall back to metadata or other sources
         const fileSize =
+            pubMagicFileSize ||
             fileSizeFromInfo ||
             metadata.fileSize ||
             metadata.size ||
@@ -206,7 +250,7 @@ const decryptFileInfo = async (
             metadata.createdAt ||
             metadata.modificationTime;
 
-        return {
+        const decryptedFileInfo = {
             id: fileId,
             fileName: fileName,
             fileSize: fileSize,
@@ -215,7 +259,12 @@ const decryptFileInfo = async (
             fileDecryptionHeader: fileDecryptionHeader,
             fileNonce: undefined,
             fileKey: fileKey,
+            lockerType: lockerType,
         };
+
+        console.log("Final decryptedFileInfo:", decryptedFileInfo);
+
+        return decryptedFileInfo;
     } catch (error) {
         // Return partial info if decryption fails
         if (!fileLinkInfo.file) {
@@ -471,43 +520,46 @@ const FilePage: React.FC = () => {
                 )}
 
                 {/* File Info Display */}
-                {fileInfo && !loading && (
-                    <>
-                        {/* Spacer for mobile to push content down */}
-                        <Box
-                            sx={{
-                                flex: { xs: 1, md: 0 },
-                                minHeight: { xs: 40, md: 0 },
-                            }}
-                        />
-
-                        {/* File Info - Centered */}
-                        <Box
-                            sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 3,
-                                width: "100%",
-                                marginBottom: 4,
-                            }}
-                        >
-                            {/* Large File Icon */}
+                {fileInfo && !loading && (() => {
+                    const iconInfo = getLockerFileIcon(
+                        fileInfo.fileName,
+                        fileInfo.lockerType,
+                    );
+                    return (
+                        <>
+                            {/* Spacer for mobile to push content down */}
                             <Box
                                 sx={{
-                                    backgroundColor: "#F0F0F0",
-                                    borderRadius: "24px",
-                                    padding: 1.5,
+                                    flex: { xs: 1, md: 0 },
+                                    minHeight: { xs: 40, md: 0 },
+                                }}
+                            />
+
+                            {/* File Info - Centered */}
+                            <Box
+                                sx={{
                                     display: "flex",
+                                    flexDirection: "column",
                                     alignItems: "center",
                                     justifyContent: "center",
+                                    gap: 3,
+                                    width: "100%",
+                                    marginBottom: 4,
                                 }}
                             >
-                                <ImageIcon
-                                    sx={{ fontSize: 48, color: "#757575" }}
-                                />
-                            </Box>
+                                {/* Large File Icon */}
+                                <Box
+                                    sx={{
+                                        backgroundColor: iconInfo.backgroundColor,
+                                        borderRadius: "20px",
+                                        padding: 1.8,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    {iconInfo.icon}
+                                </Box>
 
                             {/* File Name */}
                             <Typography
@@ -522,19 +574,21 @@ const FilePage: React.FC = () => {
                                 {fileInfo.fileName}
                             </Typography>
 
-                            {/* File Size */}
-                            <Typography
-                                variant="body"
-                                sx={{
-                                    color: "#757575",
-                                    mt: -2,
-                                    fontSize: "1rem",
-                                }}
-                            >
-                                {fileInfo.fileSize > 0
-                                    ? formatFileSize(fileInfo.fileSize)
-                                    : "Unknown size"}
-                            </Typography>
+                            {/* File Size - only show if no locker type */}
+                            {!fileInfo.lockerType && (
+                                <Typography
+                                    variant="body"
+                                    sx={{
+                                        color: "#757575",
+                                        mt: -2,
+                                        fontSize: "1rem",
+                                    }}
+                                >
+                                    {fileInfo.fileSize > 0
+                                        ? formatFileSize(fileInfo.fileSize)
+                                        : "Unknown size"}
+                                </Typography>
+                            )}
                         </Box>
 
                         {/* Another spacer to push button to bottom on mobile */}
@@ -583,7 +637,8 @@ const FilePage: React.FC = () => {
                             </Button>
                         </Box>
                     </>
-                )}
+                    );
+                })()}
             </Box>
         </Box>
     );

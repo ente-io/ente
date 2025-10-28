@@ -37,5 +37,8 @@
         "prettier": "^3.6.2",
         "typescript": "^5.8.3"
     },
-    "packageManager": "yarn@1.22.22"
+    "packageManager": "yarn@1.22.22",
+    "dependencies": {
+        "hugeicons-react": "^0.3.0"
+    }
 }
