@@ -203,6 +203,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/cli",
                             },
                             {
+                                text: "Detect Text (OCR)",
+                                link: "/photos/features/utilities/detect-text",
+                            },
+                            {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
                             },
