@@ -157,6 +157,13 @@ Open `Settings > Preferences > Machine learning`, enable "Face recognition", and
 
 Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning).
 
+### Does Detect Text let me search photos by the words inside them? {#detect-text-search}
+
+No. The **Detect Text** button performs OCR on the fly for the photo you have open. It does not build a searchable index across your library, so you cannot search for arbitrary words that appear in images.
+
+- Search results still rely on metadata, descriptions, and machine learning indexes (face recognition and magic search).
+- Magic search may sometimes surface images that contain prominent text because of CLIP embeddings, but this is not guaranteed and is not a substitute for full OCR indexing.
+
 ### Can I merge or de-merge persons recognized by the app? {#merge-persons}
 
 Yes! The general mechanism for doing this is to assign the same name to both persons.

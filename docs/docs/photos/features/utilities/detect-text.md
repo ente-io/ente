@@ -31,8 +31,13 @@ After copying, the text stays on your clipboard so you can paste it into message
 
 ## Tips
 
+- Ente caches detection results, so revisiting the same photo makes the button appear immediately.
 - If the button never appears, verify that the photo contains readable text and that the original file has finished downloading.
 - When no text is found, the overlay shows **No text detected**. Close it to return to the photo.
+
+## Limitations
+
+Detect Text runs on demand and does not build a searchable index across your library, so searches still rely on metadata, machine learning tags, and descriptions. Magic search may occasionally surface photos with prominent text (thanks to CLIP embeddings), but it is not a dedicated "search by detected text" feature.
 
 ## Privacy
 
