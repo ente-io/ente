@@ -77,6 +77,9 @@ class WrappedService {
               .millisecondsSinceEpoch;
 
   void scheduleInitialLoad() {
+    if (!isEnabled) {
+      return;
+    }
     if (_initialLoadScheduled) {
       return;
     }
