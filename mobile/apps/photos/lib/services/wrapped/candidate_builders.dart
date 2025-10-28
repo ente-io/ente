@@ -8,6 +8,7 @@ import "package:ml_linalg/vector.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -32,6 +33,7 @@ class WrappedEngineContext {
     WrappedAestheticsContext? aesthetics,
     List<WrappedCity>? cities,
     Set<int>? favoriteUploadedFileIDs,
+    Set<int>? archivedCollectionIDs,
   })  : files = List<EnteFile>.unmodifiable(files),
         people = people ?? WrappedPeopleContext.empty(),
         aesthetics = aesthetics ?? WrappedAestheticsContext.empty(),
@@ -40,6 +42,9 @@ class WrappedEngineContext {
         ),
         favoriteUploadedFileIDs = Set<int>.unmodifiable(
           favoriteUploadedFileIDs ?? const <int>{},
+        ),
+        archivedCollectionIDs = Set<int>.unmodifiable(
+          archivedCollectionIDs ?? const <int>{},
         );
 
   final int year;
@@ -49,6 +54,7 @@ class WrappedEngineContext {
   final WrappedAestheticsContext aesthetics;
   final List<WrappedCity> cities;
   final Set<int> favoriteUploadedFileIDs;
+  final Set<int> archivedCollectionIDs;
 }
 
 /// Contract for producing Wrapped candidate cards for a specific domain.

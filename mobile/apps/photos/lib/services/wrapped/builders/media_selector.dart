@@ -290,6 +290,7 @@ class _MediaSelectorCache {
       for (final EnteFile file in context.files)
         if (file.uploadedFileID != null) file.uploadedFileID!: file,
     };
+    final Set<int> archivedCollectionIDs = context.archivedCollectionIDs;
 
     final Map<int, _EmbeddingVector> imageVectors = <int, _EmbeddingVector>{};
     context.aesthetics.clipEmbeddings.forEach(
@@ -325,6 +326,14 @@ class _MediaSelectorCache {
 
     final Map<int, _MediaAsset> assets = <int, _MediaAsset>{};
     fileById.forEach((int id, EnteFile file) {
+      final int? collectionID = file.collectionID;
+      if (collectionID != null &&
+          archivedCollectionIDs.contains(collectionID)) {
+        return;
+      }
+      if (file.magicMetadata.visibility == archiveVisibility) {
+        return;
+      }
       final _EmbeddingVector? embedding = imageVectors[id];
       final _PeopleCounts counts = peopleCounts[id] ?? const _PeopleCounts();
       final double screenshotSim = embedding == null || screenshotQuery == null

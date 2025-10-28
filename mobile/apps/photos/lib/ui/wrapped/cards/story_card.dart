@@ -89,9 +89,12 @@ class _StoryCard extends StatelessWidget {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              colorScheme.backgroundElevated.withOpacity(0.45),
-                              colorScheme.backgroundElevated.withOpacity(0.2),
-                              colorScheme.backgroundElevated.withOpacity(0.08),
+                              colorScheme.backgroundElevated
+                                  .withValues(alpha: 0.45),
+                              colorScheme.backgroundElevated
+                                  .withValues(alpha: 0.2),
+                              colorScheme.backgroundElevated
+                                  .withValues(alpha: 0.08),
                             ],
                             stops: const <double>[0.0, 0.6, 1.0],
                           ),

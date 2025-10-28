@@ -29,16 +29,35 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
       return const <WrappedCard>[];
     }
 
+    final List<EnteFile> displayableFavorites = favoriteFiles
+        .where(
+          (EnteFile file) {
+            if (file.magicMetadata.visibility == archiveVisibility) {
+              return false;
+            }
+            final int? collectionID = file.collectionID;
+            if (collectionID != null &&
+                context.archivedCollectionIDs.contains(collectionID)) {
+              return false;
+            }
+            return true;
+          },
+        )
+        .toList(growable: false);
+    if (displayableFavorites.length < _kMinFavoritesForCard) {
+      return const <WrappedCard>[];
+    }
+
     final math.Random randomizer = math.Random(
-      context.year * 53 + favoriteFiles.length,
+      context.year * 53 + displayableFavorites.length,
     );
     final List<List<int>> galleryGroups =
-        _buildGalleryGroups(favoriteFiles, randomizer);
+        _buildGalleryGroups(displayableFavorites, randomizer);
     if (galleryGroups.isEmpty) {
       return const <WrappedCard>[];
     }
 
-    final List<int> uploadedIds = favoriteFiles
+    final List<int> uploadedIds = displayableFavorites
         .map((EnteFile file) => file.uploadedFileID)
         .whereType<int>()
         .toList(growable: false);

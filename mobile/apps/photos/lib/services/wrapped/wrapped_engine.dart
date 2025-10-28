@@ -7,6 +7,7 @@ import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/favorites_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -74,6 +75,8 @@ class WrappedEngine {
         "cities": cities.map((WrappedCity city) => city.toJson()).toList(),
         "favoriteUploadedIDs":
             collected.favoriteUploadedIds.toList(growable: false),
+        "archivedCollectionIDs":
+            collected.archivedCollectionIDs.toList(growable: false),
       },
       taskName: "wrapped_compute_$year",
     ) as WrappedResult;
@@ -116,11 +119,14 @@ class WrappedEngine {
     );
 
     final Set<int> favoriteUploadedIds = _collectFavoriteUploadedIDs(filtered);
+    final Set<int> archivedCollectionIDs =
+        CollectionsService.instance.archivedOrHiddenCollectionIds();
 
     return _CollectedFiles(
       yearFiles: filtered,
       fileByUploadedId: fileByUploadedId,
       favoriteUploadedIds: favoriteUploadedIds,
+      archivedCollectionIDs: archivedCollectionIDs,
     );
   }
 
@@ -386,6 +392,12 @@ Future<WrappedResult> _wrappedComputeIsolate(
     for (final dynamic entry in favoriteRaw)
       if (entry is num && entry.toInt() > 0) entry.toInt(),
   };
+  final List<dynamic> archivedRaw =
+      args["archivedCollectionIDs"] as List<dynamic>? ?? const <dynamic>[];
+  final Set<int> archivedCollectionIDs = <int>{
+    for (final dynamic entry in archivedRaw)
+      if (entry is num && entry.toInt() > 0) entry.toInt(),
+  };
 
   _computeLogger.fine(
     "Wrapped compute isolate running for $year with ${files.length} media items",
@@ -399,6 +411,7 @@ Future<WrappedResult> _wrappedComputeIsolate(
     aesthetics: aesthetics,
     cities: cities,
     favoriteUploadedFileIDs: favoriteUploadedIds,
+    archivedCollectionIDs: archivedCollectionIDs,
   );
   final List<WrappedCard> cards = <WrappedCard>[];
   for (final WrappedCandidateBuilder builder in wrappedCandidateBuilders) {
@@ -431,11 +444,16 @@ class _CollectedFiles {
     required List<EnteFile> yearFiles,
     required Map<int, EnteFile> fileByUploadedId,
     required Set<int> favoriteUploadedIds,
+    required Set<int> archivedCollectionIDs,
   })  : yearFiles = List<EnteFile>.unmodifiable(yearFiles),
         fileByUploadedId = Map<int, EnteFile>.unmodifiable(fileByUploadedId),
-        favoriteUploadedIds = Set<int>.unmodifiable(favoriteUploadedIds);
+        favoriteUploadedIds = Set<int>.unmodifiable(favoriteUploadedIds),
+        archivedCollectionIDs = Set<int>.unmodifiable(
+          archivedCollectionIDs.where((int id) => id > 0),
+        );
 
   final List<EnteFile> yearFiles;
   final Map<int, EnteFile> fileByUploadedId;
   final Set<int> favoriteUploadedIds;
+  final Set<int> archivedCollectionIDs;
 }
