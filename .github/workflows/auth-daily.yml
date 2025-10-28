@@ -1,9 +1,11 @@
 name: "Daily release (auth)"
 
 on:
-    schedule:
-        # Runs daily at 13:00 UTC (6:30 PM IST)
-        - cron: "0 13 * * *"
+    push:
+        branches:
+            - main
+        paths:
+            - 'mobile/apps/auth/**'
     workflow_dispatch: # Allow manual trigger
 
 env:
