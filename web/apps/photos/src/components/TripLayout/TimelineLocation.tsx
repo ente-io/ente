@@ -105,7 +105,7 @@ export const TimelineLocation = memo<TimelineLocationProps>(
                         <LeftPhotoContainer
                             sx={{
                                 paddingRight:
-                                    cluster.length >= 3 ? "72px" : "40px",
+                                    cluster.length === 1 ? "40px" : "72px",
                             }}
                         >
                             <PhotoFan

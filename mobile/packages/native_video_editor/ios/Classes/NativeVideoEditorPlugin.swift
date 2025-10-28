@@ -765,7 +765,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         exportSession.shouldOptimizeForNetworkUse = true
 
         if !isReEncoded {
-            exportSession.timeRange = timeRange
+            exportSession.timeRange =  CMTimeRange(start: .zero, duration: composition.duration)
         }
 
         startProgressReporting()

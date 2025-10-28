@@ -306,7 +306,7 @@ class HomeWidgetService {
       // Render widget using home_widget package
       await hw.HomeWidget.renderFlutterWidget(
         widget,
-        logicalSize: Size(size, size),
+        logicalSize: const Size(size, size),
         key: key,
       );
 
