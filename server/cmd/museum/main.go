@@ -608,7 +608,6 @@ func main() {
 	publicCollectionAPI.GET("/multipart-upload-urls", publicCollectionHandler.GetMultipartUploadURLs)
 	publicCollectionAPI.POST("/file", publicCollectionHandler.CreateFile)
 	publicCollectionAPI.POST("/verify-password", publicCollectionHandler.VerifyPassword)
-	publicCollectionAPI.POST("/report-abuse", publicCollectionHandler.ReportAbuse)
 
 	castAPI := server.Group("/cast")
 
@@ -975,10 +974,13 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	schedule(c, "@every 1m", func() {
 		_ = twoFactorRepo.RemoveExpiredTwoFactorSessions()
+		// Clean up used OTP codes older than 90 seconds
+		_ = twoFactorRepo.RemoveExpiredUsedOTPCodes(90 * 1000 * 1000) // 90 seconds in microseconds
 	})
 	schedule(c, "@every 1m", func() {
 		_ = twoFactorRepo.RemoveExpiredTempTwoFactorSecrets()
 	})
+
 	schedule(c, "@every 1m", func() {
 		_ = passkeysRepo.RemoveExpiredPasskeySessions()
 	})
@@ -1043,6 +1045,12 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	scheduleAndRun(c, "@every 24h", func() {
 		emailNotificationCtrl.NudgePaidSubscriberForFamily()
+		deleted, err := userAuthRepo.CleanupOldFakeSessions(context.Background())
+		if err != nil {
+			log.WithError(err).Error("Failed to cleanup old fake SRP sessions")
+		} else if deleted > 0 {
+			log.WithField("count", deleted).Info("Cleaned up old fake SRP sessions")
+		}
 	})
 
 	schedule(c, "@every 1m", func() {

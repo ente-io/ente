@@ -358,7 +358,7 @@ packages:
     source: hosted
     version: "2.0.1"
   convert:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: convert
       sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
@@ -517,14 +517,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.9"
-  el_tooltip:
-    dependency: "direct main"
-    description:
-      name: el_tooltip
-      sha256: "0860b00e9390a31dd98369dc16d3b6fa2668fc52df712bd00e86d8931787fc17"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.1"
   email_validator:
     dependency: "direct main"
     description:
@@ -1680,8 +1672,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "58bc326c5c9fabddd4c51b1624b43cda9c6644e7"
-      resolved-ref: "58bc326c5c9fabddd4c51b1624b43cda9c6644e7"
+      ref: "71f74bd9e3d157c78ebed90c8f74cc8e685390c4"
+      resolved-ref: "71f74bd9e3d157c78ebed90c8f74cc8e685390c4"
       url: "https://github.com/laurenspriem/mobile_ocr"
     source: git
     version: "1.0.0"

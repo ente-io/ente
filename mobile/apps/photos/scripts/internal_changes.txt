@@ -1,21 +1,23 @@
 - Laurens: WIP first iteration of Ente Wrapped
+- Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
+- Laurens: remove archived photos from memories
+- Neeraj: Fix thumbnail bg in native video player widget
+- Ashil: Fix full screen state getting disabled when swiping to video
+- Ashil: Remove long-press icon to switch to media kit player 
+- Neeraj & Laurens: fix OCR iOS issues and remove feature flag
+- Ashil: Update gallery layout when screen orientation in changed
+- Neeraj: Decrypt local chunk before reporting upload & log sha1 on decryption errors
+- Neeraj: Asserts for url reuse and plain vs enc size mismatch
+- Ashil: Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
+- Laurens: Show empty persons and fallback for face thumbnail issues
 - Prateek: (i) Add native video editor to boost performance
-- Neeraj: Remove feature flags from manage_links_widget (album layout, allow joining album, copy embed HTML)
-- Ashil: Use better copy on auto-add people selection page
-- Ashil: Add more logs to debug app stuck at splash screen issue
-- Prateek: Tag Sentry errors with execution_context for background vs foreground
-- Prateek: Upgrade WorkManager to 0.9.0 and ExistingWorkPolicy to update
-- Neeraj: (i) Copy embed link option
-- Prateek: Fix background uploads on Android 15 by skipping permission request in background mode
-- Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
-- Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
 - Neeraj: [CustomerIssue] Handle corrupt asset timestamps with detailed error reporting
 - Neeraj: Fix video aspect ratio when shared from external apps
 - Prateek: Add logging for background task execution
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking
 - Laurens: (i) OCR UX improvements based on feedback
-- Ashil: (i) Swipe to select
+- Ashil: Swipe to select
 - Laurens: Improve clip memories
 - Laurens: Add OCR capability for Android devices (behind feature flag)
 - Neeraj: Add auth.ente.io to iOS associated domains for password AutoFill

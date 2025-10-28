@@ -39,6 +39,7 @@ dependencies:
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
+  convert: ^3.1.1
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   dart_ui_isolate: ^1.1.1
@@ -48,7 +49,6 @@ dependencies:
   dots_indicator: ^4.0.1
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
-  el_tooltip: ^2.2.1
   email_validator: ^3.0.0
   encrypt: ^5.0.3
   ente_cast:
@@ -139,7 +139,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/laurenspriem/mobile_ocr
-      ref: 58bc326c5c9fabddd4c51b1624b43cda9c6644e7
+      ref: 71f74bd9e3d157c78ebed90c8f74cc8e685390c4
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"

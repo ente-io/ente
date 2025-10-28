@@ -127,24 +127,7 @@ func (pcr *CollectionLinkRepo) UpdatePublicCollectionToken(ctx context.Context, 
 	return stacktrace.Propagate(err, "failed to update public collection token")
 }
 
-func (pcr *CollectionLinkRepo) RecordAbuseReport(ctx context.Context, accessCtx ente.PublicAccessContext,
-	url string, reason string, details ente.AbuseReportDetails) error {
-	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_abuse_report 
-    (share_id, ip, user_agent, url, reason, details) VALUES ($1, $2, $3, $4, $5, $6) 
-    ON CONFLICT ON CONSTRAINT unique_report_sid_ip_ua DO UPDATE SET (reason, details) = ($5, $6)`,
-		accessCtx.ID, accessCtx.IP, accessCtx.UserAgent, url, reason, details)
-	return stacktrace.Propagate(err, "failed to record abuse report")
-}
-
-func (pcr *CollectionLinkRepo) GetAbuseReportCount(ctx context.Context, accessCtx ente.PublicAccessContext) (int64, error) {
-	row := pcr.DB.QueryRowContext(ctx, `SELECT count(*) FROM public_abuse_report WHERE share_id = $1`, accessCtx.ID)
-	var count int64 = 0
-	err := row.Scan(&count)
-	if err != nil {
-		return -1, stacktrace.Propagate(err, "")
-	}
-	return count, nil
-}
+// Report-abuse functionality removed; DB left intact.
 
 func (pcr *CollectionLinkRepo) GetUniqueAccessCount(ctx context.Context, shareId int64) (int64, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT count(*) FROM public_collection_access_history WHERE share_id = $1`, shareId)

@@ -375,7 +375,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             <MobileCoverOverlay show={showMobileCover}>
                                 <MobileCover
                                     journeyData={journeyData}
-                                    photoClusters={photoClusters}
                                     albumTitle={collectionTitle}
                                     coverImageUrl={coverImageUrl}
                                 />
@@ -478,7 +477,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                                 <div>
                                     <TripCover
                                         journeyData={journeyData}
-                                        photoClusters={photoClusters}
                                         albumTitle={collectionTitle}
                                         coverImageUrl={coverImageUrl}
                                     />

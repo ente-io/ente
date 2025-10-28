@@ -10,6 +10,7 @@ import "package:logging/logging.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/db/memories_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
@@ -27,6 +28,7 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/models/memories/time_memory.dart";
 import "package:photos/models/memories/trip_memory.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/ml/vector.dart";
@@ -185,9 +187,36 @@ class SmartMemoriesService {
     final allFilesFromSearchService = Set<EnteFile>.from(
       await SearchService.instance.getAllFilesForSearch(),
     );
+    final archivedOrHiddenCollectionIDs =
+        CollectionsService.instance.archivedOrHiddenCollectionIds();
+    final excludedUploadFileIDs = <int>{};
+    if (archivedOrHiddenCollectionIDs.isNotEmpty) {
+      final filesInArchivedCollections =
+          await FilesDB.instance.getAllFilesFromCollections(
+        archivedOrHiddenCollectionIDs,
+      );
+      for (final archivedFile in filesInArchivedCollections) {
+        final archivedUploadID = archivedFile.uploadedFileID;
+        if (archivedUploadID != null && archivedUploadID != -1) {
+          excludedUploadFileIDs.add(archivedUploadID);
+        }
+      }
+    }
     final Set<EnteFile> allFiles = {};
     for (final file in allFilesFromSearchService) {
       if (file.uploadedFileID != null && file.creationTime != null) {
+        if (excludedUploadFileIDs.contains(file.uploadedFileID)) {
+          continue;
+        }
+        if (file.magicMetadata.visibility == archiveVisibility ||
+            file.magicMetadata.visibility == hiddenVisibility) {
+          continue;
+        }
+        final collectionID = file.collectionID;
+        if (collectionID != null &&
+            archivedOrHiddenCollectionIDs.contains(collectionID)) {
+          continue;
+        }
         allFiles.add(file);
       }
     }
@@ -1691,7 +1720,9 @@ class SmartMemoriesService {
       'document',
     };
 
-    final excludedCollectionIDs = <int>{};
+    final excludedCollectionIDs = Set<int>.from(
+      CollectionsService.instance.archivedOrHiddenCollectionIds(),
+    );
     collectionLoop:
     for (final collection in collections) {
       final collectionName = collection.displayName.toLowerCase();

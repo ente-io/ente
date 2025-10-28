@@ -83,7 +83,15 @@ const RemoteFaceCluster = z.looseObject({
  */
 const RemoteCGroupData = z.looseObject({
     name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(RemoteFaceCluster).nullish().transform(nullishToEmpty),
+    // Accept nullish entries within the array and filter them out.
+    assigned: z
+        .array(RemoteFaceCluster.nullish())
+        .nullish()
+        .transform((arr) =>
+            (arr ?? []).filter(
+                (x): x is z.infer<typeof RemoteFaceCluster> => x != null,
+            ),
+        ),
     rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),

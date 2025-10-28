@@ -1,20 +1,30 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
+import 'package:computer/computer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart' as paint;
+import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:home_widget/home_widget.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:synchronized/synchronized.dart';
+
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-import "package:synchronized/synchronized.dart";
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -29,12 +39,34 @@ enum WidgetStatus {
   syncedAll,
 }
 
+// Top-level function for isolate to read and validate image file
+// Uses the same pattern as exif_util.dart for Computer.shared usage
+Future<Uint8List> _readAndValidateImageInIsolate(
+  Map<String, dynamic> params,
+) async {
+  final filePath = params['filePath'] as String;
+  final file = File(filePath);
+  final Uint8List imageBytes = await file.readAsBytes();
+
+  // Decode to validate the image can be decoded
+  // Same approach as utils/image_ml_util.dart which uses this in isolates
+  final ui.Image decodedImage = await paint.decodeImageFromList(imageBytes);
+  decodedImage.dispose();
+
+  // Return bytes for use with MemoryImage
+  return imageBytes;
+}
+
 /// Service to manage home screen widgets across the application
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {
   // Constants
   static const double THUMBNAIL_SIZE = 512.0;
+  static const double THUMBNAIL_SIZE_V2 = 1024.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
+  static const int WIDGET_IMAGE_LIMIT_V1 = 50;
+  static const int WIDGET_IMAGE_LIMIT_V2 = 25;
+  static const int WIDGET_IMAGE_LIMIT_MINIMAL = 5;
 
   // URI schemes for different widget types
   static const String MEMORY_WIDGET_SCHEME = 'memorywidget';
@@ -66,6 +98,12 @@ class HomeWidgetService {
       },
     );
     _isAppGroupSet = true;
+  }
+
+  int getWidgetImageLimit() {
+    return flagService.useWidgetV2
+        ? WIDGET_IMAGE_LIMIT_V2
+        : WIDGET_IMAGE_LIMIT_V1;
   }
 
   Future<void> initHomeWidget([bool isBg = false]) async {
@@ -101,6 +139,21 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
+    // Use V2 (1024x1024 rendering) only in debug mode for now
+    final bool useV2 = flagService.useWidgetV2;
+
+    if (useV2) {
+      // Try V2 first, fallback to V1 if it fails (e.g., for videos, live photos)
+      final result = await _captureFileV2(file, key, title, mainKey);
+      if (result) {
+        return const Size(THUMBNAIL_SIZE_V2, THUMBNAIL_SIZE_V2);
+      }
+      _logger.info(
+        "V2 capture failed for ${file.displayName}, falling back to V1",
+      );
+    }
+
+    // Use V1 (either useV2 is false, or V2 failed)
     final result = await _captureFile(file, key, title, mainKey);
     if (!result) {
       _logger.warning("Failed to capture file ${file.displayName}");
@@ -178,6 +231,107 @@ class HomeWidgetService {
       return true;
     } catch (error, stackTrace) {
       _logger.severe("Failed to save the thumbnail", error, stackTrace);
+      return false;
+    }
+  }
+
+  Future<bool> _captureFileV2(
+    EnteFile file,
+    String key,
+    String title,
+    String? mainKey,
+  ) async {
+    try {
+      late final ImageProvider imageProvider;
+      const double size = THUMBNAIL_SIZE_V2;
+
+      // For local files (images, videos, live photos), use PhotoManager's high-res thumbnails
+      if (!file.isRemoteFile) {
+        // Request 1024px thumbnail from PhotoManager (efficient for all file types)
+        final Uint8List? thumbnail = await getThumbnailFromLocal(
+          file,
+          size: THUMBNAIL_SIZE_V2.toInt(),
+        );
+
+        if (thumbnail == null) {
+          _logger.warning(
+            "Failed to get high-res thumbnail for V2 widget ${file.displayName}",
+          );
+          return false;
+        }
+
+        // PhotoManager returns thumbnails at requested size
+        imageProvider = MemoryImage(thumbnail);
+      }
+      // For remote images, download full file for best quality
+      else if (file.fileType == FileType.image) {
+        final File? imageFile = await getFileFromServer(file);
+
+        if (imageFile == null) {
+          _logger
+              .warning("Failed to get file for V2 widget ${file.displayName}");
+          return false;
+        }
+
+        // Read and validate in isolate to avoid blocking main thread
+        final Uint8List imageBytes = await Computer.shared().compute(
+          _readAndValidateImageInIsolate,
+          param: {'filePath': imageFile.path},
+          taskName: 'readAndValidateImage',
+        );
+
+        imageProvider = MemoryImage(imageBytes);
+      }
+      // Remote videos/live photos fall back to V1 (avoid large downloads)
+      else {
+        _logger.info(
+          "Skipping V2 for remote ${file.fileType} file: ${file.displayName}",
+        );
+        return false;
+      }
+
+      // Create widget with image
+      final widget = ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      );
+
+      // Render widget using home_widget package
+      await hw.HomeWidget.renderFlutterWidget(
+        widget,
+        logicalSize: Size(size, size),
+        key: key,
+      );
+
+      // Format date for display
+      final subText = await SmartMemoriesService.getDateFormattedLocale(
+        creationTime: file.creationTime!,
+      );
+
+      // Create metadata
+      final Map<String, dynamic> metadata = {
+        "title": title,
+        "subText": subText,
+        "generatedId": file.generatedID!,
+        if (mainKey != null) "mainKey": mainKey,
+      };
+
+      // Save metadata in platform-specific format
+      await _saveWidgetMetadata(key, metadata);
+
+      return true;
+    } catch (error, stackTrace) {
+      _logger.severe("Failed to save V2 widget", error, stackTrace);
       return false;
     }
   }

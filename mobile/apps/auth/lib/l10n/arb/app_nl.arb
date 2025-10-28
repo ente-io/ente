@@ -376,6 +376,7 @@
   "shouldHideCode": "Verberg codes",
   "doubleTapToViewHiddenCode": "Je kunt dubbel klikken op een item om code te bekijken",
   "focusOnSearchBar": "Focus zoekveld na starten app",
+  "minimizeToTrayOnClose": "Minimaliseer naar systeemvak bij sluiten",
   "confirmUpdatingkey": "Weet u zeker dat u de geheime sleutel wilt bijwerken?",
   "minimizeAppOnCopy": "Na kopiëren app minimaliseren",
   "editCodeAuthMessage": "Authenticeren om code te bewerken",
