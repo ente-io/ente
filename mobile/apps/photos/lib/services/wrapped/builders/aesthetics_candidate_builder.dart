@@ -297,7 +297,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.top9Wow,
-      title: "Top 9 by pure wow",
+      title: "Pure wow",
       subtitle: "CLIP loved these dramatic standouts.",
       media: media,
       meta: meta,

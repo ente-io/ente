@@ -92,7 +92,7 @@ Visual styles and aesthetics:
   - Copy: “Your biggest click.”
 - Aesthetic top picks
   - Run multiple CLIP embeddings with different positive text queries. Take the intersection of the ones with highest similarity
-  - Copy: “Your top 9 by pure wow.”
+  - Copy: “Pure wow”
 
 Camera & technique:
 
