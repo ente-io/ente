@@ -184,6 +184,20 @@ flutter_launcher_icons:
   image_path_ios_dark_transparent: "assets/generation-icons/icon-dark.png"
   image_path_ios_tinted_grayscale: "assets/generation-icons/icon-tinted.png"
 
+  macos:
+    generate: true
+    image_path: "assets/generation-icons/icon-macos.png"
+
+  windows:
+    generate: true
+    image_path: "assets/generation-icons/icon-light.png"
+    icon_size: 256
+
+  linux:
+    generate: true
+    image_path: "assets/generation-icons/icon-light.png"
+    icon_size: 256
+
 flutter_native_splash:
   color: "#FFFFFF"
   color_dark: "#000000"
