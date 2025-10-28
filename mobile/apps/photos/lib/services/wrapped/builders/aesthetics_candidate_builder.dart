@@ -333,7 +333,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       for (final _ClipMatch match in heroes) match.uploadedFileID: match.score,
     };
 
-    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+    final List<MediaRef> primarySelection =
+        WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs:
           heroes.map((match) => match.uploadedFileID).toList(growable: false),
@@ -342,6 +343,42 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       minimumSpacing: const Duration(days: 21),
       enforceDistinctness: false,
     );
+    final List<MediaRef> media =
+        List<MediaRef>.from(primarySelection, growable: true);
+
+    if (media.length < _kMaxMediaPerCard) {
+      final Set<int> seen =
+          media.map((MediaRef ref) => ref.uploadedFileID).toSet();
+
+      final List<MediaRef> relaxedSelection =
+          WrappedMediaSelector.selectMediaRefs(
+        context: context,
+        candidateUploadedFileIDs:
+            heroes.map((match) => match.uploadedFileID).toList(growable: false),
+        maxCount: math.min(_kMaxMediaPerCard, heroes.length),
+        scoreHints: scoreHints,
+        enforceDistinctness: false,
+      );
+      for (final MediaRef ref in relaxedSelection) {
+        if (seen.add(ref.uploadedFileID)) {
+          media.add(ref);
+        }
+        if (media.length >= _kMaxMediaPerCard) {
+          break;
+        }
+      }
+
+      if (media.length < _kMaxMediaPerCard) {
+        for (final _ClipMatch match in matches) {
+          if (seen.add(match.uploadedFileID)) {
+            media.add(MediaRef(match.uploadedFileID));
+          }
+          if (media.length >= _kMaxMediaPerCard) {
+            break;
+          }
+        }
+      }
+    }
 
     if (media.length < _kMaxMediaPerCard) {
       return null;
