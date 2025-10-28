@@ -1,49 +1,22 @@
-Store, share and discover your memories with Ente Photos. With end-to-end encryption, only you—and those you share with—can see your photos and videos. Ente Photos has lovingly protected over 165 million memories for people who trust us across all major platforms. Get started with 10 GB free.
+Ente - гэта простая праграма для рэзервовага капіявання і абагульвання вашых фатаграфій і відэа.
 
-Why Ente Photos?
+If you've been looking for a privacy-friendly alternative to Google Photos, you've come to the right place. З Ente, яны захоўваюцца з дапамогай скразнога шыфравання (E2EE). This means that only you can view them.
 
-Ente Photos is designed for those who truly value their memories. With end-to-end encryption and secure backups in three locations, your photos stay truly private and safe. Powerful on-device AI helps you find faces and objects instantly, while curated stories bring cherished memories to the present. Share encrypted albums with loved ones, invite family at no extra cost, and lock sensitive images with a password. Available on mobile, desktop, and web, Ente preserves every pixel of your photos and videos.
+Нашы праграмы маюць адкрыты зыходны код і з'яўляюцца кросплатформеннымі. Вы можаце карыстацца імі на Android, iOS, Linux, MacOS, Windows і праз вэб-праграму. Вашы фатаграфіі будуць сінхранізавацца паміж усімі вашымі прыладамі з дапамогай скразнога шыфравання (E2EE).
 
-Features:
+Ente таксама спрашчае абагульванне альбомаў з блізкімі людзьмі, нават калі яны не карыстаюцца Ente. Вы можаце абагульваць публічныя спасылкі, дзе яны могуць праглядаць ваш альбом і сумесна з вамі дадаваць фатаграфіі да яго, нават без уліковага запісу або праграмы.
 
-END-TO-END ENCRYPTED STORAGE: Your photos and videos are encrypted on your device, and then automatically backed up to the cloud.
+Вашы зашыфраваныя даныя дубліруюцца ў 3 розных месцах, уключаючы бамбасховішча ў Парыжы. We take posterity seriously and make it easy to ensure that your memories outlive you.
 
 SHARE AND COLLABORATE: Let your family or friends add photos and videos to your albums. Everything, end-to-end encrypted.
 
 RELIVE YOUR MEMORIES: Through the stories Ente curates for you, relive your memories from previous years. Easily spread the cheer by sharing them with your loved ones or friends.
 
-SEARCH FOR ANYONE AND ANYTHING: Using on-device AI, Ente helps you find faces and key elements in a photo, so you can search through your entire library using natural language search.
+PERMISSIONS
+Ente запытвае некаторыя дазволы, каб адпавядаць мэтам пастаўшчыка паслуг захоўвання фатаграфій. Больш падрабязныя звесткі можна знайсці па спасылцы: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
-INVITE YOUR FAMILY: Invite up to 5 family members to any paid plan at no extra cost. Only your storage space is shared, not your data. Each member will receive their own private space.
+PRICING
+Мы не прапануем пажыццёвыя тарыфныя планы з бясплатным абслугоўваннем, бо для нас важна заставацца ўстойлівымі і вытрымаць выпрабаванне часам. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
 
-AVAILABLE EVERYWHERE: Ente Photos is available on iOS, Android, Windows, Mac, Linux and the web, so you can access your photos and videos from any device you have.
-
-NEVER LOSE YOUR PHOTOS: Ente stores your encrypted backups in 3 secure locations—including an underground facility—so your photos stay safe, no matter what.
-
-EASY IMPORT: Use our powerful desktop app to import data from other providers. If you need any help moving, reach out, and we'll be there.
-
-ORIGINAL QUALITY BACKUPS: All photos and videos are stored in their original quality, including the metadata, without any compression or loss in quality.
-
-APP LOCK: Make sure no one else can see your photos and videos using the built in App Lock. You can set a pin, or use biometrics to lock the app only for yourself.
-
-HIDDEN PHOTOS: Hide your most private photos and videos to the Hidden folder, which is password protected by default.
-
-FREE DEVICE SPACE: Free up your device's space by clearing files that have already been backed, in a single click.
-
-COLLECT PHOTOS: Went to a party and want to collect all the photos in one place? Just share a link with your friends and ask them to upload.
-
-PARTNER SHARING: Share your camera album with your partner so they can automatically see your photos on their device.
-
-LEGACY: Allow trusted contacts to access your account in your absence.
-
-DARK & LIGHT THEMES: Choose the mode that will make your photos pop.
-
-ADDITIONAL SECURITY: Turn on two-factor authentication or set a lock-screen for the app.
-
-OPEN-SOURCE AND AUDITED: Ente Photos’s code is open-source, and has been audited by third-party security experts.
-
-HUMAN SUPPORT: We take pride in providing real human support. If you need help, reach out to support@ente.io, and one of us will be there to assist you.
-
-Keep your memories safe and private, with Ente Photos. Get started with 10 GB free.
-
-Visit ente.io to learn more.
+SUPPORT
+We take pride in offering human support. Вы можаце напісаць нам на адрас team@ente.io і чакаць адказу ад нашай каманды на працягу 24 гадзін, калі вы абслугоўваецеся на платным тарыфным плане.

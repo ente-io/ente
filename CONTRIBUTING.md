@@ -9,7 +9,7 @@
 
 **This is the most impactful contribution you can make**.
 
-[Spread the word](https://help.ente.io/photos/features/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
+[Spread the word](https://ente.io/help/photos/features/referral-program/). Online on your favorite social media channels. Offline to your friends and family who are looking for a privacy-friendly alternative to big tech.
 
 ## Engage with the community
 

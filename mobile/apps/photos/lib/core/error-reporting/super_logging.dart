@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/models/typedefs.dart';
+import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/ram_check_util.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -47,14 +48,19 @@ extension SuperLogRecord on LogRecord {
 
     if (error != null) {
       if (error is DioException) {
-        final String? id = (error as DioException)
-            .requestOptions
-            .headers['x-request-id'] as String?;
+        final e = error as DioException;
+        final String? id = e.requestOptions.headers['x-request-id'] as String?;
         if (id != null) {
-          msg += "\n⤷ id: $id";
+          msg += "\n⤷ id: $id ";
         }
+        if (e.response?.data != null) {
+          msg += "\n⤷ type: ${e.type}\n⤷ error: ${e.response?.data}";
+        } else {
+          msg += "\n⤷ type: ${e.type}\n⤷ error: $error";
+        }
+      } else {
+        msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
       }
-      msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
     }
     if (stackTrace != null) {
       msg += "\n⤷ trace: $stackTrace";
@@ -239,6 +245,15 @@ class SuperLogging {
             options.transport =
                 TunneledTransport(Uri.parse(appConfig.tunnel!), options);
           }
+          // Filter out errors that should not be sent to Sentry
+          options.beforeSend = (SentryEvent event, Hint hint) async {
+            // Check if the error should be skipped
+            final dynamic error = event.throwable;
+            if (error != null && _shouldSkipSentry(error)) {
+              return null; // Returning null drops the event
+            }
+            return event;
+          };
         },
         appRunner: () => appConfig!.body!(),
       );
@@ -265,7 +280,8 @@ class SuperLogging {
     final bool result = error is StorageLimitExceededError ||
         error is WiFiUnavailableError ||
         error is InvalidFileError ||
-        error is NoActiveSubscriptionError;
+        error is NoActiveSubscriptionError ||
+        error is CouldNotRetrieveAnyFileData;
     if (kDebugMode && result) {
       $.info('Not sending error to sentry: $error');
     }

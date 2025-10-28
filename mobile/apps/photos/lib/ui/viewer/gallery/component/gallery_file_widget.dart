@@ -4,13 +4,17 @@ import "package:media_extension/media_extension.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/touch_cross_detector.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -38,6 +42,8 @@ class GalleryFileWidget extends StatefulWidget {
 class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   static const borderRadius = BorderRadius.all(Radius.circular(1));
   late bool _isFileSelected;
+  int? _currentPointerId;
+  bool _isPointerInside = false;
 
   @override
   void initState() {
@@ -55,6 +61,31 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if swipe selection should be enabled
+    final shouldEnableSwipeSelection = !widget.limitSelectionToOne;
+
+    final Widget fileContent = _buildFileContent(context);
+
+    // Wrap with swipe selection if enabled
+    if (shouldEnableSwipeSelection) {
+      return SwipeSelectableFileWidget(
+        file: widget.file,
+        selectedFiles: widget.selectedFiles,
+        onPointerStateChanged: (pointerId, isInside) {
+          _currentPointerId = pointerId ?? _currentPointerId;
+          _isPointerInside = isInside;
+          if (pointerId == null) {
+            _currentPointerId = null;
+          }
+        },
+        child: fileContent,
+      );
+    }
+
+    return fileContent;
+  }
+
+  Widget _buildFileContent(BuildContext context) {
     Color selectionColor = Colors.white;
     if (_isFileSelected &&
         widget.file.isUploaded &&
@@ -160,6 +191,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   }
 
   void _toggleFileSelection(EnteFile file) {
+    HapticFeedback.selectionClick();
     widget.selectedFiles!.toggleSelection(file);
   }
 
@@ -192,8 +224,22 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     if (widget.selectedFiles!.files.isNotEmpty) {
       _routeToDetailPage(file, context);
     } else {
-      HapticFeedback.lightImpact();
       _toggleFileSelection(file);
+      // Notify SwipeSelectableFileWidget if it exists
+      _handleLongPressForSwipe();
+    }
+  }
+
+  void _handleLongPressForSwipe() {
+    // Use local state to determine if swipe should start
+    final swipeHelper = GallerySwipeHelper.of(context);
+    if (_currentPointerId != null &&
+        _isPointerInside &&
+        TouchCrossDetector.isPointerActive(_currentPointerId!) &&
+        swipeHelper != null &&
+        widget.selectedFiles != null &&
+        widget.selectedFiles!.files.isNotEmpty) {
+      swipeHelper.startSelection(widget.file, forceSelecting: true);
     }
   }
 
@@ -212,11 +258,16 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   void _routeToDetailPage(EnteFile file, BuildContext context) {
     final galleryFiles = GalleryFilesState.of(context).galleryFiles;
+    // Device folders (local-only contexts) should keep files visible
+    // even after deleting from Ente (remote) since they still exist locally
+    final galleryType = GalleryContextState.of(context)?.galleryType;
+    final isLocalOnlyContext = galleryType == GalleryType.localFolder;
     final page = DetailPage(
       DetailPageConfiguration(
         galleryFiles,
         galleryFiles.indexOf(file),
         widget.tag,
+        isLocalOnlyContext: isLocalOnlyContext,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);

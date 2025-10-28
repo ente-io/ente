@@ -23,7 +23,7 @@ import {
     FileDiffResponse,
     type EnteFile,
 } from "ente-media/file";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionFiles,

@@ -23,6 +23,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/extensions/logger_extension.dart";
 import "package:photos/main.dart" show isProcessBg, kLastBGTaskHeartBeatTime;
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
@@ -70,6 +71,9 @@ class FileUploader {
   final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
+
+  // Track used upload URLs to detect race conditions
+  final Map<String, DateTime> _usedUploadURLs = {};
 
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
 
@@ -164,13 +168,26 @@ class FileUploader {
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
   Future<EnteFile> upload(EnteFile file, int collectionID) {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] FileUploader.upload() called for ${file.title} "
+      "(localID: ${file.localID}, collectionID: $collectionID, "
+      "isProcessBg: $isProcessBg)",
+    );
+
     if (file.localID == null || file.localID!.isEmpty) {
+      _logger.internalSevere(
+        "[UPLOAD-DEBUG] Upload rejected - file's localID is null or empty for ${file.title}",
+      );
       return Future.error(Exception("file's localID can not be null or empty"));
     }
     // If the file hasn't been queued yet, queue it for upload
     _totalCountInUploadSession++;
     final String localID = file.localID!;
     if (!_queue.containsKey(localID)) {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] File ${file.title} not in queue. Adding to upload queue... "
+        "(queue size before: ${_queue.length})",
+      );
       final completer = Completer<EnteFile>();
       _queue[localID] = FileUploadItem(file, collectionID, completer);
       _allBackups[localID] = BackupItem(
@@ -180,16 +197,33 @@ class FileUploader {
         completer: completer,
       );
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] File ${file.title} added to queue (queue size: ${_queue.length}). "
+        "Calling _pollQueue()...",
+      );
       _pollQueue();
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] _pollQueue() called for ${file.title}. Returning completer.future",
+      );
       return completer.future;
     }
     // If the file exists in the queue for a matching collectionID,
     // return the existing future
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] File ${file.title} already in queue with localID $localID",
+    );
     final FileUploadItem item = _queue[localID]!;
     if (item.collectionID == collectionID) {
       _totalCountInUploadSession--;
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Same collectionID ($collectionID) - returning existing future",
+      );
       return item.completer.future;
     }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Different collectionID (existing: ${item.collectionID}, new: $collectionID) "
+      "- waiting for existing upload to complete",
+    );
     debugPrint(
       "Wait on another upload on same local ID to finish before "
       "adding it to new collection",
@@ -234,6 +268,8 @@ class FileUploader {
 
   void clearCachedUploadURLs() {
     _uploadURLs.clear();
+    _usedUploadURLs.clear();
+    _logger.info("Cleared upload URL cache and usage tracking");
   }
 
   void removeFromQueueWhere(
@@ -261,24 +297,55 @@ class FileUploader {
   }
 
   void _pollQueue() {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _pollQueue() called. Queue size: ${_queue.length}, "
+      "uploadCounter: $_uploadCounter/$kMaximumConcurrentUploads, "
+      "isProcessBg: $isProcessBg",
+    );
+
     if (SyncService.instance.shouldStopSync()) {
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] Sync stop requested - clearing queue",
+      );
       clearQueue(SyncStopRequestedError());
+      return;
     }
     if (_queue.isEmpty) {
       // Upload session completed
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Queue is empty - upload session completed. "
+        "Resetting totalCountInUploadSession",
+      );
       _totalCountInUploadSession = 0;
       return;
     }
     if (_uploadCounter < kMaximumConcurrentUploads) {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Upload capacity available ($_uploadCounter < $kMaximumConcurrentUploads). "
+        "Searching for pending entry...",
+      );
       var pendingEntry = _queue.entries
           .firstWhereOrNull(
             (entry) => entry.value.status == UploadStatus.notStarted,
           )
           ?.value;
 
+      if (pendingEntry != null) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Found pending entry: ${pendingEntry.file.title} "
+          "(fileType: ${pendingEntry.file.fileType})",
+        );
+      } else {
+        _logger.internalInfo("[UPLOAD-DEBUG] No pending entry found in queue");
+      }
+
       if (pendingEntry != null &&
           pendingEntry.file.fileType == FileType.video &&
           _videoUploadCounter >= kMaximumConcurrentVideoUploads) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Video upload limit reached ($_videoUploadCounter >= $kMaximumConcurrentVideoUploads). "
+          "Looking for non-video entry...",
+        );
         // check if there's any non-video entry which can be queued for upload
         pendingEntry = _queue.entries
             .firstWhereOrNull(
@@ -287,8 +354,19 @@ class FileUploader {
                   entry.value.file.fileType != FileType.video,
             )
             ?.value;
+        if (pendingEntry != null) {
+          _logger.internalInfo(
+            "[UPLOAD-DEBUG] Found non-video entry: ${pendingEntry.file.title}",
+          );
+        } else {
+          _logger.internalInfo("[UPLOAD-DEBUG] No non-video entry available");
+        }
       }
       if (pendingEntry != null) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Starting upload for ${pendingEntry.file.title}. "
+          "Marking as inProgress and calling _encryptAndUploadFileToCollection()...",
+        );
         pendingEntry.status = UploadStatus.inProgress;
         _allBackups[pendingEntry.file.localID!] =
             _allBackups[pendingEntry.file.localID]!
@@ -298,7 +376,20 @@ class FileUploader {
           pendingEntry.file,
           pendingEntry.collectionID,
         );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] _encryptAndUploadFileToCollection() initiated for ${pendingEntry.file.title}",
+        );
+      } else {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] No pending entry to process at this time "
+          "(either all uploads in progress or video limit reached)",
+        );
       }
+    } else {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Upload capacity full ($_uploadCounter >= $kMaximumConcurrentUploads). "
+        "Waiting for uploads to complete...",
+      );
     }
   }
 
@@ -307,20 +398,35 @@ class FileUploader {
     int collectionID, {
     bool forcedUpload = false,
   }) async {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _encryptAndUploadFileToCollection() started for ${file.title} "
+      "(collectionID: $collectionID, forcedUpload: $forcedUpload, "
+      "isProcessBg: $isProcessBg)",
+    );
     _uploadCounter++;
     if (file.fileType == FileType.video) {
       _videoUploadCounter++;
     }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Upload counters updated: uploadCounter=$_uploadCounter, "
+      "videoUploadCounter=$_videoUploadCounter",
+    );
     final localID = file.localID!;
     try {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Calling _tryToUpload() for ${file.title} with ${kFileUploadTimeout.inSeconds}s timeout...",
+      );
       final uploadedFile =
           await _tryToUpload(file, collectionID, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
           final message = "Upload timed out for file " + file.toString();
-          _logger.warning(message);
+          _logger.internalWarning("[UPLOAD-DEBUG] $message");
           throw TimeoutException(message);
         },
+      );
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] _tryToUpload() completed successfully for ${file.title}",
       );
       _queue.remove(localID)!.completer.complete(uploadedFile);
       _allBackups[localID] =
@@ -556,6 +662,7 @@ class FileUploader {
                 collectionID,
               )
             : null;
+    final sourceLength = await mediaUploadData.sourceFile!.length();
     final bool hasExistingMultiPart = existingMultipartEncFileName != null;
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
@@ -583,7 +690,7 @@ class FileUploader {
       );
 
       Uint8List? key;
-      final EncryptionResult? multiPartFileEncResult = hasExistingMultiPart
+      final FileEncryptResult? multiPartFileEncResult = hasExistingMultiPart
           ? await _multiPartUploader.getEncryptionResult(
               lockKey,
               mediaUploadData.hashData!.fileHash!,
@@ -639,18 +746,35 @@ class FileUploader {
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
 
-      final EncryptionResult fileAttributes = multiPartFileEncResult ??
-          (flagService.internalUser
-              ? await CryptoUtil.encryptFileV2(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                )
-              : await CryptoUtil.encryptFile(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                ));
+      // Calculate the number of parts to determine if we need MD5
+      // Use source length to estimate encrypted size for part count decision
+      final estimatedEncSize = CryptoUtil.estimateEncryptedSize(sourceLength);
+      final estimatedCount =
+          _multiPartUploader.calculatePartCount(estimatedEncSize);
+
+      FileEncryptResult? fileAttributes = multiPartFileEncResult;
+      String? fileMd5;
+      List<String>? partMd5s;
+
+      if (fileAttributes == null) {
+        final result = flagService.internalUser
+            ? (await CryptoUtil.encryptFileWithMD5(
+                mediaUploadData.sourceFile!.path,
+                encryptedFilePath,
+                key: key,
+                multiPartChunkSizeInBytes: (estimatedCount > 1)
+                    ? _multiPartUploader.multipartPartSizeForUpload
+                    : null,
+              ))
+            : (await CryptoUtil.encryptFile(
+                mediaUploadData.sourceFile!.path,
+                encryptedFilePath,
+                key: key,
+              ));
+        fileAttributes = result;
+        fileMd5 = result.fileMd5;
+        partMd5s = result.partMd5s;
+      }
 
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
@@ -660,11 +784,17 @@ class FileUploader {
         thumbnailData = mediaUploadData.thumbnail;
       }
       encFileSize = await encryptedFile.length();
+      if (!CryptoUtil.validateStreamEncryptionSizes(
+        sourceLength,
+        encFileSize,
+      )) {
+        throw EncSizeMismatchError("source $sourceLength, enc $encFileSize");
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
         thumbnailData!,
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
@@ -681,15 +811,34 @@ class FileUploader {
       late String thumbnailObjectKey;
 
       if (count <= 1) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Non-multipart upload: Getting thumbnail upload URL...",
+        );
         final thumbnailUploadURL = await _getUploadURL();
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Thumbnail URL obtained, uploading thumbnail (size: ${formatBytes(encThumbSize)})...",
+        );
         thumbnailObjectKey = await _putFile(
           thumbnailUploadURL,
           encryptedThumbnailFile,
           encThumbSize,
         );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Thumbnail uploaded successfully! Now getting file upload URL...",
+        );
         final fileUploadURL = await _getUploadURL();
-        fileObjectKey =
-            await _putFile(fileUploadURL, encryptedFile, encFileSize);
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] File URL obtained, uploading actual file (size: ${formatBytes(encFileSize)})...",
+        );
+        fileObjectKey = await _putFile(
+          fileUploadURL,
+          encryptedFile,
+          encFileSize,
+          contentMd5: fileMd5,
+        );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Actual file uploaded successfully!",
+        );
       } else {
         isMultipartUpload = true;
         _logger.info(
@@ -714,13 +863,17 @@ class FileUploader {
             fileUploadURLs,
             encFileName,
             encFileSize,
-            fileAttributes.key!,
-            fileAttributes.header!,
+            fileAttributes.key,
+            fileAttributes.header,
+            fileMd5: fileMd5,
+            partMd5s: partMd5s,
           );
           fileObjectKey = await _multiPartUploader.putMultipartFile(
             fileUploadURLs,
             encryptedFile,
             encFileSize,
+            fileMd5: fileMd5,
+            partMd5s: partMd5s,
           );
         }
         // in case of multipart, upload the thumbnail towards the end to avoid
@@ -738,18 +891,15 @@ class FileUploader {
         null,
         mediaUploadData.exifData,
       );
-      file.metadataVersion = flagService.internalUser
-          ? EnteFile.kMetadataSimplifiedEncVersion
-          : EnteFile.kCurrentMetadataVersion;
+      file.metadataVersion = EnteFile.kCurrentMetadataVersion;
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+      final fileDecryptionHeader = CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -769,6 +919,16 @@ class FileUploader {
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
+        // Verify that the encrypted file can be decrypted before uploading
+        // For updates, we need to verify with the existing file key
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
         remoteFile = await _updateFile(
           file,
           fileObjectKey,
@@ -784,7 +944,7 @@ class FileUploader {
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
-          fileAttributes.key!,
+          fileAttributes.key,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
         final encryptedKey =
@@ -798,9 +958,18 @@ class FileUploader {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,
-            fileAttributes.key!,
+            fileAttributes.key,
           );
         }
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          encryptedKey,
+          keyDecryptionNonce,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
+
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -902,7 +1071,9 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartFileMissingError || e is MultiPartError) {
+    if (e is MultiPartFileMissingError ||
+        e is MultiPartError ||
+        e is BadMD5DigestError) {
       return true;
     }
     if (e is DioException) {
@@ -1159,7 +1330,7 @@ class FileUploader {
     int collectionID,
     String encryptedKey,
     String keyDecryptionNonce,
-    EncryptionResult fileAttributes,
+    FileEncryptResult fileAttributes,
     String fileObjectKey,
     String fileDecryptionHeader,
     int fileSize,
@@ -1307,13 +1478,47 @@ class FileUploader {
   }
 
   Future<UploadURL> _getUploadURL() async {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _getUploadURL() called. URL queue size: ${_uploadURLs.length}, Upload queue size: ${_queue.length}",
+    );
     if (_uploadURLs.isEmpty) {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] URL queue is empty, fetching new upload URLs from server...",
+      );
       // the queue is empty, fetch at least for one file to handle force uploads
       // that are not in the queue. This is to also avoid
       await fetchUploadURLs(math.max(_queue.length, 1));
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Successfully fetched upload URLs. New queue size: ${_uploadURLs.length}",
+      );
     }
     try {
-      return _uploadURLs.removeFirst();
+      final uploadURL = _uploadURLs.removeFirst();
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Returning upload URL. Remaining URLs in queue: ${_uploadURLs.length}",
+      );
+
+      // Atomic check-and-set to prevent race conditions in parallel uploads
+      final now = DateTime.now();
+      final existingTimestamp =
+          _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
+
+      if (existingTimestamp != now) {
+        throw DuplicateUploadURLError(
+          firstUsedAt: existingTimestamp,
+          duplicateUsedAt: now,
+        );
+      }
+      // Clean up old entries to prevent memory growth (only when > 5000 entries)
+      if (_usedUploadURLs.length > 5000) {
+        final oneHourAgo = now.subtract(const Duration(hours: 1));
+        _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
+        _logger.info(
+          "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
+        );
+      }
+
+      return uploadURL;
     } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
@@ -1329,16 +1534,26 @@ class FileUploader {
   Future<void> fetchUploadURLs(int fileCount) async {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
+        final requestCount = math.min(42, fileCount * 2);
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] fetchUploadURLs() starting HTTP GET to /files/upload-urls with count=$requestCount",
+        );
         final response = await _enteDio.get(
           "/files/upload-urls",
           queryParameters: {
-            "count": math.min(42, fileCount * 2), // m4gic number
+            "count": requestCount, // m4gic number
           },
+        );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] HTTP GET completed, parsing ${(response.data["urls"] as List).length} URLs...",
         );
         final urls = (response.data["urls"] as List)
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] fetchUploadURLs() completed. Added ${urls.length} URLs to queue.",
+        );
       } on DioException catch (e, s) {
         if (e.response != null) {
           if (e.response!.statusCode == 402) {
@@ -1370,19 +1585,25 @@ class FileUploader {
     UploadURL uploadURL,
     File file,
     int fileSize, {
+    String? contentMd5,
     int attempt = 1,
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
     final fileName = basename(file.path);
     int bytesSent = 0;
     try {
+      final Map<String, dynamic> headers = {
+        Headers.contentLengthHeader: fileSize,
+      };
+      if (contentMd5 != null) {
+        headers['Content-MD5'] = contentMd5;
+      }
+
       await _dio.put(
         uploadURL.url,
         data: file.openRead(),
         options: Options(
-          headers: {
-            Headers.contentLengthHeader: fileSize,
-          },
+          headers: headers,
         ),
         onSendProgress: (sent, total) {
           bytesSent = sent;
@@ -1394,7 +1615,15 @@ class FileUploader {
 
       return uploadURL.objectKey;
     } on DioException catch (e) {
-      if (e.message?.startsWith("HttpException: Content size") ?? false) {
+      if (e.response?.statusCode == 400 &&
+              e.response?.data.toString().contains('BadDigest') == true ||
+          e.response?.data.toString().contains('InvalidDigest') == true) {
+        final String recomputedMd5 = await computeMd5(file.path);
+        throw BadMD5DigestError(
+          "Failed ${e.response?.data}, sent: $contentMd5, computed: $recomputedMd5",
+        );
+      } else if (e.message?.startsWith("HttpException: Content size") ??
+          false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info(
@@ -1405,6 +1634,7 @@ class FileUploader {
           newUploadURL,
           file,
           fileSize,
+          contentMd5: contentMd5,
           attempt: attempt + 1,
         );
       } else {

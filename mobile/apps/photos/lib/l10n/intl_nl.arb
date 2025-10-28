@@ -29,11 +29,21 @@
   "deleteEmailRequest": "Stuur een e-mail naar <warning>account-deletion@ente.io</warning> vanaf het door jou geregistreerde e-mailadres.",
   "entePhotosPerm": "Ente <i>heeft toestemming nodig om</i> je foto's te bewaren",
   "ok": "Oké",
-  "createAccount": "Account aanmaken",
-  "createNewAccount": "Nieuw account aanmaken",
+  "createAccount": "Maak account",
+  "createNewAccount": "Maak nieuw account",
   "password": "Wachtwoord",
   "confirmPassword": "Wachtwoord bevestigen",
   "activeSessions": "Actieve sessies",
+  "ocrProcessingOverlayMessage": "Tekst aan het detecteren...",
+  "ocrLoadingIndicatorLabel": "Tekst aan het detecteren",
+  "ocrSelectionHint": "Veeg of dubbeltik om precies te selecteren wat je nodig hebt",
+  "ocrNoTextDetected": "Geen tekst gevonden",
+  "ocrRetryButtonLabel": "Probeer opnieuw",
+  "ocrModelsNetworkRequiredError": "Netwerkverbinding vereist om OCR-modellen voor het eerst te gebruiken",
+  "ocrModelsPrepareFailed": "Kan OCR-modellen niet voorbereiden",
+  "ocrImageNotFoundError": "Afbeeldingsbestand niet gevonden",
+  "ocrImageDecodeFailedError": "Kan afbeeldingsbestand niet lezen",
+  "ocrGenericDetectError": "Kan geen tekst in de afbeelding vinden",
   "oops": "Oeps",
   "somethingWentWrongPleaseTryAgain": "Er is iets fout gegaan, probeer het opnieuw",
   "thisWillLogYouOutOfThisDevice": "Dit zal je uitloggen van dit apparaat!",
@@ -186,6 +196,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Samenvoegen van album toestaan",
   "allowAddPhotosDescription": "Sta toe dat mensen met de link ook foto's kunnen toevoegen aan het gedeelde album.",
   "passwordLock": "Wachtwoord slot",
   "canNotOpenTitle": "Kan dit album niet openen",
@@ -198,6 +209,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Albumweergave",
+  "layoutGrouped": "Gegroepeerd",
+  "layoutContinuous": "Doorlopend",
+  "layoutTrip": "Reis",
+  "preview": "Voorbeeld",
   "linkExpiry": "Vervaldatum",
   "linkExpired": "Verlopen",
   "linkEnabled": "Ingeschakeld",
@@ -239,6 +255,7 @@
   "sendLink": "Stuur link",
   "sendQrCode": "Stuur QR code",
   "copyLink": "Kopieer link",
+  "copyEmbedHtml": "Kopieer embed HTML",
   "linkHasExpired": "Link is vervallen",
   "publicLinkEnabled": "Publieke link ingeschakeld",
   "shareALink": "Deel een link",
@@ -1170,8 +1187,8 @@
     "description": "Label for the map view"
   },
   "maps": "Kaarten",
+  "mapsPrivacyNotice": "Benaderende coördinaten worden naar privacybewuste derden zoals OpenStreetMap gestuurd om de kaart en locatie weer te geven.",
   "enableMaps": "Kaarten inschakelen",
-  "enableMapsDesc": "Dit toont jouw foto's op een wereldkaart.\n\nDeze kaart wordt gehost door Open Street Map, en de exacte locaties van jouw foto's worden nooit gedeeld.\n\nJe kunt deze functie op elk gewenst moment uitschakelen via de instellingen.",
   "quickLinks": "Snelle links",
   "selectItemsToAdd": "Selecteer items om toe te voegen",
   "addSelected": "Voeg geselecteerde toe",
@@ -1774,6 +1791,10 @@
   "areYouSureYouWantToMergeThem": "Weet je zeker dat je ze wilt samenvoegen?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Alle naamloze groepen worden samengevoegd met de geselecteerde persoon. Dit kan nog steeds ongedaan worden gemaakt vanuit het geschiedenisoverzicht van de persoon.",
   "yesIgnore": "Ja, negeer",
+  "same": "Zelfde",
+  "different": "Andere",
+  "sameperson": "Zelfde persoon?",
+  "indexingPausedStatusDescription": "Indexeren is gepauzeerd. Het zal automatisch verdergaan wanneer het apparaat er klaar voor is. Het apparaat is er klaar voor wanneer batterijniveau, batterijgezondheid, en thermische status binnen het gezonde bereik liggen.",
   "thisWeek": "Deze week",
   "lastWeek": "Afgelopen week",
   "thisMonth": "Deze maand",
@@ -1826,18 +1847,123 @@
   "recreateStream": "Hercreëer stream",
   "addedToStreamCreationQueue": "Toegevoegd aan stream creatie wachtrij",
   "addedToStreamRecreationQueue": "Toegevoegd aan stream recreatie wachtrij",
-  "cLTitle1": "Kaartweergave voor je reizen",
-  "cLDesc1": "Kies tussen gegroepeerde, continue of reis (kaart-gebaseerde) weergaven bij het delen van albums. Ente zorgt voor de hosting!",
-  "cLTitle2": "Albums insluiten",
-  "cLDesc2": "Sluit je albums in op je eigen website, blog, of fotografie portfolio. Ente zorgt voor de hosting!",
-  "cLTitle3": "Gedeelde albums in widgets",
-  "cLDesc3": "Startscherm widgets ondersteunen nu albums die met je zijn gedeeld.",
-  "cLTitle4": "Kwaliteit van leven verbeteringen",
-  "cLDesc4": "Voeg foto's toe aan albums vanuit de bestandsviewer. Album-niveau gast weergave optie.",
-  "cLTitle5": "Verbeteringen aan delen",
-  "cLDesc5": "Deel openbare links via een QR-code. Pas de mogelijkheid aan om deel te nemen aan albums via links die je deelt.",
+  "videoPreviewAlreadyExists": "Videovoorbeeld bestaat al",
+  "videoAlreadyInQueue": "Videobestand is al aanwezig in de wachtrij",
+  "addedToQueue": "Toegevoegd aan de wachtrij",
+  "creatingStream": "Stream aan het maken",
+  "similarImages": "Soortgelijke afbeeldingen",
+  "findSimilarImages": "Vind soortgelijke afbeeldingen",
+  "noSimilarImagesFound": "Geen soortgelijke afbeeldingen gevonden",
+  "similarGroupsFound": "{count, plural, =1{{count} groep gevonden} other{{count} groepen gevonden}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Controleer en verwijder soortgelijke afbeeldingen",
+  "deletePhotosWithSize": "Verwijder {count} foto's ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Selectieopties",
+  "selectExactWithCount": "Exact hetzelfde ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarWithCount": "Grotendeels hetzelfde ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseSimilarImagesToSelect": "Selecteer afbeeldingen op basis van hun visuele overeenkomstigheid",
+  "clearSelection": "Selectie ongedaan maken",
+  "similarImagesCount": "{count} soortgelijke afbeeldingen",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Verwijder ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Verwijder bestanden",
+  "areYouSureDeleteFiles": "Weet je zeker dat je deze bestanden wilt verwijderen?",
+  "greatJob": "Goed gedaan!",
+  "cleanedUpSimilarImages": "Je hebt {size} vrijgemaakt",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Formaat",
+  "analyzingPhotosLocally": "Bezig met je foto's lokaal analyseren...",
+  "lookingForVisualSimilarities": "Zoeken naar visuele overeenkomsten...",
+  "almostDone": "Bijna klaar...",
+  "processingLocally": "Lokaal aan het verwerken",
+  "useMLToFindSimilarImages": "Controleer en verwijder afbeeldingen die op elkaar lijken.",
+  "identical": "Identiek",
+  "nothingHereTryAnotherFilter": "Niets hier, probeer een ander filter! 👀",
+  "related": "Gerelateerd",
+  "hoorayyyy": "Hoeraaaa!",
+  "nothingToTidyUpHere": "Niks op te schonen hier",
+  "cLTitle1": "OCR! Selecteer tekst in foto's",
+  "cLDesc1": "Ente detecteert of een foto of screenshot tekst bevat en toont een knop om de tekstselectiemodus te activeren. Elke regel tekst kan individueel worden geselecteerd.",
+  "cLTitle2": "Veeg om te selecteren",
+  "cLDesc2": "Gebruik het veeggebaar om snel foto's in je galerij te selecteren. Werkt perfect met één hand, zonder je vinger op te tillen!",
+  "cLTitle3": "Nieuwe herinneringen",
+  "cLDesc3": "\"Spelende kinderen\", \"Winteravonturen\", \"Neonnachten\", en meer.",
+  "cLTitle4": "Landschapsgalerij en meer",
+  "cLDesc4": "Ondersteuning voor landschapsweergave in de hoofdgalerij. Toon personen zonder gekoppelde foto's in plaats van ze uit te filteren. Verbeterde video-aspectdetectie bij delen vanuit externe apps.",
   "closeBy": "Vergelijkbaar",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "festivities": "Feestelijkheden",
+  "snowAdventures": "Winterse avonturen",
+  "waterfalls": "Watervallen",
+  "wildlife": "In het wild",
+  "flowers": "Bloeiende bloemen",
+  "nightLights": "Neonnachten",
+  "architecture": "Architectuur",
+  "autumnColors": "Heerlijke herfst",
+  "stargazing": "Sterrenhemel",
+  "fireworks": "Vuurwerk",
+  "historicSites": "Historische plaatsen",
+  "tropicalParadise": "Tropische paradijzen",
+  "forestTrails": "Boswandelingen",
+  "citySunsets": "De stad in gouden gloed",
+  "colorfulMarkets": "Levendige markten",
+  "cozyCafes": "Knusse cafés",
+  "vintageVibes": "Vintage vibes",
+  "aerialViews": "De lucht in",
+  "artisticPortraits": "Kunstige portretten",
+  "streetFood": "Street food bites",
+  "riverCruises": "Uitzichten vanaf de cruise",
+  "playfulKids": "Spelende kinderen",
+  "coastalCliffs": "Kliffen bij de zee"
 }

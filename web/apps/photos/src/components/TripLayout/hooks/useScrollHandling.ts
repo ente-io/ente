@@ -1,4 +1,3 @@
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { useCallback, useEffect, useMemo } from "react";
 
 import type { JourneyPoint } from "../types";
@@ -39,6 +38,7 @@ export interface UseScrollHandlingParams {
         clusterToSuperClusterMap: Map<number, number>;
     };
     scrollProgress: number;
+    isMobileOrTablet: boolean;
 }
 
 export const useScrollHandling = ({
@@ -57,8 +57,8 @@ export const useScrollHandling = ({
     previousSuperClusterStateRef,
     superClusterInfo,
     scrollProgress,
+    isMobileOrTablet,
 }: UseScrollHandlingParams) => {
-    const isTouchDevice = useIsTouchscreen();
     // Update location positions callback
     const updatePositions = useCallback(() => {
         updateLocationPositions({
@@ -78,7 +78,7 @@ export const useScrollHandling = ({
             setHasUserScrolled,
             setScrollProgress,
             previousActiveLocationRef,
-            isTouchDevice,
+            isMobileOrTablet,
             setTargetZoom,
             previousSuperClusterStateRef,
             superClusterInfo,
@@ -92,7 +92,7 @@ export const useScrollHandling = ({
         setHasUserScrolled,
         setScrollProgress,
         previousActiveLocationRef,
-        isTouchDevice,
+        isMobileOrTablet,
         setTargetZoom,
         previousSuperClusterStateRef,
         superClusterInfo,
@@ -112,9 +112,10 @@ export const useScrollHandling = ({
                 locationIndex,
                 photoClusters,
                 locationPositions,
+                isMobileOrTablet,
             });
         },
-        [timelineRef, photoClusters, locationPositions],
+        [timelineRef, photoClusters, locationPositions, isMobileOrTablet],
     );
 
     // Marker click handler
@@ -131,7 +132,7 @@ export const useScrollHandling = ({
                 setScrollProgress,
                 setHasUserScrolled,
                 scrollTimelineToLocation: scrollToLocation,
-                isTouchDevice,
+                isMobileOrTablet,
                 superClusterInfo,
                 scrollProgress,
                 setTargetZoom,
@@ -147,7 +148,7 @@ export const useScrollHandling = ({
             setScrollProgress,
             setHasUserScrolled,
             scrollToLocation,
-            isTouchDevice,
+            isMobileOrTablet,
             superClusterInfo,
             scrollProgress,
             setTargetZoom,

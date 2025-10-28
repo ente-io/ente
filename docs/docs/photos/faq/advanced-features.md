@@ -93,7 +93,7 @@ If exporting to NAS using CLI:
 - Check write permissions on the destination folder
 - Use a local path if the NAS is mounted on your system
 
-## Exporting from Desktop/Web
+## Exporting from Desktop
 
 ### How can I backup my data locally outside Ente? {#local-backup}
 
@@ -174,7 +174,7 @@ With continuous export enabled, the app will automatically export new items in t
 
 The desktop app needs to be running for continuous export to work.
 
-Learn more about [Desktop continuous export](/photos/features/backup-and-sync/export#desktopweb-continuous-export).
+Learn more about [Desktop continuous export](/photos/features/backup-and-sync/export#desktop-continuous-export).
 
 ## Utilities
 

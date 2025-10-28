@@ -1,6 +1,5 @@
-import { Box, styled } from "@mui/material";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
-import dynamic from "next/dynamic";
+import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
+import { useEffect, useState } from "react";
 
 import { MapEvents } from "./MapEvents";
 import {
@@ -11,19 +10,11 @@ import {
 } from "./mapHelpers";
 import type { JourneyPoint } from "./types";
 
-// Dynamically import react-leaflet components to prevent SSR issues
-const MapContainer = dynamic(
-    () => import("react-leaflet").then((mod) => mod.MapContainer),
-    { ssr: false },
-);
-const TileLayer = dynamic(
-    () => import("react-leaflet").then((mod) => mod.TileLayer),
-    { ssr: false },
-);
-const Marker = dynamic(
-    () => import("react-leaflet").then((mod) => mod.Marker),
-    { ssr: false },
-);
+interface MapComponentsType {
+    MapContainer: typeof import("react-leaflet").MapContainer;
+    TileLayer: typeof import("react-leaflet").TileLayer;
+    Marker: typeof import("react-leaflet").Marker;
+}
 
 interface TripMapProps {
     journeyData: JourneyPoint[];
@@ -69,12 +60,31 @@ export const TripMap: React.FC<TripMapProps> = ({
     setTargetZoom,
     onMarkerClick,
 }) => {
-    const isTouchDevice = useIsTouchscreen();
+    const theme = useTheme();
+    const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
+
+    // Load react-leaflet components client-side only to prevent SSR issues
+    const [mapComponents, setMapComponents] =
+        useState<MapComponentsType | null>(null);
+
+    useEffect(() => {
+        void import("react-leaflet")
+            .then((mod) => {
+                setMapComponents({
+                    MapContainer: mod.MapContainer,
+                    TileLayer: mod.TileLayer,
+                    Marker: mod.Marker,
+                });
+            })
+            .catch((error: unknown) => {
+                console.error("Failed to load react-leaflet:", error);
+            });
+    }, []);
 
     // Calculate current active location index based on scroll progress (same logic as in scrollUtils)
     let currentActiveLocationIndex = -1;
     if (photoClusters.length > 0) {
-        if (isTouchDevice) {
+        if (isMobileOrTablet) {
             // Mobile: Slower progression - stay on each location longer
             currentActiveLocationIndex = Math.floor(
                 scrollProgress * (photoClusters.length - 0.5),
@@ -97,23 +107,31 @@ export const TripMap: React.FC<TripMapProps> = ({
             optimalZoom,
         );
 
+    // Return loading state if map components haven't loaded yet
+    if (!mapComponents) {
+        return <MapContainerWrapper hasPhotoData={false} />;
+    }
+
+    const { MapContainer, TileLayer, Marker } = mapComponents;
+
     return (
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
-                <StyledMapContainer
+                <MapContainer
                     center={getMapCenter(
                         photoClusters,
                         journeyData,
                         superClusterInfo,
                     )}
                     zoom={
-                        isTouchDevice
+                        isMobileOrTablet
                             ? Math.max(1, optimalZoom - 2)
                             : optimalZoom
                     }
                     scrollWheelZoom={true}
                     zoomControl={false}
-                    attributionControl={!isTouchDevice}
+                    attributionControl={!isMobileOrTablet}
+                    style={{ width: "100%", height: "100%" }}
                 >
                     <MapEvents
                         setMapRef={setMapRef}
@@ -123,14 +141,14 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Stadia Alidade Satellite - includes both imagery and labels */}
                     <TileLayer
                         attribution={
-                            isTouchDevice
+                            isMobileOrTablet
                                 ? ""
                                 : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
                         }
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
-                        updateWhenZooming={false}
-                        keepBuffer={1}
+                        updateWhenZooming={isMobileOrTablet ? true : false}
+                        keepBuffer={isMobileOrTablet ? 3 : 1}
                     />
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
@@ -143,7 +161,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                         const icon = createSuperClusterIcon(
                             superCluster.image, // Use representative photo (first photo of first cluster)
                             superCluster.clusterCount,
-                            isTouchDevice ? 40 : 55,
+                            isMobileOrTablet ? 40 : 55,
                             isActive,
                         );
 
@@ -206,7 +224,7 @@ export const TripMap: React.FC<TripMapProps> = ({
 
                         const icon = createIcon(
                             firstPhoto.image,
-                            isTouchDevice ? 40 : 55,
+                            isMobileOrTablet ? 40 : 55,
                             "#ffffff",
                             cluster.length,
                             isActive,
@@ -240,7 +258,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                             />
                         ) : null;
                     })}
-                </StyledMapContainer>
+                </MapContainer>
             ) : null}
         </MapContainerWrapper>
     );
@@ -254,8 +272,3 @@ const MapContainerWrapper = styled(Box, {
     height: "100%",
     backgroundColor: hasPhotoData ? "transparent" : "#000000",
 }));
-
-const StyledMapContainer = styled(MapContainer)({
-    width: "100%",
-    height: "100%",
-});

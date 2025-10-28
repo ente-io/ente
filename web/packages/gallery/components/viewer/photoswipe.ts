@@ -90,7 +90,10 @@ export interface FileViewerPhotoSwipeDelegate {
     ) => void;
 }
 
-type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
+type FileViewerPhotoSwipeOptions = Pick<
+    FileViewerProps,
+    "initialIndex" | "showFullscreenButton"
+> & {
     /**
      * `true` if we're running in the context of a logged in user, and so
      * various actions that modify the file should be shown.
@@ -189,6 +192,7 @@ export class FileViewerPhotoSwipe {
     constructor({
         initialIndex,
         haveUser,
+        showFullscreenButton,
         delegate,
         onClose,
         onAnnotate,
@@ -1225,23 +1229,76 @@ export class FileViewerPhotoSwipe {
                 onClick: handleViewInfo,
             });
 
-            ui.registerElement({
-                name: "more",
-                title: t("more"),
-                order: 16,
-                isButton: true,
-                html: createPSRegisterElementIconHTML("more"),
-                onInit: (buttonElement) => {
-                    buttonElement.setAttribute("id", moreButtonID);
-                    buttonElement.setAttribute("aria-haspopup", "true");
-                },
-                onClick: (_, buttonElement) => {
-                    // See also: `resetMoreMenuButtonOnMenuClose`.
-                    buttonElement.setAttribute("aria-controls", moreMenuID);
-                    buttonElement.setAttribute("aria-expanded", "true");
-                    onMore(buttonElement);
-                },
-            });
+            // Only show the more button if there are meaningful items to display.
+            // When fullscreen is shown in the toolbar (showFullscreenButton=true)
+            // and we're in a context without user actions (no delete, archive, etc),
+            // hide the more menu since it would only contain fullscreen and shortcuts.
+            const shouldShowMoreButton = !showFullscreenButton || haveUser;
+
+            if (shouldShowMoreButton) {
+                ui.registerElement({
+                    name: "more",
+                    title: t("more"),
+                    order: 16,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("more"),
+                    onInit: (buttonElement) => {
+                        buttonElement.setAttribute("id", moreButtonID);
+                        buttonElement.setAttribute("aria-haspopup", "true");
+                    },
+                    onClick: (_, buttonElement) => {
+                        // See also: `resetMoreMenuButtonOnMenuClose`.
+                        buttonElement.setAttribute("aria-controls", moreMenuID);
+                        buttonElement.setAttribute("aria-expanded", "true");
+                        onMore(buttonElement);
+                    },
+                });
+            }
+
+            // Add fullscreen button as a primary action for embed app
+            if (showFullscreenButton) {
+                ui.registerElement({
+                    name: "fullscreen",
+                    title: t("toggle_fullscreen"),
+                    order: 18,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("fullscreen"),
+                    onInit: (buttonElement, pswp) => {
+                        const updateIcon = () => {
+                            const isFullscreen = !!document.fullscreenElement;
+                            const fullscreenIcon = buttonElement.querySelector(
+                                "#pswp__icn-fullscreen",
+                            );
+                            const exitIcon = buttonElement.querySelector(
+                                "#pswp__icn-fullscreen-exit",
+                            );
+                            if (fullscreenIcon && exitIcon) {
+                                showIf(
+                                    fullscreenIcon as HTMLElement,
+                                    !isFullscreen,
+                                );
+                                showIf(exitIcon as HTMLElement, isFullscreen);
+                            }
+                        };
+
+                        // Update icon on fullscreen changes
+                        document.addEventListener(
+                            "fullscreenchange",
+                            updateIcon,
+                        );
+                        pswp.on("destroy", () => {
+                            document.removeEventListener(
+                                "fullscreenchange",
+                                updateIcon,
+                            );
+                        });
+
+                        // Initialize icon state
+                        updateIcon();
+                    },
+                    onClick: handleToggleFullscreen,
+                });
+            }
 
             ui.registerElement({
                 name: "media-controls",

@@ -350,7 +350,7 @@ packages:
     source: hosted
     version: "2.0.1"
   convert:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: convert
       sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
@@ -509,14 +509,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.9"
-  el_tooltip:
-    dependency: "direct main"
-    description:
-      name: el_tooltip
-      sha256: "0860b00e9390a31dd98369dc16d3b6fa2668fc52df712bd00e86d8931787fc17"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.2.1"
   email_validator:
     dependency: "direct main"
     description:
@@ -1588,6 +1580,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "13.12.6"
+  mobile_ocr:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "71f74bd9e3d157c78ebed90c8f74cc8e685390c4"
+      resolved-ref: "71f74bd9e3d157c78ebed90c8f74cc8e685390c4"
+      url: "https://github.com/laurenspriem/mobile_ocr"
+    source: git
+    version: "1.0.0"
   mockito:
     dependency: "direct dev"
     description:
@@ -1668,10 +1669,17 @@ packages:
     dependency: "direct main"
     description:
       name: native_dio_adapter
-      sha256: "1c51bd42027861d27ccad462ba0903f5e3197461cc6d59a0bb8658cb5ad7bd01"
+      sha256: "7420bc9517b2abe09810199a19924617b45690a44ecfb0616ac9babc11875c03"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.4.0"
+  native_video_editor:
+    dependency: "direct main"
+    description:
+      path: "../../packages/native_video_editor"
+      relative: true
+    source: path
+    version: "1.0.0"
   native_video_player:
     dependency: "direct main"
     description:
@@ -2544,15 +2552,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.8"
-  text_detector:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: a2d2b2e0ae5705009f8d3a5e9645caf1c5ef5ace
-      url: "https://github.com/neeraj-pilot/text_detector.git"
-    source: git
-    version: "1.0.0"
   thermal:
     dependency: "direct main"
     description:
@@ -2765,7 +2764,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: master
       resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
       url: "https://github.com/ente-io/video_editor_fork.git"
     source: git
@@ -2773,12 +2772,11 @@ packages:
   video_player:
     dependency: "direct main"
     description:
-      path: "packages/video_player/video_player"
-      ref: android_video_roation_fix
-      resolved-ref: "0acef25ca43206e02a0758b51d5fd176e3d8c6b8"
-      url: "https://github.com/ente-io/packages.git"
-    source: git
-    version: "2.7.0"
+      name: video_player
+      sha256: "0d55b1f1a31e5ad4c4967bfaa8ade0240b07d20ee4af1dfef5f531056512961a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
   video_player_android:
     dependency: transitive
     description:

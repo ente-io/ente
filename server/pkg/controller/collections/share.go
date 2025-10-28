@@ -43,10 +43,6 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 	if fromUserID != collection.Owner.ID {
 		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(fromUserID, true)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
 	err = c.CollectionRepo.Share(cID, fromUserID, toUserID, encryptedKey, role, time.Microseconds())
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")

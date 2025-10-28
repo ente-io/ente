@@ -108,11 +108,14 @@ class Configuration {
           _documentsDirectory + "/ente-shared-media";
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
       if (!_preferences.containsKey(tokenKey)) {
-        _logger
-            .info("(for debugging) Token not found, deleting all secure storage data");
+        _logger.info(
+          "(for debugging) Token not found, deleting all secure storage data",
+        );
         await _secureStorage.deleteAll();
       } else {
-        _logger.info("(for debugging) Token found, loading secure storage data");
+        _logger.info(
+          "(for debugging) Token found, loading secure storage data",
+        );
         _key = await _secureStorage.read(
           key: keyKey,
         );
@@ -702,7 +705,9 @@ class Configuration {
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
-    _logger.info("(for debugging) Migrating secure storage to first unlock if needed");
+    _logger.info(
+      "(for debugging) Migrating secure storage to first unlock if needed",
+    );
     final hasMigratedSecureStorage =
         _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
     if (!hasMigratedSecureStorage && _key != null && _secretKey != null) {

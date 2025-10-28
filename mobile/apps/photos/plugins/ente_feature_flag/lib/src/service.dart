@@ -66,9 +66,11 @@ class FlagService {
 
   String get embedUrl => flags.embedUrl;
 
-  bool get textDetection => internalUser && Platform.isIOS;
-
   bool get addToAlbumFeature => internalUser;
+
+  bool get widgetSharedAlbums => internalUser;
+
+  bool get useNativeVideoEditor => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

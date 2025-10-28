@@ -127,7 +127,7 @@ Metadata is exported as JSON files in the same format as Google Takeout, making 
 
 ```
 photo.jpg
-metadata/photo.jpg.json
+.meta/photo.jpg.json
 ```
 
 Learn more in the [Export feature guide](/photos/features/backup-and-sync/export).
@@ -179,5 +179,5 @@ You can review, contribute to, or extend the CLI for your specific needs.
 
 ## Related topics
 
-- [Export](/photos/features/backup-and-sync/export) - Desktop/web export feature
+- [Export](/photos/features/backup-and-sync/export) - Desktop export feature
 - [Watch folders](/photos/features/backup-and-sync/watch-folders) - Automatic uploads
