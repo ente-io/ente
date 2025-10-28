@@ -2,6 +2,7 @@ package two_factor_recovery
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 
 	"github.com/ente-io/museum/ente"
@@ -72,7 +73,7 @@ func (r *Repository) ValidatePasskeyRecoverySecret(userID int64, secret string) 
 	if decErr != nil {
 		return false, stacktrace.Propagate(decErr, "failed to decrypt passkey reset key")
 	}
-	if secret != serverSkipSecretKey {
+	if subtle.ConstantTimeCompare([]byte(secret), []byte(serverSkipSecretKey)) != 1 {
 		logrus.Warn("invalid passkey skip secret")
 		return false, nil
 	}
