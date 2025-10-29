@@ -5,6 +5,7 @@ import "dart:ui" as ui;
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
+import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
@@ -55,6 +56,9 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   final GlobalKey _cardBoundaryKey = GlobalKey();
   final Logger _logger = Logger("WrappedViewerPage");
   bool _pendingRestart = false;
+  bool _suppressNextTapUp = false;
+  bool _longPressActive = false;
+  bool _wasPausedBeforeLongPress = false;
 
   @override
   void initState() {
@@ -233,9 +237,8 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   void _handlePageChanged(int index) {
-    final bool restart = _pendingRestart;
     _pendingRestart = false;
-    _updateCurrentIndex(index, restartProgress: restart);
+    _updateCurrentIndex(index, restartProgress: true);
   }
 
   void _updateCurrentIndex(int index, {required bool restartProgress}) {
@@ -271,23 +274,93 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
   }
 
-  void _handleTapDown(TapDownDetails details, BoxConstraints constraints) {
-    final double dx = details.localPosition.dx;
+  void _handleTap(
+    Offset localPosition,
+    BoxConstraints constraints,
+  ) {
+    final double dx = localPosition.dx;
     final double width = constraints.maxWidth;
     final double leftZoneBoundary = width * 0.25;
     final double rightZoneBoundary = width * 0.75;
+    _triggerLightHaptic();
     if (dx < leftZoneBoundary) {
       if (_progressController.value > 0.1) {
         _configureForCurrentCard(restartProgress: true);
       } else {
-        unawaited(_goToIndex(_currentIndex - 1));
+        unawaited(
+          _goToIndex(
+            _currentIndex - 1,
+            animate: false,
+          ),
+        );
       }
     } else if (dx > rightZoneBoundary) {
-      unawaited(_goToIndex(_currentIndex + 1));
+      unawaited(
+        _goToIndex(
+          _currentIndex + 1,
+          animate: false,
+        ),
+      );
     } else {
       _togglePause();
       setState(() {});
     }
+  }
+
+  void _handleTapUp(TapUpDetails details, BoxConstraints constraints) {
+    if (_suppressNextTapUp) {
+      _suppressNextTapUp = false;
+      return;
+    }
+    _handleTap(details.localPosition, constraints);
+  }
+
+  void _handleLongPressStart(LongPressStartDetails details) {
+    if (_longPressActive) {
+      return;
+    }
+    _longPressActive = true;
+    _suppressNextTapUp = true;
+    _wasPausedBeforeLongPress = _isPaused;
+    _triggerLightHaptic();
+    _pauseAutoplay();
+    setState(() {});
+  }
+
+  void _handleLongPressEnd(LongPressEndDetails details) {
+    if (!_longPressActive) {
+      return;
+    }
+    _longPressActive = false;
+    if (!_wasPausedBeforeLongPress) {
+      _resumeAutoplay();
+    }
+    _wasPausedBeforeLongPress = false;
+    _scheduleTapUpReset();
+    setState(() {});
+  }
+
+  void _handleLongPressCancel() {
+    if (!_longPressActive) {
+      return;
+    }
+    _longPressActive = false;
+    if (!_wasPausedBeforeLongPress) {
+      _resumeAutoplay();
+    }
+    _wasPausedBeforeLongPress = false;
+    _scheduleTapUpReset();
+    setState(() {});
+  }
+
+  void _scheduleTapUpReset() {
+    scheduleMicrotask(() {
+      _suppressNextTapUp = false;
+    });
+  }
+
+  void _triggerLightHaptic() {
+    unawaited(HapticFeedback.lightImpact());
   }
 
   @override
@@ -355,12 +428,18 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                         (BuildContext context, BoxConstraints constraints) {
                       return GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTapDown: (TapDownDetails details) =>
-                            _handleTapDown(details, constraints),
+                        onTapUp: (TapUpDetails details) =>
+                            _handleTapUp(details, constraints),
+                        onTapCancel: () {
+                          _suppressNextTapUp = false;
+                        },
+                        onLongPressStart: _handleLongPressStart,
+                        onLongPressEnd: _handleLongPressEnd,
+                        onLongPressCancel: _handleLongPressCancel,
                         child: RepaintBoundary(
                           key: _cardBoundaryKey,
                           child: PageView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
+                            physics: const PageScrollPhysics(),
                             controller: _pageController,
                             onPageChanged: _handlePageChanged,
                             itemCount: cardCount,
