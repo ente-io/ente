@@ -724,7 +724,7 @@ class _FilterChip extends StatelessWidget {
               Text(
                 label,
                 style: textTheme.small.copyWith(
-                  color: isSelected ? colorScheme.backgroundBase : Colors.white,
+                  color: isSelected ? Colors.white : colorScheme.textBase,
                 ),
               ),
               AnimatedSwitcher(
