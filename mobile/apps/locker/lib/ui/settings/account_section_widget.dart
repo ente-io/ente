@@ -1,4 +1,3 @@
-import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/pages/password_entry_page.dart";
 import "package:ente_accounts/pages/recovery_key_page.dart";
@@ -15,6 +14,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:locker/ui/pages/home_page.dart";
 import "package:locker/ui/settings/common_settings.dart";
@@ -58,7 +58,7 @@ class AccountSectionWidget extends StatelessWidget {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return const ChangeEmailDialog();
+                return const ChangeEmailDialogLocker();
               },
               barrierColor: Colors.black.withValues(alpha: 0.85),
               barrierDismissible: false,
