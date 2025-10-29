@@ -280,6 +280,13 @@ class BaseConfiguration {
     return _preferences.getString(endPointKey) ?? endpoint;
   }
 
+  // isEnteProduction checks if the current endpoint is the default production
+  // endpoint. This is used to determine if the app is in production mode or
+  // not. The default production endpoint is set in the environment variable
+  bool isEnteProduction() {
+    return getHttpEndpoint() == kDefaultProductionEndpoint;
+  }
+
   Future<void> setHttpEndpoint(String endpoint) async {
     await _preferences.setString(endPointKey, endpoint);
     Bus.instance.fire(EndpointUpdatedEvent());
