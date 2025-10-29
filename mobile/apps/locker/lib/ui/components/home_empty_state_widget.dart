@@ -37,7 +37,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Image.asset(
-                'assets/empty_state.png',
+                'assets/upload_file.png',
               ),
               const SizedBox(height: 12),
               Text(
