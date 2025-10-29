@@ -60,7 +60,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.magic:
         return AppLocalizations.of(context).discover;
       case SectionType.wrapped:
-        return "Wrapped 2025";
+        return "Ente Wrapped";
       case SectionType.location:
         return AppLocalizations.of(context).locations;
       case SectionType.contacts:
