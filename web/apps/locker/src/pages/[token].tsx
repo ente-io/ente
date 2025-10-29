@@ -7,7 +7,6 @@ import {
     Typography,
 } from "@mui/material";
 import bs58 from "bs58";
-import { EnteLogo } from "ente-base/components/EnteLogo";
 import {
     decryptBoxBytes,
     decryptMetadataJSON,
@@ -528,10 +527,13 @@ const FilePage: React.FC = () => {
                         mb: fileInfo?.lockerType ? { xs: 16, md: 0 } : 0,
                         alignSelf: { xs: "center", md: "flex-end" },
                         mr: { xs: 0, md: 6 },
-                        "& svg": { fill: "#000000" },
                     }}
                 >
-                    <EnteLogo />
+                    <img
+                        src="/images/ente-locker.svg"
+                        alt="Ente Locker"
+                        style={{ height: "48px" }}
+                    />
                 </Box>
 
                 {/* Main Container - Centers the file content */}
