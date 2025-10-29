@@ -99,20 +99,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (!mounted && _localThumbnailQueueTaskId != null) {
         if (widget.thumbnailSize == thumbnailLargeSize) {
           largeLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
-          _logger.info(
-            "Cancelled large thumbnail task: $_localThumbnailQueueTaskId",
-          );
         } else if (widget.thumbnailSize == thumbnailSmallSize) {
           smallLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
-          _logger.info(
-            "Cancelled small thumbnail task: $_localThumbnailQueueTaskId",
-          );
         }
       }
       // Cancel request only if the widget has been unmounted
       if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
-        _logger.info("Cancelled thumbnail request for " + widget.file.tag);
       }
     });
   }

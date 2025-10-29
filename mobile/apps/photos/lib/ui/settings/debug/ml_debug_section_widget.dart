@@ -84,6 +84,25 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     logger.info("Building ML Debug section options");
     return Column(
       children: [
+        if (wrappedService.isEnabled) sectionOptionSpacing,
+        if (wrappedService.isEnabled)
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Recompute Wrapped 2025",
+            ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () async {
+              try {
+                await wrappedService.forceRecompute();
+                showShortToast(context, "Wrapped 2025 recomputed");
+              } catch (e, s) {
+                logger.severe('Wrapped recompute failed ', e, s);
+                await showGenericErrorDialog(context: context, error: e);
+              }
+            },
+          ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(

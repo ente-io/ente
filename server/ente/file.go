@@ -157,11 +157,24 @@ type UploadURL struct {
 	URL       string `json:"url"`
 }
 
+// UploadURLRequest represents the inputs necessary to mint a single upload URL
+type UploadURLRequest struct {
+	ContentLength int64  `json:"contentLength" binding:"required"`
+	ContentMD5    string `json:"contentMD5" binding:"required"`
+}
+
 // MultipartUploadURLs represents the part upload url for a specific object
 type MultipartUploadURLs struct {
 	ObjectKey   string   `json:"objectKey"`
 	PartURLs    []string `json:"partURLs"`
 	CompleteURL string   `json:"completeURL"`
+}
+
+// MultipartUploadURLRequest encapsulates the metadata needed to mint a multipart upload URL set
+type MultipartUploadURLRequest struct {
+	ContentLength int64    `json:"contentLength" binding:"required"`
+	PartLength    int64    `json:"partLength" binding:"required"`
+	PartMD5s      []string `json:"partMd5s" binding:"required"`
 }
 
 type ObjectType string

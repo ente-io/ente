@@ -345,6 +345,9 @@ internal:
     # restoration test, where we want to be able to access data but otherwise
     # minimize external side effects.
     silent: false
+    # Header gin will trust for resolving the original client IP when requests are proxied.
+    # If the header or value is missing, server will default to X-Forwarded-For, X-Real-IP, remote-addr (in that order).
+    trusted-client-ip-header:
     # If provided, this external healthcheck url is periodically pinged.
     health-check-url:
     # Hardcoded verification codes, useful for logging in when developing.

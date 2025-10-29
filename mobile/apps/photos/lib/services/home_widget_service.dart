@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:image/image.dart' as img;
@@ -45,7 +46,11 @@ class HomeWidgetService {
   // Constants
   static const int _widgetV2Size = 1024;
   static const double THUMBNAIL_SIZE = 512.0;
+  static const double THUMBNAIL_SIZE_V2 = 1024.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
+  static const int WIDGET_IMAGE_LIMIT_V1 = 50;
+  static const int WIDGET_IMAGE_LIMIT_V2 = 25;
+  static const int WIDGET_IMAGE_LIMIT_MINIMAL = 5;
 
   // URI schemes for different widget types
   static const String MEMORY_WIDGET_SCHEME = 'memorywidget';
@@ -78,6 +83,12 @@ class HomeWidgetService {
       },
     );
     _isAppGroupSet = true;
+  }
+
+  int getWidgetImageLimit() {
+    return flagService.useWidgetV2
+        ? WIDGET_IMAGE_LIMIT_V2
+        : WIDGET_IMAGE_LIMIT_V1;
   }
 
   Future<void> initHomeWidget([bool isBg = false]) async {
@@ -113,13 +124,20 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    if (flagService.internalUser) {
+    // Use V2 (1024x1024 rendering) with isolate-based image processing
+    final bool useV2 = flagService.useWidgetV2;
+
+    if (useV2) {
       final Size? v2Size = await _captureFileV2(file, key, title, mainKey);
       if (v2Size != null) {
         return v2Size;
       }
+      _logger.info(
+        "V2 capture failed for ${file.displayName}, falling back to legacy",
+      );
     }
 
+    // Use legacy capture (either useV2 is false, or V2 failed)
     final result = await _captureFileLegacy(file, key, title, mainKey);
     if (!result) {
       _logger.warning("Failed to capture file ${file.displayName}");

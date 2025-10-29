@@ -358,7 +358,10 @@ class AlbumHomeWidgetService {
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
 
-    final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
+    final limit = isWidgetPresent
+        ? HomeWidgetService.instance.getWidgetImageLimit()
+        : HomeWidgetService.WIDGET_IMAGE_LIMIT_MINIMAL;
+
     final Set<String> uniqueRenderableItems = <String>{};
     for (final entry in albumsWithFiles.entries) {
       for (final file in entry.value.$2) {

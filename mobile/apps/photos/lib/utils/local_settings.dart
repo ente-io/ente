@@ -45,6 +45,8 @@ class LocalSettings {
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
+  static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
+  static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
 
   final SharedPreferences _prefs;
 
@@ -234,5 +236,21 @@ class LocalSettings {
 
   Future<void> setEnableDatabaseLogging(bool value) async {
     await _prefs.setBool(kEnableDatabaseLogging, value);
+  }
+
+  int wrapped2025ResumeIndex() {
+    return _prefs.getInt(_kWrapped2025ResumeIndex) ?? 0;
+  }
+
+  Future<void> setWrapped2025ResumeIndex(int index) async {
+    await _prefs.setInt(_kWrapped2025ResumeIndex, index);
+  }
+
+  bool wrapped2025Complete() {
+    return _prefs.getBool(_kWrapped2025Complete) ?? false;
+  }
+
+  Future<void> setWrapped2025Complete() async {
+    await _prefs.setBool(_kWrapped2025Complete, true);
   }
 }

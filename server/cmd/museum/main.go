@@ -388,6 +388,11 @@ func main() {
 	}
 	server := gin.New()
 
+	clientIPHeader := viper.GetString("internal.trusted-client-ip-header")
+	if clientIPHeader != "" {
+		server.TrustedPlatform = clientIPHeader
+	}
+
 	p := ginprometheus.NewPrometheus("museum")
 	p.ReqCntURLLabelMappingFn = urlSanitizer
 	server.Use(p.HandlerFunc())
@@ -454,6 +459,8 @@ func main() {
 	}
 	privateAPI.GET("/files/upload-urls", fileHandler.GetUploadURLs)
 	privateAPI.GET("/files/multipart-upload-urls", fileHandler.GetMultipartUploadURLs)
+	privateAPI.POST("/files/upload-url", fileHandler.GetUploadURLV2)
+	privateAPI.POST("/files/multipart-upload-url", fileHandler.GetMultipartUploadURLV2)
 	privateAPI.GET("/files/download/:fileID", fileHandler.Get)
 	privateAPI.GET("/files/download/v2/:fileID", fileHandler.Get)
 	privateAPI.GET("/files/preview/:fileID", fileHandler.GetThumbnail)
@@ -850,6 +857,9 @@ func runServer(environment string, server *gin.Engine) {
 			port = viper.GetInt("http.port")
 		}
 		log.Infof("starting server on port %d", port)
+		if server.TrustedPlatform != "" {
+			log.Infof("trusted platform header: %s", server.TrustedPlatform)
+		}
 		server.Run(fmt.Sprintf(":%d", port))
 	}
 }
@@ -1045,6 +1055,12 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	scheduleAndRun(c, "@every 24h", func() {
 		emailNotificationCtrl.NudgePaidSubscriberForFamily()
+		deleted, err := userAuthRepo.CleanupOldFakeSessions(context.Background())
+		if err != nil {
+			log.WithError(err).Error("Failed to cleanup old fake SRP sessions")
+		} else if deleted > 0 {
+			log.WithField("count", deleted).Info("Cleaned up old fake SRP sessions")
+		}
 	})
 
 	schedule(c, "@every 1m", func() {
