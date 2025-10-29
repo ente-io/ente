@@ -1,11 +1,13 @@
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:logging/logging.dart';
 import 'package:native_video_editor/native_video_editor.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path_helper;
 import 'package:photo_manager/photo_manager.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -19,7 +21,6 @@ import 'package:photos/ui/tools/editor/video_editor/crop_value.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_editor/video_editor.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// Trim configuration
 class TrimConfig {
@@ -27,8 +28,11 @@ class TrimConfig {
   final Duration? duration;
   final Duration startOffset;
 
-  const TrimConfig(
-      {required this.label, this.duration, this.startOffset = Duration.zero});
+  const TrimConfig({
+    required this.label,
+    this.duration,
+    this.startOffset = Duration.zero,
+  });
 
   bool get shouldTrim => duration != null;
 
@@ -60,8 +64,10 @@ class TrimConfigs {
   }
 
   /// Create a trim config from start offset and length
-  static TrimConfig fromRange(
-      {required int startSeconds, required int lengthSeconds}) {
+  static TrimConfig fromRange({
+    required int startSeconds,
+    required int lengthSeconds,
+  }) {
     return TrimConfig(
       label: "trim-${startSeconds}s-${startSeconds + lengthSeconds}s",
       duration: Duration(seconds: lengthSeconds),
@@ -249,7 +255,8 @@ void main() {
           testFiles.fold(0, (sum, config) => sum + config.totalIterations);
       logger.info('═══════════════════════════════════════════════════════');
       logger.info(
-          'Starting test with $totalFiles file(s), ${testFiles.length} configuration(s)');
+        'Starting test with $totalFiles file(s), ${testFiles.length} configuration(s)',
+      );
       logger.info('Total iterations: $totalIterations');
       logger.info('═══════════════════════════════════════════════════════\n');
 
@@ -263,7 +270,8 @@ void main() {
         final config = testFiles[configIndex];
 
         logger.info(
-            '\n╔═══════════════════════════════════════════════════════╗');
+          '\n╔═══════════════════════════════════════════════════════╗',
+        );
         logger.info('║ CONFIG ${configIndex + 1}/${testFiles.length}');
         logger.info('║ Files: ${config.fileIds}');
         logger.info('║ Iterations per file: ${config.totalIterationsPerFile}');
@@ -271,7 +279,8 @@ void main() {
         logger.info('║ Crop: ${config.cropOptions}');
         logger.info('║ Rotate: ${config.rotateOptions}');
         logger.info(
-            '╚═══════════════════════════════════════════════════════╝\n');
+          '╚═══════════════════════════════════════════════════════╝\n',
+        );
 
         // Process each file in this configuration
         for (int fileIndex = 0;
@@ -281,7 +290,8 @@ void main() {
 
           logger.info('─────────────────────────────────────────────────────');
           logger.info(
-              'File ${fileIndex + 1}/${config.fileIds.length} in config ${configIndex + 1}: ID $fileId');
+            'File ${fileIndex + 1}/${config.fileIds.length} in config ${configIndex + 1}: ID $fileId',
+          );
           logger.info('─────────────────────────────────────────────────────');
 
           // Load source file
@@ -385,7 +395,8 @@ void main() {
           }
 
           logger.info(
-              'File $fileId completed: $fileIterationCount/${config.totalIterationsPerFile} iterations\n');
+            'File $fileId completed: $fileIterationCount/${config.totalIterationsPerFile} iterations\n',
+          );
         }
 
         logger.info('═══════════════════════════════════════════════════════');
@@ -408,10 +419,12 @@ void main() {
 
       if (failedExports.isNotEmpty) {
         logger.severe(
-            '\n╔═══════════════════════════════════════════════════════╗');
+          '\n╔═══════════════════════════════════════════════════════╗',
+        );
         logger.severe('║ EXPORT FAILURES (${failedExports.length})');
         logger.severe(
-            '╚═══════════════════════════════════════════════════════╝');
+          '╚═══════════════════════════════════════════════════════╝',
+        );
         failedExports.forEach((desc, error) {
           logger.severe('  ✗ $desc');
           logger.severe('    Error: $error\n');
@@ -420,10 +433,12 @@ void main() {
 
       if (validationFailures.isNotEmpty) {
         logger.warning(
-            '\n╔═══════════════════════════════════════════════════════╗');
+          '\n╔═══════════════════════════════════════════════════════╗',
+        );
         logger.warning('║ VALIDATION FAILURES (${validationFailures.length})');
         logger.warning(
-            '╚═══════════════════════════════════════════════════════╝');
+          '╚═══════════════════════════════════════════════════════╝',
+        );
 
         // Group by failure type
         final groupedFailures = <String, List<ValidationFailure>>{};
@@ -435,10 +450,12 @@ void main() {
 
         groupedFailures.forEach((type, failures) {
           logger.warning(
-              '\n  ${type.toUpperCase()} (${failures.length} failures):');
+            '\n  ${type.toUpperCase()} (${failures.length} failures):',
+          );
           for (final failure in failures) {
             logger.warning(
-                '    ✗ File ${failure.fileId}: ${failure.description}');
+              '    ✗ File ${failure.fileId}: ${failure.description}',
+            );
             logger.warning('      Expected: ${failure.expected}');
             logger.warning('      Actual:   ${failure.actual}');
           }
@@ -483,7 +500,8 @@ Future<IterationResult> _processVideoIteration({
     controller = VideoEditorController.file(
       sourceIoFile,
       minDuration: const Duration(
-          milliseconds: 100), // Allow very short videos for testing
+        milliseconds: 100,
+      ), // Allow very short videos for testing
     );
     await controller.initialize();
 
@@ -493,7 +511,8 @@ Future<IterationResult> _processVideoIteration({
     logger
         .info('     - Original duration: ${originalDuration.inMilliseconds}ms');
     logger.info(
-        '     - Original size: ${originalSize.width.toInt()}x${originalSize.height.toInt()}');
+      '     - Original size: ${originalSize.width.toInt()}x${originalSize.height.toInt()}',
+    );
 
     // Track expected dimensions (will be updated after crop)
     var expectedWidth = originalSize.width.toInt();
@@ -562,10 +581,7 @@ Future<IterationResult> _processVideoIteration({
       if (cropValue != null) {
         final aspectRatio = cropValue.getFraction()?.toDouble();
         if (aspectRatio != null) {
-          _applyAspectCropToController(
-            controller: controller,
-            aspectRatio: aspectRatio,
-          );
+          controller.preferredCropAspectRatio = aspectRatio;
         } else {
           controller.applyCacheCrop();
         }
@@ -579,7 +595,8 @@ Future<IterationResult> _processVideoIteration({
         expectedWidth = cropCalc.width;
         expectedHeight = cropCalc.height;
         logger.info(
-            '  → Crop applied: $cropOption (${expectedWidth}x$expectedHeight)');
+          '  → Crop applied: $cropOption (${expectedWidth}x$expectedHeight)',
+        );
       } catch (e) {
         logger.warning('     - Failed to calculate crop dimensions: $e');
         logger.info('  → Crop applied: $cropOption');
@@ -641,7 +658,10 @@ Future<IterationResult> _processVideoIteration({
       },
       onError: (e, s) {
         logger.severe(
-            '  ✗ Native export failed - NO FFmpeg fallback in test!', e, s);
+          '  ✗ Native export failed - NO FFmpeg fallback in test!',
+          e,
+          s,
+        );
       },
     );
 
@@ -699,7 +719,7 @@ Future<IterationResult> _processVideoIteration({
         rotateOption: rotateOption,
       );
       if (settingsToast != null) {
-        Fluttertoast.showToast(
+        await Fluttertoast.showToast(
           msg: settingsToast,
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.TOP,
@@ -712,7 +732,8 @@ Future<IterationResult> _processVideoIteration({
         final videoInfo =
             await NativeVideoEditor.getVideoInfo(exportedFile.path);
         final actualDuration = Duration(
-            milliseconds: (videoInfo['duration'] as num?)?.toInt() ?? 0);
+          milliseconds: (videoInfo['duration'] as num?)?.toInt() ?? 0,
+        );
         final actualWidth = (videoInfo['width'] as num?)?.toInt() ?? 0;
         final actualHeight = (videoInfo['height'] as num?)?.toInt() ?? 0;
 
@@ -736,7 +757,8 @@ Future<IterationResult> _processVideoIteration({
             ),
           );
           logger.warning(
-              '     ⚠ Duration mismatch! Expected: ${expectedDuration.inMilliseconds}ms, Got: ${actualDuration.inMilliseconds}ms');
+            '     ⚠ Duration mismatch! Expected: ${expectedDuration.inMilliseconds}ms, Got: ${actualDuration.inMilliseconds}ms',
+          );
         }
 
         // Validate dimensions (accounting for crop and rotation)
@@ -786,7 +808,8 @@ Future<IterationResult> _processVideoIteration({
             ),
           );
           logger.warning(
-              '     ⚠ Width mismatch! Expected: $finalExpectedWidth, Got: $actualWidth');
+            '     ⚠ Width mismatch! Expected: $finalExpectedWidth, Got: $actualWidth',
+          );
         }
 
         // Check height (allow some tolerance for encoding)
@@ -801,7 +824,8 @@ Future<IterationResult> _processVideoIteration({
             ),
           );
           logger.warning(
-              '     ⚠ Height mismatch! Expected: $finalExpectedHeight, Got: $actualHeight');
+            '     ⚠ Height mismatch! Expected: $finalExpectedHeight, Got: $actualHeight',
+          );
         }
 
         if (failures.isEmpty) {

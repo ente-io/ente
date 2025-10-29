@@ -211,14 +211,12 @@ class _VideoWidgetState extends State<VideoWidget> {
   void _maybeShowTransformToast() {
     if (!kDebugMode) return;
     final name = widget.file.title ?? widget.file.displayName;
-    if (name == null) return;
     final editedIndex = name.indexOf('_edited');
     if (editedIndex == -1) return;
     final prefix = name.substring(0, editedIndex);
 
     final hasTrim = prefix.contains('_t');
-    final cropMatch =
-        RegExp(r'_c_([0-9]+(?:[:_-][0-9]+)?)').firstMatch(prefix);
+    final cropMatch = RegExp(r'_c_([0-9]+(?:[:_-][0-9]+)?)').firstMatch(prefix);
     final rotateMatch = RegExp(r'_r_([^_]+)').firstMatch(prefix);
 
     if (!hasTrim && cropMatch == null && rotateMatch == null) return;
