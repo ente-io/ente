@@ -233,10 +233,14 @@ jobs:
     build-windows:
         runs-on: windows-latest
         environment: "auth-win-build"
+        needs: build-android-linux
 
         defaults:
             run:
                 working-directory: mobile/apps/auth
+
+        env:
+            VERSION_NAME: ${{ needs.build-android-linux.outputs.version_name }}
 
         steps:
             - name: Checkout code and submodules
@@ -251,21 +255,6 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
-
-            - name: Increment version code for build
-              run: |
-                  $CURRENT_VERSION = (Select-String -Path pubspec.yaml -Pattern '^version:').Line -replace 'version: ', ''
-                  $VERSION_NAME = $CURRENT_VERSION.Split('+')[0]
-                  $CURRENT_BUILD = $CURRENT_VERSION.Split('+')[1]
-                  $NEW_VERSION_CODE = [int]$CURRENT_BUILD + ${{ github.run_number }}
-                  $NEW_VERSION = "${VERSION_NAME}+${NEW_VERSION_CODE}"
-
-                  (Get-Content pubspec.yaml) -replace '^version: .*', "version: $NEW_VERSION" | Set-Content pubspec.yaml
-                  Write-Output "Building with version $NEW_VERSION"
-
-                  # Store version for later use
-                  "VERSION_NAME=${VERSION_NAME}" | Out-File -FilePath $env:GITHUB_ENV -Append
-              shell: pwsh
 
             - name: Create artifacts directory
               run: mkdir artifacts
@@ -318,10 +307,14 @@ jobs:
 
     build-macos:
         runs-on: macos-13 # latest is 12
+        needs: build-android-linux
 
         defaults:
             run:
                 working-directory: mobile/apps/auth
+
+        env:
+            VERSION_NAME: ${{ needs.build-android-linux.outputs.version_name }}
 
         steps:
             - name: Checkout code and submodules
@@ -336,20 +329,6 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
-
-            - name: Increment version code for build
-              run: |
-                  CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-                  VERSION_NAME=$(echo $CURRENT_VERSION | cut -d'+' -f1)
-                  CURRENT_BUILD=$(echo $CURRENT_VERSION | cut -d'+' -f2)
-                  NEW_VERSION_CODE=$((CURRENT_BUILD + ${{ github.run_number }}))
-                  NEW_VERSION="${VERSION_NAME}+${NEW_VERSION_CODE}"
-
-                  sed -i '' "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
-                  echo "Building with version ${NEW_VERSION}"
-
-                  # Store version for later use
-                  echo "VERSION_NAME=${VERSION_NAME}" >> $GITHUB_ENV
 
             - name: Install code signing dependencies
               run: |
@@ -452,6 +431,14 @@ jobs:
               with:
                   path: mobile/apps/auth/artifacts
                   merge-multiple: true
+
+            - name: Combine checksums into single file
+              run: |
+                  cd artifacts
+                  cat sha256sum-* > sha256sum
+                  rm sha256sum-apk sha256sum-linux sha256sum-windows sha256sum-macos
+                  echo "✅ Unified checksum file created:"
+                  cat sha256sum
 
             - name: Create and push tag
               run: |
