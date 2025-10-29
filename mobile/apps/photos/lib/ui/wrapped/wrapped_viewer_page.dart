@@ -59,6 +59,8 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   bool _suppressNextTapUp = false;
   bool _longPressActive = false;
   bool _wasPausedBeforeLongPress = false;
+  double _verticalDragDistance = 0;
+  bool _isClosing = false;
 
   @override
   void initState() {
@@ -315,6 +317,51 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     _handleTap(details.localPosition, constraints);
   }
 
+  void _handleVerticalDragStart(DragStartDetails details) {
+    _verticalDragDistance = 0;
+  }
+
+  void _handleVerticalDragUpdate(DragUpdateDetails details) {
+    if (_isClosing) {
+      return;
+    }
+    final double? delta = details.primaryDelta;
+    if (delta == null || delta <= 0) {
+      return;
+    }
+    _verticalDragDistance += delta;
+    if (_verticalDragDistance >= 100) {
+      _closeViewer();
+    }
+  }
+
+  void _handleVerticalDragEnd(DragEndDetails details) {
+    if (_isClosing) {
+      return;
+    }
+    final double velocity = details.primaryVelocity ?? 0;
+    if (_verticalDragDistance >= 60 || velocity > 800) {
+      _closeViewer();
+    }
+    _verticalDragDistance = 0;
+  }
+
+  void _handleVerticalDragCancel() {
+    _verticalDragDistance = 0;
+  }
+
+  void _closeViewer() {
+    if (_isClosing || !mounted) {
+      return;
+    }
+    _isClosing = true;
+    Navigator.of(context).maybePop().then((bool didPop) {
+      if (!didPop && mounted) {
+        _isClosing = false;
+      }
+    });
+  }
+
   void _handleLongPressStart(LongPressStartDetails details) {
     if (_longPressActive) {
       return;
@@ -379,6 +426,13 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
 
     final enteColorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final double topPadding = mediaQuery.padding.top;
+    final double bottomPadding = mediaQuery.padding.bottom;
+    const double overlayHorizontalPadding = 24;
+    final double overlayTop = topPadding + 8;
+    final double contentTopPadding =
+        topPadding > 6 ? topPadding - 6 : topPadding;
 
     return PopScope(
       canPop: true,
@@ -389,80 +443,104 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         wrappedService.updateResumeIndex(_currentIndex);
       },
       child: Scaffold(
-        backgroundColor: enteColorScheme.backgroundBase,
-        appBar: AppBar(
-          title: Text(
-            "Ente Rewind",
-            style: textTheme.largeBold,
-          ),
-          backgroundColor: enteColorScheme.backgroundBase,
-          foregroundColor: enteColorScheme.textBase,
-          elevation: 0,
-        ),
+        backgroundColor: Colors.black,
         body: Stack(
           children: [
-            Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: AnimatedBuilder(
-                    animation: _progressController,
-                    builder: (BuildContext context, _) {
-                      final List<double> segments =
-                          List<double>.generate(cardCount, (int index) {
-                        if (index < _currentIndex) return 1.0;
-                        if (index > _currentIndex) return 0.0;
-                        return _progressController.value.clamp(0.0, 1.0);
-                      });
-                      return _StoryProgressBar(
-                        progressValues: segments,
-                        colorScheme: enteColorScheme,
-                      );
+            Padding(
+              padding: EdgeInsets.only(top: contentTopPadding),
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: (TapUpDetails details) =>
+                        _handleTapUp(details, constraints),
+                    onTapCancel: () {
+                      _suppressNextTapUp = false;
                     },
-                  ),
-                ),
-                Expanded(
-                  child: LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                      return GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTapUp: (TapUpDetails details) =>
-                            _handleTapUp(details, constraints),
-                        onTapCancel: () {
-                          _suppressNextTapUp = false;
+                    onLongPressStart: _handleLongPressStart,
+                    onLongPressEnd: _handleLongPressEnd,
+                    onLongPressCancel: _handleLongPressCancel,
+                    onVerticalDragStart: _handleVerticalDragStart,
+                    onVerticalDragUpdate: _handleVerticalDragUpdate,
+                    onVerticalDragEnd: _handleVerticalDragEnd,
+                    onVerticalDragCancel: _handleVerticalDragCancel,
+                    child: RepaintBoundary(
+                      key: _cardBoundaryKey,
+                      child: PageView.builder(
+                        physics: const PageScrollPhysics(),
+                        controller: _pageController,
+                        onPageChanged: _handlePageChanged,
+                        itemCount: cardCount,
+                        itemBuilder: (BuildContext context, int index) {
+                          final WrappedCard card = _cards[index];
+                          return _StoryCard(
+                            card: card,
+                            colorScheme: enteColorScheme,
+                            textTheme: textTheme,
+                            isActive: index == _currentIndex,
+                          );
                         },
-                        onLongPressStart: _handleLongPressStart,
-                        onLongPressEnd: _handleLongPressEnd,
-                        onLongPressCancel: _handleLongPressCancel,
-                        child: RepaintBoundary(
-                          key: _cardBoundaryKey,
-                          child: PageView.builder(
-                            physics: const PageScrollPhysics(),
-                            controller: _pageController,
-                            onPageChanged: _handlePageChanged,
-                            itemCount: cardCount,
-                            itemBuilder: (BuildContext context, int index) {
-                              final WrappedCard card = _cards[index];
-                              return _StoryCard(
-                                card: card,
-                                colorScheme: enteColorScheme,
-                                textTheme: textTheme,
-                                isActive: index == _currentIndex,
-                              );
-                            },
-                          ),
-                        ),
-                      );
-                    },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              top: overlayTop,
+              left: overlayHorizontalPadding,
+              right: overlayHorizontalPadding,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 14),
+                  IgnorePointer(
+                    child: AnimatedBuilder(
+                      animation: _progressController,
+                      builder: (BuildContext context, _) {
+                        final List<double> segments =
+                            List<double>.generate(cardCount, (int index) {
+                          if (index < _currentIndex) return 1.0;
+                          if (index > _currentIndex) return 0.0;
+                          return _progressController.value.clamp(0.0, 1.0);
+                        });
+                        return _StoryProgressBar(
+                          progressValues: segments,
+                          colorScheme: enteColorScheme,
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 18),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
+                      onTap: _closeViewer,
+                      behavior: HitTestBehavior.translucent,
+                      child: Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                          color: Colors.white.withValues(alpha: 0.88),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
             ),
             Positioned(
               right: 20,
-              bottom: 24,
+              bottom: bottomPadding + 24,
               child: GestureDetector(
                 key: _shareButtonKey,
                 behavior: HitTestBehavior.translucent,
