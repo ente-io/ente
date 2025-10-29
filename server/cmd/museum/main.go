@@ -104,8 +104,6 @@ func main() {
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
-	// For existing users, we were defaulting to CF-Connecting-IP. Unless there's a good reason to change it, we should keep it same.
-	viper.SetDefault("internal.trusted-client-ip-header", "CF-Connecting-IP")
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
