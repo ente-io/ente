@@ -31,11 +31,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
             >
                 {label}
             </Typography>
-            <Box
-                sx={{
-                    position: "relative",
-                }}
-            >
+            <Box sx={{ position: "relative" }}>
                 <Box
                     sx={{
                         px: 4,
@@ -63,9 +59,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                         right: 8,
                         transform: multiline ? "none" : "translateY(-50%)",
                         color: "#757575",
-                        "&:hover": {
-                            bgcolor: "rgba(0, 0, 0, 0.04)",
-                        },
+                        "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
                     }}
                 >
                     <ContentCopyIcon fontSize="small" />

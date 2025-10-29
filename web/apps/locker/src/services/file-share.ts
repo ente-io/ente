@@ -70,10 +70,7 @@ const decryptFileKey = async (
 ): Promise<string> => {
     try {
         const decryptedKeyBytes = await decryptBoxBytes(
-            {
-                encryptedData: encryptedKey,
-                nonce: keyDecryptionNonce,
-            },
+            { encryptedData: encryptedKey, nonce: keyDecryptionNonce },
             linkKey,
         );
         return await toB64(decryptedKeyBytes);
@@ -93,10 +90,7 @@ const decryptMetadata = async (
 ): Promise<FileMetadata> => {
     try {
         const decryptedMetadata = await decryptMetadataJSON(
-            {
-                encryptedData,
-                decryptionHeader,
-            },
+            { encryptedData, decryptionHeader },
             fileKey,
         );
         return decryptedMetadata as FileMetadata;
@@ -115,10 +109,7 @@ const decryptPubMagicMetadata = async (
 ): Promise<{ info?: string | LockerInfo } | null> => {
     try {
         const decryptedPubMagicMetadata = await decryptMetadataJSON(
-            {
-                encryptedData: data,
-                decryptionHeader: header,
-            },
+            { encryptedData: data, decryptionHeader: header },
             fileKey,
         );
         return decryptedPubMagicMetadata as { info?: string | LockerInfo };
@@ -153,11 +144,7 @@ const extractFileInfo = (
     metadata: FileMetadata,
     file: FileLinkInfo["file"],
     infoObject: LockerInfo | undefined,
-): {
-    fileName: string;
-    fileSize: number;
-    uploadedTime: number;
-} => {
+): { fileName: string; fileSize: number; uploadedTime: number } => {
     const fileName =
         metadata.fileName || metadata.title || metadata.name || "Unknown file";
 
