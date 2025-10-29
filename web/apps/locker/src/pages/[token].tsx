@@ -491,847 +491,882 @@ const FilePage: React.FC = () => {
         <Box
             sx={{
                 minHeight: "100vh",
-                bgcolor: "#FAFAFA",
+                bgcolor: "#1071FF",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 padding: { xs: 0, md: 3 },
-                "& ::selection": {
-                    backgroundColor: "#1071FF",
-                    color: "#FFFFFF",
-                },
-                "& ::-moz-selection": {
-                    backgroundColor: "#1071FF",
-                    color: "#FFFFFF",
-                },
+                boxSizing: "border-box",
             }}
         >
-            {/* Ente Logo - Always at the top */}
             <Box
                 sx={{
-                    mt: { xs: 3, md: 6 },
-                    mb: fileInfo?.lockerType ? 20 : { xs: 20, md: 6 },
-                    "& svg": { fill: "#000000" },
-                }}
-            >
-                <EnteLogo />
-            </Box>
-
-            {/* Main Container - Centers the file content */}
-            <Box
-                sx={{
+                    minHeight: "100vh",
+                    width: "100%",
+                    bgcolor: "#FAFAFA",
+                    borderRadius: { xs: 0, md: "40px" },
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: { xs: "flex-start", md: "center" },
-                    width: "100%",
-                    maxWidth: 400,
-                    flex: 1,
-                    px: 3,
-                    pb: { xs: 3, md: 0 },
+                    "& ::selection": {
+                        backgroundColor: "#1071FF",
+                        color: "#FFFFFF",
+                    },
+                    "& ::-moz-selection": {
+                        backgroundColor: "#1071FF",
+                        color: "#FFFFFF",
+                    },
                 }}
             >
-                {/* Loading State */}
-                {loading && (
-                    <Box
-                        sx={{
-                            flex: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                        }}
-                    >
-                        <CircularProgress sx={{ color: "#1071FF" }} size={32} />
-                    </Box>
-                )}
+                {/* Ente Logo - Always at the top */}
+                <Box
+                    sx={{
+                        mt: { xs: 3, md: 6 },
+                        mb: fileInfo?.lockerType ? 20 : { xs: 20, md: 6 },
+                        alignSelf: "flex-end",
+                        mr: { xs: 3, md: 6 },
+                        "& svg": { fill: "#000000" },
+                    }}
+                >
+                    <EnteLogo />
+                </Box>
 
-                {/* Error State */}
-                {error && !loading && (
-                    <Box
-                        sx={{
-                            flex: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            textAlign: "center",
-                            p: 3,
-                        }}
-                    >
-                        <Typography variant="body" color="error">
-                            {error}
-                        </Typography>
-                    </Box>
-                )}
+                {/* Main Container - Centers the file content */}
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: { xs: "flex-start", md: "center" },
+                        width: "100%",
+                        maxWidth: 400,
+                        flex: 1,
+                        px: 3,
+                        pb: { xs: 3, md: 0 },
+                    }}
+                >
+                    {/* Loading State */}
+                    {loading && (
+                        <Box
+                            sx={{
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <CircularProgress
+                                sx={{ color: "#1071FF" }}
+                                size={32}
+                            />
+                        </Box>
+                    )}
 
-                {/* File Info Display */}
-                {fileInfo &&
-                    !loading &&
-                    (() => {
-                        const iconInfo = getLockerFileIcon(
-                            fileInfo.fileName,
-                            fileInfo.lockerType,
-                        );
-                        return (
-                            <>
-                                {/* File Info - Centered */}
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        gap: 3,
-                                        width: "100%",
-                                        marginBottom: 4,
-                                    }}
-                                >
-                                    {/* Large File Icon */}
+                    {/* Error State */}
+                    {error && !loading && (
+                        <Box
+                            sx={{
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                p: 3,
+                            }}
+                        >
+                            <Typography variant="body" color="error">
+                                {error}
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {/* File Info Display */}
+                    {fileInfo &&
+                        !loading &&
+                        (() => {
+                            const iconInfo = getLockerFileIcon(
+                                fileInfo.fileName,
+                                fileInfo.lockerType,
+                            );
+                            return (
+                                <>
+                                    {/* File Info - Centered */}
                                     <Box
                                         sx={{
-                                            backgroundColor:
-                                                iconInfo.backgroundColor,
-                                            borderRadius: "20px",
-                                            padding: 1.8,
                                             display: "flex",
+                                            flexDirection: "column",
                                             alignItems: "center",
                                             justifyContent: "center",
+                                            gap: 3,
+                                            width: "100%",
+                                            marginBottom: 4,
                                         }}
                                     >
-                                        {iconInfo.icon}
-                                    </Box>
-
-                                    {/* File Name */}
-                                    <Typography
-                                        variant="h5"
-                                        sx={{
-                                            fontWeight: 600,
-                                            fontSize: fileInfo.lockerType
-                                                ? "24px"
-                                                : "22px",
-                                            textAlign: "center",
-                                            wordBreak: "break-word",
-                                            color: "#000000",
-                                        }}
-                                    >
-                                        {fileInfo.fileName}
-                                    </Typography>
-
-                                    {/* File Size - only show if no locker type */}
-                                    {!fileInfo.lockerType && (
-                                        <Typography
-                                            variant="body"
+                                        {/* Large File Icon */}
+                                        <Box
                                             sx={{
-                                                color: "#757575",
-                                                mt: -2,
-                                                fontSize: "1rem",
+                                                backgroundColor:
+                                                    iconInfo.backgroundColor,
+                                                borderRadius: "20px",
+                                                padding: 1.8,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
                                             }}
                                         >
-                                            {fileInfo.fileSize > 0
-                                                ? formatFileSize(
-                                                      fileInfo.fileSize,
-                                                  )
-                                                : "Unknown size"}
-                                        </Typography>
-                                    )}
+                                            {iconInfo.icon}
+                                        </Box>
 
-                                    {/* Note Content - show for note type */}
-                                    {fileInfo.lockerType === "note" &&
-                                        fileInfo.lockerInfoData?.content && (
-                                            <Box sx={{ width: "100%", mt: 2 }}>
-                                                <Typography
-                                                    variant="h6"
-                                                    sx={{
-                                                        fontWeight: 500,
-                                                        fontSize: "16px",
-                                                        color: "#000000",
-                                                        mb: 1,
-                                                        mt: 3,
-                                                    }}
-                                                >
-                                                    Content
-                                                </Typography>
+                                        {/* File Name */}
+                                        <Typography
+                                            variant="h5"
+                                            sx={{
+                                                fontWeight: 600,
+                                                fontSize: fileInfo.lockerType
+                                                    ? "24px"
+                                                    : "22px",
+                                                textAlign: "center",
+                                                wordBreak: "break-word",
+                                                color: "#000000",
+                                            }}
+                                        >
+                                            {fileInfo.fileName}
+                                        </Typography>
+
+                                        {/* File Size - only show if no locker type */}
+                                        {!fileInfo.lockerType && (
+                                            <Typography
+                                                variant="body"
+                                                sx={{
+                                                    color: "#757575",
+                                                    mt: -2,
+                                                    fontSize: "1rem",
+                                                }}
+                                            >
+                                                {fileInfo.fileSize > 0
+                                                    ? formatFileSize(
+                                                          fileInfo.fileSize,
+                                                      )
+                                                    : "Unknown size"}
+                                            </Typography>
+                                        )}
+
+                                        {/* Note Content - show for note type */}
+                                        {fileInfo.lockerType === "note" &&
+                                            fileInfo.lockerInfoData
+                                                ?.content && (
                                                 <Box
                                                     sx={{
-                                                        position: "relative",
+                                                        width: "100%",
+                                                        mt: 2,
                                                     }}
                                                 >
+                                                    <Typography
+                                                        variant="h6"
+                                                        sx={{
+                                                            fontWeight: 500,
+                                                            fontSize: "16px",
+                                                            color: "#000000",
+                                                            mb: 1,
+                                                            mt: 3,
+                                                        }}
+                                                    >
+                                                        Content
+                                                    </Typography>
                                                     <Box
                                                         sx={{
-                                                            p: 4,
-                                                            bgcolor: "#FFFFFF",
-                                                            borderRadius:
-                                                                "12px",
-                                                        }}
-                                                    >
-                                                        <Typography
-                                                            variant="body1"
-                                                            sx={{
-                                                                color: "#757575",
-                                                                whiteSpace:
-                                                                    "pre-wrap",
-                                                                wordBreak:
-                                                                    "break-word",
-                                                            }}
-                                                        >
-                                                            {
-                                                                fileInfo
-                                                                    .lockerInfoData
-                                                                    .content
-                                                            }
-                                                        </Typography>
-                                                    </Box>
-                                                    {/* Copy Button */}
-                                                    <IconButton
-                                                        onClick={() =>
-                                                            handleCopyContent(
-                                                                fileInfo
-                                                                    .lockerInfoData
-                                                                    .content,
-                                                            )
-                                                        }
-                                                        sx={{
                                                             position:
-                                                                "absolute",
-                                                            top: 8,
-                                                            right: 8,
-                                                            color: "#757575",
-                                                            "&:hover": {
-                                                                bgcolor:
-                                                                    "rgba(0, 0, 0, 0.04)",
-                                                            },
+                                                                "relative",
                                                         }}
                                                     >
-                                                        <ContentCopyIcon fontSize="small" />
-                                                    </IconButton>
+                                                        <Box
+                                                            sx={{
+                                                                p: 4,
+                                                                bgcolor:
+                                                                    "#FFFFFF",
+                                                                borderRadius:
+                                                                    "12px",
+                                                            }}
+                                                        >
+                                                            <Typography
+                                                                variant="body1"
+                                                                sx={{
+                                                                    color: "#757575",
+                                                                    whiteSpace:
+                                                                        "pre-wrap",
+                                                                    wordBreak:
+                                                                        "break-word",
+                                                                }}
+                                                            >
+                                                                {
+                                                                    fileInfo
+                                                                        .lockerInfoData
+                                                                        .content
+                                                                }
+                                                            </Typography>
+                                                        </Box>
+                                                        {/* Copy Button */}
+                                                        <IconButton
+                                                            onClick={() =>
+                                                                handleCopyContent(
+                                                                    fileInfo
+                                                                        .lockerInfoData
+                                                                        .content,
+                                                                )
+                                                            }
+                                                            sx={{
+                                                                position:
+                                                                    "absolute",
+                                                                top: 8,
+                                                                right: 8,
+                                                                color: "#757575",
+                                                                "&:hover": {
+                                                                    bgcolor:
+                                                                        "rgba(0, 0, 0, 0.04)",
+                                                                },
+                                                            }}
+                                                        >
+                                                            <ContentCopyIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                        )}
+                                            )}
 
-                                    {/* Physical Record - show for physicalRecord type */}
-                                    {fileInfo.lockerType === "physicalRecord" &&
-                                        fileInfo.lockerInfoData && (
-                                            <Box
+                                        {/* Physical Record - show for physicalRecord type */}
+                                        {fileInfo.lockerType ===
+                                            "physicalRecord" &&
+                                            fileInfo.lockerInfoData && (
+                                                <Box
+                                                    sx={{
+                                                        width: "100%",
+                                                        mt: 2,
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: 2,
+                                                    }}
+                                                >
+                                                    {/* Location */}
+                                                    {fileInfo.lockerInfoData
+                                                        .location && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Location
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        px: 4,
+                                                                        py: 2,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .location
+                                                                        }
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .location,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+
+                                                    {/* Notes */}
+                                                    {fileInfo.lockerInfoData
+                                                        .notes && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Notes
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        p: 4,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .notes
+                                                                        }
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .notes,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+                                            )}
+
+                                        {/* Account Credential - show for accountCredential type */}
+                                        {fileInfo.lockerType ===
+                                            "accountCredential" &&
+                                            fileInfo.lockerInfoData && (
+                                                <Box
+                                                    sx={{
+                                                        width: "100%",
+                                                        mt: 2,
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: 2,
+                                                    }}
+                                                >
+                                                    {/* Username */}
+                                                    {fileInfo.lockerInfoData
+                                                        .username && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Username
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        px: 4,
+                                                                        py: 2,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .username
+                                                                        }
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .username,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+
+                                                    {/* Password */}
+                                                    {fileInfo.lockerInfoData
+                                                        .password && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Password
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        px: 4,
+                                                                        py: 2,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        **********************
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .password,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+
+                                                    {/* Notes */}
+                                                    {fileInfo.lockerInfoData
+                                                        .notes && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Notes
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        p: 4,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .notes
+                                                                        }
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .notes,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+                                            )}
+
+                                        {/* Emergency Contact - show for emergencyContact type */}
+                                        {fileInfo.lockerType ===
+                                            "emergencyContact" &&
+                                            fileInfo.lockerInfoData && (
+                                                <Box
+                                                    sx={{
+                                                        width: "100%",
+                                                        mt: 2,
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        gap: 2,
+                                                    }}
+                                                >
+                                                    {/* Contact Details */}
+                                                    {fileInfo.lockerInfoData
+                                                        .contactDetails && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Contact
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        px: 4,
+                                                                        py: 2,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .contactDetails
+                                                                        }
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .contactDetails,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+
+                                                    {/* Notes */}
+                                                    {fileInfo.lockerInfoData
+                                                        .notes && (
+                                                        <Box>
+                                                            <Typography
+                                                                variant="h6"
+                                                                sx={{
+                                                                    fontWeight: 500,
+                                                                    fontSize:
+                                                                        "16px",
+                                                                    color: "#000000",
+                                                                    mb: 1,
+                                                                    mt: 3,
+                                                                }}
+                                                            >
+                                                                Message for
+                                                                contact
+                                                            </Typography>
+                                                            <Box
+                                                                sx={{
+                                                                    position:
+                                                                        "relative",
+                                                                }}
+                                                            >
+                                                                <Box
+                                                                    sx={{
+                                                                        p: 4,
+                                                                        bgcolor:
+                                                                            "#FFFFFF",
+                                                                        borderRadius:
+                                                                            "12px",
+                                                                    }}
+                                                                >
+                                                                    <Typography
+                                                                        variant="body1"
+                                                                        sx={{
+                                                                            color: "#757575",
+                                                                            whiteSpace:
+                                                                                "pre-wrap",
+                                                                            wordBreak:
+                                                                                "break-word",
+                                                                        }}
+                                                                    >
+                                                                        {
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .notes
+                                                                        }
+                                                                    </Typography>
+                                                                </Box>
+                                                                <IconButton
+                                                                    onClick={() =>
+                                                                        handleCopyContent(
+                                                                            fileInfo
+                                                                                .lockerInfoData
+                                                                                .notes,
+                                                                        )
+                                                                    }
+                                                                    sx={{
+                                                                        position:
+                                                                            "absolute",
+                                                                        top: 8,
+                                                                        right: 8,
+                                                                        color: "#757575",
+                                                                        "&:hover":
+                                                                            {
+                                                                                bgcolor:
+                                                                                    "rgba(0, 0, 0, 0.04)",
+                                                                            },
+                                                                    }}
+                                                                >
+                                                                    <ContentCopyIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </Box>
+                                                        </Box>
+                                                    )}
+                                                </Box>
+                                            )}
+                                    </Box>
+
+                                    {/* Download Button */}
+                                    {/* Only show download button if not a LockerInfoType */}
+                                    {!fileInfo.lockerType && (
+                                        <Box sx={{ width: "100%", mt: 4 }}>
+                                            <Button
+                                                variant="contained"
+                                                size="large"
+                                                fullWidth
+                                                onClick={handleDownload}
+                                                disabled={downloading}
                                                 sx={{
-                                                    width: "100%",
-                                                    mt: 2,
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    gap: 2,
-                                                }}
-                                            >
-                                                {/* Location */}
-                                                {fileInfo.lockerInfoData
-                                                    .location && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Location
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    px: 4,
-                                                                    py: 2,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .location
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .location,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-
-                                                {/* Notes */}
-                                                {fileInfo.lockerInfoData
-                                                    .notes && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Notes
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    p: 4,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .notes
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .notes,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                        )}
-
-                                    {/* Account Credential - show for accountCredential type */}
-                                    {fileInfo.lockerType ===
-                                        "accountCredential" &&
-                                        fileInfo.lockerInfoData && (
-                                            <Box
-                                                sx={{
-                                                    width: "100%",
-                                                    mt: 2,
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    gap: 2,
-                                                }}
-                                            >
-                                                {/* Username */}
-                                                {fileInfo.lockerInfoData
-                                                    .username && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Username
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    px: 4,
-                                                                    py: 2,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .username
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .username,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-
-                                                {/* Password */}
-                                                {fileInfo.lockerInfoData
-                                                    .password && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Password
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    px: 4,
-                                                                    py: 2,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    **********************
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .password,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-
-                                                {/* Notes */}
-                                                {fileInfo.lockerInfoData
-                                                    .notes && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Notes
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    p: 4,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .notes
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .notes,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                        )}
-
-                                    {/* Emergency Contact - show for emergencyContact type */}
-                                    {fileInfo.lockerType ===
-                                        "emergencyContact" &&
-                                        fileInfo.lockerInfoData && (
-                                            <Box
-                                                sx={{
-                                                    width: "100%",
-                                                    mt: 2,
-                                                    display: "flex",
-                                                    flexDirection: "column",
-                                                    gap: 2,
-                                                }}
-                                            >
-                                                {/* Contact Details */}
-                                                {fileInfo.lockerInfoData
-                                                    .contactDetails && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Contact
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    px: 4,
-                                                                    py: 2,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .contactDetails
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .contactDetails,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-
-                                                {/* Notes */}
-                                                {fileInfo.lockerInfoData
-                                                    .notes && (
-                                                    <Box>
-                                                        <Typography
-                                                            variant="h6"
-                                                            sx={{
-                                                                fontWeight: 500,
-                                                                fontSize:
-                                                                    "16px",
-                                                                color: "#000000",
-                                                                mb: 1,
-                                                                mt: 3,
-                                                            }}
-                                                        >
-                                                            Notes
-                                                        </Typography>
-                                                        <Box
-                                                            sx={{
-                                                                position:
-                                                                    "relative",
-                                                            }}
-                                                        >
-                                                            <Box
-                                                                sx={{
-                                                                    p: 4,
-                                                                    bgcolor:
-                                                                        "#FFFFFF",
-                                                                    borderRadius:
-                                                                        "12px",
-                                                                }}
-                                                            >
-                                                                <Typography
-                                                                    variant="body1"
-                                                                    sx={{
-                                                                        color: "#757575",
-                                                                        whiteSpace:
-                                                                            "pre-wrap",
-                                                                        wordBreak:
-                                                                            "break-word",
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .notes
-                                                                    }
-                                                                </Typography>
-                                                            </Box>
-                                                            <IconButton
-                                                                onClick={() =>
-                                                                    handleCopyContent(
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .notes,
-                                                                    )
-                                                                }
-                                                                sx={{
-                                                                    position:
-                                                                        "absolute",
-                                                                    top: 8,
-                                                                    right: 8,
-                                                                    color: "#757575",
-                                                                    "&:hover": {
-                                                                        bgcolor:
-                                                                            "rgba(0, 0, 0, 0.04)",
-                                                                    },
-                                                                }}
-                                                            >
-                                                                <ContentCopyIcon fontSize="small" />
-                                                            </IconButton>
-                                                        </Box>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                        )}
-                                </Box>
-
-                                {/* Download Button */}
-                                {/* Only show download button if not a LockerInfoType */}
-                                {!fileInfo.lockerType && (
-                                    <Box sx={{ width: "100%", mt: 4 }}>
-                                        <Button
-                                            variant="contained"
-                                            size="large"
-                                            fullWidth
-                                            onClick={handleDownload}
-                                            disabled={downloading}
-                                            sx={{
-                                                py: 2.5,
-                                                fontSize: "1rem",
-                                                fontWeight: 600,
-                                                bgcolor: "#1071FF",
-                                                color: "white",
-                                                "&:hover": {
-                                                    bgcolor: "#0056CC",
-                                                },
-                                                "&:disabled": {
+                                                    py: 2.5,
+                                                    fontSize: "1rem",
+                                                    fontWeight: 600,
                                                     bgcolor: "#1071FF",
                                                     color: "white",
-                                                    opacity: 0.7,
-                                                },
-                                                borderRadius: "22px",
-                                                textTransform: "none",
-                                            }}
-                                        >
-                                            {downloading ? (
-                                                <>
-                                                    <CircularProgress
-                                                        size={20}
-                                                        sx={{
-                                                            mr: 1,
-                                                            color: "white",
-                                                        }}
-                                                    />
-                                                    Downloading...
-                                                </>
-                                            ) : (
-                                                "Download"
-                                            )}
-                                        </Button>
-                                    </Box>
-                                )}
-                            </>
-                        );
-                    })()}
-            </Box>
+                                                    "&:hover": {
+                                                        bgcolor: "#0056CC",
+                                                    },
+                                                    "&:disabled": {
+                                                        bgcolor: "#1071FF",
+                                                        color: "white",
+                                                        opacity: 0.7,
+                                                    },
+                                                    borderRadius: "22px",
+                                                    textTransform: "none",
+                                                }}
+                                            >
+                                                {downloading ? (
+                                                    <>
+                                                        <CircularProgress
+                                                            size={20}
+                                                            sx={{
+                                                                mr: 1,
+                                                                color: "white",
+                                                            }}
+                                                        />
+                                                        Downloading...
+                                                    </>
+                                                ) : (
+                                                    "Download"
+                                                )}
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </>
+                            );
+                        })()}
+                </Box>
 
-            <Notification
-                open={!!notificationAttributes}
-                onClose={() => setNotificationAttributes(undefined)}
-                attributes={notificationAttributes}
-            />
+                <Notification
+                    open={!!notificationAttributes}
+                    onClose={() => setNotificationAttributes(undefined)}
+                    attributes={notificationAttributes}
+                />
+            </Box>
         </Box>
     );
 };
