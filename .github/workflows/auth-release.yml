@@ -201,8 +201,7 @@ jobs:
                   # dart pub global activate flutter_distributor
                   dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
                   choco install innosetup -y
-                  export PATH="$PATH:$LOCALAPPDATA/Pub/Cache/bin"
-                  flutter_distributor package --platform=windows --targets=exe --skip-clean
+                  flutter_distributor.bat package --platform=windows --targets=exe --skip-clean
                   shopt -s globstar
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
               shell: bash
