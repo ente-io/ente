@@ -566,8 +566,10 @@ class _StatsSnapshot {
         ? const <int>[]
         : List<int>.unmodifiable(busiestDayAggregate.uploadedFileIDs);
 
-    final DateTime heatmapStart = _alignToMonday(DateTime(year, 1, 1));
-    final DateTime heatmapEnd = _alignToSunday(DateTime(year, 12, 31));
+    final DateTime heatmapStart =
+        _atLocalMidnight(_alignToMonday(DateTime(year, 1, 1)));
+    final DateTime heatmapEnd =
+        _atLocalMidnight(_alignToSunday(DateTime(year, 12, 31)));
     final int heatmapDayCount = heatmapEnd.difference(heatmapStart).inDays + 1;
     final int heatmapWeekCount = heatmapDayCount ~/ 7;
     final List<List<int>> heatmapRows = List<List<int>>.generate(
@@ -576,20 +578,25 @@ class _StatsSnapshot {
       growable: false,
     );
     final List<DateTime> heatmapWeekStartDates =
-        List<DateTime>.filled(heatmapWeekCount, heatmapStart);
+        List<DateTime>.filled(heatmapWeekCount, heatmapStart, growable: false);
     int heatmapMaxCount = 0;
     DateTime weekCursor = heatmapStart;
     for (int weekIndex = 0; weekIndex < heatmapWeekCount; weekIndex += 1) {
-      heatmapWeekStartDates[weekIndex] = weekCursor;
+      final DateTime weekStart = _atLocalMidnight(weekCursor);
+      heatmapWeekStartDates[weekIndex] = weekStart;
       for (int dayOffset = 0; dayOffset < 7; dayOffset += 1) {
-        final DateTime day = weekCursor.add(Duration(days: dayOffset));
+        final DateTime day = _atLocalMidnight(
+          weekStart.add(Duration(days: dayOffset)),
+        );
         final int count = dailyCounts[day.toIso8601String()] ?? 0;
         heatmapRows[weekIndex][dayOffset] = count;
         if (count > heatmapMaxCount) {
           heatmapMaxCount = count;
         }
       }
-      weekCursor = weekCursor.add(const Duration(days: 7));
+      weekCursor = _atLocalMidnight(
+        weekCursor.add(const Duration(days: 7)),
+      );
     }
 
     final DateFormat monthAbbrevFormat = DateFormat("MMM");
@@ -685,10 +692,11 @@ class _QuarterHeatmapData {
       return const <Map<String, Object?>>[];
     }
     final DateFormat monthFormat = DateFormat("MMM");
-    final DateTime lastVisibleDay =
-        snapshot.periodEndDay.isBefore(snapshot.heatmapEnd)
-            ? snapshot.periodEndDay
-            : snapshot.heatmapEnd;
+    final DateTime lastVisibleDay = _atLocalMidnight(
+      snapshot.periodEndDay.isBefore(snapshot.heatmapEnd)
+          ? snapshot.periodEndDay
+          : snapshot.heatmapEnd,
+    );
     final List<List<List<int>>> quarterWeeks =
         List<List<List<int>>>.generate(4, (_) => <List<int>>[]);
     final List<List<DateTime>> quarterWeekDates =
@@ -698,13 +706,16 @@ class _QuarterHeatmapData {
         index < snapshot.heatmapRows.length &&
             index < snapshot.heatmapWeekStartDates.length;
         index += 1) {
-      final DateTime weekStart = snapshot.heatmapWeekStartDates[index];
+      final DateTime weekStart =
+          _atLocalMidnight(snapshot.heatmapWeekStartDates[index]);
       final int quarterIndex = ((weekStart.month - 1) ~/ 3).clamp(0, 3);
       final List<int> counts = snapshot.heatmapRows[index];
       final List<int> sanitized = List<int>.filled(7, 0);
       final DateTime yearStart = DateTime(snapshot.year, 1, 1);
       for (int dayOffset = 0; dayOffset < 7; dayOffset += 1) {
-        final DateTime day = weekStart.add(Duration(days: dayOffset));
+        final DateTime day = _atLocalMidnight(
+          weekStart.add(Duration(days: dayOffset)),
+        );
         if (day.isAfter(lastVisibleDay)) {
           sanitized[dayOffset] = kWrappedHeatmapFutureValue;
         } else if (day.isBefore(yearStart)) {
@@ -941,14 +952,16 @@ DateTime _resolvePeriodEndDay(DateTime now, int year) {
   return DateTime(year, now.month, now.day);
 }
 
+DateTime _atLocalMidnight(DateTime value) {
+  return DateTime(value.year, value.month, value.day);
+}
+
 DateTime _alignToMonday(DateTime date) {
   int delta = date.weekday - DateTime.monday;
   if (delta < 0) {
     delta += 7;
   }
-  return DateTime(date.year, date.month, date.day).subtract(
-    Duration(days: delta),
-  );
+  return _atLocalMidnight(DateTime(date.year, date.month, date.day - delta));
 }
 
 DateTime _alignToSunday(DateTime date) {
@@ -956,7 +969,5 @@ DateTime _alignToSunday(DateTime date) {
   if (delta < 0) {
     delta += 7;
   }
-  return DateTime(date.year, date.month, date.day).add(
-    Duration(days: delta),
-  );
+  return _atLocalMidnight(DateTime(date.year, date.month, date.day + delta));
 }

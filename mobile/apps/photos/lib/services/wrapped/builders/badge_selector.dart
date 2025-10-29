@@ -80,7 +80,7 @@ class WrappedBadgeSelector {
     if (candidates.isEmpty) {
       final WrappedCard fallbackCard = WrappedCard(
         type: WrappedCardType.badge,
-        title: "Wrapped ${context.year} is on its way",
+        title: "Ente Rewind ${context.year} is on its way",
         subtitle: "Full story coming soon.",
         meta: <String, Object?>{
           "generatedAt": context.now.toIso8601String(),
@@ -856,6 +856,10 @@ class _BadgeCandidate {
           "detailChips": detailChips,
           "score": score,
           "tier": tier,
+          "uploadedFileIDs": mediaRefs
+              .map((MediaRef ref) => ref.uploadedFileID)
+              .where((int id) => id > 0)
+              .toList(growable: false),
           "extras": extras ?? const <String, Object?>{},
         },
         deterministicTieBreaker = _stableHash(key);

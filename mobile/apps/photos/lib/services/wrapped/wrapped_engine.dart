@@ -21,7 +21,7 @@ import "package:photos/services/wrapped/models.dart";
 final Logger _engineLogger = Logger("WrappedEngine");
 final Logger _computeLogger = Logger("WrappedEngineIsolate");
 
-/// Orchestrates the single-isolate computation pipeline for Ente Wrapped.
+/// Orchestrates the single-isolate computation pipeline for Ente Rewind.
 class WrappedEngine {
   const WrappedEngine._();
 
@@ -427,6 +427,7 @@ Future<WrappedResult> _wrappedComputeIsolate(
     favoriteUploadedFileIDs: favoriteUploadedIds,
     archivedCollectionIDs: archivedCollectionIDs,
   );
+  final Set<int> usedMediaUploadedFileIDs = <int>{};
   final List<WrappedCard> cards = <WrappedCard>[];
   for (final WrappedCandidateBuilder builder in wrappedCandidateBuilders) {
     _computeLogger.finer("Running candidate builder ${builder.debugLabel}");
@@ -434,16 +435,28 @@ Future<WrappedResult> _wrappedComputeIsolate(
     if (builtCards.isEmpty) {
       continue;
     }
-    cards.addAll(builtCards);
+    for (final WrappedCard card in builtCards) {
+      final WrappedCard finalized = _finalizeCardMedia(
+        context: context,
+        card: card,
+        usedMediaUploadedFileIDs: usedMediaUploadedFileIDs,
+      );
+      cards.add(finalized);
+    }
   }
 
   final WrappedBadgeSelection badgeSelection = WrappedBadgeSelector.select(
     context: context,
     existingCards: cards,
   );
+  final WrappedCard badgeCard = _finalizeCardMedia(
+    context: context,
+    card: badgeSelection.card,
+    usedMediaUploadedFileIDs: usedMediaUploadedFileIDs,
+  );
   final List<WrappedCard> finalCards = <WrappedCard>[
     ...cards,
-    badgeSelection.card,
+    badgeCard,
   ];
 
   return WrappedResult(
@@ -470,4 +483,160 @@ class _CollectedFiles {
   final Map<int, EnteFile> fileByUploadedId;
   final Set<int> favoriteUploadedIds;
   final Set<int> archivedCollectionIDs;
+}
+
+WrappedCard _finalizeCardMedia({
+  required WrappedEngineContext context,
+  required WrappedCard card,
+  required Set<int> usedMediaUploadedFileIDs,
+}) {
+  if (card.media.isEmpty) {
+    return card;
+  }
+
+  final int targetCount = card.media.length;
+  final List<MediaRef> updatedMedia = <MediaRef>[];
+  final Set<int> seenInCard = <int>{};
+
+  void tryAddMediaRef(MediaRef ref) {
+    final int id = ref.uploadedFileID;
+    if (id <= 0) {
+      return;
+    }
+    if (usedMediaUploadedFileIDs.contains(id)) {
+      return;
+    }
+    if (!seenInCard.add(id)) {
+      return;
+    }
+    updatedMedia.add(ref);
+  }
+
+  for (final MediaRef ref in card.media) {
+    tryAddMediaRef(ref);
+  }
+
+  if (updatedMedia.length < targetCount) {
+    final List<int> candidateIds = _extractCandidateUploadedFileIDs(card.meta);
+    for (final int id in candidateIds) {
+      if (updatedMedia.length >= targetCount) {
+        break;
+      }
+      if (id <= 0 || seenInCard.contains(id)) {
+        continue;
+      }
+      if (usedMediaUploadedFileIDs.contains(id)) {
+        continue;
+      }
+      updatedMedia.add(MediaRef(id));
+      seenInCard.add(id);
+    }
+  }
+
+  if (updatedMedia.length < targetCount) {
+    final int remaining = targetCount - updatedMedia.length;
+    if (remaining > 0) {
+      final List<int> fallbackPool = context.files
+          .where((EnteFile file) => file.uploadedFileID != null)
+          .map((EnteFile file) => file.uploadedFileID!)
+          .where(
+            (int id) =>
+                id > 0 &&
+                !usedMediaUploadedFileIDs.contains(id) &&
+                !seenInCard.contains(id),
+          )
+          .toList(growable: false);
+      if (fallbackPool.isNotEmpty) {
+        final List<int> fallbackSelection = WrappedMediaSelector.select(
+          context: context,
+          candidateUploadedFileIDs: fallbackPool,
+          maxCount: remaining,
+          avoidPreviouslySelected: true,
+          reserveSelected: false,
+        );
+        for (final int id in fallbackSelection) {
+          if (updatedMedia.length >= targetCount) {
+            break;
+          }
+          if (id <= 0 || seenInCard.contains(id)) {
+            continue;
+          }
+          updatedMedia.add(MediaRef(id));
+          seenInCard.add(id);
+        }
+      }
+    }
+  }
+
+  final bool mediaChanged = updatedMedia.length != card.media.length ||
+      !_mediaListsEqual(card.media, updatedMedia);
+
+  final WrappedCard resultCard;
+  if (!mediaChanged) {
+    resultCard = card;
+  } else {
+    final Map<String, Object?> metaCopy = Map<String, Object?>.from(card.meta);
+    if (metaCopy.containsKey("uploadedFileIDs")) {
+      metaCopy["uploadedFileIDs"] = updatedMedia
+          .map((MediaRef ref) => ref.uploadedFileID)
+          .toList(growable: false);
+    }
+    resultCard = WrappedCard(
+      type: card.type,
+      title: card.title,
+      subtitle: card.subtitle,
+      media: updatedMedia,
+      meta: metaCopy,
+    );
+  }
+
+  final List<int> finalIds = resultCard.media
+      .map((MediaRef ref) => ref.uploadedFileID)
+      .where((int id) => id > 0)
+      .toList(growable: false);
+  if (finalIds.isNotEmpty) {
+    usedMediaUploadedFileIDs.addAll(finalIds);
+    WrappedMediaSelector.reserveUploadedFileIDs(
+      context: context,
+      uploadedFileIDs: finalIds,
+    );
+  }
+
+  return resultCard;
+}
+
+List<int> _extractCandidateUploadedFileIDs(Map<String, Object?> meta) {
+  final Object? raw = meta["uploadedFileIDs"];
+  if (raw is! List) {
+    return const <int>[];
+  }
+  final List<int> ids = <int>[];
+  for (final Object? entry in raw) {
+    if (entry is int) {
+      ids.add(entry);
+    } else if (entry is num) {
+      ids.add(entry.toInt());
+    } else if (entry is String) {
+      final int? parsed = int.tryParse(entry);
+      if (parsed != null) {
+        ids.add(parsed);
+      }
+    }
+  }
+  return ids;
+}
+
+bool _mediaListsEqual(List<MediaRef> a, List<MediaRef> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (int index = 0; index < a.length; index += 1) {
+    if (a[index].uploadedFileID != b[index].uploadedFileID) {
+      return false;
+    }
+  }
+  return true;
 }

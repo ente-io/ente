@@ -52,6 +52,8 @@ class WrappedMediaSelector {
     bool preferNamedPeople = false,
     Duration? minimumSpacing,
     bool enforceDistinctness = true,
+    bool avoidPreviouslySelected = true,
+    bool reserveSelected = true,
   }) {
     final List<int> ids = select(
       context: context,
@@ -61,6 +63,8 @@ class WrappedMediaSelector {
       preferNamedPeople: preferNamedPeople,
       minimumSpacing: minimumSpacing,
       enforceDistinctness: enforceDistinctness,
+      avoidPreviouslySelected: avoidPreviouslySelected,
+      reserveSelected: reserveSelected,
     );
     return ids.map(MediaRef.new).toList(growable: false);
   }
@@ -73,6 +77,8 @@ class WrappedMediaSelector {
     bool preferNamedPeople = false,
     Duration? minimumSpacing,
     bool enforceDistinctness = true,
+    bool avoidPreviouslySelected = true,
+    bool reserveSelected = true,
   }) {
     if (maxCount <= 0) {
       return const <int>[];
@@ -85,6 +91,9 @@ class WrappedMediaSelector {
     final List<_ScoredCandidate> candidates = <_ScoredCandidate>[];
     for (final int id in candidateUploadedFileIDs) {
       if (id <= 0 || !seen.add(id)) {
+        continue;
+      }
+      if (avoidPreviouslySelected && cache.isUsed(id)) {
         continue;
       }
       final _MediaAsset? asset = cache.assetFor(id);
@@ -138,9 +147,22 @@ class WrappedMediaSelector {
       candidates.remove(bestCandidate);
     }
 
-    return selected
+    final List<int> chosen = selected
         .map((_ScoredCandidate candidate) => candidate.asset.uploadedFileID)
         .toList(growable: false);
+    if (reserveSelected && chosen.isNotEmpty) {
+      cache.markUsed(chosen);
+    }
+    return chosen;
+  }
+
+  static void reserveUploadedFileIDs({
+    required WrappedEngineContext context,
+    required Iterable<int> uploadedFileIDs,
+  }) {
+    final _MediaSelectorCache cache =
+        _cache[context] ??= _MediaSelectorCache.fromEngineContext(context);
+    cache.markUsed(uploadedFileIDs);
   }
 }
 
@@ -275,12 +297,26 @@ class _ScoredCandidate {
 class _MediaSelectorCache {
   _MediaSelectorCache._({
     required Map<int, _MediaAsset> assets,
-  }) : _assets = assets;
+  })  : _assets = assets,
+        _usedUploadedFileIDs = <int>{};
 
   final Map<int, _MediaAsset> _assets;
+  final Set<int> _usedUploadedFileIDs;
 
   _MediaAsset? assetFor(int uploadedFileID) {
     return _assets[uploadedFileID];
+  }
+
+  bool isUsed(int uploadedFileID) {
+    return uploadedFileID > 0 && _usedUploadedFileIDs.contains(uploadedFileID);
+  }
+
+  void markUsed(Iterable<int> uploadedFileIDs) {
+    for (final int id in uploadedFileIDs) {
+      if (id > 0) {
+        _usedUploadedFileIDs.add(id);
+      }
+    }
   }
 
   factory _MediaSelectorCache.fromEngineContext(

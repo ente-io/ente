@@ -367,6 +367,8 @@ class _StoryProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color trackColor = Colors.white.withValues(alpha: 0.22);
+    final Color fillColor = Colors.white.withValues(alpha: 0.92);
     return Row(
       children: [
         for (final (int index, double value)
@@ -374,7 +376,8 @@ class _StoryProgressBar extends StatelessWidget {
           Expanded(
             child: _ProgressSegment(
               progress: value,
-              colorScheme: colorScheme,
+              trackColor: trackColor,
+              fillColor: fillColor,
             ),
           ),
           if (index != progressValues.length - 1) const SizedBox(width: 6),
@@ -387,27 +390,29 @@ class _StoryProgressBar extends StatelessWidget {
 class _ProgressSegment extends StatelessWidget {
   const _ProgressSegment({
     required this.progress,
-    required this.colorScheme,
+    required this.trackColor,
+    required this.fillColor,
   });
 
   final double progress;
-  final EnteColorScheme colorScheme;
+  final Color trackColor;
+  final Color fillColor;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(4),
       child: Stack(
         children: [
           Container(
             height: 4,
-            color: colorScheme.fillFaint,
+            color: trackColor,
           ),
           FractionallySizedBox(
             widthFactor: progress.clamp(0.0, 1.0),
             child: Container(
               height: 4,
-              color: colorScheme.primary500,
+              color: fillColor,
             ),
           ),
         ],

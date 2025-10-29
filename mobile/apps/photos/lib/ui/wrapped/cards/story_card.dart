@@ -61,7 +61,7 @@ class _StoryCard extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       opacity: isActive ? 1.0 : 0.6,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Material(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
@@ -102,7 +102,7 @@ class _StoryCard extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+                      padding: const EdgeInsets.fromLTRB(24, 44, 24, 32),
                       child: _CardContent(
                         card: card,
                         colorScheme: colorScheme,

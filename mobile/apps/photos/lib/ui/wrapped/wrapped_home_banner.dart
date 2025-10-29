@@ -21,7 +21,7 @@ class WrappedHomeBanner extends StatelessWidget {
     final bool hasProgress = state.resumeIndex > 0 &&
         state.resumeIndex < (state.result?.cards.length ?? 0);
 
-    const String title = "Your 2025 Wrapped";
+    const String title = "Your 2025 Rewind";
     final String subtitle = hasProgress && !state.isComplete
         ? "Resume where you left off"
         : "See your 2025 highlights";
@@ -84,7 +84,7 @@ class WrappedHomeBanner extends StatelessWidget {
     final WrappedEntryState currentState = wrappedService.state;
     final WrappedResult? result = currentState.result;
     if (result == null || result.cards.isEmpty) {
-      showShortToast(context, "Wrapped isn’t ready yet");
+      showShortToast(context, "Ente Rewind isn't ready yet");
       return;
     }
     Navigator.of(context).push(

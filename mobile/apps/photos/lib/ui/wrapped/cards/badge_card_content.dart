@@ -299,7 +299,7 @@ class _BadgeDebugCardContent extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 260),
+          constraints: const BoxConstraints(maxHeight: 600),
           child: Scrollbar(
             thumbVisibility: true,
             child: ListView.builder(
