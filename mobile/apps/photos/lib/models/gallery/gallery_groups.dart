@@ -31,7 +31,6 @@ class GalleryGroups {
   final bool sortOrderAsc;
   final double widthAvailable;
   final double groupHeaderExtent;
-  final EnteFile? fileToJumpScrollTo;
   GalleryGroups({
     required this.allFiles,
     required this.groupType,
@@ -44,7 +43,6 @@ class GalleryGroups {
     required this.groupHeaderExtent,
     required this.showSelectAll,
     this.limitSelectionToOne = false,
-    this.fileToJumpScrollTo,
     this.showGallerySettingsCTA = false,
   }) {
     init();
