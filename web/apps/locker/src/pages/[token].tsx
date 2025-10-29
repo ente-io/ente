@@ -17,6 +17,7 @@ import {
 import { apiOrigin } from "ente-base/origins";
 import type { NotificationAttributes } from "ente-new/photos/components/Notification";
 import { Notification } from "ente-new/photos/components/Notification";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { getLockerFileIcon } from "../utils/file-type";
@@ -487,17 +488,21 @@ const FilePage: React.FC = () => {
     };
 
     return (
-        <Box
-            sx={{
-                minHeight: "100vh",
-                bgcolor: "#1071FF",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                padding: { xs: 1, md: 3 },
-                boxSizing: "border-box",
-            }}
-        >
+        <>
+            <Head>
+                <meta name="robots" content="noindex, nofollow" />
+            </Head>
+            <Box
+                sx={{
+                    minHeight: "100vh",
+                    bgcolor: "#1071FF",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    padding: { xs: 1, md: 3 },
+                    boxSizing: "border-box",
+                }}
+            >
             <Box
                 sx={{
                     minHeight: {
@@ -529,11 +534,18 @@ const FilePage: React.FC = () => {
                         mr: { xs: 0, md: 6 },
                     }}
                 >
-                    <img
-                        src="/images/ente-locker.svg"
-                        alt="Ente Locker"
-                        style={{ height: "48px" }}
-                    />
+                    <a
+                        href="https://ente.io/locker"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: "block", lineHeight: 0 }}
+                    >
+                        <img
+                            src="/images/ente-locker.svg"
+                            alt="Ente Locker"
+                            style={{ height: "52px", cursor: "pointer" }}
+                        />
+                    </a>
                 </Box>
 
                 {/* Main Container - Centers the file content */}
@@ -1376,6 +1388,7 @@ const FilePage: React.FC = () => {
                 />
             </Box>
         </Box>
+        </>
     );
 };
 
