@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -85,29 +86,34 @@ void main() {
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
           await tester.runAsync(() async {
+            await HomeWidgetService.instance.clearWidget(false);
             await AlbumHomeWidgetService.instance.setAlbumsLastHash('');
             await AlbumHomeWidgetService.instance.initAlbumHomeWidget(false);
           });
 
           await tester.pumpAndSettle(const Duration(seconds: 2));
 
-          final failures = await tester.runAsync(() async {
-            final widgetDir = await _resolveWidgetDirectory();
-            final imageSizes = await _collectWidgetImageSizes(widgetDir);
-            if (imageSizes.isEmpty) {
-              return <String>['No widget images were generated at $widgetDir'];
-            }
-            final failedEntries = imageSizes.entries.where(
-              (entry) =>
-                  entry.value.width != 1024 || entry.value.height != 1024,
-            );
-            return failedEntries
-                .map(
+          final List<String> failures = (await tester
+                  .runAsync<List<String>>(() async {
+                final widgetDir = await _resolveWidgetDirectory();
+                final imageSizes = await _collectWidgetImageSizes(widgetDir);
+                if (imageSizes.isEmpty) {
+                  return <String>[
+                    'No widget images were generated at $widgetDir'
+                  ];
+                }
+                final failedEntries = imageSizes.entries.where(
                   (entry) =>
-                      '${entry.key}: ${entry.value.width.toInt()}x${entry.value.height.toInt()}',
-                )
-                .toList();
-          });
+                      entry.value.width != 1024 || entry.value.height != 1024,
+                );
+                return failedEntries
+                    .map(
+                      (entry) =>
+                          '${entry.key}: ${entry.value.width.toInt()}x${entry.value.height.toInt()}',
+                    )
+                    .toList();
+              })) ??
+              <String>[];
 
           if (failures.isNotEmpty) {
             final buffer = StringBuffer()
@@ -175,7 +181,7 @@ Future<Map<String, Size>> _collectWidgetImageSizes(String widgetDir) async {
   return result;
 }
 
-Future<ui.Image> _decodeImageFromList(List<int> bytes) {
+Future<ui.Image> _decodeImageFromList(Uint8List bytes) {
   final completer = Completer<ui.Image>();
   ui.decodeImageFromList(bytes, (image) => completer.complete(image));
   return completer.future;

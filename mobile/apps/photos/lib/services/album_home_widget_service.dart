@@ -359,7 +359,28 @@ class AlbumHomeWidgetService {
     final bool isWidgetPresent = await countHomeWidgets() > 0;
 
     final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
-    final maxAttempts = limit * 10;
+    final Set<String> uniqueRenderableItems = <String>{};
+    for (final entry in albumsWithFiles.entries) {
+      for (final file in entry.value.$2) {
+        if (file.generatedID != null) {
+          uniqueRenderableItems.add('${entry.key}_${file.generatedID}');
+        }
+      }
+    }
+
+    final int renderTarget = uniqueRenderableItems.isEmpty
+        ? 0
+        : min(limit, uniqueRenderableItems.length);
+
+    if (renderTarget == 0) {
+      _logger.warning(
+        "No unique files available for widget rendering (limit=$limit)",
+      );
+      await clearWidget();
+      return;
+    }
+
+    final maxAttempts = renderTarget * 10;
 
     int renderedCount = 0;
     int attemptsCount = 0;
@@ -370,7 +391,9 @@ class AlbumHomeWidgetService {
     final albumsWithFilesEntries = albumsWithFiles.entries.toList();
     final random = Random();
 
-    while (renderedCount < limit && attemptsCount < maxAttempts) {
+    final Set<String> renderedKeys = <String>{};
+
+    while (renderedCount < renderTarget && attemptsCount < maxAttempts) {
       final randomEntry =
           albumsWithFilesEntries[random.nextInt(albumsWithFilesLength)];
 
@@ -379,8 +402,18 @@ class AlbumHomeWidgetService {
       final randomAlbumFile = randomEntry.value.$2.elementAt(
         random.nextInt(randomEntry.value.$2.length),
       );
+      if (randomAlbumFile.generatedID == null) {
+        attemptsCount++;
+        continue;
+      }
       final albumId = randomEntry.key;
       final albumName = randomEntry.value.$1;
+
+      final String renderKey = '${albumId}_${randomAlbumFile.generatedID}';
+      if (!renderedKeys.add(renderKey)) {
+        attemptsCount++;
+        continue;
+      }
 
       final renderResult = await HomeWidgetService.instance
           .renderFile(
@@ -412,14 +445,16 @@ class AlbumHomeWidgetService {
         }
 
         renderedCount++;
+        attemptsCount++;
+      } else {
+        renderedKeys.remove(renderKey);
+        attemptsCount++;
       }
-
-      attemptsCount++;
     }
 
     if (attemptsCount >= maxAttempts) {
       _logger.warning(
-        "Hit max attempts $maxAttempts. Only rendered $renderedCount of limit $limit.",
+        "Hit max attempts $maxAttempts. Only rendered $renderedCount of target $renderTarget.",
       );
     }
 

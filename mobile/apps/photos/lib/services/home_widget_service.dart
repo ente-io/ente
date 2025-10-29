@@ -1,20 +1,28 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:home_widget/home_widget.dart' as hw;
 import 'package:home_widget/home_widget.dart';
+import 'package:home_widget/home_widget.dart' as hw;
+import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/models/file/file_type.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
+import 'package:photos/utils/file_download_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-import "package:synchronized/synchronized.dart";
+import 'package:synchronized/synchronized.dart';
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -33,6 +41,7 @@ enum WidgetStatus {
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {
   // Constants
+  static const int _widgetV2Size = 1024;
   static const double THUMBNAIL_SIZE = 512.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
 
@@ -101,7 +110,12 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    final result = await _captureFile(file, key, title, mainKey);
+    final Size? v2Size = await _captureFileV2(file, key, title, mainKey);
+    if (v2Size != null) {
+      return v2Size;
+    }
+
+    final result = await _captureFileLegacy(file, key, title, mainKey);
     if (!result) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
@@ -130,7 +144,237 @@ class HomeWidgetService {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
-  Future<bool> _captureFile(
+  Future<Size?> _captureFileV2(
+    EnteFile file,
+    String key,
+    String title,
+    String? mainKey,
+  ) async {
+    if (file.fileType == FileType.video) {
+      return null;
+    }
+
+    final _WidgetSourceBytes? source = await _resolveWidgetSourceBytes(file);
+    if (source == null) {
+      return null;
+    }
+
+    try {
+      img.Image? decoded = img.decodeImage(source.bytes);
+      String decodeStrategy = 'package:image';
+      if (decoded == null) {
+        final Uint8List? pngBytes = await _decodeWithUiFallback(source.bytes);
+        if (pngBytes != null) {
+          decoded = img.decodeImage(pngBytes);
+          if (decoded != null) {
+            decodeStrategy = 'ui-codec';
+          }
+        }
+      }
+
+      if (decoded == null) {
+        _logger.warning(
+          "[widget_capture_v2] Failed to decode image for ${file.displayName} using ${source.sourceLabel}",
+        );
+        return null;
+      }
+
+      final int originalWidth = decoded.width;
+      final int originalHeight = decoded.height;
+      final String originalDims = '${originalWidth}x$originalHeight';
+      final int minSide = math.min(originalWidth, originalHeight);
+      if (minSide <= 0) {
+        _logger.warning(
+          "[widget_capture_v2] Invalid dimensions $originalDims for ${file.displayName}",
+        );
+        return null;
+      }
+
+      img.Image working = decoded;
+      bool croppedToSquare = false;
+      if (originalWidth != originalHeight) {
+        final int cropSize = minSide;
+        final int left = ((originalWidth - cropSize) / 2).round();
+        final int top = ((originalHeight - cropSize) / 2).round();
+        working = img.copyCrop(
+          decoded,
+          x: math.max(0, left),
+          y: math.max(0, top),
+          width: cropSize,
+          height: cropSize,
+        );
+        croppedToSquare = true;
+      }
+
+      final img.Image finalImage = img.copyResize(
+        working,
+        width: _widgetV2Size,
+        height: _widgetV2Size,
+        interpolation: img.Interpolation.linear,
+      );
+      final int finalWidth = finalImage.width;
+      final int finalHeight = finalImage.height;
+      final String finalDims = '${finalWidth}x$finalHeight';
+      final Uint8List pngBytes =
+          Uint8List.fromList(img.encodePng(finalImage, level: 0));
+
+      final String widgetDirectory = await _getWidgetStorageDirectory();
+      final String imagePath = '$widgetDirectory/$WIDGET_DIRECTORY/$key.png';
+      final File outputFile = File(imagePath);
+      if (!await outputFile.exists()) {
+        await outputFile.create(recursive: true);
+      }
+      await outputFile.writeAsBytes(pngBytes);
+      await setData(key, imagePath);
+
+      final subText = await SmartMemoriesService.getDateFormattedLocale(
+        creationTime: file.creationTime!,
+      );
+      final String resolvedSubText =
+          kDebugMode ? '$subText · $finalDims' : subText;
+      final Map<String, dynamic> metadata = {
+        "title": title,
+        "subText": resolvedSubText,
+        "generatedId": file.generatedID!,
+        if (mainKey != null) "mainKey": mainKey,
+      };
+      await _saveWidgetMetadata(key, metadata);
+
+      _logger.info(
+        "[widget_capture_v2] key=$key source=${source.sourceLabel} original=$originalDims "
+        "final=$finalDims cropped=$croppedToSquare strategy=$decodeStrategy",
+      );
+
+      return Size(
+        finalWidth.toDouble(),
+        finalHeight.toDouble(),
+      );
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "[widget_capture_v2] Failed to capture widget for ${file.displayName}",
+        error,
+        stackTrace,
+      );
+      return null;
+    } finally {
+      await source.dispose();
+    }
+  }
+
+  Future<Uint8List?> _decodeWithUiFallback(Uint8List bytes) async {
+    try {
+      final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      final ui.Image image = frame.image;
+      final ByteData? data =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      codec.dispose();
+      return data?.buffer.asUint8List();
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "[widget_capture_v2] ui codec decode failed",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<_WidgetSourceBytes?> _resolveWidgetSourceBytes(EnteFile file) async {
+    if (!file.isRemoteFile) {
+      try {
+        final AssetEntity? asset = await file.getAsset;
+        if (asset != null) {
+          final Uint8List? assetBytes = await asset.thumbnailDataWithSize(
+            const ThumbnailSize.square(_widgetV2Size),
+            quality: 90,
+          );
+          if (assetBytes != null && assetBytes.isNotEmpty) {
+            return _WidgetSourceBytes(
+              bytes: assetBytes,
+              sourceLabel: 'asset.thumbnail',
+            );
+          }
+
+          final File? originFile = await asset.originFile;
+          if (originFile != null && await originFile.exists()) {
+            final Uint8List originBytes = await originFile.readAsBytes();
+            if (originBytes.isNotEmpty) {
+              return _WidgetSourceBytes(
+                bytes: originBytes,
+                sourceLabel: 'asset.origin',
+              );
+            }
+          }
+        }
+      } catch (error, stackTrace) {
+        _logger.fine(
+          "[widget_capture_v2] Failed to resolve local asset for ${file.displayName}",
+          error,
+          stackTrace,
+        );
+      }
+    }
+
+    if (file.uploadedFileID != null &&
+        (file.isRemoteFile ||
+            file.fileType == FileType.image ||
+            file.fileType == FileType.livePhoto)) {
+      if (file.fileType == FileType.livePhoto) {
+        try {
+          final File? livePhotoImage = await getFileFromServer(file);
+          if (livePhotoImage != null && await livePhotoImage.exists()) {
+            final Uint8List livePhotoBytes = await livePhotoImage.readAsBytes();
+            if (livePhotoBytes.isNotEmpty) {
+              return _WidgetSourceBytes(
+                bytes: livePhotoBytes,
+                sourceLabel: 'downloaded-live-image',
+              );
+            }
+          }
+        } catch (error, stackTrace) {
+          _logger.fine(
+            "[widget_capture_v2] Live photo fetch failed for ${file.displayName}",
+            error,
+            stackTrace,
+          );
+        }
+      }
+
+      try {
+        final File? downloaded = await downloadAndDecrypt(file);
+        if (downloaded != null && await downloaded.exists()) {
+          final Uint8List bytes = await downloaded.readAsBytes();
+          if (bytes.isNotEmpty) {
+            return _WidgetSourceBytes(
+              bytes: bytes,
+              sourceLabel: 'downloaded-full',
+              tempFile: downloaded,
+            );
+          }
+        }
+      } catch (error, stackTrace) {
+        _logger.warning(
+          "[widget_capture_v2] Download failed for ${file.displayName}",
+          error,
+          stackTrace,
+        );
+      }
+    }
+
+    final Uint8List? fallbackThumbnail = await getThumbnail(file);
+    if (fallbackThumbnail != null && fallbackThumbnail.isNotEmpty) {
+      return _WidgetSourceBytes(
+        bytes: fallbackThumbnail,
+        sourceLabel: 'legacy-thumbnail',
+      );
+    }
+
+    return null;
+  }
+
+  Future<bool> _captureFileLegacy(
     EnteFile file,
     String key,
     String title,
@@ -294,6 +538,35 @@ class HomeWidgetService {
           "Widget launch failed: Unknown widget scheme '${uri.scheme}'",
         );
         break;
+    }
+  }
+}
+
+class _WidgetSourceBytes {
+  const _WidgetSourceBytes({
+    required this.bytes,
+    required this.sourceLabel,
+    this.tempFile,
+  });
+
+  final Uint8List bytes;
+  final String sourceLabel;
+  final File? tempFile;
+
+  Future<void> dispose() async {
+    if (tempFile == null) {
+      return;
+    }
+    try {
+      if (await tempFile!.exists()) {
+        await tempFile!.delete();
+      }
+    } catch (error, stackTrace) {
+      Logger('_WidgetSourceBytes').fine(
+        'Failed to delete temp file ${tempFile!.path}',
+        error,
+        stackTrace,
+      );
     }
   }
 }
