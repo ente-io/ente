@@ -85,13 +85,18 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
-    // Try to preserve offline key if it exists
-    String? offlineKey;
+    // First check if offline key exists - if it does, we're in offline mode
+    // and should not clear secure storage at all
     try {
-      offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
+      final offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
+      if (offlineKey != null && offlineKey.isNotEmpty) {
+        _logger.info('Offline mode detected, skipping secure storage reset');
+        return;
+      }
     } catch (e) {
-      _logger.warning('Failed to read offline key: $e');
-      // Continue with reset even if we can't read the offline key
+      // If we can't read the offline key due to BadPaddingException or other issues,
+      // we proceed with the reset as the storage is likely corrupted
+      _logger.warning('Failed to check offline key, proceeding with reset: $e');
     }
 
     try {
@@ -110,20 +115,6 @@ class BaseConfiguration {
       );
       try {
         await _secureStorage.deleteAll();
-        // Try to restore the offline key if we had it
-        if (offlineKey != null) {
-          try {
-            await _secureStorage.write(
-              key: offlineAuthSecretKey,
-              value: offlineKey,
-            );
-          } catch (writeError) {
-            _logger.warning(
-              'Failed to restore offline key after deleteAll: $writeError',
-            );
-            // We tried our best, continue without the offline key
-          }
-        }
       } catch (deleteAllError) {
         _logger.severe(
           'Failed to delete all from secure storage: $deleteAllError',
