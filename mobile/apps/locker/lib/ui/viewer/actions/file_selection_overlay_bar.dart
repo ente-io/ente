@@ -11,7 +11,6 @@ import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
-import "package:locker/ui/components/selection_action_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
@@ -302,15 +301,20 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       child: IntrinsicHeight(
         child: Row(
           children: [
-            SelectionActionWidget(
-              icon: Icons.edit_outlined,
-              label: context.l10n.edit,
-              onTap: () => _showEditDialog(context, file),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.edit_outlined,
+                label: context.l10n.edit,
+                onTap: () => _showEditDialog(context, file),
+              ),
             ),
-            SelectionActionWidget(
-              icon: _isImportant ? Icons.star : Icons.star_outline,
-              label: _isImportant ? "Unmark" : "Important",
-              onTap: () => _toggleImportant(context, file),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: _isImportant ? Icons.star : Icons.star_outline,
+                label: _isImportant ? "Unmark" : "Important",
+                onTap: () => _toggleImportant(context, file),
+              ),
             ),
           ],
         ),
@@ -330,17 +334,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       child: IntrinsicHeight(
         child: Row(
           children: [
-            SelectionActionWidget(
-              icon: Icons.star_outline,
-              label: "Important",
-              onTap: () => _markMultipleAsImportant(context, files),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.star_outline,
+                label: "Important",
+                onTap: () => _markMultipleAsImportant(context, files),
+              ),
             ),
-            SelectionActionWidget(
-              icon: Icons.delete_outline,
-              label: context.l10n.delete,
-              onTap: () => _deleteMultipleFile(context, files),
-              iconColor: colorScheme.warning500,
-              textColor: colorScheme.warning500,
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.delete_outline,
+                label: context.l10n.delete,
+                onTap: () => _deleteMultipleFile(context, files),
+                isDestructive: true,
+              ),
             ),
           ],
         ),
