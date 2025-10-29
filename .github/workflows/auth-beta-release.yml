@@ -440,13 +440,6 @@ jobs:
                   echo "✅ Unified checksum file created:"
                   cat sha256sum
 
-            - name: Create and push tag
-              run: |
-                  git config user.name "github-actions[bot]"
-                  git config user.email "github-actions[bot]@users.noreply.github.com"
-                  git tag -a "auth-v${{ env.VERSION_NAME }}-beta" -m "Daily beta release v${{ env.VERSION_NAME }} (build ${{ env.NEW_VERSION_CODE }})"
-                  git push origin "auth-v${{ env.VERSION_NAME }}-beta"
-
             - name: Create pre-release on GitHub
               uses: ncipollo/release-action@v1
               with:
@@ -454,19 +447,20 @@ jobs:
                   tag: "auth-v${{ env.VERSION_NAME }}-beta"
                   name: "Auth v${{ env.VERSION_NAME }} Beta (Build ${{ env.NEW_VERSION_CODE }})"
                   body: |
-                      Daily beta release for Auth v${{ env.VERSION_NAME }}
+                      Nightly build for Auth v${{ env.VERSION_NAME }}
 
                       Build: ${{ env.NEW_VERSION_CODE }}
                       Commit: ${{ github.sha }}
                   prerelease: true
                   allowUpdates: true
+                  updateOnlyUnreleased: true
 
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🏆 Beta release Auth v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
+                  title: "🏆 Nightly build Auth v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
                   description: |
                       **Version:** ${{ env.NEW_VERSION }}
                       **Flutter:** ${{ env.FLUTTER_VERSION }}
