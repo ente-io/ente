@@ -1,0 +1,4 @@
+- Auto backup of 2FA codes with encryption
+- Import codes by scanning QR images from gallery
+- Minimize to tray on desktop platforms
+- Bug fixes and performance improvements
