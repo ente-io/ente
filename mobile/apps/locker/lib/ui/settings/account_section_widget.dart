@@ -22,6 +22,8 @@ import "package:locker/ui/settings/common_settings.dart";
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
 
+  static const double _leadingSpace = 52;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -42,7 +44,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changeEmail,
           makeTextBold: true,
         ),
-        leadingSpace: 52, 
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -70,6 +72,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changePassword,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -99,6 +102,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.recoveryKey,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -139,6 +143,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.legacy,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         showOnlyLoadingState: true,
         onTap: () async {
@@ -167,6 +172,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.logout,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           _onLogoutTapped(context);
@@ -178,6 +184,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.deleteAccount,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final config = Configuration.instance;
