@@ -595,21 +595,24 @@ Future<Map<String, dynamic>?> _processWidgetImage(
     return null;
   }
 
-  final int originalWidth = decoded.width;
-  final int originalHeight = decoded.height;
+  // Apply EXIF orientation before cropping to prevent portrait photos from being rotated incorrectly
+  final img.Image oriented = img.bakeOrientation(decoded);
+
+  final int originalWidth = oriented.width;
+  final int originalHeight = oriented.height;
   final int minSide = math.min(originalWidth, originalHeight);
   if (minSide <= 0) {
     return null;
   }
 
-  img.Image working = decoded;
+  img.Image working = oriented;
   bool croppedToSquare = false;
   if (originalWidth != originalHeight) {
     final int cropSize = minSide;
     final int left = ((originalWidth - cropSize) / 2).round();
     final int top = ((originalHeight - cropSize) / 2).round();
     working = img.copyCrop(
-      decoded,
+      oriented,
       x: math.max(0, left),
       y: math.max(0, top),
       width: cropSize,
