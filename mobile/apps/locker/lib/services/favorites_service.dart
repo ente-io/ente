@@ -33,14 +33,10 @@ class FavoritesService {
     _db = CollectionDB.instance;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) {
-      _logger.info(
-        "CollectionsUpdatedEvent received in FavoritesService: ${event.source}",
-      );
       // When collections are updated, refresh our cache
       _warmUpCache();
     });
     await _warmUpCache();
-    _logger.info("FavoritesService initialized");
   }
 
   void dispose() {
@@ -51,8 +47,10 @@ class FavoritesService {
     final favCollection = await getFavoritesCollection();
     if (favCollection != null) {
       final favoriteFiles = await _db.getFilesInCollection(favCollection);
+
       _cachedFavUploadedIDs.clear();
       _cachedFavFileHashes.clear();
+
       for (final file in favoriteFiles) {
         if (file.uploadedFileID != null) {
           _cachedFavUploadedIDs.add(file.uploadedFileID!);
@@ -76,17 +74,19 @@ class FavoritesService {
     if (file.collectionID != null &&
         _cachedFavoritesCollectionID != null &&
         file.collectionID == _cachedFavoritesCollectionID) {
-      debugPrint("File ${file.uploadedFileID} is part of favorite collection");
       return true;
     }
     if (checkOnlyAlbum) {
       return false;
     }
     if (file.uploadedFileID != null) {
+      bool isFav = false;
       if (file.ownerID != _config.getUserID() && file.hash != null) {
-        return _cachedFavFileHashes.containsKey(file.hash!);
+        isFav = _cachedFavFileHashes.containsKey(file.hash!);
+      } else {
+        isFav = _cachedFavUploadedIDs.contains(file.uploadedFileID);
       }
-      return _cachedFavUploadedIDs.contains(file.uploadedFileID);
+      return isFav;
     }
     return false;
   }
@@ -94,10 +94,13 @@ class FavoritesService {
   Future<bool> isFavorite(EnteFile file) async {
     // Use cache for better performance
     if (file.uploadedFileID != null) {
+      bool isFav = false;
       if (file.ownerID != _config.getUserID() && file.hash != null) {
-        return _cachedFavFileHashes.containsKey(file.hash!);
+        isFav = _cachedFavFileHashes.containsKey(file.hash!);
+      } else {
+        isFav = _cachedFavUploadedIDs.contains(file.uploadedFileID);
       }
-      return _cachedFavUploadedIDs.contains(file.uploadedFileID);
+      return isFav;
     }
     return false;
   }
@@ -116,6 +119,7 @@ class FavoritesService {
         }
       }
     }
+
     if (favFlag) {
       _cachedFavUploadedIDs.addAll(updatedIDs);
       _cachedFavFileHashes.addAll(hashes);
@@ -129,15 +133,20 @@ class FavoritesService {
 
   Future<void> addToFavorites(BuildContext context, EnteFile file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
+
     final List<EnteFile> files = [file];
     if (file.uploadedFileID == null) {
+      _logger.severe("Cannot favorite file without uploadedFileID");
       throw AssertionError("Can only favorite uploaded items");
     } else {
       final collection =
           await _collectionService.getCollectionByID(collectionID);
+
       await _collectionService.addToCollection(collection!, files[0]);
     }
+
     _updateFavoriteFilesCache(files, favFlag: true);
+
     _collectionService.sync().ignore();
   }
 
@@ -200,6 +209,7 @@ class FavoritesService {
       // Do nothing, ignore
     } else {
       final Collection? favCollection = await getFavoritesCollection();
+
       // The file might be part of another collection. For unfav, we need to
       // move file from the fav collection.
       if (file.ownerID != _config.getUserID() &&
@@ -212,6 +222,7 @@ class FavoritesService {
         );
         file = favFile;
       }
+
       if (file.collectionID != favCollection!.id) {
         final favFiles = await _db.getFilesInCollection(favCollection);
         final favFile = favFiles.firstWhere(
@@ -236,8 +247,10 @@ class FavoritesService {
       }
 
       // If no other collection found, move to uncategorized
-      targetCollection ??=
-          await _collectionService.getOrCreateUncategorizedCollection();
+      if (targetCollection == null) {
+        targetCollection =
+            await _collectionService.getOrCreateUncategorizedCollection();
+      }
 
       await _collectionService.move(
         file,
@@ -245,12 +258,14 @@ class FavoritesService {
         targetCollection,
       );
     }
+
     _updateFavoriteFilesCache([file], favFlag: false);
   }
 
   Future<Collection?> getFavoritesCollection() async {
     if (_cachedFavoritesCollectionID == null) {
       final collections = await _collectionService.getCollections();
+
       for (final collection in collections) {
         if (collection.owner.id == _config.getUserID() &&
             collection.type == CollectionType.favorites) {
@@ -260,6 +275,7 @@ class FavoritesService {
       }
       return null;
     }
+
     return _collectionService.getCollectionByID(_cachedFavoritesCollectionID!);
   }
 
@@ -272,9 +288,11 @@ class FavoritesService {
     if (_cachedFavoritesCollectionID != null) {
       return _cachedFavoritesCollectionID!;
     }
+
     final collection =
         await _collectionService.getOrCreateImportantCollection();
     _cachedFavoritesCollectionID = collection.id;
+
     return collection.id;
   }
 }

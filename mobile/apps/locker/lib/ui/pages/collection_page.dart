@@ -53,6 +53,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   List<EnteFile> _filteredFiles = [];
   late CollectionViewType collectionViewType;
   bool isQuickLink = false;
+  bool isFavorite = false;
 
   final _selectedFiles = SelectedFiles();
 
@@ -142,6 +143,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       _collection,
       Configuration.instance.getUserID()!,
     );
+    isFavorite = collectionViewType == CollectionViewType.favorite;
   }
 
   Future<void> _initializeData(Collection collection) async {
@@ -238,6 +240,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Widget _buildMenuButton(EnteColorScheme colorScheme) {
+    if (isFavorite) {
+      return SizedBox.fromSize();
+    }
     return PopupMenuButton<String>(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),

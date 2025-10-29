@@ -102,7 +102,7 @@ class CollectionService {
             diff.latestUpdatedAtTime,
           );
         }).catchError((e) {
-          _logger.warning(
+          _logger.severe(
             "Failed to fetch files for collection ${collection.id}: $e",
           );
         }),
@@ -129,6 +129,14 @@ class CollectionService {
 
       // Cache in memory
       _collectionIDToCollections[collection.id] = collection;
+
+      // Add to local database immediately
+      await _db.updateCollections([collection]);
+
+      // Fire event to update UI
+      Bus.instance.fire(CollectionsUpdatedEvent('collection_created'));
+
+      // Sync to ensure we have the latest state
       await sync();
 
       return collection;
@@ -243,8 +251,8 @@ class CollectionService {
         // Also sync to ensure we have the latest state from server
         await sync();
       }
-    } catch (e) {
-      _logger.severe("Failed to add file to collection: $e");
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to add file to collection: $e", e, stackTrace);
       rethrow;
     }
   }
@@ -280,7 +288,7 @@ class CollectionService {
       // Let sync update the local state
       await sync();
     } catch (e, s) {
-      _logger.warning("failed to rename collection", e, s);
+      _logger.severe("failed to rename collection", e, s);
       rethrow;
     }
   }
@@ -319,18 +327,32 @@ class CollectionService {
         return collection;
       }
     }
-    _logger.info("No collections found, creating important collection.");
-    return await createCollection("Important", type: CollectionType.favorites);
+    _logger
+        .info("No favorites collection found, creating important collection.");
+    final collection =
+        await createCollection("Important", type: CollectionType.favorites);
+    return collection;
   }
 
   Future<void> move(EnteFile file, Collection from, Collection to) async {
     try {
       await _apiClient.move(file, from, to);
-      _logger.info("Moved file ${file.title} from ${from.name} to ${to.name}");
-      // Let sync update the local state
+
+      // Update local database immediately for both collections
+      // Remove from source collection
+      await _db.deleteFilesFromCollection(from, [file]);
+
+      // Add to target collection with updated collectionID
+      file.collectionID = to.id;
+      await _db.addFilesToCollection(to, [file]);
+
+      // Fire event to update UI
+      Bus.instance.fire(CollectionsUpdatedEvent('file_moved'));
+
+      // Let sync update the local state to ensure consistency
       await sync();
-    } catch (e) {
-      _logger.severe("Failed to move file: $e");
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to move file: $e", e, stackTrace);
       rethrow;
     }
   }

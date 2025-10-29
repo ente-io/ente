@@ -440,11 +440,18 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Future<void> _loadCollections() async {
+    final shouldShowLoading =
+        _collections.isEmpty && _recentFiles.isEmpty && !_isLoading;
+
     try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
+      if (shouldShowLoading || _error != null) {
+        setState(() {
+          if (shouldShowLoading) {
+            _isLoading = true;
+          }
+          _error = null;
+        });
+      }
 
       final collections = await CollectionService.instance.getCollections();
       await _loadRecentFiles(collections);
@@ -639,12 +646,20 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final scrollBottomPadding =
+            MediaQuery.of(context).padding.bottom + 120.0;
+
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom: scrollBottomPadding,
+          ),
           physics: const AlwaysScrollableScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: constraints.maxHeight - 32, // Account for padding
+              minHeight: constraints.maxHeight,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

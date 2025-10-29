@@ -256,8 +256,9 @@ class TrashService {
         data: params,
       );
       await _trashDB.delete(files.map((e) => e.uploadedFileID!).toList());
+      // Refresh collections so restored files are immediately available in UI
+      await CollectionService.instance.sync();
       Bus.instance.fire(CollectionsUpdatedEvent("file_restore"));
-      // Force reload home gallery to pull in the restored files
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;
