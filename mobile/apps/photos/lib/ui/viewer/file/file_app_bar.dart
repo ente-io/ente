@@ -28,12 +28,10 @@ import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
-import 'package:photos/ui/viewer/gallery/jump_to_date_gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
@@ -232,14 +230,6 @@ class FileAppBarState extends State<FileAppBar> {
           iconColor: Theme.of(context).iconTheme.color,
         ),
       );
-      items.add(
-        EntePopupMenuItem(
-          "Jump to Date",
-          value: 11,
-          icon: Icons.calendar_today,
-          iconColor: Theme.of(context).iconTheme.color,
-        ),
-      );
     }
     if ((widget.file.fileType == FileType.image ||
             widget.file.fileType == FileType.livePhoto) &&
@@ -384,11 +374,6 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('recreate');
             } else if (value == 10) {
               await _handleAddToAlbum();
-            } else if (value == 11) {
-              await routeToPage(
-                context,
-                JumpToDateGallery(fileToJumpTo: widget.file),
-              );
             }
           },
         ),
