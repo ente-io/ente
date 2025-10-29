@@ -495,16 +495,19 @@ const FilePage: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                padding: { xs: 0, md: 3 },
+                padding: { xs: 1, md: 3 },
                 boxSizing: "border-box",
             }}
         >
             <Box
                 sx={{
-                    minHeight: "100vh",
+                    minHeight: {
+                        xs: "calc(100vh - 16px)",
+                        md: "calc(100vh - 48px)",
+                    },
                     width: "100%",
                     bgcolor: "#FAFAFA",
-                    borderRadius: { xs: 0, md: "40px" },
+                    borderRadius: { xs: "20px", md: "40px" },
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -521,10 +524,10 @@ const FilePage: React.FC = () => {
                 {/* Ente Logo - Always at the top */}
                 <Box
                     sx={{
-                        mt: { xs: 3, md: 6 },
-                        mb: fileInfo?.lockerType ? 20 : { xs: 20, md: 6 },
-                        alignSelf: "flex-end",
-                        mr: { xs: 3, md: 6 },
+                        mt: { xs: 5, md: 6 },
+                        mb: fileInfo?.lockerType ? { xs: 16, md: 0 } : 0,
+                        alignSelf: { xs: "center", md: "flex-end" },
+                        mr: { xs: 0, md: 6 },
                         "& svg": { fill: "#000000" },
                     }}
                 >
@@ -537,12 +540,15 @@ const FilePage: React.FC = () => {
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        justifyContent: { xs: "flex-start", md: "center" },
+                        justifyContent: fileInfo?.lockerType
+                            ? "flex-start"
+                            : "center",
                         width: "100%",
                         maxWidth: 400,
                         flex: 1,
                         px: 3,
-                        pb: { xs: 3, md: 0 },
+                        pb: 8,
+                        mt: fileInfo?.lockerType ? { xs: 0, md: "20vh" } : 0,
                     }}
                 >
                     {/* Loading State */}
