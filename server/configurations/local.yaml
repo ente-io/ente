@@ -347,6 +347,7 @@ internal:
     silent: false
     # Header gin will trust for resolving the original client IP when requests are proxied.
     # Defaults to CF-Connecting-IP; uncomment and change if your proxy uses another header.
+    # If empty, server will default to X-Forwarded-For,X-Real-IP,remote-addr (in that order).
     # trusted-client-ip-header: CF-Connecting-IP
     # If provided, this external healthcheck url is periodically pinged.
     health-check-url:
