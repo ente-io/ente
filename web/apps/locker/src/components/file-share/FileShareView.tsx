@@ -1,9 +1,4 @@
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import { Notification } from "ente-new/photos/components/Notification";
 import Head from "next/head";
 import React from "react";
@@ -62,7 +57,7 @@ export const FileShareView: React.FC = () => {
                         },
                     }}
                 >
-                    {/* Ente Logo */}
+                    {/* Ente Locker Logo */}
                     <Box
                         sx={{
                             mt: { xs: 5, md: 6 },
@@ -80,7 +75,7 @@ export const FileShareView: React.FC = () => {
                             <img
                                 src="/images/ente-locker.svg"
                                 alt="Ente Locker"
-                                style={{ height: "52px", cursor: "pointer" }}
+                                style={{ height: "56px", cursor: "pointer" }}
                             />
                         </a>
                     </Box>
@@ -157,11 +152,10 @@ export const FileShareView: React.FC = () => {
                                     {/* Large File Icon */}
                                     <Box
                                         sx={{
-                                            backgroundColor:
-                                                getLockerFileIcon(
-                                                    fileInfo.fileName,
-                                                    fileInfo.lockerType,
-                                                ).backgroundColor,
+                                            backgroundColor: getLockerFileIcon(
+                                                fileInfo.fileName,
+                                                fileInfo.lockerType,
+                                            ).backgroundColor,
                                             borderRadius: "20px",
                                             padding: 1.8,
                                             display: "flex",

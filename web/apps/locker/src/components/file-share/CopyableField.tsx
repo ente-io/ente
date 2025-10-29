@@ -59,8 +59,9 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                     onClick={() => onCopy(value)}
                     sx={{
                         position: "absolute",
-                        top: 8,
+                        top: multiline ? 8 : "50%",
                         right: 8,
+                        transform: multiline ? "none" : "translateY(-50%)",
                         color: "#757575",
                         "&:hover": {
                             bgcolor: "rgba(0, 0, 0, 0.04)",
