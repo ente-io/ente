@@ -25,6 +25,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       isUtc: true,
     ).toLocal();
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
       },
