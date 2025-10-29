@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:core';
 import 'dart:io';
 
+import "package:dio/dio.dart";
 import 'package:ente_logging/tunneled_transport.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -38,8 +39,7 @@ extension SuperString on String {
 
 extension SuperLogRecord on log.LogRecord {
   String toPrettyString([String? extraLines]) {
-    final header =
-        "[$loggerName${inIsolate ? " (in isolate)" : ""}] [$level] [$time]";
+    final header = "[$loggerName][$level] [$time]";
 
     var msg = "$header $message";
 
