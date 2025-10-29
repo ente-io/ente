@@ -91,7 +91,7 @@ class GalleryGroups {
   /// incomplete rows in each group.
   List<EnteFile> get allFilesWithDummies => _allFilesWithDummies;
 
-  double? getOffsetOfFile(EnteFile file) {
+  double? getOffsetOfGroupContainingFile(EnteFile file) {
     final creationTime = file.creationTime;
     if (creationTime == null) {
       _logger.warning('Cannot scroll to file with null creation time');
@@ -101,7 +101,7 @@ class GalleryGroups {
     final groupId = _findGroupForCreationTime(creationTime);
     if (groupId == null) {
       _logger.warning(
-        'jumpToFile No group found for creation time: $creationTime',
+        'No group found for creation time: $creationTime',
       );
       return null;
     }
