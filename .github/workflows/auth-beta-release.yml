@@ -224,11 +224,21 @@ jobs:
                   whatsNewDirectory: mobile/apps/auth/whatsnew
                   mappingFile: mobile/apps/auth/build/app/outputs/mapping/playstoreRelease/mapping.txt
 
+            - name: Export version info for job outputs
+              id: version-info
+              run: |
+                  echo "version_name=${{ env.VERSION_NAME }}" >> $GITHUB_OUTPUT
+                  echo "new_version=${{ env.NEW_VERSION }}" >> $GITHUB_OUTPUT
+                  echo "new_version_code=${{ env.NEW_VERSION_CODE }}" >> $GITHUB_OUTPUT
+                  echo "changelog_discord<<EOF" >> $GITHUB_OUTPUT
+                  echo "${{ env.CHANGELOG_DISCORD }}" >> $GITHUB_OUTPUT
+                  echo "EOF" >> $GITHUB_OUTPUT
+
         outputs:
-            version_name: ${{ env.VERSION_NAME }}
-            new_version: ${{ env.NEW_VERSION }}
-            new_version_code: ${{ env.NEW_VERSION_CODE }}
-            changelog_discord: ${{ env.CHANGELOG_DISCORD }}
+            version_name: ${{ steps.version-info.outputs.version_name }}
+            new_version: ${{ steps.version-info.outputs.new_version }}
+            new_version_code: ${{ steps.version-info.outputs.new_version_code }}
+            changelog_discord: ${{ steps.version-info.outputs.changelog_discord }}
 
     build-windows:
         runs-on: windows-latest
