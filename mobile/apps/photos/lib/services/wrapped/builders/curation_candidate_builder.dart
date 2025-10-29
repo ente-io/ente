@@ -136,7 +136,7 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
           .map((List<int> group) => group.toList(growable: false))
           .toList(growable: false),
       "rotationMillis": _kRotationMillis,
-      "displayDurationMillis": 9000,
+      "displayDurationMillis": 18000,
     };
 
     final String subtitle = favoritesCount == 1
