@@ -83,10 +83,10 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90.0),
+            preferredSize: const Size.fromHeight(50.0),
             child: GalleryAppBarWidget(
               JumpToDateGallery.appBarType,
-              "Jump to Date",
+              "",
               _selectedFiles,
             ),
           ),
