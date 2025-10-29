@@ -1240,9 +1240,39 @@ class FilesDB with SqlDbBase {
     final db = await instance.sqliteAsyncDB;
     await db.execute(
       'UPDATE $filesTable SET $columnLocalID = ? WHERE $columnUploadedFileID = ?'
-      ' AND $columnLocalID IS NULL',
+      ' AND ($columnLocalID IS NULL OR $columnLocalID = \'\')',
       [localID, uploadedID],
     );
+  }
+
+  Future<Map<int, String>> getUploadedIDsNeedingLocalID(int ownerID) async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT f1.$columnUploadedFileID AS uploadID, f1.$columnLocalID AS localID
+      FROM $filesTable f1
+      WHERE f1.$columnOwnerID = ?
+        AND f1.$columnUploadedFileID IS NOT NULL
+        AND f1.$columnUploadedFileID != -1
+        AND f1.$columnLocalID IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM $filesTable f2
+          WHERE f2.$columnUploadedFileID = f1.$columnUploadedFileID
+            AND f2.$columnLocalID IS NULL
+        )
+      ''',
+      [ownerID],
+    );
+    final result = <int, String>{};
+    for (final row in rows) {
+      final int? uploadID = row["uploadID"] as int?;
+      final String? localID = row["localID"] as String?;
+      if (uploadID == null || localID == null || localID.isEmpty) {
+        continue;
+      }
+      result.putIfAbsent(uploadID, () => localID);
+    }
+    return result;
   }
 
   Future<void> deleteByGeneratedID(int genID) async {

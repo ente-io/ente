@@ -1546,6 +1546,8 @@ class CollectionsService {
     List<EnteFile> files, {
     bool toCopy = true,
   }) async {
+    await _checkLocalMetadataIfAvailable(files);
+
     final splitResult = FilesSplit.split(files, _config.getUserID()!);
     if (splitResult.pendingUploads.isNotEmpty) {
       throw ArgumentError('File should be already uploaded');
@@ -1666,6 +1668,7 @@ class CollectionsService {
     if (files.isEmpty) {
       return;
     }
+    await _checkLocalMetadataIfAvailable(files);
     // as any non uploaded file
     final pendingUpload = files.any(
       (element) => element.uploadedFileID == null,
@@ -1710,6 +1713,38 @@ class CollectionsService {
         _logger.warning('failed to add files to collection', e);
         rethrow;
       }
+    }
+  }
+
+  Future<void> _checkLocalMetadataIfAvailable(List<EnteFile> files) async {
+    if (files.isEmpty) {
+      return;
+    }
+
+    final Map<int, EnteFile?> uploadIDToCachedFile = {};
+    for (final file in files) {
+      final int? uploadedID = file.uploadedFileID;
+      if (uploadedID == null || file.localID != null) {
+        continue;
+      }
+      if (file.ownerID != null && file.ownerID != _config.getUserID()) {
+        continue;
+      }
+
+      EnteFile? canonicalFile;
+      if (uploadIDToCachedFile.containsKey(uploadedID)) {
+        canonicalFile = uploadIDToCachedFile[uploadedID];
+      } else {
+        canonicalFile = await _filesDB.getAnyUploadedFile(uploadedID);
+        uploadIDToCachedFile[uploadedID] = canonicalFile;
+      }
+
+      if (canonicalFile == null || canonicalFile.localID == null) {
+        continue;
+      }
+
+      file.localID = canonicalFile.localID;
+      file.deviceFolder ??= canonicalFile.deviceFolder;
     }
   }
 
