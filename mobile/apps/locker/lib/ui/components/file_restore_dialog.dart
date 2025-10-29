@@ -152,6 +152,7 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
                 selectedCollectionIds: _selectedCollectionIds,
                 onToggleCollection: _toggleCollection,
                 onCollectionsUpdated: _onCollectionsUpdated,
+                singleSelectionMode: true,
                 titleWidget: Text(
                   "Move to collection",
                   style: textTheme.largeBold,

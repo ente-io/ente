@@ -205,6 +205,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
                 selectedCollectionIds: _selectedCollectionIds,
                 onToggleCollection: _toggleCollection,
                 onCollectionsUpdated: _onCollectionsUpdated,
+                singleSelectionMode: true,
                 titleWidget: Text(
                   "Move to collection",
                   style: textTheme.largeBold,
