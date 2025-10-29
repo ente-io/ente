@@ -109,7 +109,7 @@ const fetchFileInfo = async (accessToken: string): Promise<FileLinkInfo> => {
     });
 
     if (!response.ok) {
-        throw new Error(`Failed to fetch file info: ${response.statusText}`);
+        throw new Error(`Failed to fetch file`);
     }
 
     const data = await response.json();
