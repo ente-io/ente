@@ -1,4 +1,4 @@
-name: "Daily release (auth)"
+name: "Beta release (auth)"
 
 on:
     push:
@@ -6,6 +6,15 @@ on:
             - main
         paths:
             - 'mobile/apps/auth/**'
+            - 'mobile/packages/accounts/**'
+            - 'mobile/packages/base/**'
+            - 'mobile/packages/configuration/**'
+            - 'mobile/packages/events/**'
+            - 'mobile/packages/lock_screen/**'
+            - 'mobile/packages/logging/**'
+            - 'mobile/packages/network/**'
+            - 'mobile/packages/strings/**'
+            - 'mobile/packages/ui/**'
     workflow_dispatch: # Allow manual trigger
 
 env:
@@ -470,7 +479,7 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🏆 Daily release Auth v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
+                  title: "🏆 Beta release Auth v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
                   description: |
                       **Version:** ${{ env.NEW_VERSION }}
                       **Flutter:** ${{ env.FLUTTER_VERSION }}
