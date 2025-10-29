@@ -1004,11 +1004,7 @@ const FilePage: React.FC = () => {
                                                                             "break-word",
                                                                     }}
                                                                 >
-                                                                    {
-                                                                        fileInfo
-                                                                            .lockerInfoData
-                                                                            .password
-                                                                    }
+                                                                    **********************
                                                                 </Typography>
                                                             </Box>
                                                             <IconButton
@@ -1284,12 +1280,7 @@ const FilePage: React.FC = () => {
                                 {/* Download Button */}
                                 {/* Only show download button if not a LockerInfoType */}
                                 {!fileInfo.lockerType && (
-                                    <Box
-                                        sx={{
-                                            width: "100%",
-                                            mt: 4,
-                                        }}
-                                    >
+                                    <Box sx={{ width: "100%", mt: 4 }}>
                                         <Button
                                             variant="contained"
                                             size="large"
