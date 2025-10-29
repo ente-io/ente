@@ -1,4 +1,4 @@
-- Laurens: WIP first iteration of Ente Wrapped
+- Laurens: WIP first iteration of Ente Rewind
 - Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
 - Neeraj: (i) Safeguards for Bitflip errors (md5, immedidate decryption)
 - Neeraj: Fix thumbnail bg in native video player widget

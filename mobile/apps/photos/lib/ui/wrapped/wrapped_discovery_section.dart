@@ -33,7 +33,7 @@ class WrappedDiscoverySection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Wrapped 2025",
+            "Ente Rewind",
             style: textTheme.largeBold,
           ),
           const SizedBox(height: 12),
@@ -93,7 +93,7 @@ class WrappedDiscoverySection extends StatelessWidget {
     WrappedEntryState currentState = wrappedService.state;
     final WrappedResult? result = currentState.result;
     if (result == null || result.cards.isEmpty) {
-      showShortToast(context, "Wrapped isn’t ready yet");
+      showShortToast(context, "Ente Rewind isn't ready yet");
       return;
     }
     final int cardCount = result.cards.length;

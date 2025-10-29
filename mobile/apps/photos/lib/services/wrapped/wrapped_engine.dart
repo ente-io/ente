@@ -21,7 +21,7 @@ import "package:photos/services/wrapped/models.dart";
 final Logger _engineLogger = Logger("WrappedEngine");
 final Logger _computeLogger = Logger("WrappedEngineIsolate");
 
-/// Orchestrates the single-isolate computation pipeline for Ente Wrapped.
+/// Orchestrates the single-isolate computation pipeline for Ente Rewind.
 class WrappedEngine {
   const WrappedEngine._();
 

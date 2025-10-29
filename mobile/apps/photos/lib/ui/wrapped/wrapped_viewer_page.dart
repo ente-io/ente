@@ -29,7 +29,7 @@ part "cards/narrative_card_content.dart";
 part "cards/badge_card_content.dart";
 part "cards/shared_widgets.dart";
 
-/// Basic viewer for the stats-only Ente Wrapped experience.
+/// Basic viewer for the stats-only Ente Rewind experience.
 class WrappedViewerPage extends StatefulWidget {
   const WrappedViewerPage({
     required this.initialState,
@@ -297,7 +297,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     if (result == null || cardCount == 0) {
       scheduleMicrotask(() {
         if (mounted) {
-          showShortToast(context, "Wrapped data not available");
+          showShortToast(context, "Ente Rewind data not available");
           Navigator.of(context).maybePop();
         }
       });
@@ -319,7 +319,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         backgroundColor: enteColorScheme.backgroundBase,
         appBar: AppBar(
           title: Text(
-            "Wrapped ${result.year}",
+            "Ente Rewind",
             style: textTheme.largeBold,
           ),
           backgroundColor: enteColorScheme.backgroundBase,
@@ -424,7 +424,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
           files: <XFile>[
             XFile.fromData(
               bytes,
-              name: "ente_wrapped_${_currentIndex + 1}.png",
+              name: "ente_rewind_${_currentIndex + 1}.png",
               mimeType: "image/png",
             ),
           ],
@@ -432,7 +432,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         ),
       );
     } catch (error, stackTrace) {
-      _logger.severe("Failed to share Wrapped card", error, stackTrace);
+      _logger.severe("Failed to share Ente Rewind card", error, stackTrace);
       if (mounted) {
         showShortToast(context, "Share failed");
       }

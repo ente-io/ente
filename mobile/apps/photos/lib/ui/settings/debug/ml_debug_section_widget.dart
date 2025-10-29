@@ -88,7 +88,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         if (wrappedService.isEnabled)
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
-              title: "Recompute Wrapped 2025",
+              title: "Recompute Ente Rewind",
             ),
             pressedColor: getEnteColorScheme(context).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,
@@ -96,7 +96,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             onTap: () async {
               try {
                 await wrappedService.forceRecompute();
-                showShortToast(context, "Wrapped 2025 recomputed");
+                showShortToast(context, "Ente Rewind recomputed");
               } catch (e, s) {
                 logger.severe('Wrapped recompute failed ', e, s);
                 await showGenericErrorDialog(context: context, error: e);
