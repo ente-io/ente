@@ -104,6 +104,8 @@ func main() {
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
+	// For existing users, we were defaulting to CF-Connecting-IP. Unless there's a good reason to change it, we should keep it same.
+	viper.SetDefault("internal.trusted-client-ip-header", "CF-Connecting-IP")
 
 	setupLogger(environment)
 	log.Infof("Booting up %s server with commit #%s", environment, os.Getenv("GIT_COMMIT"))
@@ -387,6 +389,11 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	server := gin.New()
+
+	clientIPHeader := viper.GetString("internal.trusted-client-ip-header")
+	if clientIPHeader != "" {
+		server.TrustedPlatform = clientIPHeader
+	}
 
 	p := ginprometheus.NewPrometheus("museum")
 	p.ReqCntURLLabelMappingFn = urlSanitizer
@@ -852,6 +859,9 @@ func runServer(environment string, server *gin.Engine) {
 			port = viper.GetInt("http.port")
 		}
 		log.Infof("starting server on port %d", port)
+		if server.TrustedPlatform != "" {
+			log.Infof("trusted platform header: %s", server.TrustedPlatform)
+		}
 		server.Run(fmt.Sprintf(":%d", port))
 	}
 }
