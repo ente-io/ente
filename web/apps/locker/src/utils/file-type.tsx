@@ -108,7 +108,7 @@ export const getLockerFileIcon = (
 ): LockerIconInfo => {
     // First priority: Check locker info type
     if (lockerType) {
-        switch (lockerType) {
+        switch (lockerType as LockerInfoType) {
             case LockerInfoType.Note:
                 return {
                     icon: <StickyNote02Icon size={42} color="#FFA825" />,

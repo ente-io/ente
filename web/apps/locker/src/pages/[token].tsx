@@ -65,6 +65,32 @@ interface FileLinkInfo {
     ownerName?: string;
 }
 
+interface LockerInfoData {
+    content?: string;
+    location?: string;
+    notes?: string;
+    username?: string;
+    password?: string;
+    contactDetails?: string;
+    size?: number;
+}
+
+interface LockerInfo {
+    type?: string;
+    data?: LockerInfoData;
+}
+
+interface FileMetadata {
+    fileName?: string;
+    title?: string;
+    name?: string;
+    fileSize?: number;
+    size?: number;
+    uploadedTime?: number;
+    createdAt?: number;
+    modificationTime?: number;
+}
+
 interface DecryptedFileInfo {
     id: number;
     fileName: string;
@@ -75,7 +101,7 @@ interface DecryptedFileInfo {
     fileNonce?: string;
     fileKey?: string;
     lockerType?: string; // Locker file type from pubMagicMetadata.info
-    lockerInfoData?: any; // Data from pubMagicMetadata.info.data
+    lockerInfoData?: LockerInfoData; // Data from pubMagicMetadata.info.data
 }
 
 // Extract file key from URL hash (similar to extractCollectionKeyFromShareURL)
@@ -95,7 +121,7 @@ const extractFileKeyFromURL = async (url: URL): Promise<string | null> => {
             decodedKey = await fromHex(hashValue);
         }
         return decodedKey;
-    } catch (error) {
+    } catch {
         return null;
     }
 };
@@ -112,7 +138,7 @@ const fetchFileInfo = async (accessToken: string): Promise<FileLinkInfo> => {
         throw new Error(`Failed to fetch file`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as FileLinkInfo;
     return data;
 };
 
@@ -142,7 +168,7 @@ const decryptFileInfo = async (
                     linkKey,
                 );
                 fileKey = await toB64(decryptedKeyBytes);
-            } catch (error) {
+            } catch {
                 // If decryption fails, assume the link key IS the file key
                 fileKey = linkKey;
             }
@@ -184,7 +210,7 @@ const decryptFileInfo = async (
         }
 
         // Try decryption with the extracted fields
-        let metadata: any;
+        let metadata: FileMetadata = {};
 
         try {
             // Use the decryption header format
@@ -195,15 +221,15 @@ const decryptFileInfo = async (
                 },
                 fileKey,
             );
-            metadata = decryptedMetadata as any;
+            metadata = decryptedMetadata as FileMetadata;
             console.log("Decrypted metadata:", metadata);
-        } catch (err) {
+        } catch {
             metadata = {};
         }
 
         // Try to decrypt pubMagicMetadata if it exists
-        let pubMagicMetadata: any = null;
-        if (file.pubMagicMetadata?.data && file.pubMagicMetadata?.header) {
+        let pubMagicMetadata: { info?: string | LockerInfo } | null = null;
+        if (file.pubMagicMetadata?.data && file.pubMagicMetadata.header) {
             try {
                 const decryptedPubMagicMetadata = await decryptMetadataJSON(
                     {
@@ -212,8 +238,10 @@ const decryptFileInfo = async (
                     },
                     fileKey,
                 );
-                pubMagicMetadata = decryptedPubMagicMetadata;
-            } catch (err) {
+                pubMagicMetadata = decryptedPubMagicMetadata as {
+                    info?: string | LockerInfo;
+                };
+            } catch {
                 // Failed to decrypt pubMagicMetadata
             }
         }
@@ -223,14 +251,17 @@ const decryptFileInfo = async (
         console.log("pubMagicMetadata?.info:", pubMagicMetadata?.info);
 
         // Check if info is a JSON string that needs parsing
-        let infoObject = pubMagicMetadata?.info;
-        if (typeof infoObject === "string") {
+        let infoObject: LockerInfo | undefined;
+        const rawInfo = pubMagicMetadata?.info;
+        if (typeof rawInfo === "string") {
             try {
-                infoObject = JSON.parse(infoObject);
+                infoObject = JSON.parse(rawInfo) as LockerInfo;
                 console.log("Parsed info object:", infoObject);
-            } catch (e) {
+            } catch {
                 console.log("Failed to parse info as JSON");
             }
+        } else {
+            infoObject = rawInfo;
         }
 
         const lockerType = infoObject?.type;
@@ -284,7 +315,7 @@ const decryptFileInfo = async (
         console.log("Final decryptedFileInfo:", decryptedFileInfo);
 
         return decryptedFileInfo;
-    } catch (error) {
+    } catch {
         // Return partial info if decryption fails
         if (!fileLinkInfo.file) {
             return {
@@ -326,62 +357,58 @@ const downloadFile = async (
     fileDecryptionHeader?: string,
     fileNonce?: string,
 ) => {
-    try {
-        const url = `${await apiOrigin()}/file-link/file?accessToken=${accessToken}`;
+    const url = `${await apiOrigin()}/file-link/file?accessToken=${accessToken}`;
 
-        // Fetch the encrypted file from the server
-        const response = await fetch(url, {
-            headers: { "X-Auth-Access-Token": accessToken },
-        });
+    // Fetch the encrypted file from the server
+    const response = await fetch(url, {
+        headers: { "X-Auth-Access-Token": accessToken },
+    });
 
-        if (!response.ok) {
-            throw new Error(`Failed to download file: ${response.statusText}`);
-        }
-
-        // Get the response stream
-        const body = response.body;
-        if (!body) {
-            throw new Error("Response body is empty");
-        }
-
-        // For now, we'll do a simpler approach - download the entire file and decrypt it
-        // In production, you'd want to stream the decryption for large files
-        const encryptedData = new Uint8Array(await response.arrayBuffer());
-
-        let decryptedData: Uint8Array;
-
-        if (fileDecryptionHeader) {
-            // Modern format: Decrypt the file using the decryption header
-            decryptedData = await decryptStreamBytes(
-                { encryptedData, decryptionHeader: fileDecryptionHeader },
-                fileKey,
-            );
-        } else if (fileNonce) {
-            // Legacy format: Use box decryption with nonce
-            decryptedData = await decryptBoxBytes(
-                { encryptedData: await toB64(encryptedData), nonce: fileNonce },
-                fileKey,
-            );
-        } else {
-            // No encryption information, return as is
-            decryptedData = encryptedData;
-        }
-
-        // Create a blob from the decrypted data
-        const blob = new Blob([new Uint8Array(decryptedData)]);
-
-        // Create download link
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-        throw error;
+    if (!response.ok) {
+        throw new Error(`Failed to download file: ${response.statusText}`);
     }
+
+    // Get the response stream
+    const body = response.body;
+    if (!body) {
+        throw new Error("Response body is empty");
+    }
+
+    // For now, we'll do a simpler approach - download the entire file and decrypt it
+    // In production, you'd want to stream the decryption for large files
+    const encryptedData = new Uint8Array(await response.arrayBuffer());
+
+    let decryptedData: Uint8Array;
+
+    if (fileDecryptionHeader) {
+        // Modern format: Decrypt the file using the decryption header
+        decryptedData = await decryptStreamBytes(
+            { encryptedData, decryptionHeader: fileDecryptionHeader },
+            fileKey,
+        );
+    } else if (fileNonce) {
+        // Legacy format: Use box decryption with nonce
+        decryptedData = await decryptBoxBytes(
+            { encryptedData: await toB64(encryptedData), nonce: fileNonce },
+            fileKey,
+        );
+    } else {
+        // No encryption information, return as is
+        decryptedData = encryptedData;
+    }
+
+    // Create a blob from the decrypted data
+    const blob = new Blob([new Uint8Array(decryptedData)]);
+
+    // Create download link
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
 };
 
 const FilePage: React.FC = () => {
@@ -479,7 +506,7 @@ const FilePage: React.FC = () => {
                 color: "secondary",
                 title: "Copied to clipboard",
             });
-        } catch (err) {
+        } catch {
             setNotificationAttributes({
                 color: "critical",
                 title: "Failed to copy",
@@ -673,8 +700,7 @@ const FilePage: React.FC = () => {
 
                                         {/* Note Content - show for note type */}
                                         {fileInfo.lockerType === "note" &&
-                                            fileInfo.lockerInfoData
-                                                ?.content && (
+                                            fileInfo.lockerInfoData?.content && (
                                                 <Box
                                                     sx={{
                                                         width: "100%",
@@ -709,7 +735,7 @@ const FilePage: React.FC = () => {
                                                             }}
                                                         >
                                                             <Typography
-                                                                variant="body1"
+                                                                variant="body"
                                                                 sx={{
                                                                     color: "#757575",
                                                                     whiteSpace:
@@ -730,8 +756,8 @@ const FilePage: React.FC = () => {
                                                             onClick={() =>
                                                                 handleCopyContent(
                                                                     fileInfo
-                                                                        .lockerInfoData
-                                                                        .content,
+                                                                        .lockerInfoData!
+                                                                        .content!,
                                                                 )
                                                             }
                                                             sx={{
@@ -799,7 +825,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -819,8 +845,8 @@ const FilePage: React.FC = () => {
                                                                     onClick={() =>
                                                                         handleCopyContent(
                                                                             fileInfo
-                                                                                .lockerInfoData
-                                                                                .location,
+                                                                                .lockerInfoData!
+                                                                                .location!,
                                                                         )
                                                                     }
                                                                     sx={{
@@ -875,7 +901,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -895,8 +921,8 @@ const FilePage: React.FC = () => {
                                                                     onClick={() =>
                                                                         handleCopyContent(
                                                                             fileInfo
-                                                                                .lockerInfoData
-                                                                                .notes,
+                                                                                .lockerInfoData!
+                                                                                .notes!,
                                                                         )
                                                                     }
                                                                     sx={{
@@ -967,7 +993,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -987,8 +1013,8 @@ const FilePage: React.FC = () => {
                                                                     onClick={() =>
                                                                         handleCopyContent(
                                                                             fileInfo
-                                                                                .lockerInfoData
-                                                                                .username,
+                                                                                .lockerInfoData!
+                                                                                .username!,
                                                                         )
                                                                     }
                                                                     sx={{
@@ -1044,7 +1070,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -1060,8 +1086,8 @@ const FilePage: React.FC = () => {
                                                                     onClick={() =>
                                                                         handleCopyContent(
                                                                             fileInfo
-                                                                                .lockerInfoData
-                                                                                .password,
+                                                                                .lockerInfoData!
+                                                                                .password!,
                                                                         )
                                                                     }
                                                                     sx={{
@@ -1116,7 +1142,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -1133,13 +1159,17 @@ const FilePage: React.FC = () => {
                                                                     </Typography>
                                                                 </Box>
                                                                 <IconButton
-                                                                    onClick={() =>
-                                                                        handleCopyContent(
+                                                                    onClick={() => {
+                                                                        const notes =
                                                                             fileInfo
                                                                                 .lockerInfoData
-                                                                                .notes,
-                                                                        )
-                                                                    }
+                                                                                ?.notes;
+                                                                        if (notes) {
+                                                                            void handleCopyContent(
+                                                                                notes,
+                                                                            );
+                                                                        }
+                                                                    }}
                                                                     sx={{
                                                                         position:
                                                                             "absolute",
@@ -1208,7 +1238,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -1228,8 +1258,8 @@ const FilePage: React.FC = () => {
                                                                     onClick={() =>
                                                                         handleCopyContent(
                                                                             fileInfo
-                                                                                .lockerInfoData
-                                                                                .contactDetails,
+                                                                                .lockerInfoData!
+                                                                                .contactDetails!,
                                                                         )
                                                                     }
                                                                     sx={{
@@ -1285,7 +1315,7 @@ const FilePage: React.FC = () => {
                                                                     }}
                                                                 >
                                                                     <Typography
-                                                                        variant="body1"
+                                                                        variant="body"
                                                                         sx={{
                                                                             color: "#757575",
                                                                             whiteSpace:
@@ -1302,13 +1332,17 @@ const FilePage: React.FC = () => {
                                                                     </Typography>
                                                                 </Box>
                                                                 <IconButton
-                                                                    onClick={() =>
-                                                                        handleCopyContent(
+                                                                    onClick={() => {
+                                                                        const notes =
                                                                             fileInfo
                                                                                 .lockerInfoData
-                                                                                .notes,
-                                                                        )
-                                                                    }
+                                                                                ?.notes;
+                                                                        if (notes) {
+                                                                            void handleCopyContent(
+                                                                                notes,
+                                                                            );
+                                                                        }
+                                                                    }}
                                                                     sx={{
                                                                         position:
                                                                             "absolute",
