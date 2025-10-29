@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
@@ -15,6 +16,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
@@ -62,6 +64,7 @@ class HomeWidgetService {
   HomeWidgetService._privateConstructor();
 
   final Logger _logger = Logger((HomeWidgetService).toString());
+  final Computer _computer = Computer.shared();
   final computeLock = Lock();
   bool _isAppGroupSet = false;
 
@@ -110,9 +113,11 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    final Size? v2Size = await _captureFileV2(file, key, title, mainKey);
-    if (v2Size != null) {
-      return v2Size;
+    if (flagService.internalUser) {
+      final Size? v2Size = await _captureFileV2(file, key, title, mainKey);
+      if (v2Size != null) {
+        return v2Size;
+      }
     }
 
     final result = await _captureFileLegacy(file, key, title, mainKey);
@@ -160,63 +165,24 @@ class HomeWidgetService {
     }
 
     try {
-      img.Image? decoded = img.decodeImage(source.bytes);
       String decodeStrategy = 'package:image';
-      if (decoded == null) {
+      _WidgetImageProcessResult? processed =
+          await _computeWidgetImageResult(source.bytes);
+
+      if (processed == null) {
         final Uint8List? pngBytes = await _decodeWithUiFallback(source.bytes);
         if (pngBytes != null) {
-          decoded = img.decodeImage(pngBytes);
-          if (decoded != null) {
-            decodeStrategy = 'ui-codec';
-          }
+          decodeStrategy = 'ui-codec';
+          processed = await _computeWidgetImageResult(pngBytes);
         }
       }
 
-      if (decoded == null) {
+      if (processed == null) {
         _logger.warning(
           "[widget_capture_v2] Failed to decode image for ${file.displayName} using ${source.sourceLabel}",
         );
         return null;
       }
-
-      final int originalWidth = decoded.width;
-      final int originalHeight = decoded.height;
-      final String originalDims = '${originalWidth}x$originalHeight';
-      final int minSide = math.min(originalWidth, originalHeight);
-      if (minSide <= 0) {
-        _logger.warning(
-          "[widget_capture_v2] Invalid dimensions $originalDims for ${file.displayName}",
-        );
-        return null;
-      }
-
-      img.Image working = decoded;
-      bool croppedToSquare = false;
-      if (originalWidth != originalHeight) {
-        final int cropSize = minSide;
-        final int left = ((originalWidth - cropSize) / 2).round();
-        final int top = ((originalHeight - cropSize) / 2).round();
-        working = img.copyCrop(
-          decoded,
-          x: math.max(0, left),
-          y: math.max(0, top),
-          width: cropSize,
-          height: cropSize,
-        );
-        croppedToSquare = true;
-      }
-
-      final img.Image finalImage = img.copyResize(
-        working,
-        width: _widgetV2Size,
-        height: _widgetV2Size,
-        interpolation: img.Interpolation.linear,
-      );
-      final int finalWidth = finalImage.width;
-      final int finalHeight = finalImage.height;
-      final String finalDims = '${finalWidth}x$finalHeight';
-      final Uint8List pngBytes =
-          Uint8List.fromList(img.encodePng(finalImage, level: 0));
 
       final String widgetDirectory = await _getWidgetStorageDirectory();
       final String imagePath = '$widgetDirectory/$WIDGET_DIRECTORY/$key.png';
@@ -224,14 +190,15 @@ class HomeWidgetService {
       if (!await outputFile.exists()) {
         await outputFile.create(recursive: true);
       }
-      await outputFile.writeAsBytes(pngBytes);
+      await outputFile.writeAsBytes(processed.pngBytes);
       await setData(key, imagePath);
 
       final subText = await SmartMemoriesService.getDateFormattedLocale(
         creationTime: file.creationTime!,
       );
-      final String resolvedSubText =
-          kDebugMode ? '$subText · $finalDims' : subText;
+      final String resolvedSubText = kDebugMode
+          ? '$subText · ${processed.finalWidth}x${processed.finalHeight}'
+          : subText;
       final Map<String, dynamic> metadata = {
         "title": title,
         "subText": resolvedSubText,
@@ -241,13 +208,13 @@ class HomeWidgetService {
       await _saveWidgetMetadata(key, metadata);
 
       _logger.info(
-        "[widget_capture_v2] key=$key source=${source.sourceLabel} original=$originalDims "
-        "final=$finalDims cropped=$croppedToSquare strategy=$decodeStrategy",
+        "[widget_capture_v2] key=$key source=${source.sourceLabel} original=${processed.originalWidth}x${processed.originalHeight} "
+        "final=${processed.finalWidth}x${processed.finalHeight} cropped=${processed.croppedToSquare} downscaled=${processed.downscaled} strategy=$decodeStrategy",
       );
 
       return Size(
-        finalWidth.toDouble(),
-        finalHeight.toDouble(),
+        processed.finalWidth.toDouble(),
+        processed.finalHeight.toDouble(),
       );
     } catch (error, stackTrace) {
       _logger.severe(
@@ -274,6 +241,31 @@ class HomeWidgetService {
     } catch (error, stackTrace) {
       _logger.fine(
         "[widget_capture_v2] ui codec decode failed",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<_WidgetImageProcessResult?> _computeWidgetImageResult(
+    Uint8List bytes,
+  ) async {
+    try {
+      final Map<String, dynamic>? result = await _computer.compute(
+        _processWidgetImage,
+        param: {
+          'bytes': bytes,
+          'targetSize': _widgetV2Size,
+        },
+      );
+      if (result == null) {
+        return null;
+      }
+      return _WidgetImageProcessResult.fromMap(result);
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "[widget_capture_v2] isolate processing failed",
         error,
         stackTrace,
       );
@@ -540,6 +532,98 @@ class HomeWidgetService {
         break;
     }
   }
+}
+
+class _WidgetImageProcessResult {
+  const _WidgetImageProcessResult({
+    required this.pngBytes,
+    required this.originalWidth,
+    required this.originalHeight,
+    required this.finalWidth,
+    required this.finalHeight,
+    required this.croppedToSquare,
+    required this.downscaled,
+  });
+
+  factory _WidgetImageProcessResult.fromMap(Map<String, dynamic> map) {
+    return _WidgetImageProcessResult(
+      pngBytes: map['pngBytes'] as Uint8List,
+      originalWidth: map['originalWidth'] as int,
+      originalHeight: map['originalHeight'] as int,
+      finalWidth: map['finalWidth'] as int,
+      finalHeight: map['finalHeight'] as int,
+      croppedToSquare: map['croppedToSquare'] as bool,
+      downscaled: map['downscaled'] as bool,
+    );
+  }
+
+  final Uint8List pngBytes;
+  final int originalWidth;
+  final int originalHeight;
+  final int finalWidth;
+  final int finalHeight;
+  final bool croppedToSquare;
+  final bool downscaled;
+}
+
+Future<Map<String, dynamic>?> _processWidgetImage(
+  Map<String, dynamic> param,
+) async {
+  final Uint8List bytes = param['bytes'] as Uint8List;
+  final int targetSize = param['targetSize'] as int;
+
+  final img.Image? decoded = img.decodeImage(bytes);
+  if (decoded == null) {
+    return null;
+  }
+
+  final int originalWidth = decoded.width;
+  final int originalHeight = decoded.height;
+  final int minSide = math.min(originalWidth, originalHeight);
+  if (minSide <= 0) {
+    return null;
+  }
+
+  img.Image working = decoded;
+  bool croppedToSquare = false;
+  if (originalWidth != originalHeight) {
+    final int cropSize = minSide;
+    final int left = ((originalWidth - cropSize) / 2).round();
+    final int top = ((originalHeight - cropSize) / 2).round();
+    working = img.copyCrop(
+      decoded,
+      x: math.max(0, left),
+      y: math.max(0, top),
+      width: cropSize,
+      height: cropSize,
+    );
+    croppedToSquare = true;
+  }
+
+  img.Image finalImage = working;
+  bool downscaled = false;
+  if (working.width > targetSize) {
+    finalImage = img.copyResize(
+      working,
+      width: targetSize,
+      height: targetSize,
+      interpolation: img.Interpolation.linear,
+    );
+    downscaled = true;
+  }
+
+  final Uint8List pngBytes =
+      Uint8List.fromList(img.encodePng(finalImage, level: 0));
+
+  return <String, dynamic>{
+    'pngBytes': pngBytes,
+    'originalWidth': originalWidth,
+    'originalHeight': originalHeight,
+    'finalWidth': finalImage.width,
+    'finalHeight': finalImage.height,
+    'croppedToSquare': croppedToSquare,
+    'downscaled': downscaled,
+  };
 }
 
 class _WidgetSourceBytes {
