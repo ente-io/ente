@@ -88,7 +88,9 @@ jobs:
                   CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
                   VERSION_NAME=$(echo $CURRENT_VERSION | cut -d'+' -f1)
                   CURRENT_BUILD=$(echo $CURRENT_VERSION | cut -d'+' -f2)
-                  NEW_VERSION_CODE=$((CURRENT_BUILD + ${{ github.run_number }}))
+                  # Combine run_number and run_attempt for unique version codes across re-runs
+                  # Formula: base + (run_number * 100) + run_attempt ensures monotonic increase
+                  NEW_VERSION_CODE=$((CURRENT_BUILD + (${{ github.run_number }} * 100) + ${{ github.run_attempt }}))
                   NEW_VERSION="${VERSION_NAME}+${NEW_VERSION_CODE}"
 
                   sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
