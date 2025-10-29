@@ -510,7 +510,7 @@ const FilePage: React.FC = () => {
             <Box
                 sx={{
                     mt: { xs: 3, md: 6 },
-                    mb: { xs: 20, md: 0 },
+                    mb: fileInfo?.lockerType ? 20 : { xs: 20, md: 6 },
                     "& svg": { fill: "#000000" },
                 }}
             >
@@ -573,16 +573,6 @@ const FilePage: React.FC = () => {
                         );
                         return (
                             <>
-                                {/* Spacer for mobile - fixed spacing for LockerInfoType, flexible for regular files */}
-                                {!fileInfo.lockerType && (
-                                    <Box
-                                        sx={{
-                                            flex: { xs: 1, md: 0 },
-                                            minHeight: { xs: 40, md: 0 },
-                                        }}
-                                    />
-                                )}
-
                                 {/* File Info - Centered */}
                                 <Box
                                     sx={{
@@ -615,7 +605,9 @@ const FilePage: React.FC = () => {
                                         variant="h5"
                                         sx={{
                                             fontWeight: 600,
-                                            fontSize: "24px",
+                                            fontSize: fileInfo.lockerType
+                                                ? "24px"
+                                                : "22px",
                                             textAlign: "center",
                                             wordBreak: "break-word",
                                             color: "#000000",
@@ -1150,7 +1142,7 @@ const FilePage: React.FC = () => {
                                                                 mt: 3,
                                                             }}
                                                         >
-                                                            Contact Details
+                                                            Contact
                                                         </Typography>
                                                         <Box
                                                             sx={{
@@ -1289,23 +1281,13 @@ const FilePage: React.FC = () => {
                                         )}
                                 </Box>
 
-                                {/* Another spacer to push button to bottom on mobile - only for regular files */}
-                                {!fileInfo.lockerType && (
-                                    <Box
-                                        sx={{
-                                            flex: { xs: 1, md: 0 },
-                                            minHeight: { xs: 40, md: 0 },
-                                        }}
-                                    />
-                                )}
-
-                                {/* Download Button - Bottom on mobile, with file info on desktop */}
+                                {/* Download Button */}
                                 {/* Only show download button if not a LockerInfoType */}
                                 {!fileInfo.lockerType && (
                                     <Box
                                         sx={{
                                             width: "100%",
-                                            mt: { xs: 0, md: 4 },
+                                            mt: 4,
                                         }}
                                     >
                                         <Button
