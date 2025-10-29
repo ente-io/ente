@@ -134,11 +134,16 @@ class NativeVideoExportService {
   }
 
   /// Export video using native operations
+  ///
+  /// [allowFfmpegFallback] - If true (default), automatically falls back to
+  /// FFmpeg if native export fails quickly. Set to false to test native-only
+  /// processing (useful for integration tests).
   static Future<File> exportVideo({
     required VideoEditorController controller,
     required String outputPath,
     void Function(double)? onProgress,
     void Function(Object, StackTrace)? onError,
+    bool allowFfmpegFallback = true,
   }) async {
     final startTime = DateTime.now();
     try {
@@ -161,7 +166,8 @@ class NativeVideoExportService {
       }
 
       // If native export fails quickly, attempt FFmpeg fallback automatically
-      if (elapsed <= _nativeFallbackThreshold) {
+      // (only if fallback is enabled)
+      if (allowFfmpegFallback && elapsed <= _nativeFallbackThreshold) {
         return await ExportService.exportVideo(
           controller: controller,
           outputPath: outputPath,
