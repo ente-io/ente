@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
@@ -208,7 +209,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   }
 
   void _maybeShowTransformToast() {
-    if (!flagService.internalUser) return;
+    if (!kDebugMode) return;
     final name = widget.file.title ?? widget.file.displayName;
     if (name == null) return;
     final editedIndex = name.indexOf('_edited');
