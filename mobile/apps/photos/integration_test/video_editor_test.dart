@@ -1,9 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' show Offset, Size;
-
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image/image.dart' as img;
 import 'package:integration_test/integration_test.dart';
 import 'package:logging/logging.dart';
 import 'package:native_video_editor/native_video_editor.dart';
@@ -23,7 +19,6 @@ import 'package:photos/ui/tools/editor/video_editor/crop_value.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_editor/video_editor.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 /// Trim configuration
@@ -32,7 +27,8 @@ class TrimConfig {
   final Duration? duration;
   final Duration startOffset;
 
-  const TrimConfig({required this.label, this.duration, this.startOffset = Duration.zero});
+  const TrimConfig(
+      {required this.label, this.duration, this.startOffset = Duration.zero});
 
   bool get shouldTrim => duration != null;
 
@@ -64,7 +60,8 @@ class TrimConfigs {
   }
 
   /// Create a trim config from start offset and length
-  static TrimConfig fromRange({required int startSeconds, required int lengthSeconds}) {
+  static TrimConfig fromRange(
+      {required int startSeconds, required int lengthSeconds}) {
     return TrimConfig(
       label: "trim-${startSeconds}s-${startSeconds + lengthSeconds}s",
       duration: Duration(seconds: lengthSeconds),
@@ -92,31 +89,12 @@ class ValidationFailure {
   });
 }
 
-/// Crop visual validation failure details
-class CropValidationFailure {
-  final String fileId;
-  final String description;
-  final String reason;
-  final double similarity;
-  final String? debugInfo;
-
-  CropValidationFailure({
-    required this.fileId,
-    required this.description,
-    required this.reason,
-    required this.similarity,
-    this.debugInfo,
-  });
-}
-
 /// Result of processing a video iteration
 class IterationResult {
   final List<ValidationFailure> validationFailures;
-  final List<CropValidationFailure> cropValidationFailures;
 
   IterationResult({
     required this.validationFailures,
-    required this.cropValidationFailures,
   });
 }
 
@@ -128,24 +106,12 @@ class TestFileConfig {
   final List<String> cropOptions;
   final List<int> rotateOptions;
 
-  /// Timestamp (in seconds) to extract thumbnail from SOURCE video for crop comparison.
-  /// Actual timestamp used: trimStart + cropCompareAtSeconds
-  /// Default is 0 (at trim start). Use a different value if video has
-  /// black frames or unclear visuals at the trim start.
-  final int cropCompareAtSeconds;
-
-  /// Timestamp (in seconds) to extract thumbnail from EXPORTED video for crop comparison.
-  /// Default is 0 (start of exported video).
-  final int exportedVideoThumbnailAtSeconds;
-
   TestFileConfig({
     required this.fileIds,
     this.collectionId,
     required this.trimOptions,
     required this.cropOptions,
     required this.rotateOptions,
-    this.cropCompareAtSeconds = 0,
-    this.exportedVideoThumbnailAtSeconds = 0,
   });
 
   int get totalIterationsPerFile =>
@@ -157,8 +123,7 @@ class TestFileConfig {
 /// Video Editor Integration Test
 ///
 /// Tests native video editor by processing videos through all combinations
-/// of trim/crop/rotate. Validates exported video duration, dimensions, and
-/// crop accuracy via visual thumbnail comparison.
+/// of trim/crop/rotate. Validates exported video duration and dimensions.
 ///
 /// CONFIGURATION:
 /// Update testFiles list below. Each TestFileConfig can have:
@@ -167,10 +132,6 @@ class TestFileConfig {
 /// - trimOptions: [TrimConfigs.noTrim, TrimConfigs.fromSeconds(1), TrimConfigs.fromSeconds(15), ...]
 /// - cropOptions: ["None", "1:1", "16:9", "9:16", "3:4", "4:3"]
 /// - rotateOptions: [0, 90, 180, 270]
-/// - cropCompareAtSeconds: 0 (default) - Offset from trim start for SOURCE video thumbnail.
-///   Actual timestamp: trimStart + cropCompareAtSeconds
-/// - exportedVideoThumbnailAtSeconds: 0 (default) - Timestamp for EXPORTED video thumbnail.
-///   Use different values if videos have black frames or unclear visuals.
 ///
 /// EXAMPLES:
 /// // Single file, full test
@@ -197,19 +158,6 @@ class TestFileConfig {
 ///   rotateOptions: [0],
 /// )
 ///
-/// // With custom thumbnail timestamps (videos have black frames at start)
-/// TestFileConfig(
-///   fileIds: [456],
-///   trimOptions: [TrimConfigs.fromSeconds(10)], // Trim to 10s
-///   cropOptions: ["1:1", "16:9"],
-///   rotateOptions: [0],
-///   cropCompareAtSeconds: 2, // Source: trimStart + 2s
-///   exportedVideoThumbnailAtSeconds: 5, // Exported: at 5s
-/// )
-/// // In this example:
-/// // - Source thumbnail extracted at: trimStart (0) + 2 = 2nd second
-/// // - Exported thumbnail extracted at: 5th second of exported video
-///
 /// RUN:
 /// flutter drive --driver=test_driver/integration_test.dart \
 ///   --target=integration_test/video_editor_test.dart --flavor independent
@@ -217,8 +165,7 @@ class TestFileConfig {
 /// VALIDATION:
 /// - Duration check: ±100ms tolerance
 /// - Width/Height check: ±2px tolerance
-/// - Crop visual check: Compares thumbnails with ≥85% similarity threshold
-/// - Failures are grouped by type (export, validation, crop) in final report
+/// - Failures are grouped by type (export vs validation) in the final report
 /// - Tests native editor only (no FFmpeg fallback)
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -296,11 +243,13 @@ void main() {
       }
 
       // Calculate total files and iterations
-      final totalFiles = testFiles.fold(0, (sum, config) => sum + config.fileIds.length);
+      final totalFiles =
+          testFiles.fold(0, (sum, config) => sum + config.fileIds.length);
       final totalIterations =
           testFiles.fold(0, (sum, config) => sum + config.totalIterations);
       logger.info('═══════════════════════════════════════════════════════');
-      logger.info('Starting test with $totalFiles file(s), ${testFiles.length} configuration(s)');
+      logger.info(
+          'Starting test with $totalFiles file(s), ${testFiles.length} configuration(s)');
       logger.info('Total iterations: $totalIterations');
       logger.info('═══════════════════════════════════════════════════════\n');
 
@@ -308,27 +257,31 @@ void main() {
       final successfulExports = <String>[];
       final failedExports = <String, String>{};
       final validationFailures = <ValidationFailure>[];
-      final cropValidationFailures = <CropValidationFailure>[];
 
       // Process each configuration
       for (int configIndex = 0; configIndex < testFiles.length; configIndex++) {
         final config = testFiles[configIndex];
 
-        logger.info('\n╔═══════════════════════════════════════════════════════╗');
+        logger.info(
+            '\n╔═══════════════════════════════════════════════════════╗');
         logger.info('║ CONFIG ${configIndex + 1}/${testFiles.length}');
         logger.info('║ Files: ${config.fileIds}');
         logger.info('║ Iterations per file: ${config.totalIterationsPerFile}');
         logger.info('║ Trim: ${config.trimOptions}');
         logger.info('║ Crop: ${config.cropOptions}');
         logger.info('║ Rotate: ${config.rotateOptions}');
-        logger.info('╚═══════════════════════════════════════════════════════╝\n');
+        logger.info(
+            '╚═══════════════════════════════════════════════════════╝\n');
 
         // Process each file in this configuration
-        for (int fileIndex = 0; fileIndex < config.fileIds.length; fileIndex++) {
+        for (int fileIndex = 0;
+            fileIndex < config.fileIds.length;
+            fileIndex++) {
           final fileId = config.fileIds[fileIndex];
 
           logger.info('─────────────────────────────────────────────────────');
-          logger.info('File ${fileIndex + 1}/${config.fileIds.length} in config ${configIndex + 1}: ID $fileId');
+          logger.info(
+              'File ${fileIndex + 1}/${config.fileIds.length} in config ${configIndex + 1}: ID $fileId');
           logger.info('─────────────────────────────────────────────────────');
 
           // Load source file
@@ -407,21 +360,18 @@ void main() {
                     trimOption: trimOption,
                     cropOption: cropOption,
                     rotateOption: rotateOption,
-                    cropCompareAtSeconds: config.cropCompareAtSeconds,
-                    exportedVideoThumbnailAtSeconds: config.exportedVideoThumbnailAtSeconds,
                     description: description,
                     logger: logger,
                   );
 
-                  final totalFailures = result.validationFailures.length + result.cropValidationFailures.length;
+                  final totalFailures = result.validationFailures.length;
                   if (totalFailures == 0) {
                     successfulExports.add('File $fileId: $description');
                     logger.info('✓ Iteration completed successfully\n');
                   } else {
                     validationFailures.addAll(result.validationFailures);
-                    cropValidationFailures.addAll(result.cropValidationFailures);
-                    final msg = '⚠ Iteration completed with $totalFailures failure(s) '
-                        '(${result.validationFailures.length} validation, ${result.cropValidationFailures.length} crop)\n';
+                    final msg =
+                        '⚠ Iteration completed with $totalFailures validation failure(s)\n';
                     logger.warning(msg);
                   }
                 } catch (e, s) {
@@ -434,16 +384,19 @@ void main() {
             }
           }
 
-          logger.info('File $fileId completed: $fileIterationCount/${config.totalIterationsPerFile} iterations\n');
+          logger.info(
+              'File $fileId completed: $fileIterationCount/${config.totalIterationsPerFile} iterations\n');
         }
 
         logger.info('═══════════════════════════════════════════════════════');
         logger.info('Config ${configIndex + 1}/${testFiles.length} completed');
-        logger.info('═══════════════════════════════════════════════════════\n');
+        logger
+            .info('═══════════════════════════════════════════════════════\n');
       }
 
       // Print final summary
-      logger.info('\n╔═══════════════════════════════════════════════════════╗');
+      logger
+          .info('\n╔═══════════════════════════════════════════════════════╗');
       logger.info('║ FINAL TEST SUMMARY');
       logger.info('╚═══════════════════════════════════════════════════════╝');
       logger.info('Total configurations: ${testFiles.length}');
@@ -452,12 +405,13 @@ void main() {
       logger.info('Successful: ${successfulExports.length}');
       logger.info('Export failures: ${failedExports.length}');
       logger.info('Validation failures: ${validationFailures.length}');
-      logger.info('Crop validation failures: ${cropValidationFailures.length}');
 
       if (failedExports.isNotEmpty) {
-        logger.severe('\n╔═══════════════════════════════════════════════════════╗');
+        logger.severe(
+            '\n╔═══════════════════════════════════════════════════════╗');
         logger.severe('║ EXPORT FAILURES (${failedExports.length})');
-        logger.severe('╚═══════════════════════════════════════════════════════╝');
+        logger.severe(
+            '╚═══════════════════════════════════════════════════════╝');
         failedExports.forEach((desc, error) {
           logger.severe('  ✗ $desc');
           logger.severe('    Error: $error\n');
@@ -465,20 +419,26 @@ void main() {
       }
 
       if (validationFailures.isNotEmpty) {
-        logger.warning('\n╔═══════════════════════════════════════════════════════╗');
+        logger.warning(
+            '\n╔═══════════════════════════════════════════════════════╗');
         logger.warning('║ VALIDATION FAILURES (${validationFailures.length})');
-        logger.warning('╚═══════════════════════════════════════════════════════╝');
+        logger.warning(
+            '╚═══════════════════════════════════════════════════════╝');
 
         // Group by failure type
         final groupedFailures = <String, List<ValidationFailure>>{};
         for (final failure in validationFailures) {
-          groupedFailures.putIfAbsent(failure.failureType, () => []).add(failure);
+          groupedFailures
+              .putIfAbsent(failure.failureType, () => [])
+              .add(failure);
         }
 
         groupedFailures.forEach((type, failures) {
-          logger.warning('\n  ${type.toUpperCase()} (${failures.length} failures):');
+          logger.warning(
+              '\n  ${type.toUpperCase()} (${failures.length} failures):');
           for (final failure in failures) {
-            logger.warning('    ✗ File ${failure.fileId}: ${failure.description}');
+            logger.warning(
+                '    ✗ File ${failure.fileId}: ${failure.description}');
             logger.warning('      Expected: ${failure.expected}');
             logger.warning('      Actual:   ${failure.actual}');
           }
@@ -486,39 +446,22 @@ void main() {
         logger.warning('');
       }
 
-      if (cropValidationFailures.isNotEmpty) {
-        logger.warning('\n╔═══════════════════════════════════════════════════════╗');
-        logger.warning('║ CROP VALIDATION FAILURES (${cropValidationFailures.length})');
-        logger.warning('╚═══════════════════════════════════════════════════════╝');
-        logger.warning('Note: Export and dimension validation passed, but visual crop comparison failed.\n');
-
-        for (final failure in cropValidationFailures) {
-          logger.warning('  ✗ File ${failure.fileId}: ${failure.description}');
-          logger.warning('    Reason: ${failure.reason}');
-          logger.warning('    Similarity: ${(failure.similarity * 100).toStringAsFixed(2)}%');
-          if (failure.debugInfo != null) {
-            logger.warning('    Debug: ${failure.debugInfo}');
-          }
-          logger.warning('');
-        }
-      }
-
       logger.info('═══════════════════════════════════════════════════════\n');
 
       // Fail test if any iteration failed or had validation errors
-      final totalFailures = failedExports.length + validationFailures.length + cropValidationFailures.length;
+      final totalFailures = failedExports.length + validationFailures.length;
       expect(
         totalFailures,
         0,
         reason:
-            '$totalFailures failure(s) detected (${failedExports.length} export, ${validationFailures.length} validation, ${cropValidationFailures.length} crop). See logs above.',
+            '$totalFailures failure(s) detected (${failedExports.length} export, ${validationFailures.length} validation). See logs above.',
       );
     });
   });
 }
 
-/// Process a single video iteration with the specified settings
-/// Returns validation failures and crop validation failures
+/// Process a single video iteration with the specified settings.
+/// Returns any validation failures detected for the exported video.
 Future<IterationResult> _processVideoIteration({
   required EnteFile sourceFile,
   required File sourceIoFile,
@@ -526,15 +469,12 @@ Future<IterationResult> _processVideoIteration({
   required TrimConfig trimOption,
   required String cropOption,
   required int rotateOption,
-  required int cropCompareAtSeconds,
-  required int exportedVideoThumbnailAtSeconds,
   required String description,
   required Logger logger,
 }) async {
   VideoEditorController? controller;
   File? tempOutputFile;
   final failures = <ValidationFailure>[];
-  final cropFailures = <CropValidationFailure>[];
   CropCalculation? cropCalc;
 
   try {
@@ -542,15 +482,18 @@ Future<IterationResult> _processVideoIteration({
     logger.info('  → Initializing video editor controller...');
     controller = VideoEditorController.file(
       sourceIoFile,
-      minDuration: const Duration(milliseconds: 100), // Allow very short videos for testing
+      minDuration: const Duration(
+          milliseconds: 100), // Allow very short videos for testing
     );
     await controller.initialize();
 
     final originalDuration = controller.videoDuration;
     final originalSize = controller.video.value.size;
     logger.info('  → Controller initialized');
-    logger.info('     - Original duration: ${originalDuration.inMilliseconds}ms');
-    logger.info('     - Original size: ${originalSize.width.toInt()}x${originalSize.height.toInt()}');
+    logger
+        .info('     - Original duration: ${originalDuration.inMilliseconds}ms');
+    logger.info(
+        '     - Original size: ${originalSize.width.toInt()}x${originalSize.height.toInt()}');
 
     // Track expected dimensions (will be updated after crop)
     var expectedWidth = originalSize.width.toInt();
@@ -579,8 +522,10 @@ Future<IterationResult> _processVideoIteration({
           '  → Applying trim from ${trimmedStart.inMilliseconds}ms to ${trimmedEnd.inMilliseconds}ms...',
         );
 
-        final minTrim = trimmedStart.inMilliseconds / originalDuration.inMilliseconds;
-        final maxTrim = trimmedEnd.inMilliseconds / originalDuration.inMilliseconds;
+        final minTrim =
+            trimmedStart.inMilliseconds / originalDuration.inMilliseconds;
+        final maxTrim =
+            trimmedEnd.inMilliseconds / originalDuration.inMilliseconds;
         controller.updateTrim(minTrim, maxTrim);
 
         expectedDuration = trimmedEnd - trimmedStart;
@@ -633,7 +578,8 @@ Future<IterationResult> _processVideoIteration({
         cropCalc = VideoCropUtil.calculateFileSpaceCrop(controller: controller);
         expectedWidth = cropCalc.width;
         expectedHeight = cropCalc.height;
-        logger.info('  → Crop applied: $cropOption (${expectedWidth}x$expectedHeight)');
+        logger.info(
+            '  → Crop applied: $cropOption (${expectedWidth}x$expectedHeight)');
       } catch (e) {
         logger.warning('     - Failed to calculate crop dimensions: $e');
         logger.info('  → Crop applied: $cropOption');
@@ -674,7 +620,8 @@ Future<IterationResult> _processVideoIteration({
     logger.info('  → Exporting video with native editor...');
 
     // Create temp output path
-    final tempDir = Directory.systemTemp.createTempSync('ente_video_export_test');
+    final tempDir =
+        Directory.systemTemp.createTempSync('ente_video_export_test');
     final outputPath = path_helper.join(
       tempDir.path,
       'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
@@ -688,11 +635,13 @@ Future<IterationResult> _processVideoIteration({
       onProgress: (progress) {
         // Log progress at 25% intervals
         if ((progress * 100).round() % 25 == 0) {
-          logger.info('     - Progress: ${(progress * 100).toStringAsFixed(0)}%');
+          logger
+              .info('     - Progress: ${(progress * 100).toStringAsFixed(0)}%');
         }
       },
       onError: (e, s) {
-        logger.severe('  ✗ Native export failed - NO FFmpeg fallback in test!', e, s);
+        logger.severe(
+            '  ✗ Native export failed - NO FFmpeg fallback in test!', e, s);
       },
     );
 
@@ -760,16 +709,21 @@ Future<IterationResult> _processVideoIteration({
       // Step 8: Validate exported video
       logger.info('  → Validating exported video...');
       try {
-        final videoInfo = await NativeVideoEditor.getVideoInfo(exportedFile.path);
-        final actualDuration = Duration(milliseconds: (videoInfo['duration'] as num?)?.toInt() ?? 0);
+        final videoInfo =
+            await NativeVideoEditor.getVideoInfo(exportedFile.path);
+        final actualDuration = Duration(
+            milliseconds: (videoInfo['duration'] as num?)?.toInt() ?? 0);
         final actualWidth = (videoInfo['width'] as num?)?.toInt() ?? 0;
         final actualHeight = (videoInfo['height'] as num?)?.toInt() ?? 0;
 
-        logger.info('     - Actual duration: ${actualDuration.inMilliseconds}ms');
+        logger
+            .info('     - Actual duration: ${actualDuration.inMilliseconds}ms');
         logger.info('     - Actual size: ${actualWidth}x$actualHeight');
 
         // Validate duration (allow 100ms tolerance for encoding variations)
-        final durationDiff = (actualDuration.inMilliseconds - expectedDuration.inMilliseconds).abs();
+        final durationDiff =
+            (actualDuration.inMilliseconds - expectedDuration.inMilliseconds)
+                .abs();
         if (durationDiff > 100) {
           failures.add(
             ValidationFailure(
@@ -777,10 +731,12 @@ Future<IterationResult> _processVideoIteration({
               description: description,
               failureType: 'duration',
               expected: '${expectedDuration.inMilliseconds}ms',
-              actual: '${actualDuration.inMilliseconds}ms (diff: ${durationDiff}ms)',
+              actual:
+                  '${actualDuration.inMilliseconds}ms (diff: ${durationDiff}ms)',
             ),
           );
-          logger.warning('     ⚠ Duration mismatch! Expected: ${expectedDuration.inMilliseconds}ms, Got: ${actualDuration.inMilliseconds}ms');
+          logger.warning(
+              '     ⚠ Duration mismatch! Expected: ${expectedDuration.inMilliseconds}ms, Got: ${actualDuration.inMilliseconds}ms');
         }
 
         // Validate dimensions (accounting for crop and rotation)
@@ -799,18 +755,14 @@ Future<IterationResult> _processVideoIteration({
           finalExpectedHeight = temp;
         }
 
-        bool widthOk =
-            (actualWidth - finalExpectedWidth).abs() <= 2;
-        bool heightOk =
-            (actualHeight - finalExpectedHeight).abs() <= 2;
+        bool widthOk = (actualWidth - finalExpectedWidth).abs() <= 2;
+        bool heightOk = (actualHeight - finalExpectedHeight).abs() <= 2;
 
         if (!widthOk || !heightOk) {
           final swappedWidth = finalExpectedHeight;
           final swappedHeight = finalExpectedWidth;
-          final swappedWidthOk =
-              (actualWidth - swappedWidth).abs() <= 2;
-          final swappedHeightOk =
-              (actualHeight - swappedHeight).abs() <= 2;
+          final swappedWidthOk = (actualWidth - swappedWidth).abs() <= 2;
+          final swappedHeightOk = (actualHeight - swappedHeight).abs() <= 2;
 
           if (swappedWidthOk && swappedHeightOk) {
             logger.info(
@@ -833,7 +785,8 @@ Future<IterationResult> _processVideoIteration({
               actual: '$actualWidth',
             ),
           );
-          logger.warning('     ⚠ Width mismatch! Expected: $finalExpectedWidth, Got: $actualWidth');
+          logger.warning(
+              '     ⚠ Width mismatch! Expected: $finalExpectedWidth, Got: $actualWidth');
         }
 
         // Check height (allow some tolerance for encoding)
@@ -847,7 +800,8 @@ Future<IterationResult> _processVideoIteration({
               actual: '$actualHeight',
             ),
           );
-          logger.warning('     ⚠ Height mismatch! Expected: $finalExpectedHeight, Got: $actualHeight');
+          logger.warning(
+              '     ⚠ Height mismatch! Expected: $finalExpectedHeight, Got: $actualHeight');
         }
 
         if (failures.isEmpty) {
@@ -859,8 +813,6 @@ Future<IterationResult> _processVideoIteration({
         logger.warning('     - Failed to validate video info: $e');
         // Non-fatal - continue
       }
-
-      // Step 8b: Visual crop validation disabled temporarily.
 
       // Step 9: Update description with test parameters
       logger.info('  → Updating video description...');
@@ -879,7 +831,8 @@ Future<IterationResult> _processVideoIteration({
           // Don't fail the test if description update fails
         }
       } else {
-        logger.info('     - Skipping description update (file not uploaded yet)');
+        logger
+            .info('     - Skipping description update (file not uploaded yet)');
       }
 
       // Cleanup temp file
@@ -889,7 +842,6 @@ Future<IterationResult> _processVideoIteration({
     } finally {
       await PhotoManager.startChangeNotify();
     }
-
   } finally {
     // Cleanup
     await controller?.dispose();
@@ -902,278 +854,6 @@ Future<IterationResult> _processVideoIteration({
 
   return IterationResult(
     validationFailures: failures,
-    cropValidationFailures: cropFailures,
-  );
-}
-
-/// Validate crop visually by comparing thumbnails
-/// Returns CropValidationFailure if validation fails, null if passes
-Future<CropValidationFailure?> _validateCropVisually({
-  required String sourceVideoPath,
-  required String exportedVideoPath,
-  required String cropOption,
-  required int rotateOption,
-  required int sourceVideoThumbnailAtSeconds,
-  required int exportedVideoThumbnailAtSeconds,
-  required String fileId,
-  required String description,
-  required Logger logger,
-  required Offset minCrop,
-  required Offset maxCrop,
-  required Size videoSize,
-  CropCalculation? cropCalc,
-}) async {
-  // Generate thumbnails
-  final sourceThumbnailPath = await VideoThumbnail.thumbnailFile(
-    video: sourceVideoPath,
-    thumbnailPath: Directory.systemTemp.path,
-    imageFormat: ImageFormat.PNG,
-    timeMs: sourceVideoThumbnailAtSeconds * 1000,
-    quality: 100,
-  );
-
-  final exportedThumbnailPath = await VideoThumbnail.thumbnailFile(
-    video: exportedVideoPath,
-    thumbnailPath: Directory.systemTemp.path,
-    imageFormat: ImageFormat.PNG,
-    timeMs: exportedVideoThumbnailAtSeconds * 1000,
-    quality: 100,
-  );
-
-  if (sourceThumbnailPath == null || exportedThumbnailPath == null) {
-    return CropValidationFailure(
-      fileId: fileId,
-      description: description,
-      reason: 'Failed to generate thumbnails',
-      similarity: 0.0,
-    );
-  }
-
-  try {
-    logger.info('     - Source thumbnail path: $sourceThumbnailPath');
-    logger.info('     - Exported thumbnail path: $exportedThumbnailPath');
-
-    // Load images
-    final sourceBytes = await File(sourceThumbnailPath).readAsBytes();
-    final exportedBytes = await File(exportedThumbnailPath).readAsBytes();
-
-    final sourceImage = img.decodeImage(sourceBytes);
-    final exportedImage = img.decodeImage(exportedBytes);
-
-    if (sourceImage == null || exportedImage == null) {
-      return CropValidationFailure(
-        fileId: fileId,
-        description: description,
-        reason: 'Failed to decode thumbnails',
-        similarity: 0.0,
-      );
-    }
-
-    // Apply crop to source image based on aspect ratio
-    final croppedSource = cropCalc != null
-        ? _cropSourceImageUsingCalculation(
-            sourceImage,
-            cropCalc,
-          )
-        : _cropSourceImageUsingController(
-            sourceImage,
-            cropOption,
-            minCrop,
-            maxCrop,
-            videoSize,
-          );
-
-    // Apply rotation to cropped source image
-    final rotatedCroppedSource = _rotateImage(croppedSource, rotateOption);
-
-    // Resize both images to same size for comparison (in case of slight size differences)
-    final minWidth = rotatedCroppedSource.width < exportedImage.width
-        ? rotatedCroppedSource.width
-        : exportedImage.width;
-    final minHeight = rotatedCroppedSource.height < exportedImage.height
-        ? rotatedCroppedSource.height
-        : exportedImage.height;
-
-    final resizedSource = img.copyResize(
-      rotatedCroppedSource,
-      width: minWidth,
-      height: minHeight,
-    );
-    final resizedExported = img.copyResize(
-      exportedImage,
-      width: minWidth,
-      height: minHeight,
-    );
-
-    // Compare images
-    final similarity = _compareImages(resizedSource, resizedExported);
-
-    logger.info('     - Similarity: ${(similarity * 100).toStringAsFixed(2)}%');
-
-    // Consider it a pass if similarity is above 85%
-    if (similarity < 0.85) {
-      return CropValidationFailure(
-        fileId: fileId,
-        description: description,
-        reason: 'Thumbnail similarity too low (expected >= 85%)',
-        similarity: similarity,
-        debugInfo: 'Source: ${rotatedCroppedSource.width}x${rotatedCroppedSource.height}, '
-            'Exported: ${exportedImage.width}x${exportedImage.height}',
-      );
-    }
-
-    return null; // Validation passed
-  } finally {
-    // Clean up temporary thumbnail files
-    try {
-      await File(sourceThumbnailPath).delete();
-    } catch (_) {}
-    try {
-      await File(exportedThumbnailPath).delete();
-    } catch (_) {}
-  }
-}
-
-void _applyAspectCropToController({
-  required VideoEditorController controller,
-  required double aspectRatio,
-}) {
-  controller.cropAspectRatio(aspectRatio);
-  controller.cacheMinCrop = controller.minCrop;
-  controller.cacheMaxCrop = controller.maxCrop;
-}
-
-img.Image _cropSourceImageUsingCalculation(
-  img.Image image,
-  CropCalculation cropCalc,
-) {
-  int cropX = cropCalc.x.clamp(0, image.width - 1);
-  int cropY = cropCalc.y.clamp(0, image.height - 1);
-  int cropWidth = cropCalc.width.clamp(1, image.width - cropX);
-  int cropHeight = cropCalc.height.clamp(1, image.height - cropY);
-
-  return img.copyCrop(
-    image,
-    x: cropX,
-    y: cropY,
-    width: cropWidth,
-    height: cropHeight,
-  );
-}
-
-/// Apply crop aspect ratio to an image
-img.Image _cropSourceImageUsingController(
-  img.Image image,
-  String cropOption,
-  Offset minCrop,
-  Offset maxCrop,
-  Size videoSize,
-) {
-  if (cropOption == "None") {
-    return image;
-  }
-
-  try {
-    final displayCrop = VideoCropUtil.calculateDisplaySpaceCropRectFromData(
-      minCrop: minCrop,
-      maxCrop: maxCrop,
-      videoSize: videoSize,
-    );
-
-    final normalizedLeft =
-        (displayCrop.left / videoSize.width).clamp(0.0, 1.0);
-    final normalizedTop =
-        (displayCrop.top / videoSize.height).clamp(0.0, 1.0);
-    final normalizedWidth =
-        (displayCrop.width / videoSize.width).clamp(0.0, 1.0);
-    final normalizedHeight =
-        (displayCrop.height / videoSize.height).clamp(0.0, 1.0);
-
-    final int cropXRaw = (normalizedLeft * image.width).round();
-    final int cropYRaw = (normalizedTop * image.height).round();
-
-    final int cropX = cropXRaw.clamp(0, image.width > 0 ? image.width - 1 : 0);
-    final int cropY =
-        cropYRaw.clamp(0, image.height > 0 ? image.height - 1 : 0);
-
-    int cropWidth = (normalizedWidth * image.width).round();
-    int cropHeight = (normalizedHeight * image.height).round();
-
-    if (cropWidth <= 0 || cropHeight <= 0) {
-      return _applyCropToImage(image, cropOption);
-    }
-
-    if (cropX + cropWidth > image.width) {
-      cropWidth = image.width - cropX;
-    }
-    if (cropY + cropHeight > image.height) {
-      cropHeight = image.height - cropY;
-    }
-
-    cropWidth = cropWidth.clamp(1, image.width);
-    cropHeight = cropHeight.clamp(1, image.height);
-
-    return img.copyCrop(
-      image,
-      x: cropX,
-      y: cropY,
-      width: cropWidth,
-      height: cropHeight,
-    );
-  } catch (_) {
-    // Fall back to ratio-based crop if we cannot compute from controller data.
-    return _applyCropToImage(image, cropOption);
-  }
-}
-
-/// Apply crop aspect ratio to an image
-img.Image _applyCropToImage(img.Image image, String cropOption) {
-  if (cropOption == "None") return image;
-
-  double aspectRatio;
-  switch (cropOption) {
-    case "1:1":
-      aspectRatio = 1.0;
-      break;
-    case "16:9":
-      aspectRatio = 16.0 / 9.0;
-      break;
-    case "9:16":
-      aspectRatio = 9.0 / 16.0;
-      break;
-    case "3:4":
-      aspectRatio = 3.0 / 4.0;
-      break;
-    case "4:3":
-      aspectRatio = 4.0 / 3.0;
-      break;
-    default:
-      return image;
-  }
-
-  final imageAspect = image.width / image.height;
-  int cropWidth, cropHeight, cropX, cropY;
-
-  if (imageAspect > aspectRatio) {
-    // Image is wider, crop width
-    cropHeight = image.height;
-    cropWidth = (cropHeight * aspectRatio).round();
-    cropX = ((image.width - cropWidth) / 2).round();
-    cropY = 0;
-  } else {
-    // Image is taller, crop height
-    cropWidth = image.width;
-    cropHeight = (cropWidth / aspectRatio).round();
-    cropX = 0;
-    cropY = ((image.height - cropHeight) / 2).round();
-  }
-
-  return img.copyCrop(
-    image,
-    x: cropX,
-    y: cropY,
-    width: cropWidth,
-    height: cropHeight,
   );
 }
 
@@ -1186,7 +866,9 @@ String? _buildSettingsToastMessage({
 
   if (trimOption.shouldTrim) {
     final start = trimOption.startOffset.inSeconds;
-    final end = (trimOption.startOffset + (trimOption.duration ?? Duration.zero)).inSeconds;
+    final end =
+        (trimOption.startOffset + (trimOption.duration ?? Duration.zero))
+            .inSeconds;
     parts.add('Trim: ${start}s → ${end}s');
   }
   if (cropOption != 'None') {
@@ -1200,60 +882,4 @@ String? _buildSettingsToastMessage({
     return null;
   }
   return parts.join(' • ');
-}
-
-/// Rotate an image by the specified degrees (0, 90, 180, 270)
-img.Image _rotateImage(img.Image image, int degrees) {
-  switch (degrees) {
-    case 90:
-      return img.copyRotate(image, angle: 90);
-    case 180:
-      return img.copyRotate(image, angle: 180);
-    case 270:
-      return img.copyRotate(image, angle: 270);
-    default:
-      return image;
-  }
-}
-
-/// Compare two images and return similarity score (0.0 to 1.0)
-double _compareImages(img.Image img1, img.Image img2) {
-  if (img1.width != img2.width || img1.height != img2.height) {
-    return 0.0;
-  }
-
-  int totalPixels = img1.width * img1.height;
-  int matchingPixels = 0;
-  int totalDiff = 0;
-
-  for (int y = 0; y < img1.height; y++) {
-    for (int x = 0; x < img1.width; x++) {
-      final pixel1 = img1.getPixel(x, y);
-      final pixel2 = img2.getPixel(x, y);
-
-      final r1 = pixel1.r.toInt();
-      final g1 = pixel1.g.toInt();
-      final b1 = pixel1.b.toInt();
-
-      final r2 = pixel2.r.toInt();
-      final g2 = pixel2.g.toInt();
-      final b2 = pixel2.b.toInt();
-
-      final diff = (r1 - r2).abs() + (g1 - g2).abs() + (b1 - b2).abs();
-      totalDiff += diff;
-
-      // Consider pixels matching if difference is small (within 10 per channel)
-      if (diff < 30) {
-        matchingPixels++;
-      }
-    }
-  }
-
-  // Calculate similarity based on matching pixels and average difference
-  final matchRatio = matchingPixels / totalPixels;
-  final avgDiff = totalDiff / totalPixels / (255 * 3); // Normalize to 0-1
-  final diffScore = 1.0 - avgDiff;
-
-  // Weight both metrics
-  return (matchRatio * 0.6) + (diffScore * 0.4);
 }
