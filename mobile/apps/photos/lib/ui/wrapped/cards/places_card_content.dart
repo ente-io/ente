@@ -231,6 +231,7 @@ class _MostVisitedSpotCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
     final List<MediaRef> extraMedia =
         card.media.skip(3).toList(growable: false);
     final List<MediaRef> secondRowMedia =
@@ -301,6 +302,14 @@ class _MostVisitedSpotCardContent extends StatelessWidget {
               style: textTheme.bodyMuted,
             ),
           ),
+        if (chips.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          _DetailChips(
+            chips: chips,
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+        ],
         const SizedBox(height: 12),
       ],
     );

@@ -63,16 +63,26 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
             : topPerson.faceCount / dataset.totalNamedFaceCount;
     final int sharePercent = _percentOf(share);
     final List<String> chips = _cleanChips(<String>[
-      if (sharePercent > 0) "$sharePercent% of your shots with people",
+      "Appearances: ${numberFormat.format(topPerson.faceCount)}",
+      if (sharePercent > 0) "Share: $sharePercent%",
       if (topPerson.firstSeenYear != null &&
           topPerson.firstSeenYear == dataset.year)
-        "New in ${dataset.year}",
+        "First year: ${topPerson.firstSeenYear}",
     ]);
 
-    final String mention = topPerson.mentionForSentence;
-    final String subtitle = uniqueMoments > 1
-        ? "${numberFormat.format(uniqueMoments)} moments with $mention."
-        : "One unforgettable moment with $mention.";
+    final String displayName = topPerson.displayNameForTitle.trim();
+    final bool endsWithS =
+        displayName.isNotEmpty && displayName.toLowerCase().endsWith("s");
+    final String title = displayName.isEmpty
+        ? "Your star"
+        : endsWithS
+            ? "$displayName spotlight"
+            : "$displayName's spotlight";
+    final String? heroName =
+        displayName.isNotEmpty ? displayName : null;
+    final String subtitle = heroName != null
+        ? "$heroName was the star of your year!"
+        : "Someone special was the star of your year!";
 
     final List<int> candidateIds = topPerson.topMediaFileIDs(6);
     final Map<int, double> scoreHints = topPerson.mediaScoreHints();
@@ -97,7 +107,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.topPerson,
-      title: "${topPerson.displayNameForTitle} starred in your ${dataset.year}",
+      title: title,
       subtitle: subtitle,
       media: media,
       meta: meta
@@ -169,8 +179,9 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.topThreePeople,
-      title: "Your top people",
-      subtitle: "${_formatNameList(names)} lit up your ${dataset.year}.",
+      title: "Core crew",
+      subtitle:
+          "${_formatNameList(names)} kept showing up in your favorite frames.",
       media: media,
       meta: meta
         ..addAll(
@@ -203,24 +214,38 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final int duoPercent =
         _percentOf(dataset.duoMoments / totalMoments.toDouble());
 
-    final List<String> subtitleParts = <String>[];
-    if (groupPercent > 0) {
-      subtitleParts.add("$groupPercent% with the group");
-    }
-    if (soloPercent > 0) {
-      subtitleParts.add("$soloPercent% one-on-one");
-    }
-    if (subtitleParts.isEmpty && duoPercent > 0) {
-      subtitleParts.add("$duoPercent% with a plus-one");
+    final bool hasGroup = groupPercent > 0;
+    final bool hasSolo = soloPercent > 0;
+    final bool hasDuo = duoPercent > 0;
+    final List<String> intimateParts = <String>[
+      if (hasSolo) "$soloPercent% were one-on-one moments",
+      if (hasDuo) "$duoPercent% played out in small circles",
+    ];
+    final String? intimateSummary = intimateParts.isEmpty
+        ? null
+        : intimateParts.length == 1
+            ? intimateParts.first
+            : "${intimateParts[0]} and ${intimateParts[1]}";
+
+    final String subtitle;
+    if (hasGroup && intimateSummary != null) {
+      subtitle =
+          "You made $groupPercent% of your memories in groups, while $intimateSummary.";
+    } else if (hasGroup) {
+      subtitle = "You made $groupPercent% of your memories in groups.";
+    } else if (intimateSummary != null) {
+      subtitle = "You kept things close—$intimateSummary.";
+    } else {
+      subtitle = "You balanced time with friends and quiet moments.";
     }
 
     final List<String> chips = _cleanChips(<String>[
       if (dataset.groupMoments > 0)
-        "${numberFormat.format(dataset.groupMoments)} group moments",
+        "Group shots: ${numberFormat.format(dataset.groupMoments)}",
       if (dataset.duoMoments > 0)
-        "${numberFormat.format(dataset.duoMoments)} duo shots",
+        "Duo shots: ${numberFormat.format(dataset.duoMoments)}",
       if (dataset.soloMoments > 0)
-        "${numberFormat.format(dataset.soloMoments)} solo portraits",
+        "Solo shots: ${numberFormat.format(dataset.soloMoments)}",
     ]);
 
     final List<int> candidateIds = <int>[
@@ -250,10 +275,8 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.groupVsSolo,
-      title: "Memories shared",
-      subtitle: subtitleParts.isEmpty
-          ? "You balanced time with friends and quiet moments."
-          : subtitleParts.join(" · "),
+      title: "Sharing memories",
+      subtitle: subtitle,
       media: media,
       meta: meta
         ..addAll(
@@ -304,9 +327,19 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         : "${_formatNameList(highlightNames)} joined your story.";
 
     final List<String> chips = _cleanChips(<String>[
-      "${numberFormat.format(count)} new faces",
-      if (highlightNames.isNotEmpty)
-        "Spotlight: ${_formatNameList(highlightNames)}",
+      for (int index = 0;
+          index < highlights.length && index < 3;
+          index += 1)
+        () {
+          final _PersonStats stats = highlights[index];
+          final String name = stats.displayNameForTitle.trim();
+          final String labelName =
+              name.isNotEmpty ? name : "New friend ${index + 1}";
+          final String countLabel = stats.faceCount == 1
+              ? "1 memory"
+              : "${numberFormat.format(stats.faceCount)} memories";
+          return "$labelName: $countLabel";
+        }(),
     ]);
 
     final List<int> candidateIds = highlights
@@ -342,12 +375,14 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       "displayDurationMillis": 6500,
     };
 
+    final String subtitle = subtitleNames.isEmpty
+        ? "${numberFormat.format(count)} new faces joined your story."
+        : subtitleNames;
+
     return WrappedCard(
       type: WrappedCardType.newFaces,
-      title: "${numberFormat.format(count)} new faces met",
-      subtitle: subtitleNames.isEmpty
-          ? "Fresh connections defined your ${dataset.year}."
-          : subtitleNames,
+      title: "Fresh faces",
+      subtitle: subtitle,
       media: media,
       meta: meta
         ..addAll(

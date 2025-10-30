@@ -49,7 +49,6 @@ class _TotalsCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
-    final String? firstCaptureLine = card.meta["firstCaptureLine"] as String?;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,13 +76,6 @@ class _TotalsCardContent extends StatelessWidget {
             chips: chips,
             colorScheme: colorScheme,
             textTheme: textTheme,
-          ),
-        ],
-        if (firstCaptureLine != null) ...[
-          const SizedBox(height: 16),
-          Text(
-            firstCaptureLine,
-            style: textTheme.smallMuted,
           ),
         ],
         const Spacer(),

@@ -162,12 +162,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
         ...candidate.personNames,
     }..removeWhere((String name) => name.isEmpty);
 
-    final List<String> detailChips = <String>[
-      "${candidates.length} delightfully blurry shots",
-      if (nameSet.isNotEmpty)
-        "Featuring ${_formatNameList(nameSet.toList(growable: false))}",
-    ];
-
     final double averageBlur = _average(
       selectedCandidates
           .map((candidate) => candidate.blurScore)
@@ -181,7 +175,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Map<String, Object?> meta = <String, Object?>{
       "totalCandidates": candidates.length,
-      "detailChips": detailChips,
+      "detailChips": const <String>[],
       if (nameSet.isNotEmpty) "personNames": nameSet.toList(growable: false),
       "averageBlur": averageBlur,
       "averageFaceScore": averageScore,
@@ -271,13 +265,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final List<String> detailChips = <String>[
-      "${_formatCount(
-        chosenBucket.matches.length,
-        'shot',
-      )} in ${chosenBucket.spec.displayName.toLowerCase()}",
-    ];
-
     final Map<String, Object?> meta = <String, Object?>{
       "palette": <Map<String, Object?>>[
         <String, Object?>{
@@ -289,15 +276,16 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
               media.map((MediaRef ref) => ref.uploadedFileID).toList(),
         },
       ],
-      "detailChips": detailChips,
+      "detailChips": const <String>[],
       "dominantColor": chosenBucket.spec.displayName,
     };
 
-    final String subtitle = "Your palette: ${chosenBucket.spec.displayName}";
+    final String subtitle =
+        "${chosenBucket.spec.displayName} stole your palette.";
 
     return WrappedCard(
       type: WrappedCardType.yearInColor,
-      title: "2025 looked like this",
+      title: "Color crush",
       subtitle: subtitle,
       media: media,
       meta: meta,
@@ -386,9 +374,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Map<String, Object?> meta = <String, Object?>{
       "matchCount": matches.length,
-      "detailChips": <String>[
-        "${matches.length} black-and-white frames",
-      ],
+      "detailChips": const <String>[],
       "uploadedFileIDs": media
           .map((MediaRef ref) => ref.uploadedFileID)
           .toList(growable: false),
@@ -396,9 +382,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.monochrome,
-      title: "Monochrome moments",
-      subtitle:
-          "You kept ${matches.length} ${matches.length == 1 ? "monochrome story" : "monochrome stories"}.",
+      title: "Mono mood",
+      subtitle: "You kept these black-and-white captures in rotation.",
       media: media,
       meta: meta,
     );
@@ -470,7 +455,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Map<String, Object?> meta = <String, Object?>{
       "queries": AestheticsCandidateBuilder._kWowQueries,
-      "detailChips": <String>[],
+      "detailChips": const <String>[],
       "uploadedFileIDs": media
           .map((MediaRef ref) => ref.uploadedFileID)
           .toList(growable: false),
@@ -478,8 +463,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.top9Wow,
-      title: "Wonderful captures",
-      subtitle: "You made some truly stunning photos this year!",
+      title: "Wonderful Captures",
+      subtitle: "Your showstoppers look gallery-ready.",
       media: media,
       meta: meta,
     );
@@ -497,25 +482,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return "Soft-focus laughs with ${sorted[0]} & ${sorted[1]}.";
     }
     return "Soft-focus laughs with ${sorted[0]}, ${sorted[1]} and crew.";
-  }
-
-  static String _formatNameList(List<String> names) {
-    if (names.isEmpty) return "";
-    names.sort();
-    if (names.length == 1) {
-      return names.first;
-    }
-    if (names.length == 2) {
-      return "${names[0]} & ${names[1]}";
-    }
-    return "${names[0]}, ${names[1]} + ${names.length - 2} more";
-  }
-
-  static String _formatCount(int count, String label) {
-    if (count == 1) {
-      return "1 $label";
-    }
-    return "$count ${label}s";
   }
 
   static double _average(List<double> values) {
