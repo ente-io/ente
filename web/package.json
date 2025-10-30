@@ -31,9 +31,6 @@
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2"
     },
-    "dependencies": {
-        "hugeicons-react": "^0.3.0"
-    },
     "devDependencies": {
         "concurrently": "^9.2.1",
         "eslint": "^9.30.1",
