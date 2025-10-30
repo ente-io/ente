@@ -52,14 +52,14 @@ Future<List<EnteFile>> _convertLocalAssetsToUniqueFiles(
 ) async {
   final Set<String> alreadySeenLocalIDs = <String>{};
   final List<EnteFile> files = [];
+  final Logger logger = Logger('_convertLocalAssetsToUniqueFiles');
   for (LocalPathAsset localPathAsset in assets) {
     final String localPathName = localPathAsset.pathName;
     for (final String localID in localPathAsset.localIDs) {
       if (!alreadySeenLocalIDs.contains(localID)) {
         final assetEntity = await AssetEntity.fromId(localID);
         if (assetEntity == null) {
-          Logger("_convertLocalAssetsToUniqueFiles")
-              .warning('Failed to fetch asset with id $localID');
+          logger.warning('Failed to fetch asset with id $localID');
           continue;
         }
         files.add(

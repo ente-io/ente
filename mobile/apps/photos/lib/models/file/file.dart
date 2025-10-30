@@ -5,11 +5,11 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/core/errors.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
+import 'package:photos/utils/asset_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/panorama_util.dart";
@@ -71,25 +71,6 @@ class EnteFile {
 
   EnteFile();
 
-  /// Safely extracts microsecondsSinceEpoch from DateTime, throwing InvalidDateTimeError if invalid
-  static int _safeGetMicroseconds(
-    DateTime dateTime,
-    String assetId,
-    String? assetTitle,
-    String label,
-  ) {
-    try {
-      return dateTime.microsecondsSinceEpoch;
-    } on RangeError catch (e) {
-      throw InvalidDateTimeError(
-        assetId: assetId,
-        assetTitle: assetTitle,
-        field: label,
-        originalError: e.message ?? e.toString(),
-      );
-    }
-  }
-
   static Future<EnteFile> fromAsset(String pathName, AssetEntity asset) async {
     final EnteFile file = EnteFile();
     file.localID = asset.id;
@@ -99,11 +80,10 @@ class EnteFile {
         Location(latitude: asset.latitude, longitude: asset.longitude);
     file.fileType = fileTypeFromAsset(asset);
     file.creationTime = parseFileCreationTime(file.title, asset);
-    file.modificationTime = _safeGetMicroseconds(
-      asset.modifiedDateTime,
-      asset.id,
-      asset.title,
-      'modificationTime',
+    file.modificationTime = safeAssetTime(
+      asset,
+      label: AssetDateTimeLabel.modification,
+      precision: AssetTimePrecision.microseconds,
     );
     file.fileSubType = asset.subtype;
     file.metadataVersion = -1;
@@ -111,17 +91,15 @@ class EnteFile {
   }
 
   static int parseFileCreationTime(String? fileTitle, AssetEntity asset) {
-    int creationTime = _safeGetMicroseconds(
-      asset.createDateTime,
-      asset.id,
-      asset.title,
-      'createDateTime',
+    int creationTime = safeAssetTime(
+      asset,
+      label: AssetDateTimeLabel.creation,
+      precision: AssetTimePrecision.microseconds,
     );
-    final int modificationTime = _safeGetMicroseconds(
-      asset.modifiedDateTime,
-      asset.id,
-      asset.title,
-      'modificationTime',
+    final int modificationTime = safeAssetTime(
+      asset,
+      label: AssetDateTimeLabel.modification,
+      precision: AssetTimePrecision.microseconds,
     );
     if (creationTime >= jan011981Time) {
       // assuming that fileSystem is returning correct creationTime.

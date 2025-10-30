@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/sync/import/model.dart";
+import 'package:photos/utils/asset_time_util.dart';
 import 'package:tuple/tuple.dart';
 
 final _logger = Logger("FileSyncUtil");
@@ -197,25 +198,6 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
   return result;
 }
 
-/// Safely extracts millisecondsSinceEpoch from DateTime, throwing InvalidDateTimeError if invalid
-int _safeGetMilliseconds(
-  DateTime dateTime,
-  String assetId,
-  String? assetTitle,
-  String label,
-) {
-  try {
-    return dateTime.millisecondsSinceEpoch;
-  } on RangeError catch (e) {
-    throw InvalidDateTimeError(
-      assetId: assetId,
-      assetTitle: assetTitle,
-      field: label,
-      originalError: e.message ?? e.toString(),
-    );
-  }
-}
-
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
 Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
@@ -229,20 +211,18 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
   final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
     localIDs.add(entity.id);
-    final createMs = _safeGetMilliseconds(
-      entity.createDateTime,
-      entity.id,
-      entity.title,
-      'createDateTime',
+    final int createMs = safeAssetTime(
+      entity,
+      label: AssetDateTimeLabel.creation,
+      precision: AssetTimePrecision.milliseconds,
     );
-    final modifiedMs = _safeGetMilliseconds(
-      entity.modifiedDateTime,
-      entity.id,
-      entity.title,
-      'modifiedDateTime',
+    final int modifiedMs = safeAssetTime(
+      entity,
+      label: AssetDateTimeLabel.modification,
+      precision: AssetTimePrecision.milliseconds,
     );
     final bool assetCreatedOrUpdatedAfterGivenTime =
-        max(createMs, modifiedMs) >= (fromTime / ~1000);
+        max(createMs, modifiedMs) >= (fromTime ~/ 1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       final file = await EnteFile.fromAsset(pathEntity.name, entity);
