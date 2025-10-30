@@ -41,6 +41,13 @@ class Configuration extends BaseConfiguration {
   }
 
   @override
+  // Also remove the auth secret key so cached sessions are fully revoked.
+  List<String> get secureStorageKeys => [
+        ...super.secureStorageKeys,
+        authSecretKeyKey,
+      ];
+
+  @override
   Future<void> logout({bool autoLogout = false}) async {
     _authSecretKey = null;
     await super.logout();
