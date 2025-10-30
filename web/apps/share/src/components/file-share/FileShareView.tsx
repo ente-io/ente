@@ -116,6 +116,26 @@ export const FileShareView: React.FC = () => {
                             </Box>
                         )}
 
+                        {/* Coming Soon State (no token) */}
+                        {!loading && !error && !fileInfo && (
+                            <Box
+                                sx={{
+                                    flex: 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    textAlign: "center",
+                                }}
+                            >
+                                <Typography
+                                    variant="body"
+                                    sx={{ color: "#a2a2a2", mt: 4 }}
+                                >
+                                    — Coming soon —
+                                </Typography>
+                            </Box>
+                        )}
+
                         {/* Error State */}
                         {error && !loading && (
                             <Box

@@ -36,15 +36,18 @@ export const useFileShare = (): UseFileShareResult => {
     useEffect(() => {
         const loadFileInfo = async () => {
             try {
-                const { token } = router.query;
+                const currentURL = new URL(window.location.href);
 
-                if (!token || typeof token !== "string") {
-                    setError("Invalid file link. Missing access token.");
+                // Extract token from pathname (e.g., "/abc123" -> "abc123")
+                const pathname = currentURL.pathname;
+                const token = pathname === "/" ? null : pathname.slice(1);
+
+                if (!token) {
+                    // No token means user is at root - just finish loading without error
                     setLoading(false);
                     return;
                 }
 
-                const currentURL = new URL(window.location.href);
                 const key = await extractFileKeyFromURL(currentURL);
 
                 if (!key) {
@@ -83,7 +86,7 @@ export const useFileShare = (): UseFileShareResult => {
         if (router.isReady) {
             void loadFileInfo();
         }
-    }, [router.isReady, router.query]);
+    }, [router.isReady]);
 
     const handleDownload = async () => {
         if (!accessToken || !fileInfo?.fileKey) return;

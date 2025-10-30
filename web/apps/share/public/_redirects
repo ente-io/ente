@@ -1,0 +1,10 @@
+# Cloudflare Pages redirect configuration
+# Route all paths to /index.html for client-side routing
+# The 200 status code means this is a rewrite (not a redirect)
+
+# Serve static assets normally (these rules are processed first)
+/_next/*  /_next/:splat  200
+/images/*  /images/:splat  200
+
+# SPA fallback for everything else
+/*  /index.html  200
