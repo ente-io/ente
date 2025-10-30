@@ -102,7 +102,7 @@ class _StoryCard extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 44, 24, 32),
+                      padding: const EdgeInsets.fromLTRB(24, 56, 24, 32),
                       child: _CardContent(
                         card: card,
                         colorScheme: colorScheme,

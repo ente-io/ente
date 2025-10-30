@@ -512,24 +512,19 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                       },
                     ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
                   Align(
                     alignment: Alignment.centerRight,
                     child: GestureDetector(
                       onTap: _closeViewer,
                       behavior: HitTestBehavior.translucent,
-                      child: Container(
-                        width: 36,
-                        height: 36,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
+                      child: SizedBox(
+                        width: 44,
+                        height: 44,
                         child: Icon(
                           Icons.close_rounded,
-                          size: 20,
-                          color: Colors.white.withValues(alpha: 0.88),
+                          size: 24,
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ),
