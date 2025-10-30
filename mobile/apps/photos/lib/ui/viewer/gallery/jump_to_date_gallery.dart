@@ -9,6 +9,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -16,6 +17,12 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+
+enum GalleryLoadState {
+  loadingFiles,
+  waitingForGalleryFinalBuildToComplete,
+  galleryReady,
+}
 
 class JumpToDateGallery extends StatefulWidget {
   final EnteFile fileToJumpTo;
@@ -38,7 +45,7 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
   final _selectedFiles = SelectedFiles();
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
-  bool _isLoadingFiles = true;
+  GalleryLoadState _loadState = GalleryLoadState.loadingFiles;
 
   @override
   void initState() {
@@ -62,12 +69,35 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
   }
 
   Future<void> _loadFiles() async {
+    final startTime = DateTime.now();
     final allFiles =
         await SearchService.instance.getAllFilesForHierarchicalSearch();
+
+    // Ensure minimum loading duration to mask Gallery initialization jank
+    final elapsed = DateTime.now().difference(startTime).inMilliseconds;
+    const minLoadingDuration = 200;
+
+    if (elapsed < minLoadingDuration) {
+      await Future.delayed(
+        Duration(milliseconds: minLoadingDuration - elapsed),
+      );
+    }
+
+    if (!mounted) return;
+
     setState(() {
       files.clear();
       files.addAll(allFiles);
-      _isLoadingFiles = false;
+      _loadState = GalleryLoadState.waitingForGalleryFinalBuildToComplete;
+    });
+
+    // Wait for gallery to build, then make it visible
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          _loadState = GalleryLoadState.galleryReady;
+        });
+      }
     });
   }
 
@@ -90,50 +120,59 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
               _selectedFiles,
             ),
           ),
-          body: _isLoadingFiles
-              ? const EnteLoadingWidget()
-              : SelectionState(
-                  selectedFiles: _selectedFiles,
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Gallery(
-                        asyncLoader: (
-                          creationStartTime,
-                          creationEndTime, {
-                          limit,
-                          asc,
-                        }) {
-                          final result = files
-                              .where(
-                                (file) =>
-                                    file.creationTime! >= creationStartTime &&
-                                    file.creationTime! <= creationEndTime,
-                              )
-                              .toList();
-                          return Future.value(
-                            FileLoadResult(
-                              result,
-                              result.length < files.length,
-                            ),
-                          );
-                        },
-                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                        removalEventTypes: const {
-                          EventType.deletedFromRemote,
-                          EventType.deletedFromEverywhere,
-                          EventType.hide,
-                        },
-                        tagPrefix: widget.tagPrefix,
-                        selectedFiles: _selectedFiles,
-                        enableFileGrouping: true,
-                        fileToJumpTo: widget.fileToJumpTo,
-                      ),
-                      FileSelectionOverlayBar(
-                        JumpToDateGallery.overlayType,
-                        _selectedFiles,
-                      ),
-                    ],
+          body: _loadState == GalleryLoadState.loadingFiles
+              ? EnteLoadingWidget(
+                  color: getEnteColorScheme(context).strokeMuted,
+                )
+              : AnimatedOpacity(
+                  opacity:
+                      _loadState == GalleryLoadState.galleryReady ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutQuad,
+                  child: SelectionState(
+                    selectedFiles: _selectedFiles,
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        Gallery(
+                          asyncLoader: (
+                            creationStartTime,
+                            creationEndTime, {
+                            limit,
+                            asc,
+                          }) {
+                            final result = files
+                                .where(
+                                  (file) =>
+                                      file.creationTime! >= creationStartTime &&
+                                      file.creationTime! <= creationEndTime,
+                                )
+                                .toList();
+                            return Future.value(
+                              FileLoadResult(
+                                result,
+                                result.length < files.length,
+                              ),
+                            );
+                          },
+                          reloadEvent:
+                              Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                          removalEventTypes: const {
+                            EventType.deletedFromRemote,
+                            EventType.deletedFromEverywhere,
+                            EventType.hide,
+                          },
+                          tagPrefix: widget.tagPrefix,
+                          selectedFiles: _selectedFiles,
+                          enableFileGrouping: true,
+                          fileToJumpTo: widget.fileToJumpTo,
+                        ),
+                        FileSelectionOverlayBar(
+                          JumpToDateGallery.overlayType,
+                          _selectedFiles,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
         ),
