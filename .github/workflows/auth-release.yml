@@ -101,7 +101,7 @@ jobs:
                   VERSION_NAME=$(echo "${{ github.ref_name }}" | sed 's/^auth-v//')
 
                   # Create new release entry
-                  NEW_RELEASE="    <release version=\"${VERSION_NAME}\" date=\"${RELEASE_DATE}\" />"
+                  NEW_RELEASE="        <release version=\"${VERSION_NAME}\" date=\"${RELEASE_DATE}\" />"
 
                   # Insert new release entry after <releases> tag
                   sed -i "/<releases>/a\\${NEW_RELEASE}" "$APPDATA_FILE"
