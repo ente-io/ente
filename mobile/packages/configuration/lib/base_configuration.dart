@@ -53,11 +53,6 @@ class BaseConfiguration {
 
   String? _volatilePassword;
 
-  // Keys that should not be deleted during logout
-  // These keys are necessary for functionality that needs to work even when users
-  // aren't signed in, such as using Auth without backup
-  List<String> preservedKeys = [offlineAuthSecretKey];
-
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
@@ -85,9 +80,8 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
-    String? offlineKeyValue;
     try {
-      offlineKeyValue = await _secureStorage.read(
+      final offlineKeyValue = await _secureStorage.read(
         key: offlineAuthSecretKey,
       );
       if (offlineKeyValue != null && offlineKeyValue.isNotEmpty) {
@@ -101,24 +95,6 @@ class BaseConfiguration {
       _logger.fine(stackTrace);
     }
 
-    final preservedEntries = <String, String>{};
-    for (final key in preservedKeys) {
-      try {
-        final value = key == offlineAuthSecretKey && offlineKeyValue != null
-            ? offlineKeyValue
-            : await _secureStorage.read(key: key);
-        if (value != null) {
-          preservedEntries[key] = value;
-        }
-      } catch (error, stackTrace) {
-        _logger.warning(
-          'Failed to read preserved key $key before secure storage reset: '
-          '$error',
-        );
-        _logger.fine(stackTrace);
-      }
-    }
-
     try {
       await _secureStorage.deleteAll();
     } catch (error, stackTrace) {
@@ -128,18 +104,6 @@ class BaseConfiguration {
         stackTrace,
       );
       return;
-    }
-
-    for (final entry in preservedEntries.entries) {
-      try {
-        await _secureStorage.write(key: entry.key, value: entry.value);
-      } catch (error, stackTrace) {
-        _logger.severe(
-          'Failed to restore preserved key ${entry.key}: $error',
-          error,
-          stackTrace,
-        );
-      }
     }
   }
 
