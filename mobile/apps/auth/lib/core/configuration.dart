@@ -32,12 +32,21 @@ class Configuration extends BaseConfiguration {
     );
     sqfliteFfiInit();
     await _initOfflineAccount();
+    await _initOnlineAccount();
   }
 
   Future<void> _initOfflineAccount() async {
     _offlineAuthKey = await _secureStorage.read(
       key: offlineAuthSecretKey,
     );
+  }
+
+  Future<void> _initOnlineAccount() async {
+    if (hasConfiguredAccount()) {
+      _authSecretKey = await _secureStorage.read(
+        key: authSecretKeyKey,
+      );
+    }
   }
 
   @override
