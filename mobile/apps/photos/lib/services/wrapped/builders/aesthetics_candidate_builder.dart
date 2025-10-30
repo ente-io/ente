@@ -276,7 +276,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
               media.map((MediaRef ref) => ref.uploadedFileID).toList(),
         },
       ],
-      "detailChips": const <String>[],
       "dominantColor": chosenBucket.spec.displayName,
     };
 
@@ -463,7 +462,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.top9Wow,
-      title: "Wonderful Captures",
+      title: "Wonderful captures",
       subtitle: "Your showstoppers look gallery-ready.",
       media: media,
       meta: meta,
