@@ -1,7 +1,7 @@
 import { decryptBox, decryptMetadataJSON } from "ente-base/crypto";
 import log from "ente-base/log";
 import { nullishToBlank, nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { ignore } from "./collection";
 import {
     fileFileName,

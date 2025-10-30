@@ -427,15 +427,9 @@ All sharing happens with end-to-end encryption. Only people you share with (or w
 
 Ente allows you to embed public albums on your own website or blog using an iframe, similar to how you would embed a YouTube video.
 
-**Easy method (recommended):**
+**Easy method:**
 
-1. Open the album in [web.ente.io](https://web.ente.io)
-2. Open the album's sharing settings
-3. Create a public link (if you haven't already)
-4. Open the link settings ("Manage link")
-5. Click the "Copy embed HTML" button
-
-This copies ready-to-use iframe code that you can paste directly into your website's HTML.
+Open the album in Ente (web or mobile app), create a public link, open link settings, and tap/click "Copy embed HTML".
 
 **Manual method:**
 

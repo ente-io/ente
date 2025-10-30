@@ -13,7 +13,7 @@ import {
     beginPasskeyAuthentication,
     finishPasskeyAuthentication,
     isWebAuthnSupported,
-    isWhitelistedRedirect,
+    parseRedirectURLParam,
     passkeyAuthenticationSuccessRedirectURL,
     passkeySessionAlreadyClaimedErrorMessage,
     redirectToPasskeyRecoverPage,
@@ -82,11 +82,11 @@ const Page = () => {
 
         // Extract redirect from the query params.
         const redirect = nullToUndefined(searchParams.get("redirect"));
-        const redirectURL = redirect ? new URL(redirect) : undefined;
+        const redirectURL = parseRedirectURLParam(redirect);
 
-        // Ensure that redirectURL is whitelisted, otherwise show an invalid
-        // "login" URL error to the user.
-        if (!redirectURL || !isWhitelistedRedirect(redirectURL)) {
+        // Ensure that redirectURL is valid/whitelisted, otherwise show an
+        // invalid "login" URL error to the user.
+        if (!redirectURL) {
             log.error(`Redirect '${redirect}' is not whitelisted`);
             setStatus("unknownRedirect");
             return;
@@ -223,7 +223,10 @@ const Page = () => {
             return undefined;
         }
 
-        return () => redirectToPasskeyRecoverPage(new URL(recover));
+        const recoverURL = parseRedirectURLParam(recover);
+        if (!recoverURL) return undefined;
+
+        return () => redirectToPasskeyRecoverPage(recoverURL);
     })();
 
     const handleRedirectAgain = () => redirectToURL(successRedirectURL!);

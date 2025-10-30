@@ -18,9 +18,9 @@ Export is useful for:
 
 ## Export options
 
-### Desktop/Web continuous export
+### Desktop continuous export
 
-The desktop and web apps offer continuous export, which automatically exports new items as they're uploaded to Ente.
+The desktop app offers continuous export, which automatically exports new items as they're uploaded to Ente. The web app does not support export.
 
 **How to set up:**
 
@@ -33,7 +33,9 @@ The desktop and web apps offer continuous export, which automatically exports ne
 
 - The desktop app must be running for continuous export to work
 - Exports happen in the background without interrupting your work
+- Mirrors album changes (new files, album moves, and deletions) so your export reflects the latest album state
 - Incremental exports only download new or changed files
+- The web app does not support export; use the desktop app or CLI
 
 ### CLI export
 
@@ -64,13 +66,20 @@ export-folder/
 
 ### Metadata preservation
 
-Metadata is exported as separate JSON files alongside your photos. The original files are **not modified**.
+Metadata is exported as separate JSON files alongside your photos. The original files are not modified. The metadata folder name differs depending on whether you export using Ente Desktop or the Ente CLI.
 
-**Format:**
+**Ente Desktop Format:**
 
 ```
 photo.jpg
 metadata/photo.jpg.json
+```
+
+**Ente CLI Format:**
+
+```
+photo.jpg
+.meta/photo.jpg.json
 ```
 
 The JSON format matches Google Takeout format, so tools that support Google Takeout imports can read Ente's exported metadata.

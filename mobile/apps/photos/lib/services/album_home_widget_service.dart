@@ -357,8 +357,9 @@ class AlbumHomeWidgetService {
     }
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
-
-    final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
+    final limit = isWidgetPresent
+        ? HomeWidgetService.instance.getWidgetImageLimit()
+        : HomeWidgetService.WIDGET_IMAGE_LIMIT_MINIMAL;
     final maxAttempts = limit * 10;
 
     int renderedCount = 0;

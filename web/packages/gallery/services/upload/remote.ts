@@ -10,7 +10,7 @@ import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { RemoteEnteFile, type RemoteFileMetadata } from "ente-media/file";
 import type { RemoteMagicMetadata } from "ente-media/magic-metadata";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to

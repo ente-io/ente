@@ -34,7 +34,7 @@ import {
 import { PromiseQueue } from "ente-utils/promise";
 import { nullToUndefined } from "ente-utils/transform";
 import i18n from "i18next";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 // TODO: Audit the uses of these constants

@@ -203,6 +203,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/cli",
                             },
                             {
+                                text: "Detect Text (OCR)",
+                                link: "/photos/features/utilities/detect-text",
+                            },
+                            {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
                             },
@@ -216,6 +220,7 @@ export const sidebar = [
             },
             {
                 text: "FAQ",
+                link: "/photos/faq/",
                 collapsed: true,
                 items: [
                     {
@@ -241,6 +246,10 @@ export const sidebar = [
                     {
                         text: "Search and Discovery",
                         link: "/photos/faq/search-and-discovery",
+                    },
+                    {
+                        text: "Security and Privacy",
+                        link: "/photos/faq/security-and-privacy",
                     },
                     {
                         text: "Sharing and Collaboration",
@@ -292,15 +301,9 @@ export const sidebar = [
                         text: "From Steam",
                         link: "/auth/migration/steam/",
                     },
-                ],
-            },
-            {
-                text: "Troubleshooting",
-                collapsed: true,
-                items: [
                     {
                         text: "Export",
-                        link: "/auth/troubleshooting/export",
+                        link: "/auth/migration/export",
                     },
                 ],
             },
@@ -399,6 +402,10 @@ export const sidebar = [
                     {
                         text: "Running Ente using systemd",
                         link: "/self-hosting/guides/systemd",
+                    },
+                    {
+                        text: "Ente on Windows",
+                        link: "/self-hosting/guides/windows",
                     },
                 ],
             },

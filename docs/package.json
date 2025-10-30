@@ -9,8 +9,8 @@
         "pretty:check": "prettier -c ."
     },
     "devDependencies": {
-        "prettier": "^3.3.4",
-        "vitepress": "^1.5.0"
+        "prettier": "^3.6.2",
+        "vitepress": "^1.6.4"
     },
     "packageManager": "yarn@1.22.22"
 }

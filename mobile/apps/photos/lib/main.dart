@@ -128,6 +128,23 @@ Future<void> runBackgroundTask(
   TimeLogger tlog, {
   String mode = 'normal',
 }) async {
+  // Check if foreground is recently active to avoid conflicts
+  final isRunningInFG = await _isRunningInForeground();
+
+  // If FG was active in last 30 seconds, skip BG work
+  if (isRunningInFG) {
+    _logger.info(
+      "[BG TASK] Foreground recently active, skipping background work",
+    );
+    return;
+  }
+
+  _logger.info(
+    "[BG TASK] No recent foreground activity, proceeding with background work",
+  );
+
+  // Mark BG as active
+
   await _runMinimally(taskId, tlog);
 }
 
@@ -135,6 +152,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   try {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _scheduleHeartBeat(prefs, true);
 
     _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
@@ -181,6 +199,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     updateService.showUpdateNotification().ignore();
     _logger.info("[BG TASK] sync starting");
     await _sync('bgTaskActiveProcess');
+    _logger.info("[BG TASK] sync completed");
 
     _logger.info("[BG TASK] locale fetch");
     final locale = await getLocale();
@@ -294,6 +313,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
+    wrappedService.scheduleInitialLoad();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -411,18 +431,28 @@ Future<bool> _isRunningInForeground() async {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final bool isRunningInFG = await _isRunningInForeground(); // hb
   final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (await _isRunningInForeground()) {
+  if (isRunningInFG) {
     _logger.info(
-      "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
+      "Background push received when app is alive and runningInFG: $isRunningInFG inForeground: $isInForeground",
     );
     if (PushService.shouldSync(message)) {
-      await _sync('firebaseBgSyncActiveProcess');
+      // FG is active, let it handle the sync
+      _logger.info("Foreground is active, skipping background sync from push");
+      // Could optionally trigger a sync event that FG can handle
     }
   } else {
-    // App is dead
+    // App is dead or FG is not active
     runWithLogs(
       () async {
-        _logger.info("Background push received");
+        _logger.info("Background push received, no active foreground");
+
+        // Mark BG as active before starting
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(
+          kLastBGTaskHeartBeatTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
+
         await _init(true, via: 'firebasePush');
         if (PushService.shouldSync(message)) {
           await _sync('firebaseBgSyncNoActiveProcess');

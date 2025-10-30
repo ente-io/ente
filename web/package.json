@@ -12,27 +12,27 @@
         "build:auth": "yarn workspace auth next build",
         "build:cast": "yarn workspace cast next build",
         "build:embed": "yarn workspace embed next build",
-        "build:locker": "yarn workspace locker next build",
         "build:payments": "yarn workspace payments build",
         "build:photos": "yarn workspace photos next build",
+        "build:share": "yarn workspace share next build",
         "dev": "yarn dev:photos",
         "dev:accounts": "yarn workspace accounts next dev -p 3001",
         "dev:albums": "yarn workspace photos next dev -p 3002",
         "dev:auth": "yarn workspace auth next dev -p 3003",
         "dev:cast": "yarn workspace cast next dev -p 3004",
         "dev:embed": "yarn workspace embed next dev -p 3006",
-        "dev:locker": "yarn workspace locker next dev -p 3005",
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn workspace photos next dev -p 3000",
+        "dev:share": "yarn workspace share next dev -p 3005",
         "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint\" \"yarn workspaces run tsc\"",
         "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\""
     },
     "resolutions": {
-        "@types/react": "^19.1.8",
-        "@types/react-dom": "^19.1.6"
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2"
     },
     "devDependencies": {
-        "concurrently": "^9.2.0",
+        "concurrently": "^9.2.1",
         "eslint": "^9.30.1",
         "prettier": "^3.6.2",
         "typescript": "^5.8.3"

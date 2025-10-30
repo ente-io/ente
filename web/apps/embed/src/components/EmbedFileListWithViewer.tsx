@@ -42,16 +42,14 @@ export const EmbedFileListWithViewer: React.FC<
 
     const handleThumbnailClick = useCallback(
         (index: number) => {
-            console.log("Thumbnail clicked, index:", index);
-            console.log("Files available:", files.length);
             setCurrentIndex(index);
             setOpenFileViewer(true);
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [files.length],
     );
 
     const handleCloseFileViewer = useCallback(() => {
-        console.log("Closing file viewer");
         setOpenFileViewer(false);
     }, []);
 
@@ -129,9 +127,10 @@ export const EmbedFileListWithViewer: React.FC<
                     initialIndex={currentIndex}
                     files={files}
                     disableDownload={true}
+                    showFullscreenButton={true}
                     onTriggerRemotePull={handleTriggerRemotePull}
                     onVisualFeedback={() => {
-                        console.log("Visual feedback requested");
+                        // Visual feedback requested
                     }}
                 />
             )}

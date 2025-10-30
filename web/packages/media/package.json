@@ -4,7 +4,7 @@
     "private": true,
     "dependencies": {
         "ente-base": "*",
-        "file-type": "16.5.4",
+        "file-type": "21.0.0",
         "heic-convert": "^2.1.0",
         "jszip": "^3.10.1"
     },

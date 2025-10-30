@@ -8,11 +8,9 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoRotatePage extends StatelessWidget {
-  final int quarterTurnsForRotationCorrection;
   const VideoRotatePage({
     super.key,
     required this.controller,
-    required this.quarterTurnsForRotationCorrection,
   });
 
   final VideoEditorController controller;
@@ -44,33 +42,27 @@ class VideoRotatePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Positioned.fill(
-                        child: Hero(
-                          tag: "video-editor-preview",
-                          child: RotatedBox(
-                            quarterTurns: quarterTurnsForRotationCorrection,
-                            child: CropGridViewer.preview(
-                              controller: controller,
-                            ),
-                          ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: Hero(
+                        tag: "video-editor-preview",
+                        child: CropGridViewer.preview(
+                          controller: controller,
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: VideoEditorPlayerControl(
-                            controller: controller,
-                          ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: VideoEditorPlayerControl(
+                          controller: controller,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               VideoEditorMainActions(

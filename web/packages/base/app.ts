@@ -3,7 +3,7 @@ export const appNames = [
     "auth",
     "cast",
     "embed",
-    "locker",
+    "share",
     "photos",
 ] as const;
 
@@ -64,7 +64,7 @@ export const staticAppTitle = {
     auth: "Ente Auth",
     cast: "Ente Photos",
     embed: "Ente Photos",
-    locker: "Ente Locker",
+    share: "Ente Locker",
     photos: "Ente Photos",
 }[appName];
 
@@ -87,7 +87,7 @@ export const clientPackageName = (() => {
         auth: "io.ente.auth.web",
         cast: "io.ente.cast.web",
         embed: "io.ente.photos.web", // Use photos package name for embed app
-        locker: "io.ente.locker.web",
+        share: "io.ente.share.web",
         photos: "io.ente.photos.web",
     }[appName];
 })();

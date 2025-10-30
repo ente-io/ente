@@ -23,7 +23,7 @@ Ente Locker is a Flutter application for securely storing important documents. I
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
 ```bash
-# 1. Format Dart code
+# 1. Format Dart code for ente/mobile/app/locker
 dart format .
 
 # 2. Analyze flutter code for errors and warnings
@@ -57,7 +57,7 @@ flutter analyze
 ### Build & Run
 
 ```bash
-# Install dependencies (from monorepo root /Users/amanraj/development/ente/mobile)
+# From mobile/ directory - bootstrap all packages
 melos bootstrap
 
 # Clean the locker app specifically

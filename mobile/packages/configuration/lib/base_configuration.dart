@@ -35,7 +35,6 @@ class BaseConfiguration {
   static const userIDKey = "user_id";
   static const endPointKey = "endpoint";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
-  static const offlineAuthSecretKey = "offline_auth_secret_key";
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -53,10 +52,8 @@ class BaseConfiguration {
 
   String? _volatilePassword;
 
-  // Keys that should not be deleted during logout
-  // These keys are necessary for functionality that needs to work even when users
-  // aren't signed in, such as using Auth without backup
-  List<String> preservedKeys = [offlineAuthSecretKey];
+  // Descendants can override to append keys that must be cleared.
+  List<String> get secureStorageKeys => [];
 
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
@@ -85,12 +82,12 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
-    // Delete all keys except preserved ones
-    final allKeys = await _secureStorage.readAll();
-    for (final key in allKeys.keys) {
-      if (!preservedKeys.contains(key)) {
-        await _secureStorage.delete(key: key);
-      }
+    assert(
+      secureStorageKeys.isNotEmpty,
+      'secureStorageKeys must not be empty. Apps must explicitly define which keys to clear.',
+    );
+    for (final key in secureStorageKeys.toSet()) {
+      await _secureStorage.delete(key: key);
     }
   }
 
@@ -278,6 +275,13 @@ class BaseConfiguration {
 
   String getHttpEndpoint() {
     return _preferences.getString(endPointKey) ?? endpoint;
+  }
+
+  // isEnteProduction checks if the current endpoint is the default production
+  // endpoint. This is used to determine if the app is in production mode or
+  // not. The default production endpoint is set in the environment variable
+  bool isEnteProduction() {
+    return getHttpEndpoint() == kDefaultProductionEndpoint;
   }
 
   Future<void> setHttpEndpoint(String endpoint) async {

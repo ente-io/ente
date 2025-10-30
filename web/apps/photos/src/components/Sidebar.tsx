@@ -1105,7 +1105,7 @@ const DomainSettingsContents: React.FC = () => {
                         components={{
                             a: (
                                 <Link
-                                    href="https://help.ente.io/photos/features/sharing-and-collaboration/custom-domains/"
+                                    href="https://ente.io/help/photos/features/sharing-and-collaboration/custom-domains/"
                                     target="_blank"
                                     rel="noopener"
                                     color="accent"
@@ -1281,7 +1281,7 @@ const Help: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         onRootClose();
     };
 
-    const handleHelp = () => openURL("https://help.ente.io/photos/");
+    const handleHelp = () => openURL("https://ente.io/help/photos/");
 
     const handleBlog = () => openURL("https://ente.io/blog/");
 

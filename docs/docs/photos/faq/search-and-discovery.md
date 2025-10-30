@@ -157,6 +157,10 @@ Open `Settings > Preferences > Machine learning`, enable "Face recognition", and
 
 Learn more in the [Machine learning guide](/photos/features/search-and-discovery/machine-learning).
 
+### Can I search my library by text that appears inside images? {#search-text-in-images}
+
+Only partially. Ente does not maintain a full OCR index of your photos, so search cannot guarantee matches for arbitrary words. Text-related hits today come from metadata or from magic search (CLIP embeddings); magic search can surface photos with very apparent text, but doesn't offer a dedicated OCR search.
+
 ### Can I merge or de-merge persons recognized by the app? {#merge-persons}
 
 Yes! The general mechanism for doing this is to assign the same name to both persons.
