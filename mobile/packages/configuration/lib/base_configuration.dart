@@ -85,41 +85,60 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
-    // First check if offline key exists - if it does, we're in offline mode
-    // and should not clear secure storage at all
+    String? offlineKeyValue;
     try {
-      final offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
-      if (offlineKey != null && offlineKey.isNotEmpty) {
+      offlineKeyValue = await _secureStorage.read(
+        key: offlineAuthSecretKey,
+      );
+      if (offlineKeyValue != null && offlineKeyValue.isNotEmpty) {
         _logger.info('Offline mode detected, skipping secure storage reset');
         return;
       }
-    } catch (e) {
-      // If we can't read the offline key due to BadPaddingException or other issues,
-      // we proceed with the reset as the storage is likely corrupted
-      _logger.warning('Failed to check offline key, proceeding with reset: $e');
+    } catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to read offline key prior to secure storage reset: $error',
+      );
+      _logger.fine(stackTrace);
+    }
+
+    final preservedEntries = <String, String>{};
+    for (final key in preservedKeys) {
+      try {
+        final value = key == offlineAuthSecretKey && offlineKeyValue != null
+            ? offlineKeyValue
+            : await _secureStorage.read(key: key);
+        if (value != null) {
+          preservedEntries[key] = value;
+        }
+      } catch (error, stackTrace) {
+        _logger.warning(
+          'Failed to read preserved key $key before secure storage reset: '
+          '$error',
+        );
+        _logger.fine(stackTrace);
+      }
     }
 
     try {
-      // Try selective deletion first (preserving specified keys)
-      final allKeys = await _secureStorage.readAll();
-      for (final key in allKeys.keys) {
-        if (!preservedKeys.contains(key)) {
-          await _secureStorage.delete(key: key);
-        }
-      }
-    } catch (e) {
-      // If readAll or delete operations fail (e.g., BadPaddingException),
-      // fall back to deleting everything
-      _logger.warning(
-        'Error during selective deletion, falling back to deleteAll: $e',
+      await _secureStorage.deleteAll();
+    } catch (error, stackTrace) {
+      _logger.severe(
+        'Failed to delete secure storage entries: $error',
+        error,
+        stackTrace,
       );
+      return;
+    }
+
+    for (final entry in preservedEntries.entries) {
       try {
-        await _secureStorage.deleteAll();
-      } catch (deleteAllError) {
+        await _secureStorage.write(key: entry.key, value: entry.value);
+      } catch (error, stackTrace) {
         _logger.severe(
-          'Failed to delete all from secure storage: $deleteAllError',
+          'Failed to restore preserved key ${entry.key}: $error',
+          error,
+          stackTrace,
         );
-        // Even deleteAll failed, but we should continue to prevent app crash
       }
     }
   }
