@@ -56,16 +56,17 @@ class _BadgeCardContent extends StatelessWidget {
           children: [
             const SizedBox(height: 12),
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: Alignment.center,
               child: FittedBox(
                 fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.center,
                 child: Text(
                   card.title,
                   style: textTheme.h1Bold.copyWith(
                     color: Colors.white,
                     height: 1.05,
                   ),
+                  textAlign: TextAlign.center,
                   maxLines: 1,
                 ),
               ),

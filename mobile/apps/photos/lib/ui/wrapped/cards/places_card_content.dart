@@ -45,17 +45,15 @@ class _TopCitiesCardContent extends StatelessWidget {
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 24),
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         if (stats.isNotEmpty) ...[
           const SizedBox(height: 22),
@@ -290,17 +288,15 @@ class _MostVisitedSpotCardContent extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 24),
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 18),

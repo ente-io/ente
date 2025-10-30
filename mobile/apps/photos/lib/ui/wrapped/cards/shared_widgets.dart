@@ -1,5 +1,51 @@
 part of 'package:photos/ui/wrapped/wrapped_viewer_page.dart';
 
+Widget buildWrappedCardTitle(
+  String text,
+  TextStyle style, {
+  EdgeInsetsGeometry? padding,
+}) {
+  return _buildCenteredCardText(
+    text: text,
+    style: style,
+    padding: padding,
+  );
+}
+
+Widget buildWrappedCardSubtitle(
+  String text,
+  TextStyle style, {
+  EdgeInsetsGeometry? padding,
+}) {
+  return _buildCenteredCardText(
+    text: text,
+    style: style,
+    padding: padding,
+  );
+}
+
+Widget _buildCenteredCardText({
+  required String text,
+  required TextStyle style,
+  EdgeInsetsGeometry? padding,
+}) {
+  final Widget label = Align(
+    alignment: Alignment.center,
+    child: Text(
+      text,
+      style: style,
+      textAlign: TextAlign.center,
+    ),
+  );
+  if (padding != null) {
+    return Padding(
+      padding: padding,
+      child: label,
+    );
+  }
+  return label;
+}
+
 class _DetailChips extends StatelessWidget {
   const _DetailChips({
     required this.chips,

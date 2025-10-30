@@ -58,17 +58,15 @@ class _BlurryFacesCardContent extends StatelessWidget {
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 24),
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 20),
@@ -111,17 +109,15 @@ class _YearInColorCardContent extends StatelessWidget {
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 24),
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         if (palette.isNotEmpty) ...[
           const SizedBox(height: 18),
@@ -163,17 +159,15 @@ class _MonochromeCardContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         const SizedBox(height: 20),
         _MediaGrid(
@@ -212,17 +206,15 @@ class _TopWowCardContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         const SizedBox(height: 20),
         _MediaGrid(
