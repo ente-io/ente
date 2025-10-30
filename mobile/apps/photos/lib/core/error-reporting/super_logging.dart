@@ -374,7 +374,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && error != null) {
-      _sendErrorToSentry(error, null, rec: rec).ignore();
+      _sendErrorToSentry(error, rec?.stackTrace, rec: rec).ignore();
     }
   }
 
