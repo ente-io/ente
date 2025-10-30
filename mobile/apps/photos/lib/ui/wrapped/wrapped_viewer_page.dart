@@ -494,7 +494,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   IgnorePointer(
                     child: AnimatedBuilder(
                       animation: _progressController,
@@ -512,7 +512,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                       },
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 4),
                   Align(
                     alignment: Alignment.centerRight,
                     child: GestureDetector(
@@ -524,7 +524,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                         child: Icon(
                           Icons.close_rounded,
                           size: 24,
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: Colors.white.withValues(alpha: 0.65),
                         ),
                       ),
                     ),
