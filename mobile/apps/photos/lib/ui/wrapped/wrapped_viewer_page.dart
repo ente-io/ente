@@ -432,12 +432,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
           final enteColorScheme = getEnteColorScheme(context);
           final textTheme = getEnteTextTheme(context);
           final MediaQueryData mediaQuery = MediaQuery.of(context);
-          final double topPadding = mediaQuery.padding.top;
           final double bottomPadding = mediaQuery.padding.bottom;
-          const double overlayHorizontalPadding = 24;
-          final double overlayTop = topPadding + 8;
-          final double contentTopPadding =
-              topPadding > 6 ? topPadding - 6 : topPadding;
 
           return PopScope(
             canPop: true,
@@ -449,66 +444,39 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
             },
             child: Scaffold(
               backgroundColor: Colors.black,
+              appBar: AppBar(
+                leading: BackButton(
+                  onPressed: _closeViewer,
+                ),
+                title: Text(
+                  "Ente Rewind",
+                  style: textTheme.largeBold,
+                ),
+                backgroundColor: Colors.black,
+                foregroundColor: enteColorScheme.textBase,
+                elevation: 0,
+              ),
               body: Stack(
                 children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: contentTopPadding),
-                    child: LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        return GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTapUp: (TapUpDetails details) =>
-                              _handleTapUp(details, constraints),
-                          onTapCancel: () {
-                            _suppressNextTapUp = false;
-                          },
-                          onLongPressStart: _handleLongPressStart,
-                          onLongPressEnd: _handleLongPressEnd,
-                          onLongPressCancel: _handleLongPressCancel,
-                          onVerticalDragStart: _handleVerticalDragStart,
-                          onVerticalDragUpdate: _handleVerticalDragUpdate,
-                          onVerticalDragEnd: _handleVerticalDragEnd,
-                          onVerticalDragCancel: _handleVerticalDragCancel,
-                          child: RepaintBoundary(
-                            key: _cardBoundaryKey,
-                            child: PageView.builder(
-                              physics: const PageScrollPhysics(),
-                              controller: _pageController,
-                              onPageChanged: _handlePageChanged,
-                              itemCount: cardCount,
-                              itemBuilder: (BuildContext context, int index) {
-                                final WrappedCard card = _cards[index];
-                                return _StoryCard(
-                                  card: card,
-                                  colorScheme: enteColorScheme,
-                                  textTheme: textTheme,
-                                  isActive: index == _currentIndex,
-                                );
-                              },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Positioned(
-                    top: overlayTop,
-                    left: overlayHorizontalPadding,
-                    right: overlayHorizontalPadding,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 10),
-                        IgnorePointer(
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: IgnorePointer(
                           child: AnimatedBuilder(
                             animation: _progressController,
                             builder: (BuildContext context, _) {
                               final List<double> segments =
                                   List<double>.generate(cardCount, (int index) {
-                                if (index < _currentIndex) return 1.0;
-                                if (index > _currentIndex) return 0.0;
+                                if (index < _currentIndex) {
+                                  return 1.0;
+                                }
+                                if (index > _currentIndex) {
+                                  return 0.0;
+                                }
                                 return _progressController.value
                                     .clamp(0.0, 1.0);
                               });
@@ -519,26 +487,51 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                             },
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: GestureDetector(
-                            onTap: _closeViewer,
-                            behavior: HitTestBehavior.translucent,
-                            child: SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Icon(
-                                Icons.close_rounded,
-                                size: 24,
-                                color: Colors.white.withValues(alpha: 0.65),
+                      ),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (
+                            BuildContext context,
+                            BoxConstraints constraints,
+                          ) {
+                            return GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTapUp: (TapUpDetails details) =>
+                                  _handleTapUp(details, constraints),
+                              onTapCancel: () {
+                                _suppressNextTapUp = false;
+                              },
+                              onLongPressStart: _handleLongPressStart,
+                              onLongPressEnd: _handleLongPressEnd,
+                              onLongPressCancel: _handleLongPressCancel,
+                              onVerticalDragStart: _handleVerticalDragStart,
+                              onVerticalDragUpdate: _handleVerticalDragUpdate,
+                              onVerticalDragEnd: _handleVerticalDragEnd,
+                              onVerticalDragCancel: _handleVerticalDragCancel,
+                              child: RepaintBoundary(
+                                key: _cardBoundaryKey,
+                                child: PageView.builder(
+                                  physics: const PageScrollPhysics(),
+                                  controller: _pageController,
+                                  onPageChanged: _handlePageChanged,
+                                  itemCount: cardCount,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final WrappedCard card = _cards[index];
+                                    return _StoryCard(
+                                      card: card,
+                                      colorScheme: enteColorScheme,
+                                      textTheme: textTheme,
+                                      isActive: index == _currentIndex,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
-                        const SizedBox(height: 12),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   Positioned(
                     right: 20,
