@@ -46,7 +46,7 @@ export const extractFileKeyFromURL = async (
 export const fetchFileInfo = async (
     accessToken: string,
 ): Promise<FileLinkInfo> => {
-    const url = `${await apiOrigin()}/file-link/info?accessToken=${accessToken}`;
+    const url = `${await apiOrigin()}/file-link/info`;
 
     const response = await fetch(url, {
         headers: { "X-Auth-Access-Token": accessToken },
@@ -296,7 +296,7 @@ export const downloadFile = async (
     fileDecryptionHeader?: string,
     fileNonce?: string,
 ): Promise<void> => {
-    const url = `${await apiOrigin()}/file-link/file?accessToken=${accessToken}`;
+    const url = `${await apiOrigin()}/file-link/file`;
 
     // Fetch the encrypted file from the server
     const response = await fetch(url, {
