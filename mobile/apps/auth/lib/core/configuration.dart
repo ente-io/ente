@@ -41,6 +41,16 @@ class Configuration extends BaseConfiguration {
   }
 
   @override
+  // This includes both base keys (key, secretKey) and auth-specific keys.
+  List<String> get secureStorageKeys => [
+        BaseConfiguration.keyKey,
+        BaseConfiguration.secretKeyKey,
+        authSecretKeyKey,
+        // Note: offlineAuthSecretKey is intentionally not included here
+        // as it persists across logouts
+      ];
+
+  @override
   Future<void> logout({bool autoLogout = false}) async {
     _authSecretKey = null;
     await super.logout();
