@@ -397,7 +397,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     return WrappedCard(
       type: WrappedCardType.monochrome,
       title: "Monochrome moments",
-      subtitle: "You kept ${_formatCount(matches.length, 'monochrome story')}.",
+      subtitle:
+          "You kept ${matches.length} ${matches.length == 1 ? "monochrome story" : "monochrome stories"}.",
       media: media,
       meta: meta,
     );
@@ -469,9 +470,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Map<String, Object?> meta = <String, Object?>{
       "queries": AestheticsCandidateBuilder._kWowQueries,
-      "detailChips": <String>[
-        "${media.length} CLIP-approved stunners",
-      ],
+      "detailChips": <String>[],
       "uploadedFileIDs": media
           .map((MediaRef ref) => ref.uploadedFileID)
           .toList(growable: false),
@@ -479,8 +478,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.top9Wow,
-      title: "Pure wow",
-      subtitle: "CLIP loved these dramatic standouts.",
+      title: "Wonderful captures",
+      subtitle: "You made some truly stunning photos this year!",
       media: media,
       meta: meta,
     );

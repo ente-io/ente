@@ -149,12 +149,6 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     subtitleParts.add(
       "${numberFormat.format(snapshot.daysWithCaptures)} active days",
     );
-    if (snapshot.daysWithCaptures > 0 &&
-        snapshot.averagePerActiveDay > snapshot.averagePerDay) {
-      subtitleParts.add(
-        "${averageFormat.format(snapshot.averagePerActiveDay)} on shooting days",
-      );
-    }
 
     final List<String> chips = <String>[
       "${numberFormat.format(snapshot.daysWithCaptures)} active days",

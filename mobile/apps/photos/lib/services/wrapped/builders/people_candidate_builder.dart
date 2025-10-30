@@ -63,8 +63,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
             : topPerson.faceCount / dataset.totalNamedFaceCount;
     final int sharePercent = _percentOf(share);
     final List<String> chips = _cleanChips(<String>[
-      "${numberFormat.format(topPerson.faceCount)} close-ups",
-      if (sharePercent > 0) "$sharePercent% of your people shots",
+      if (sharePercent > 0) "$sharePercent% of your shots with people",
       if (topPerson.firstSeenYear != null &&
           topPerson.firstSeenYear == dataset.year)
         "New in ${dataset.year}",
@@ -170,7 +169,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.topThreePeople,
-      title: "Your top crew",
+      title: "Your top people",
       subtitle: "${_formatNameList(names)} lit up your ${dataset.year}.",
       media: media,
       meta: meta
@@ -206,7 +205,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
 
     final List<String> subtitleParts = <String>[];
     if (groupPercent > 0) {
-      subtitleParts.add("$groupPercent% with the crew");
+      subtitleParts.add("$groupPercent% with the group");
     }
     if (soloPercent > 0) {
       subtitleParts.add("$soloPercent% one-on-one");
