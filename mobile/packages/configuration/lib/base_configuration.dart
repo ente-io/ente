@@ -82,6 +82,10 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
+    assert(
+      secureStorageKeys.isNotEmpty,
+      'secureStorageKeys must not be empty. Apps must explicitly define which keys to clear.',
+    );
     for (final key in secureStorageKeys.toSet()) {
       await _secureStorage.delete(key: key);
     }
