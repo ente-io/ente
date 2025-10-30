@@ -1,5 +1,4 @@
 import { Stack, Typography } from "@mui/material";
-import { EnteLogo } from "ente-base/components/EnteLogo";
 import React from "react";
 
 const Page: React.FC = () => {
@@ -9,16 +8,18 @@ const Page: React.FC = () => {
                 justifyContent: "center",
                 minHeight: "100vh",
                 gap: 2,
-                bgcolor: "accent.main",
-                color: "white",
+                bgcolor: "white",
                 textAlign: "center",
             }}
         >
-            <EnteLogo height={42} />
-            <Typography variant="h1" sx={{ fontWeight: "bold" }}>
-                Locker
+            <img
+                src="/images/ente-locker.svg"
+                alt="Ente Locker"
+                style={{ height: "100px", alignSelf: "center" }}
+            />
+            <Typography variant="small" sx={{ color: "#a2a2a2", mt: 4 }}>
+                — Coming soon —
             </Typography>
-            <Typography variant="small">— Coming soon —</Typography>
         </Stack>
     );
 };
