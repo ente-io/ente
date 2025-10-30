@@ -369,13 +369,20 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                           children: [
                             child!,
                             GestureDetector(
-                              onTap: () => routeToPage(
-                                context,
-                                JumpToDateGallery(
-                                  fileToJumpTo:
-                                      inheritedData.memories[value].file,
-                                ),
-                              ),
+                              onTap: () async {
+                                final fullScreenState =
+                                    context.findAncestorStateOfType<
+                                        _FullScreenMemoryState>();
+                                fullScreenState?._toggleAnimation(pause: true);
+                                await routeToPage(
+                                  context,
+                                  JumpToDateGallery(
+                                    fileToJumpTo:
+                                        inheritedData.memories[value].file,
+                                  ),
+                                );
+                                fullScreenState?._toggleAnimation(pause: false);
+                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(4),
