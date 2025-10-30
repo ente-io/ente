@@ -36,7 +36,7 @@ export const useFileShare = (): UseFileShareResult => {
     useEffect(() => {
         const loadFileInfo = async () => {
             try {
-                const { token } = router.query;
+                const { t: token } = router.query;
 
                 if (!token || typeof token !== "string") {
                     setError("Invalid file link. Missing access token.");
