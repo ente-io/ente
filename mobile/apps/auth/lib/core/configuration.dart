@@ -41,10 +41,13 @@ class Configuration extends BaseConfiguration {
   }
 
   @override
-  // Also remove the auth secret key so cached sessions are fully revoked.
+  // This includes both base keys (key, secretKey) and auth-specific keys.
   List<String> get secureStorageKeys => [
-        ...super.secureStorageKeys,
+        BaseConfiguration.keyKey,
+        BaseConfiguration.secretKeyKey,
         authSecretKeyKey,
+        // Note: offlineAuthSecretKey is intentionally not included here
+        // as it persists across logouts
       ];
 
   @override

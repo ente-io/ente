@@ -52,14 +52,8 @@ class BaseConfiguration {
 
   String? _volatilePassword;
 
-  // Default secure storage keys that should be wiped when the user logs out.
-  static const List<String> _defaultSecureStorageKeysToDelete = [
-    keyKey,
-    secretKeyKey,
-  ];
-
-  // Descendants can override to append additional keys that must be cleared.
-  List<String> get secureStorageKeys => _defaultSecureStorageKeysToDelete;
+  // Descendants can override to append keys that must be cleared.
+  List<String> get secureStorageKeys => [];
 
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     _databases = dbs;
