@@ -266,16 +266,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     }
 
     final Map<String, Object?> meta = <String, Object?>{
-      "palette": <Map<String, Object?>>[
-        <String, Object?>{
-          "name": chosenBucket.spec.displayName,
-          "hex": chosenBucket.spec.hex,
-          "query": chosenBucket.spec.query,
-          "count": chosenBucket.matches.length,
-          "uploadedFileIDs":
-              media.map((MediaRef ref) => ref.uploadedFileID).toList(),
-        },
-      ],
       "dominantColor": chosenBucket.spec.displayName,
     };
 
