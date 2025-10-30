@@ -109,10 +109,6 @@ export const useFileShare = (): UseFileShareResult => {
     const handleCopyContent = async (content: string) => {
         try {
             await navigator.clipboard.writeText(content);
-            setNotificationAttributes({
-                color: "secondary",
-                title: "Copied to clipboard",
-            });
         } catch {
             setNotificationAttributes({
                 color: "critical",
