@@ -29,7 +29,7 @@ func NewFileLinkRepo(db *sql.DB) *FileLinkRepository {
 	}
 	lockerHost := viper.GetString("apps.public-locker")
 	if lockerHost == "" {
-		lockerHost = "https://locker.ente.io"
+		lockerHost = "https://share.ente.io"
 	}
 	return &FileLinkRepository{
 		DB:         db,

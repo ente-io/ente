@@ -90,7 +90,7 @@ apps:
     # Default is https://embed.ente.io
     # For self-hosted instances, set this to the URL where your embed app is running.
     embed-albums:
-    # Default is https://locker.ente.io
+    # Default is https://share.ente.io
     #
     # If you're running a self-hosted instance and wish to serve public links for locker,
     # set this to the URL where your albums web app is running.
