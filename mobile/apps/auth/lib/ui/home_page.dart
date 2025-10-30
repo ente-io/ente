@@ -322,6 +322,7 @@ class _HomePageState extends State<HomePage> {
           if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
             _focusNewCode(newCode);
           }
+          LocalBackupService.instance.triggerAutomaticBackup().ignore();
         } catch (e) {
           _logger.severe('Error adding code from QR scan', e);
           await showErrorDialog(
