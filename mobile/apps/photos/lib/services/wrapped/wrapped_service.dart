@@ -52,6 +52,9 @@ class WrappedService {
 
   static const Duration _kInitialDelay = Duration(seconds: 5);
   static const int _kWrappedYear = 2025;
+  static final DateTime _kAvailabilityStart = DateTime(_kWrappedYear, 12, 6);
+  static final DateTime _kAvailabilityEndExclusive =
+      DateTime(_kWrappedYear + 1, 1, 7);
 
   final Logger _logger;
   final WrappedCacheService _cacheService;
@@ -63,7 +66,16 @@ class WrappedService {
 
   WrappedEntryState get state => _state.value;
 
-  bool get isEnabled => flagService.enteWrapped;
+  bool get isEnabled {
+    final DateTime now = DateTime.now();
+    if (flagService.internalUser && now.isBefore(_kAvailabilityEndExclusive)) {
+      return true;
+    }
+    if (flagService.enteWrapped && _isWithinAvailabilityWindow(now)) {
+      return true;
+    }
+    return false;
+  }
 
   bool get shouldShowHomeBanner =>
       isEnabled && state.hasResult && !state.isComplete;
@@ -106,7 +118,7 @@ class WrappedService {
 
     if (!isEnabled) {
       _logger.info(
-        "Wrapped flag disabled; skipping initial compute for $_kWrappedYear",
+        "Wrapped unavailable; skipping initial compute for $_kWrappedYear",
       );
       return;
     }
@@ -141,7 +153,7 @@ class WrappedService {
   }) async {
     if (!bypassFlag && !isEnabled) {
       _logger.info(
-        "Wrapped flag disabled; skipping compute for $_kWrappedYear ($reason)",
+        "Wrapped unavailable; skipping compute for $_kWrappedYear ($reason)",
       );
       return;
     }
@@ -228,5 +240,10 @@ class WrappedService {
       // Keep storage in sync if state already reflects completion.
       unawaited(localSettings.setWrapped2025Complete());
     }
+  }
+
+  static bool _isWithinAvailabilityWindow(DateTime now) {
+    return !now.isBefore(_kAvailabilityStart) &&
+        now.isBefore(_kAvailabilityEndExclusive);
   }
 }
