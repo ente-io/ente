@@ -180,12 +180,11 @@ export const handleTimelineScroll = ({
 
         // Get super cluster info for both source and destination
         // On mobile, disable super cluster zoom behavior
-        const currentSuperClusterIndex =
-            !isMobileOrTablet
-                ? (superClusterInfo.clusterToSuperClusterMap.get(
-                      currentActiveLocationIndex,
-                  ) ?? -1)
-                : -1;
+        const currentSuperClusterIndex = !isMobileOrTablet
+            ? (superClusterInfo.clusterToSuperClusterMap.get(
+                  currentActiveLocationIndex,
+              ) ?? -1)
+            : -1;
         const isInSuperCluster = currentSuperClusterIndex !== -1;
 
         // Get the super cluster index of where we're coming FROM (not the stored state)
@@ -243,7 +242,11 @@ export const handleTimelineScroll = ({
                         mapRef.flyTo(
                             [zoomAwareLat, zoomAwareLng],
                             superClusterZoom,
-                            { animate: true, duration: 1.2, easeLinearity: 0.2 },
+                            {
+                                animate: true,
+                                duration: 1.2,
+                                easeLinearity: 0.2,
+                            },
                         );
                     }, 150);
                 };
@@ -347,11 +350,15 @@ export const handleTimelineScroll = ({
                         // Small pause to let user see the zoomed out view
                         setTimeout(() => {
                             setTargetZoom(finalZoom);
-                            mapRef.flyTo([zoomAwareLat, zoomAwareLng], finalZoom, {
-                                animate: true,
-                                duration: 1.2,
-                                easeLinearity: 0.2,
-                            });
+                            mapRef.flyTo(
+                                [zoomAwareLat, zoomAwareLng],
+                                finalZoom,
+                                {
+                                    animate: true,
+                                    duration: 1.2,
+                                    easeLinearity: 0.2,
+                                },
+                            );
                         }, 150);
                     };
 
@@ -423,11 +430,15 @@ export const handleTimelineScroll = ({
                     // Small pause to let user see the zoomed out view
                     setTimeout(() => {
                         setTargetZoom(targetZoom);
-                        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                            animate: true,
-                            duration: 1.2,
-                            easeLinearity: 0.2,
-                        });
+                        mapRef.flyTo(
+                            [positionedLat, positionedLng],
+                            targetZoom,
+                            {
+                                animate: true,
+                                duration: 1.2,
+                                easeLinearity: 0.2,
+                            },
+                        );
                     }, 150);
                 };
 
@@ -597,7 +608,11 @@ export const handleMarkerClick = ({
     // Check if both current and target locations are in the same super cluster
     // On mobile, disable super cluster zoom behavior
     let shouldJustPan = false;
-    if (superClusterInfo && currentActiveLocationIndex >= 0 && !isMobileOrTablet) {
+    if (
+        superClusterInfo &&
+        currentActiveLocationIndex >= 0 &&
+        !isMobileOrTablet
+    ) {
         const currentSuperClusterIndex =
             superClusterInfo.clusterToSuperClusterMap.get(
                 currentActiveLocationIndex,
@@ -640,12 +655,11 @@ export const handleMarkerClick = ({
             } else {
                 // Check if the target cluster is part of a super cluster
                 // On mobile, disable super cluster zoom behavior
-                const targetSuperClusterIndex =
-                    !isMobileOrTablet
-                        ? superClusterInfo?.clusterToSuperClusterMap.get(
-                              clusterIndex,
-                          )
-                        : undefined;
+                const targetSuperClusterIndex = !isMobileOrTablet
+                    ? superClusterInfo?.clusterToSuperClusterMap.get(
+                          clusterIndex,
+                      )
+                    : undefined;
                 const isInSuperCluster = targetSuperClusterIndex !== undefined;
 
                 if (isInSuperCluster) {
