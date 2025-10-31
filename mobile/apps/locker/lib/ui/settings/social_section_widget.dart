@@ -42,8 +42,6 @@ class SocialSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Mastodon", "https://fosstodon.org/@ente"),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Matrix", "https://ente.io/matrix"),
-      sectionOptionSpacing,
       const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
       sectionOptionSpacing,
       const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),

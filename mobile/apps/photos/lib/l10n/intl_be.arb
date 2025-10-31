@@ -34,6 +34,16 @@
   "password": "Пароль",
   "confirmPassword": "Пацвердзіць пароль",
   "activeSessions": "Актыўныя сеансы",
+  "ocrProcessingOverlayMessage": "Выяўленне тэксту...",
+  "ocrLoadingIndicatorLabel": "Выяўленне тэксту",
+  "ocrSelectionHint": "Правядзіце пальцам або двойчы націсніце, каб выбраць менавіта тое, што вам трэба",
+  "ocrNoTextDetected": "Тэкст не выяўлены",
+  "ocrRetryButtonLabel": "Паўтарыць",
+  "ocrModelsNetworkRequiredError": "Для спампоўвання мадэляў аптычнага распазнавання пры першым выкарыстанні патрабуецца падключэнне да сеткі",
+  "ocrModelsPrepareFailed": "Не ўдалося падрыхтаваць мадэлі аптычнага распазнавання",
+  "ocrImageNotFoundError": "Файл відарыса не знойдзены",
+  "ocrImageDecodeFailedError": "Не ўдалося прачытаць файл відарыса",
+  "ocrGenericDetectError": "Не ўдалося выявіць тэкст у відарысе",
   "oops": "Вой",
   "somethingWentWrongPleaseTryAgain": "Нешта пайшло не так. Паспрабуйце яшчэ раз",
   "thisWillLogYouOutOfThisDevice": "Гэта дзеянне завершыць сеанс на вашай прыладзе!",
@@ -227,7 +237,7 @@
   "after1Month": "Праз 1 месяц",
   "after1Year": "Праз 1 год",
   "manageParticipants": "Кіраванне",
-  "albumParticipantsCount": "{count, plural, =0 {Няма ўдзельнікаў} =1 {{count} удзельнік} other {{count} удзельнікаў}}",
+  "albumParticipantsCount": "{count, plural, =0 {Няма ўдзельнікаў} =1 {1 удзельнік} few {{count} удзельнікі} many {{count} удзельнікаў} other {{count} удзельнікаў}}",
   "@albumParticipantsCount": {
     "placeholders": {
       "count": {
@@ -250,7 +260,7 @@
   "publicLinkEnabled": "Публічная спасылка ўключана",
   "shareALink": "Абагуліць спасылку",
   "sharedAlbumSectionDescription": "Стварайце абагуленыя і сумесныя альбомы з іншымі карыстальнікамі Ente, уключаючы карыстальнікаў з бясплатным тарыфным планам.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Абагуліць з іншымі} =1 {Абагулена з 1 чалавекам} other {Абагулена з {numberOfPeople} людзьмі}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Абагуліць з пэўнымі людзьмі} =1 {Абагулена з 1 чалавекам} other {Абагулена з {numberOfPeople} людзьмі}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -291,7 +301,7 @@
   "unavailableReferralCode": "На жаль, гэты код ужо недаступны.",
   "codeChangeLimitReached": "На жаль, вы дасягнулі абмежавання па колькасці змяненняў кода.",
   "onlyFamilyAdminCanChangeCode": "Напішыце {familyAdminEmail}, каб змяніць код.",
-  "storageInGB": "{storageAmountInGB} Гб",
+  "storageInGB": "{storageAmountInGB} ГБ",
   "claimed": "Атрымана",
   "@claimed": {
     "description": "Used to indicate storage claimed, like 10GB Claimed"
@@ -309,7 +319,7 @@
   "referralStep3": "3. Вы абодва атрымаеце {storageInGB} ГБ* бясплатнага сховішча",
   "referralsAreCurrentlyPaused": "Рэфералы ў цяперашні момант прыпынены",
   "youCanAtMaxDoubleYourStorage": "* Вы можаце павялічыць сховішча максімум у два разы",
-  "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сям'я атрымала {storageAmountInGb} ГБ} false {Вы атрымалі {storageAmountInGb} ГБ} other {Вы атрымалі {storageAmountInGb} ГБ!}}",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Ваша сям'я атрымала {storageAmountInGb} ГБ} false {Вы атрымалі {storageAmountInGb} ГБ} other {У дадзены момант вы атрымалі {storageAmountInGb} ГБ!}}",
   "@claimedStorageSoFar": {
     "placeholders": {
       "isFamilyMember": {
@@ -380,7 +390,7 @@
   "deleteFromBoth": "Выдаліць і ў Ente, і на вашай прыладзе",
   "newAlbum": "Новы альбом",
   "albums": "Альбомы",
-  "memoryCount": "{count, plural, =0{няма ўспамінаў} one{{formattedCount} успамін} other{{formattedCount} успамінаў}}",
+  "memoryCount": "{count, plural, =0{няма ўспамінаў} one{{formattedCount} успамін} few {{formattedCount} успаміны} many {{formattedCount} успамінаў} other{{formattedCount} успамінаў}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -395,7 +405,7 @@
       }
     }
   },
-  "selectedPhotos": "Выбрана {count}",
+  "selectedPhotos": "Выбрана: {count}",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
     "type": "text",
@@ -406,7 +416,7 @@
       }
     }
   },
-  "selectedPhotosWithYours": "{count} выбрана ({yourCount} вашы)",
+  "selectedPhotosWithYours": "Выбрана: {count} ({yourCount} вашы)",
   "@selectedPhotosWithYours": {
     "description": "Display the number of selected photos, including the number of selected photos owned by the user",
     "type": "text",
@@ -467,9 +477,9 @@
   "selectAll": "Абраць усё",
   "skip": "Прапусціць",
   "updatingFolderSelection": "Абнаўленне выбару папкі...",
-  "itemCount": "{count, plural, one{{count} элемент} few{{count} элемента} other{{count} элементаў}}",
-  "deleteItemCount": "{count, plural, =1 {Выдаліць {count} элемент} few{Выдаліць {count} элемента} other {Выдаліць {count} элементаў}}",
-  "duplicateItemsGroup": "{count} файлаў, кожны {formattedSize}",
+  "itemCount": "{count, plural, one{{count} элемент} few{{count} элементы} other{{count} элементаў}}",
+  "deleteItemCount": "{count, plural, =1 {Выдаліць {count} элемент} few{Выдаліць {count} элементы} other {Выдаліць {count} элементаў}}",
+  "duplicateItemsGroup": "Файлаў: {count}; кожны з іх па {formattedSize}",
   "@duplicateItemsGroup": {
     "description": "Display the number of duplicate files and their size",
     "type": "text",
@@ -493,7 +503,7 @@
   "backupVideos": "Рэзервовае капіяванне відэа",
   "disableAutoLock": "Адключыць аўтаблакіроўку",
   "deviceLockExplanation": "Адключыць блакіроўку экрана, калі Ente знаходзіцца на пярэднім плане і выконваецца рэзервовае капіяванне. У большасці выпадкаў гэта не патрабуецца, але можа дапамагчы з вялікімі запампоўваннямі і пры першапачатковым імпартаванні вялікіх бібліятэк.",
-  "about": "Пра праграму",
+  "about": "Аб праграме",
   "weAreOpenSource": "Праграма мае адкрыты зыходны код!",
   "privacy": "Прыватнасць",
   "terms": "Умовы",
@@ -527,13 +537,13 @@
   "backup": "Рэзервовая копія",
   "freeUpDeviceSpace": "Вызваленне месца на прыладзе",
   "freeUpDeviceSpaceDesc": "Вызваліце месца на вашай прыладзе, ачысціўшы файлы, якія ўжо адрэзерваваны.",
-  "allClear": "✨ Усё ачышчана",
+  "allClear": "✨ Усё лаканічна",
   "noDeviceThatCanBeDeleted": "На гэтай прыладзе няма файлаў для выдалення",
   "removeDuplicates": "Выдаліць дублікаты",
   "removeDuplicatesDesc": "Пераглядзіце і выдаліце файлы-дублікаты.",
   "viewLargeFiles": "Вялікія файлы",
   "viewLargeFilesDesc": "Праглядзіце файлы, якія займаюць найбольш месца на прыладзе.",
-  "noDuplicates": "✨ Няма дублікатаў",
+  "noDuplicates": "✨ Без дублікатаў",
   "youveNoDuplicateFilesThatCanBeCleared": "У вас няма дубліраваных файлаў, якія можна ачысціць",
   "success": "Паспяхова",
   "rateUs": "Ацаніце нас",
@@ -550,7 +560,7 @@
     }
   },
   "remindToEmptyEnteTrash": "Таксама ачысціце сметніцу, каб вызваліць месца",
-  "sparkleSuccess": "✨ Паспяхова",
+  "sparkleSuccess": "✨ Поспех",
   "duplicateFileCountWithStorageSaved": "Вы выдалілі {count, plural, one{{count} дублікат} few{{count} дубліката} other{{count} дублікатаў}}, вызваліўшы ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
@@ -571,7 +581,7 @@
   "notifications": "Апавяшчэнні",
   "sharedPhotoNotifications": "Новыя абагульненыя фота",
   "sharedPhotoNotificationsExplanation": "Атрымліваць апавяшчэнні, калі хтосьці дадае фота ў абагульнены альбом, да якога вы належыце",
-  "advanced": "Пашыраныя",
+  "advanced": "Дадаткова",
   "general": "Асноўныя",
   "security": "Бяспека",
   "authToViewYourRecoveryKey": "Прайдзіце аўтэнтыфікацыю, каб паглядзець свае ключы аднаўлення",
@@ -802,6 +812,14 @@
   "share": "Абагуліць",
   "unhideToAlbum": "Паказаць альбом",
   "restoreToAlbum": "Аднавіць у альбом",
+  "moveItem": "{count, plural, =1 {Перамясціць элемент} other {Перамясціць элементы}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Дадаць элемент} other {Дадаць элементы}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Стварыць або выбраць альбом",
   "selectAlbum": "Выбраць альбом",
   "searchByAlbumNameHint": "Назва альбома",
@@ -812,10 +830,11 @@
   "unhidingFilesToAlbum": "Паказ файлаў у альбоме",
   "canNotUploadToAlbumsOwnedByOthers": "Нельга запампоўваць у альбомы, якія належаць іншым",
   "uploadingFilesToAlbum": "Запампоўванне файлаў у альбом...",
-  "addedSuccessfullyTo": "Паспяхова дадзена ў {albumName}",
+  "addedSuccessfullyTo": "Паспяхова дададзена ў {albumName}",
   "movedSuccessfullyTo": "Паспяхова перамешчана ў {albumName}",
   "thisAlbumAlreadyHDACollaborativeLink": "У гэтага альбома ўжо ёсць сумесную спасылку",
   "collaborativeLinkCreatedFor": "Сумесная спасылка створана для {albumName}",
+  "askYourLovedOnesToShare": "Папрасіце сваіх блізкіх падзяліцца",
   "invite": "Запрасіць",
   "shareYourFirstAlbum": "Абагуліце свой першы альбом",
   "sharedWith": "Абагулена з {emailIDs}",
@@ -825,7 +844,7 @@
   "referFriendsAnd2xYourPlan": "Запрасіце сяброў і падвойце свой тарыфны план",
   "shareAlbumHint": "Адкрыйце альбом і націсніце кнопку абагульвання ў верхнім правым куце.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "На элементах паказваецца колькасць дзён, якія засталіся да іх незваротнага выдалення",
-  "trashDaysLeft": "{count, plural, =0 {Хутка} =1 {1 дзень}  other {{count} дні/дзён}}",
+  "trashDaysLeft": "{count, plural, =0 {Неўзабаве} =1{1 дзень} few {{count} дні} other{{count} дзён}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -898,6 +917,49 @@
   "authToViewYourMemories": "Прайдзіце аўтэнтыфікацыю, каб паглядзець свае ўспаміны",
   "unlock": "Разблакіраваць",
   "freeUpSpace": "Вызваліць прастору",
+  "freeUpSpaceSaving": "{count, plural, =1 {Яго можна выдаліць з прылады, каб вызваліць {formattedSize}} other {Іх можна выдаліць з прылады, каб вызваліць {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {Для 1 файла ў} other {Для {formattedNumber} файлаў у}} гэтым альбоме была створана рэзервовая копія",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {Для 1 файла} other {Для {formattedNumber} файлаў}} на гэтай прыладзе была створана рэзервовая копія",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Вы ўсё яшчэ можаце атрымаць доступ да {count, plural, =1 {яго ў} other {іх у}} Ente, пакуль у вас актыўная падпіска",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
   "freeUpAmount": "Вызваліць {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Гэта электронная пошта ўжо выкарыстоўваецца",
   "incorrectCode": "Няправільны код",
@@ -1132,6 +1194,12 @@
   "addSelected": "Дадаць выбраныя",
   "addFromDevice": "Дадаць з прылады",
   "addPhotos": "Дадаць фатаграфіі",
+  "noPhotosFoundHere": "Тут фатаграфій не знойдзена",
+  "zoomOutToSeePhotos": "Паменшыць маштаб, каб убачыць фатаграфіі",
+  "noImagesWithLocation": "Відарысы з месцазнаходжаннем адсутнічаюць",
+  "unpinAlbum": "Адмацаваць альбом",
+  "pinAlbum": "Замацаваць альбом",
+  "create": "Стварыць",
   "viewAll": "Паглядзець усе",
   "nothingSharedWithYouYet": "Пакуль з вамі нічога не абагулена",
   "noAlbumsSharedByYouYet": "Ніякія альбомы пакуль не абагулены вамі",
@@ -1146,10 +1214,45 @@
   "crashReporting": "Справаздачы аб збоях",
   "resumableUploads": "Запампоўванні з магчымасцю ўзнаўлення",
   "addToHiddenAlbum": "Дадаць у схаваны альбом",
+  "moveToHiddenAlbum": "Перамясціць у схаваны альбом",
+  "fileTypes": "Тыпы файлаў",
+  "deleteConfirmDialogBody": "Гэты ўліковы запіс звязаны з іншымі праграмамі Ente, калі вы імі карыстаецеся. Запампаваныя вамі даныя будуць запланаваны да выдалення ва ўсіх праграмах Ente, а ваш уліковы запіс будзе незваротна выдалены.",
+  "hearUsWhereTitle": "Адкуль вы пачулі пра Ente? (неабавязкова)",
+  "hearUsExplanation": "Наша каманда не збірае статыстыку ўсталяванняў. Нам вельмі дапаможа, калі вы абагуліце інфармацыю, дзе вы знайшлі нашу праграму!",
+  "viewAddOnButton": "Паглядзець дадаткі",
+  "addOns": "Дадаткі",
+  "addOnPageSubtitle": "Падрабязнасці дадаткаў",
+  "yourMap": "Ваша карта",
+  "modifyYourQueryOrTrySearchingFor": "Змяніце свой запыт або паспрабуйце шукаць",
+  "blackFridaySale": "Распродаж з нагоды «Чорнай пятніцы»",
+  "upto50OffUntil4thDec": "Скідка ў памеры 50% да 4-га снежня.",
+  "photos": "Фатаграфіі",
+  "videos": "Відэа",
+  "livePhotos": "Live Photos",
+  "searchHint1": "Хуткі пошук на прыладзе",
+  "searchHint2": "Даты фатаграфій і іх апісанне",
+  "searchHint3": "Альбомы, назвы і тыпы файлаў",
+  "searchHint4": "Месцазнаходжанне",
+  "searchHint5": "Неўзабаве чакаецца: твары і магічны пошук ✨",
+  "addYourPhotosNow": "Дадайце свае фатаграфіі",
+  "searchResultCount": "{count, plural, one{Знойдзены {count} вынік} few {Знойдзены {count} вынікі} many {Знойдзены {count} вынікаў} other{Знойдзены {count} вынікаў}}",
+  "@searchResultCount": {
+    "description": "Text to tell user how many results were found for their search query",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "faces": "Твары",
+  "people": "Людзі",
+  "contents": "Змесціва",
   "addNew": "Дадаць новы",
   "@addNew": {
     "description": "Text to add a new item (location tag, album, caption etc)"
   },
+  "contacts": "Кантакты",
   "noInternetConnection": "Адсутнічае падключэнне да інтэрнэту",
   "pleaseCheckYourInternetConnectionAndTryAgain": "Праверце злучэнне з інтэрнэтам і паспрабуйце яшчэ раз.",
   "signOutFromOtherDevices": "Выйсці з іншых прылад",
@@ -1158,6 +1261,11 @@
   "doNotSignOut": "Не выходзіць",
   "editLocation": "Змяніць месцазнаходжанне",
   "selectALocation": "Выбраць месцазнаходжанне",
+  "selectALocationFirst": "Спачатку выберыце месцазнаходжанне",
+  "changeLocationOfSelectedItems": "Змяніць месцазнаходжанне выбраных элементаў?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Рэдагаванне месцазнаходжання будзе бачна толькі ў Ente",
+  "cleanUncategorized": "Ачысціць«Без катэгорыі»",
+  "cleanUncategorizedDescription": "Выдаліць у раздзеле «Без катэгорыі» ўсе файлы, якія прысутнічаюць у іншых альбомах",
   "waitingForVerification": "Чаканне спраўджання...",
   "passkey": "Ключ доступу",
   "passkeyAuthTitle": "Спраўджанне ключа доступу",
@@ -1166,6 +1274,11 @@
   "loginSessionExpired": "Сеанс завяршыўся",
   "loginSessionExpiredDetails": "Ваш сеанс завяршыўся. Увайдзіце яшчэ раз.",
   "verifyPasskey": "Спраўдзіць ключ доступу",
+  "playOnTv": "Прайграць альбом на тэлевізары",
+  "pair": "Спалучыць",
+  "deviceNotFound": "Прылада не знойдзена",
+  "castInstruction": "Наведайце cast.ente.io на прыладзе, якую хочаце спалучыць.\n\nУвядзіце кода ніжэй, каб прайграць альбом на тэлевізары.",
+  "deviceCodeHint": "Увядзіце код",
   "joinDiscord": "Далучыцца да Discord",
   "locations": "Месцазнаходжанні",
   "addAName": "Дадаць назву",
@@ -1221,8 +1334,23 @@
   "right": "Управа",
   "whatsNew": "Што новага",
   "reviewSuggestions": "Паглядзець прапановы",
+  "review": "Ацаніць",
+  "useAsCover": "Выкарыстоўваць як вокладку",
+  "notPersonLabel": "Вы не {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  },
   "enable": "Уключыць",
   "enabled": "Уключана",
+  "moreDetails": "Падрабязней",
+  "enableMLIndexingDesc": "Ente падтрымлівае машыннае навучанне для распазнавання твару, магічны пошук і іншыя пошукавыя функцыі",
+  "magicSearchHint": "Магічны пошук дазваляе шукаць фатаграфіі па іх змесціву. Напрыклад, «кветка», «чырвоная машына» «дакументы»",
   "panorama": "Панарама",
   "reenterPassword": "Увядзіце пароль яшчэ раз",
   "reenterPin": "Увядзіце PIN-код яшчэ раз",
@@ -1236,23 +1364,83 @@
   "noSystemLockFound": "Сістэмная блакіроўка не знойдзена",
   "tapToUnlock": "Націсніце, каб разблакіраваць",
   "tooManyIncorrectAttempts": "Занадта шмат няўдалых спроб",
+  "videoInfo": "Інфармацыя аб відэа",
   "autoLock": "Аўтаблакіроўка",
   "immediately": "Неадкладна",
   "autoLockFeatureDescription": "Час, праз які праграма будзе заблакіравана пасля пераходу ў фонавы рэжым",
   "hideContent": "Схаваць змесціва",
   "hideContentDescriptionAndroid": "Схаваць змесціва праграмы ў пераключальніку праграм і адключыць здымкі экрана",
   "hideContentDescriptionIos": "Схаваць змесціва праграмы ў пераключальніку праграм",
+  "passwordStrengthInfo": "Надзейнасць пароля вылічана з улікам яго даўжыні, выкарыстаных сімвалаў, а таксама прысутнасці сярод 10000 самых папулярных пароляў",
+  "noQuickLinksSelected": "Хуткія спасылкі не выбраны",
+  "pleaseSelectQuickLinksToRemove": "Выберыце хуткія спасылкі для выдалення",
   "removePublicLinks": "Выдаліць публічныя спасылкі",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Гэта дзеянне прывядзе да выдалення публічных спасылак усіх выбраных хуткіх спасылак.",
+  "guestView": "Гасцявы прагляд",
+  "guestViewEnablePreSteps": "Наладзьце код доступу або блакіроўку экрана ў сістэмных наладах вашай прылады, каб уключыць гасцявы ўваход.",
+  "nameTheAlbum": "Назва альбома",
+  "collectPhotosDescription": "Стварыце спасылку, па якой вашы сябры змогуць запампоўваць фатаграфіі ў арыгінальнай якасці.",
+  "collect": "Сабраць",
   "appLockDescriptions": "Выберыце паміж прадвызначаным экранам блакіравання сваёй прылады і карыстальніцкім экранам блакіравання з PIN-кодам або паролем.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Наладзьце код доступу да прылады або блакіроўку экрана ў наладах вашай сістэме, каб уключыць блакіроўку праграмы.",
+  "authToViewPasskey": "Прайдзіце аўтэнтыфікацыю, каб паглядзець свой код доступу",
+  "loopVideoOn": "Уключыць зацыкліванне відэа",
+  "loopVideoOff": "Адключыць зацыкліванне відэа",
+  "localSyncErrorMessage": "Здаецца, што нешта пайшло не так. Паколькі лакальная сінхранізацыя фатаграфій займае больш часу, чым чакалася. Звяжыцеся з нашай службай падтрымкі",
+  "showPerson": "Паказаць асобу",
+  "sort": "Сартаваць",
+  "mostRecent": "Самыя апошнія",
+  "mostRelevant": "Самыя актуальныя",
   "loadingYourPhotos": "Загрузка вашых фатаграфій...",
   "processingImport": "Апрацоўка {folderName}...",
+  "personName": "Імя асобы",
+  "addNewPerson": "Дадаць новую асобу",
+  "addNameOrMerge": "Дадаць імя або аб'яднаць",
+  "mergeWithExisting": "Аб'яднаць з існуючым",
+  "newPerson": "Новая асоба",
   "addName": "Дадаць імя",
   "add": "Дадаць",
+  "extraPhotosFoundFor": "Дадатковыя фатаграфіі знойдзены для {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "Знойдзены дадатковыя фатаграфіі",
   "configuration": "Канфігурацыя",
+  "localIndexing": "Лакальная індэксацыя",
+  "processed": "Апрацавана",
   "resetPerson": "Выдаліць",
+  "areYouSureYouWantToResetThisPerson": "Вы сапраўды хочаце скінуць даныя гэтай асобы?",
+  "allPersonGroupingWillReset": "Усе групы для гэтай асобы будуць скінуты, а вы згубіце ўсе прапановы, якія зроблены для яе",
+  "yesResetPerson": "Так, скінуць асобу",
+  "onlyThem": "Толькі яны",
+  "checkingModels": "Праверка мадэляў...",
+  "enableMachineLearningBanner": "Уключыць машыннае навучанне для магічнага пошуку і распазнавання твару",
   "searchDiscoverEmptySection": "Відарысы будуць паказаны тут пасля завяршэння апрацоўкі і сінхранізацыі",
   "searchPersonsEmptySection": "Людзі будуць паказаны тут пасля завяршэння апрацоўкі і сінхранізацыі",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Дададзены 0 праглядальнікаў} =1 {Дададзены 1 праглядальнік} few {Дададзены {count} праглядальнікі} many {Дададзены {count} праглядальнікаў} other {Дададзены {count} праглядальнікаў}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Дададзены 0 суаўтараў} =1 {Дададзены 1 суаўтар} few {Дададзены {count} суаўтары} many {Дададзены {count} суаўтараў} other {Дададзены {count} суаўтараў}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
   "accountIsAlreadyConfigured": "Уліковы запіс ужо сканфігурыраваны.",
   "sessionIdMismatch": "Неадпаведнасць ідэнтыфікатара сеанса",
   "@sessionIdMismatch": {
@@ -1298,21 +1486,511 @@
   },
   "info": "Інфармацыя",
   "addFiles": "Дадаць файлы",
+  "castAlbum": "Вяшчаць альбом",
+  "imageNotAnalyzed": "Відарыс не прааналізаваны",
+  "noFacesFound": "Твар не знойдзены",
+  "fileNotUploadedYet": "Файл пакуль не запампаваны",
+  "noSuggestionsForPerson": "Адсутнічаюць прапановы для {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "месяц",
+  "yearShort": "год",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "цяпер выконваецца",
+  "ignored": "ігнаруецца",
+  "photosCount": "{count, plural, =0 {0 фатаграфій} =1 {1 фатаграфія} few {{count} фатаграфіі} many {{count} фатаграфій} other {{count} фатаграфій}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Файл",
+  "searchSectionsLengthMismatch": "Неадпаведнасць даўжыні раздзелаў: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Выберыце паштовую праграму",
   "selectAllShort": "Усе",
   "@selectAllShort": {
     "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
   },
+  "selectCoverPhoto": "Выберыце фатаграфію вокладкі",
   "newLocation": "Новае месцазнаходжанне",
+  "faceNotClusteredYet": "Твар пакуль не кластэрызаваны. Паспрабуйце яшчэ раз пазней",
+  "theLinkYouAreTryingToAccessHasExpired": "Тэрмін дзеяння спасылкі, да якой вы спрабавалі атрымаць доступ, пратэрмінаваны.",
   "openFile": "Адкрыць файл",
+  "backupFile": "Файл рэзервовай копіі",
+  "openAlbumInBrowser": "Адкрыць альбом у браўзеры",
+  "openAlbumInBrowserTitle": "Скарыстайцеся вэб-праграмай, каб дадаць фатаграфіі ў гэты альбом",
+  "allow": "Дазволіць",
+  "allowAppToOpenSharedAlbumLinks": "Дазволіць праграме адкрываць спасылкі на агульныя альбомы",
+  "seePublicAlbumLinksInApp": "Праглядаць публічныя спасылкі на альбомы ў праграме",
+  "emergencyContacts": "Экстранныя кантакты",
+  "acceptTrustInvite": "Прыняць запрашэнне",
+  "declineTrustInvite": "Адхіліць запрашэнне",
+  "removeYourselfAsTrustedContact": "Выдаліць сябе з давераных кантактаў",
+  "legacy": "Спадчына",
+  "legacyPageDesc": "Функцыя «Спадчына» дазваляе давераным кантактам атрымаць доступ да вашага ўліковага запісу пры вашай адсутнасці.",
+  "legacyPageDesc2": "Давераныя кантакты могуць ініцыяваць аднаўленне ўліковага запісу, і калі яно не будзе заблакіравана цягам 30 дзён, то яны змогуць скінуць пароль і атрымаць доступ да яго.",
+  "legacyAccounts": "Уліковыя запісы «Спадчына»",
+  "trustedContacts": "Давераныя кантакты",
+  "addTrustedContact": "Дадаць давераны кантакт",
+  "removeInvite": "Выдаліць запрашэнне",
+  "recoveryWarning": "Давераны кантакт спрабуе атрымаць доступ да вашага ўліковага запісу",
+  "rejectRecovery": "Адхіліць аднаўленне",
+  "recoveryInitiated": "Ініцыявана аднаўленне",
+  "recoveryInitiatedDesc": "Вы зможаце атрымаць доступ да ўліковага запісу праз {days} дні/дзён. Апавяшчэнне будзе адпраўлена на {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Скасаваць аднаўленне",
+  "recoveryAccount": "Аднавіць уліковы запіс",
+  "cancelAccountRecoveryBody": "Вы сапраўды хочаце скасаваць аднаўленне?",
+  "startAccountRecoveryTitle": "Пачаць аднаўленне",
+  "whyAddTrustContact": "Давераныя кантакты могуць дапамагчы з аднаўленнем вашых даных.",
+  "recoveryReady": "Цяпер вы можаце аднавіць уліковы запіс {email}, задаўшы новы пароль.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} спрабуе аднавіць ваш уліковы запіс.",
+  "trustedInviteBody": "Вы атрымалі запрашэнне стаць давераным кантактам {email}.",
+  "warning": "Папярэджанне",
+  "proceed": "Працягнуць",
+  "confirmAddingTrustedContact": "Вы збіраеце дадаць {email} у якасці даверанага кантакту. У гэтага карыстальніка будзе магчымасць аднавіць ваш уліковы запіс, калі вы будзеце адсутнічаць {numOfDays} дні/дзён.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} запрасіў вас стаць давераным кантактам",
+  "authToManageLegacy": "Прайдзіце аўтэнтыфікацыю, каб кіраваць сваімі даверанымі кантактамі",
+  "hideSharedItemsFromHomeGallery": "Схаваць абагулены элементы з асноўнай галерэі",
   "gallery": "Галерэя",
+  "joinAlbum": "Далучыцца да альбома",
+  "joinAlbumSubtext": "каб праглядаць і дадаваць свае фатаграфіі",
+  "joinAlbumSubtextViewer": "каб дадаць яе ў абагуленыя альбомы",
   "join": "Далучыцца",
+  "linkEmail": "Прывязаць электронную пошту",
+  "link": "Прывязаць",
+  "noEnteAccountExclamation": "Адсутнічае ўліковы запіс Ente!",
+  "orPickFromYourContacts": "або выберыце са сваіх кантактаў",
+  "emailDoesNotHaveEnteAccount": "У {email} адсутнічае ўліковы запіс Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Я)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Пераназначыць «Мяне»",
+  "me": "Я",
+  "linkEmailToContactBannerCaption": "для больш хуткага абагульвання",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Выберыце асобу для прывязкі",
+  "linkPersonToEmail": "Прывязаць асобу да {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Гэта дзеянне прывяжа {personName} да {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Выберыце свой твар",
+  "reassigningLoading": "Пераназначэнне...",
+  "reassignedToName": "Вы пераназначаны на {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Захаваць змяненні перад выхадам?",
   "dontSave": "Не захоўваць",
+  "thisIsMeExclamation": "Гэта я!",
+  "linkPerson": "Прывязаць асобу",
+  "linkPersonCaption": "для больш зручнага абагульвання",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Перадача відэа плынню",
+  "processingVideos": "Апрацоўка відэа",
+  "streamDetails": "Падрабязнасці плыні",
   "processing": "Апрацоўка",
+  "queued": "У чарзе",
+  "ineligible": "Непрыдатны",
+  "failed": "Збой",
+  "playStream": "Узнавіць плынь",
+  "playOriginal": "Узнавіць арыгінал",
+  "joinAlbumConfirmationDialogBody": "Іншыя ўдзельнікі змогуць убачыць вашу электронную пошту, калі вы далучыцеся да альбома.",
+  "pleaseWaitThisWillTakeAWhile": "Гэта зойме пэўны час. Пачакайце...",
+  "editTime": "Рэдагаваць час",
+  "selectTime": "Выбраць час",
+  "selectDate": "Выбраць дату",
+  "previous": "Папярэдні",
+  "selectOneDateAndTimeForAll": "Выберыце адну дату і час для ўсіх",
+  "selectStartOfRange": "Выберыце пачатак дыяпазону",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Гэта зробіць дату і час усіх выбраных фатаграфій аднолькавымі.",
+  "allWillShiftRangeBasedOnFirst": "Гэта першае ў групе. Іншыя выбраныя фатаграфіі будуць аўтаматычна зрушаныя ў залежнасці ад гэтай новай даты",
+  "newRange": "Новы дыяпазон",
+  "selectOneDateAndTime": "Выберыце адну дату і час",
+  "moveSelectedPhotosToOneDate": "Перанесці выбраныя фатаграфіі ў адну дату",
+  "shiftDatesAndTime": "Перанос даты і часу",
+  "photosKeepRelativeTimeDifference": "Фатаграфіі захоўваюць адносную розніцу ў часе",
+  "photocountPhotos": "{count, plural, =0 {Няма фатаграфій} =1 {1 фатаграфія} few {{count} фатаграфіі} many {{count} фатаграфій} other {{count} фатаграфій}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Значок праграмы",
+  "notThisPerson": "Не гэта асоба?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Выбраныя элементы будуць выдалены ў гэтай асобы, але не выдалены з вашай бібліятэкі.",
+  "throughTheYears": "{dateFormat} праз гады",
+  "thisWeekThroughTheYears": "Гэты тыдзень праз гады",
+  "thisWeekXYearsAgo": "{count, plural, =1 {На гэтым тыдні {count} год таму} few {На гэтым тыдні {count} гады таму} many {На гэтым тыдні {count} гадоў таму} other {На гэтым тыдні {count} гадоў таму}}",
+  "youAndThem": "Вы і {name}",
+  "admiringThem": "Любуючыся {name}",
+  "embracingThem": "Абдымаючы {name}",
+  "partyWithThem": "Вечарына з {name}",
+  "hikingWithThem": "Паход з {name}",
+  "feastingWithThem": "Застолле з {name}",
+  "selfiesWithThem": "Сэлфі з {name}",
+  "posingWithThem": "Пазіруючы з {name}",
+  "backgroundWithThem": "Прыгожыя краявіды з {name}",
+  "sportsWithThem": "Спорт з {name}",
+  "roadtripWithThem": "Падарожжа з {name}",
+  "spotlightOnYourself": "Вы ў цэнтры ўвагі",
+  "spotlightOnThem": "У цэнтры ўвагі {name}",
+  "personIsAge": "{name} споўнілася {age}!",
+  "personTurningAge": "{name} неўзабаве споўніцца {age}",
+  "lastTimeWithThem": "У апошні раз з {name}",
+  "tripToLocation": "Падарожжа ў {location}",
+  "tripInYear": "Падарожжа ў {year}",
+  "lastYearsTrip": "Леташняе падарожжа",
+  "sunrise": "На гарызонце",
+  "mountains": "Праз узвышшы",
+  "greenery": "Зялёнае жыццё",
+  "beach": "Пясок і мора",
+  "city": "У горадзе",
+  "moon": "Пад святлом месяца",
+  "onTheRoad": "Зноў у дарозе",
+  "food": "Кулінарнае задавальненне",
+  "pets": "Пухнатыя спадарожнікі",
+  "curatedMemories": "Абраныя ўспаміны",
+  "widgets": "Віджэты",
+  "memories": "Успаміны",
+  "peopleWidgetDesc": "Выберыце людзей, якіх вы хочаце бачыць на галоўным экране.",
+  "albumsWidgetDesc": "Выберыце альбомы, якія вы хочаце бачыць на галоўным экране.",
+  "memoriesWidgetDesc": "Выберыце, якія ўспаміны вы хочаце бачыць на галоўным экране.",
+  "smartMemories": "Інтэлектуальныя ўспаміны",
+  "pastYearsMemories": "Успаміны мінулых гадоў",
+  "deleteMultipleAlbumDialog": "Таксама выдаліць фатаграфіі (разам з відэа), якія знаходзяцца ў гэтых {count} альбомах, з <bold>усіх</bold> іншых альбомаў, часткай якіх яны з'яўляюцца?",
+  "addParticipants": "Дадаць удзельнікаў",
+  "selectedAlbums": "Выбрана: {count}",
+  "actionNotSupportedOnFavouritesAlbum": "Дзеянне не падтрымліваецца ў альбоме «Абранае»",
+  "onThisDayMemories": "Успаміны ў гэты дзень",
+  "onThisDay": "У гэты дзень",
+  "lookBackOnYourMemories": "Азіраючыся на вашы ўспаміны",
+  "newPhotosEmoji": " новая 📸",
+  "sorryWeHadToPauseYourBackups": "Прабачце, але давялося прыпыніць ваша рэзервовае капіяванне",
+  "clickToInstallOurBestVersionYet": "Націсніце, каб усталяваць нашу лепшую версію",
+  "onThisDayNotificationExplanation": "Атрымліваць напаміны аб успамінах з гэтага дня ў мінулыя гады.",
+  "addMemoriesWidgetPrompt": "Дадайце віджэт успамін на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
+  "addAlbumWidgetPrompt": "Дадайце віджэт альбома на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
+  "addPeopleWidgetPrompt": "Дадайце віджэт людзей на галоўны экран і вярніцеся сюды, каб наладзіць яго.",
+  "birthdayNotifications": "Апавяшчэнні аб днях нараджэння",
+  "receiveRemindersOnBirthdays": "Атрымлівайце напаміны, калі ў некага дзень нараджэння. Націск на апавяшчэнне перанясе вас да фатаграфій імянінніка.",
+  "happyBirthday": "З днём нараджэння! 🥳",
+  "birthdays": "Дні нараджэння",
+  "wishThemAHappyBirthday": "Віншуем з днём нараджэння, {name}! 🎉",
+  "areYouSureRemoveThisFaceFromPerson": "Вы сапраўды хочаце выдаліць твар з гэтай асобы?",
+  "otherDetectedFaces": "Іншыя выяўленыя твары",
+  "areThey": "Яны ",
   "questionmark": "?",
+  "saveAsAnotherPerson": "Захаваць як іншую асобу",
+  "showLessFaces": "Паказаць менш твараў",
+  "showMoreFaces": "Паказаць больш твараў",
   "ignore": "Iгнараваць",
   "merge": "Аб'яднаць",
   "reset": "Скінуць",
+  "areYouSureYouWantToIgnoreThisPerson": "Вы сапраўды хочаце ігнараваць гэту асобу?",
+  "areYouSureYouWantToIgnoreThesePersons": "Вы сапраўды хочаце ігнараваць гэтых асоб?",
+  "thePersonGroupsWillNotBeDisplayed": "Групы асоб больш не будуць паказвацца ў раздзеле людзей. Фатаграфіі застануцца некранутымі.",
+  "thePersonWillNotBeDisplayed": "Асобы больш не будуць паказвацца ў раздзеле людзей. Фатаграфіі застануцца некранутымі.",
+  "areYouSureYouWantToMergeThem": "Вы сапраўды хочаце іх аб'яднаць?",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Усе групы, у якіх адсутнічае назва, будуць аб'яднаны з выбранай асобай. Гэта можна адрабіць у аглядзе гісторыі прапаноў для гэтай асобы.",
+  "yesIgnore": "Так, ігнараваць",
+  "same": "Пакінуць папярэдні",
+  "different": "Змяніць",
+  "sameperson": "Тая ж асоба?",
+  "indexingPausedStatusDescription": "Індэксаванне прыпынена. Яно аўтаматычна будзе ўзноўлена, калі прылада будзе гатова. Прылада лічыцца гатовай, калі ўзровень зараду акумулятара, стан акумулятара і цеплавы статус знаходзяцца ў межах нармальнага дыяпазону.",
   "thisWeek": "На гэтым тыдні",
+  "lastWeek": "На мінулым тыдні",
+  "thisMonth": "У гэтым месяцы",
+  "thisYear": "У гэтым тыдні",
+  "groupBy": "Групаваць па",
+  "faceThumbnailGenerationFailed": "Немагчыма згенерыраваць мініяцюру твару",
+  "fileAnalysisFailed": "Немагчыма прааналізаваць файл",
+  "editAutoAddPeople": "Рэдагаваць аўтаматычнае дадаванне людзей",
+  "autoAddPeople": "Аўтаматычнае дадаванне людзей",
+  "autoAddToAlbum": "Аўтаматычнае дадаванне альбома",
+  "shouldRemoveFilesSmartAlbumsDesc": "Ці варта выдаляць файлы, звязаны з чалавекам, які раней быў выбраны ў інтэлектуальных альбомах?",
+  "addingPhotos": "Дадаванне фатаграфій",
+  "gettingReady": "Ідзе падрыхтоўка",
+  "addSomePhotosDesc1": "Дадайце некалькі фатаграфій або выберыце ",
+  "addSomePhotosDesc2": "знаёмыя твары",
+  "addSomePhotosDesc3": "\nпачаць з",
+  "ignorePerson": "Ігнараваць асобу",
+  "mixedGrouping": "Змешаная група?",
+  "analysis": "Аналіз",
+  "doesGroupContainMultiplePeople": "Ці змяшчае гэта група некалькі людзей?",
+  "automaticallyAnalyzeAndSplitGrouping": "Сістэма аўтаматычна прааналізуе групу для вызначэння, ці ёсць у ёй некалькі людзей, і зноў раздзеліць іх. Гэта можа заняць некалькі секунд.",
+  "layout": "Макет",
   "day": "Дзень",
-  "font": "Шрыфт"
+  "undo": "Адрабіць",
+  "redo": "Узнавіць",
+  "filter": "Фільтр",
+  "adjust": "Рэгуляваць",
+  "draw": "Намаляваць",
+  "sticker": "Стыкер",
+  "brushColor": "Колер пэндзля",
+  "font": "Шрыфт",
+  "background": "Фон",
+  "align": "Выраўноўванне",
+  "addedToAlbums": "{count, plural, =1{Паспяхова дададзена ў 1 альбом} few{Паспяхова дададзена ў {count} альбомы} other{Паспяхова дададзена ў {count} альбомаў}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "videosProcessed": "Відэа было апрацавана",
+  "totalVideos": "Усяго відэа",
+  "skippedVideos": "Прапушчаныя відэа",
+  "videoStreamingDescriptionLine1": "Імгненнае ўзнаўленне відэа на любой прыладзе.",
+  "videoStreamingDescriptionLine2": "Уключыць апрацоўку відэаплыняў на гэтай прыладзе.",
+  "videoStreamingNote": "Гэта прылада можа апрацаваць відэа, якія зняты не пазней за 60 дзён таму і працягласцю не больш за 1 хвіліну. Для больш старых або больш доўгіх відэа ўключыце перадачу плынню ў праграме для камп'ютара.",
+  "createStream": "Уключыць перадачу плынню",
+  "recreateStream": "Стварыць трансляцыю паўторна",
+  "addedToStreamCreationQueue": "Дададзена ў чаргу стварэння плыні",
+  "addedToStreamRecreationQueue": "Дададзена ў чаргу паўторнай рэгенерацыі плыні",
+  "videoPreviewAlreadyExists": "Прадпрагляд відэа ўжо існуе",
+  "videoAlreadyInQueue": "Файл відэа ўжо знаходзіцца ў чарзе",
+  "addedToQueue": "Дададзена ў чаргу",
+  "creatingStream": "Стварэнне плыні",
+  "similarImages": "Падобныя відарысы",
+  "findSimilarImages": "Знайсці падобныя відарысы",
+  "noSimilarImagesFound": "Падобныя відарысы не знойдзены",
+  "yourPhotosLookUnique": "Вашы фатаграфіі выглядаюць унікальнымі",
+  "similarGroupsFound": "{count, plural, =1{Знойдзена {count} група} few{Знойдзена {count} групы} other{Знойдзена {count} груп}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Прагляд і выдаленне падобных відарысаў",
+  "deletePhotosWithSize": "Выдаліць {count} фатаграфій ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Параметры выбару",
+  "selectExactWithCount": "Такія ж самыя ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Выбраць дакладныя",
+  "selectSimilarWithCount": "Часткова падобныя ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Выбраць падобныя",
+  "selectAllWithCount": "Усе падабенствы ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Выбраць падобныя відарысы",
+  "chooseSimilarImagesToSelect": "Выбраць відарысы на аснове іх візуальнага падабенства",
+  "clearSelection": "Ачысціць выбраныя",
+  "similarImagesCount": "Падобных відарысаў ({count})",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Выдаліць ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Выдаліць файлы",
+  "areYouSureDeleteFiles": "Вы сапраўды хочаце выдаліць гэтыя файлы?",
+  "greatJob": "Выдатная праца!",
+  "cleanedUpSimilarImages": "Вы вызвалілі {size} прасторы",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Памер",
+  "similarity": "Падабенства",
+  "analyzingPhotosLocally": "Аналіз вашых фатаграфій лакальна...",
+  "lookingForVisualSimilarities": "Пошук па візуальным падабенстве...",
+  "comparingImageDetails": "Параўнанне падрабязнасцяў відарыса...",
+  "findingSimilarImages": "Пошук падобных відарысаў...",
+  "almostDone": "Амаль гатова...",
+  "processingLocally": "Апрацоўка лакальна",
+  "useMLToFindSimilarImages": "Паглядзець і выдаліць відарысы, якія выглядаюць падобна.",
+  "all": "Усе",
+  "similar": "Падобныя",
+  "identical": "Ідэнтычныя",
+  "nothingHereTryAnotherFilter": "Тут нічога няма. Паспрабуйце іншы фільтр!👀",
+  "related": "Звязаныя",
+  "hoorayyyy": "Ураааа!",
+  "nothingToTidyUpHere": "У гэтым месцы адсутнічаюць элементы для ўпарадкоўвання",
+  "deletingDash": "Выдаленне - ",
+  "cLTitle1": "OCR! Вылучыце тэкст на фатаграфіях",
+  "cLDesc1": "Ente вызначыць, ці ёсць тэкст на фатаграфіі ці скрыншоце, і пакажа вам кнопку для пераходу ў рэжым вылучэння тэксту. Кожны радок тэксту можна будзе вылучыць асобна.",
+  "cLTitle2": "Правядзіце пальцам, каб выбраць",
+  "cLDesc2": "Выкарыстоўвайце правядзення пальцам, каб хутка выбіраць фатаграфіі ў галерэі. Выдатна працуе адной рукой, не трэба падымаць палец!",
+  "cLTitle3": "Новыя ўспаміны",
+  "cLDesc3": "«Гуллівыя дзеці», «Зімовыя прыгоды», «Неонавыя ночы» і многае іншае.",
+  "cLTitle4": "Галерэя пейзажаў і іншае",
+  "cLDesc4": "Падтрымка альбомнай арыентацыі ў галоўнай галерэі праграмы. Паказваць людзей без звязаных з імі фатаграфій замест іх фільтрацыі. Палепшана выяўленне аспекту відэа пры абмене са знешнімі праграмамі.",
+  "closeBy": "Закрыць",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "Аўтаматычна дадаваць фатаграфіі выбраных людзей у гэты альбом",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
+  },
+  "festivities": "Святочны настрой",
+  "snowAdventures": "Зімовыя прыгоды",
+  "waterfalls": "Пагоня за вадаспадамі",
+  "wildlife": "У дзікай прыродзе",
+  "flowers": "Квітнеючая прыгажосць",
+  "nightLights": "Неонавая ноч",
+  "architecture": "Дызайн значкоў",
+  "autumnColors": "Восеньскае хараство",
+  "desertDreams": "Мара пустыні",
+  "stargazing": "Пад зоркамі",
+  "lakeside": "Цішыня ў возера",
+  "rainyDays": "Адчуванне дажджлівага дня",
+  "sportsAction": "Гульня",
+  "streetArt": "Гісторыі вулічнага мастацтва",
+  "familyMoments": "Час сям'і",
+  "fireworks": "Фінал з феерверкам",
+  "historicSites": "Адгалоскі гісторыі",
+  "tropicalParadise": "Трапічныя ўцёкі",
+  "forestTrails": "Прагулкі па лесе",
+  "citySunsets": "Закатнае ззянне горада",
+  "colorfulMarkets": "Яркі рынак",
+  "cozyCafes": "Утульны куток у кавярні",
+  "vintageVibes": "Вінтажны сталь",
+  "aerialViews": "Паветраная перспектыва",
+  "artisticPortraits": "Майстэрскі партрэт",
+  "streetFood": "Вулічна ежа",
+  "riverCruises": "Від на раку",
+  "playfulKids": "Гарэзлівыя дзеці",
+  "coastalCliffs": "Скалы ля мора"
 }

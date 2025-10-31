@@ -1587,7 +1587,6 @@
   },
   "legacyInvite": "{email} sizi güvenilir bir kişi olmaya davet etti",
   "authToManageLegacy": "Güvenilir kişilerinizi yönetmek için lütfen kimlik doğrulaması yapın",
-  "useDifferentPlayerInfo": "Bu videoyu oynatmakta sorun mu yaşıyorsunuz? Farklı bir oynatıcı denemek için buraya uzun basın.",
   "hideSharedItemsFromHomeGallery": "Paylaşılan öğeleri ana galeriden gizle",
   "gallery": "Galeri",
   "joinAlbum": "Albüme Katılın",

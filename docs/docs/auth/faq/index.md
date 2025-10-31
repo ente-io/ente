@@ -51,6 +51,14 @@ incorrect time when certain privacy settings are enabled.
 > If you've recently changed your system time and the codes are still incorrect,
 > try to refresh / restart the app if needed.
 
+### Why may TOTP verification fail with Google Workspace? {#google-workspace-totp-verification}
+
+Google Workspace doesn't explicitly block Ente Auth, but its implementation of TOTP is more restrictive and can sometimes be incompatible with third-party authenticators. While Ente Auth follows the open TOTP standard, Google's system occasionally expects additional metadata or a specific app ID, which can cause verification to fail. 
+
+That said, many users are able to use Ente Auth with Google Workspace without issues, so this behavior can vary.
+
+Also ensure that your system time is accurate, as any time drift can cause TOTP codes to be invalid. You can verify your time at https://time.is/
+
 ### Can I access my codes on web?
 
 You can access your codes on the web at [auth.ente.io](https://auth.ente.io).

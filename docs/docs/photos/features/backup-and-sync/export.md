@@ -18,9 +18,9 @@ Export is useful for:
 
 ## Export options
 
-### Desktop/Web continuous export
+### Desktop continuous export
 
-The desktop and web apps offer continuous export, which automatically exports new items as they're uploaded to Ente.
+The desktop app offers continuous export, which automatically exports new items as they're uploaded to Ente. The web app does not support export.
 
 **How to set up:**
 
@@ -33,7 +33,9 @@ The desktop and web apps offer continuous export, which automatically exports ne
 
 - The desktop app must be running for continuous export to work
 - Exports happen in the background without interrupting your work
+- Mirrors album changes (new files, album moves, and deletions) so your export reflects the latest album state
 - Incremental exports only download new or changed files
+- The web app does not support export; use the desktop app or CLI
 
 ### CLI export
 

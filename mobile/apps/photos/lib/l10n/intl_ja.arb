@@ -1525,7 +1525,6 @@
   },
   "legacyInvite": "{email} があなたを信頼する連絡先として招待しました",
   "authToManageLegacy": "信頼する連絡先を管理するために認証してください",
-  "useDifferentPlayerInfo": "この動画の再生に問題がありますか？別のプレイヤーを試すには、ここを長押ししてください。",
   "hideSharedItemsFromHomeGallery": "ホームギャラリーから共有された写真等を非表示",
   "gallery": "ギャラリー",
   "joinAlbum": "アルバムに参加",
