@@ -131,6 +131,16 @@ Disable the option to download original quality photos. Recipients can still vie
 
 **Note:** This doesn't prevent screenshots or screen recording, but does make it harder for recipients to get high-quality copies.
 
+### Allow joining album
+
+Let people who open the link in their Ente app add the shared album to their account. This is handy when you want other Ente users to keep the album in their Shared tab without sending them individual invites.
+
+> [!NOTE]
+>
+> When someone joins an album, their email address becomes visible to the album owner and other participants. Disable this option if you need to keep participant identities private while still sharing via a public link.
+
+When disabled, anyone with the link can still view the album in a browser, but they cannot join it from the Ente app.
+
 ### Allow adding photos (Collect mode)
 
 Enable photo uploads through the link. Anyone with the link can add photos to the album via web browser - no Ente account needed.
