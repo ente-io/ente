@@ -1,8 +1,9 @@
+- Ashil: Update auth icons
 - a5xwin: Auto backup feature for 2FA codes with encryption support
 - a5xwin: Import 2FA codes from gallery using QR image scanning
 - Tristan: Minimize to tray on Windows, macOS, and Linux
-- Adrián: Fix manual app lock with macOS Touch ID
-- Adrián: Fix "Copied to Clipboard" notification visibility
+- Adriï¿½n: Fix manual app lock with macOS Touch ID
+- Adriï¿½n: Fix "Copied to Clipboard" notification visibility
 - Aman: Fix white flash when switching tabs with lock screen
 - Tristan: Fix app crash on window close for Windows
 - Neeraj: Add in-app log viewer with search and filtering
