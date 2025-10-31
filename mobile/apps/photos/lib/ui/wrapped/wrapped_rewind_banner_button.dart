@@ -127,7 +127,7 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
                                 color: Color(0x99000000),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.play_arrow_rounded,
                                 color: Colors.white,
                                 size: 18,

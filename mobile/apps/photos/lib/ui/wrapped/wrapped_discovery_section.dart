@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
-import "package:photos/services/wrapped/models.dart";
+import "package:photos/services/wrapped/wrapped_service.dart"
+    show WrappedEntryState;
 import "package:photos/ui/wrapped/wrapped_rewind_banner_button.dart";
 
 class WrappedDiscoverySection extends StatelessWidget {
