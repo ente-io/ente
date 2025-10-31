@@ -9,6 +9,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
   static const double _kMonochromeDisplayThreshold = 0.175;
   static const double _kTopWowPerQueryThreshold = 0.175;
   static const double _kTopWowHighlightThreshold = 0.225;
+  static const double _kColorScoreBoostMultiplier = 4.0;
   static const double _kBlurryFaceBlurThreshold = 50;
   static const int _kMaxMediaPerCard = 6;
   static const int _kMinBlurryFiles = 3;
@@ -246,7 +247,10 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
         .toList(growable: false);
     final Map<int, double> scoreHints = <int, double>{
       for (final _ClipMatch match in prioritizedMatches)
-        match.uploadedFileID: match.score,
+        match.uploadedFileID: math.max(
+          0.0,
+          (match.score - _kCountThreshold) * _kColorScoreBoostMultiplier,
+        ),
     };
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
@@ -254,7 +258,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       candidateUploadedFileIDs: candidateIds,
       maxCount: _kMaxMediaPerCard,
       scoreHints: scoreHints,
-      minimumSpacing: const Duration(days: 30),
+      minimumSpacing: const Duration(days: 1),
       enforceDistinctness: false,
     );
 
