@@ -5,6 +5,7 @@ import "package:flutter/foundation.dart" show immutable;
 import "package:intl/intl.dart";
 import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
+import "package:path/path.dart" as p;
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location/location.dart";

@@ -148,24 +148,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
         "Longest breather: ${numberFormat.format(snapshot.longestGapDays)} days",
     ]);
 
-    final List<int> rhythmIds = _collectUniqueIds(
-      <List<int>>[
-        snapshot.streakStartUploadedIDs,
-        snapshot.busiestMonthHighlightUploadedIDs,
-        snapshot.breakReturnUploadedIDs,
-      ],
-      selectionTarget: 6,
-    );
-
-    final List<int> rhythmCandidates = limitSelectorCandidates(rhythmIds);
-
-    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
-      context: context,
-      candidateUploadedFileIDs: rhythmCandidates,
-      maxCount: 3,
-      preferNamedPeople: true,
-      minimumSpacing: const Duration(days: 21),
-    );
+    const List<MediaRef> media = <MediaRef>[];
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": snapshot.year,
@@ -181,6 +164,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
           entry.key.toString(): entry.value,
       },
       "dailyCounts": snapshot.dailyCounts,
+      "formatCounts": snapshot.formatCounts,
       "detailChips": chips,
       if (snapshot.longestStreakStart != null)
         "longestStreakStart": snapshot.longestStreakStart!.toIso8601String(),
@@ -324,6 +308,7 @@ class _StatsSnapshot {
     required this.otherCount,
     required this.storageBytes,
     required this.monthCounts,
+    required this.formatCounts,
     required this.dailyCounts,
     required this.elapsedDays,
     required this.daysWithCaptures,
@@ -366,6 +351,7 @@ class _StatsSnapshot {
   final int otherCount;
   final int storageBytes;
   final Map<int, int> monthCounts;
+  final Map<String, int> formatCounts;
   final Map<String, int> dailyCounts;
   final int elapsedDays;
   final int daysWithCaptures;
@@ -408,6 +394,7 @@ class _StatsSnapshot {
       for (int month = 1; month <= 12; month += 1) month: 0,
     };
     final Map<int, _DayAggregate> dayAggregates = <int, _DayAggregate>{};
+    final Map<String, int> formatCounts = <String, int>{};
 
     int totalCount = 0;
     int photoCount = 0;
@@ -457,6 +444,13 @@ class _StatsSnapshot {
       if (uploadedId != null) {
         aggregate.uploadedFileIDs.add(uploadedId);
       }
+
+      final String formatLabel = _resolveFormatLabel(file);
+      formatCounts.update(
+        formatLabel,
+        (int current) => current + 1,
+        ifAbsent: () => 1,
+      );
     }
 
     final List<_DayAggregate> sortedAggregates = dayAggregates.values
@@ -632,6 +626,7 @@ class _StatsSnapshot {
       otherCount: otherCount,
       storageBytes: storageBytes,
       monthCounts: Map<int, int>.unmodifiable(monthCounts),
+      formatCounts: Map<String, int>.unmodifiable(formatCounts),
       dailyCounts: Map<String, int>.unmodifiable(dailyCounts),
       elapsedDays: elapsedDays,
       daysWithCaptures: daysWithCaptures,
@@ -665,6 +660,55 @@ class _StatsSnapshot {
       heatmapWeekStartDates: normalizedWeekStartDates,
       heatmapMaxCount: heatmapMaxCount,
     );
+  }
+
+  static String _resolveFormatLabel(EnteFile file) {
+    final String? candidateName = _firstNonEmpty(
+      <String?>[
+        file.title,
+        file.pubMagicMetadata?.editedName,
+      ],
+    );
+    final String rawExtension = candidateName != null
+        ? p.extension(candidateName).replaceFirst(".", "")
+        : "";
+    final String normalizedExtension = rawExtension.toLowerCase();
+    if (normalizedExtension.isEmpty) {
+      return _fallbackLabelForType(file.fileType);
+    }
+
+    const Map<String, String> overrides = <String, String>{
+      "jpg": "JPEG",
+      "jpeg": "JPEG",
+      "heif": "HEIC",
+    };
+
+    return overrides[normalizedExtension] ?? normalizedExtension.toUpperCase();
+  }
+
+  static String _fallbackLabelForType(FileType type) {
+    switch (type) {
+      case FileType.video:
+        return "VIDEO";
+      case FileType.livePhoto:
+        return "LIVE PHOTO";
+      case FileType.image:
+        return "IMAGE";
+      default:
+        return "OTHER";
+    }
+  }
+
+  static String? _firstNonEmpty(Iterable<String?> values) {
+    for (final String? value in values) {
+      if (value != null) {
+        final String trimmed = value.trim();
+        if (trimmed.isNotEmpty) {
+          return trimmed;
+        }
+      }
+    }
+    return null;
   }
 }
 
