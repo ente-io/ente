@@ -378,9 +378,8 @@ class _MonthlyCaptureChart extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.only(
-              left: _axisLabelWidth + _axisLabelSpacing,
-              right: 8,
+            padding: const EdgeInsets.symmetric(
+              horizontal: _axisLabelWidth + _axisLabelSpacing,
             ),
             child: Row(
               children: [
@@ -436,10 +435,10 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
       return;
     }
 
-    const double rightPadding = 12;
     const double topPadding = 12;
     const double bottomPadding = 12;
     final double leftPadding = axisLabelWidth + axisLabelSpacing;
+    final double rightPadding = leftPadding;
     final double chartHeight = math.max(
       0,
       size.height - topPadding - bottomPadding,
