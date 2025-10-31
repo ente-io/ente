@@ -307,7 +307,7 @@ class _MonthlyCaptureChart extends StatelessWidget {
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
 
-  static const double _axisLabelWidth = 38;
+  static const double _axisLabelWidth = 34;
   static const double _axisLabelSpacing = 4;
   static const List<String> _labels = <String>[
     "J",
@@ -343,6 +343,8 @@ class _MonthlyCaptureChart extends StatelessWidget {
     final Color background = colorScheme.fillMuted.withValues(alpha: 0.12);
     final Color axisColor = colorScheme.fillMuted.withValues(alpha: 0.45);
     final Color outlineColor = colorScheme.backgroundElevated;
+    const double leftInset = _axisLabelWidth + _axisLabelSpacing;
+    final double rightInset = math.max(12, leftInset / 2);
 
     return Container(
       width: double.infinity,
@@ -372,14 +374,16 @@ class _MonthlyCaptureChart extends StatelessWidget {
                 axisLabelStyle: textTheme.miniMuted,
                 axisLabelWidth: _axisLabelWidth,
                 axisLabelSpacing: _axisLabelSpacing,
+                rightPadding: rightInset,
                 ticks: ticks,
               ),
             ),
           ),
           const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _axisLabelWidth + _axisLabelSpacing,
+            padding: EdgeInsets.only(
+              left: leftInset,
+              right: rightInset,
             ),
             child: Row(
               children: [
@@ -413,6 +417,7 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
     required this.axisLabelStyle,
     required this.axisLabelWidth,
     required this.axisLabelSpacing,
+    required this.rightPadding,
     required this.ticks,
   });
 
@@ -427,6 +432,7 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
   final TextStyle axisLabelStyle;
   final double axisLabelWidth;
   final double axisLabelSpacing;
+  final double rightPadding;
   final List<_ChartTick> ticks;
 
   @override
@@ -438,7 +444,6 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
     const double topPadding = 12;
     const double bottomPadding = 12;
     final double leftPadding = axisLabelWidth + axisLabelSpacing;
-    final double rightPadding = leftPadding;
     final double chartHeight = math.max(
       0,
       size.height - topPadding - bottomPadding,
@@ -568,6 +573,7 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
         oldDelegate.axisLabelStyle != axisLabelStyle ||
         oldDelegate.axisLabelWidth != axisLabelWidth ||
         oldDelegate.axisLabelSpacing != axisLabelSpacing ||
+        oldDelegate.rightPadding != rightPadding ||
         !listEquals(oldDelegate.ticks, ticks);
   }
 
