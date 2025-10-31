@@ -42,8 +42,8 @@ export const calculateDistance = (
 export const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
     if (photos.length === 0) return [];
 
-    // 10km clustering distance (roughly 0.1 degrees)
-    const distanceThreshold = 0.1; // About 10km in degrees
+    // 25km clustering distance (roughly 0.25 degrees)
+    const distanceThreshold = 0.25; // About 25km in degrees
 
     // First, group photos by day
     const photosByDay = new Map<string, JourneyPoint[]>();
