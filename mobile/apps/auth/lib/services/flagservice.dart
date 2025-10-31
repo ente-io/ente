@@ -12,6 +12,6 @@ class FeatureFlagService {
       return false;
     }
     
-    return email.endsWith("@ente.io") || (userID < 6);
+    return email.endsWith("@ente.io") || (userID <= 6);
   }
 }
