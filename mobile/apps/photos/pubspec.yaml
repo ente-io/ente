@@ -25,6 +25,7 @@ dependencies:
   app_links: ^6.4.0
   archive: ^4.0.7
   async: ^2.11.0
+  audio_session: ^0.1.21
   battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info

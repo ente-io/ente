@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math" as math;
 import "dart:ui" as ui;
 
+import "package:audio_session/audio_session.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
@@ -74,11 +75,13 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   StreamSubscription<PlayerState>? _playerStateSubscription;
   ModalRoute<dynamic>? _registeredRoute;
   bool _didRegisterWillPop = false;
+  static bool _audioSessionConfigured = false;
 
   static const double _kShareBrandingHeight = 42;
   static const double _kShareBrandingLogoWidth = 58;
   static const double _kShareBrandingLogoHeight = 11;
   static const double _kShareBrandingLogoVerticalNudge = -8;
+  static const Duration _kMusicLoopTrim = Duration(milliseconds: 40);
 
   @override
   void initState() {
@@ -782,9 +785,24 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   Future<void> _initBackgroundMusic() async {
     _musicLoadFailed = false;
     try {
-      await _audioPlayer.setAsset("assets/ente_rewind_2025_music.mp3");
-      await _audioPlayer.setLoopMode(LoopMode.one);
+      await _ensureAudioSessionConfigured();
+      const String assetPath = "assets/ente_rewind_2025_music.mp3";
+      final Duration? trackDuration = await _audioPlayer.setAsset(
+        assetPath,
+        preload: true,
+      );
+      final AudioSource playlist = _buildLoopingMusicSource(
+        assetPath: assetPath,
+        trackDuration: trackDuration,
+      );
+      await _audioPlayer.setAudioSource(
+        playlist,
+        preload: true,
+      );
+      await _audioPlayer.setLoopMode(LoopMode.all);
+      await _audioPlayer.setShuffleModeEnabled(false);
       await _audioPlayer.setVolume(1.0);
+      await _audioPlayer.seek(Duration.zero);
       if (!mounted) {
         return;
       }
@@ -814,8 +832,24 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         _updateMusicPlaying(false);
         return;
       }
-      unawaited(_audioPlayer.seek(Duration.zero));
-      unawaited(_audioPlayer.play());
+      if (_audioPlayer.loopMode != LoopMode.off) {
+        _updateMusicPlaying(true);
+        return;
+      }
+      unawaited(() async {
+        try {
+          await _audioPlayer.seek(Duration.zero);
+          await _audioPlayer.play();
+          _updateMusicPlaying(true);
+        } catch (error, stackTrace) {
+          _logger.warning(
+            "Failed to restart Ente Rewind music",
+            error,
+            stackTrace,
+          );
+          _updateMusicPlaying(false);
+        }
+      }());
       return;
     }
     _updateMusicPlaying(state.playing);
@@ -962,5 +996,59 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     } else {
       _isMusicPlaying = value;
     }
+  }
+
+  Future<void> _ensureAudioSessionConfigured() async {
+    if (_audioSessionConfigured) {
+      return;
+    }
+    try {
+      final AudioSession session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      _audioSessionConfigured = true;
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to configure audio session for Ente Rewind music",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  AudioSource _buildLoopingMusicSource({
+    required String assetPath,
+    required Duration? trackDuration,
+  }) {
+    final Duration? clipEnd = _calculateLoopEnd(trackDuration);
+    AudioSource buildChild() {
+      final UriAudioSource base = AudioSource.asset(assetPath);
+      if (clipEnd == null) {
+        return base;
+      }
+      return ClippingAudioSource(
+        start: Duration.zero,
+        end: clipEnd,
+        child: base,
+      );
+    }
+
+    return ConcatenatingAudioSource(
+      useLazyPreparation: false,
+      children: <AudioSource>[
+        buildChild(),
+        buildChild(),
+      ],
+    );
+  }
+
+  Duration? _calculateLoopEnd(Duration? trackDuration) {
+    if (trackDuration == null) {
+      return null;
+    }
+    final Duration clipEnd = trackDuration - _kMusicLoopTrim;
+    if (clipEnd <= Duration.zero) {
+      return null;
+    }
+    return clipEnd;
   }
 }
