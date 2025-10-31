@@ -230,22 +230,26 @@ export const handleTimelineScroll = ({
                     superClusterZoom,
                 );
 
-                // First zoom out far for distant locations
+                // Use event listener for smoother animation chaining with pause
+                const onZoomEnd = () => {
+                    mapRef.off("zoomend", onZoomEnd);
+                    // Small pause to let user see the zoomed out view
+                    setTimeout(() => {
+                        setTargetZoom(superClusterZoom);
+                        mapRef.flyTo(
+                            [zoomAwareLat, zoomAwareLng],
+                            superClusterZoom,
+                            { animate: true, duration: 1.2, easeLinearity: 0.2 },
+                        );
+                    }, 150);
+                };
+
+                mapRef.once("zoomend", onZoomEnd);
                 mapRef.flyTo([zoomAwareLat, zoomAwareLng], intermediateZoom, {
                     animate: true,
-                    duration: 1.5,
-                    easeLinearity: 0.25,
+                    duration: 1.2,
+                    easeLinearity: 0.2,
                 });
-
-                // Then zoom back in to super cluster level
-                setTimeout(() => {
-                    setTargetZoom(superClusterZoom);
-                    mapRef.flyTo(
-                        [zoomAwareLat, zoomAwareLng],
-                        superClusterZoom,
-                        { animate: true, duration: 1.2, easeLinearity: 0.25 },
-                    );
-                }, 1600);
             } else if (isInSuperCluster && !wasInSuperCluster) {
                 // Entering super cluster from nearby location - direct zoom in
                 const superClusterZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
@@ -265,24 +269,31 @@ export const handleTimelineScroll = ({
                 if (isDistantLocation) {
                     // Distant location: full zoom out → pan → zoom in
                     const intermediateZoom = isMobileOrTablet ? 2 : 4;
+
+                    // Use event listener for smoother animation chaining with pause
+                    const onZoomEnd = () => {
+                        mapRef.off("zoomend", onZoomEnd);
+                        // Small pause to let user see the zoomed out view
+                        setTimeout(() => {
+                            setTargetZoom(targetZoom);
+                            mapRef.flyTo(
+                                [positionedLat, positionedLng],
+                                targetZoom,
+                                {
+                                    animate: true,
+                                    duration: 1.2,
+                                    easeLinearity: 0.2,
+                                },
+                            );
+                        }, 150);
+                    };
+
+                    mapRef.once("zoomend", onZoomEnd);
                     mapRef.flyTo(
                         [positionedLat, positionedLng],
                         intermediateZoom,
-                        { animate: true, duration: 1.5, easeLinearity: 0.25 },
+                        { animate: true, duration: 1.2, easeLinearity: 0.2 },
                     );
-
-                    setTimeout(() => {
-                        setTargetZoom(targetZoom);
-                        mapRef.flyTo(
-                            [positionedLat, positionedLng],
-                            targetZoom,
-                            {
-                                animate: true,
-                                duration: 1.2,
-                                easeLinearity: 0.25,
-                            },
-                        );
-                    }, 1600);
                 } else {
                     // Nearby location: direct zoom out to normal view
                     setTargetZoom(targetZoom);
@@ -324,22 +335,26 @@ export const handleTimelineScroll = ({
                             finalZoom,
                         );
 
-                    // First zoom out far for distant locations
+                    // Use event listener for smoother animation chaining with pause
+                    const onZoomEnd = () => {
+                        mapRef.off("zoomend", onZoomEnd);
+                        // Small pause to let user see the zoomed out view
+                        setTimeout(() => {
+                            setTargetZoom(finalZoom);
+                            mapRef.flyTo([zoomAwareLat, zoomAwareLng], finalZoom, {
+                                animate: true,
+                                duration: 1.2,
+                                easeLinearity: 0.2,
+                            });
+                        }, 150);
+                    };
+
+                    mapRef.once("zoomend", onZoomEnd);
                     mapRef.flyTo(
                         [zoomAwareLat, zoomAwareLng],
                         intermediateZoom,
-                        { animate: true, duration: 1.5, easeLinearity: 0.25 },
+                        { animate: true, duration: 1.2, easeLinearity: 0.2 },
                     );
-
-                    // Then zoom back in to appropriate level (super cluster or normal)
-                    setTimeout(() => {
-                        setTargetZoom(finalZoom);
-                        mapRef.flyTo([zoomAwareLat, zoomAwareLng], finalZoom, {
-                            animate: true,
-                            duration: 1.2,
-                            easeLinearity: 0.25,
-                        });
-                    }, 1600);
                 } else if (isDifferentSuperCluster) {
                     // Different super cluster (not distant): moderate zoom out → pan → zoom in
                     const superClusterZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
@@ -351,26 +366,30 @@ export const handleTimelineScroll = ({
                             superClusterZoom,
                         );
 
-                    // First zoom out moderately
+                    // Use event listener for smoother animation chaining with pause
+                    const onZoomEnd = () => {
+                        mapRef.off("zoomend", onZoomEnd);
+                        // Small pause to let user see the zoomed out view
+                        setTimeout(() => {
+                            setTargetZoom(superClusterZoom);
+                            mapRef.flyTo(
+                                [zoomAwareLat, zoomAwareLng],
+                                superClusterZoom,
+                                {
+                                    animate: true,
+                                    duration: 0.8,
+                                    easeLinearity: 0.2,
+                                },
+                            );
+                        }, 100);
+                    };
+
+                    mapRef.once("zoomend", onZoomEnd);
                     mapRef.flyTo(
                         [zoomAwareLat, zoomAwareLng],
                         intermediateZoom,
-                        { animate: true, duration: 0.8, easeLinearity: 0.25 },
+                        { animate: true, duration: 0.8, easeLinearity: 0.2 },
                     );
-
-                    // Then zoom back in to super cluster level
-                    setTimeout(() => {
-                        setTargetZoom(superClusterZoom);
-                        mapRef.flyTo(
-                            [zoomAwareLat, zoomAwareLng],
-                            superClusterZoom,
-                            {
-                                animate: true,
-                                duration: 0.8,
-                                easeLinearity: 0.25,
-                            },
-                        );
-                    }, 900);
                 } else {
                     // Same super cluster, different location - just pan with zoom-aware positioning
                     const currentMapZoom = mapRef.getZoom();
@@ -389,19 +408,26 @@ export const handleTimelineScroll = ({
             } else if (isDistantLocation) {
                 // For distant locations not in super cluster: zoom out → pan → zoom in
                 const intermediateZoom = isMobileOrTablet ? 2 : 4;
+
+                // Use event listener for smoother animation chaining with pause
+                const onZoomEnd = () => {
+                    mapRef.off("zoomend", onZoomEnd);
+                    // Small pause to let user see the zoomed out view
+                    setTimeout(() => {
+                        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                            animate: true,
+                            duration: 1.2,
+                            easeLinearity: 0.2,
+                        });
+                    }, 150);
+                };
+
+                mapRef.once("zoomend", onZoomEnd);
                 mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
                     animate: true,
-                    duration: 1.5,
-                    easeLinearity: 0.25,
+                    duration: 1.2,
+                    easeLinearity: 0.2,
                 });
-
-                setTimeout(() => {
-                    mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                        animate: true,
-                        duration: 1.2,
-                        easeLinearity: 0.25,
-                    });
-                }, 1600);
             } else {
                 // For nearby locations not in super cluster: simple pan to target location
                 const currentMapZoom = mapRef.getZoom();
@@ -619,6 +645,14 @@ export const handleMarkerClick = ({
                         );
                     // Set target zoom before animation so clusters separate during zoom
                     setTargetZoom(superClusterZoom);
+
+                    // Clear target zoom after animation completes
+                    const onMoveEnd = () => {
+                        mapRef.off("moveend", onMoveEnd);
+                        setTargetZoom(null);
+                    };
+                    mapRef.once("moveend", onMoveEnd);
+
                     mapRef.flyTo(
                         [zoomAwareLat, zoomAwareLng],
                         superClusterZoom,
@@ -630,11 +664,6 @@ export const handleMarkerClick = ({
                         isInSuperCluster: true,
                         superClusterIndex: targetSuperClusterIndex,
                     };
-
-                    // Clear target zoom after animation completes
-                    setTimeout(() => {
-                        setTargetZoom(null);
-                    }, 1100);
                 } else {
                     // Normal behavior: fly to with standard zoom
                     const [positionedLat, positionedLng] = getLocationPosition(
@@ -644,6 +673,14 @@ export const handleMarkerClick = ({
                     const targetZoomLevel = isMobileOrTablet ? 8 : 10;
                     // Set target zoom before animation
                     setTargetZoom(targetZoomLevel);
+
+                    // Clear target zoom after animation completes
+                    const onMoveEnd = () => {
+                        mapRef.off("moveend", onMoveEnd);
+                        setTargetZoom(null);
+                    };
+                    mapRef.once("moveend", onMoveEnd);
+
                     mapRef.flyTo(
                         [positionedLat, positionedLng],
                         targetZoomLevel,
@@ -655,11 +692,6 @@ export const handleMarkerClick = ({
                         isInSuperCluster: false,
                         superClusterIndex: null,
                     };
-
-                    // Clear target zoom after animation completes
-                    setTimeout(() => {
-                        setTargetZoom(null);
-                    }, 1100);
                 }
             }
         } catch (error) {
