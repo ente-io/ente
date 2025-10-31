@@ -98,26 +98,16 @@ class _FavoritesCardContentState extends State<_FavoritesCardContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        buildWrappedCardTitle(
           widget.card.title,
-          style: widget.textTheme.h2Bold,
+          widget.textTheme.h2Bold,
         ),
         if (widget.card.subtitle != null && widget.card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            widget.card.subtitle!,
+            widget.textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              widget.card.subtitle!,
-              style: widget.textTheme.bodyMuted,
-            ),
           ),
-        if (detailChips.isNotEmpty) ...[
-          const SizedBox(height: 18),
-          _DetailChips(
-            chips: detailChips,
-            colorScheme: widget.colorScheme,
-            textTheme: widget.textTheme,
-          ),
-        ],
         const SizedBox(height: 22),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 420),
@@ -131,6 +121,14 @@ class _FavoritesCardContentState extends State<_FavoritesCardContent> {
             ),
           ),
         ),
+        if (detailChips.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          _DetailChips(
+            chips: detailChips,
+            colorScheme: widget.colorScheme,
+            textTheme: widget.textTheme,
+          ),
+        ],
         const Spacer(),
       ],
     );

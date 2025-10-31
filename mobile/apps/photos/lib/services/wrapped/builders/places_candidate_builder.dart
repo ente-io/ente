@@ -9,10 +9,8 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
   static const int _kMinSpotCaptures = 6;
   static const int _kMinSpotDistinctDays = 2;
   static const double _kMaxCityLabelDistanceKm = 120.0;
-  static const int _kTopCityMediaCount = 4;
+  static const int _kTopCityMediaCount = 3;
   static const int _kSpotMediaCount = 6;
-  static const int _kSelectionPoolMultiplier = 5;
-  static const int _kSelectionPoolMinimum = 18;
 
   @override
   String get debugLabel => "places";
@@ -57,24 +55,23 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
     }
 
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
-    final List<String> nameHighlights = <String>[];
+    final List<String> nameHighlights = <String>[
+      for (final _PlaceClusterSummary cluster in topClusters)
+        cluster.displayLabel,
+    ];
 
-    for (final _PlaceClusterSummary cluster in topClusters) {
-      final String displayName = cluster.displayLabel;
-      nameHighlights.add(displayName);
-    }
-
-    final String title = nameHighlights.isEmpty
-        ? "Your photo map lit up"
-        : "${nameHighlights.first} headlined your ${context.year}";
+    final List<String> detailChips = <String>[
+      for (final _PlaceClusterSummary cluster in topClusters)
+        "${cluster.displayLabel}: ${numberFormat.format(cluster.totalCount)}",
+    ];
 
     final String subtitle = switch (nameHighlights.length) {
       0 => "You kept moving and the camera tagged along.",
       1 =>
-        "${nameHighlights.first} soaked up ${numberFormat.format(topClusters.first.totalCount)} memories.",
+        "${nameHighlights.first} soaked up ${numberFormat.format(topClusters.first.totalCount)} captures.",
       2 =>
         "${nameHighlights.first} and ${nameHighlights[1]} were your go-to cities.",
-      _ => "Top stops: ${_formatList(nameHighlights)}.",
+      _ => "${_formatList(nameHighlights)} kept pulling you back.",
     };
 
     final List<int> mediaIds = _collectMediaIds(
@@ -115,11 +112,12 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
             "lastCapture": cluster.lastCaptureIsoString,
           },
       ],
+      "detailChips": detailChips,
     };
 
     return WrappedCard(
       type: WrappedCardType.topCities,
-      title: title,
+      title: "City circuit",
       subtitle: subtitle,
       media: media,
       meta: meta
@@ -164,17 +162,13 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final String subtitle;
-    if (cluster.distinctDays <= 0) {
-      subtitle =
-          "You made ${numberFormat.format(cluster.totalCount)} memories here.";
-    } else if (cluster.distinctDays == 1) {
-      subtitle =
-          "You made ${numberFormat.format(cluster.totalCount)} memories here in a single day.";
-    } else {
-      subtitle =
-          "You made ${numberFormat.format(cluster.totalCount)} memories here across ${numberFormat.format(cluster.distinctDays)} different days.";
-    }
+    final String countText = numberFormat.format(cluster.totalCount);
+    final int distinctDays = cluster.distinctDays;
+    final String subtitle = distinctDays <= 0
+        ? "You made $countText memories here."
+        : distinctDays == 1
+            ? "You made $countText memories here in a single day."
+            : "You made $countText memories here across ${numberFormat.format(distinctDays)} days.";
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
@@ -183,6 +177,13 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
     );
+
+    final int sharePercent = _percentOf(
+      cluster.totalCount / dataset.totalCount.toDouble(),
+    );
+    final List<String> detailChips = _cleanChips(<String>[
+      if (sharePercent > 0) "Share: $sharePercent%",
+    ]);
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": context.year,
@@ -202,11 +203,12 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
         "firstCapture": cluster.firstCaptureIsoString,
         "lastCapture": cluster.lastCaptureIsoString,
       },
+      "detailChips": detailChips,
     };
 
     return WrappedCard(
       type: WrappedCardType.mostVisitedSpot,
-      title: "Your favorite spot",
+      title: "Go-to spot",
       subtitle: subtitle,
       media: media,
       meta: meta
@@ -243,17 +245,11 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       return collected;
     }
 
-    final int candidateLimit = math.max(
-      maxCount,
-      math.max(maxCount * _kSelectionPoolMultiplier, _kSelectionPoolMinimum),
-    );
+    const int candidateLimit = kWrappedSelectorCandidateCap;
     for (final _PlaceClusterSummary cluster in clusters) {
       final int perClusterLimit = math.min(
-        cluster.totalCount,
-        math.max(
-          maxCount,
-          (candidateLimit / clusters.length).ceil(),
-        ),
+        candidateLimit,
+        math.max(cluster.totalCount, maxCount),
       );
       final List<int> clusterIds = cluster.sampleMediaIds(
         perClusterLimit,

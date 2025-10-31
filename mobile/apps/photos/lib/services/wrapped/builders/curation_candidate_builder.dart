@@ -29,21 +29,19 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
       return const <WrappedCard>[];
     }
 
-    final List<EnteFile> displayableFavorites = favoriteFiles
-        .where(
-          (EnteFile file) {
-            if (file.magicMetadata.visibility == archiveVisibility) {
-              return false;
-            }
-            final int? collectionID = file.collectionID;
-            if (collectionID != null &&
-                context.archivedCollectionIDs.contains(collectionID)) {
-              return false;
-            }
-            return true;
-          },
-        )
-        .toList(growable: false);
+    final List<EnteFile> displayableFavorites = favoriteFiles.where(
+      (EnteFile file) {
+        if (file.magicMetadata.visibility == archiveVisibility) {
+          return false;
+        }
+        final int? collectionID = file.collectionID;
+        if (collectionID != null &&
+            context.archivedCollectionIDs.contains(collectionID)) {
+          return false;
+        }
+        return true;
+      },
+    ).toList(growable: false);
     if (displayableFavorites.length < _kMinFavoritesForCard) {
       return const <WrappedCard>[];
     }
@@ -67,10 +65,9 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
 
     final Set<int> seenHeroIds = <int>{};
     final List<int> heroCandidates = <int>[];
-    const int baseLimit = _kGalleryGroupSize * _kMaxGalleryGroups;
     final int extendedLimit = math.min(
       uploadedIds.length,
-      baseLimit * 4,
+      kWrappedSelectorCandidateCap,
     );
 
     for (final List<int> group in galleryGroups) {
@@ -123,8 +120,8 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
         totalCount <= 0 ? 0 : _percentOf(favoritesCount / totalCount);
 
     final List<String> chips = _cleanChips(<String>[
-      "${numberFormat.format(favoritesCount)} favorites saved",
-      if (sharePercent > 0) "$sharePercent% of your year",
+      "Favorites: ${numberFormat.format(favoritesCount)}",
+      if (sharePercent > 0) "Share: $sharePercent%",
     ]);
 
     final Map<String, Object?> meta = <String, Object?>{
@@ -140,12 +137,12 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
     };
 
     final String subtitle = favoritesCount == 1
-        ? "One standout you couldn't resist starring."
-        : "${numberFormat.format(favoritesCount)} handpicked keeps.";
+        ? "You kept one standout starred for safekeeping."
+        : "You handpicked ${numberFormat.format(favoritesCount)} favorites to keep close.";
 
     final WrappedCard favoritesCard = WrappedCard(
       type: WrappedCardType.favorites,
-      title: "Your favorites of ${context.year}",
+      title: "Your favorites",
       subtitle: subtitle,
       media: heroMedia,
       meta: meta,

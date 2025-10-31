@@ -9,8 +9,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
   static const double _kMonochromeDisplayThreshold = 0.175;
   static const double _kTopWowPerQueryThreshold = 0.175;
   static const double _kTopWowHighlightThreshold = 0.225;
+  static const double _kColorScoreBoostMultiplier = 4.0;
   static const double _kBlurryFaceBlurThreshold = 50;
-  static const int _kMaxMatchesPerQuery = 250;
   static const int _kMaxMediaPerCard = 6;
   static const int _kMinBlurryFiles = 3;
   static const int _kMinColorBuckets = 2;
@@ -125,16 +125,23 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
+    final List<int> candidateIds = limitSelectorCandidates(
+      candidates.map((candidate) => candidate.uploadedFileID),
+    );
+    if (candidateIds.length < _kMinBlurryFiles) {
+      return null;
+    }
+
     final Map<int, double> scoreHints = <int, double>{
       for (final _BlurryCandidate candidate in candidates)
-        candidate.uploadedFileID: candidate.faceScore,
+        if (candidateIds.contains(candidate.uploadedFileID))
+          candidate.uploadedFileID: candidate.faceScore,
     };
 
     final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs:
-          candidates.map((c) => c.uploadedFileID).toList(growable: false),
-      maxCount: math.min(_kMaxMediaPerCard, candidates.length),
+      candidateUploadedFileIDs: candidateIds,
+      maxCount: math.min(_kMaxMediaPerCard, candidateIds.length),
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
@@ -162,12 +169,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
         ...candidate.personNames,
     }..removeWhere((String name) => name.isEmpty);
 
-    final List<String> detailChips = <String>[
-      "${candidates.length} delightfully blurry shots",
-      if (nameSet.isNotEmpty)
-        "Featuring ${_formatNameList(nameSet.toList(growable: false))}",
-    ];
-
     final double averageBlur = _average(
       selectedCandidates
           .map((candidate) => candidate.blurScore)
@@ -181,7 +182,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Map<String, Object?> meta = <String, Object?>{
       "totalCandidates": candidates.length,
-      "detailChips": detailChips,
+      "detailChips": const <String>[],
       if (nameSet.isNotEmpty) "personNames": nameSet.toList(growable: false),
       "averageBlur": averageBlur,
       "averageFaceScore": averageScore,
@@ -230,74 +231,62 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
         ? tiedBuckets.first
         : tiedBuckets[randomizer.nextInt(tiedBuckets.length)];
 
-    List<_ClipMatch> heroMatches = chosenBucket.matches
-        .where((match) => match.score >= _kDisplayThreshold)
-        .take(_kMaxMatchesPerQuery)
-        .toList();
-    if (heroMatches.length < _kMaxMediaPerCard) {
-      final Set<int> seen =
-          heroMatches.map((match) => match.uploadedFileID).toSet();
-      for (final _ClipMatch match in chosenBucket.matches) {
-        if (seen.length >= _kMaxMediaPerCard) {
-          break;
-        }
-        if (seen.add(match.uploadedFileID)) {
-          heroMatches.add(match);
-        }
-      }
-    }
-    if (heroMatches.isEmpty) {
-      heroMatches = chosenBucket.matches
-          .take(_kMaxMatchesPerQuery)
-          .toList(growable: false);
+    final List<_ClipMatch> prioritizedMatches = _limitMatches(
+      <_ClipMatch>[
+        ...chosenBucket.matches
+            .where((match) => match.score >= _kDisplayThreshold),
+        ...chosenBucket.matches,
+      ],
+    );
+    if (prioritizedMatches.length < _kMaxMediaPerCard) {
+      return null;
     }
 
+    final List<int> candidateIds = prioritizedMatches
+        .map((match) => match.uploadedFileID)
+        .toList(growable: false);
     final Map<int, double> scoreHints = <int, double>{
-      for (final _ClipMatch match in heroMatches)
-        match.uploadedFileID: match.score,
+      for (final _ClipMatch match in prioritizedMatches)
+        match.uploadedFileID: math.max(
+          0.0,
+          (match.score - _kCountThreshold) * _kColorScoreBoostMultiplier,
+        ),
     };
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs:
-          heroMatches.map((match) => match.uploadedFileID),
-      maxCount: math.min(_kMaxMediaPerCard, heroMatches.length),
+      candidateUploadedFileIDs: candidateIds,
+      maxCount: _kMaxMediaPerCard,
       scoreHints: scoreHints,
-      minimumSpacing: const Duration(days: 30),
+      minimumSpacing: const Duration(days: 1),
       enforceDistinctness: false,
     );
 
     if (media.length < _kMaxMediaPerCard) {
-      return null;
+      final Set<int> seen = media.map((ref) => ref.uploadedFileID).toSet();
+      for (final int id in candidateIds) {
+        if (seen.add(id)) {
+          media.add(MediaRef(id));
+        }
+        if (media.length >= _kMaxMediaPerCard) {
+          break;
+        }
+      }
+      if (media.length < _kMaxMediaPerCard) {
+        return null;
+      }
     }
 
-    final List<String> detailChips = <String>[
-      "${_formatCount(
-        chosenBucket.matches.length,
-        'shot',
-      )} in ${chosenBucket.spec.displayName.toLowerCase()}",
-    ];
-
     final Map<String, Object?> meta = <String, Object?>{
-      "palette": <Map<String, Object?>>[
-        <String, Object?>{
-          "name": chosenBucket.spec.displayName,
-          "hex": chosenBucket.spec.hex,
-          "query": chosenBucket.spec.query,
-          "count": chosenBucket.matches.length,
-          "uploadedFileIDs":
-              media.map((MediaRef ref) => ref.uploadedFileID).toList(),
-        },
-      ],
-      "detailChips": detailChips,
       "dominantColor": chosenBucket.spec.displayName,
     };
 
-    final String subtitle = "Your palette: ${chosenBucket.spec.displayName}";
+    final String subtitle =
+        "${chosenBucket.spec.displayName} stole your palette.";
 
     return WrappedCard(
       type: WrappedCardType.yearInColor,
-      title: "2025 looked like this",
+      title: "Color crush",
       subtitle: subtitle,
       media: media,
       meta: meta,
@@ -313,32 +302,32 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final List<_ClipMatch> heroes = matches
-        .where((match) => match.score >= _kMonochromeDisplayThreshold)
-        .toList();
+    final List<_ClipMatch> prioritizedMatches = _limitMatches(
+      <_ClipMatch>[
+        ...matches
+            .where((match) => match.score >= _kMonochromeDisplayThreshold),
+        ...matches,
+      ],
+    );
 
-    if (heroes.length < _kMaxMediaPerCard) {
-      final Set<int> seen = heroes.map((match) => match.uploadedFileID).toSet();
-      for (final _ClipMatch match in matches) {
-        if (seen.length >= _kMaxMediaPerCard) {
-          break;
-        }
-        if (seen.add(match.uploadedFileID)) {
-          heroes.add(match);
-        }
-      }
+    if (prioritizedMatches.length < _kMaxMediaPerCard) {
+      return null;
     }
 
+    final List<int> candidateIds = prioritizedMatches
+        .map((match) => match.uploadedFileID)
+        .toList(growable: false);
+
     final Map<int, double> scoreHints = <int, double>{
-      for (final _ClipMatch match in heroes) match.uploadedFileID: match.score,
+      for (final _ClipMatch match in prioritizedMatches)
+        match.uploadedFileID: match.score,
     };
 
     final List<MediaRef> primarySelection =
         WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs:
-          heroes.map((match) => match.uploadedFileID).toList(growable: false),
-      maxCount: math.min(_kMaxMediaPerCard, heroes.length),
+      candidateUploadedFileIDs: candidateIds,
+      maxCount: _kMaxMediaPerCard,
       scoreHints: scoreHints,
       minimumSpacing: const Duration(days: 21),
       enforceDistinctness: false,
@@ -350,32 +339,12 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       final Set<int> seen =
           media.map((MediaRef ref) => ref.uploadedFileID).toSet();
 
-      final List<MediaRef> relaxedSelection =
-          WrappedMediaSelector.selectMediaRefs(
-        context: context,
-        candidateUploadedFileIDs:
-            heroes.map((match) => match.uploadedFileID).toList(growable: false),
-        maxCount: math.min(_kMaxMediaPerCard, heroes.length),
-        scoreHints: scoreHints,
-        enforceDistinctness: false,
-      );
-      for (final MediaRef ref in relaxedSelection) {
-        if (seen.add(ref.uploadedFileID)) {
-          media.add(ref);
+      for (final int id in candidateIds) {
+        if (seen.add(id)) {
+          media.add(MediaRef(id));
         }
         if (media.length >= _kMaxMediaPerCard) {
           break;
-        }
-      }
-
-      if (media.length < _kMaxMediaPerCard) {
-        for (final _ClipMatch match in matches) {
-          if (seen.add(match.uploadedFileID)) {
-            media.add(MediaRef(match.uploadedFileID));
-          }
-          if (media.length >= _kMaxMediaPerCard) {
-            break;
-          }
         }
       }
     }
@@ -386,9 +355,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Map<String, Object?> meta = <String, Object?>{
       "matchCount": matches.length,
-      "detailChips": <String>[
-        "${matches.length} black-and-white frames",
-      ],
+      "detailChips": const <String>[],
       "uploadedFileIDs": media
           .map((MediaRef ref) => ref.uploadedFileID)
           .toList(growable: false),
@@ -396,8 +363,8 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.monochrome,
-      title: "Monochrome moments",
-      subtitle: "You kept ${_formatCount(matches.length, 'monochrome story')}.",
+      title: "Mono mood",
+      subtitle: "You kept these black-and-white captures in rotation.",
       media: media,
       meta: meta,
     );
@@ -446,17 +413,25 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     final Set<int> intersectionIds =
         intersection.map((match) => match.uploadedFileID).toSet();
+
+    final List<_ClipMatch> limitedCandidates = _limitMatches(candidates);
+    if (limitedCandidates.length < desiredCount) {
+      return null;
+    }
+
+    final List<int> candidateIds = limitedCandidates
+        .map((match) => match.uploadedFileID)
+        .toList(growable: false);
+
     final Map<int, double> scoreHints = <int, double>{
-      for (final _ClipMatch match in candidates)
+      for (final _ClipMatch match in limitedCandidates)
         match.uploadedFileID: match.score *
             (intersectionIds.contains(match.uploadedFileID) ? 1.5 : 1.0),
     };
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: candidates
-          .map((match) => match.uploadedFileID)
-          .toList(growable: false),
+      candidateUploadedFileIDs: candidateIds,
       maxCount: desiredCount,
       scoreHints: scoreHints,
       preferNamedPeople: true,
@@ -464,14 +439,23 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     );
 
     if (media.length < desiredCount) {
-      return null;
+      final Set<int> seen = media.map((ref) => ref.uploadedFileID).toSet();
+      for (final int id in candidateIds) {
+        if (seen.add(id)) {
+          media.add(MediaRef(id));
+        }
+        if (media.length >= desiredCount) {
+          break;
+        }
+      }
+      if (media.length < desiredCount) {
+        return null;
+      }
     }
 
     final Map<String, Object?> meta = <String, Object?>{
       "queries": AestheticsCandidateBuilder._kWowQueries,
-      "detailChips": <String>[
-        "${media.length} CLIP-approved stunners",
-      ],
+      "detailChips": const <String>[],
       "uploadedFileIDs": media
           .map((MediaRef ref) => ref.uploadedFileID)
           .toList(growable: false),
@@ -479,11 +463,27 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.top9Wow,
-      title: "Pure wow",
-      subtitle: "CLIP loved these dramatic standouts.",
+      title: "Wonderful captures",
+      subtitle: "Your showstoppers look gallery-ready.",
       media: media,
       meta: meta,
     );
+  }
+
+  static List<_ClipMatch> _limitMatches(Iterable<_ClipMatch> matches) {
+    final List<_ClipMatch> limited = <_ClipMatch>[];
+    final Set<int> seen = <int>{};
+    for (final _ClipMatch match in matches) {
+      final int id = match.uploadedFileID;
+      if (id <= 0 || !seen.add(id)) {
+        continue;
+      }
+      limited.add(match);
+      if (limited.length >= kWrappedSelectorCandidateCap) {
+        break;
+      }
+    }
+    return limited;
   }
 
   String? _buildBlurrySubtitle(Set<String> names) {
@@ -498,25 +498,6 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return "Soft-focus laughs with ${sorted[0]} & ${sorted[1]}.";
     }
     return "Soft-focus laughs with ${sorted[0]}, ${sorted[1]} and crew.";
-  }
-
-  static String _formatNameList(List<String> names) {
-    if (names.isEmpty) return "";
-    names.sort();
-    if (names.length == 1) {
-      return names.first;
-    }
-    if (names.length == 2) {
-      return "${names[0]} & ${names[1]}";
-    }
-    return "${names[0]}, ${names[1]} + ${names.length - 2} more";
-  }
-
-  static String _formatCount(int count, String label) {
-    if (count == 1) {
-      return "1 $label";
-    }
-    return "$count ${label}s";
   }
 
   static double _average(List<double> values) {
@@ -817,8 +798,8 @@ class _AestheticsSnapshot {
         }
       }
       matches.sort((a, b) => b.score.compareTo(a.score));
-      if (matches.length > AestheticsCandidateBuilder._kMaxMatchesPerQuery) {
-        matches.length = AestheticsCandidateBuilder._kMaxMatchesPerQuery;
+      if (matches.length > kWrappedSelectorCandidateCap) {
+        matches.length = kWrappedSelectorCandidateCap;
       }
       return matches;
     });
