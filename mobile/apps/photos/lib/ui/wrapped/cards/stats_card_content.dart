@@ -307,8 +307,8 @@ class _MonthlyCaptureChart extends StatelessWidget {
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
 
-  static const double _axisLabelWidth = 44;
-  static const double _axisLabelSpacing = 6;
+  static const double _axisLabelWidth = 38;
+  static const double _axisLabelSpacing = 4;
   static const List<String> _labels = <String>[
     "J",
     "F",
@@ -502,12 +502,11 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
       return;
     }
 
-    final Path fillPath = Path()..moveTo(points.first.dx, baselineY);
-    for (final Offset point in points) {
-      fillPath.lineTo(point.dx, point.dy);
-    }
-    fillPath
+    final Path linePath = _createSmoothPath(points);
+    final Path fillPath = Path()
+      ..addPath(linePath, Offset.zero)
       ..lineTo(points.last.dx, baselineY)
+      ..lineTo(points.first.dx, baselineY)
       ..close();
 
     final Rect fillBounds = Rect.fromLTWH(
@@ -531,20 +530,10 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
       ..color = axisColor
       ..strokeWidth = 1.2;
     canvas.drawLine(
-      Offset(leftPadding, topPadding),
-      Offset(leftPadding, baselineY),
-      axisPaint,
-    );
-    canvas.drawLine(
       Offset(leftPadding, baselineY),
       Offset(size.width - rightPadding, baselineY),
       axisPaint,
     );
-
-    final Path linePath = Path()..moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i += 1) {
-      linePath.lineTo(points[i].dx, points[i].dy);
-    }
 
     final Paint linePaint = Paint()
       ..color = lineColor
@@ -581,6 +570,102 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
         oldDelegate.axisLabelWidth != axisLabelWidth ||
         oldDelegate.axisLabelSpacing != axisLabelSpacing ||
         !listEquals(oldDelegate.ticks, ticks);
+  }
+
+  Path _createSmoothPath(List<Offset> points) {
+    final Path path = Path();
+    if (points.isEmpty) {
+      return path;
+    }
+
+    path.moveTo(points.first.dx, points.first.dy);
+
+    if (points.length == 1) {
+      return path;
+    }
+
+    if (points.length == 2) {
+      path.lineTo(points.last.dx, points.last.dy);
+      return path;
+    }
+
+    final int count = points.length;
+    final List<double> slopes = <double>[];
+    final List<double> dx = <double>[];
+    for (int i = 0; i < count - 1; i += 1) {
+      final double deltaX = points[i + 1].dx - points[i].dx;
+      final double deltaY = points[i + 1].dy - points[i].dy;
+      dx.add(deltaX);
+      if (deltaX.abs() < 1e-6) {
+        slopes.add(0);
+      } else {
+        slopes.add(deltaY / deltaX);
+      }
+    }
+
+    final List<double> tangents = List<double>.filled(count, 0);
+    tangents[0] = slopes.first;
+    tangents[count - 1] = slopes.last;
+    for (int i = 1; i < count - 1; i += 1) {
+      final double slopePrev = slopes[i - 1];
+      final double slopeNext = slopes[i];
+      if ((slopePrev > 0 && slopeNext < 0) ||
+          (slopePrev < 0 && slopeNext > 0) ||
+          slopePrev.abs() < 1e-6 ||
+          slopeNext.abs() < 1e-6) {
+        tangents[i] = 0;
+      } else {
+        tangents[i] = (slopePrev + slopeNext) / 2;
+      }
+    }
+
+    for (int i = 0; i < slopes.length; i += 1) {
+      final double slope = slopes[i];
+      if (slope.abs() < 1e-6) {
+        tangents[i] = 0;
+        tangents[i + 1] = 0;
+        continue;
+      }
+      double a = tangents[i] / slope;
+      double b = tangents[i + 1] / slope;
+      final double sum = (a * a) + (b * b);
+      if (sum > 9) {
+        final double tau = 3 / math.sqrt(sum);
+        a *= tau;
+        b *= tau;
+        tangents[i] = a * slope;
+        tangents[i + 1] = b * slope;
+      }
+    }
+
+    for (int i = 0; i < count - 1; i += 1) {
+      final Offset p0 = points[i];
+      final Offset p1 = points[i + 1];
+      final double segmentDx = dx[i];
+      if (segmentDx.abs() < 1e-6) {
+        path.lineTo(p1.dx, p1.dy);
+        continue;
+      }
+      final double t0 = tangents[i];
+      final double t1 = tangents[i + 1];
+      final Offset control1 = Offset(
+        p0.dx + segmentDx / 3,
+        p0.dy + (t0 * segmentDx) / 3,
+      );
+      final Offset control2 = Offset(
+        p1.dx - segmentDx / 3,
+        p1.dy - (t1 * segmentDx) / 3,
+      );
+      path.cubicTo(
+        control1.dx,
+        control1.dy,
+        control2.dx,
+        control2.dy,
+        p1.dx,
+        p1.dy,
+      );
+    }
+    return path;
   }
 }
 
@@ -721,7 +806,8 @@ class _FormatPieChartPainter extends CustomPainter {
       ..isAntiAlias = true
       ..color = ringBackgroundColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth;
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.butt;
     canvas.drawArc(arcRect, 0, 2 * math.pi, false, basePaint);
 
     final double total = values.fold<double>(
@@ -741,7 +827,7 @@ class _FormatPieChartPainter extends CustomPainter {
           ..color = colors[i]
           ..style = PaintingStyle.stroke
           ..strokeWidth = strokeWidth
-          ..strokeCap = StrokeCap.round;
+          ..strokeCap = StrokeCap.butt;
         canvas.drawArc(arcRect, startAngle, sweepAngle, false, segmentPaint);
         startAngle += sweepAngle;
       }
