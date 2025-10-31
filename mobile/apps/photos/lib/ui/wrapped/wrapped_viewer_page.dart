@@ -63,6 +63,12 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   bool _wasPausedBeforeLongPress = false;
   double _verticalDragDistance = 0;
   bool _isClosing = false;
+  ui.Image? _shareBrandingLogo;
+
+  static const double _kShareBrandingHeight = 42;
+  static const double _kShareBrandingLogoWidth = 58;
+  static const double _kShareBrandingLogoHeight = 11;
+  static const double _kShareBrandingLogoVerticalNudge = -8;
 
   @override
   void initState() {
@@ -568,10 +574,13 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       showShortToast(context, "Nothing to share yet");
       return;
     }
+    final WrappedCard currentCard = _cards[_currentIndex];
+    final bool shouldShowBranding = _shouldShowBrandingForCard(currentCard);
     final bool wasPaused = _isPaused;
     _pauseAutoplay();
     try {
-      final Uint8List? bytes = await _captureCurrentCard();
+      final Uint8List? bytes =
+          await _captureCurrentCard(includeBranding: shouldShowBranding);
       if (bytes == null) {
         showShortToast(context, "Unable to prepare share");
         return;
@@ -600,22 +609,105 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
   }
 
-  Future<Uint8List?> _captureCurrentCard() async {
+  Future<Uint8List?> _captureCurrentCard({
+    required bool includeBranding,
+  }) async {
     await Future<void>.delayed(Duration.zero);
     final RenderRepaintBoundary? boundary = _cardBoundaryKey.currentContext
         ?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary == null) {
       return null;
     }
-    final double width = boundary.size.width;
-    if (width <= 0) {
+    final double logicalWidth = boundary.size.width;
+    if (logicalWidth <= 0) {
       return null;
     }
-    final double pixelRatio = (1080 / width).clamp(1.0, 6.0);
+    final double pixelRatio = (1080 / logicalWidth).clamp(1.0, 6.0);
     final ui.Image image =
         await boundary.toImage(pixelRatio: pixelRatio.toDouble());
+    final double scale = image.width / logicalWidth;
+    final ui.Image finalImage =
+        includeBranding ? await _compositeBranding(image, scale) : image;
     final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+        await finalImage.toByteData(format: ui.ImageByteFormat.png);
     return byteData?.buffer.asUint8List();
+  }
+
+  bool _shouldShowBrandingForCard(WrappedCard card) {
+    return card.type != WrappedCardType.badge &&
+        card.type != WrappedCardType.badgeDebug;
+  }
+
+  Future<ui.Image> _compositeBranding(ui.Image baseImage, double scale) async {
+    final ui.Image? logo = await _loadBrandingLogoImage();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Size size = Size(
+      baseImage.width.toDouble(),
+      baseImage.height.toDouble(),
+    );
+
+    canvas.drawImage(baseImage, Offset.zero, Paint());
+
+    final double brandingHeight = _kShareBrandingHeight * scale;
+    final Rect brandingRect = Rect.fromLTWH(
+      0,
+      size.height - brandingHeight,
+      size.width,
+      brandingHeight,
+    );
+    canvas.drawRect(
+      brandingRect,
+      Paint()..color = const Color(0x80000000),
+    );
+
+    if (logo != null) {
+      final Rect srcRect = Rect.fromLTWH(
+        0,
+        0,
+        logo.width.toDouble(),
+        logo.height.toDouble(),
+      );
+      final double targetLogoWidth = _kShareBrandingLogoWidth * scale;
+      final double targetLogoHeight = _kShareBrandingLogoHeight * scale;
+      final Offset center = brandingRect.center.translate(
+        0,
+        _kShareBrandingLogoVerticalNudge * scale,
+      );
+      final Rect destRect = Rect.fromCenter(
+        center: center,
+        width: targetLogoWidth,
+        height: targetLogoHeight,
+      );
+      canvas.drawImageRect(logo, srcRect, destRect, Paint());
+    }
+
+    final ui.Image composedImage = await recorder.endRecording().toImage(
+          baseImage.width,
+          baseImage.height,
+        );
+    return composedImage;
+  }
+
+  Future<ui.Image?> _loadBrandingLogoImage() async {
+    if (_shareBrandingLogo != null) {
+      return _shareBrandingLogo;
+    }
+    try {
+      final ByteData data = await rootBundle.load("assets/ente_io_green.png");
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+      );
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      _shareBrandingLogo = frame.image;
+      return _shareBrandingLogo;
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to load branding logo for share export",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
   }
 }
