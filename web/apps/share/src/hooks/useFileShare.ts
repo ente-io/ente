@@ -36,9 +36,10 @@ export const useFileShare = (): UseFileShareResult => {
     useEffect(() => {
         const loadFileInfo = async () => {
             try {
-                const { t: token } = router.query;
+                // Extract token from pathname (e.g., /4MzPEanZK8)
+                const token = window.location.pathname.slice(1);
 
-                if (!token || typeof token !== "string") {
+                if (!token) {
                     setError("Invalid file link. Missing access token.");
                     setLoading(false);
                     return;
@@ -83,7 +84,7 @@ export const useFileShare = (): UseFileShareResult => {
         if (router.isReady) {
             void loadFileInfo();
         }
-    }, [router.isReady, router.query]);
+    }, [router.isReady]);
 
     const handleDownload = async () => {
         if (!accessToken || !fileInfo?.fileKey) return;
