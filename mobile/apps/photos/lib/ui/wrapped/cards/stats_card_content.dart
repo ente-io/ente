@@ -110,19 +110,19 @@ class _RhythmCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
+        if (card.media.isNotEmpty) ...[
+          const SizedBox(height: 22),
+          _MediaRow(
+            media: card.media.take(3).toList(growable: false),
+            colorScheme: colorScheme,
+          ),
+        ],
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 18),
           _DetailChips(
             chips: chips,
             colorScheme: colorScheme,
             textTheme: textTheme,
-          ),
-        ],
-        if (card.media.isNotEmpty) ...[
-          const SizedBox(height: 22),
-          _MediaRow(
-            media: card.media.take(3).toList(growable: false),
-            colorScheme: colorScheme,
           ),
         ],
         const Spacer(),
@@ -159,6 +159,11 @@ class _BusiestDayCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
+        const SizedBox(height: 22),
+        _MediaGrid(
+          media: card.media.take(6).toList(growable: false),
+          colorScheme: colorScheme,
+        ),
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 18),
           _DetailChips(
@@ -167,11 +172,6 @@ class _BusiestDayCardContent extends StatelessWidget {
             textTheme: textTheme,
           ),
         ],
-        const SizedBox(height: 22),
-        _MediaGrid(
-          media: card.media.take(6).toList(growable: false),
-          colorScheme: colorScheme,
-        ),
         const Spacer(),
       ],
     );

@@ -108,14 +108,6 @@ class _FavoritesCardContentState extends State<_FavoritesCardContent> {
             widget.textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
-        if (detailChips.isNotEmpty) ...[
-          const SizedBox(height: 18),
-          _DetailChips(
-            chips: detailChips,
-            colorScheme: widget.colorScheme,
-            textTheme: widget.textTheme,
-          ),
-        ],
         const SizedBox(height: 22),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 420),
@@ -129,6 +121,14 @@ class _FavoritesCardContentState extends State<_FavoritesCardContent> {
             ),
           ),
         ),
+        if (detailChips.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          _DetailChips(
+            chips: detailChips,
+            colorScheme: widget.colorScheme,
+            textTheme: widget.textTheme,
+          ),
+        ],
         const Spacer(),
       ],
     );
