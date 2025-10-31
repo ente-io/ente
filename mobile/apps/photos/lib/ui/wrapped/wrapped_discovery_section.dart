@@ -23,7 +23,7 @@ class WrappedDiscoverySection extends StatelessWidget {
     const double bannerHeight = 164;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 4),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final double baseWidth =
