@@ -307,7 +307,7 @@ class _MonthlyCaptureChart extends StatelessWidget {
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
 
-  static const double _axisLabelWidth = 34;
+  static const double _axisLabelWidth = 30;
   static const double _axisLabelSpacing = 4;
   static const List<String> _labels = <String>[
     "J",
@@ -344,7 +344,7 @@ class _MonthlyCaptureChart extends StatelessWidget {
     final Color axisColor = colorScheme.fillMuted.withValues(alpha: 0.45);
     final Color outlineColor = colorScheme.backgroundElevated;
     const double leftInset = _axisLabelWidth + _axisLabelSpacing;
-    final double rightInset = math.max(12, leftInset / 2);
+    final double rightInset = math.max(12, leftInset * 0.4);
 
     return Container(
       width: double.infinity,
@@ -352,7 +352,7 @@ class _MonthlyCaptureChart extends StatelessWidget {
         color: background,
         borderRadius: BorderRadius.circular(20),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -453,6 +453,17 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
       size.width - leftPadding - rightPadding,
     );
     final double baselineY = topPadding + chartHeight;
+    final double segmentWidth =
+        values.isEmpty ? 0 : (chartWidth / values.length);
+    final double chartLeft = values.length <= 1
+        ? leftPadding + (chartWidth / 2)
+        : leftPadding + (segmentWidth / 2);
+    final double chartRight = values.length <= 1
+        ? chartLeft
+        : size.width - rightPadding - (segmentWidth / 2);
+    final double gridStartX = values.length <= 1 ? leftPadding : chartLeft;
+    final double gridEndX =
+        values.length <= 1 ? size.width - rightPadding : chartRight;
 
     final Paint gridPaint = Paint()
       ..color = gridColor
@@ -465,8 +476,8 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
 
       if (tick.value > 0) {
         canvas.drawLine(
-          Offset(leftPadding, y),
-          Offset(size.width - rightPadding, y),
+          Offset(gridStartX, y),
+          Offset(gridEndX, y),
           gridPaint,
         );
       }
@@ -490,14 +501,13 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
     }
 
     final List<Offset> points = <Offset>[];
-    final double stepX =
-        values.length <= 1 ? 0 : chartWidth / (values.length - 1);
+    final double stepX = values.length <= 1 ? 0 : segmentWidth;
     for (int i = 0; i < values.length; i += 1) {
       final double fraction =
           maxValue <= 0 ? 0 : (values[i] / maxValue).clamp(0, 1);
-      final double x = values.length <= 1
-          ? leftPadding + (chartWidth / 2)
-          : leftPadding + (stepX * i);
+      final double x = (values.length <= 1 || stepX <= 0)
+          ? chartLeft
+          : chartLeft + (stepX * i);
       final double y = baselineY - (fraction * chartHeight);
       points.add(Offset(x, y));
     }
@@ -514,9 +524,9 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
       ..close();
 
     final Rect fillBounds = Rect.fromLTWH(
-      leftPadding,
+      gridStartX,
       topPadding,
-      chartWidth,
+      math.max(0, gridEndX - gridStartX),
       chartHeight,
     );
     final Paint fillPaint = Paint()
@@ -534,8 +544,8 @@ class _MonthlyCaptureChartPainter extends CustomPainter {
       ..color = axisColor
       ..strokeWidth = 1.2;
     canvas.drawLine(
-      Offset(leftPadding, baselineY),
-      Offset(size.width - rightPadding, baselineY),
+      Offset(gridStartX, baselineY),
+      Offset(gridEndX, baselineY),
       axisPaint,
     );
 
