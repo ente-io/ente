@@ -249,6 +249,7 @@ export const handleTimelineScroll = ({
                 };
 
                 mapRef.once("zoomend", onZoomEnd);
+                setTargetZoom(intermediateZoom);
                 mapRef.flyTo([zoomAwareLat, zoomAwareLng], intermediateZoom, {
                     animate: true,
                     duration: 1.2,
@@ -293,6 +294,7 @@ export const handleTimelineScroll = ({
                     };
 
                     mapRef.once("zoomend", onZoomEnd);
+                    setTargetZoom(intermediateZoom);
                     mapRef.flyTo(
                         [positionedLat, positionedLng],
                         intermediateZoom,
@@ -354,6 +356,7 @@ export const handleTimelineScroll = ({
                     };
 
                     mapRef.once("zoomend", onZoomEnd);
+                    setTargetZoom(intermediateZoom);
                     mapRef.flyTo(
                         [zoomAwareLat, zoomAwareLng],
                         intermediateZoom,
@@ -389,6 +392,7 @@ export const handleTimelineScroll = ({
                     };
 
                     mapRef.once("zoomend", onZoomEnd);
+                    setTargetZoom(intermediateZoom);
                     mapRef.flyTo(
                         [zoomAwareLat, zoomAwareLng],
                         intermediateZoom,
@@ -418,6 +422,7 @@ export const handleTimelineScroll = ({
                     mapRef.off("zoomend", onZoomEnd);
                     // Small pause to let user see the zoomed out view
                     setTimeout(() => {
+                        setTargetZoom(targetZoom);
                         mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
                             animate: true,
                             duration: 1.2,
@@ -427,6 +432,7 @@ export const handleTimelineScroll = ({
                 };
 
                 mapRef.once("zoomend", onZoomEnd);
+                setTargetZoom(intermediateZoom);
                 mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
                     animate: true,
                     duration: 1.2,
