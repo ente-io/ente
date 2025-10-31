@@ -183,46 +183,6 @@ class _HeroMediaCollage extends StatelessWidget {
   }
 }
 
-class _MediaRow extends StatelessWidget {
-  const _MediaRow({
-    required this.media,
-    required this.colorScheme,
-  });
-
-  final List<MediaRef> media;
-  final EnteColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 96,
-      child: Row(
-        children: [
-          for (final (int index, MediaRef ref) in media.indexed) ...[
-            Expanded(
-              child: Padding(
-                padding:
-                    EdgeInsets.only(right: index == media.length - 1 ? 0 : 12),
-                child: _MediaTile(
-                  mediaRef: ref,
-                  borderRadius: 18,
-                ),
-              ),
-            ),
-          ],
-          if (media.isEmpty)
-            Expanded(
-              child: _MediaPlaceholder(
-                colorScheme: colorScheme,
-                borderRadius: 18,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 class _MediaGrid extends StatelessWidget {
   const _MediaGrid({
     required this.media,

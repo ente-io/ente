@@ -124,31 +124,41 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final DateFormat monthFormat = DateFormat("MMMM");
 
     final String baseSentence =
-        "You averaged ${averageFormat.format(snapshot.averagePerDay)} memories a day.";
+        "You averaged ${averageFormat.format(snapshot.averagePerDay)} memories a day";
     String? busiestMonthName;
-    String? secondSentence;
     if (snapshot.busiestMonth != null && snapshot.busiestMonthCount > 0) {
       busiestMonthName = monthFormat
           .format(DateTime(snapshot.year, snapshot.busiestMonth!, 1));
     }
-    if (busiestMonthName != null && snapshot.longestStreakDays >= 1) {
-      secondSentence =
-          "$busiestMonthName peaked at ${numberFormat.format(snapshot.busiestMonthCount)} memories, and your longest streak ran ${numberFormat.format(snapshot.longestStreakDays)} days.";
-    } else if (busiestMonthName != null) {
-      secondSentence =
-          "$busiestMonthName peaked at ${numberFormat.format(snapshot.busiestMonthCount)} memories.";
-    } else if (snapshot.longestStreakDays >= 1) {
-      secondSentence =
-          "Your longest streak ran ${numberFormat.format(snapshot.longestStreakDays)} days.";
+    String? topFormatLabel;
+    int topFormatCount = 0;
+    snapshot.formatCounts.forEach((String format, int count) {
+      if (count > topFormatCount ||
+          (count == topFormatCount &&
+              topFormatLabel != null &&
+              format.compareTo(topFormatLabel!) < 0)) {
+        topFormatLabel = format;
+        topFormatCount = count;
+      }
+    });
+    if (topFormatLabel != null && topFormatCount <= 0) {
+      topFormatLabel = null;
     }
 
     final List<String> chips = _cleanChips(<String>[
-      "Active days: ${numberFormat.format(snapshot.daysWithCaptures)}",
+      if (busiestMonthName != null && snapshot.busiestMonthCount > 0)
+        "$busiestMonthName: ${numberFormat.format(snapshot.busiestMonthCount)}",
       if (snapshot.longestGapDays >= 2)
         "Longest breather: ${numberFormat.format(snapshot.longestGapDays)} days",
+      if (topFormatLabel != null)
+        "$topFormatLabel: ${numberFormat.format(topFormatCount)}",
     ]);
 
     const List<MediaRef> media = <MediaRef>[];
+
+    final String subtitle = topFormatLabel != null
+        ? "$baseSentence, and $topFormatLabel was your format of choice."
+        : "$baseSentence.";
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": snapshot.year,
@@ -181,9 +191,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     return WrappedCard(
       type: WrappedCardType.statsVelocity,
       title: "Daily groove",
-      subtitle: secondSentence != null
-          ? "$baseSentence $secondSentence"
-          : baseSentence,
+      subtitle: subtitle,
       media: media,
       meta: meta
         ..addAll(
@@ -255,22 +263,66 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     }
 
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
+    final DateFormat weekStartFormat = DateFormat("MMM d");
+    DateTime? peakWeekStart;
+    int peakWeekCount = 0;
+    for (int index = 0;
+        index < snapshot.heatmapRows.length &&
+            index < snapshot.heatmapWeekStartDates.length;
+        index += 1) {
+      final List<int> week = snapshot.heatmapRows[index];
+      final int weekTotal =
+          week.fold<int>(0, (int sum, int value) => sum + math.max(0, value));
+      final DateTime weekStart = snapshot.heatmapWeekStartDates[index];
+      if (weekTotal > peakWeekCount ||
+          (weekTotal == peakWeekCount &&
+              (peakWeekStart == null || weekStart.isBefore(peakWeekStart)))) {
+        peakWeekCount = weekTotal;
+        peakWeekStart = weekStart;
+      }
+    }
+    DateTime? displayWeekStart;
+    if (peakWeekStart != null) {
+      final DateTime yearStart = DateTime(snapshot.year, 1, 1);
+      final DateTime yearEnd = DateTime(snapshot.year, 12, 31);
+      final DateTime weekBase = peakWeekStart;
+      displayWeekStart = weekBase;
+      if (displayWeekStart.isBefore(yearStart) ||
+          displayWeekStart.isAfter(yearEnd)) {
+        for (int offset = 0; offset < 7; offset += 1) {
+          final DateTime candidate =
+              _atLocalMidnight(weekBase.add(Duration(days: offset)));
+          if (!candidate.isBefore(yearStart) && !candidate.isAfter(yearEnd)) {
+            displayWeekStart = candidate;
+            break;
+          }
+        }
+      }
+    }
+    String formatDayCount(int value) {
+      final String formatted = numberFormat.format(value);
+      return value == 1 ? "$formatted day" : "$formatted days";
+    }
+
+    final List<String> detailChips = _cleanChips(<String>[
+      if (displayWeekStart != null)
+        "Peak week: ${weekStartFormat.format(displayWeekStart)} · ${numberFormat.format(peakWeekCount)}",
+      "Longest streak: ${formatDayCount(snapshot.longestStreakDays)}",
+      "Longest pause: ${formatDayCount(snapshot.longestGapDays)}",
+      "Active days: ${numberFormat.format(snapshot.daysWithCaptures)}",
+    ]);
     final Map<String, Object?> meta = <String, Object?>{
       "weekdayLabels": snapshot.heatmapWeekdayLabels,
       "quarters": quarterBlocks,
       "maxCount": snapshot.heatmapMaxCount,
-      "detailChips": <String>[
-        if (snapshot.busiestMonthName != null)
-          "Peak month: ${snapshot.busiestMonthName}",
-        "Total captures: ${numberFormat.format(snapshot.totalCount)}",
-      ],
+      "detailChips": detailChips,
     };
 
     return <WrappedCard>[
       WrappedCard(
         type: WrappedCardType.statsHeatmap,
         title: "Season rhythm",
-        subtitle: "Quarter by quarter, here's how the year flowed.",
+        subtitle: "Week by week, here's how the year flowed.",
         meta: meta,
       ),
     ];

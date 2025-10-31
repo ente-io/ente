@@ -738,32 +738,33 @@ class _FormatDistributionChart extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: 140,
-            width: 140,
-            child: CustomPaint(
-              painter: _FormatPieChartPainter(
-                values: entries
-                    .map(
-                      (MapEntry<String, int> entry) => entry.value.toDouble(),
-                    )
-                    .toList(growable: false),
-                colors: colors,
-                totalLabel: numberFormat.format(totalCount),
-                totalCaption: "files",
-                totalStyle: textTheme.largeBold,
-                captionStyle: textTheme.tinyMuted,
-                ringBackgroundColor:
-                    colorScheme.fillMuted.withValues(alpha: 0.18),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: 140,
+              width: 140,
+              child: CustomPaint(
+                painter: _FormatPieChartPainter(
+                  values: entries
+                      .map(
+                        (MapEntry<String, int> entry) => entry.value.toDouble(),
+                      )
+                      .toList(growable: false),
+                  colors: colors,
+                  totalLabel: numberFormat.format(totalCount),
+                  totalCaption: "files",
+                  totalStyle: textTheme.largeBold,
+                  captionStyle: textTheme.tinyMuted,
+                  ringBackgroundColor:
+                      colorScheme.fillMuted.withValues(alpha: 0.18),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
+            const SizedBox(width: 20),
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -774,15 +775,14 @@ class _FormatDistributionChart extends StatelessWidget {
                     ),
                     child: _FormatLegendEntry(
                       color: colors[index],
-                      label:
-                          "${entries[index].key} ${numberFormat.format(entries[index].value)}",
+                      label: entries[index].key,
                       textTheme: textTheme,
                     ),
                   ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
