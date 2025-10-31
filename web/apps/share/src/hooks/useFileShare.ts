@@ -36,7 +36,7 @@ export const useFileShare = (): UseFileShareResult => {
     useEffect(() => {
         const loadFileInfo = async () => {
             try {
-                const { token } = router.query;
+                const { t: token } = router.query;
 
                 if (!token || typeof token !== "string") {
                     setError("Invalid file link. Missing access token.");
@@ -109,10 +109,6 @@ export const useFileShare = (): UseFileShareResult => {
     const handleCopyContent = async (content: string) => {
         try {
             await navigator.clipboard.writeText(content);
-            setNotificationAttributes({
-                color: "secondary",
-                title: "Copied to clipboard",
-            });
         } catch {
             setNotificationAttributes({
                 color: "critical",
