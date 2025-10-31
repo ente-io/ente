@@ -147,7 +147,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                         }
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
-                        updateWhenZooming={isMobileOrTablet ? true : false}
+                        updateWhenZooming={true}
                         keepBuffer={isMobileOrTablet ? 3 : 1}
                     />
 
