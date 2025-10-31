@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:intl/intl.dart";
+import "package:just_audio/just_audio.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
@@ -64,6 +65,15 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   double _verticalDragDistance = 0;
   bool _isClosing = false;
   ui.Image? _shareBrandingLogo;
+  late final AudioPlayer _audioPlayer;
+  bool _isMusicReady = false;
+  bool _isMusicMuted = false;
+  bool _isMusicPlaying = false;
+  bool _musicLoadFailed = false;
+  bool _isFadingOutMusic = false;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+  ModalRoute<dynamic>? _registeredRoute;
+  bool _didRegisterWillPop = false;
 
   static const double _kShareBrandingHeight = 42;
   static const double _kShareBrandingLogoWidth = 58;
@@ -87,6 +97,23 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     _stateListener = () => _handleServiceUpdate(wrappedService.state);
     wrappedService.stateListenable.addListener(_stateListener!);
+    _audioPlayer = AudioPlayer();
+    _playerStateSubscription =
+        _audioPlayer.playerStateStream.listen(_handlePlayerState);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final ModalRoute<dynamic>? route = ModalRoute.of(context);
+      if (route == null) {
+        return;
+      }
+      // ignore: deprecated_member_use
+      route.addScopedWillPopCallback(_handleWillPop);
+      _registeredRoute = route;
+      _didRegisterWillPop = true;
+    });
+    unawaited(_initBackgroundMusic());
   }
 
   @override
@@ -94,9 +121,17 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     if (_stateListener != null) {
       wrappedService.stateListenable.removeListener(_stateListener!);
     }
+    if (_didRegisterWillPop && _registeredRoute != null) {
+      // ignore: deprecated_member_use
+      _registeredRoute!.removeScopedWillPopCallback(_handleWillPop);
+      _didRegisterWillPop = false;
+      _registeredRoute = null;
+    }
     _progressController.removeStatusListener(_handleProgressStatus);
     _progressController.dispose();
     _pageController.dispose();
+    unawaited(_playerStateSubscription?.cancel());
+    unawaited(_audioPlayer.dispose());
     super.dispose();
   }
 
@@ -117,6 +152,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       _cards = _buildCards(next.result?.cards);
     });
     final int newCardCount = _cards.length;
+    _syncMusicPlayback();
     if (newCardCount == 0) {
       Navigator.of(context).maybePop();
       return;
@@ -339,7 +375,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     _verticalDragDistance += delta;
     if (_verticalDragDistance >= 100) {
-      _closeViewer();
+      unawaited(_closeViewer());
     }
   }
 
@@ -349,7 +385,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     final double velocity = details.primaryVelocity ?? 0;
     if (_verticalDragDistance >= 60 || velocity > 800) {
-      _closeViewer();
+      unawaited(_closeViewer());
     }
     _verticalDragDistance = 0;
   }
@@ -358,16 +394,26 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     _verticalDragDistance = 0;
   }
 
-  void _closeViewer() {
+  Future<void> _closeViewer() async {
     if (_isClosing || !mounted) {
       return;
     }
     _isClosing = true;
-    Navigator.of(context).maybePop().then((bool didPop) {
-      if (!didPop && mounted) {
-        _isClosing = false;
-      }
-    });
+    if (!_didRegisterWillPop) {
+      await _fadeOutAndStopMusic();
+    }
+    final bool didPop = await Navigator.of(context).maybePop();
+    if (!didPop && mounted) {
+      _isClosing = false;
+    }
+  }
+
+  Future<bool> _handleWillPop() async {
+    if (!_isClosing) {
+      _isClosing = true;
+    }
+    await _fadeOutAndStopMusic();
+    return true;
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
@@ -445,6 +491,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
             canPop: true,
             onPopInvokedWithResult: (bool didPop, Object? result) {
               if (!didPop) {
+                _isClosing = false;
                 return;
               }
               wrappedService.updateResumeIndex(_currentIndex);
@@ -453,7 +500,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
               backgroundColor: Colors.black,
               appBar: AppBar(
                 leading: BackButton(
-                  onPressed: _closeViewer,
+                  onPressed: () => unawaited(_closeViewer()),
                 ),
                 title: Text(
                   "Ente Rewind",
@@ -553,6 +600,27 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                         alignment: Alignment.center,
                         child: Icon(
                           Icons.share,
+                          size: 28,
+                          color:
+                              enteColorScheme.textMuted.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 20,
+                    bottom: bottomPadding + 24,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => unawaited(_handleMusicToggle()),
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          (_isMusicMuted || !_isMusicPlaying)
+                              ? Icons.volume_off
+                              : Icons.volume_up,
                           size: 28,
                           color:
                               enteColorScheme.textMuted.withValues(alpha: 0.7),
@@ -708,6 +776,191 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         stackTrace,
       );
       return null;
+    }
+  }
+
+  Future<void> _initBackgroundMusic() async {
+    _musicLoadFailed = false;
+    try {
+      await _audioPlayer.setAsset("assets/ente_rewind_2025_music.mp3");
+      await _audioPlayer.setLoopMode(LoopMode.one);
+      await _audioPlayer.setVolume(1.0);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isMusicReady = true;
+      });
+      await _resumeMusic();
+    } catch (error, stackTrace) {
+      _musicLoadFailed = true;
+      _logger.warning(
+        "Failed to initialize Ente Rewind music",
+        error,
+        stackTrace,
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _handlePlayerState(PlayerState state) {
+    if (_musicLoadFailed || !_isMusicReady) {
+      return;
+    }
+    if (state.processingState == ProcessingState.completed) {
+      if (_isMusicMuted || _isClosing || _cards.isEmpty) {
+        _updateMusicPlaying(false);
+        return;
+      }
+      unawaited(_audioPlayer.seek(Duration.zero));
+      unawaited(_audioPlayer.play());
+      return;
+    }
+    _updateMusicPlaying(state.playing);
+  }
+
+  Future<void> _pauseMusic() async {
+    if (!_isMusicReady) {
+      _updateMusicPlaying(false);
+      return;
+    }
+    try {
+      if (_audioPlayer.playing) {
+        await _audioPlayer.pause();
+      }
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to pause Ente Rewind music",
+        error,
+        stackTrace,
+      );
+    } finally {
+      _updateMusicPlaying(false);
+    }
+  }
+
+  Future<void> _resumeMusic() async {
+    if (!_isMusicReady || _isMusicMuted || _cards.isEmpty) {
+      _updateMusicPlaying(false);
+      return;
+    }
+    try {
+      final Future<void> playFuture = _audioPlayer.play();
+      unawaited(
+        playFuture.catchError(
+          (Object error, StackTrace stackTrace) {
+            _logger.warning(
+              "Failed to play Ente Rewind music",
+              error,
+              stackTrace,
+            );
+            _updateMusicPlaying(false);
+          },
+        ),
+      );
+      _updateMusicPlaying(true);
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to play Ente Rewind music",
+        error,
+        stackTrace,
+      );
+      _updateMusicPlaying(false);
+    }
+  }
+
+  void _syncMusicPlayback() {
+    if (!_isMusicReady || _isMusicMuted || _cards.isEmpty) {
+      unawaited(_pauseMusic());
+      return;
+    }
+    unawaited(_resumeMusic());
+  }
+
+  Future<void> _fadeOutAndStopMusic() async {
+    if (_musicLoadFailed || !_isMusicReady) {
+      await _pauseMusic();
+      return;
+    }
+    if (_isFadingOutMusic) {
+      return;
+    }
+    _isFadingOutMusic = true;
+    final double initialVolume =
+        math.min(1.0, math.max(0.0, _audioPlayer.volume));
+    try {
+      if (!_audioPlayer.playing) {
+        await _pauseMusic();
+        return;
+      }
+      const Duration totalDuration = Duration(milliseconds: 400);
+      const int steps = 8;
+      final int stepMillis = math.max(
+        10,
+        (totalDuration.inMilliseconds / steps).round(),
+      );
+      final Duration stepDuration = Duration(milliseconds: stepMillis);
+      for (int i = 0; i < steps; i++) {
+        final double factor = 1 - ((i + 1) / steps);
+        await _audioPlayer.setVolume(initialVolume * factor);
+        await Future<void>.delayed(stepDuration);
+      }
+      await _pauseMusic();
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to fade out Ente Rewind music",
+        error,
+        stackTrace,
+      );
+      await _pauseMusic();
+    } finally {
+      try {
+        await _audioPlayer.setVolume(initialVolume);
+      } catch (error, stackTrace) {
+        _logger.fine(
+          "Failed to restore Ente Rewind music volume",
+          error,
+          stackTrace,
+        );
+      }
+      _isFadingOutMusic = false;
+    }
+  }
+
+  Future<void> _handleMusicToggle() async {
+    if (_musicLoadFailed) {
+      showShortToast(context, "Music unavailable");
+      return;
+    }
+    if (!_isMusicReady) {
+      showShortToast(context, "Music loading…");
+      return;
+    }
+    if (_isMusicMuted) {
+      setState(() {
+        _isMusicMuted = false;
+      });
+      await _resumeMusic();
+    } else {
+      setState(() {
+        _isMusicMuted = true;
+      });
+      await _pauseMusic();
+    }
+  }
+
+  void _updateMusicPlaying(bool value) {
+    if (_isMusicPlaying == value) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _isMusicPlaying = value;
+      });
+    } else {
+      _isMusicPlaying = value;
     }
   }
 }
