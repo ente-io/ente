@@ -179,15 +179,19 @@ export const handleTimelineScroll = ({
         const targetZoom = isMobileOrTablet ? 8 : 10; // Touch device-aware zoom level
 
         // Get super cluster info for both source and destination
+        // On mobile, disable super cluster zoom behavior
         const currentSuperClusterIndex =
-            superClusterInfo.clusterToSuperClusterMap.get(
-                currentActiveLocationIndex,
-            ) ?? -1;
+            !isMobileOrTablet
+                ? (superClusterInfo.clusterToSuperClusterMap.get(
+                      currentActiveLocationIndex,
+                  ) ?? -1)
+                : -1;
         const isInSuperCluster = currentSuperClusterIndex !== -1;
 
         // Get the super cluster index of where we're coming FROM (not the stored state)
+        // On mobile, disable super cluster zoom behavior
         const fromSuperClusterIndex =
-            previousActiveLocationIndex >= 0
+            previousActiveLocationIndex >= 0 && !isMobileOrTablet
                 ? (superClusterInfo.clusterToSuperClusterMap.get(
                       previousActiveLocationIndex,
                   ) ?? -1)
@@ -585,8 +589,9 @@ export const handleMarkerClick = ({
     }
 
     // Check if both current and target locations are in the same super cluster
+    // On mobile, disable super cluster zoom behavior
     let shouldJustPan = false;
-    if (superClusterInfo && currentActiveLocationIndex >= 0) {
+    if (superClusterInfo && currentActiveLocationIndex >= 0 && !isMobileOrTablet) {
         const currentSuperClusterIndex =
             superClusterInfo.clusterToSuperClusterMap.get(
                 currentActiveLocationIndex,
@@ -628,10 +633,13 @@ export const handleMarkerClick = ({
                 };
             } else {
                 // Check if the target cluster is part of a super cluster
+                // On mobile, disable super cluster zoom behavior
                 const targetSuperClusterIndex =
-                    superClusterInfo?.clusterToSuperClusterMap.get(
-                        clusterIndex,
-                    );
+                    !isMobileOrTablet
+                        ? superClusterInfo?.clusterToSuperClusterMap.get(
+                              clusterIndex,
+                          )
+                        : undefined;
                 const isInSuperCluster = targetSuperClusterIndex !== undefined;
 
                 if (isInSuperCluster) {
