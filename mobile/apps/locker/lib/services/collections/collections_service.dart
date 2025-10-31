@@ -310,7 +310,13 @@ class CollectionService {
   Future<void> _init() async {
     // ignore: unawaited_futures
     sync().then((_) {
-      setupDefaultCollections();
+      if (Configuration.instance.getKey() != null) {
+        setupDefaultCollections();
+      } else {
+        _logger.warning(
+          "Skipping default collections setup - master key not yet available",
+        );
+      }
     }).catchError((error) {
       _logger.severe("Failed to initialize collections: $error");
     });
@@ -369,8 +375,24 @@ class CollectionService {
     }
   }
 
+  // Track if default collections have been set up
+  bool _defaultCollectionsSetupCompleted = false;
+
   Future<void> setupDefaultCollections() async {
     try {
+      if (Configuration.instance.getKey() == null) {
+        _logger.warning(
+          "Cannot setup default collections - master key not available",
+        );
+        return;
+      }
+
+      // Skip if already completed
+      if (_defaultCollectionsSetupCompleted) {
+        _logger.info("Default collections already set up, skipping.");
+        return;
+      }
+
       _logger.info("Setting up default collections...");
 
       // Create uncategorized collection if it doesn't exist
@@ -382,9 +404,25 @@ class CollectionService {
       // Create Documents collection if it doesn't exist
       await _getOrCreateDocumentsCollection();
 
+      _defaultCollectionsSetupCompleted = true;
       _logger.info("Default collections setup completed.");
     } catch (e, s) {
       _logger.severe("Failed to setup default collections", e, s);
+    }
+  }
+
+  /// Ensures default collections are set up if they haven't been already
+  /// This should be called from HomePage once the master key is available
+  Future<void> ensureDefaultCollections() async {
+    if (!_defaultCollectionsSetupCompleted &&
+        Configuration.instance.getKey() != null) {
+      await setupDefaultCollections();
+    } else {
+      if (_defaultCollectionsSetupCompleted) {
+        _logger.info("Default collections already setup, skipping");
+      } else {
+        _logger.warning("Master key not available, cannot setup collections");
+      }
     }
   }
 
