@@ -28,7 +28,7 @@ import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
-import "package:rive/rive.dart" show RiveAnimation;
+import "package:rive/rive.dart" as rive;
 
 enum SimilarImagesPageState {
   setup,
@@ -1216,10 +1216,15 @@ class _LoadingScreenState extends State<_LoadingScreen> {
   int _currentTextIndex = 0;
 
   late List<String> _loadingTexts;
+  late final rive.FileLoader _analysisAnimationLoader;
 
   @override
   void initState() {
     super.initState();
+    _analysisAnimationLoader = rive.FileLoader.fromAsset(
+      'assets/ducky_analyze_files.riv',
+      riveFactory: rive.Factory.rive,
+    );
     _startTextCycling();
   }
 
@@ -1242,6 +1247,7 @@ class _LoadingScreenState extends State<_LoadingScreen> {
   @override
   void dispose() {
     _timer?.cancel();
+    _analysisAnimationLoader.dispose();
     super.dispose();
   }
 
@@ -1261,11 +1267,19 @@ class _LoadingScreenState extends State<_LoadingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
+          SizedBox(
             height: 160,
-            child: RiveAnimation.asset(
-              'assets/ducky_analyze_files.riv',
-              fit: BoxFit.contain,
+            child: rive.RiveWidgetBuilder(
+              fileLoader: _analysisAnimationLoader,
+              builder: (BuildContext context, rive.RiveState state) {
+                if (state is rive.RiveLoaded) {
+                  return rive.RiveWidget(
+                    controller: state.controller,
+                    fit: rive.Fit.contain,
+                  );
+                }
+                return const SizedBox.expand();
+              },
             ),
           ),
           const SizedBox(height: 16),

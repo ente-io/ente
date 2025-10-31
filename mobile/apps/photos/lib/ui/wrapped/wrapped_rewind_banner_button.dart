@@ -5,7 +5,7 @@ import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/wrapped/wrapped_viewer_page.dart";
-import "package:rive/rive.dart" show Artboard, Fill, RiveAnimation;
+import "package:rive/rive.dart" as rive;
 
 class WrappedRewindBannerButton extends StatefulWidget {
   const WrappedRewindBannerButton({
@@ -23,7 +23,23 @@ class WrappedRewindBannerButton extends StatefulWidget {
 }
 
 class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
+  late final rive.FileLoader _riveFileLoader;
   double? _artboardAspectRatio;
+
+  @override
+  void initState() {
+    super.initState();
+    _riveFileLoader = rive.FileLoader.fromAsset(
+      "assets/ente_rewind_banner.riv",
+      riveFactory: rive.Factory.rive,
+    );
+  }
+
+  @override
+  void dispose() {
+    _riveFileLoader.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,11 +80,25 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
                     alignment: Alignment.center,
                     children: [
                       Positioned.fill(
-                        child: RiveAnimation.asset(
-                          "assets/ente_rewind_banner.riv",
-                          fit: BoxFit.cover,
-                          stateMachines: const ["State Machine 1"],
-                          onInit: _onRiveInit,
+                        child: rive.RiveWidgetBuilder(
+                          fileLoader: _riveFileLoader,
+                          stateMachineSelector: const rive.StateMachineNamed(
+                            "State Machine 1",
+                          ),
+                          onLoaded: _handleRiveLoaded,
+                          builder:
+                              (BuildContext context, rive.RiveState state) {
+                            if (state is rive.RiveLoaded) {
+                              return rive.RiveWidget(
+                                controller: state.controller,
+                                fit: rive.Fit.cover,
+                              );
+                            }
+                            if (state is rive.RiveFailed) {
+                              return const ColoredBox(color: Colors.black);
+                            }
+                            return const SizedBox.expand();
+                          },
                         ),
                       ),
                       Container(
@@ -116,11 +146,11 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
     );
   }
 
-  void _onRiveInit(Artboard artboard) {
-    _sanitizeFillRules(artboard);
+  void _handleRiveLoaded(rive.RiveLoaded loaded) {
     if (!mounted) return;
-    final double height = artboard.height;
-    final double width = artboard.width;
+    final rive.AABB bounds = loaded.controller.artboard.bounds;
+    final double height = bounds.height;
+    final double width = bounds.width;
     if (height <= 0 || width <= 0) {
       return;
     }
@@ -130,15 +160,6 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
     }
     setState(() {
       _artboardAspectRatio = aspectRatio;
-    });
-  }
-
-  void _sanitizeFillRules(Artboard artboard) {
-    artboard.forEachComponent((component) {
-      if (component is! Fill) return;
-      if (component.fillRule >= PathFillType.values.length) {
-        component.fillRule = PathFillType.nonZero.index;
-      }
     });
   }
 
