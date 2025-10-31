@@ -583,9 +583,7 @@ class GalleryState extends State<Gallery> {
           if (offset != null) {
             _logger.info("Jumping to date at offset: $offset");
             _scrollController.jumpTo(offset);
-            setState(() {
-              _completedJumpToDate = true;
-            });
+            _completedJumpToDate = true;
           } else {
             _logger.warning(
               "Could not find offset for file to jump to: ${widget.fileToJumpTo!.tag}",
