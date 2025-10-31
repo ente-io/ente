@@ -9,10 +9,8 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
   static const int _kMinSpotCaptures = 6;
   static const int _kMinSpotDistinctDays = 2;
   static const double _kMaxCityLabelDistanceKm = 120.0;
-  static const int _kTopCityMediaCount = 4;
+  static const int _kTopCityMediaCount = 3;
   static const int _kSpotMediaCount = 6;
-  static const int _kSelectionPoolMultiplier = 5;
-  static const int _kSelectionPoolMinimum = 18;
 
   @override
   String get debugLabel => "places";
@@ -247,17 +245,11 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       return collected;
     }
 
-    final int candidateLimit = math.max(
-      maxCount,
-      math.max(maxCount * _kSelectionPoolMultiplier, _kSelectionPoolMinimum),
-    );
+    const int candidateLimit = kWrappedSelectorCandidateCap;
     for (final _PlaceClusterSummary cluster in clusters) {
       final int perClusterLimit = math.min(
-        cluster.totalCount,
-        math.max(
-          maxCount,
-          (candidateLimit / clusters.length).ceil(),
-        ),
+        candidateLimit,
+        math.max(cluster.totalCount, maxCount),
       );
       final List<int> clusterIds = cluster.sampleMediaIds(
         perClusterLimit,

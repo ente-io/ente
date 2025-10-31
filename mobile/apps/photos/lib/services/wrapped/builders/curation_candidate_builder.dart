@@ -65,10 +65,9 @@ class CurationCandidateBuilder extends WrappedCandidateBuilder {
 
     final Set<int> seenHeroIds = <int>{};
     final List<int> heroCandidates = <int>[];
-    const int baseLimit = _kGalleryGroupSize * _kMaxGalleryGroups;
     final int extendedLimit = math.min(
       uploadedIds.length,
-      baseLimit * 4,
+      kWrappedSelectorCandidateCap,
     );
 
     for (final List<int> group in galleryGroups) {

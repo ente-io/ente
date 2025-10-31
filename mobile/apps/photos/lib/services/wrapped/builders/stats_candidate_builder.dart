@@ -67,10 +67,12 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       selectionTarget: 6,
     );
 
+    final List<int> heroCandidates = limitSelectorCandidates(heroIds);
+
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: heroIds,
-      maxCount: 6,
+      candidateUploadedFileIDs: heroCandidates,
+      maxCount: 3,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 45),
     );
@@ -155,10 +157,12 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       selectionTarget: 6,
     );
 
+    final List<int> rhythmCandidates = limitSelectorCandidates(rhythmIds);
+
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: rhythmIds,
-      maxCount: 6,
+      candidateUploadedFileIDs: rhythmCandidates,
+      maxCount: 3,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
     );
@@ -222,9 +226,12 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateTime day = snapshot.busiestDay!;
 
+    final List<int> candidateIds =
+        limitSelectorCandidates(snapshot.busiestDayMediaUploadedIDs);
+
     final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: snapshot.busiestDayMediaUploadedIDs,
+      candidateUploadedFileIDs: candidateIds,
       maxCount: 6,
       preferNamedPeople: true,
     );
@@ -447,7 +454,7 @@ class _StatsSnapshot {
           dayAggregates.putIfAbsent(dayKey, () => _DayAggregate(day));
       aggregate.count += 1;
       final int? uploadedId = file.uploadedFileID;
-      if (uploadedId != null && aggregate.uploadedFileIDs.length < 9) {
+      if (uploadedId != null) {
         aggregate.uploadedFileIDs.add(uploadedId);
       }
     }

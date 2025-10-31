@@ -22,6 +22,23 @@ part "builders/narrative_candidate_builder.dart";
 part "builders/badge_selector.dart";
 part "builders/media_selector.dart";
 
+const int kWrappedSelectorCandidateCap = 400;
+
+List<int> limitSelectorCandidates(Iterable<int> ids) {
+  final List<int> limited = <int>[];
+  final Set<int> seen = <int>{};
+  for (final int id in ids) {
+    if (id <= 0 || !seen.add(id)) {
+      continue;
+    }
+    limited.add(id);
+    if (limited.length >= kWrappedSelectorCandidateCap) {
+      break;
+    }
+  }
+  return limited;
+}
+
 /// Provides basic context details for candidate builders.
 @immutable
 class WrappedEngineContext {

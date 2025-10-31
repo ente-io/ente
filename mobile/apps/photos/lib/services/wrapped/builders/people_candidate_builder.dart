@@ -78,14 +78,20 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         : endsWithS
             ? "$displayName spotlight"
             : "$displayName's spotlight";
-    final String? heroName =
-        displayName.isNotEmpty ? displayName : null;
+    final String? heroName = displayName.isNotEmpty ? displayName : null;
     final String subtitle = heroName != null
         ? "$heroName was the star of your year!"
         : "Someone special was the star of your year!";
 
-    final List<int> candidateIds = topPerson.topMediaFileIDs(6);
-    final Map<int, double> scoreHints = topPerson.mediaScoreHints();
+    final List<int> candidateIds = limitSelectorCandidates(
+      topPerson.topMediaFileIDs(kWrappedSelectorCandidateCap),
+    );
+    final Set<int> candidateSet = candidateIds.toSet();
+    final Map<int, double> scoreHints = <int, double>{
+      for (final MapEntry<int, double> entry
+          in topPerson.mediaScoreHints().entries)
+        if (candidateSet.contains(entry.key)) entry.key: entry.value,
+    };
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
@@ -143,15 +149,23 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       ],
     );
 
-    final List<int> candidateIds = topThree
-        .map((_PersonStats stats) => stats.topMediaFileIDs(3))
-        .expand((List<int> ids) => ids)
-        .toList(growable: false);
+    final List<int> candidateIds = limitSelectorCandidates(
+      topThree
+          .map(
+            (_PersonStats stats) =>
+                stats.topMediaFileIDs(kWrappedSelectorCandidateCap),
+          )
+          .expand((List<int> ids) => ids),
+    );
+    final Set<int> candidateSet = candidateIds.toSet();
 
     final Map<int, double> scoreHints = <int, double>{};
     for (final _PersonStats stats in topThree) {
       final Map<int, double> personHints = stats.mediaScoreHints();
       for (final MapEntry<int, double> entry in personHints.entries) {
+        if (!candidateSet.contains(entry.key)) {
+          continue;
+        }
         scoreHints.update(
           entry.key,
           (double value) => value + entry.value,
@@ -248,10 +262,12 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         "Solo shots: ${numberFormat.format(dataset.soloMoments)}",
     ]);
 
-    final List<int> candidateIds = <int>[
-      ...dataset.groupSampleFileIDs(4),
-      ...dataset.soloSampleFileIDs(2),
-    ]..removeWhere((int id) => id <= 0);
+    final List<int> candidateIds = limitSelectorCandidates(
+      <int>[
+        ...dataset.groupSampleFileIDs(kWrappedSelectorCandidateCap),
+        ...dataset.soloSampleFileIDs(kWrappedSelectorCandidateCap),
+      ],
+    );
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
@@ -327,9 +343,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         : "${_formatNameList(highlightNames)} joined your story.";
 
     final List<String> chips = _cleanChips(<String>[
-      for (int index = 0;
-          index < highlights.length && index < 3;
-          index += 1)
+      for (int index = 0; index < highlights.length && index < 3; index += 1)
         () {
           final _PersonStats stats = highlights[index];
           final String name = stats.displayNameForTitle.trim();
@@ -342,15 +356,23 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         }(),
     ]);
 
-    final List<int> candidateIds = highlights
-        .map((_PersonStats stats) => stats.topMediaFileIDs(3))
-        .expand((List<int> ids) => ids)
-        .toList(growable: false);
+    final List<int> candidateIds = limitSelectorCandidates(
+      highlights
+          .map(
+            (_PersonStats stats) =>
+                stats.topMediaFileIDs(kWrappedSelectorCandidateCap),
+          )
+          .expand((List<int> ids) => ids),
+    );
+    final Set<int> candidateSet = candidateIds.toSet();
 
     final Map<int, double> scoreHints = <int, double>{};
     for (final _PersonStats stats in highlights) {
       final Map<int, double> personHints = stats.mediaScoreHints();
       for (final MapEntry<int, double> entry in personHints.entries) {
+        if (!candidateSet.contains(entry.key)) {
+          continue;
+        }
         scoreHints.update(
           entry.key,
           (double value) => value + entry.value,
