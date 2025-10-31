@@ -144,23 +144,21 @@ class _AdvancedSharingBottomSheetState
                         leadingSpace: leadingSpace,
                         trailingWidget: ToggleSwitchWidget(
                           value: () => isDownloadEnabled,
-                          onChanged: _publicUrl != null
-                              ? () async {
-                                  await _updatePublicUrlSettings(
-                                    {
-                                      'enableDownload': !isDownloadEnabled,
-                                    },
-                                  );
-                                  if (isDownloadEnabled) {
-                                    // ignore: unawaited_futures
-                                    showErrorDialog(
-                                      context,
-                                      "Please note",
-                                      "Viewers can still take screenshots or save a copy of your photos using external tools",
-                                    );
-                                  }
-                                }
-                              : () async {},
+                          onChanged: () async {
+                            await _updatePublicUrlSettings(
+                              {
+                                'enableDownload': !isDownloadEnabled,
+                              },
+                            );
+                            if (isDownloadEnabled) {
+                              // ignore: unawaited_futures
+                              showErrorDialog(
+                                context,
+                                "Please note",
+                                "Viewers can still take screenshots or save a copy of your photos using external tools",
+                              );
+                            }
+                          },
                         ),
                         isGestureDetectorDisabled: true,
                       ),
@@ -290,6 +288,30 @@ class _AdvancedSharingBottomSheetState
         ),
       ),
     );
+  }
+
+  Future<void> _updateUrlSettings(
+    BuildContext context,
+    Map<String, dynamic> prop, {
+    bool showProgressDialog = true,
+  }) async {
+    final dialog = showProgressDialog
+        ? createProgressDialog(context, context.l10n.pleaseWait)
+        : null;
+    await dialog?.show();
+    try {
+      await CollectionApiClient.instance
+          .updateShareUrl(widget.collection!, prop);
+      await dialog?.hide();
+      showShortToast(context, "Collection updated");
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      await dialog?.hide();
+      await showGenericErrorDialog(context: context, error: e);
+      rethrow;
+    }
   }
 
   Future<void> _createPublicLink() async {

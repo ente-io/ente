@@ -1,7 +1,5 @@
-import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/pages/password_entry_page.dart";
-import "package:ente_accounts/pages/recovery_key_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_legacy/pages/emergency_page.dart";
@@ -15,12 +13,16 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
+import "package:locker/ui/components/recovery_key_dialog_locker.dart";
 import "package:locker/ui/pages/home_page.dart";
 import "package:locker/ui/settings/common_settings.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
+
+  static const double _leadingSpace = 52;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changeEmail,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -55,7 +58,7 @@ class AccountSectionWidget extends StatelessWidget {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return const ChangeEmailDialog();
+                return const ChangeEmailDialogLocker();
               },
               barrierColor: Colors.black.withValues(alpha: 0.85),
               barrierDismissible: false,
@@ -69,6 +72,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changePassword,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -98,6 +102,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.recoveryKey,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -118,16 +123,10 @@ class AccountSectionWidget extends StatelessWidget {
               );
               return;
             }
-            // ignore: unawaited_futures
-            routeToPage(
+            await showRecoveryKeyDialogLocker(
               context,
-              RecoveryKeyPage(
-                Configuration.instance,
-                recoveryKey,
-                l10n.ok,
-                showAppBar: true,
-                onDone: () {},
-              ),
+              recoveryKey: recoveryKey,
+              onDone: () {},
             );
           }
         },
@@ -138,6 +137,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.legacy,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         showOnlyLoadingState: true,
         onTap: () async {
@@ -166,6 +166,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.logout,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           _onLogoutTapped(context);
@@ -177,6 +178,7 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.deleteAccount,
           makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final config = Configuration.instance;

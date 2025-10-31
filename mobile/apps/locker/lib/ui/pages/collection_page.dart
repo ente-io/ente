@@ -16,6 +16,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
@@ -52,11 +53,15 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   List<EnteFile> _filteredFiles = [];
   late CollectionViewType collectionViewType;
   bool isQuickLink = false;
+  bool isFavorite = false;
 
   final _selectedFiles = SelectedFiles();
 
   @override
   void onFileUploadComplete() {
+    _logger.info(
+      "File upload completed from CollectionPage (${widget.collection.id}), refreshing collection data",
+    );
     CollectionService.instance.getCollections().then((collections) {
       setState(() {
         _initializeData(collections.where((c) => c.id == _collection.id).first);
@@ -107,6 +112,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     _initializeData(widget.collection);
     _collectionUpdateSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      _logger.info(
+        "CollectionsUpdatedEvent received on CollectionPage (${widget.collection.id}): ${event.source}",
+      );
       if (!mounted) return;
 
       try {
@@ -135,6 +143,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       _collection,
       Configuration.instance.getUserID()!,
     );
+    isFavorite = collectionViewType == CollectionViewType.favorite;
   }
 
   Future<void> _initializeData(Collection collection) async {
@@ -231,6 +240,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Widget _buildMenuButton(EnteColorScheme colorScheme) {
+    if (isFavorite) {
+      return SizedBox.fromSize();
+    }
     return PopupMenuButton<String>(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -284,7 +296,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             collectionViewType == CollectionViewType.quickLink) {
           items.add(
             PopupMenuItem<String>(
-              value: 'rename',
+              value: 'edit',
               height: 0,
               padding: EdgeInsets.zero,
               child: MenuItemWidget(
@@ -312,7 +324,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                   color: colorScheme.warning500,
                   size: 20,
                 ),
-                isDelete: true,
+                isWarning: true,
                 label: context.l10n.delete,
                 isFirst: itemIndex == 0,
                 isLast: itemIndex == totalItems - 1,
@@ -402,9 +414,14 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           child: _displayedFiles.isEmpty
-              ? SizedBox(
-                  height: 400,
-                  child: _buildEmptyState(textTheme),
+              ? const Center(
+                  child: EmptyStateWidget(
+                    assetPath: 'assets/empty_state.png',
+                    title: "Nothing to see here",
+                    subtitle:
+                        "Upload files to this collection to see them here",
+                    showBorder: false,
+                  ),
                 )
               : ItemListView(
                   key: ValueKey(_displayedFiles.length),
@@ -413,44 +430,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 ),
         ),
       ],
-    );
-  }
-
-  Widget _buildEmptyState(EnteTextTheme textTheme) {
-    return Padding(
-      padding: const EdgeInsets.all(32.0),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSearchActive ? Icons.search_off : Icons.folder_off,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isSearchActive
-                  ? context.l10n.noFilesFoundForQuery(searchQuery)
-                  : context.l10n.noFilesFound,
-              style: textTheme.large.copyWith(
-                color: Colors.grey,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (isSearchActive) ...[
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.tryAdjustingYourSearchQuery,
-                style: textTheme.body.copyWith(
-                  color: Colors.grey[600],
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
-        ),
-      ),
     );
   }
 

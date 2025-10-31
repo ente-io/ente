@@ -159,12 +159,10 @@ The desktop/web app tries to detect if a particular file is a video or image. If
 **On Android:**
 
 1. **Disable battery optimization for Ente:**
-
     - Open device `Settings > Apps > Ente > Battery`
     - Select "Unrestricted" or "Don't optimize"
 
 2. **Check storage permissions:**
-
     - Open device `Settings > Apps > Ente > Permissions`
     - Ensure "Photos and videos" or "Files and media" is allowed
 
@@ -175,7 +173,6 @@ The desktop/web app tries to detect if a particular file is a video or image. If
 **On iOS:**
 
 1. **Check Background App Refresh:**
-
     - Open device `Settings > Ente > Background App Refresh`
     - Ensure it's enabled
 
@@ -243,12 +240,10 @@ Ente will automatically skip files that have already been uploaded, so you can d
 If watch folders aren't uploading new files automatically:
 
 1. **Check the watch folders list:**
-
     - Click "Watch folders" in the sidebar
     - Verify the correct folders are being watched
 
 2. **Check upload status:**
-
     - Look for the sync status indicator in the bottom right
     - Expand it to see any errors
 
@@ -418,7 +413,6 @@ Mobile browsers cannot handle the computationally intensive password derivation 
 **Solutions:**
 
 1. **Use the native mobile app instead** (recommended):
-
     - Install Ente Photos from the [App Store (iOS)](https://apps.apple.com/app/id1542026904) or [Play Store (Android)](https://play.google.com/store/apps/details?id=io.ente.photos)
     - Mobile apps are optimized for phones and tablets
     - Full feature support including machine learning
@@ -448,6 +442,16 @@ Click on each section to see the specific files and error messages.
 
 **On mobile:**
 Open `Settings > Backup` to see the backup status and any errors.
+
+### Why aren't videos playing on web? {#content-blocker-videos}
+
+If videos aren't playing on web.ente.io, browser content blockers or ad blockers may be blocking video playback.
+
+**Solution:**
+
+Disable your content blocker or add `web.ente.io` to your allowlist. Wait 15-20 seconds for changes to take effect before trying again.
+
+**Known issue with AdGuard:** AdGuard's basic filter blocks videos in Ente when using AdGuard Mini on Safari. This has been [reported to AdGuard filter developers](https://github.com/AdguardTeam/AdguardFilters/issues/216424).
 
 ## Performance Issues
 

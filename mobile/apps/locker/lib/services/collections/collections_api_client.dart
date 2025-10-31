@@ -429,14 +429,16 @@ class CollectionApiClient {
 
     collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
     await _updateCollectionInDB(collection);
-    Bus.instance.fire(CollectionsUpdatedEvent());
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_created");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_created"));
   }
 
   Future<void> disableShareUrl(Collection collection) async {
     await CollectionSharingService.instance.disableShareUrl(collection.id);
     collection.publicURLs.clear();
     await _updateCollectionInDB(collection);
-    Bus.instance.fire(CollectionsUpdatedEvent());
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_disabled");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_disabled"));
   }
 
   Future<void> updateShareUrl(
@@ -453,7 +455,8 @@ class CollectionApiClient {
     collection.publicURLs.clear();
     collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
     await _updateCollectionInDB(collection);
-    Bus.instance.fire(CollectionsUpdatedEvent());
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_updated");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_updated"));
   }
 
   Future<List<User>> share(

@@ -11,6 +11,8 @@ import 'package:url_launcher/url_launcher_string.dart';
 class SocialSectionWidget extends StatelessWidget {
   const SocialSectionWidget({super.key});
 
+  static const double _leadingSpace = 52;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -29,23 +31,45 @@ class SocialSectionWidget extends StatelessWidget {
       SocialsMenuItemWidget(
         l10n.blog,
         "https://ente.io/blog",
+        leadingSpace: _leadingSpace,
         launchInExternalApp: !Platform.isAndroid,
       ),
       sectionOptionSpacing,
       SocialsMenuItemWidget(
         l10n.merchandise,
         "https://shop.ente.io",
+        leadingSpace: _leadingSpace,
         launchInExternalApp: !Platform.isAndroid,
       ),
-      const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
+      const SocialsMenuItemWidget(
+        "Twitter",
+        "https://twitter.com/enteio",
+        leadingSpace: _leadingSpace,
+      ),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Mastodon", "https://fosstodon.org/@ente"),
+      const SocialsMenuItemWidget(
+        "Mastodon",
+        "https://fosstodon.org/@ente",
+        leadingSpace: _leadingSpace,
+      ),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Matrix", "https://ente.io/matrix"),
+      const SocialsMenuItemWidget(
+        "Matrix",
+        "https://ente.io/matrix",
+        leadingSpace: _leadingSpace,
+      ),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+      const SocialsMenuItemWidget(
+        "Discord",
+        "https://ente.io/discord",
+        leadingSpace: _leadingSpace,
+      ),
       sectionOptionSpacing,
-      const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
+      const SocialsMenuItemWidget(
+        "Reddit",
+        "https://reddit.com/r/enteio",
+        leadingSpace: _leadingSpace,
+      ),
       sectionOptionSpacing,
     ];
     return Column(children: options);
@@ -56,12 +80,14 @@ class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
   final String url;
   final bool launchInExternalApp;
+  final double leadingSpace;
 
   const SocialsMenuItemWidget(
     this.text,
     this.url, {
     super.key,
     this.launchInExternalApp = true,
+    required this.leadingSpace,
   });
 
   @override
@@ -71,6 +97,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
         title: text,
         makeTextBold: true,
       ),
+      leadingSpace: leadingSpace,
       trailingIcon: Icons.chevron_right_outlined,
       onTap: () async {
         // ignore: unawaited_futures

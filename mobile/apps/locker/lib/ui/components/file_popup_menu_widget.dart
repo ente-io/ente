@@ -69,14 +69,11 @@ class FilePopupMenuWidget extends StatelessWidget {
             padding: EdgeInsets.zero,
             height: 0,
             child: MenuItemWidget(
-              icon: Icon(
-                action.icon,
-                color: colorScheme.textBase,
-                size: 20,
-              ),
+              icon: action.icon,
               label: action.label,
               isFirst: i == 0,
               isLast: i == overflowActions!.length - 1,
+              isWarning: action.isWarning,
             ),
           ),
         );
@@ -128,7 +125,7 @@ class FilePopupMenuWidget extends StatelessWidget {
           label: context.l10n.delete,
           isFirst: false,
           isLast: true,
-          isDelete: true,
+          isWarning: true,
         ),
       ),
     ];
@@ -195,8 +192,9 @@ class FilePopupMenuWidget extends StatelessWidget {
     final result = await showDeleteConfirmationDialog(
       context,
       title: context.l10n.areYouSure,
-      body: context.l10n.deleteMultipleCollectionsDialogBody(1),
+      body: context.l10n.deleteMultipleFilesDialogBody(1),
       deleteButtonLabel: context.l10n.yesDeleteFiles(1),
+      assetPath: "assets/file_delete_icon.png",
     );
 
     if (result?.action == ButtonAction.first && context.mounted) {
@@ -281,14 +279,21 @@ class FilePopupMenuWidget extends StatelessWidget {
         await dialog.show();
 
         try {
-          final List<Future<void>> apiCalls = [];
+          final addFutures = <Future<void>>[];
           for (final collection in collectionsToAdd) {
-            apiCalls.add(
-              CollectionService.instance.addToCollection(collection, file),
+            addFutures.add(
+              CollectionService.instance.addToCollection(
+                collection,
+                file,
+                runSync: false,
+              ),
             );
           }
-          await Future.wait(apiCalls);
-          apiCalls.clear();
+          if (addFutures.isNotEmpty) {
+            await Future.wait(addFutures);
+          }
+
+          final List<Future<void>> apiCalls = [];
 
           for (final collection in collectionsToRemove) {
             apiCalls.add(

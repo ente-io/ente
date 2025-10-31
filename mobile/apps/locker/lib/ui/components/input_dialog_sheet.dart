@@ -77,86 +77,85 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Container(
-      width: 400,
-      decoration: BoxDecoration(
-        color: colorScheme.backdropBase,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                widget.title,
-                style: textTheme.largeBold,
-              ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: colorScheme.backgroundElevated,
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: Icon(
-                    Icons.close,
-                    color: colorScheme.textBase,
-                    size: 20,
+    return SizedBox(
+      width: 360,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.title,
+                  style: textTheme.largeBold,
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.backgroundElevated,
+                      shape: BoxShape.circle,
+                    ),
+                    padding: const EdgeInsets.all(6),
+                    child: Icon(
+                      Icons.close,
+                      color: colorScheme.textBase,
+                      size: 20,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          TextField(
-            controller: _textController,
-            autofocus: true,
-            textCapitalization: widget.textCapitalization,
-            maxLength: widget.maxLength,
-            decoration: InputDecoration(
-              hintText: widget.hintText,
-              hintStyle: textTheme.body.copyWith(
-                color: colorScheme.textMuted,
-              ),
-              filled: true,
-              fillColor: colorScheme.fillFaint,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(
-                  color: colorScheme.strokeFaint,
+              ],
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: _textController,
+              autofocus: true,
+              textCapitalization: widget.textCapitalization,
+              maxLength: widget.maxLength,
+              decoration: InputDecoration(
+                hintText: widget.hintText,
+                hintStyle: textTheme.body.copyWith(
+                  color: colorScheme.textMuted,
                 ),
+                filled: true,
+                fillColor: colorScheme.fillFaint,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: colorScheme.strokeFaint,
+                  ),
+                ),
+                counterText: "",
               ),
-              counterText: "",
+              style: textTheme.body.copyWith(
+                color: colorScheme.textBase,
+              ),
+              onSubmitted: (_) => _onSubmit(),
             ),
-            style: textTheme.body.copyWith(
-              color: colorScheme.textBase,
+            const SizedBox(height: 36),
+            SizedBox(
+              width: double.infinity,
+              child: GradientButton(
+                onTap: _isSubmitting ? null : _onSubmit,
+                text: widget.submitButtonLabel,
+              ),
             ),
-            onSubmitted: (_) => _onSubmit(),
-          ),
-          const SizedBox(height: 36),
-          SizedBox(
-            width: double.infinity,
-            child: GradientButton(
-              onTap: _isSubmitting ? null : _onSubmit,
-              text: widget.submitButtonLabel,
-            ),
-          ),
-          const SizedBox(height: 24),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -174,17 +173,29 @@ Future<dynamic> showInputDialogSheet(
 }) async {
   final result = await showDialog<dynamic>(
     context: context,
-    builder: (context) => Dialog(
-      child: InputDialogSheet(
-        title: title,
-        hintText: hintText,
-        submitButtonLabel: submitButtonLabel,
-        onSubmit: onSubmit,
-        initialValue: initialValue,
-        textCapitalization: textCapitalization,
-        maxLength: maxLength,
-      ),
-    ),
+    builder: (dialogContext) {
+      final colorScheme = getEnteColorScheme(dialogContext);
+      return Dialog(
+        backgroundColor: colorScheme.backdropBase,
+        clipBehavior: Clip.antiAlias,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 24,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: InputDialogSheet(
+          title: title,
+          hintText: hintText,
+          submitButtonLabel: submitButtonLabel,
+          onSubmit: onSubmit,
+          initialValue: initialValue,
+          textCapitalization: textCapitalization,
+          maxLength: maxLength,
+        ),
+      );
+    },
   );
 
   return result;

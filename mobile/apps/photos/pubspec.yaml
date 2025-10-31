@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.12-beta+1211
+version: 1.2.16-beta+1216
 publish_to: none
 
 environment:
@@ -39,6 +39,7 @@ dependencies:
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
   connectivity_plus: ^6.0.2
+  convert: ^3.1.1
   crypto: ^3.0.2
   cupertino_icons: ^1.0.0
   dart_ui_isolate: ^1.1.1
@@ -48,7 +49,6 @@ dependencies:
   dots_indicator: ^4.0.1
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
-  el_tooltip: ^2.2.1
   email_validator: ^3.0.0
   encrypt: ^5.0.3
   ente_cast:
@@ -139,7 +139,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/laurenspriem/mobile_ocr
-      ref: 486ec54a352cdd5c176424488d7fde5c84f21978
+      ref: 7d613ed61dcf9797ab2dfdc78b62422704eccc4f
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -151,6 +151,8 @@ dependencies:
       ref: v2-only
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
+  native_video_editor:
+    path: ../../packages/native_video_editor
   native_video_player: ^4.0.0
   onnx_dart:
     path: plugins/onnx_dart
@@ -214,11 +216,8 @@ dependencies:
   video_editor: # edge cases handled in fork
     git:
       url: https://github.com/ente-io/video_editor_fork.git
-  video_player:
-    git:
-      url: https://github.com/ente-io/packages.git
-      ref: android_video_roation_fix
-      path: packages/video_player/video_player/
+      ref: master
+  video_player: ^2.10.0
   video_thumbnail: ^0.5.6
   visibility_detector: ^0.4.0+2
   wakelock_plus: ^1.1.1
@@ -254,11 +253,6 @@ dependency_overrides:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
   protobuf: ^3.1.0
-  video_player: # remove this dep as soon as we move to one player for all
-    git:
-      url: https://github.com/ente-io/packages.git
-      ref: android_video_roation_fix
-      path: packages/video_player/video_player/
   watcher: ^1.1.0
   win32: "5.10.1"
 

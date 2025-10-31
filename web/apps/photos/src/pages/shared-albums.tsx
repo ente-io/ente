@@ -50,6 +50,7 @@ import {
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
 import { useBaseContext } from "ente-base/context";
+import { isDevBuild } from "ente-base/env";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
@@ -442,6 +443,8 @@ export default function PublicCollectionGallery() {
             : undefined;
     }, [publicCollection]);
 
+    const shouldShowReferralBanner = isDevBuild || !isCustomAlbumsAppOrigin;
+
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
     };
@@ -467,13 +470,16 @@ export default function PublicCollectionGallery() {
     );
 
     const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
-        const props = { referralCode, onAddPhotos };
+        const props = {
+            referralCode: shouldShowReferralBanner ? referralCode : undefined,
+            onAddPhotos,
+        };
         return {
             component: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
             extendToInlineEdges: true,
         };
-    }, [referralCode, onAddPhotos]);
+    }, [referralCode, onAddPhotos, shouldShowReferralBanner]);
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;

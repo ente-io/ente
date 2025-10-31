@@ -9,6 +9,8 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
   required String title,
   required String body,
   required String deleteButtonLabel,
+  required String assetPath,
+  Widget? icon,
 }) {
   return showModalBottomSheet<ButtonResult>(
     context: context,
@@ -19,6 +21,8 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
         title: title,
         body: body,
         deleteButtonLabel: deleteButtonLabel,
+        assetPath: assetPath,
+        icon: icon,
       );
     },
   );
@@ -28,11 +32,15 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
   final String title;
   final String body;
   final String deleteButtonLabel;
+  final String assetPath;
+  final Widget? icon;
 
   const _DeleteConfirmationBottomSheet({
     required this.title,
     required this.body,
     required this.deleteButtonLabel,
+    required this.assetPath,
+    this.icon,
   });
 
   @override
@@ -77,7 +85,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Image.asset('assets/delete_icon.png'),
+              Image.asset(assetPath),
               const SizedBox(height: 24),
               Text(
                 title,
@@ -109,12 +117,13 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  icon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedFileUpload,
-                    color: Colors.white,
-                    size: 20,
-                    strokeWidth: 1.9,
-                  ),
+                  icon: icon ??
+                      const HugeIcon(
+                        icon: HugeIcons.strokeRoundedFileUpload,
+                        color: Colors.white,
+                        size: 20,
+                        strokeWidth: 1.9,
+                      ),
                   label: Text(
                     deleteButtonLabel,
                     style: textTheme.bodyBold.copyWith(

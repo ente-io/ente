@@ -102,7 +102,7 @@ class CollectionService {
             diff.latestUpdatedAtTime,
           );
         }).catchError((e) {
-          _logger.warning(
+          _logger.severe(
             "Failed to fetch files for collection ${collection.id}: $e",
           );
         }),
@@ -110,7 +110,7 @@ class CollectionService {
     }
     await Future.wait(fileFutures);
     if (updatedCollections.isNotEmpty) {
-      Bus.instance.fire(CollectionsUpdatedEvent());
+      Bus.instance.fire(CollectionsUpdatedEvent('sync'));
     }
   }
 
@@ -129,6 +129,14 @@ class CollectionService {
 
       // Cache in memory
       _collectionIDToCollections[collection.id] = collection;
+
+      // Add to local database immediately
+      await _db.updateCollections([collection]);
+
+      // Fire event to update UI
+      Bus.instance.fire(CollectionsUpdatedEvent('collection_created'));
+
+      // Sync to ensure we have the latest state
       await sync();
 
       return collection;
@@ -237,14 +245,14 @@ class CollectionService {
       await _db.addFilesToCollection(collection, [file]);
 
       // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent());
+      Bus.instance.fire(CollectionsUpdatedEvent('add_to_collection'));
 
       if (runSync) {
         // Also sync to ensure we have the latest state from server
         await sync();
       }
-    } catch (e) {
-      _logger.severe("Failed to add file to collection: $e");
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to add file to collection: $e", e, stackTrace);
       rethrow;
     }
   }
@@ -259,7 +267,7 @@ class CollectionService {
       await _db.deleteFilesFromCollection(collection, [file]);
 
       // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent());
+      Bus.instance.fire(CollectionsUpdatedEvent('trash_file'));
 
       // Also sync to ensure we have the latest state
       await sync();
@@ -280,7 +288,7 @@ class CollectionService {
       // Let sync update the local state
       await sync();
     } catch (e, s) {
-      _logger.warning("failed to rename collection", e, s);
+      _logger.severe("failed to rename collection", e, s);
       rethrow;
     }
   }
@@ -302,7 +310,13 @@ class CollectionService {
   Future<void> _init() async {
     // ignore: unawaited_futures
     sync().then((_) {
-      setupDefaultCollections();
+      if (Configuration.instance.getKey() != null) {
+        setupDefaultCollections();
+      } else {
+        _logger.warning(
+          "Skipping default collections setup - master key not yet available",
+        );
+      }
     }).catchError((error) {
       _logger.severe("Failed to initialize collections: $error");
     });
@@ -319,18 +333,32 @@ class CollectionService {
         return collection;
       }
     }
-    _logger.info("No collections found, creating important collection.");
-    return await createCollection("Important", type: CollectionType.favorites);
+    _logger
+        .info("No favorites collection found, creating important collection.");
+    final collection =
+        await createCollection("Important", type: CollectionType.favorites);
+    return collection;
   }
 
   Future<void> move(EnteFile file, Collection from, Collection to) async {
     try {
       await _apiClient.move(file, from, to);
-      _logger.info("Moved file ${file.title} from ${from.name} to ${to.name}");
-      // Let sync update the local state
+
+      // Update local database immediately for both collections
+      // Remove from source collection
+      await _db.deleteFilesFromCollection(from, [file]);
+
+      // Add to target collection with updated collectionID
+      file.collectionID = to.id;
+      await _db.addFilesToCollection(to, [file]);
+
+      // Fire event to update UI
+      Bus.instance.fire(CollectionsUpdatedEvent('file_moved'));
+
+      // Let sync update the local state to ensure consistency
       await sync();
-    } catch (e) {
-      _logger.severe("Failed to move file: $e");
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to move file: $e", e, stackTrace);
       rethrow;
     }
   }
@@ -347,8 +375,24 @@ class CollectionService {
     }
   }
 
+  // Track if default collections have been set up
+  bool _defaultCollectionsSetupCompleted = false;
+
   Future<void> setupDefaultCollections() async {
     try {
+      if (Configuration.instance.getKey() == null) {
+        _logger.warning(
+          "Cannot setup default collections - master key not available",
+        );
+        return;
+      }
+
+      // Skip if already completed
+      if (_defaultCollectionsSetupCompleted) {
+        _logger.info("Default collections already set up, skipping.");
+        return;
+      }
+
       _logger.info("Setting up default collections...");
 
       // Create uncategorized collection if it doesn't exist
@@ -360,9 +404,25 @@ class CollectionService {
       // Create Documents collection if it doesn't exist
       await _getOrCreateDocumentsCollection();
 
+      _defaultCollectionsSetupCompleted = true;
       _logger.info("Default collections setup completed.");
     } catch (e, s) {
       _logger.severe("Failed to setup default collections", e, s);
+    }
+  }
+
+  /// Ensures default collections are set up if they haven't been already
+  /// This should be called from HomePage once the master key is available
+  Future<void> ensureDefaultCollections() async {
+    if (!_defaultCollectionsSetupCompleted &&
+        Configuration.instance.getKey() != null) {
+      await setupDefaultCollections();
+    } else {
+      if (_defaultCollectionsSetupCompleted) {
+        _logger.info("Default collections already setup, skipping");
+      } else {
+        _logger.warning("Master key not available, cannot setup collections");
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 
@@ -45,8 +46,10 @@ class SwipeToSelectHelper {
     // Immediately select/deselect the starting file based on mode
     if (_selecting == true) {
       selectedFiles.selectAll({file});
+      HapticFeedback.selectionClick();
     } else {
       selectedFiles.unSelectAll({file});
+      HapticFeedback.selectionClick();
     }
   }
 
@@ -95,12 +98,14 @@ class SwipeToSelectHelper {
           final itemsToAdd = getRange(toIndex, min(fromIndex, lastToIndex));
           if (itemsToAdd.isNotEmpty) {
             selectedFiles.selectAll(itemsToAdd);
+            HapticFeedback.selectionClick();
           }
           // Remove items to the right of start if we were previously there
           if (fromIndex < lastToIndex) {
             final itemsToRemove = getRange(fromIndex + 1, lastToIndex + 1);
             if (itemsToRemove.isNotEmpty) {
               selectedFiles.unSelectAll(itemsToRemove);
+              HapticFeedback.selectionClick();
             }
           }
         } else if (lastToIndex < toIndex) {
@@ -108,6 +113,7 @@ class SwipeToSelectHelper {
           final itemsToRemove = getRange(lastToIndex, toIndex);
           if (itemsToRemove.isNotEmpty) {
             selectedFiles.unSelectAll(itemsToRemove);
+            HapticFeedback.selectionClick();
           }
         }
       } else if (fromIndex < toIndex) {
@@ -117,12 +123,14 @@ class SwipeToSelectHelper {
           final itemsToAdd = getRange(max(fromIndex, lastToIndex), toIndex + 1);
           if (itemsToAdd.isNotEmpty) {
             selectedFiles.selectAll(itemsToAdd);
+            HapticFeedback.selectionClick();
           }
           // Remove items to the left of start if we were previously there
           if (lastToIndex < fromIndex) {
             final itemsToRemove = getRange(lastToIndex, fromIndex);
             if (itemsToRemove.isNotEmpty) {
               selectedFiles.unSelectAll(itemsToRemove);
+              HapticFeedback.selectionClick();
             }
           }
         } else if (toIndex < lastToIndex) {
@@ -130,6 +138,7 @@ class SwipeToSelectHelper {
           final itemsToRemove = getRange(toIndex + 1, lastToIndex + 1);
           if (itemsToRemove.isNotEmpty) {
             selectedFiles.unSelectAll(itemsToRemove);
+            HapticFeedback.selectionClick();
           }
         }
       }
@@ -142,12 +151,14 @@ class SwipeToSelectHelper {
           final itemsToRemove = getRange(toIndex, min(fromIndex, lastToIndex));
           if (itemsToRemove.isNotEmpty) {
             selectedFiles.unSelectAll(itemsToRemove);
+            HapticFeedback.selectionClick();
           }
           // Add items back to the right of start if we were previously there
           if (fromIndex < lastToIndex) {
             final itemsToAdd = getRange(fromIndex + 1, lastToIndex + 1);
             if (itemsToAdd.isNotEmpty) {
               selectedFiles.selectAll(itemsToAdd);
+              HapticFeedback.selectionClick();
             }
           }
         } else if (lastToIndex < toIndex) {
@@ -155,6 +166,7 @@ class SwipeToSelectHelper {
           final itemsToAdd = getRange(lastToIndex, toIndex);
           if (itemsToAdd.isNotEmpty) {
             selectedFiles.selectAll(itemsToAdd);
+            HapticFeedback.selectionClick();
           }
         }
       } else if (fromIndex < toIndex) {
@@ -165,12 +177,14 @@ class SwipeToSelectHelper {
               getRange(max(fromIndex, lastToIndex), toIndex + 1);
           if (itemsToRemove.isNotEmpty) {
             selectedFiles.unSelectAll(itemsToRemove);
+            HapticFeedback.selectionClick();
           }
           // Add items back to the left of start if we were previously there
           if (lastToIndex < fromIndex) {
             final itemsToAdd = getRange(lastToIndex, fromIndex);
             if (itemsToAdd.isNotEmpty) {
               selectedFiles.selectAll(itemsToAdd);
+              HapticFeedback.selectionClick();
             }
           }
         } else if (toIndex < lastToIndex) {
@@ -178,6 +192,7 @@ class SwipeToSelectHelper {
           final itemsToAdd = getRange(toIndex + 1, lastToIndex + 1);
           if (itemsToAdd.isNotEmpty) {
             selectedFiles.selectAll(itemsToAdd);
+            HapticFeedback.selectionClick();
           }
         }
       }

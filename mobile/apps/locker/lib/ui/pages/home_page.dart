@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import "package:dotted_border/dotted_border.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/buttons/icon_button_widget.dart";
@@ -15,11 +14,13 @@ import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_collections.dart';
+import 'package:locker/models/ui_section_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/collection_flex_grid_view.dart";
 import "package:locker/ui/collections/section_title.dart";
+import "package:locker/ui/components/home_empty_state_widget.dart";
 import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -303,6 +304,14 @@ class _HomePageState extends UploaderPageState<HomePage>
       _loadCollections();
     }
 
+    // Ensure default collections are created now that we're on the home page
+    // This handles the case where SignedInEvent fired before master key was available
+    CollectionService.instance.ensureDefaultCollections().then((_) {
+      _logger.info("Default collections check completed in HomePage");
+    }).catchError((error) {
+      _logger.warning("Failed to ensure default collections: $error");
+    });
+
     // Initialize sharing functionality to handle shared files
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -439,11 +448,18 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Future<void> _loadCollections() async {
+    final shouldShowLoading =
+        _collections.isEmpty && _recentFiles.isEmpty && !_isLoading;
+
     try {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
+      if (shouldShowLoading || _error != null) {
+        setState(() {
+          if (shouldShowLoading) {
+            _isLoading = true;
+          }
+          _error = null;
+        });
+      }
 
       final collections = await CollectionService.instance.getCollections();
       await _loadRecentFiles(collections);
@@ -627,72 +643,31 @@ class _HomePageState extends UploaderPageState<HomePage>
         ),
       );
     }
-    // Show empty state only if both collections and recent files are empty
-    if (_displayedCollections.isEmpty && _recentFiles.isEmpty) {
-      final colorScheme = getEnteColorScheme(context);
-      final textTheme = getEnteTextTheme(context);
-
+    if (_displayedCollections.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: DottedBorder(
-            options: const RoundedRectDottedBorderOptions(
-              strokeWidth: 1,
-              color: Color(0xFF6B6B6B),
-              dashPattern: [5, 5],
-              radius: Radius.circular(24),
-            ),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorScheme.backdropBase,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 42,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/empty_state.png',
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Upload a File',
-                    style: textTheme.h3Bold.copyWith(
-                      color: colorScheme.textBase,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: addFile,
-                    child: Text(
-                      'Click here to upload',
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.primary700,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          child: HomeEmptyStateWidget(onTap: addFile),
         ),
       );
     }
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final scrollBottomPadding =
+            MediaQuery.of(context).padding.bottom + 120.0;
+
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom: scrollBottomPadding,
+          ),
           physics: const AlwaysScrollableScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: constraints.maxHeight - 32, // Account for padding
+              minHeight: constraints.maxHeight,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -724,6 +699,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildRecentsSection() {
+    if (_recentFiles.isEmpty) {
+      return HomeEmptyStateWidget(
+        onTap: addFile,
+      );
+    }
     return RecentsSectionWidget(
       collections: _filterOutUncategorized(_collections),
       recentFiles: _recentFiles,

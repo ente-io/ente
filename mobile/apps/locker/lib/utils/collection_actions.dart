@@ -77,7 +77,7 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
-    await showTextInputDialog(
+    await showInputDialogSheet(
       context,
       title: context.l10n.renameCollection,
       initialValue: collection.name ?? '',
@@ -123,15 +123,13 @@ class CollectionActions {
   }) async {
     if (collections.isEmpty) return;
 
-    final dialogChoice = await showChoiceDialog(
+    final dialogChoice = await showDeleteConfirmationDialog(
       context,
       title: context.l10n.areYouSure,
       body:
           context.l10n.deleteMultipleCollectionsDialogBody(collections.length),
-      firstButtonLabel: context.l10n.yesDeleteCollections(collections.length),
-      secondButtonLabel: context.l10n.cancel,
-      firstButtonType: ButtonType.critical,
-      isCritical: true,
+      deleteButtonLabel: context.l10n.yesDeleteCollections(collections.length),
+      assetPath: "assets/collection_delete_icon.png",
     );
 
     if (dialogChoice?.action != ButtonAction.first) return;
@@ -198,6 +196,7 @@ class CollectionActions {
       title: context.l10n.areYouSure,
       body: context.l10n.deleteCollectionDialogBody(collectionName),
       deleteButtonLabel: context.l10n.yesDeleteCollections(1),
+      assetPath: "assets/collection_delete_icon.png",
     );
 
     if (result?.action != ButtonAction.first && context.mounted) {
@@ -246,6 +245,55 @@ class CollectionActions {
           labelText: context.l10n.leaveCollection,
           onTap: () async {
             await CollectionApiClient.instance.leaveCollection(collection);
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: context.l10n.cancel,
+        ),
+      ],
+      title: context.l10n.leaveCollection,
+      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+    );
+    if (actionResult?.action != null && context.mounted) {
+      if (actionResult!.action == ButtonAction.error) {
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
+      } else if (actionResult.action == ButtonAction.first) {
+        onSuccess?.call();
+        Navigator.of(context).pop();
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          "Leave collection successfully",
+        );
+      }
+    }
+  }
+
+  static Future<void> leaveMultipleCollection(
+    BuildContext context,
+    List<Collection> collections, {
+    VoidCallback? onSuccess,
+  }) async {
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: context.l10n.leaveCollection,
+          onTap: () async {
+            for (final col in collections) {
+              await CollectionApiClient.instance.leaveCollection(col);
+            }
           },
         ),
         ButtonWidget(

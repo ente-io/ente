@@ -45,6 +45,7 @@ import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/tabs/home_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import "package:photos/utils/standalone/timed_cache.dart";
 import "package:pointycastle/export.dart";
 import "package:pointycastle/srp/srp6_client.dart";
 import "package:pointycastle/srp/srp6_standard_groups.dart";
@@ -60,6 +61,9 @@ class UserService {
 
   final SRP6GroupParameters kDefaultSrpGroup = SRP6StandardGroups.rfc5054_4096;
   final _dio = NetworkClient.instance.getDio();
+  final _emailToPubKeyCache =
+      TimedCache<String, String>(duration: const Duration(seconds: 10));
+
   final _enteDio = NetworkClient.instance.enteDio;
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
@@ -181,12 +185,17 @@ class UserService {
   // getPublicKey returns null value if email id is not
   // associated with another ente account
   Future<String?> getPublicKey(String email) async {
+    final String? cachedPubKey = _emailToPubKeyCache.get(email);
+    if (cachedPubKey != null) {
+      return cachedPubKey;
+    }
     try {
       final response = await _enteDio.get(
         "/users/public-key",
         queryParameters: {"email": email},
       );
       final publicKey = response.data["publicKey"];
+      _emailToPubKeyCache.set(email, publicKey);
       return publicKey;
     } on DioException catch (e) {
       if (e.response != null && e.response?.statusCode == 404) {

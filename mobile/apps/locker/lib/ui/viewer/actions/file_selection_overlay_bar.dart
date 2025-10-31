@@ -5,6 +5,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
@@ -12,10 +13,9 @@ import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/utils/snack_bar_utils.dart";
+import "package:logging/logging.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
-  static const double roughHeight = 300.0;
-
   final SelectedFiles selectedFiles;
   final List<EnteFile> files;
   const FileSelectionOverlayBar({
@@ -30,10 +30,32 @@ class FileSelectionOverlayBar extends StatefulWidget {
 }
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
+  static final Logger _logger = Logger("FileSelectionOverlayBar");
+  bool _isImportant = false;
+
   @override
   void initState() {
     super.initState();
     widget.selectedFiles.addListener(_onSelectionChanged);
+    _checkIfImportant();
+  }
+
+  Future<void> _checkIfImportant() async {
+    if (widget.selectedFiles.files.length == 1) {
+      final file = widget.selectedFiles.files.first;
+
+      try {
+        final isFav = await FavoritesService.instance.isFavorite(file);
+
+        if (mounted) {
+          setState(() {
+            _isImportant = isFav;
+          });
+        }
+      } catch (e) {
+        _logger.severe("Error checking favorite status: $e");
+      }
+    }
   }
 
   @override
@@ -45,6 +67,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   void _onSelectionChanged() {
     if (mounted) {
       setState(() {});
+      _checkIfImportant();
     }
   }
 
@@ -263,26 +286,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                 _buildContinuousActionRow(file!),
               ],
             )
-          : Row(
-              key: const ValueKey('multi_selection'),
-              children: [
-                Expanded(
-                  child: SelectionActionButton(
-                    icon: Icons.delete_outline,
-                    label: context.l10n.delete,
-                    onTap: () =>
-                        _deleteMultipleFile(context, selectedFiles.toList()),
-                    isDestructive: true,
-                  ),
-                ),
-              ],
-            ),
+          : _buildMultiSelectionActionRow(selectedFiles.toList()),
     );
   }
 
   Widget _buildContinuousActionRow(EnteFile file) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
 
     return Container(
       decoration: BoxDecoration(
@@ -293,63 +302,52 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         child: Row(
           children: [
             Expanded(
-              child: GestureDetector(
+              child: SelectionActionButton(
+                icon: Icons.edit_outlined,
+                label: context.l10n.edit,
                 onTap: () => _showEditDialog(context, file),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 18.0,
-                    horizontal: 12.0,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.edit_outlined,
-                        color: colorScheme.textBase,
-                        size: 24,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        context.l10n.edit,
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
+            const SizedBox(width: 12),
             Expanded(
-              child: GestureDetector(
+              child: SelectionActionButton(
+                icon: _isImportant ? Icons.star : Icons.star_outline,
+                label: _isImportant ? "Unmark" : "Important",
                 onTap: () => _toggleImportant(context, file),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 18.0,
-                    horizontal: 12.0,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.star_outline,
-                        color: colorScheme.textBase,
-                        size: 24,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "Important",
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.textBase,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMultiSelectionActionRow(List<EnteFile> files) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      key: const ValueKey('multi_selection'),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24.0),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.star_outline,
+                label: "Important",
+                onTap: () => _markMultipleAsImportant(context, files),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.delete_outline,
+                label: context.l10n.delete,
+                onTap: () => _deleteMultipleFile(context, files),
+                isDestructive: true,
               ),
             ),
           ],
@@ -439,14 +437,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         await dialog.show();
 
         try {
-          final List<Future<void>> apiCalls = [];
+          final addFutures = <Future<void>>[];
           for (final collection in collectionsToAdd) {
-            apiCalls.add(
-              CollectionService.instance.addToCollection(collection, file),
+            addFutures.add(
+              CollectionService.instance.addToCollection(
+                collection,
+                file,
+                runSync: false,
+              ),
             );
           }
-          await Future.wait(apiCalls);
-          apiCalls.clear();
+          if (addFutures.isNotEmpty) {
+            await Future.wait(addFutures);
+          }
+
+          final List<Future<void>> apiCalls = [];
 
           for (final collection in collectionsToRemove) {
             apiCalls.add(
@@ -564,10 +569,107 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Future<void> _toggleImportant(BuildContext context, EnteFile file) async {
-    // TODO: Implement toggle important/star functionality
-    SnackBarUtils.showInfoSnackBar(
+    final dialog = createProgressDialog(
       context,
-      "Mark as important functionality coming soon",
+      _isImportant ? "Removing from Important..." : "Adding to Important...",
+      isDismissible: false,
     );
+
+    try {
+      await dialog.show();
+
+      if (_isImportant) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else {
+        await FavoritesService.instance.addToFavorites(context, file);
+      }
+
+      await dialog.hide();
+      widget.selectedFiles.clearAll();
+
+      setState(() {
+        _isImportant = !_isImportant;
+      });
+
+      if (context.mounted) {
+        final message = _isImportant
+            ? "File marked as important"
+            : "File removed from important";
+        SnackBarUtils.showInfoSnackBar(context, message);
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
+      await dialog.hide();
+
+      if (context.mounted) {
+        final errorMessage =
+            'Failed to update important status: ${e.toString()}';
+        SnackBarUtils.showWarningSnackBar(context, errorMessage);
+      }
+    }
+  }
+
+  Future<void> _markMultipleAsImportant(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    final dialog = createProgressDialog(
+      context,
+      "Marking as Important...",
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      final List<EnteFile> filesToMark = [];
+      for (final file in files) {
+        final isFav = await FavoritesService.instance.isFavorite(file);
+        if (!isFav) {
+          filesToMark.add(file);
+        }
+      }
+
+      if (filesToMark.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          SnackBarUtils.showInfoSnackBar(
+            context,
+            "All files are already marked as important",
+          );
+        }
+        return;
+      }
+
+      await FavoritesService.instance.updateFavorites(
+        context,
+        filesToMark,
+        true,
+      );
+
+      await dialog.hide();
+
+      widget.selectedFiles.clearAll();
+
+      if (context.mounted) {
+        final message = filesToMark.length == 1
+            ? "1 file marked as important"
+            : "${filesToMark.length} files marked as important";
+        SnackBarUtils.showInfoSnackBar(context, message);
+      }
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Failed to mark multiple files as important: $e",
+        e,
+        stackTrace,
+      );
+      await dialog.hide();
+
+      if (context.mounted) {
+        final errorMessage =
+            'Failed to mark files as important: ${e.toString()}';
+        SnackBarUtils.showWarningSnackBar(context, errorMessage);
+      }
+    }
   }
 }

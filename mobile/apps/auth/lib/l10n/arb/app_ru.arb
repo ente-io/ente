@@ -376,6 +376,7 @@
   "shouldHideCode": "Скрыть коды",
   "doubleTapToViewHiddenCode": "Вы можете нажать дважды на запись для просмотра кода",
   "focusOnSearchBar": "Фокусировать поиск при запуске приложения",
+  "minimizeToTrayOnClose": "Сворачивать в трей при закрытии",
   "confirmUpdatingkey": "Вы уверены, что хотите обновить секретный ключ?",
   "minimizeAppOnCopy": "Сворачивать приложение при копировании",
   "editCodeAuthMessage": "Аутентификация для редактирования кода",

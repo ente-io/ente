@@ -11,6 +11,8 @@ class CollectionSelectionWidget extends StatefulWidget {
   final Set<int> selectedCollectionIds;
   final Function(int) onToggleCollection;
   final Function(List<Collection>)? onCollectionsUpdated;
+  final Widget? titleWidget;
+  final bool singleSelectionMode;
 
   const CollectionSelectionWidget({
     super.key,
@@ -18,6 +20,8 @@ class CollectionSelectionWidget extends StatefulWidget {
     required this.selectedCollectionIds,
     required this.onToggleCollection,
     this.onCollectionsUpdated,
+    this.titleWidget,
+    this.singleSelectionMode = false,
   });
 
   @override
@@ -50,6 +54,14 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
         _availableCollections.add(newCollection);
       });
 
+      // In single selection mode, clear other selections before selecting the new one
+      if (widget.singleSelectionMode) {
+        final collectionIdsCopy = Set<int>.from(widget.selectedCollectionIds);
+        for (final id in collectionIdsCopy) {
+          widget.onToggleCollection(id);
+        }
+      }
+
       widget.onToggleCollection(newCollection.id);
 
       widget.onCollectionsUpdated?.call(_availableCollections);
@@ -64,6 +76,19 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     }
   }
 
+  void _onCollectionTap(int collectionId) {
+    if (widget.singleSelectionMode) {
+      // In single selection mode, clear other selections first
+      final collectionIdsCopy = Set<int>.from(widget.selectedCollectionIds);
+      for (final id in collectionIdsCopy) {
+        if (id != collectionId) {
+          widget.onToggleCollection(id);
+        }
+      }
+    }
+    widget.onToggleCollection(collectionId);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -72,9 +97,10 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TitleBarTitleWidget(
-          title: context.l10n.addToCollection,
-        ),
+        widget.titleWidget ??
+            TitleBarTitleWidget(
+              title: context.l10n.addToCollection,
+            ),
         const SizedBox(height: 24),
         Wrap(
           spacing: 8,
@@ -92,7 +118,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
                 collection: collection,
                 isSelected:
                     widget.selectedCollectionIds.contains(collection.id),
-                onTap: () => widget.onToggleCollection(collection.id),
+                onTap: () => _onCollectionTap(collection.id),
                 colorScheme: colorScheme,
                 textTheme: textTheme,
               ),

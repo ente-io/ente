@@ -33,7 +33,7 @@ yarn dev:auth         # Auth app (port 3003)
 yarn dev:embed        # Embed app (port 3006)
 yarn dev:accounts     # Accounts app (port 3001)
 yarn dev:cast         # Cast app (port 3004)
-yarn dev:locker       # Locker app (port 3005)
+yarn dev:share       # Public Locker app (port 3005)
 
 # Production builds
 yarn build            # Photos app
@@ -70,7 +70,7 @@ web/
 │   ├── embed/         # Embeddable photo viewer (iframe-friendly)
 │   ├── accounts/      # Passkey support
 │   ├── cast/          # Chromecast/browser casting
-│   ├── locker/        # Document storage
+│   ├── share/         # Document storage
 │   └── payments/      # Subscription management
 │
 ├── packages/          # Shared code between apps

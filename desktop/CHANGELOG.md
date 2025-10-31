@@ -1,10 +1,16 @@
 # CHANGELOG
 
-## v1.7.15 (Unreleased)
+## v1.7.16 (unreleased)
 
-- Custom domains.
-- Support Czech translations.
 - .
+
+## v1.7.15
+
+- Support Czech translations.
+- Custom domain support for public album sharing.
+- New layouts for public albums - grouped, continuous and trip.
+- Quicker way to create new albums.
+- Search functionality for album selection dialogs.
 
 ## v1.7.14
 
@@ -15,7 +21,7 @@
 - Generate streams for videos (beta)
 
     > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://help.ente.io/photos/faq/video-streaming).
+    > [video streaming FAQ](https://ente.io/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 

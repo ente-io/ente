@@ -347,7 +347,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
         options: const RoundedRectDottedBorderOptions(
           padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
           strokeWidth: 1,
-          color: Color(0xFF6B6B6B),
+          color: Color.fromRGBO(82, 82, 82, 0.6),
           dashPattern: [5, 5],
           radius: Radius.circular(24),
         ),

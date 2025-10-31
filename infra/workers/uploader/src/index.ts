@@ -20,6 +20,27 @@ export default {
     },
 } satisfies ExportedHandler;
 
+// Strict allowlist of upload destinations. Expand as needed.
+const ALLOWED_UPLOAD_HOSTS = new Set<string>([
+    // Example: Backblaze B2 S3-compatible bucket endpoint
+    "ente-prod-eu.s3.eu-central-003.backblazeb2.com",
+]);
+
+const isAllowedUploadURL = (uploadURL: string) => {
+    try {
+        const url = new URL(uploadURL);
+        // Enforce HTTPS, no credentials, and an allowlisted host.
+        if (url.protocol !== "https:") return false;
+        if (url.username || url.password) return false;
+        // Only default HTTPS port; signed URLs should not need a custom port.
+        if (url.port && url.port !== "443") return false;
+        if (!ALLOWED_UPLOAD_HOSTS.has(url.hostname)) return false;
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 const handleOPTIONS = (request: Request) => {
     const origin = request.headers.get("Origin");
     if (!isAllowedOrigin(origin)) console.warn("Unknown origin", origin);
@@ -59,6 +80,17 @@ const handlePOSTOrPUT = async (request: Request) => {
     if (!uploadURL) {
         console.error("No uploadURL provided");
         return new Response(null, { status: 400 });
+    }
+    if (!isAllowedUploadURL(uploadURL)) {
+        console.warn("Blocked uploadURL due to allowlist", uploadURL);
+        return new Response(JSON.stringify({ error: "host not whitelisted" }), {
+            status: 400,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Expose-Headers": "X-Request-Id, CF-Ray",
+            },
+        });
     }
 
     let response: Response;

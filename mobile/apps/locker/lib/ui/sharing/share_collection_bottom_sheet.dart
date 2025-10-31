@@ -111,12 +111,14 @@ class _ShareCollectionBottomSheetState
                     _buildPublicLinkSection(colorScheme, textTheme),
                     const SizedBox(height: 12),
                     _buildShareLinkButton(),
+
+                    // Hide Advance Options
+                    // const SizedBox(height: 24),
+                    // _buildAdvancedOptionsRow(colorScheme, textTheme),
+                    // const SizedBox(height: 24),
                   ] else ...[
                     _buildCompactActionsCard(colorScheme, textTheme),
                   ],
-                  const SizedBox(height: 24),
-                  _buildAdvancedOptionsRow(colorScheme, textTheme),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

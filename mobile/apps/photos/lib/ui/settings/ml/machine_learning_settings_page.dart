@@ -188,7 +188,7 @@ class _MachineLearningSettingsPageState
                                 builder: (BuildContext context) {
                                   return WebPage(
                                     AppLocalizations.of(context).help,
-                                    "https://help.ente.io/photos/features/machine-learning",
+                                    "https://ente.io/help/photos/features/machine-learning",
                                   );
                                 },
                               ),

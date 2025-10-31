@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/selected_files.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.dart";
 
 /// A widget that displays a dummy placeholder in the gallery grid.
@@ -20,8 +19,7 @@ class DummyFileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shouldEnableSwipeSelection =
-        flagService.internalUser && !limitSelectionToOne;
+    final shouldEnableSwipeSelection = !limitSelectionToOne;
 
     const Widget dummyContent = SizedBox.expand();
 

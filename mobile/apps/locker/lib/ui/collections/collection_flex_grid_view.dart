@@ -1,8 +1,11 @@
 import "dart:math";
 
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
@@ -28,6 +31,21 @@ class _CollectionFlexGridViewWidgetState
   void initState() {
     super.initState();
     _displayedCollections = widget.collections;
+    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(CollectionFlexGridViewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.collections, widget.collections)) {
+      setState(() {
+        _displayedCollections = widget.collections;
+      });
+    }
   }
 
   @override

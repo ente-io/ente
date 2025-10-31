@@ -72,6 +72,9 @@ class FileUploader {
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
+  // Track used upload URLs to detect race conditions
+  final Map<String, DateTime> _usedUploadURLs = {};
+
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
 
   // Maintains the count of files in the current upload session.
@@ -265,6 +268,8 @@ class FileUploader {
 
   void clearCachedUploadURLs() {
     _uploadURLs.clear();
+    _usedUploadURLs.clear();
+    _logger.info("Cleared upload URL cache and usage tracking");
   }
 
   void removeFromQueueWhere(
@@ -657,6 +662,7 @@ class FileUploader {
                 collectionID,
               )
             : null;
+    final sourceLength = await mediaUploadData.sourceFile!.length();
     final bool hasExistingMultiPart = existingMultipartEncFileName != null;
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
@@ -684,7 +690,7 @@ class FileUploader {
       );
 
       Uint8List? key;
-      final EncryptionResult? multiPartFileEncResult = hasExistingMultiPart
+      final FileEncryptResult? multiPartFileEncResult = hasExistingMultiPart
           ? await _multiPartUploader.getEncryptionResult(
               lockKey,
               mediaUploadData.hashData!.fileHash!,
@@ -740,18 +746,35 @@ class FileUploader {
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
 
-      final EncryptionResult fileAttributes = multiPartFileEncResult ??
-          (flagService.internalUser
-              ? await CryptoUtil.encryptFileV2(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                )
-              : await CryptoUtil.encryptFile(
-                  mediaUploadData.sourceFile!.path,
-                  encryptedFilePath,
-                  key: key,
-                ));
+      // Calculate the number of parts to determine if we need MD5
+      // Use source length to estimate encrypted size for part count decision
+      final estimatedEncSize = CryptoUtil.estimateEncryptedSize(sourceLength);
+      final estimatedCount =
+          _multiPartUploader.calculatePartCount(estimatedEncSize);
+
+      FileEncryptResult? fileAttributes = multiPartFileEncResult;
+      String? fileMd5;
+      List<String>? partMd5s;
+
+      if (fileAttributes == null) {
+        final result = flagService.internalUser
+            ? (await CryptoUtil.encryptFileWithMD5(
+                mediaUploadData.sourceFile!.path,
+                encryptedFilePath,
+                key: key,
+                multiPartChunkSizeInBytes: (estimatedCount > 1)
+                    ? _multiPartUploader.multipartPartSizeForUpload
+                    : null,
+              ))
+            : (await CryptoUtil.encryptFile(
+                mediaUploadData.sourceFile!.path,
+                encryptedFilePath,
+                key: key,
+              ));
+        fileAttributes = result;
+        fileMd5 = result.fileMd5;
+        partMd5s = result.partMd5s;
+      }
 
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
@@ -761,11 +784,17 @@ class FileUploader {
         thumbnailData = mediaUploadData.thumbnail;
       }
       encFileSize = await encryptedFile.length();
+      if (!CryptoUtil.validateStreamEncryptionSizes(
+        sourceLength,
+        encFileSize,
+      )) {
+        throw EncSizeMismatchError("source $sourceLength, enc $encFileSize");
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
         thumbnailData!,
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
@@ -774,6 +803,12 @@ class FileUploader {
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
       encThumbSize = await encryptedThumbnailFile.length();
+      String? thumbnailMd5;
+      if (flagService.internalUser) {
+        thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
+      }
+      final bool useChecksumThumbnailUpload =
+          flagService.internalUser && thumbnailMd5?.isNotEmpty == true;
 
       // Calculate the number of parts for the file.
       final count = _multiPartUploader.calculatePartCount(encFileSize);
@@ -785,7 +820,10 @@ class FileUploader {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Non-multipart upload: Getting thumbnail upload URL...",
         );
-        final thumbnailUploadURL = await _getUploadURL();
+        final thumbnailUploadURL = await _getUploadURL(
+          contentLength: useChecksumThumbnailUpload ? encThumbSize : null,
+          contentMd5: useChecksumThumbnailUpload ? thumbnailMd5 : null,
+        );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Thumbnail URL obtained, uploading thumbnail (size: ${formatBytes(encThumbSize)})...",
         );
@@ -793,16 +831,26 @@ class FileUploader {
           thumbnailUploadURL,
           encryptedThumbnailFile,
           encThumbSize,
+          contentMd5: thumbnailMd5,
         );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Thumbnail uploaded successfully! Now getting file upload URL...",
         );
-        final fileUploadURL = await _getUploadURL();
+        final useChecksumUpload =
+            flagService.internalUser && fileMd5?.isNotEmpty == true;
+        final fileUploadURL = await _getUploadURL(
+          contentLength: useChecksumUpload ? encFileSize : null,
+          contentMd5: useChecksumUpload ? fileMd5 : null,
+        );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] File URL obtained, uploading actual file (size: ${formatBytes(encFileSize)})...",
         );
-        fileObjectKey =
-            await _putFile(fileUploadURL, encryptedFile, encFileSize);
+        fileObjectKey = await _putFile(
+          fileUploadURL,
+          encryptedFile,
+          encFileSize,
+          contentMd5: fileMd5,
+        );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Actual file uploaded successfully!",
         );
@@ -820,8 +868,15 @@ class FileUploader {
             existingMultipartEncFileName,
           );
         } else {
+          final multipartPartLength = fileAttributes.partSize ??
+              _multiPartUploader.multipartPartSizeForUpload;
           final fileUploadURLs =
-              await _multiPartUploader.getMultipartUploadURLs(count);
+              await _multiPartUploader.getMultipartUploadURLs(
+            count: count,
+            contentLength: encFileSize,
+            partLength: multipartPartLength,
+            partMd5s: flagService.internalUser ? partMd5s : null,
+          );
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
             lockKey,
@@ -830,42 +885,47 @@ class FileUploader {
             fileUploadURLs,
             encFileName,
             encFileSize,
-            fileAttributes.key!,
-            fileAttributes.header!,
+            fileAttributes.key,
+            fileAttributes.header,
+            fileMd5: fileMd5,
+            partMd5s: partMd5s,
           );
           fileObjectKey = await _multiPartUploader.putMultipartFile(
             fileUploadURLs,
             encryptedFile,
             encFileSize,
+            fileMd5: fileMd5,
+            partMd5s: partMd5s,
           );
         }
         // in case of multipart, upload the thumbnail towards the end to avoid
         // re-uploading the thumbnail in case of failure.
         // In regular upload, always upload the thumbnail first to keep existing behaviour
         //
-        final thumbnailUploadURL = await _getUploadURL();
+        final thumbnailUploadURL = await _getUploadURL(
+          contentLength: useChecksumThumbnailUpload ? encThumbSize : null,
+          contentMd5: useChecksumThumbnailUpload ? thumbnailMd5 : null,
+        );
         thumbnailObjectKey = await _putFile(
           thumbnailUploadURL,
           encryptedThumbnailFile,
           encThumbSize,
+          contentMd5: thumbnailMd5,
         );
       }
       final ParsedExifDateTime? exifTime = await tryParseExifDateTime(
         null,
         mediaUploadData.exifData,
       );
-      file.metadataVersion = flagService.internalUser
-          ? EnteFile.kMetadataSimplifiedEncVersion
-          : EnteFile.kCurrentMetadataVersion;
+      file.metadataVersion = EnteFile.kCurrentMetadataVersion;
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
 
       final encryptedMetadataResult = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
-        fileAttributes.key!,
+        fileAttributes.key,
       );
-      final fileDecryptionHeader =
-          CryptoUtil.bin2base64(fileAttributes.header!);
+      final fileDecryptionHeader = CryptoUtil.bin2base64(fileAttributes.header);
       final thumbnailDecryptionHeader =
           CryptoUtil.bin2base64(encryptedThumbnailData.header!);
       final encryptedMetadata = CryptoUtil.bin2base64(
@@ -885,6 +945,16 @@ class FileUploader {
 
       EnteFile remoteFile;
       if (isUpdatedFile) {
+        // Verify that the encrypted file can be decrypted before uploading
+        // For updates, we need to verify with the existing file key
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
         remoteFile = await _updateFile(
           file,
           fileObjectKey,
@@ -900,7 +970,7 @@ class FileUploader {
         await FilesDB.instance.updateUploadedFileAcrossCollections(remoteFile);
       } else {
         final encryptedFileKeyData = CryptoUtil.encryptSync(
-          fileAttributes.key!,
+          fileAttributes.key,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
         final encryptedKey =
@@ -914,9 +984,18 @@ class FileUploader {
           pubMetadataRequest = await getPubMetadataRequest(
             file,
             pubMetadata,
-            fileAttributes.key!,
+            fileAttributes.key,
           );
         }
+        await CryptoUtil.decryptVerify(
+          encryptedFilePath,
+          fileDecryptionHeader,
+          encryptedKey,
+          keyDecryptionNonce,
+          CollectionsService.instance.getCollectionKey(collectionID),
+          chunkLimit: 1, // Verify at least first chunk
+        );
+
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -1018,7 +1097,9 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartFileMissingError || e is MultiPartError) {
+    if (e is MultiPartFileMissingError ||
+        e is MultiPartError ||
+        e is BadMD5DigestError) {
       return true;
     }
     if (e is DioException) {
@@ -1275,7 +1356,7 @@ class FileUploader {
     int collectionID,
     String encryptedKey,
     String keyDecryptionNonce,
-    EncryptionResult fileAttributes,
+    FileEncryptResult fileAttributes,
     String fileObjectKey,
     String fileDecryptionHeader,
     int fileSize,
@@ -1422,7 +1503,45 @@ class FileUploader {
     }
   }
 
-  Future<UploadURL> _getUploadURL() async {
+  Future<UploadURL> _getUploadURL({
+    int? contentLength,
+    String? contentMd5,
+  }) async {
+    final bool useSingleEndpoint = flagService.internalUser &&
+        contentLength != null &&
+        contentMd5 != null &&
+        contentMd5.isNotEmpty;
+
+    final uploadURL = useSingleEndpoint
+        ? await _requestChecksumProtectedUploadURL(
+            contentLength: contentLength,
+            contentMd5: contentMd5,
+          )
+        : await _getLegacyUploadURL();
+
+    return _registerUploadURLUsage(uploadURL);
+  }
+
+  Future<UploadURL> _requestChecksumProtectedUploadURL({
+    required int contentLength,
+    required String contentMd5,
+  }) async {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Requesting single upload URL with checksum metadata (size: ${formatBytes(contentLength)})",
+    );
+    final response = await _enteDio.post(
+      "/files/upload-url",
+      data: {
+        "contentLength": contentLength,
+        "contentMD5": contentMd5,
+      },
+    );
+    return UploadURL.fromMap(
+      (response.data as Map).cast<String, dynamic>(),
+    );
+  }
+
+  Future<UploadURL> _getLegacyUploadURL() async {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _getUploadURL() called. URL queue size: ${_uploadURLs.length}, Upload queue size: ${_queue.length}",
     );
@@ -1438,19 +1557,43 @@ class FileUploader {
       );
     }
     try {
-      final url = _uploadURLs.removeFirst();
+      final uploadURL = _uploadURLs.removeFirst();
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Returning upload URL. Remaining URLs in queue: ${_uploadURLs.length}",
       );
-      return url;
+      return uploadURL;
     } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
-        return _getUploadURL();
+        return _getLegacyUploadURL();
       } else {
         rethrow;
       }
     }
+  }
+
+  UploadURL _registerUploadURLUsage(UploadURL uploadURL) {
+    // Atomic check-and-set to prevent race conditions in parallel uploads
+    final now = DateTime.now();
+    final existingTimestamp =
+        _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
+
+    if (existingTimestamp != now) {
+      throw DuplicateUploadURLError(
+        firstUsedAt: existingTimestamp,
+        duplicateUsedAt: now,
+      );
+    }
+    // Clean up old entries to prevent memory growth (only when > 5000 entries)
+    if (_usedUploadURLs.length > 5000) {
+      final oneHourAgo = now.subtract(const Duration(hours: 1));
+      _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
+      _logger.info(
+        "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
+      );
+    }
+
+    return uploadURL;
   }
 
   Future<void>? _uploadURLFetchInProgress;
@@ -1509,19 +1652,25 @@ class FileUploader {
     UploadURL uploadURL,
     File file,
     int fileSize, {
+    String? contentMd5,
     int attempt = 1,
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
     final fileName = basename(file.path);
     int bytesSent = 0;
     try {
+      final Map<String, dynamic> headers = {
+        Headers.contentLengthHeader: fileSize,
+      };
+      if (contentMd5 != null) {
+        headers['Content-MD5'] = contentMd5;
+      }
+
       await _dio.put(
         uploadURL.url,
         data: file.openRead(),
         options: Options(
-          headers: {
-            Headers.contentLengthHeader: fileSize,
-          },
+          headers: headers,
         ),
         onSendProgress: (sent, total) {
           bytesSent = sent;
@@ -1533,7 +1682,15 @@ class FileUploader {
 
       return uploadURL.objectKey;
     } on DioException catch (e) {
-      if (e.message?.startsWith("HttpException: Content size") ?? false) {
+      if (e.response?.statusCode == 400 &&
+              e.response?.data.toString().contains('BadDigest') == true ||
+          e.response?.data.toString().contains('InvalidDigest') == true) {
+        final String recomputedMd5 = await computeMd5(file.path);
+        throw BadMD5DigestError(
+          "Failed ${e.response?.data}, sent: $contentMd5, computed: $recomputedMd5",
+        );
+      } else if (e.message?.startsWith("HttpException: Content size") ??
+          false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info(
@@ -1544,6 +1701,7 @@ class FileUploader {
           newUploadURL,
           file,
           fileSize,
+          contentMd5: contentMd5,
           attempt: attempt + 1,
         );
       } else {

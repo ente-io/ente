@@ -124,3 +124,53 @@ func (repo *TwoFactorRepository) RemoveExpiredTempTwoFactorSecrets() error {
 		time.Microseconds())
 	return stacktrace.Propagate(err, "")
 }
+
+// GetWrongAttempts returns the wrong attempt count for the given two factor session
+func (repo *TwoFactorRepository) GetWrongAttempts(sessionID string) (int, error) {
+	row := repo.DB.QueryRow(`SELECT wrong_attempt FROM two_factor_sessions WHERE session_id = $1`,
+		sessionID)
+	var wrongAttempt int
+	if err := row.Scan(&wrongAttempt); err != nil {
+		return 0, stacktrace.Propagate(err, "Failed to scan row")
+	}
+	return wrongAttempt, nil
+}
+
+// RecordWrongAttempt increases the wrong_attempt count for the given two factor session.
+// This is used to track and prevent brute-force attacks on two-factor verification
+func (repo *TwoFactorRepository) RecordWrongAttempt(sessionID string) error {
+	_, err := repo.DB.Exec(`UPDATE two_factor_sessions SET wrong_attempt = wrong_attempt + 1
+			WHERE session_id = $1`, sessionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to update wrong attempt count")
+	}
+	return nil
+}
+
+// TryRecordUsedOTPCode atomically tries to record an OTP code as used
+// Returns true if the code was newly recorded, false if it already existed (replay attack)
+func (repo *TwoFactorRepository) TryRecordUsedOTPCode(userID int64, codeHash string) (bool, error) {
+	result, err := repo.DB.Exec(`INSERT INTO two_factor_used_codes(user_id, code_hash, used_at)
+		VALUES($1, $2, $3) ON CONFLICT (user_id, code_hash) DO NOTHING`,
+		userID, codeHash, time.Microseconds())
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed to record used OTP code")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed to get rows affected")
+	}
+
+	return rowsAffected > 0, nil
+}
+
+// RemoveExpiredUsedOTPCodes removes OTP codes older than the specified duration
+func (repo *TwoFactorRepository) RemoveExpiredUsedOTPCodes(expirationMicroseconds int64) error {
+	cutoffTime := time.Microseconds() - expirationMicroseconds
+	_, err := repo.DB.Exec(`DELETE FROM two_factor_used_codes WHERE used_at < $1`, cutoffTime)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to remove expired used OTP codes")
+	}
+	return nil
+}

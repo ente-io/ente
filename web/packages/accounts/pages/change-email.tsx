@@ -17,7 +17,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * A page that allows a user to change the email address associated with their

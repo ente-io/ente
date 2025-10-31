@@ -7,7 +7,7 @@ import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
     fetchFeatureFlags,
     updateRemoteFlag,
