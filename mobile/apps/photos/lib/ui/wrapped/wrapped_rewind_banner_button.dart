@@ -43,7 +43,6 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(24));
 
@@ -112,7 +111,9 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
                             Flexible(
                               child: Text(
                                 "Ente Rewind 2025",
-                                style: textTheme.largeBold.copyWith(
+                                style: textTheme.h3Bold.copyWith(
+                                  fontSize:
+                                      (textTheme.h3Bold.fontSize ?? 24) + 2,
                                   color: Colors.white,
                                 ),
                                 textAlign: TextAlign.center,
@@ -120,16 +121,16 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
                             ),
                             const SizedBox(width: 12),
                             Container(
-                              width: 36,
-                              height: 36,
+                              width: 28,
+                              height: 28,
                               decoration: const BoxDecoration(
-                                color: Colors.white,
+                                color: Color(0x99000000),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.play_arrow_rounded,
-                                color: enteColorScheme.textBase,
-                                size: 24,
+                                color: Colors.white,
+                                size: 18,
                               ),
                             ),
                           ],
