@@ -71,7 +71,7 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
   Future<void> _loadFiles() async {
     final startTime = DateTime.now();
     final allFiles =
-        await SearchService.instance.getAllFilesForHierarchicalSearch();
+        await SearchService.instance.getAllFilesForGenericGallery();
 
     // Ensure minimum loading duration to mask Gallery initialization jank
     final elapsed = DateTime.now().difference(startTime).inMilliseconds;
