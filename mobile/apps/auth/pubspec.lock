@@ -113,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
-  bloc:
-    dependency: "direct main"
-    description:
-      name: bloc
-      sha256: "52c10575f4445c61dd9e0cafcc6356fdd827c4c64dd7945ef3c4105f6b6ac189"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -581,14 +573,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.2"
-  flutter_bloc:
-    dependency: "direct main"
-    description:
-      name: flutter_bloc
-      sha256: cf51747952201a455a1c840f8171d273be009b932c75093020f9af64f2123e38
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.1.1"
   flutter_context_menu:
     dependency: "direct main"
     description:
@@ -1166,14 +1150,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  nested:
-    dependency: transitive
-    description:
-      name: nested
-      sha256: "03bac4c528c64c95c722ec99280375a6f2fc708eec17c7b3f07253b626cd2a20"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   nm:
     dependency: transitive
     description:
@@ -1366,14 +1342,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
-  provider:
-    dependency: transitive
-    description:
-      name: provider
-      sha256: "4abbd070a04e9ddc287673bf5a030c7ca8b685ff70218720abab8b092f53dd84"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.1.5"
   pub_semver:
     dependency: transitive
     description:
