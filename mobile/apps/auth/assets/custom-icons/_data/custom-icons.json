@@ -1708,7 +1708,10 @@
       "title": "Titan"
     },
     {
-      "title": "Tokopedia"
+      "title": "Tokopedia",
+      "altNames": [
+        "Tokped"
+      ]
     },
     {
       "title": "TorGuard"
