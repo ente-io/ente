@@ -78,6 +78,8 @@ import {
     generateThumbnailWeb,
 } from "./thumbnail";
 
+const bitFlipErrorPrefix = "BitFlipDetected";
+
 /**
  * A readable stream for a file, and its associated size and last modified time.
  *
@@ -1540,10 +1542,21 @@ const encryptFile = async (
         localID,
     } = file;
 
+    const shouldVerify = areChecksumProtectedUploadsEnabled();
     const encryptedFiledata =
         fileStreamOrData instanceof Uint8Array
-            ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
-            : await encryptFileStream(fileStreamOrData, fileKey, worker);
+            ? await encryptBytesWithOptionalVerification(
+                  fileStreamOrData,
+                  fileKey,
+                  worker,
+                  shouldVerify,
+              )
+            : await encryptFileStream(
+                  fileStreamOrData,
+                  fileKey,
+                  worker,
+                  shouldVerify,
+              );
 
     const {
         encryptedData: encryptedThumbnailData,
@@ -1583,14 +1596,45 @@ const encryptFile = async (
     };
 };
 
+const encryptBytesWithOptionalVerification = async (
+    data: Uint8Array,
+    fileKey: BytesOrB64,
+    worker: CryptoWorker,
+    shouldVerify: boolean,
+) => {
+    const encrypted = await worker.encryptStreamBytes(data, fileKey);
+    if (!shouldVerify) return encrypted;
+    try {
+        const decrypted = await worker.decryptStreamBytes(encrypted, fileKey);
+        if (!areUint8ArraysEqual(decrypted, data)) {
+            throw new Error(
+                `${bitFlipErrorPrefix}: mismatch while verifying encrypted bytes`,
+            );
+        }
+    } catch (error) {
+        log.error("Encrypted bytes verification failed", error);
+        throw error instanceof Error
+            ? error
+            : new Error(
+                  `${bitFlipErrorPrefix}: verification failed while encrypting bytes`,
+              );
+    }
+    return encrypted;
+};
+
 const encryptFileStream = async (
     { stream, chunkCount }: FileStream,
     fileKey: BytesOrB64,
     worker: CryptoWorker,
+    shouldVerify: boolean,
 ) => {
     const fileStreamReader = stream.getReader();
     const { decryptionHeader, pushState } =
         await worker.initChunkEncryption(fileKey);
+    const verificationPullState = shouldVerify
+        ? (await worker.initChunkDecryption(decryptionHeader, fileKey))
+              .pullState
+        : undefined;
     const ref = { pullCount: 1 };
     const encryptedFileStream = new ReadableStream({
         async pull(controller) {
@@ -1603,13 +1647,37 @@ const encryptFileStream = async (
                 controller.close();
                 throw new Error("Unexpected stream state");
             }
+            const isFinalChunk = ref.pullCount === chunkCount;
             const encryptedFileChunk = await worker.encryptStreamChunk(
                 value,
                 pushState,
-                ref.pullCount === chunkCount,
+                isFinalChunk,
             );
+            if (verificationPullState) {
+                try {
+                    const decryptedChunk = await worker.decryptStreamChunk(
+                        encryptedFileChunk,
+                        verificationPullState,
+                    );
+                    if (!areUint8ArraysEqual(decryptedChunk, value)) {
+                        throw new Error(
+                            `${bitFlipErrorPrefix}: mismatch while verifying chunk ${ref.pullCount}`,
+                        );
+                    }
+                } catch (error) {
+                    log.error(
+                        `Encrypted chunk verification failed (chunk ${ref.pullCount})`,
+                        error,
+                    );
+                    throw error instanceof Error
+                        ? error
+                        : new Error(
+                              `${bitFlipErrorPrefix}: verification failed for chunk ${ref.pullCount}`,
+                          );
+                }
+            }
             controller.enqueue(encryptedFileChunk);
-            if (ref.pullCount === chunkCount) {
+            if (isFinalChunk) {
                 controller.close();
             }
             ref.pullCount++;
@@ -1619,6 +1687,14 @@ const encryptFileStream = async (
         decryptionHeader,
         encryptedData: { stream: encryptedFileStream, chunkCount },
     };
+};
+
+const areUint8ArraysEqual = (a: Uint8Array, b: Uint8Array) => {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
 };
 
 const uploadToBucket = async (
