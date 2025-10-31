@@ -19,14 +19,38 @@ class WrappedDiscoverySection extends StatelessWidget {
         ? "Resume Ente Rewind 2025"
         : "Open Ente Rewind 2025";
 
+    const double bleed = 12;
+    const double bannerHeight = 164;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 32),
-      child: SizedBox(
-        width: double.infinity,
-        child: WrappedRewindBannerButton(
-          height: 164,
-          semanticsLabel: semanticsLabel,
-        ),
+      padding: const EdgeInsets.only(top: 16, bottom: 16),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double baseWidth =
+              constraints.hasBoundedWidth && constraints.maxWidth.isFinite
+                  ? constraints.maxWidth
+                  : MediaQuery.sizeOf(context).width;
+          final double targetWidth = baseWidth + bleed * 2;
+
+          return SizedBox(
+            height: bannerHeight,
+            child: OverflowBox(
+              alignment: Alignment.center,
+              minWidth: targetWidth,
+              maxWidth: targetWidth,
+              minHeight: bannerHeight,
+              maxHeight: bannerHeight,
+              child: SizedBox(
+                width: targetWidth,
+                height: bannerHeight,
+                child: WrappedRewindBannerButton(
+                  height: bannerHeight,
+                  semanticsLabel: semanticsLabel,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
