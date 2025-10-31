@@ -49,6 +49,8 @@ class _BlurryFacesCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<MediaRef> supportingMedia =
+        card.media.skip(3).take(2).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,6 +70,14 @@ class _BlurryFacesCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
+        if (supportingMedia.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _MediaPairRow(
+            media: supportingMedia,
+            colorScheme: colorScheme,
+            height: 132,
+          ),
+        ],
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 20),
           _DetailChips(

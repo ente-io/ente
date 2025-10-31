@@ -49,6 +49,8 @@ class _TopPersonCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<MediaRef> supportingMedia =
+        card.media.skip(3).take(2).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,6 +70,14 @@ class _TopPersonCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
+        if (supportingMedia.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _MediaPairRow(
+            media: supportingMedia,
+            colorScheme: colorScheme,
+            height: 132,
+          ),
+        ],
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 20),
           _DetailChips(
@@ -96,6 +106,7 @@ class _TopThreePeopleCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<MediaRef> gridMedia = card.media.take(4).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,10 +121,10 @@ class _TopThreePeopleCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
-        if (card.media.isNotEmpty) ...[
+        if (gridMedia.isNotEmpty) ...[
           const SizedBox(height: 24),
-          _MediaRow(
-            media: card.media.take(3).toList(growable: false),
+          _SquareMediaGrid(
+            media: gridMedia,
             colorScheme: colorScheme,
           ),
         ],
@@ -145,6 +156,8 @@ class _GroupVsSoloCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<MediaRef> collageMedia =
+        card.media.take(5).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,10 +172,10 @@ class _GroupVsSoloCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
-        if (card.media.isNotEmpty) ...[
+        if (collageMedia.isNotEmpty) ...[
           const SizedBox(height: 20),
-          _MediaRow(
-            media: card.media.take(3).toList(growable: false),
+          _GroupSoloMediaCollage(
+            media: collageMedia,
             colorScheme: colorScheme,
           ),
         ],
@@ -194,6 +207,8 @@ class _NewFacesCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<MediaRef> supportingMedia =
+        card.media.skip(3).take(2).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,6 +228,14 @@ class _NewFacesCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
+        if (supportingMedia.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _MediaPairRow(
+            media: supportingMedia,
+            colorScheme: colorScheme,
+            height: 132,
+          ),
+        ],
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 20),
           _DetailChips(

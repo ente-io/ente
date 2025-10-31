@@ -95,7 +95,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 3,
+      maxCount: 5,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
@@ -177,7 +177,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 3,
+      maxCount: 4,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
@@ -272,7 +272,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 3,
+      maxCount: 5,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 45),
     );
@@ -384,7 +384,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 3,
+      maxCount: 5,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
