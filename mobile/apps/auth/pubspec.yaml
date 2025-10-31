@@ -190,12 +190,12 @@ flutter_launcher_icons:
 
   windows:
     generate: true
-    image_path: "assets/generation-icons/icon-light.png"
+    image_path: "assets/generation-icons/icon-windows-linux.png"
     icon_size: 256
 
   linux:
     generate: true
-    image_path: "assets/generation-icons/icon-light.png"
+    image_path: "assets/generation-icons/icon-windows-linux.png"
     icon_size: 256
 
 flutter_native_splash:
