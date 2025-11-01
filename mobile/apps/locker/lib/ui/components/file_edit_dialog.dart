@@ -109,120 +109,117 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
     return Dialog(
       backgroundColor: colorScheme.backgroundBase,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
-        child: Container(
-          decoration: BoxDecoration(
-            color: colorScheme.backdropBase,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Rename your document",
-                          style: textTheme.largeBold,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _fileName,
-                          style: textTheme.small.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _onCancel,
-                    child: Container(
-                      height: 36,
-                      width: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.backgroundElevated,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Rename your document",
+                        style: textTheme.largeBold,
                       ),
-                      child: const Icon(
-                        Icons.close_rounded,
-                        size: 20,
+                      const SizedBox(height: 4),
+                      Text(
+                        _fileName,
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _onCancel,
+                  child: Container(
+                    height: 36,
+                    width: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.backgroundElevated,
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 20,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: "Enter a new name for your document",
-                  hintStyle: textTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                  filled: true,
-                  fillColor: colorScheme.fillFaint,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(
-                      color: colorScheme.strokeFaint,
-                    ),
-                  ),
-                  counterText: "",
                 ),
-                maxLength: 200,
-                style: textTheme.body.copyWith(
-                  color: colorScheme.textBase,
+              ],
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                hintText: "Enter a new name for your document",
+                hintStyle: textTheme.body.copyWith(
+                  color: colorScheme.textMuted,
                 ),
-              ),
-              const SizedBox(height: 24),
-              CollectionSelectionWidget(
-                collections: _availableCollections,
-                selectedCollectionIds: _selectedCollectionIds,
-                onToggleCollection: _toggleCollection,
-                onCollectionsUpdated: _onCollectionsUpdated,
-                singleSelectionMode: true,
-                titleWidget: Text(
-                  "Move to collection",
-                  style: textTheme.largeBold,
+                filled: true,
+                fillColor: colorScheme.fillFaint,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
                 ),
-              ),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  onTap: () async {
-                    await _onSave();
-                  },
-                  text: context.l10n.save,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
                 ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: colorScheme.strokeFaint,
+                  ),
+                ),
+                counterText: "",
               ),
-            ],
-          ),
+              maxLength: 200,
+              style: textTheme.body.copyWith(
+                color: colorScheme.textBase,
+              ),
+            ),
+            const SizedBox(height: 24),
+            CollectionSelectionWidget(
+              collections: _availableCollections,
+              selectedCollectionIds: _selectedCollectionIds,
+              onToggleCollection: _toggleCollection,
+              onCollectionsUpdated: _onCollectionsUpdated,
+              singleSelectionMode: true,
+              titleWidget: Text(
+                "Move to collection",
+                style: textTheme.largeBold,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: GradientButton(
+                onTap: () async {
+                  await _onSave();
+                },
+                text: context.l10n.save,
+              ),
+            ),
+          ],
         ),
       ),
     );

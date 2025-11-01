@@ -9,9 +9,11 @@ import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/ui/components/add_to_collection_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
+import "package:locker/utils/file_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 
@@ -236,64 +238,85 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final isSingleSelection = selectedFiles.length == 1;
     final file = isSingleSelection ? selectedFiles.first : null;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      switchInCurve: Curves.easeInOut,
-      switchOutCurve: Curves.easeInOut,
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: SizeTransition(
-            sizeFactor: animation,
-            child: child,
-          ),
-        );
-      },
-      child: isSingleSelection
-          ? Column(
-              key: const ValueKey('single_selection'),
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: SelectionActionButton(
-                        icon: Icons.download_outlined,
-                        label: "Download",
-                        onTap: () => _downloadFile(context, file!),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SelectionActionButton(
-                        icon: Icons.share_outlined,
-                        label: context.l10n.share,
-                        onTap: () => _shareLink(context, file!),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: SelectionActionButton(
-                        icon: Icons.delete_outline,
-                        label: context.l10n.delete,
-                        onTap: () => _deleteFile(context, file!),
-                        isDestructive: true,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                _buildContinuousActionRow(file!),
-              ],
-            )
-          : _buildMultiSelectionActionRow(selectedFiles.toList()),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildPrimaryActionRow(selectedFiles.toList()),
+        const SizedBox(height: 12),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                child: child,
+              ),
+            );
+          },
+          child: isSingleSelection
+              ? _buildSingleSelectionSecondaryRow(file!)
+              : _buildMultiSelectionSecondaryRow(selectedFiles.toList()),
+        ),
+      ],
     );
   }
 
-  Widget _buildContinuousActionRow(EnteFile file) {
+  Widget _buildPrimaryActionRow(List<EnteFile> files) {
+    final isSingle = files.length == 1;
     final colorScheme = getEnteColorScheme(context);
 
     return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24.0),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.download_outlined,
+                label: "Download",
+                onTap: () => isSingle
+                    ? _downloadFile(context, files.first)
+                    : _downloadMultipleFiles(context, files),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.share_outlined,
+                label: context.l10n.share,
+                onTap: () => isSingle
+                    ? _shareLink(context, files.first)
+                    : _shareMultipleFiles(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.delete_outline,
+                label: context.l10n.delete,
+                onTap: () => isSingle
+                    ? _deleteFile(context, files.first)
+                    : _deleteMultipleFile(context, files),
+                isDestructive: true,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSingleSelectionSecondaryRow(EnteFile file) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      key: const ValueKey('single_selection_secondary'),
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(24.0),
@@ -316,17 +339,25 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                 onTap: () => _toggleImportant(context, file),
               ),
             ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.start_rounded,
+                label: "Add to",
+                onTap: () => _showAddToDialog(context, [file]),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMultiSelectionActionRow(List<EnteFile> files) {
+  Widget _buildMultiSelectionSecondaryRow(List<EnteFile> files) {
     final colorScheme = getEnteColorScheme(context);
 
     return Container(
-      key: const ValueKey('multi_selection'),
+      key: const ValueKey('multi_selection_secondary'),
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(24.0),
@@ -344,15 +375,41 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             const SizedBox(width: 12),
             Expanded(
               child: SelectionActionButton(
-                icon: Icons.delete_outline,
-                label: context.l10n.delete,
-                onTap: () => _deleteMultipleFile(context, files),
-                isDestructive: true,
+                icon: Icons.start_rounded,
+                label: "Add to",
+                onTap: () => _showAddToDialog(context, files),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Future<void> _downloadMultipleFiles(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    try {
+      final success = await FileUtil.downloadFilesToDownloads(context, files);
+      if (success) {
+        widget.selectedFiles.clearAll();
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to download files: $e", e, stackTrace);
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToDownloadOrDecrypt,
+        );
+      }
+    }
+  }
+
+  void _shareMultipleFiles(BuildContext context) {
+    SnackBarUtils.showWarningSnackBar(
+      context,
+      "Sharing multiple files is coming soon",
     );
   }
 
@@ -490,6 +547,91 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
   }
 
+  Future<void> _showAddToDialog(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) {
+      return;
+    }
+
+    final allCollections = await CollectionService.instance.getCollections();
+
+    final result = await showAddToCollectionDialog(
+      context,
+      collections: allCollections,
+    );
+
+    if (result != null && context.mounted) {
+      final dialog = createProgressDialog(
+        context,
+        context.l10n.pleaseWait,
+        isDismissible: false,
+      );
+
+      await dialog.show();
+
+      try {
+        final addFutures = <Future<void>>[];
+
+        for (final file in files) {
+          List<Collection> currentCollections;
+          try {
+            currentCollections =
+                await CollectionService.instance.getCollectionsForFile(file);
+          } catch (_) {
+            currentCollections = <Collection>[];
+          }
+
+          final currentCollectionIds =
+              currentCollections.map((collection) => collection.id).toSet();
+
+          final collectionsToAdd = result.selectedCollections.where(
+            (collection) => !currentCollectionIds.contains(collection.id),
+          );
+
+          for (final collection in collectionsToAdd) {
+            addFutures.add(
+              CollectionService.instance.addToCollection(
+                collection,
+                file,
+                runSync: false,
+              ),
+            );
+          }
+        }
+
+        if (addFutures.isEmpty) {
+          await dialog.hide();
+          SnackBarUtils.showInfoSnackBar(
+            context,
+            context.l10n.noChangesWereMade,
+          );
+          return;
+        }
+
+        await Future.wait(addFutures);
+        await CollectionService.instance.sync();
+
+        await dialog.hide();
+
+        widget.selectedFiles.clearAll();
+
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          context.l10n.fileUpdatedSuccessfully,
+        );
+      } catch (e) {
+        await dialog.hide();
+
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToUpdateFile(e.toString()),
+        );
+      }
+    }
+  }
+
   Future<void> _deleteFile(BuildContext context, EnteFile file) async {
     final dialog = createProgressDialog(
       context,
@@ -561,11 +703,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {
-    // TODO: Implemexnt file download functionality
-    SnackBarUtils.showInfoSnackBar(
-      context,
-      "Download functionality coming soon",
-    );
+    try {
+      final success =
+          await FileUtil.downloadFilesToDownloads(context, [file]);
+      if (success) {
+        widget.selectedFiles.clearAll();
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to download file: $e", e, stackTrace);
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToDownloadOrDecrypt,
+        );
+      }
+    }
   }
 
   Future<void> _toggleImportant(BuildContext context, EnteFile file) async {
