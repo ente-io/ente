@@ -10,8 +10,13 @@ const String roadmapURL = "https://roadmap.ente.io";
 
 const String kAccountsUrl = "https://accounts.ente.io";
 
-const String githubFeatureRequestUrl =
-    "https://github.com/ente-io/ente/discussions/categories/enhancements?discussions_q=is%3Aopen%+label%3A%22-+auth%22+sort%3Atop";
+final Uri githubFeatureRequestUri = Uri.https(
+  "github.com",
+  "/ente-io/ente/discussions/categories/enhancements",
+  {
+    "discussions_q": "is:open label:\"- auth\" sort:top",
+  },
+);
 const int microSecondsInDay = 86400000000;
 const int android11SDKINT = 30;
 const int galleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748
