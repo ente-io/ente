@@ -92,6 +92,24 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Update Linux AppData metadata
+              run: |
+                  APPDATA_FILE="linux/packaging/enteauth.appdata.xml"
+                  RELEASE_DATE=$(date -u +%Y-%m-%d)
+
+                  # Extract version from tag (e.g., auth-v4.4.8 -> 4.4.8)
+                  VERSION_NAME=$(echo "${{ github.ref_name }}" | sed 's/^auth-v//')
+
+                  # Create new release entry
+                  NEW_RELEASE="        <release version=\"${VERSION_NAME}\" date=\"${RELEASE_DATE}\" />"
+
+                  # Insert new release entry after <releases> tag
+                  sed -i "/<releases>/a\\${NEW_RELEASE}" "$APPDATA_FILE"
+
+                  echo "✅ Updated $APPDATA_FILE with version ${VERSION_NAME}"
+                  echo "Release entry added:"
+                  echo "$NEW_RELEASE"
+
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:

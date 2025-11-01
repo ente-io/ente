@@ -149,6 +149,21 @@ jobs:
                   echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
 
+            - name: Update Linux AppData metadata
+              run: |
+                  APPDATA_FILE="linux/packaging/enteauth.appdata.xml"
+                  RELEASE_DATE=$(date -u +%Y-%m-%d)
+
+                  # Create new release entry
+                  NEW_RELEASE="        <release version=\"${{ env.VERSION_NAME }}\" date=\"${RELEASE_DATE}\" />"
+
+                  # Insert new release entry after <releases> tag
+                  sed -i "/<releases>/a\\${NEW_RELEASE}" "$APPDATA_FILE"
+
+                  echo "✅ Updated $APPDATA_FILE with version ${{ env.VERSION_NAME }}"
+                  echo "Release entry added:"
+                  echo "$NEW_RELEASE"
+
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:

@@ -667,6 +667,9 @@
       "title": "G2A"
     },
     {
+      "title": "Garena"
+    },
+    {
       "title": "Gate.io",
       "slug": "gateio.svg"
     },
@@ -1703,6 +1706,12 @@
     },
     {
       "title": "Titan"
+    },
+    {
+      "title": "Tokopedia",
+      "altNames": [
+        "Tokped"
+      ]
     },
     {
       "title": "TorGuard"

@@ -1,5 +1,77 @@
 part of 'package:photos/ui/wrapped/wrapped_viewer_page.dart';
 
+Widget buildWrappedCardTitle(
+  String text,
+  TextStyle style, {
+  EdgeInsetsGeometry? padding,
+}) {
+  return _buildCenteredCardText(
+    text: text,
+    style: style,
+    padding: padding,
+  );
+}
+
+Widget buildWrappedCardSubtitle(
+  String text,
+  TextStyle style, {
+  EdgeInsetsGeometry? padding,
+}) {
+  return _buildCenteredCardText(
+    text: text,
+    style: style,
+    padding: padding,
+  );
+}
+
+Widget _buildCenteredCardText({
+  required String text,
+  required TextStyle style,
+  EdgeInsetsGeometry? padding,
+}) {
+  final Widget label = Align(
+    alignment: Alignment.center,
+    child: Text(
+      text,
+      style: style,
+      textAlign: TextAlign.center,
+    ),
+  );
+  if (padding != null) {
+    return Padding(
+      padding: padding,
+      child: label,
+    );
+  }
+  return label;
+}
+
+Widget _mediaTileOrPlaceholder(
+  MediaRef? ref,
+  EnteColorScheme colorScheme, {
+  double borderRadius = 20,
+  double? aspectRatio,
+}) {
+  if (ref == null) {
+    Widget placeholder = _MediaPlaceholder(
+      colorScheme: colorScheme,
+      borderRadius: borderRadius,
+    );
+    if (aspectRatio != null) {
+      placeholder = AspectRatio(
+        aspectRatio: aspectRatio,
+        child: placeholder,
+      );
+    }
+    return placeholder;
+  }
+  return _MediaTile(
+    mediaRef: ref,
+    borderRadius: borderRadius,
+    aspectRatio: aspectRatio,
+  );
+}
+
 class _DetailChips extends StatelessWidget {
   const _DetailChips({
     required this.chips,
@@ -111,46 +183,6 @@ class _HeroMediaCollage extends StatelessWidget {
   }
 }
 
-class _MediaRow extends StatelessWidget {
-  const _MediaRow({
-    required this.media,
-    required this.colorScheme,
-  });
-
-  final List<MediaRef> media;
-  final EnteColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 96,
-      child: Row(
-        children: [
-          for (final (int index, MediaRef ref) in media.indexed) ...[
-            Expanded(
-              child: Padding(
-                padding:
-                    EdgeInsets.only(right: index == media.length - 1 ? 0 : 12),
-                child: _MediaTile(
-                  mediaRef: ref,
-                  borderRadius: 18,
-                ),
-              ),
-            ),
-          ],
-          if (media.isEmpty)
-            Expanded(
-              child: _MediaPlaceholder(
-                colorScheme: colorScheme,
-                borderRadius: 18,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
 class _MediaGrid extends StatelessWidget {
   const _MediaGrid({
     required this.media,
@@ -199,6 +231,240 @@ class _MediaGrid extends StatelessWidget {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class _SquareMediaGrid extends StatelessWidget {
+  const _SquareMediaGrid({
+    required this.media,
+    required this.colorScheme,
+  });
+
+  static const int _kCrossAxisCount = 2;
+  static const double _kSpacing = 12;
+
+  final List<MediaRef> media;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (media.isEmpty) {
+      return _MediaPlaceholder(
+        colorScheme: colorScheme,
+        borderRadius: 20,
+        height: 120,
+      );
+    }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double availableWidth = constraints.hasBoundedWidth &&
+                constraints.maxWidth.isFinite &&
+                constraints.maxWidth > 0
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width;
+        final double rawTileSize =
+            (availableWidth - _kSpacing * (_kCrossAxisCount - 1)) /
+                _kCrossAxisCount;
+        final double tileSize =
+            rawTileSize.isFinite && rawTileSize > 0 ? rawTileSize : 140;
+
+        return Wrap(
+          spacing: _kSpacing,
+          runSpacing: _kSpacing,
+          children: media
+              .map(
+                (MediaRef ref) => SizedBox(
+                  width: tileSize,
+                  height: tileSize,
+                  child: _mediaTileOrPlaceholder(
+                    ref,
+                    colorScheme,
+                    borderRadius: 20,
+                  ),
+                ),
+              )
+              .toList(growable: false),
+        );
+      },
+    );
+  }
+}
+
+class _MediaPairRow extends StatelessWidget {
+  const _MediaPairRow({
+    required this.media,
+    required this.colorScheme,
+    this.height,
+  });
+
+  final List<MediaRef> media;
+  final EnteColorScheme colorScheme;
+  final double? height;
+  static const double _kBorderRadius = 20;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<MediaRef?> slots = <MediaRef?>[
+      media.isNotEmpty ? media.first : null,
+      media.length > 1 ? media[1] : null,
+    ];
+    Widget row = Row(
+      children: [
+        for (final (int index, MediaRef? ref) in slots.indexed) ...[
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == slots.length - 1 ? 0 : 12,
+              ),
+              child: _mediaTileOrPlaceholder(
+                ref,
+                colorScheme,
+                borderRadius: _kBorderRadius,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+    if (height != null) {
+      row = SizedBox(
+        height: height,
+        child: row,
+      );
+    }
+    return row;
+  }
+}
+
+class _GroupSoloMediaCollage extends StatelessWidget {
+  const _GroupSoloMediaCollage({
+    required this.media,
+    required this.colorScheme,
+  });
+
+  final List<MediaRef> media;
+  final EnteColorScheme colorScheme;
+
+  MediaRef? _at(int index) => index < media.length ? media[index] : null;
+
+  @override
+  Widget build(BuildContext context) {
+    if (media.isEmpty) {
+      return _MediaPlaceholder(
+        height: 200,
+        colorScheme: colorScheme,
+        borderRadius: 24,
+      );
+    }
+
+    final MediaRef? primary = _at(0);
+    final MediaRef? rightTop = _at(1);
+    final MediaRef? rightBottom = _at(2);
+    final MediaRef? bottomLeft = _at(3);
+    final MediaRef? bottomRight = _at(4);
+
+    final List<MediaRef> bottomMedia = <MediaRef>[
+      if (bottomLeft != null) bottomLeft,
+      if (bottomRight != null) bottomRight,
+    ];
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 200,
+          child: Row(
+            children: [
+              Expanded(
+                flex: (rightTop != null || rightBottom != null) ? 3 : 1,
+                child: _mediaTileOrPlaceholder(
+                  primary,
+                  colorScheme,
+                  borderRadius: 24,
+                ),
+              ),
+              if (rightTop != null || rightBottom != null) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: _mediaTileOrPlaceholder(
+                            rightTop,
+                            colorScheme,
+                            borderRadius: 22,
+                          ),
+                        ),
+                        if (rightTop != null && rightBottom != null)
+                          const SizedBox(height: 12),
+                        if (rightBottom != null)
+                          Expanded(
+                            child: _mediaTileOrPlaceholder(
+                              rightBottom,
+                              colorScheme,
+                              borderRadius: 22,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (bottomMedia.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _buildBottomRow(bottomMedia, colorScheme),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBottomRow(
+    List<MediaRef> refs,
+    EnteColorScheme colorScheme,
+  ) {
+    if (refs.length == 1) {
+      return SizedBox(
+        height: 120,
+        child: Align(
+          alignment: Alignment.center,
+          child: FractionallySizedBox(
+            widthFactor: 0.65,
+            child: _mediaTileOrPlaceholder(
+              refs.first,
+              colorScheme,
+              borderRadius: 22,
+            ),
+          ),
+        ),
+      );
+    }
+    return SizedBox(
+      height: 110,
+      child: Row(
+        children: [
+          Expanded(
+            child: _mediaTileOrPlaceholder(
+              refs[0],
+              colorScheme,
+              borderRadius: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _mediaTileOrPlaceholder(
+              refs[1],
+              colorScheme,
+              borderRadius: 22,
+            ),
+          ),
+        ],
       ),
     );
   }

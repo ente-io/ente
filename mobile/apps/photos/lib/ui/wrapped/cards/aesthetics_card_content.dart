@@ -49,6 +49,8 @@ class _BlurryFacesCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
+    final List<MediaRef> supportingMedia =
+        card.media.skip(3).take(2).toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,18 +60,24 @@ class _BlurryFacesCardContent extends StatelessWidget {
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 24),
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
+        if (supportingMedia.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          _MediaPairRow(
+            media: supportingMedia,
+            colorScheme: colorScheme,
+            height: 132,
+          ),
+        ],
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 20),
           _DetailChips(
@@ -111,17 +119,15 @@ class _YearInColorCardContent extends StatelessWidget {
           colorScheme: colorScheme,
         ),
         const SizedBox(height: 24),
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         if (palette.isNotEmpty) ...[
           const SizedBox(height: 18),
@@ -163,17 +169,15 @@ class _MonochromeCardContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         const SizedBox(height: 20),
         _MediaGrid(
@@ -212,17 +216,15 @@ class _TopWowCardContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        buildWrappedCardTitle(
           card.title,
-          style: textTheme.h2Bold,
+          textTheme.h2Bold,
         ),
         if (card.subtitle != null && card.subtitle!.isNotEmpty)
-          Padding(
+          buildWrappedCardSubtitle(
+            card.subtitle!,
+            textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              card.subtitle!,
-              style: textTheme.bodyMuted,
-            ),
           ),
         const SizedBox(height: 20),
         _MediaGrid(

@@ -96,6 +96,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             onTap: () async {
               try {
                 await wrappedService.forceRecompute();
+                await localSettings.resetWrapped2025Complete();
                 showShortToast(context, "Ente Rewind recomputed");
               } catch (e, s) {
                 logger.severe('Wrapped recompute failed ', e, s);

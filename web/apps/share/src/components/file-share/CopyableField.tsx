@@ -1,6 +1,7 @@
+import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { Box, IconButton, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 
 interface CopyableFieldProps {
     label: string;
@@ -17,6 +18,16 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
     multiline = false,
     maskValue = false,
 }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        onCopy(value);
+        setCopied(true);
+        setTimeout(() => {
+            setCopied(false);
+        }, 2000);
+    };
+
     return (
         <Box>
             <Typography
@@ -51,19 +62,37 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                         {maskValue ? "**********************" : value}
                     </Typography>
                 </Box>
-                <IconButton
-                    onClick={() => onCopy(value)}
-                    sx={{
-                        position: "absolute",
-                        top: multiline ? 8 : "50%",
-                        right: 8,
-                        transform: multiline ? "none" : "translateY(-50%)",
-                        color: "#757575",
-                        "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
-                    }}
-                >
-                    <ContentCopyIcon fontSize="small" />
-                </IconButton>
+                {copied ? (
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: multiline ? 8 : "50%",
+                            right: 8,
+                            transform: multiline ? "none" : "translateY(-50%)",
+                            color: "#4caf50",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            p: 1,
+                        }}
+                    >
+                        <CheckIcon fontSize="small" />
+                    </Box>
+                ) : (
+                    <IconButton
+                        onClick={handleCopy}
+                        sx={{
+                            position: "absolute",
+                            top: multiline ? 8 : "50%",
+                            right: 8,
+                            transform: multiline ? "none" : "translateY(-50%)",
+                            color: "#757575",
+                            "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
+                        }}
+                    >
+                        <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                )}
             </Box>
         </Box>
     );

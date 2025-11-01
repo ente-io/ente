@@ -13,7 +13,6 @@ dependencies:
   auto_size_text: ^3.0.0
   base32: ^2.1.3
   bip39: ^1.0.6
-  bloc: ^9.0.0
   clipboard: ^0.1.3
   collection: ^1.18.0
   confetti: ^0.8.0
@@ -62,7 +61,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_animate: ^4.1.0
-  flutter_bloc: ^9.1.1
   flutter_context_menu: ^0.2.0
   flutter_displaymode: ^0.6.0
   flutter_email_sender: ^7.0.0
@@ -175,19 +173,38 @@ flutter_launcher_icons:
 
   android: "launcher_icon"
   adaptive_icon_foreground: "assets/generation-icons/icon-light-adaptive-fg.png"
-  adaptive_icon_background: "assets/generation-icons/icon-light-adaptive-bg.png"
+  adaptive_icon_background: "#A75CFF"
   adaptive_icon_monochrome: "assets/generation-icons/icon-monochrome.png"
   adaptive_icon_foreground_inset: 0
 
   ios: true
   remove_alpha_ios: true
+  image_path_ios_dark_transparent: "assets/generation-icons/icon-dark.png"
+  image_path_ios_tinted_grayscale: "assets/generation-icons/icon-tinted.png"
+
+  macos:
+    generate: true
+    image_path: "assets/generation-icons/icon-macos.png"
+
+  windows:
+    generate: true
+    image_path: "assets/generation-icons/icon-windows-linux.png"
+    icon_size: 256
+
+  linux:
+    generate: true
+    image_path: "assets/generation-icons/icon-windows-linux.png"
+    icon_size: 256
 
 flutter_native_splash:
   color: "#FFFFFF"
   color_dark: "#000000"
-  image: "assets/splash/splash-icon-fg.png"
+  image: "assets/generation-icons/splash-icon-ios-padded.png"
   android_gravity: center
   ios_content_mode: center
+  android: true
+  ios: true
+  web: false
   android_12:
     # The image parameter sets the splash screen icon image.  If this parameter is not specified,
     # the app's launcher icon will be used instead.
@@ -196,13 +213,13 @@ flutter_native_splash:
     # 640 pixels in diameter.
     # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
     # 768 pixels in diameter.
-    image: "assets/splash/splash-icon-fg-12.png"
+    image: "assets/generation-icons/splash-icon-ios-padded.png"
 
     # Splash screen background color.
     color: "#FFFFFF"
 
     # App icon background color.
-    #icon_background_color: "#111111"
+    icon_background_color: "#FFFFFF"
 
     # The branding property allows you to specify an image used as branding in the splash screen.
     #branding: assets/dart.png
@@ -211,4 +228,4 @@ flutter_native_splash:
     # apply when the device is in dark mode. If they are not specified, the app will use the
     # parameters from above.
     color_dark: "#000000"
-    #icon_background_color_dark: "#eeeeee"
+    icon_background_color_dark: "#000000"

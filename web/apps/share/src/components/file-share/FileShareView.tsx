@@ -26,7 +26,7 @@ export const FileShareView: React.FC = () => {
             </Head>
             <Box
                 sx={{
-                    minHeight: "100vh",
+                    minHeight: "100dvh",
                     bgcolor: "#1071FF",
                     display: "flex",
                     flexDirection: "column",
@@ -38,8 +38,8 @@ export const FileShareView: React.FC = () => {
                 <Box
                     sx={{
                         minHeight: {
-                            xs: "calc(100vh - 16px)",
-                            md: "calc(100vh - 48px)",
+                            xs: "calc(100dvh - 16px)",
+                            md: "calc(100dvh - 48px)",
                         },
                         width: "100%",
                         bgcolor: "#FAFAFA",
@@ -95,7 +95,7 @@ export const FileShareView: React.FC = () => {
                             px: 3,
                             pb: 8,
                             mt: fileInfo?.lockerType
-                                ? { xs: 0, md: "20vh" }
+                                ? { xs: 0, md: "20dvh" }
                                 : 0,
                         }}
                     >

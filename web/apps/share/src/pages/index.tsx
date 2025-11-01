@@ -1,27 +1,24 @@
-import { Stack, Typography } from "@mui/material";
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
+import { FileShareView } from "../components/file-share/FileShareView";
 
 const Page: React.FC = () => {
-    return (
-        <Stack
-            sx={{
-                justifyContent: "center",
-                minHeight: "100vh",
-                gap: 2,
-                bgcolor: "white",
-                textAlign: "center",
-            }}
-        >
-            <img
-                src="/images/ente-locker.svg"
-                alt="Ente Locker"
-                style={{ height: "100px", alignSelf: "center" }}
-            />
-            <Typography variant="small" sx={{ color: "#a2a2a2", mt: 4 }}>
-                — Coming soon —
-            </Typography>
-        </Stack>
-    );
+    const router = useRouter();
+    const { t } = router.query;
+
+    useEffect(() => {
+        // Redirect to ente.io/locker if no token parameter
+        if (router.isReady && !t) {
+            window.location.href = "https://ente.io/locker";
+        }
+    }, [router.isReady, t]);
+
+    // Don't render anything if redirecting
+    if (!t) {
+        return null;
+    }
+
+    return <FileShareView />;
 };
 
 export default Page;
