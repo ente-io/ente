@@ -1,20 +1,9 @@
 name: "Beta release (auth)"
 
 on:
-    push:
-        branches:
-            - main
-        paths:
-            - 'mobile/apps/auth/**'
-            - 'mobile/packages/accounts/**'
-            - 'mobile/packages/base/**'
-            - 'mobile/packages/configuration/**'
-            - 'mobile/packages/events/**'
-            - 'mobile/packages/lock_screen/**'
-            - 'mobile/packages/logging/**'
-            - 'mobile/packages/network/**'
-            - 'mobile/packages/strings/**'
-            - 'mobile/packages/ui/**'
+    schedule:
+        # Runs daily at 12:00 UTC (5:30 PM IST)
+        - cron: "0 12 * * *"
     workflow_dispatch: # Allow manual trigger
 
 env:
@@ -36,8 +25,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
-                  # Need to fetch all history for proper tagging
-                  fetch-depth: 0
+                  fetch-depth: 1
 
             - name: Free up disk space
               run: |
@@ -272,7 +260,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
-                  fetch-depth: 0
+                  fetch-depth: 1
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -346,7 +334,7 @@ jobs:
               uses: actions/checkout@v4
               with:
                   submodules: recursive
-                  fetch-depth: 0
+                  fetch-depth: 1
 
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
@@ -448,8 +436,7 @@ jobs:
             - name: Checkout code and submodules
               uses: actions/checkout@v4
               with:
-                  submodules: recursive
-                  fetch-depth: 0
+                  fetch-depth: 1
 
             - name: Download all artifacts
               uses: actions/download-artifact@v4
