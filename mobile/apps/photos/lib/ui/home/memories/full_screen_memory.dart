@@ -14,6 +14,7 @@ import "package:photos/models/memories/memory.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/home/memories/custom_listener.dart";
@@ -21,7 +22,9 @@ import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
+import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
 import "package:photos/utils/file_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
 //There are two states of variables that FullScreenMemory depends on:
@@ -326,9 +329,13 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   valueListenable: inheritedData.indexNotifier,
                   child: GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Padding(
-                      padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
-                      child: Icon(Icons.close, color: Colors.white),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: flagService.internalUser ? 20 : null,
+                      ),
                     ),
                   ),
                   builder: (context, value, child) {
@@ -361,20 +368,79 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         Row(
                           children: [
                             child!,
-                            Text(
-                              SmartMemoriesService.getDateFormatted(
-                                creationTime: inheritedData
-                                    .memories[value].file.creationTime!,
-                                context: context,
-                              ),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .copyWith(
-                                    fontSize: 14,
-                                    color: Colors.white,
+                            if (flagService.internalUser)
+                              GestureDetector(
+                                onTap: () async {
+                                  final fullScreenState =
+                                      context.findAncestorStateOfType<
+                                          _FullScreenMemoryState>();
+                                  fullScreenState?._toggleAnimation(
+                                    pause: true,
+                                  );
+                                  await routeToPage(
+                                    context,
+                                    JumpToDateGallery(
+                                      fileToJumpTo:
+                                          inheritedData.memories[value].file,
+                                    ),
+                                  );
+                                  fullScreenState?._toggleAnimation(
+                                    pause: false,
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4),
+                                    // color: fillFaintDark,
+                                    color: blurStrokeFaintDark,
+                                    border: Border.all(
+                                      color: strokeFaintDark,
+                                      width: 1,
+                                    ),
                                   ),
-                            ),
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 2),
+                                      Padding(
+                                        padding: const EdgeInsets.all(2.0),
+                                        child: Text(
+                                          SmartMemoriesService.getDateFormatted(
+                                            creationTime: inheritedData
+                                                .memories[value]
+                                                .file
+                                                .creationTime!,
+                                            context: context,
+                                          ),
+                                          style: getEnteTextTheme(context)
+                                              .miniMuted
+                                              .copyWith(color: textBaseDark),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Icon(
+                                        Icons.keyboard_arrow_right_outlined,
+                                        size: 14,
+                                        color: blurStrokeBaseDark,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            else
+                              Text(
+                                SmartMemoriesService.getDateFormatted(
+                                  creationTime: inheritedData
+                                      .memories[value].file.creationTime!,
+                                  context: context,
+                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
+                              ),
                           ],
                         ),
                       ],
