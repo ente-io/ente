@@ -135,11 +135,28 @@ Disable the option to download original quality photos. Recipients can still vie
 
 Let people who open the link in their Ente app add the shared album to their account. This is handy when you want other Ente users to keep the album in their Shared tab without sending them individual invites.
 
+#### How joining works
+
+- When creating a public link, by default the **Allow joining album** option is enabled.
+- When the link is opened on a mobile device which also has the Ente Photos mobile app installed, then the OS will show an option to reopen the link in the mobile app, where there will be a banner to join the link.
+
 > [!NOTE]
 >
 > When someone joins an album, their email address becomes visible to the album owner and other participants. Disable this option if you need to keep participant identities private while still sharing via a public link.
 
 When disabled, anyone with the link can still view the album in a browser, but they cannot join it from the Ente app.
+
+#### Tips for recipients
+
+- On iOS, Firefox does not show the option to reopen the link in the mobile app - Safari does.
+
+<div align="center">
+
+![Safari showing the Open in Ente banner](/join-ios-safari.jpg){width=320px}
+
+</div>
+
+- The prompt to reopen the link in the app does not work with custom domains; use the default `https://albums.ente.io` link instead.
 
 ### Allow adding photos (Collect mode)
 
