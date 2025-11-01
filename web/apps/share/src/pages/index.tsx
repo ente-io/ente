@@ -1,24 +1,18 @@
-import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { FileShareView } from "../components/file-share/FileShareView";
 
+/**
+ * Index page that redirects to ente.io/locker
+ *
+ * Users visiting the root domain (/) are redirected to the Locker homepage.
+ * All share links use the format /token#key and are handled by 404.tsx.
+ */
 const Page: React.FC = () => {
-    const router = useRouter();
-    const { t } = router.query;
-
     useEffect(() => {
-        // Redirect to ente.io/locker if no token parameter
-        if (router.isReady && !t) {
-            window.location.href = "https://ente.io/locker";
-        }
-    }, [router.isReady, t]);
+        // Redirect to ente.io/locker
+        window.location.href = "https://ente.io/locker";
+    }, []);
 
-    // Don't render anything if redirecting
-    if (!t) {
-        return null;
-    }
-
-    return <FileShareView />;
+    return null;
 };
 
 export default Page;
