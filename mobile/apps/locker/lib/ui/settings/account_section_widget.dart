@@ -11,7 +11,6 @@ import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
-import "package:ente_utils/platform_util.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
@@ -51,7 +50,6 @@ class AccountSectionWidget extends StatelessWidget {
             context,
             l10n.authToChangeYourEmail,
           );
-          await PlatformUtil.refocusWindows();
           if (hasAuthenticated) {
             // ignore: unawaited_futures
             showDialog(

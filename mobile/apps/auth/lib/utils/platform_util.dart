@@ -78,9 +78,9 @@ class PlatformUtil {
   // https://github.com/flutter/flutter/issues/122322
   static Future<void> refocusWindows() async {
     if (!Platform.isWindows) return;
-    await windowManager.blur();
-    await windowManager.focus();
     await windowManager.setAlwaysOnTop(true);
+    await windowManager.blur();
+    await windowManager.show();
     await windowManager.setAlwaysOnTop(false);
   }
 }

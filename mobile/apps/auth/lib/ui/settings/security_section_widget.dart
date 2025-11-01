@@ -18,7 +18,6 @@ import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_lock_screen/auth_util.dart';
@@ -86,7 +85,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               );
               final isEmailMFAEnabled =
                   UserService.instance.hasEmailMFAEnabled();
-              await PlatformUtil.refocusWindows();
               if (hasAuthenticated) {
                 await updateEmailMFA(!isEmailMFAEnabled);
                 if (mounted) {
@@ -122,7 +120,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               context,
               context.l10n.authToViewYourActiveSessions,
             );
-            await PlatformUtil.refocusWindows();
             if (hasAuthenticated) {
               // ignore: unawaited_futures
               Navigator.of(context).push(
@@ -204,8 +201,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           await LocalAuthenticationService.instance.requestLocalAuthentication(
         context,
         context.l10n.authenticateGeneric,
+        refocusWindows: false,
       );
-      await PlatformUtil.refocusWindows();
       if (!hasAuthenticated) {
         return;
       }
@@ -225,7 +222,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           CryptoUtil.bin2base64(encryptionResult.nonce!),
         );
       }
-      PasskeyService.instance.openPasskeyPage(buildContext).ignore();
+      await PasskeyService.instance.openPasskeyPage(buildContext);
     } catch (e, s) {
       _logger.severe("failed to open passkey page", e, s);
       await showGenericErrorDialog(
