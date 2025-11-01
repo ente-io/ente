@@ -35,6 +35,7 @@ dependencies:
   file_saver: ^0.3.0
   flutter:
     sdk: flutter
+  hugeicons: ^1.1.1
   logging: ^1.2.0
   password_strength: ^0.2.0
   pinput: ^5.0.1

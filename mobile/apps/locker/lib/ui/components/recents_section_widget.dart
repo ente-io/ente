@@ -3,12 +3,17 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
 import 'package:locker/models/info/info_item.dart';
+import 'package:locker/models/item_view_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/files/download/service_locator.dart";
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/collections/section_title.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 
 class RecentsSectionWidget extends StatefulWidget {
@@ -38,6 +43,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   final Map<int, List<Collection>> _fileCollectionsCache = {};
   final Map<int, Future<List<Collection>>> _fileCollectionsRequests = {};
   final Map<int, InfoType?> _fileInfoTypeCache = {};
+  ItemViewType? _viewType;
 
   @override
   void initState() {
@@ -45,6 +51,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     _originalCollectionOrder = List.from(widget.collections);
     _availableCollections = List.from(widget.collections);
     _availableInfoTypes = _computeAvailableInfoTypes(widget.recentFiles);
+    _viewType = localSettings.itemViewType();
   }
 
   @override
@@ -88,9 +95,40 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   Widget _buildRecentsHeader() {
-    return Text(
-      'Recents',
-      style: getEnteTextTheme(context).h3Bold,
+    final colorScheme = getEnteColorScheme(context);
+    return SectionOptions(
+      body: context.l10n.items(_displayedFiles.length),
+      SectionTitle(title: context.l10n.recents),
+      trailingWidget: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          localSettings.setItemViewType(
+            _viewType == ItemViewType.listView
+                ? ItemViewType.gridView
+                : ItemViewType.listView,
+          );
+          setState(() {
+            _viewType = _viewType == ItemViewType.listView
+                ? ItemViewType.gridView
+                : ItemViewType.listView;
+          });
+        },
+        child: Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: colorScheme.backdropBase,
+          ),
+          padding: const EdgeInsets.all(12),
+          child: HugeIcon(
+            icon: _viewType == ItemViewType.listView
+                ? HugeIcons.strokeRoundedGridView
+                : HugeIcons.strokeRoundedMenu01,
+            color: colorScheme.textBase,
+          ),
+        ),
+      ),
     );
   }
 
@@ -120,38 +158,23 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
     return _FilterChipsRow(
       chips: chipModels,
-      showClearButton: _hasActiveFilters,
+      showClearButton: false,
       onClearTapped: _clearAllFilters,
     );
   }
 
   Widget _buildRecentsTable() {
     if (_displayedFiles.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                Icons.folder_off,
-                size: 48,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No items match the selected filters',
-                style: getEnteTextTheme(context).body.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-            ],
-          ),
-        ),
+      return const EmptyStateWidget(
+        assetPath: "assets/empty_state.png",
+        title: "Oops",
+        subtitle: "No items match the selected filters",
       );
     }
 
     return ItemListView(
       files: _displayedFiles,
+      viewType: _viewType ?? ItemViewType.listView,
     );
   }
 
@@ -598,7 +621,7 @@ class _FilterChipsRow extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return SizedBox(
-      height: 40,
+      height: 48,
       child: Row(
         children: [
           Expanded(
@@ -688,22 +711,21 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
-            color: isSelected ? colorScheme.fillMuted : null,
-            border: Border.all(
-              color:
-                  isSelected ? colorScheme.strokeBase : colorScheme.fillFaint,
-              width: 1,
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+            color:
+                isSelected ? colorScheme.primary700 : colorScheme.backdropBase,
+            borderRadius: const BorderRadius.all(Radius.circular(24.0)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 label,
-                style: textTheme.mini,
+                style: textTheme.small.copyWith(
+                  color: isSelected ? Colors.white : colorScheme.textBase,
+                ),
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
@@ -726,30 +748,6 @@ class _FilterChip extends StatelessWidget {
                     ),
                   );
                 },
-                child: isSelected
-                    ? Row(
-                        key: const ValueKey('selected_chip'),
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: onTap,
-                            child: Container(
-                              padding: const EdgeInsets.all(1),
-                              decoration: BoxDecoration(
-                                color: colorScheme.strokeBase,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                size: 10,
-                                color: colorScheme.backdropBase,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(key: ValueKey('unselected_chip')),
               ),
             ],
           ),
@@ -772,30 +770,33 @@ class _FilterClearButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accentColor = colorScheme.warning500;
+    final backgroundColor = accentColor.withOpacity(0.12);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        constraints: const BoxConstraints(minHeight: 48),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
-          color: colorScheme.fillFaint,
-          border: Border.all(
-            color: colorScheme.strokeMuted,
-            width: 1,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+          color: backgroundColor,
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.clear_all,
-              size: 14,
-              color: colorScheme.textMuted,
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              size: 16,
+              color: accentColor,
             ),
             const SizedBox(width: 4),
             Text(
-              'Clear',
-              style: textTheme.miniMuted,
+              context.l10n.clear,
+              style: textTheme.small.copyWith(
+                color: accentColor,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

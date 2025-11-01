@@ -67,7 +67,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                     .textTheme
                     .bodyMedium
                     ?.color
-                    ?.withOpacity(0.6),
+                    ?.withValues(alpha: 0.6),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20.0),
@@ -91,7 +91,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                                   .textTheme
                                   .bodyMedium
                                   ?.color
-                                  ?.withOpacity(0.6) ??
+                                  ?.withValues(alpha: 0.6) ??
                               Colors.grey,
                         ),
                       ),
@@ -103,7 +103,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
                           .textTheme
                           .bodyMedium
                           ?.color
-                          ?.withOpacity(0.6),
+                          ?.withValues(alpha: 0.6),
                     ),
             ),
             style: TextStyle(

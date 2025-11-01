@@ -83,6 +83,7 @@ class _PhysicalRecordsPageState
         labelText: context.l10n.recordName,
         hintText: context.l10n.recordNameHint,
         controller: _nameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterRecordName;
@@ -90,11 +91,12 @@ class _PhysicalRecordsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.recordLocation,
         hintText: context.l10n.recordLocationHint,
         controller: _locationController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterLocation;
@@ -102,11 +104,12 @@ class _PhysicalRecordsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.recordNotes,
         hintText: context.l10n.recordNotesHint,
         controller: _notesController,
+        shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
       const SizedBox(height: 24),
@@ -120,13 +123,13 @@ class _PhysicalRecordsPageState
         label: context.l10n.recordName,
         value: _nameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.recordLocation,
         value: _locationController.text,
       ),
       if (_notesController.text.isNotEmpty) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.recordNotes,
           value: _notesController.text,

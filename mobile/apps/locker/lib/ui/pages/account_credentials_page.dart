@@ -96,6 +96,7 @@ class _AccountCredentialsPageState
         labelText: context.l10n.credentialName,
         hintText: context.l10n.credentialNameHint,
         controller: _nameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterAccountName;
@@ -103,11 +104,12 @@ class _AccountCredentialsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.username,
         hintText: context.l10n.usernameHint,
         controller: _usernameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterUsername;
@@ -115,12 +117,13 @@ class _AccountCredentialsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.password,
         hintText: context.l10n.passwordHint,
         controller: _passwordController,
         obscureText: !_passwordVisible,
+        shouldUseTextInputWidget: false,
         suffixIcon: IconButton(
           icon: Icon(
             _passwordVisible ? Icons.visibility : Icons.visibility_off,
@@ -138,11 +141,12 @@ class _AccountCredentialsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.credentialNotes,
         hintText: context.l10n.credentialNotesHint,
         controller: _notesController,
+        shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
       const SizedBox(height: 24),
@@ -156,19 +160,19 @@ class _AccountCredentialsPageState
         label: context.l10n.credentialName,
         value: _nameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.username,
         value: _usernameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.password,
         value: _passwordController.text,
         isSecret: true,
       ),
       if (_notesController.text.isNotEmpty) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.credentialNotes,
           value: _notesController.text,

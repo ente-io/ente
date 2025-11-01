@@ -5,13 +5,17 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/ui/components/add_to_collection_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
+import "package:locker/utils/file_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
+import "package:logging/logging.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
@@ -28,232 +32,385 @@ class FileSelectionOverlayBar extends StatefulWidget {
 }
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
+  static final Logger _logger = Logger("FileSelectionOverlayBar");
+  bool _isImportant = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.selectedFiles.addListener(_onSelectionChanged);
+    _checkIfImportant();
+  }
+
+  Future<void> _checkIfImportant() async {
+    if (widget.selectedFiles.files.length == 1) {
+      final file = widget.selectedFiles.files.first;
+
+      try {
+        final isFav = await FavoritesService.instance.isFavorite(file);
+
+        if (mounted) {
+          setState(() {
+            _isImportant = isFav;
+          });
+        }
+      } catch (e) {
+        _logger.severe("Error checking favorite status: $e");
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.selectedFiles.removeListener(_onSelectionChanged);
+    super.dispose();
+  }
+
+  void _onSelectionChanged() {
+    if (mounted) {
+      setState(() {});
+      _checkIfImportant();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = getEnteTextTheme(context);
+    final hasSelection = widget.selectedFiles.files.isNotEmpty;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.4,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              children: [
-                ListenableBuilder(
-                  listenable: widget.selectedFiles,
-                  builder: (context, child) {
-                    final isAllSelected =
-                        widget.selectedFiles.count == widget.files.length;
-                    final buttonText = isAllSelected
-                        ? context.l10n.deselectAll
-                        : context.l10n.selectAll;
-                    final iconData = isAllSelected
-                        ? Icons.remove_circle_outline
-                        : Icons.check_circle_outline_outlined;
-
-                    return InkWell(
-                      onTap: () {
-                        if (isAllSelected) {
-                          widget.selectedFiles.clearAll();
-                        } else {
-                          widget.selectedFiles.selectAll(widget.files.toSet());
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: colorScheme.strokeMuted,
-                            width: 0.5,
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                          color: isDarkMode
-                              ? const Color.fromRGBO(27, 27, 27, 1)
-                              : colorScheme.backgroundElevated2,
+    return IgnorePointer(
+      ignoring: !hasSelection,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubic,
+          offset: hasSelection ? Offset.zero : const Offset(0, 1),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 250),
+            opacity: hasSelection ? 1.0 : 0.0,
+            curve: Curves.easeInOut,
+            child: hasSelection
+                ? GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onVerticalDragUpdate: (_) {},
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.backdropBase,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 8.0,
+                        border: Border(
+                          top: BorderSide(color: colorScheme.strokeFaint),
                         ),
-                        child: Row(
+                      ),
+                      margin: EdgeInsets.zero,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              buttonText,
-                              style: getEnteTextTheme(context).bodyBold,
+                            Row(
+                              children: [
+                                ListenableBuilder(
+                                  listenable: widget.selectedFiles,
+                                  builder: (context, child) {
+                                    final isAllSelected =
+                                        widget.selectedFiles.count ==
+                                            widget.files.length;
+                                    final buttonText = isAllSelected
+                                        ? context.l10n.deselectAll
+                                        : context.l10n.selectAll;
+                                    final iconData = isAllSelected
+                                        ? Icons.remove_circle_outline
+                                        : Icons.check_circle_outline_outlined;
+
+                                    return InkWell(
+                                      onTap: () {
+                                        if (isAllSelected) {
+                                          widget.selectedFiles.clearAll();
+                                        } else {
+                                          widget.selectedFiles
+                                              .selectAll(widget.files.toSet());
+                                        }
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color:
+                                              colorScheme.backgroundElevated2,
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0,
+                                          vertical: 14.0,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              buttonText,
+                                              style: textTheme.body,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Icon(
+                                              iconData,
+                                              color: getEnteColorScheme(context)
+                                                  .textBase,
+                                              size: 20,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const Spacer(),
+                                ListenableBuilder(
+                                  listenable: widget.selectedFiles,
+                                  builder: (context, child) {
+                                    final count = widget.selectedFiles.count;
+                                    final countText = count == 1
+                                        ? '1 selected'
+                                        : '$count selected';
+
+                                    return InkWell(
+                                      onTap: () {
+                                        widget.selectedFiles.clearAll();
+                                      },
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color:
+                                              colorScheme.backgroundElevated2,
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0,
+                                          vertical: 14.0,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              countText,
+                                              style: textTheme.body,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Icon(
+                                              Icons.close,
+                                              color: getEnteColorScheme(context)
+                                                  .textBase,
+                                              size: 20,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              iconData,
-                              color: Colors.grey,
-                              size: 16,
-                            ),
+                            const SizedBox(height: 24),
+                            _buildActionButtons(),
                           ],
                         ),
                       ),
-                    );
-                  },
-                ),
-                const Spacer(),
-                ListenableBuilder(
-                  listenable: widget.selectedFiles,
-                  builder: (context, child) {
-                    final count = widget.selectedFiles.count;
-                    final countText =
-                        count == 1 ? '1 selected' : '$count selected';
-
-                    return InkWell(
-                      onTap: () {
-                        widget.selectedFiles.clearAll();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: colorScheme.strokeMuted,
-                            width: 0.5,
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                          color: isDarkMode
-                              ? const Color.fromRGBO(27, 27, 27, 1)
-                              : colorScheme.backgroundElevated2,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 8.0,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              countText,
-                              style: getEnteTextTheme(context).bodyBold,
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.close,
-                              color: Colors.grey,
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ),
-          const SizedBox(height: 12),
-          Card(
-            margin: EdgeInsets.zero,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            elevation: 4,
-            surfaceTintColor: isDarkMode
-                ? const Color.fromRGBO(18, 18, 18, 1)
-                : colorScheme.backgroundBase,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildActionButtons(),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildActionButtons() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final selectedFiles = widget.selectedFiles.files;
+    if (selectedFiles.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-    return ListenableBuilder(
-      listenable: widget.selectedFiles,
-      builder: (context, child) {
-        final selectedFiles = widget.selectedFiles.files;
-        if (selectedFiles.isEmpty) {
-          return const SizedBox.shrink();
-        }
+    final isSingleSelection = selectedFiles.length == 1;
+    final file = isSingleSelection ? selectedFiles.first : null;
 
-        final actions = _getActionsForSelection(selectedFiles);
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeInOut,
-          decoration: BoxDecoration(
-            color: isDarkMode
-                ? const Color.fromRGBO(255, 255, 255, 0.04)
-                : getEnteColorScheme(context).backgroundElevated2,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: actions,
-            ),
-          ),
-        );
-      },
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildPrimaryActionRow(selectedFiles.toList()),
+        const SizedBox(height: 12),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                child: child,
+              ),
+            );
+          },
+          child: isSingleSelection
+              ? _buildSingleSelectionSecondaryRow(file!)
+              : _buildMultiSelectionSecondaryRow(selectedFiles.toList()),
+        ),
+      ],
     );
   }
 
-  List<Widget> _getActionsForSelection(Set<EnteFile> selectedFiles) {
-    final isSingleSelection = selectedFiles.length == 1;
-    final file = isSingleSelection ? selectedFiles.first : null;
-    final actions = <Widget>[];
+  Widget _buildPrimaryActionRow(List<EnteFile> files) {
+    final isSingle = files.length == 1;
+    final colorScheme = getEnteColorScheme(context);
 
-    if (isSingleSelection) {
-      actions.addAll([
-        SelectionActionButton(
-          icon: Icons.share_outlined,
-          label: context.l10n.share,
-          onTap: () {
-            _shareLink(context, file!);
-          },
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24.0),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.download_outlined,
+                label: "Download",
+                onTap: () => isSingle
+                    ? _downloadFile(context, files.first)
+                    : _downloadMultipleFiles(context, files),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.share_outlined,
+                label: context.l10n.share,
+                onTap: () => isSingle
+                    ? _shareLink(context, files.first)
+                    : _shareMultipleFiles(context),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.delete_outline,
+                label: context.l10n.delete,
+                onTap: () => isSingle
+                    ? _deleteFile(context, files.first)
+                    : _deleteMultipleFile(context, files),
+                isDestructive: true,
+              ),
+            ),
+          ],
         ),
-        SelectionActionButton(
-          icon: Icons.edit_outlined,
-          label: context.l10n.edit,
-          onTap: () {
-            _showEditDialog(context, file!);
-          },
+      ),
+    );
+  }
+
+  Widget _buildSingleSelectionSecondaryRow(EnteFile file) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      key: const ValueKey('single_selection_secondary'),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24.0),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.edit_outlined,
+                label: context.l10n.edit,
+                onTap: () => _showEditDialog(context, file),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: _isImportant ? Icons.star : Icons.star_outline,
+                label: _isImportant ? "Unmark" : "Important",
+                onTap: () => _toggleImportant(context, file),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.start_rounded,
+                label: "Add to",
+                onTap: () => _showAddToDialog(context, [file]),
+              ),
+            ),
+          ],
         ),
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          label: context.l10n.delete,
-          onTap: () {
-            _deleteFile(context, file!);
-          },
-          isDestructive: true,
+      ),
+    );
+  }
+
+  Widget _buildMultiSelectionSecondaryRow(List<EnteFile> files) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      key: const ValueKey('multi_selection_secondary'),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24.0),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.star_outline,
+                label: "Important",
+                onTap: () => _markMultipleAsImportant(context, files),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: SelectionActionButton(
+                icon: Icons.start_rounded,
+                label: "Add to",
+                onTap: () => _showAddToDialog(context, files),
+              ),
+            ),
+          ],
         ),
-      ]);
-    } else {
-      actions.addAll([
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          label: context.l10n.delete,
-          onTap: () {
-            _deleteMultipleFile(context, selectedFiles.toList());
-          },
-          isDestructive: true,
-        ),
-      ]);
+      ),
+    );
+  }
+
+  Future<void> _downloadMultipleFiles(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    try {
+      final success = await FileUtil.downloadFilesToDownloads(context, files);
+      if (success) {
+        widget.selectedFiles.clearAll();
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to download files: $e", e, stackTrace);
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToDownloadOrDecrypt,
+        );
+      }
     }
-    return actions;
+  }
+
+  void _shareMultipleFiles(BuildContext context) {
+    SnackBarUtils.showWarningSnackBar(
+      context,
+      "Sharing multiple files is coming soon",
+    );
   }
 
   Future<void> _shareLink(BuildContext context, EnteFile file) async {
@@ -337,14 +494,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         await dialog.show();
 
         try {
-          final List<Future<void>> apiCalls = [];
+          final addFutures = <Future<void>>[];
           for (final collection in collectionsToAdd) {
-            apiCalls.add(
-              CollectionService.instance.addToCollection(collection, file),
+            addFutures.add(
+              CollectionService.instance.addToCollection(
+                collection,
+                file,
+                runSync: false,
+              ),
             );
           }
-          await Future.wait(apiCalls);
-          apiCalls.clear();
+          if (addFutures.isNotEmpty) {
+            await Future.wait(addFutures);
+          }
+
+          final List<Future<void>> apiCalls = [];
 
           for (final collection in collectionsToRemove) {
             apiCalls.add(
@@ -378,6 +542,91 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         SnackBarUtils.showWarningSnackBar(
           context,
           context.l10n.noChangesWereMade,
+        );
+      }
+    }
+  }
+
+  Future<void> _showAddToDialog(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) {
+      return;
+    }
+
+    final allCollections = await CollectionService.instance.getCollections();
+
+    final result = await showAddToCollectionDialog(
+      context,
+      collections: allCollections,
+    );
+
+    if (result != null && context.mounted) {
+      final dialog = createProgressDialog(
+        context,
+        context.l10n.pleaseWait,
+        isDismissible: false,
+      );
+
+      await dialog.show();
+
+      try {
+        final addFutures = <Future<void>>[];
+
+        for (final file in files) {
+          List<Collection> currentCollections;
+          try {
+            currentCollections =
+                await CollectionService.instance.getCollectionsForFile(file);
+          } catch (_) {
+            currentCollections = <Collection>[];
+          }
+
+          final currentCollectionIds =
+              currentCollections.map((collection) => collection.id).toSet();
+
+          final collectionsToAdd = result.selectedCollections.where(
+            (collection) => !currentCollectionIds.contains(collection.id),
+          );
+
+          for (final collection in collectionsToAdd) {
+            addFutures.add(
+              CollectionService.instance.addToCollection(
+                collection,
+                file,
+                runSync: false,
+              ),
+            );
+          }
+        }
+
+        if (addFutures.isEmpty) {
+          await dialog.hide();
+          SnackBarUtils.showInfoSnackBar(
+            context,
+            context.l10n.noChangesWereMade,
+          );
+          return;
+        }
+
+        await Future.wait(addFutures);
+        await CollectionService.instance.sync();
+
+        await dialog.hide();
+
+        widget.selectedFiles.clearAll();
+
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          context.l10n.fileUpdatedSuccessfully,
+        );
+      } catch (e) {
+        await dialog.hide();
+
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToUpdateFile(e.toString()),
         );
       }
     }
@@ -450,6 +699,129 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         context,
         context.l10n.failedToDeleteFile(e.toString()),
       );
+    }
+  }
+
+  Future<void> _downloadFile(BuildContext context, EnteFile file) async {
+    try {
+      final success =
+          await FileUtil.downloadFilesToDownloads(context, [file]);
+      if (success) {
+        widget.selectedFiles.clearAll();
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to download file: $e", e, stackTrace);
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToDownloadOrDecrypt,
+        );
+      }
+    }
+  }
+
+  Future<void> _toggleImportant(BuildContext context, EnteFile file) async {
+    final dialog = createProgressDialog(
+      context,
+      _isImportant ? "Removing from Important..." : "Adding to Important...",
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      if (_isImportant) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else {
+        await FavoritesService.instance.addToFavorites(context, file);
+      }
+
+      await dialog.hide();
+      widget.selectedFiles.clearAll();
+
+      setState(() {
+        _isImportant = !_isImportant;
+      });
+
+      if (context.mounted) {
+        final message = _isImportant
+            ? "File marked as important"
+            : "File removed from important";
+        SnackBarUtils.showInfoSnackBar(context, message);
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
+      await dialog.hide();
+
+      if (context.mounted) {
+        final errorMessage =
+            'Failed to update important status: ${e.toString()}';
+        SnackBarUtils.showWarningSnackBar(context, errorMessage);
+      }
+    }
+  }
+
+  Future<void> _markMultipleAsImportant(
+    BuildContext context,
+    List<EnteFile> files,
+  ) async {
+    final dialog = createProgressDialog(
+      context,
+      "Marking as Important...",
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      final List<EnteFile> filesToMark = [];
+      for (final file in files) {
+        final isFav = await FavoritesService.instance.isFavorite(file);
+        if (!isFav) {
+          filesToMark.add(file);
+        }
+      }
+
+      if (filesToMark.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          SnackBarUtils.showInfoSnackBar(
+            context,
+            "All files are already marked as important",
+          );
+        }
+        return;
+      }
+
+      await FavoritesService.instance.updateFavorites(
+        context,
+        filesToMark,
+        true,
+      );
+
+      await dialog.hide();
+
+      widget.selectedFiles.clearAll();
+
+      if (context.mounted) {
+        final message = filesToMark.length == 1
+            ? "1 file marked as important"
+            : "${filesToMark.length} files marked as important";
+        SnackBarUtils.showInfoSnackBar(context, message);
+      }
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Failed to mark multiple files as important: $e",
+        e,
+        stackTrace,
+      );
+      await dialog.hide();
+
+      if (context.mounted) {
+        final errorMessage =
+            'Failed to mark files as important: ${e.toString()}';
+        SnackBarUtils.showWarningSnackBar(context, errorMessage);
+      }
     }
   }
 }

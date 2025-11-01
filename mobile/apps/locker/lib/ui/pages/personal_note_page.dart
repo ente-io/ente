@@ -77,6 +77,7 @@ class _PersonalNotePageState
         labelText: context.l10n.noteName,
         hintText: context.l10n.noteNameHint,
         controller: _nameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterNoteName;
@@ -84,7 +85,7 @@ class _PersonalNotePageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.noteContent,
         hintText: context.l10n.noteContentHint,
@@ -108,7 +109,7 @@ class _PersonalNotePageState
         label: context.l10n.noteName,
         value: _nameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.noteContent,
         value: _contentController.text,

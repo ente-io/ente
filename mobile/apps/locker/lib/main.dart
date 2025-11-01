@@ -16,6 +16,7 @@ import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:ente_utils/platform_util.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:locker/app.dart';
 import 'package:locker/core/locale.dart';
@@ -24,6 +25,7 @@ import 'package:locker/services/collections/collections_api_client.dart';
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import "package:locker/services/files/links/links_client.dart";
 import "package:locker/services/files/links/links_service.dart";
@@ -58,6 +60,13 @@ void main() async {
   await _runInForeground();
   if (Platform.isAndroid) {
     FlutterDisplayMode.setHighRefreshRate().ignore();
+    // Make the navigation bar transparent so the app theme can take over
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0x00000000),
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
   }
 }
 
@@ -161,6 +170,7 @@ Future<void> _init(bool bool, {String? via}) async {
   await LockScreenSettings.instance.init(Configuration.instance);
   await CollectionApiClient.instance.init();
   await CollectionService.instance.init();
+  await FavoritesService.instance.init();
   await LinksClient.instance.init();
   await LinksService.instance.init();
   await ServiceLocator.instance.init(

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:locker/services/files/download/manager.dart';
+import "package:locker/utils/local_settings.dart";
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,4 +34,10 @@ DownloadManager get downloadManager {
     ServiceLocator.instance.nonEnteDio,
   );
   return _downloadManager!;
+}
+
+LocalSettings? _localSettings;
+LocalSettings get localSettings {
+  _localSettings ??= LocalSettings(ServiceLocator.instance.prefs);
+  return _localSettings!;
 }

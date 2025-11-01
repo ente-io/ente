@@ -1,14 +1,11 @@
-import "package:ente_accounts/pages/change_email_dialog.dart";
 import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/pages/password_entry_page.dart";
-import "package:ente_accounts/pages/recovery_key_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_legacy/pages/emergency_page.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/platform_util.dart";
@@ -16,12 +13,16 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
+import "package:locker/ui/components/recovery_key_dialog_locker.dart";
 import "package:locker/ui/pages/home_page.dart";
 import "package:locker/ui/settings/common_settings.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
+
+  static const double _leadingSpace = 52;
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +42,10 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.changeEmail,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -57,7 +58,7 @@ class AccountSectionWidget extends StatelessWidget {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return const ChangeEmailDialog();
+                return const ChangeEmailDialogLocker();
               },
               barrierColor: Colors.black.withValues(alpha: 0.85),
               barrierDismissible: false,
@@ -69,10 +70,10 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.changePassword,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -99,10 +100,10 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.recoveryKey,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -122,16 +123,10 @@ class AccountSectionWidget extends StatelessWidget {
               );
               return;
             }
-            // ignore: unawaited_futures
-            routeToPage(
+            await showRecoveryKeyDialogLocker(
               context,
-              RecoveryKeyPage(
-                Configuration.instance,
-                recoveryKey,
-                l10n.ok,
-                showAppBar: true,
-                onDone: () {},
-              ),
+              recoveryKey: recoveryKey,
+              onDone: () {},
             );
           }
         },
@@ -140,10 +135,10 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.legacy,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         showOnlyLoadingState: true,
         onTap: () async {
           final hasAuthenticated = kDebugMode ||
@@ -169,10 +164,10 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.logout,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           _onLogoutTapped(context);
         },
@@ -181,10 +176,10 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.deleteAccount,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final config = Configuration.instance;
           // ignore: unawaited_futures

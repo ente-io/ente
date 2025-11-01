@@ -1,12 +1,12 @@
 import "dart:convert";
 
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_lock_screen/lock_screen_config.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_confirm_password.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/dynamic_fab.dart";
-import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/components/text_input_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
@@ -69,6 +69,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
   Widget build(BuildContext context) {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final config = LockScreenConfig.current;
     final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     FloatingActionButtonLocation? fabLocation() {
@@ -80,8 +81,10 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
     }
 
     return Scaffold(
+      backgroundColor: config.getBackgroundColor(colorTheme),
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
+        backgroundColor: config.getBackgroundColor(colorTheme),
         elevation: 0,
         leading: IconButton(
           onPressed: () {
@@ -93,6 +96,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
             color: colorTheme.textBase,
           ),
         ),
+        centerTitle: config.showTitle,
+        title: config.titleWidget,
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
         valueListenable: _isFormValid,
@@ -111,86 +116,45 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
       floatingActionButtonAnimator: NoScalingAnimation(),
       body: SingleChildScrollView(
         child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 120,
-                width: 120,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 82,
-                      height: 82,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.grey.shade500.withValues(alpha: 0.2),
-                            Colors.grey.shade50.withValues(alpha: 0.1),
-                            Colors.grey.shade400.withValues(alpha: 0.2),
-                            Colors.grey.shade300.withValues(alpha: 0.4),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(1.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: colorTheme.backgroundBase,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 75,
-                      width: 75,
-                      child: CircularProgressIndicator(
-                        color: colorTheme.fillFaintPressed,
-                        value: 1,
-                        strokeWidth: 1.5,
-                      ),
-                    ),
-                    IconButtonWidget(
-                      icon: Icons.lock,
-                      iconButtonType: IconButtonType.primary,
-                      iconColor: colorTheme.textBase,
-                    ),
-                  ],
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: config.showTitle ? 16.0 : 0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: config.showTitle ? 40 : 0),
+                config.iconBuilder(context, null),
+                SizedBox(height: config.showTitle ? 24 : 0),
+                Text(
+                  widget.isChangingLockScreenSettings
+                      ? context.strings.enterPassword
+                      : context.strings.setNewPassword,
+                  textAlign: TextAlign.center,
+                  style: textTheme.bodyBold,
                 ),
-              ),
-              Text(
-                widget.isChangingLockScreenSettings
-                    ? context.strings.enterPassword
-                    : context.strings.setNewPassword,
-                textAlign: TextAlign.center,
-                style: textTheme.bodyBold,
-              ),
-              const Padding(padding: EdgeInsets.all(12)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextInputWidget(
-                  hintText: context.strings.password,
-                  autoFocus: true,
-                  textCapitalization: TextCapitalization.none,
-                  isPasswordInput: true,
-                  shouldSurfaceExecutionStates: false,
-                  onChange: (p0) {
-                    _passwordController.text = p0;
-                    _isFormValid.value = _passwordController.text.isNotEmpty;
-                  },
-                  onSubmit: (p0) {
-                    return _confirmPassword();
-                  },
-                  submitNotifier: _submitNotifier,
+                const Padding(padding: EdgeInsets.all(12)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextInputWidget(
+                    hintText: context.strings.password,
+                    autoFocus: true,
+                    textCapitalization: TextCapitalization.none,
+                    isPasswordInput: true,
+                    shouldSurfaceExecutionStates: false,
+                    onChange: (p0) {
+                      _passwordController.text = p0;
+                      _isFormValid.value = _passwordController.text.isNotEmpty;
+                    },
+                    onSubmit: (p0) {
+                      return _confirmPassword();
+                    },
+                    submitNotifier: _submitNotifier,
+                  ),
                 ),
-              ),
-              const Padding(padding: EdgeInsets.all(12)),
-            ],
+                const Padding(padding: EdgeInsets.all(12)),
+              ],
+            ),
           ),
         ),
       ),

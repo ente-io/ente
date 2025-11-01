@@ -209,7 +209,7 @@
   },
   "noCollectionsFound": "No collections found",
   "createYourFirstCollection": "Create your first collection to get started",
-  "createCollection": "Create Collection",
+  "createCollection": "Create collection",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
   "uploadDocument": "Upload Document",
@@ -354,23 +354,23 @@
   "saveInformation": "Save information",
   "informationDescription": "Save important information that can be shared and passed down to loved ones.",
   "personalNote": "Personal note",
-  "personalNoteDescription": "Save important notes or thoughts",
-  "physicalRecords": "Physical records",
-  "physicalRecordsDescription": "Save the real-world locations of important items",
+  "personalNoteDescription": "Store essential notes or reflections securely.",
+  "physicalRecords": "Physical Record",
+  "physicalRecordsDescription": "Document real-world locations of key items.",
   "accountCredentials": "Account credentials",
-  "accountCredentialsDescription": "Securely store login details for important accounts",
+  "accountCredentialsDescription": "Safely save login details for vital accounts.",
   "emergencyContact": "Emergency contact",
-  "emergencyContactDescription": "Save details of people to contact in emergencies",
+  "emergencyContactDescription": "Keep contact info for key people in crises.",
   "noteName": "Title",
-  "noteNameHint": "Give your note a meaningful title",
+  "noteNameHint": "Hint text",
   "noteContent": "Content",
   "noteContentHint": "Write down important thoughts, instructions, or memories you want to preserve",
   "recordName": "Record name",
   "recordNameHint": "Name of the real-world item",
   "recordLocation": "Location",
-  "recordLocationHint": "Where can this item be found? (e.g., 'Safety deposit box at First Bank, Box #123')",
+  "recordLocationHint": "Where can this item be found?",
   "recordNotes": "Notes",
-  "recordNotesHint": "Any additional details about accessing or understanding this record",
+  "recordNotesHint": "Any additional information about the item?",
   "credentialName": "Account name",
   "credentialNameHint": "Name of the service or account",
   "username": "Username",
@@ -608,5 +608,127 @@
   "hideWindow": "Hide Window",
   "showWindow": "Show Window",
   "exitApp": "Exit App",
-  "lockerLogs": "Locker logs"
+  "lockerLogs": "Locker logs",
+  "recents": "Recents",
+  "clear": "Clear",
+  "uploadAFile": "Upload a File",
+  "clickHereToUpload": "Click here to upload",
+  "saveDocument": "Save document",
+  "uploadFiles": "Upload Files",
+  "filesSelected": "{count, plural, =0{No files selected} =1{1 file selected} other{{count} files selected}}",
+  "@filesSelected": {
+    "description": "Number of files selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addToCollection": "Add to collection",
+  "newCollection": "New collection",
+  "title": "Title",
+  "backToView": "Back to view",
+  "back": "Back",
+  "failedToLoadCollections": "Failed to load collections: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "informationCollectionName": "Information",
+  "recordSavedToMultipleCollections": "Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "copiedToClipboard": "{fieldName} copied to clipboard",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
+  "searchResultsCount": "{count, plural, =1{1 result} other{{count} results}} for \"{query}\"",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
+  "locker": "Locker",
+  "unnamed": "Unnamed",
+  "collectionLabel": "Collection",
+  "areYouSure": "Are you sure?",
+  "yesDeleteCollection": "Yes, delete collection",
+  "yesDeleteFile": "Yes, delete file",
+  "deleteCollectionDialogBody": "This action is immediate and cannot be undone.\nThe {collectionName} will be deleted permanently.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
+  "deleteMultipleCollectionsDialogBody": "This action is immediate and cannot be undone.\n{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "deleteMultipleFilesDialogBody": "This action is immediate and cannot be undone.\n{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDeleteCollections": "Yes, delete {count, plural, =1{collection} other{collections}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDeleteFiles": "Yes, delete {count, plural, =1{file} other{files}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  }
 }

@@ -13,7 +13,6 @@ import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/navigation_util.dart";
@@ -37,6 +36,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
   late bool _hasLoggedIn;
   final Logger _logger = Logger('SecuritySectionWidget');
+
+  static const double _leadingSpace = 52;
 
   @override
   void initState() {
@@ -69,7 +70,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: l10n.emailVerificationToggle,
+              makeTextBold: true,
             ),
+            leadingSpace: _leadingSpace,
             trailingWidget: ToggleSwitchWidget(
               value: () => UserService.instance.hasEmailMFAEnabled(),
               onChanged: () async {
@@ -91,10 +94,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: context.l10n.passkey,
+              makeTextBold: true,
             ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
+            leadingSpace: _leadingSpace,
             trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
             onTap: () async {
               final hasAuthenticated = await LocalAuthenticationService.instance
                   .requestLocalAuthentication(
@@ -117,10 +120,11 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.appLock,
+          makeTextBold: true,
         ),
+        leadingSpace: _leadingSpace,
         surfaceExecutionStates: false,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           if (await LockScreenSettings.instance.isDeviceSupported()) {
             final bool result = await requestAuthentication(

@@ -469,7 +469,7 @@ abstract class AppLocalizations {
   /// No description provided for @createCollection.
   ///
   /// In en, this message translates to:
-  /// **'Create Collection'**
+  /// **'Create collection'**
   String get createCollection;
 
   /// No description provided for @nothingYet.
@@ -1045,19 +1045,19 @@ abstract class AppLocalizations {
   /// No description provided for @personalNoteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save important notes or thoughts'**
+  /// **'Store essential notes or reflections securely.'**
   String get personalNoteDescription;
 
   /// No description provided for @physicalRecords.
   ///
   /// In en, this message translates to:
-  /// **'Physical records'**
+  /// **'Physical Record'**
   String get physicalRecords;
 
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save the real-world locations of important items'**
+  /// **'Document real-world locations of key items.'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.
@@ -1069,7 +1069,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountCredentialsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Securely store login details for important accounts'**
+  /// **'Safely save login details for vital accounts.'**
   String get accountCredentialsDescription;
 
   /// No description provided for @emergencyContact.
@@ -1081,7 +1081,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencyContactDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save details of people to contact in emergencies'**
+  /// **'Keep contact info for key people in crises.'**
   String get emergencyContactDescription;
 
   /// No description provided for @noteName.
@@ -1093,7 +1093,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Give your note a meaningful title'**
+  /// **'Hint text'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -1129,7 +1129,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordLocationHint.
   ///
   /// In en, this message translates to:
-  /// **'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')'**
+  /// **'Where can this item be found?'**
   String get recordLocationHint;
 
   /// No description provided for @recordNotes.
@@ -1141,7 +1141,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Any additional details about accessing or understanding this record'**
+  /// **'Any additional information about the item?'**
   String get recordNotesHint;
 
   /// No description provided for @credentialName.
@@ -1977,6 +1977,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Locker logs'**
   String get lockerLogs;
+
+  /// No description provided for @recents.
+  ///
+  /// In en, this message translates to:
+  /// **'Recents'**
+  String get recents;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @uploadAFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a File'**
+  String get uploadAFile;
+
+  /// No description provided for @clickHereToUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Click here to upload'**
+  String get clickHereToUpload;
+
+  /// No description provided for @saveDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Save document'**
+  String get saveDocument;
+
+  /// No description provided for @uploadFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Files'**
+  String get uploadFiles;
+
+  /// Number of files selected for upload
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No files selected} =1{1 file selected} other{{count} files selected}}'**
+  String filesSelected(int count);
+
+  /// No description provided for @addToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to collection'**
+  String get addToCollection;
+
+  /// No description provided for @newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get newCollection;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @backToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to view'**
+  String get backToView;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// Error message when loading collections fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load collections: {error}'**
+  String failedToLoadCollections(String error);
+
+  /// No description provided for @informationCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get informationCollectionName;
+
+  /// Success message when record is saved to multiple collections
+  ///
+  /// In en, this message translates to:
+  /// **'Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully'**
+  String recordSavedToMultipleCollections(int count);
+
+  /// Message when a field is copied to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} copied to clipboard'**
+  String copiedToClipboard(String fieldName);
+
+  /// Search results count message
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}} for \"{query}\"'**
+  String searchResultsCount(int count, String query);
+
+  /// No description provided for @locker.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker'**
+  String get locker;
+
+  /// No description provided for @unnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed'**
+  String get unnamed;
+
+  /// No description provided for @collectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get collectionLabel;
+
+  /// No description provided for @areYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get areYouSure;
+
+  /// No description provided for @yesDeleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete collection'**
+  String get yesDeleteCollection;
+
+  /// No description provided for @yesDeleteFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete file'**
+  String get yesDeleteFile;
+
+  /// Confirmation message body for deleting a single collection
+  ///
+  /// In en, this message translates to:
+  /// **'This action is immediate and cannot be undone.\nThe {collectionName} will be deleted permanently.'**
+  String deleteCollectionDialogBody(String collectionName);
+
+  /// Confirmation message body for deleting multiple collections
+  ///
+  /// In en, this message translates to:
+  /// **'This action is immediate and cannot be undone.\n{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
+  String deleteMultipleCollectionsDialogBody(int count);
+
+  /// Confirmation message body for deleting multiple files
+  ///
+  /// In en, this message translates to:
+  /// **'This action is immediate and cannot be undone.\n{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.'**
+  String deleteMultipleFilesDialogBody(int count);
+
+  /// Button label for confirming deletion of one or more collections
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete {count, plural, =1{collection} other{collections}}'**
+  String yesDeleteCollections(int count);
+
+  /// Button label for confirming deletion of one or more files
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete {count, plural, =1{file} other{files}}'**
+  String yesDeleteFiles(int count);
 }
 
 class _AppLocalizationsDelegate

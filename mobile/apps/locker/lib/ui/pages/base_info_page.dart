@@ -1,9 +1,9 @@
-import 'dart:io';
-
 import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -86,12 +86,15 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     try {
       final collections = await CollectionService.instance.getCollections();
       setState(() {
-        _availableCollections = collections;
+        // Filter out uncategorized collection (it will be shown separately)
+        _availableCollections = collections
+            .where((c) => c.type != CollectionType.uncategorized)
+            .toList();
         // Pre-select a default collection if available
-        if (collections.isNotEmpty) {
-          final defaultCollection = collections.firstWhere(
-            (c) => c.name == 'Information',
-            orElse: () => collections.first,
+        if (_availableCollections.isNotEmpty) {
+          final defaultCollection = _availableCollections.firstWhere(
+            (c) => c.name == context.l10n.informationCollectionName,
+            orElse: () => _availableCollections.first,
           );
           _selectedCollectionIds = {defaultCollection.id};
         }
@@ -215,8 +218,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one collection'),
+        SnackBar(
+          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
           backgroundColor: Colors.red,
         ),
       );
@@ -243,7 +246,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final collectionCount = selectedCollections.length;
     final message = collectionCount == 1
         ? context.l10n.recordSavedSuccessfully
-        : 'Record saved to $collectionCount collections successfully';
+        : context.l10n.recordSavedToMultipleCollections(collectionCount);
 
     // Navigate to home page and clear all previous routes
     await Navigator.of(context).pushAndRemoveUntil(
@@ -276,7 +279,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$fieldName copied to clipboard'),
+        content: Text(context.l10n.copiedToClipboard(fieldName)),
         duration: const Duration(seconds: 2),
         backgroundColor: Colors.green,
       ),
@@ -296,8 +299,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label.isNotEmpty) ...[
-          Text(label), // Use default style to match FormTextInputWidget
-          const SizedBox(height: 4),
+          Text(
+            label,
+            style: textTheme.body,
+          ), // Use default style to match FormTextInputWidget
+          const SizedBox(height: 12),
         ],
         ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -347,7 +353,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Widget build(BuildContext context) {
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
-
+    final colorScheme = getEnteColorScheme(context);
     return PopScope(
       canPop: isViewMode,
       onPopInvokedWithResult: (didPop, result) {
@@ -358,21 +364,24 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(pageTitle),
+          backgroundColor: colorScheme.backgroundBase,
+          surfaceTintColor: Colors.transparent,
+          toolbarHeight: 48,
+          leadingWidth: 48,
           leading: isEditMode && currentData != null
               ? IconButton(
-                  icon: Icon(
-                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
                   ),
                   onPressed: _toggleMode,
-                  tooltip: 'Back to view',
+                  tooltip: context.l10n.backToView,
                 )
               : IconButton(
-                  icon: Icon(
-                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Back',
+                  tooltip: context.l10n.back,
                 ),
           automaticallyImplyLeading: false,
           actions: [
@@ -380,20 +389,28 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: _toggleMode,
-                tooltip: 'Edit',
+                tooltip: context.l10n.edit,
               ),
           ],
         ),
+        backgroundColor: colorScheme.backgroundBase,
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: TitleBarTitleWidget(
+                    title: pageTitle,
+                  ),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -422,13 +439,19 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                 // Save button only in edit mode
                 if (isEditMode) ...[
                   const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      onTap: _isLoading ? null : _saveRecord,
-                      text: _isLoading
-                          ? context.l10n.pleaseWait
-                          : submitButtonText,
+                  SafeArea(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: GradientButton(
+                        hugeIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedFileUpload,
+                          color: colorScheme.textBase,
+                        ),
+                        onTap: _isLoading ? null : _saveRecord,
+                        text: _isLoading
+                            ? context.l10n.pleaseWait
+                            : submitButtonText,
+                      ),
                     ),
                   ),
                 ],

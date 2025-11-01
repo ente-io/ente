@@ -3,18 +3,20 @@ import 'package:flutter/material.dart';
 
 class SnackBarUtils {
   static void showInfoSnackBar(BuildContext context, String message) {
+    final colorScheme = getEnteColorScheme(context);
     _showSnackBar(
       context,
       message,
-      backgroundColor: getEnteColorScheme(context).primary500,
+      backgroundColor: colorScheme.primary500,
     );
   }
 
   static void showWarningSnackBar(BuildContext context, String message) {
+    final colorScheme = getEnteColorScheme(context);
     _showSnackBar(
       context,
       message,
-      backgroundColor: getEnteColorScheme(context).warning500,
+      backgroundColor: colorScheme.warning500,
     );
   }
 
@@ -25,11 +27,12 @@ class SnackBarUtils {
   }) {
     if (!context.mounted) return;
 
+    final colorScheme = getEnteColorScheme(context);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor:
-            backgroundColor ?? getEnteColorScheme(context).primary500,
+        backgroundColor: backgroundColor ?? colorScheme.primary500,
       ),
     );
   }

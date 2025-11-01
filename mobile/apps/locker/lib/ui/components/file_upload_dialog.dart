@@ -123,10 +123,10 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
           children: [
             Row(
               children: [
-                Icon(
-                  FileIconUtils.getFileIcon(_fileName),
-                  color: FileIconUtils.getFileIconColor(_fileName),
+                FileIconUtils.getFileIcon(
+                  _fileName,
                   size: 24,
+                  showBackground: false,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
