@@ -173,7 +173,9 @@ class _AlbumSelectionActionWidgetState
     final List<Collection> nonEmptyCollection = [];
 
     final List errors = [];
-    for (final collection in widget.selectedAlbums.albums) {
+    final List<Collection> selectedAlbums =
+        widget.selectedAlbums.albums.toList(growable: false);
+    for (final collection in selectedAlbums) {
       if (collection.type == CollectionType.favorites) {
         continue;
       }

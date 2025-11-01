@@ -19,6 +19,7 @@ import 'package:photos/models/typedefs.dart';
 import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/ram_check_util.dart";
+import "package:photos/utils/standalone/task_queue.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -281,6 +282,9 @@ class SuperLogging {
         error is WiFiUnavailableError ||
         error is InvalidFileError ||
         error is NoActiveSubscriptionError ||
+        error is TaskQueueTimeoutException ||
+        error is TaskQueueOverflowException ||
+        error is TaskQueueCancelledException ||
         error is CouldNotRetrieveAnyFileData;
     if (kDebugMode && result) {
       $.info('Not sending error to sentry: $error');
@@ -370,7 +374,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && error != null) {
-      _sendErrorToSentry(error, null, rec: rec).ignore();
+      _sendErrorToSentry(error, rec?.stackTrace, rec: rec).ignore();
     }
   }
 
