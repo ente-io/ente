@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/components/collection_selection_widget.dart";
+import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 
 class AddToCollectionDialogResult {
@@ -17,10 +18,12 @@ class AddToCollectionDialogResult {
 
 class AddToCollectionDialog extends StatefulWidget {
   final List<Collection> collections;
+  final BuildContext snackBarContext;
 
   const AddToCollectionDialog({
     super.key,
     required this.collections,
+    required this.snackBarContext,
   });
 
   @override
@@ -34,7 +37,7 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
   @override
   void initState() {
     super.initState();
-    _availableCollections = List.from(widget.collections);
+    _availableCollections = uniqueCollectionsById(widget.collections);
   }
 
   void _toggleCollection(int collectionId) {
@@ -49,7 +52,7 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
 
   void _onCollectionsUpdated(List<Collection> updatedCollections) {
     setState(() {
-      _availableCollections = updatedCollections;
+      _availableCollections = uniqueCollectionsById(updatedCollections);
     });
   }
 
@@ -64,8 +67,8 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
 
     if (selectedCollections.isEmpty) {
       SnackBarUtils.showWarningSnackBar(
-        context,
-        context.l10n.pleaseSelectAtLeastOneCollection,
+        widget.snackBarContext,
+        widget.snackBarContext.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -149,11 +152,14 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
 Future<AddToCollectionDialogResult?> showAddToCollectionDialog(
   BuildContext context, {
   required List<Collection> collections,
+  BuildContext? snackBarContext,
 }) async {
+  final messengerContext = snackBarContext ?? context;
   return showDialog<AddToCollectionDialogResult>(
     context: context,
-    builder: (context) => AddToCollectionDialog(
+    builder: (dialogContext) => AddToCollectionDialog(
       collections: collections,
+      snackBarContext: messengerContext,
     ),
   );
 }

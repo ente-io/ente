@@ -1,12 +1,8 @@
 import 'package:locker/services/collections/models/collection.dart';
-import 'package:logging/logging.dart';
 
 /// Returns a list of collections with duplicate IDs removed while preserving
 /// order. Stops at the first uncategorized collection encountered.
-List<Collection> uniqueCollectionsById(
-  List<Collection> collections, {
-  Logger? logger,
-}) {
+List<Collection> uniqueCollectionsById(List<Collection> collections) {
   final seenIds = <int>{};
   final unique = <Collection>[];
 
@@ -15,25 +11,15 @@ List<Collection> uniqueCollectionsById(
   for (final collection in collections) {
     final isUncategorizedCollection = _isUncategorized(collection);
 
-    if (!seenIds.add(collection.id)) {
-      logger?.fine(
-        'Skipping duplicate collection with id ${collection.id} '
-        '(${collection.name ?? "Unnamed"})',
-      );
-      continue;
-    }
-
-    if (isUncategorizedCollection) {
-      if (uncategorizedSeen) {
-        logger?.finer(
-          'Skipping duplicate uncategorized collection with id ${collection.id}',
-        );
-        continue;
+    if (seenIds.add(collection.id)) {
+      if (isUncategorizedCollection) {
+        if (uncategorizedSeen) {
+          continue;
+        }
+        uncategorizedSeen = true;
       }
-      uncategorizedSeen = true;
+      unique.add(collection);
     }
-
-    unique.add(collection);
   }
 
   return unique;
