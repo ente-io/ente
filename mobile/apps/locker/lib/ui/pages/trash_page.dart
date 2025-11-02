@@ -13,8 +13,10 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_file.dart';
 import 'package:locker/services/trash/trash_service.dart';
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/file_restore_dialog.dart';
 import 'package:locker/ui/components/item_list_view.dart';
+import 'package:locker/utils/collection_list_util.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
 
 class TrashPage extends StatefulWidget {
@@ -74,9 +76,9 @@ class _TrashPageState extends State<TrashPage> {
   void _restoreFile(BuildContext context, EnteFile file) async {
     final collections = await CollectionService.instance.getCollections();
 
-    final availableCollections = collections
-        .where((c) => !c.isDeleted && c.type != CollectionType.uncategorized)
-        .toList();
+    final availableCollections = uniqueCollectionsById(
+      collections.where((c) => !c.isDeleted).toList(),
+    );
 
     if (availableCollections.isEmpty) {
       SnackBarUtils.showWarningSnackBar(
@@ -227,32 +229,6 @@ class _TrashPageState extends State<TrashPage> {
   }
 
   Widget _buildBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
-    if (_sortedTrashFiles.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.delete_outline,
-                size: 64,
-                color: Colors.grey,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                context.l10n.trashIsEmpty,
-                style: textTheme.large.copyWith(
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -281,25 +257,31 @@ class _TrashPageState extends State<TrashPage> {
             ],
           ),
           const SizedBox(height: 24),
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.zero,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: ItemListView(
-                      files: _sortedTrashFiles.cast<EnteFile>(),
-                      fileOverflowActions: _getFileOverflowActions(),
-                    ),
+          _sortedTrashFiles.isEmpty
+              ? const EmptyStateWidget(
+                  assetPath: 'assets/empty_state.png',
+                  title: "Nothing to see here",
+                  showBorder: false,
+                )
+              : Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: ItemListView(
+                            files: _sortedTrashFiles.cast<EnteFile>(),
+                            fileOverflowActions: _getFileOverflowActions(),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ),
+                ),
         ],
       ),
     );
