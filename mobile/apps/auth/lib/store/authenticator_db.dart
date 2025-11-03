@@ -184,6 +184,7 @@ class AuthenticatorDB extends EnteBaseDatabase {
     debugPrint("Done");
   }
 
+  @override
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(entityTable);

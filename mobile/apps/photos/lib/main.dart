@@ -313,6 +313,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
+    wrappedService.scheduleInitialLoad();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;

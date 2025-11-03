@@ -50,6 +50,8 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
+  bool get enteWrapped => internalUser;
+
   bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
@@ -71,6 +73,8 @@ class FlagService {
   bool get widgetSharedAlbums => internalUser;
 
   bool get useNativeVideoEditor => internalUser;
+
+  bool get useWidgetV2 => kDebugMode;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

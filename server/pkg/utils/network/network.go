@@ -6,11 +6,7 @@ import (
 )
 
 func GetClientIP(c *gin.Context) string {
-	ip := c.GetHeader("CF-Connecting-IP")
-	if ip == "" {
-		ip = c.ClientIP()
-	}
-	return ip
+	return c.ClientIP()
 }
 
 func IsCFWorkerIP(ip string) bool {

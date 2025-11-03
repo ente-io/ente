@@ -8,6 +8,7 @@ description: A community guide with a Windows specific workflow for running the 
 While this setup was tested on Windows, the concepts are not OS-specific and will apply to any containerized deployment, including Linux and MacOS. If you are struggling with self-hosting, I recommend you read this guide.
 
 The key differences are:
+
 - Docker Desktop/Engine installation
 - File path formatting for container volume mounts
 - Startup service automation
@@ -15,10 +16,10 @@ The key differences are:
 ## Prerequisites
 
 You will need Docker Desktop or Docker Engine. Follow the installation instructions for your system:
+
 - [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
 - [MacOS](https://docs.docker.com/desktop/setup/install/mac-install/) (or install [docker-desktop Homebrew cask](https://formulae.brew.sh/cask/docker-desktop))
 - [Linux](https://docs.docker.com/desktop/setup/install/linux/)
-
 
 ## Architecture
 
@@ -49,7 +50,6 @@ extra_hosts:
   - localhost:host-gateway
 ```
 
-
 ## Secrets
 
 **DO NOT** store secrets in plaintext. Let Docker handle them for you. Docker secrets are only available to swarm services, so we will be deploying using `docker stack` instead of `docker compose`.
@@ -60,7 +60,7 @@ You will need 6 secrets stored in your favorite password manager (any will do, I
 2. `minio_user`: random password
 3. `minio_password`: random password
 4. `encryption_key`: 32-char, base64
-5. `hash_key`: 64-char, base64 
+5. `hash_key`: 64-char, base64
 6. `jwt_secret`: 32-char, base64, URL-safe
 
 I generated the passwords using my password manager and the base64 values using bash:
@@ -72,10 +72,10 @@ I generated the passwords using my password manager and the base64 values using 
 If you don't have access to a unix shell, you can find an equivalent powershell command.
 
 For each key, store it as a docker secret:
+
 ```
 "Kx7v..." | docker secret create encryption_key -
 ```
-
 
 ## Configuration
 
@@ -116,7 +116,7 @@ s3:
     bucket: b2-eu-cen
 
 apps:
-  public-albums: http://localhost:3002    
+  public-albums: http://localhost:3002
   # public-albums: http://192.168.1.42:3002
   # public-albums: https://albums.mydomain.com
   cast: http://localhost:3004
@@ -230,7 +230,6 @@ Modify the volume mappings for museum, postgres, and minio to target the corresp
 - `./relative/windows/path:/container/path/do/not/modify`
 - `D:/absolute/windows/path:/container/path/do/not/modify`
 
-
 ## Deployment
 
 From the directory containing `docker-compose.yaml` run:
@@ -250,54 +249,58 @@ Follow https://ente.io/help/self-hosting/installation/post-install and enjoy the
 - I recommend using Docker Desktop UI to view logs and run container commands.
 - On shutdown (`docker stack rm ente`), docker will wait for postgres to terminate before deleting the default network. The startup command (`docker stack deploy -d -c docker-compose.yaml ente`) will fail until all resources are deleted.
 - Minio **will not** auto-create the bucket. I feel like museum should be doing this, but at the time of testing, this was not handled automatically. Additionally, if you don't allowlist CORS, your uploads will not complete. Run the following commands to fix both issues:
-  1. In Docker Desktop, open the `ente_minio` container Exec tab, or run the following powershell command:
-      ```
-      docker exec -it $(docker ps -q -f name=ente_minio) sh
-      ```
-  2. Log in, create the default bucket, and allowlist CORS:
-      ```
-      printf '%s\n%s\n' "$(cat /run/secrets/minio_user)" "$(cat /run/secrets/minio_password)" | mc alias set admin http://localhost:9000
-      mc mb -p admin/b2-eu-cen
-      mc admin config set admin api cors\_allow\_origin="\*"
-      ```
-  3. Restart your minio container and you should be ready to upload!
+    1. In Docker Desktop, open the `ente_minio` container Exec tab, or run the following powershell command:
+        ```
+        docker exec -it $(docker ps -q -f name=ente_minio) sh
+        ```
+    2. Log in, create the default bucket, and allowlist CORS:
+        ```
+        printf '%s\n%s\n' "$(cat /run/secrets/minio_user)" "$(cat /run/secrets/minio_password)" | mc alias set admin http://localhost:9000
+        mc mb -p admin/b2-eu-cen
+        mc admin config set admin api cors\_allow\_origin="\*"
+        ```
+    3. Restart your minio container and you should be ready to upload!
 - In case you missed it, use the ente CLI to increase your storage limits: https://ente.io/help/self-hosting/administration/cli#step-4-increase-storage-and-account-validity
-
 
 ## Next steps
 
 1. Start ente automatically with Windows Task Scheduler. Create a basic task to run on login using `powershell.exe` with the following flags:
+
     ```
     -WindowStyle Hidden -ExecutionPolicy Bypass -File "D:\ente\ente_deploy.ps1"
     ```
+
     Then add `ente_deploy.ps1` to your `ente` directory:
-      ```
-      param(
-        [string]$LogFile = "$PSScriptRoot\ente-deploy.log"
-      )
 
-      function Log($msg) {
-          "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $msg" | Add-Content $LogFile
-      }
+    ```
+    param(
+      [string]$LogFile = "$PSScriptRoot\ente-deploy.log"
+    )
 
-      do {
-          $ok = try { docker node ls 2>$null } catch { $null }
-          if ($ok) { break }
-          Start-Sleep -Seconds 5
-      } while ($true)
+    function Log($msg) {
+        "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] $msg" | Add-Content $LogFile
+    }
 
-      Set-Location $PSScriptRoot
-      $output = docker stack deploy -d -c docker-compose.yaml ente 2>&1
-      $exitCode = $LASTEXITCODE
+    do {
+        $ok = try { docker node ls 2>$null } catch { $null }
+        if ($ok) { break }
+        Start-Sleep -Seconds 5
+    } while ($true)
 
-      if ($exitCode -ne 0) {
-          Log $output
-          exit $exitCode
-      }
+    Set-Location $PSScriptRoot
+    $output = docker stack deploy -d -c docker-compose.yaml ente 2>&1
+    $exitCode = $LASTEXITCODE
 
-      exit 0
-      ```
+    if ($exitCode -ne 0) {
+        Log $output
+        exit $exitCode
+    }
+
+    exit 0
+    ```
+
     - For non-Windows setups, find the recommended service manager for your OS (e.g. `systemd`), and configure it to use the following startup command: `cd /path/to/ente && docker stack deploy -c docker-compose.yaml ente`
+
 2. To expose ente on your local network or custom domain, update the three endpoints in `museum.yamls` and two ORIGIN values in `docker-compose.yaml` (if you want web support).
     - For custom domains, I use a Cloudflare tunnel. Cloudflare client comes with a reverse proxy.
     - If you don't want to use a custom domain, but still want your ente service exposed publicly, Tailscale is a good choice. However, their "funnel" only routes to a single port, so you will need to set up your own reverse proxy. Caddy and Nginx are both great options which can be deployed as part of your existing `docker-compose.yaml`.
@@ -306,10 +309,8 @@ Follow https://ente.io/help/self-hosting/installation/post-install and enjoy the
 4. You're self-hosting, so you have to worry about replication! Be sure to periodically back up either your postgres+minio databases or photos export to local disk. See https://ente.io/help/self-hosting/administration/backup for recommendations.
     - For example, my setup uses ente's continuous export and sync to an external drive, which is then uploaded daily to B2 using Kopia.
 
-
 ## Troubleshooting tips
 
 1. Most errors will be network misconfigurations. Use your browser (or desktop app) developer tools console to see where a request is being sent. For example, if you're connecting from a different device or through a custom domain, and you see `localhost:8080` domain being hit in the networking logs, you know you forgot to update the web UI's `ENTE_API_ORIGIN` value. If your uploads aren't starting, your `s3.b2-eu-cen.endpoint` may be misconfigured. If your uploads are getting stuck at 97%, look for symptoms of a `403` and follow the CORS allowlist instructions.
 2. Secrets are finicky when reading from files. You have to worry about trimming newlines and carriage returns. The configuration I shared should handle this, but if you see key authentication errors, you're in for a treat.
 3. If you have lots of disk I/O (like a large copy) happening in the background, Windows will prioritize the Windows process over containers. This means containers will be slow to start up and may be terminated on startup. Wait for the copy to finish or increase the container `healthcheck.start_period`.
-

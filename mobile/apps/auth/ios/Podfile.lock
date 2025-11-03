@@ -87,9 +87,9 @@ PODS:
   - qr_code_scanner (0.2.0):
     - Flutter
     - MTBBarcodeScanner
-  - SDWebImage (5.21.1):
-    - SDWebImage/Core (= 5.21.1)
-  - SDWebImage/Core (5.21.1)
+  - SDWebImage (5.21.2):
+    - SDWebImage/Core (= 5.21.2)
+  - SDWebImage/Core (5.21.2)
   - Sentry/HybridSDK (8.46.0)
   - sentry_flutter (8.14.2):
     - Flutter
@@ -105,18 +105,18 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.50.2):
-    - sqlite3/common (= 3.50.2)
-  - sqlite3/common (3.50.2)
-  - sqlite3/dbstatvtab (3.50.2):
+  - sqlite3 (3.50.4):
+    - sqlite3/common (= 3.50.4)
+  - sqlite3/common (3.50.4)
+  - sqlite3/dbstatvtab (3.50.4):
     - sqlite3/common
-  - sqlite3/fts5 (3.50.2):
+  - sqlite3/fts5 (3.50.4):
     - sqlite3/common
-  - sqlite3/math (3.50.2):
+  - sqlite3/math (3.50.4):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.50.2):
+  - sqlite3/perf-threadsafe (3.50.4):
     - sqlite3/common
-  - sqlite3/rtree (3.50.2):
+  - sqlite3/rtree (3.50.4):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
@@ -242,45 +242,45 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  app_links: f3e17e4ee5e357b39d8b95290a9b2c299fca71c6
-  connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
-  cupertino_http: 947a233f40cfea55167a49f2facc18434ea117ba
-  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
+  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
+  cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
+  device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
-  ente_qr: f39434aa69ea0e71047b49316365b2737f8a20aa
-  file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
-  file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
-  fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
+  ente_qr: 2a30f91f9e938c229ebcbc98a6f8f018d1ac665d
+  file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
+  file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
+  fk_user_agent: 137145b086229251761678fe034da53753f4ce59
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_email_sender: e03bdda7637bcd3539bfe718fddd980e9508efaa
-  flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
-  flutter_local_authentication: 1172a4dd88f6306dadce067454e2c4caf07977bb
-  flutter_local_notifications: df98d66e515e1ca797af436137b4459b160ad8c9
-  flutter_native_splash: df59bb2e1421aa0282cb2e95618af4dcb0c56c29
-  flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
-  fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
-  local_auth_darwin: fa4b06454df7df8e97c18d7ee55151c57e7af0de
-  move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
+  flutter_email_sender: aa1e9772696691d02cd91fea829856c11efb8e58
+  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
+  flutter_local_authentication: 989278c681612f1ee0e36019e149137f114b9d7f
+  flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  fluttertoast: 2c67e14dce98bbdb200df9e1acf610d7a6264ea1
+  local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
+  move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  objective_c: 77e887b5ba1827970907e10e832eec1683f3431d
+  objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
-  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
-  privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
-  qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
-  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
+  privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
+  qr_code_scanner: d77f94ecc9abf96d9b9b8fc04ef13f611e5a147a
+  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
-  sentry_flutter: 2df8b0aab7e4aba81261c230cbea31c82a62dd1b
-  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  sodium_libs: 1faae17af662384acbd13e41867a0008cd2e2318
-  sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
-  sqlite3: 3e82a2daae39ba3b41ae6ee84a130494585460fc
-  sqlite3_flutter_libs: 2c48c4ee7217fd653251975e43412250d5bcbbe2
+  sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  sodium_libs: 6c6d0e83f4ee427c6464caa1f1bdc2abf3ca0b7f
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
+  sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  ua_client_hints: aeabd123262c087f0ce151ef96fa3ab77bfc8b38
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: 78f002751f1a8f65042b8da97902ba4124271c5a
 

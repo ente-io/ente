@@ -296,24 +296,22 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         transform = transform.rotated(by: clockwiseRadians)
         transform = transform.translatedBy(x: -centerX, y: -centerY)
 
-        // Set renderSize based on rotation
-        var renderSize: CGSize
-        if abs(degrees) == 90 || abs(degrees) == 270 {
-            renderSize = CGSize(width: orientedSize.height, height: orientedSize.width)
-        } else {
-            renderSize = orientedSize
-        }
+        // Calculate renderSize from actual transformed bounds (more accurate for metadata-rotated videos)
+        // Use naturalSize here because transform expects input in natural/file coordinate space
+        let testRect = CGRect(origin: .zero, size: naturalSize)
+        let transformedBounds = testRect.applying(transform)
 
-        // Use bounds testing to calculate the necessary translation to center the video
-        let testRect = CGRect(origin: .zero, size: orientedSize)
-        let finalBounds = testRect.applying(transform)
+        // Get the actual dimensions after the full transform chain
+        let finalWidth = abs(transformedBounds.width)
+        let finalHeight = abs(transformedBounds.height)
+        let renderSize = CGSize(width: finalWidth, height: finalHeight)
 
         // Center the video in the renderSize
-        let targetMinX: CGFloat = (renderSize.width - finalBounds.width) / 2
-        let additionalTranslateX = targetMinX - finalBounds.minX
+        let targetMinX: CGFloat = (renderSize.width - transformedBounds.width) / 2
+        let additionalTranslateX = targetMinX - transformedBounds.minX
 
-        let targetMinY: CGFloat = (renderSize.height - finalBounds.height) / 2
-        let additionalTranslateY = targetMinY - finalBounds.minY
+        let targetMinY: CGFloat = (renderSize.height - transformedBounds.height) / 2
+        let additionalTranslateY = targetMinY - transformedBounds.minY
 
         transform = transform.concatenating(CGAffineTransform(translationX: additionalTranslateX, y: additionalTranslateY))
 
@@ -698,23 +696,22 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             transform = transform.rotated(by: clockwiseRadians)
             transform = transform.translatedBy(x: -centerX, y: -centerY)
 
-            // Set renderSize based on rotation
-            if abs(rotateDegrees) == 90 || abs(rotateDegrees) == 270 {
-                renderSize = CGSize(width: orientedSize.height, height: orientedSize.width)
-            } else {
-                renderSize = orientedSize
-            }
+            // Calculate renderSize from actual transformed bounds (more accurate for metadata-rotated videos)
+            // Use naturalSize here because transform expects input in natural/file coordinate space
+            let testRect = CGRect(origin: .zero, size: naturalSize)
+            let transformedBounds = testRect.applying(transform)
 
-            // Use bounds testing to calculate the necessary translation to center the video
-            let testRect = CGRect(origin: .zero, size: orientedSize)
-            let finalBounds = testRect.applying(transform)
+            // Get the actual dimensions after the full transform chain
+            let finalWidth = abs(transformedBounds.width)
+            let finalHeight = abs(transformedBounds.height)
+            renderSize = CGSize(width: finalWidth, height: finalHeight)
 
             // Center the video in the renderSize
-            let targetMinX: CGFloat = (renderSize.width - finalBounds.width) / 2
-            let additionalTranslateX = targetMinX - finalBounds.minX
+            let targetMinX: CGFloat = (renderSize.width - transformedBounds.width) / 2
+            let additionalTranslateX = targetMinX - transformedBounds.minX
 
-            let targetMinY: CGFloat = (renderSize.height - finalBounds.height) / 2
-            let additionalTranslateY = targetMinY - finalBounds.minY
+            let targetMinY: CGFloat = (renderSize.height - transformedBounds.height) / 2
+            let additionalTranslateY = targetMinY - transformedBounds.minY
 
             transform = transform.concatenating(CGAffineTransform(translationX: additionalTranslateX, y: additionalTranslateY))
 
@@ -768,7 +765,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         exportSession.shouldOptimizeForNetworkUse = true
 
         if !isReEncoded {
-            exportSession.timeRange = timeRange
+            exportSession.timeRange =  CMTimeRange(start: .zero, duration: composition.duration)
         }
 
         startProgressReporting()

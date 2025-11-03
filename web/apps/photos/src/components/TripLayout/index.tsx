@@ -219,14 +219,13 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
                         setPhotoClusters(sortedClusters);
 
-                        // Check if first location is in a super cluster and adjust initial zoom
+                        // Check if first location is in a super cluster and adjust initial zoom (desktop only)
                         const firstLocationInSuperCluster =
                             clusterToSuperClusterMap.has(0);
-                        const initialZoom = firstLocationInSuperCluster
-                            ? isMobileOrTablet
-                                ? 15
-                                : 14 // Super cluster zoom level
-                            : optimalZoomLevel;
+                        const initialZoom =
+                            firstLocationInSuperCluster && !isMobileOrTablet
+                                ? 14 // Super cluster zoom level (desktop only)
+                                : optimalZoomLevel;
 
                         setOptimalZoom(initialZoom);
                         setSuperClusterInfo({
