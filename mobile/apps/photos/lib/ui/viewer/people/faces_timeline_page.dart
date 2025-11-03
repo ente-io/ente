@@ -30,6 +30,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   static const _frameInterval = Duration(milliseconds: 1200);
 
   final Logger _logger = Logger("FacesTimelinePage");
+  int _frameViewVersion = 0;
 
   late Future<List<_TimelineFrame>> _framesFuture;
   final List<_TimelineFrame> _frames = [];
@@ -71,6 +72,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         ..clear()
         ..addAll(frames);
       _currentIndex = 0;
+      _frameViewVersion = 0;
       _currentCaptionValue = frames.first.captionValue;
       _previousCaptionValue = _currentCaptionValue;
       _currentCaptionType = frames.first.captionType;
@@ -188,13 +190,16 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   }
 
   void _setCurrentFrame(int index) {
-    if (index < 0 || index >= _frames.length) return;
+    if (index < 0 || index >= _frames.length || index == _currentIndex) {
+      return;
+    }
     final frame = _frames[index];
     setState(() {
       _previousCaptionValue = _currentCaptionValue;
       _currentCaptionValue = frame.captionValue;
       _currentCaptionType = frame.captionType;
       _currentIndex = index;
+      _frameViewVersion++;
     });
   }
 
@@ -302,7 +307,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       return Container(color: colorScheme.backgroundBase);
     }
     final frame = _frames[_currentIndex];
-    final key = ValueKey<String>(frame.entry.faceId);
+    final key = ValueKey<int>(_frameViewVersion);
     if (frame.image != null) {
       return Container(
         key: key,
