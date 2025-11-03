@@ -119,12 +119,13 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final NumberFormat averageFormat = NumberFormat("0.#");
+    final NumberFormat averageFormat = NumberFormat.decimalPattern();
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateFormat monthFormat = DateFormat("MMMM");
 
+    final int roundedMonthlyAverage = snapshot.averagePerMonth.round();
     final String baseSentence =
-        "You averaged ${averageFormat.format(snapshot.averagePerDay)} memories a day";
+        "You averaged ${averageFormat.format(roundedMonthlyAverage)} memories a month";
     String? busiestMonthName;
     if (snapshot.busiestMonth != null && snapshot.busiestMonthCount > 0) {
       busiestMonthName = monthFormat
@@ -163,8 +164,10 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final Map<String, Object?> meta = <String, Object?>{
       "year": snapshot.year,
       "averagePerDay": snapshot.averagePerDay,
+      "averagePerMonth": snapshot.averagePerMonth,
       "averagePerActiveDay": snapshot.averagePerActiveDay,
       "elapsedDays": snapshot.elapsedDays,
+      "elapsedMonths": snapshot.elapsedMonths,
       "daysWithCaptures": snapshot.daysWithCaptures,
       "busiestMonth": snapshot.busiestMonth,
       "busiestMonthName": busiestMonthName,
@@ -190,7 +193,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.statsVelocity,
-      title: "Daily groove",
+      title: "Monthly groove",
       subtitle: subtitle,
       media: media,
       meta: meta
@@ -386,6 +389,7 @@ class _StatsSnapshot {
     required this.elapsedDays,
     required this.daysWithCaptures,
     required this.averagePerDay,
+    required this.averagePerMonth,
     required this.averagePerActiveDay,
     required this.busiestMonth,
     required this.busiestMonthCount,
@@ -407,6 +411,7 @@ class _StatsSnapshot {
     required this.lastCaptureUploadedIDs,
     required this.busiestMonthHighlightUploadedIDs,
     required this.periodEndDay,
+    required this.elapsedMonths,
     required this.heatmapStart,
     required this.heatmapEnd,
     required this.heatmapRows,
@@ -429,6 +434,7 @@ class _StatsSnapshot {
   final int elapsedDays;
   final int daysWithCaptures;
   final double averagePerDay;
+  final double averagePerMonth;
   final double averagePerActiveDay;
   final int? busiestMonth;
   final int busiestMonthCount;
@@ -450,6 +456,7 @@ class _StatsSnapshot {
   final List<int> lastCaptureUploadedIDs;
   final List<int> busiestMonthHighlightUploadedIDs;
   final DateTime periodEndDay;
+  final int elapsedMonths;
   final DateTime heatmapStart;
   final DateTime heatmapEnd;
   final List<List<int>> heatmapRows;
@@ -613,6 +620,9 @@ class _StatsSnapshot {
 
     final double averagePerDay =
         elapsedDays > 0 ? totalCount / elapsedDays : 0.0;
+    final int elapsedMonths = math.max(1, math.min(12, periodEndDay.month));
+    final double averagePerMonth =
+        elapsedMonths > 0 ? totalCount / elapsedMonths : 0.0;
     final double averagePerActiveDay =
         daysWithCaptures > 0 ? totalCount / daysWithCaptures : 0.0;
 
@@ -704,6 +714,7 @@ class _StatsSnapshot {
       elapsedDays: elapsedDays,
       daysWithCaptures: daysWithCaptures,
       averagePerDay: averagePerDay,
+      averagePerMonth: averagePerMonth,
       averagePerActiveDay: averagePerActiveDay,
       busiestMonth: busiestMonth,
       busiestMonthCount: busiestMonthCount,
@@ -725,6 +736,7 @@ class _StatsSnapshot {
       lastCaptureUploadedIDs: lastCaptureUploadedIDs,
       busiestMonthHighlightUploadedIDs: busiestMonthHighlightUploadedIDs,
       periodEndDay: periodEndDay,
+      elapsedMonths: elapsedMonths,
       heatmapStart: heatmapStart,
       heatmapEnd: heatmapEnd,
       heatmapRows: normalizedHeatmapRows,
