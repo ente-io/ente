@@ -132,13 +132,6 @@ const PhotoFrame = styled(Box)(() => ({
     cursor: "pointer",
 }));
 
-const PhotoFrameTwo = styled(PhotoFrame)({
-    transform: "translateX(33px) skewY(8deg)",
-    top: "50%",
-    left: "0",
-    marginTop: "-103.5px",
-});
-
 const PhotoFrameLeft = styled(PhotoFrame)({
     transform: "translateX(-33px) skewY(-8deg)",
     top: "16.5px",
