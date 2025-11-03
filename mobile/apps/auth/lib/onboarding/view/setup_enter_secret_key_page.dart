@@ -458,24 +458,27 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         }
       }
 
-      // When editing, preserve original type/algorithm/digits/period/counter
-      // When creating new, apply isStreamCode logic and use UI values
-      final Code newCode = Code.fromAccountAndSecret(
-        widget.code != null
-            ? widget.code!.type
-            : (isStreamCode ? Type.steam : _type),
-        account,
-        issuer,
-        secret,
-        display,
-        widget.code != null
-            ? widget.code!.digits
-            : (isStreamCode ? Code.steamDigits : digits!),
-        algorithm: widget.code?.algorithm ?? _algorithm,
-        period: widget.code?.period ?? period!,
-        counter: widget.code?.counter ?? 0,
-        generatedID: widget.code?.generatedID,
-      );
+      final Code newCode = widget.code == null
+          ? Code.fromAccountAndSecret(
+              isStreamCode ? Type.steam : _type,
+              account,
+              issuer,
+              secret,
+              display,
+              isStreamCode ? Code.steamDigits : digits!,
+              algorithm: _algorithm,
+              period: period!,
+            )
+          : widget.code!.copyWith(
+              account: account,
+              issuer: issuer,
+              secret: secret,
+              display: display,
+              algorithm: _algorithm,
+              digits: digits!,
+              type: _type,
+              period: period,
+            );
 
       // Verify the validity of the code
       getOTP(newCode);

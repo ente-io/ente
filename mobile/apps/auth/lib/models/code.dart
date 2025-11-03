@@ -98,7 +98,7 @@ class Code {
       updatedAlgo,
       updatedType,
       updatedCounter,
-      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}"
+      "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name.toUpperCase()}"
       "&digits=$updatedDigits&issuer=$encodedIssuer"
       "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
@@ -115,8 +115,6 @@ class Code {
     int digits, {
     Algorithm algorithm = Algorithm.sha1,
     int period = defaultPeriod,
-    int counter = 0,
-    int? generatedID,
   }) {
     final String encodedIssuer = Uri.encodeQueryComponent(issuer);
     return Code(
@@ -127,9 +125,8 @@ class Code {
       secret,
       algorithm,
       type,
-      counter,
-      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=$period&secret=$secret${type == Type.hotp ? "&counter=$counter" : ""}",
-      generatedID: generatedID,
+      0,
+      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=$period&secret=$secret",
       display: display ?? CodeDisplay(),
     );
   }
