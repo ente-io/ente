@@ -2015,7 +2015,7 @@
       }
     }
   },
-  "facesTimelineCaptionYearsOld": "{name} was {count, plural, one {# year old} other {# years old}}",
+  "facesTimelineCaptionYearsOld": "{name} was {count, plural, one {{count} year old} other {{count} years old}}",
   "@facesTimelineCaptionYearsOld": {
     "description": "Caption for frames when birthdate is known, describing the person's age",
     "placeholders": {
