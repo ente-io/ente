@@ -320,10 +320,60 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   }) async {
     if (shouldUseNative) {
       final tempDir = Directory.systemTemp.createTempSync('ente_video_export');
+      try {
+        return await _runNativeExportWithRetry(
+          tempDir: tempDir,
+          dialogKey: dialogKey,
+        );
+      } catch (nativeError, stackTrace) {
+        if (nativeError is NativeVideoEditorException) {
+          _logger.warning(
+            "Native export failed, attempting FFmpeg fallback (code=${nativeError.code}, details=${nativeError.details})",
+            nativeError,
+          );
+        } else {
+          _logger.warning(
+            "Native export failed, attempting FFmpeg fallback",
+            nativeError,
+          );
+        }
+
+        if (flagService.internalUser && mounted) {
+          showShortToast(context, "(i) Switching to FFmpeg fallback");
+        }
+
+        if (dialogKey.currentState != null) {
+          dialogKey.currentState!.setProgress(0.0);
+        }
+
+        _logger.fine(
+          "Falling back to FFmpeg after native failure",
+          nativeError,
+          stackTrace,
+        );
+      }
+    }
+
+    return await _runFfmpegExportWithRetry(dialogKey: dialogKey);
+  }
+
+  Future<File> _runNativeExportWithRetry({
+    required Directory tempDir,
+    required GlobalKey<LinearProgressDialogState> dialogKey,
+  }) async {
+    const maxAttempts = 2;
+    Object? lastError;
+    StackTrace? lastStackTrace;
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
       final outputPath = path.join(
         tempDir.path,
-        'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
+        'native_export_${DateTime.now().microsecondsSinceEpoch}_$attempt.mp4',
       );
+
+      if (attempt > 0 && dialogKey.currentState != null) {
+        dialogKey.currentState!.setProgress(0.0);
+      }
 
       try {
         return await NativeVideoExportService.exportVideo(
@@ -347,51 +397,89 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           },
           allowFfmpegFallback: false,
         );
-      } catch (nativeError, _) {
-        if (nativeError is NativeVideoEditorException) {
-          _logger.warning(
-            "Native export failed, attempting FFmpeg fallback (code=${nativeError.code}, details=${nativeError.details})",
-            nativeError,
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+
+        if (attempt < maxAttempts - 1) {
+          _logger.info(
+            "Native export attempt ${attempt + 1} failed, retrying with fresh output path",
+            error,
+            stackTrace,
           );
+          continue;
+        }
+
+        if (error is Error) {
+          throw error;
         } else {
-          _logger.warning(
-            "Native export failed, attempting FFmpeg fallback",
-            nativeError,
-          );
+          throw error!;
         }
-
-        if (flagService.internalUser && mounted) {
-          showShortToast(context, "(i) Switching to FFmpeg fallback");
-        }
-
-        if (dialogKey.currentState != null) {
-          dialogKey.currentState!.setProgress(0.0);
-        }
-
-        return await _runFfmpegExport(dialogKey: dialogKey);
       }
     }
 
-    return await _runFfmpegExport(dialogKey: dialogKey);
+    throw lastError ?? Exception("Unknown native export failure");
   }
 
-  Future<File> _runFfmpegExport({
+  Future<File> _runFfmpegExportWithRetry({
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
-    final config = VideoFFmpegVideoEditorConfig(
-      _controller!,
-      format: VideoExportFormat.mp4,
-      commandBuilder: (config, videoPath, outputPath) {
-        final List<String> filters = config.getExportFilters();
+    const maxAttempts = 2;
+    Object? lastError;
+    StackTrace? lastStackTrace;
 
-        final String startTrimCmd = "-ss ${_controller!.startTrim}";
-        final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
-        final command =
-            '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
-        return command;
-      },
-    );
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0 && dialogKey.currentState != null) {
+        dialogKey.currentState!.setProgress(0.0);
+      }
 
+      final config = VideoFFmpegVideoEditorConfig(
+        _controller!,
+        format: VideoExportFormat.mp4,
+        commandBuilder: (config, videoPath, outputPath) {
+          final List<String> filters = config.getExportFilters();
+
+          final String startTrimCmd = "-ss ${_controller!.startTrim}";
+          final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
+          final command =
+              '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+          return command;
+        },
+      );
+
+      try {
+        return await _runFfmpegExportAttempt(
+          config: config,
+          dialogKey: dialogKey,
+        );
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+
+        if (attempt < maxAttempts - 1) {
+          _logger.info(
+            "FFmpeg export attempt ${attempt + 1} failed, retrying with fresh output path",
+            error,
+            stackTrace,
+          );
+          continue;
+        }
+
+        if (error is Error) {
+          throw error;
+        } else {
+          throw error!;
+        }
+      }
+    }
+
+    throw lastError ?? Exception("Unknown FFmpeg export failure");
+  }
+
+  Future<File> _runFfmpegExportAttempt({
+    required VideoFFmpegVideoEditorConfig config,
+    required GlobalKey<LinearProgressDialogState> dialogKey,
+  }) async {
     final executeConfig = await config.getExecuteConfig();
     final completer = Completer<File>();
 
