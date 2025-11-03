@@ -7,12 +7,12 @@ import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:photos/ui/tools/editor/video_crop_util.dart';
 import 'package:video_editor/video_editor.dart';
 
-/// Service that uses native video editing operations when possible.
-/// Falls back to FFmpeg when native processing fails quickly.
+/// Service that uses native video editing operations when possible
+/// Falls back to FFmpeg for operations that require re-encoding
 class NativeVideoExportService {
   static const Duration _nativeFallbackThreshold = Duration(seconds: 3);
 
-  /// Export video using native operations.
+  /// Export video using native operations
   ///
   /// [allowFfmpegFallback] - If true (default), automatically falls back to
   /// FFmpeg if native export fails quickly. Set to false to test native-only
@@ -69,8 +69,7 @@ class NativeVideoExportService {
     // Use the combined native path only when needed; otherwise do a fast copy.
     // Note: despite legacy comments, Android cropping is supported via Media3
     // Transformer, so we keep native for crop/trim/rotate combinations.
-    final needsCrop =
-        controller.minCrop != Offset.zero ||
+    final needsCrop = controller.minCrop != Offset.zero ||
         controller.maxCrop != const Offset(1.0, 1.0);
     final needsRotate = controller.rotation != 0;
     final needsTrim = controller.isTrimmed;
