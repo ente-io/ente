@@ -621,7 +621,7 @@ const TimelineSidebar = styled(Box)(({ theme }) => ({
     },
     scrollbarWidth: "thin",
     scrollbarColor: `${theme.palette.divider} transparent`,
-    [theme.breakpoints.up(1600)]: { width: "960px" },
+    [theme.breakpoints.up(1920)]: { width: "960px" },
 }));
 
 const TimelineContent = styled(Box)({
