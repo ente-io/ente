@@ -304,13 +304,27 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       return value == 1 ? "$formatted day" : "$formatted days";
     }
 
-    final List<String> detailChips = _cleanChips(<String>[
-      if (displayWeekStart != null)
-        "Peak week: ${weekStartFormat.format(displayWeekStart)} · ${numberFormat.format(peakWeekCount)}",
-      "Longest streak: ${formatDayCount(snapshot.longestStreakDays)}",
-      "Longest pause: ${formatDayCount(snapshot.longestGapDays)}",
-      "Active days: ${numberFormat.format(snapshot.daysWithCaptures)}",
-    ]);
+    final String? peakWeekSummary = displayWeekStart != null
+        ? "Peak week: ${weekStartFormat.format(displayWeekStart)} · ${numberFormat.format(peakWeekCount)}"
+        : null;
+    final String? streakSummary = snapshot.longestStreakDays > 0
+        ? "${numberFormat.format(snapshot.longestStreakDays)}-day streak"
+        : null;
+    final String? activeDaysSummary = snapshot.daysWithCaptures > 0
+        ? "${numberFormat.format(snapshot.daysWithCaptures)} active days"
+        : null;
+
+    const List<String> detailChips = <String>[];
+
+    final List<String> subtitleHighlights = <String>[];
+    if (streakSummary != null) {
+      subtitleHighlights.add(streakSummary);
+    }
+    if (activeDaysSummary != null) {
+      subtitleHighlights.add(activeDaysSummary);
+    }
+    final String subtitleSuffix =
+        subtitleHighlights.isEmpty ? "" : "\n${subtitleHighlights.join(" · ")}";
     final Map<String, Object?> meta = <String, Object?>{
       "weekdayLabels": snapshot.heatmapWeekdayLabels,
       "grid": heatmapData.grid,
@@ -318,12 +332,19 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       "maxCount": snapshot.heatmapMaxCount,
       "detailChips": detailChips,
     };
+    if (peakWeekSummary != null) {
+      meta["peakWeekSummary"] = peakWeekSummary;
+    }
+    if (snapshot.longestGapDays > 0) {
+      meta["longestPauseSummary"] =
+          "Longest pause: ${formatDayCount(snapshot.longestGapDays)}";
+    }
 
     return <WrappedCard>[
       WrappedCard(
         type: WrappedCardType.statsHeatmap,
         title: "Season rhythm",
-        subtitle: "Week by week, here's how the year flowed.",
+        subtitle: "Week by week, here's how the year flowed.$subtitleSuffix",
         meta: meta,
       ),
     ];

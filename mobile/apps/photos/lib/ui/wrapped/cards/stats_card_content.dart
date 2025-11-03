@@ -1016,7 +1016,7 @@ class _HeatmapCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         if (grid.isEmpty)
           _MediaPlaceholder(
             height: 180,
@@ -1094,13 +1094,13 @@ class _YearHeatmap extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        const double labelColumnWidth = 22;
-        const double horizontalSpacing = 0.8;
-        const double verticalSpacing = 0.6;
-        const double minCellSize = 4;
-        const double maxCellWidth = 11;
-        const double maxCellHeight = 7.0;
-        const double heightCompression = 0.55;
+        const double labelColumnWidth = 24;
+        const double horizontalSpacing = 1.2;
+        const double verticalSpacing = 1.0;
+        const double minCellSize = 5;
+        const double maxCellWidth = 13;
+        const double maxCellHeight = 9.0;
+        const double heightCompression = 0.7;
 
         final double usableWidth = math.max(
           0,
@@ -1119,7 +1119,7 @@ class _YearHeatmap extends StatelessWidget {
             (cellWidth * columnCount) +
             horizontalSpacing * math.max(0, columnCount - 1);
         final TextStyle axisStyle =
-            textTheme.tinyMuted.copyWith(fontSize: 7.5, height: 1.05);
+            textTheme.tinyMuted.copyWith(fontSize: 8.0, height: 1.1);
 
         return Align(
           alignment: Alignment.topCenter,
