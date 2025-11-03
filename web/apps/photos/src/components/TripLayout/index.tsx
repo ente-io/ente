@@ -108,10 +108,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
     const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
-    const previousSuperClusterStateRef = useRef<{
-        isInSuperCluster: boolean;
-        superClusterIndex: number | null;
-    }>({ isInSuperCluster: false, superClusterIndex: null }); // Track previous super cluster state for zoom logic
 
     const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
     const [optimalZoom, setOptimalZoom] = useState(7);
@@ -166,11 +162,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             // Load mapHelpers and calculate clusters if we have data
             if (journeyData.length > 0) {
                 void import("./mapHelpers").then(
-                    ({
-                        clusterPhotosByProximity,
-                        calculateOptimalZoom,
-                        detectScreenCollisions,
-                    }) => {
+                    ({ clusterPhotosByProximity, calculateOptimalZoom }) => {
                         const clusters = clusterPhotosByProximity(journeyData);
 
                         // Sort clusters by their earliest timestamp to maintain chronological order
@@ -190,47 +182,13 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
                         const optimalZoomLevel = calculateOptimalZoom();
 
-                        // Calculate super clusters at optimal zoom level once
-                        const { superClusters } = detectScreenCollisions(
-                            sortedClusters,
-                            optimalZoomLevel,
-                            null,
-                            null,
-                            optimalZoomLevel,
-                        );
-
-                        // Create a map of cluster index to super cluster index
-                        const clusterToSuperClusterMap = new Map<
-                            number,
-                            number
-                        >();
-                        superClusters.forEach(
-                            (superCluster, superClusterIndex) => {
-                                superCluster.clustersInvolved.forEach(
-                                    (clusterIndex) => {
-                                        clusterToSuperClusterMap.set(
-                                            clusterIndex,
-                                            superClusterIndex,
-                                        );
-                                    },
-                                );
-                            },
-                        );
-
                         setPhotoClusters(sortedClusters);
+                        setOptimalZoom(optimalZoomLevel);
 
-                        // Check if first location is in a super cluster and adjust initial zoom (desktop only)
-                        const firstLocationInSuperCluster =
-                            clusterToSuperClusterMap.has(0);
-                        const initialZoom =
-                            firstLocationInSuperCluster && !isMobileOrTablet
-                                ? 14 // Super cluster zoom level (desktop only)
-                                : optimalZoomLevel;
-
-                        setOptimalZoom(initialZoom);
+                        // Super clusters disabled for all devices
                         setSuperClusterInfo({
-                            superClusters,
-                            clusterToSuperClusterMap,
+                            superClusters: [],
+                            clusterToSuperClusterMap: new Map(),
                         });
                     },
                 );
@@ -316,9 +274,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         },
         setScrollProgress,
         setTargetZoom,
-        previousSuperClusterStateRef,
-        superClusterInfo,
-        scrollProgress,
     });
 
     // Only wait for client-side rendering (needed for maps), but show layout immediately

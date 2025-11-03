@@ -2,12 +2,7 @@ import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState } from "react";
 
 import { MapEvents } from "./MapEvents";
-import {
-    createIcon,
-    createSuperClusterIcon,
-    detectScreenCollisions,
-    getMapCenter,
-} from "./mapHelpers";
+import { createIcon, getMapCenter } from "./mapHelpers";
 import type { JourneyPoint } from "./types";
 
 interface MapComponentsType {
@@ -21,20 +16,7 @@ interface TripMapProps {
     photoClusters: JourneyPoint[][];
     hasPhotoData: boolean;
     optimalZoom: number;
-    currentZoom: number;
-    targetZoom: number | null;
-    mapRef: import("leaflet").Map | null;
     scrollProgress: number;
-    superClusterInfo?: {
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    };
     setMapRef: (map: import("leaflet").Map | null) => void;
     setCurrentZoom: (zoom: number) => void;
     setTargetZoom: (zoom: number | null) => void;
@@ -50,11 +32,7 @@ export const TripMap: React.FC<TripMapProps> = ({
     photoClusters,
     hasPhotoData,
     optimalZoom,
-    currentZoom,
-    targetZoom,
-    mapRef,
     scrollProgress,
-    superClusterInfo,
     setMapRef,
     setCurrentZoom,
     setTargetZoom,
@@ -97,15 +75,10 @@ export const TripMap: React.FC<TripMapProps> = ({
         }
     }
 
-    // Calculate super-clusters based on screen collisions
-    const { superClusters, visibleClustersWithIndices } =
-        detectScreenCollisions(
-            photoClusters,
-            currentZoom,
-            targetZoom,
-            mapRef,
-            optimalZoom,
-        );
+    // Super clusters disabled - show all clusters individually
+    const visibleClustersWithIndices = photoClusters.map(
+        (cluster, originalIndex) => ({ cluster, originalIndex }),
+    );
 
     // Return loading state if map components haven't loaded yet
     if (!mapComponents) {
@@ -118,11 +91,7 @@ export const TripMap: React.FC<TripMapProps> = ({
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
                 <MapContainer
-                    center={getMapCenter(
-                        photoClusters,
-                        journeyData,
-                        superClusterInfo,
-                    )}
+                    center={getMapCenter(photoClusters, journeyData)}
                     zoom={
                         isMobileOrTablet
                             ? Math.max(1, optimalZoom - 2)
@@ -151,60 +120,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                         keepBuffer={isMobileOrTablet ? 3 : 1}
                     />
 
-                    {/* Draw super-clusters (clickable for zoom and gallery) */}
-                    {superClusters.map((superCluster, index) => {
-                        // Show green only for active locations
-                        const isActive = superCluster.clustersInvolved.includes(
-                            currentActiveLocationIndex,
-                        );
-
-                        const icon = createSuperClusterIcon(
-                            superCluster.image, // Use representative photo (first photo of first cluster)
-                            superCluster.clusterCount,
-                            isMobileOrTablet ? 40 : 55,
-                            isActive,
-                        );
-
-                        return icon ? (
-                            <Marker
-                                key={`super-cluster-${index}`}
-                                position={[superCluster.lat, superCluster.lng]}
-                                icon={icon}
-                                eventHandlers={{
-                                    click: () => {
-                                        const firstClusterIndex =
-                                            superCluster.clustersInvolved[0];
-                                        if (firstClusterIndex !== undefined) {
-                                            // Get the actual first cluster's coordinates
-                                            const firstCluster =
-                                                photoClusters[
-                                                    firstClusterIndex
-                                                ];
-                                            if (firstCluster) {
-                                                const avgLat =
-                                                    firstCluster.reduce(
-                                                        (sum, p) => sum + p.lat,
-                                                        0,
-                                                    ) / firstCluster.length;
-                                                const avgLng =
-                                                    firstCluster.reduce(
-                                                        (sum, p) => sum + p.lng,
-                                                        0,
-                                                    ) / firstCluster.length;
-                                                onMarkerClick(
-                                                    firstClusterIndex,
-                                                    avgLat,
-                                                    avgLng,
-                                                );
-                                            }
-                                        }
-                                    },
-                                }}
-                            />
-                        ) : null;
-                    })}
-
-                    {/* Draw visible regular clusters */}
+                    {/* Draw visible clusters */}
                     {visibleClustersWithIndices.map((item, index) => {
                         const { cluster, originalIndex } = item;
                         const firstPhoto = cluster[0];
@@ -235,6 +151,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 key={`cluster-${index}`}
                                 position={[avgLat, avgLng]}
                                 icon={icon}
+                                zIndexOffset={isActive ? 1000 : 0}
                                 eventHandlers={{
                                     click: () => {
                                         // Calculate cluster center
