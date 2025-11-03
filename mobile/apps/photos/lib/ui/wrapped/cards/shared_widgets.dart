@@ -5,9 +5,13 @@ Widget buildWrappedCardTitle(
   TextStyle style, {
   EdgeInsetsGeometry? padding,
 }) {
+  final TextStyle titleStyle = style.copyWith(
+    fontWeight: FontWeight.w700,
+    letterSpacing: -2,
+  );
   return _buildCenteredCardText(
     text: text,
-    style: style,
+    style: titleStyle,
     padding: padding,
   );
 }
