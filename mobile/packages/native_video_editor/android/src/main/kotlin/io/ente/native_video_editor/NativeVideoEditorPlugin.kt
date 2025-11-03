@@ -5,6 +5,7 @@ import android.media.*
 import android.os.Build
 import android.util.Log
 import androidx.annotation.NonNull
+import androidx.media3.transformer.ExportException
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
