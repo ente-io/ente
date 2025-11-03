@@ -422,11 +422,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           continue;
         }
 
-        if (error is Error) {
-          throw error;
-        } else {
-          throw error!;
-        }
+        throw error;
       }
     }
 
@@ -489,11 +485,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           continue;
         }
 
-        if (error is Error) {
-          throw error;
-        } else {
-          throw error!;
-        }
+        throw error;
       }
     }
 
