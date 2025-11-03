@@ -72,7 +72,7 @@ class FlagService {
 
   bool get widgetSharedAlbums => internalUser;
 
-  bool get useNativeVideoEditor => internalUser;
+  bool get useNativeVideoEditor => true;
 
   bool get useWidgetV2 => kDebugMode;
 
