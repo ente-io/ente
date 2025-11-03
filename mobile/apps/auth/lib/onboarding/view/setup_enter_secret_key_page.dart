@@ -458,7 +458,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         }
       }
 
-      // When editing, preserve original type/algorithm/digits/period
+      // When editing, preserve original type/algorithm/digits/period/counter
       // When creating new, apply isStreamCode logic and use UI values
       final Code newCode = Code.fromAccountAndSecret(
         widget.code != null
@@ -473,6 +473,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
             : (isStreamCode ? Code.steamDigits : digits!),
         algorithm: widget.code?.algorithm ?? _algorithm,
         period: widget.code?.period ?? period!,
+        counter: widget.code?.counter ?? 0,
         generatedID: widget.code?.generatedID,
       );
 

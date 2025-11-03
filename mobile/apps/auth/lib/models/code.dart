@@ -115,6 +115,7 @@ class Code {
     int digits, {
     Algorithm algorithm = Algorithm.sha1,
     int period = defaultPeriod,
+    int counter = 0,
     int? generatedID,
   }) {
     final String encodedIssuer = Uri.encodeQueryComponent(issuer);
@@ -126,8 +127,8 @@ class Code {
       secret,
       algorithm,
       type,
-      0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=$period&secret=$secret",
+      counter,
+      "otpauth://${type.name}/$issuer:$account?algorithm=${algorithm.name.toUpperCase()}&digits=$digits&issuer=$encodedIssuer&period=$period&secret=$secret${type == Type.hotp ? "&counter=$counter" : ""}",
       generatedID: generatedID,
       display: display ?? CodeDisplay(),
     );
