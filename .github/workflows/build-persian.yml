@@ -1,0 +1,40 @@
+name: Build Persian APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [persian-localized]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: persian-localized
+      
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.7'
+          channel: 'stable'
+      
+      - name: Get Dependencies
+        working-directory: mobile/apps/photos
+        run: flutter pub get
+      
+      - name: Build APK
+        working-directory: mobile/apps/photos
+        run: |
+          flutter build apk --release \
+            --dart-define=endpoint=https://api.photos.degoogle.ir
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ente-persian-apk
+          path: mobile/apps/photos/build/app/outputs/flutter-apk/app-release.apk
