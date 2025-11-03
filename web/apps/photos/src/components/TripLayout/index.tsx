@@ -90,7 +90,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [currentZoom, setCurrentZoom] = useState(7); // Default zoom, will be updated by MapEvents and optimalZoom
     const [mapRef, setMapRef] = useState<import("leaflet").Map | null>(null);
-    const [targetZoom, setTargetZoom] = useState<number | null>(null);
+    const [, setTargetZoom] = useState<number | null>(null); // Only setter is used by child components
     const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 representing scroll progress
     const [hasUserScrolled, setHasUserScrolled] = useState(false); // Track if user has actually scrolled
     const [showMobileCover, setShowMobileCover] = useState(true); // Track mobile cover state
@@ -111,36 +111,13 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
     const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
     const [optimalZoom, setOptimalZoom] = useState(7);
-    const [superClusterInfo, setSuperClusterInfo] = useState<{
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    }>({ superClusters: [], clusterToSuperClusterMap: new Map() });
     const [TripMapComponent, setTripMapComponent] =
         useState<React.ComponentType<{
             journeyData: JourneyPoint[];
             photoClusters: JourneyPoint[][];
             hasPhotoData: boolean;
             optimalZoom: number;
-            currentZoom: number;
-            targetZoom: number | null;
-            mapRef: import("leaflet").Map | null;
             scrollProgress: number;
-            superClusterInfo?: {
-                superClusters: {
-                    lat: number;
-                    lng: number;
-                    clusterCount: number;
-                    clustersInvolved: number[];
-                    image: string;
-                }[];
-                clusterToSuperClusterMap: Map<number, number>;
-            };
             setMapRef: (map: import("leaflet").Map | null) => void;
             setCurrentZoom: (zoom: number) => void;
             setTargetZoom: (zoom: number | null) => void;
@@ -184,12 +161,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
                         setPhotoClusters(sortedClusters);
                         setOptimalZoom(optimalZoomLevel);
-
-                        // Super clusters disabled for all devices
-                        setSuperClusterInfo({
-                            superClusters: [],
-                            clusterToSuperClusterMap: new Map(),
-                        });
                     },
                 );
             }
@@ -313,11 +284,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                                 photoClusters={photoClusters}
                                 hasPhotoData={hasPhotoData}
                                 optimalZoom={optimalZoom}
-                                currentZoom={currentZoom}
-                                targetZoom={targetZoom}
-                                mapRef={mapRef}
                                 scrollProgress={scrollProgress}
-                                superClusterInfo={superClusterInfo}
                                 setMapRef={setMapRef}
                                 setCurrentZoom={setCurrentZoom}
                                 setTargetZoom={setTargetZoom}
@@ -508,11 +475,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             photoClusters={photoClusters}
                             hasPhotoData={hasPhotoData}
                             optimalZoom={optimalZoom}
-                            currentZoom={currentZoom}
-                            targetZoom={targetZoom}
-                            mapRef={mapRef}
                             scrollProgress={scrollProgress}
-                            superClusterInfo={superClusterInfo}
                             setMapRef={setMapRef}
                             setCurrentZoom={setCurrentZoom}
                             setTargetZoom={setTargetZoom}
