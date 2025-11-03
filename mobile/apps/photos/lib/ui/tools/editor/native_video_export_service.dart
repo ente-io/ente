@@ -7,133 +7,12 @@ import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:photos/ui/tools/editor/video_crop_util.dart';
 import 'package:video_editor/video_editor.dart';
 
-class DebugExportSummary {
-  DebugExportSummary({
-    required this.videoSize,
-    required this.trimStart,
-    required this.trimEnd,
-    required this.nativeRotateDegrees,
-    required this.nativeDisplayCrop,
-    required this.nativeFileCrop,
-    required this.nativeOutputSize,
-    required this.ffmpegFileCrop,
-    required this.ffmpegCropFilter,
-    required this.ffmpegCommand,
-  });
-
-  final Size videoSize;
-  final Duration? trimStart;
-  final Duration? trimEnd;
-  final int? nativeRotateDegrees;
-  final Rect? nativeDisplayCrop;
-  final CropCalculation? nativeFileCrop;
-  final Size? nativeOutputSize;
-  final CropCalculation? ffmpegFileCrop;
-  final String? ffmpegCropFilter;
-  final String? ffmpegCommand;
-}
-
-/// Service that uses native video editing operations when possible
-/// Falls back to FFmpeg for operations that require re-encoding
+/// Service that uses native video editing operations when possible.
+/// Falls back to FFmpeg when native processing fails quickly.
 class NativeVideoExportService {
   static const Duration _nativeFallbackThreshold = Duration(seconds: 3);
 
-  static Future<DebugExportSummary> buildDebugSummary({
-    required VideoEditorController controller,
-  }) async {
-    final videoSize = controller.video.value.size;
-    final Duration? trimStart =
-        controller.isTrimmed ? controller.startTrim : null;
-    final Duration? trimEnd = controller.isTrimmed ? controller.endTrim : null;
-    final int? nativeRotateDegrees =
-        controller.rotation != 0 ? controller.rotation : null;
-
-    Rect? nativeDisplayCrop;
-    CropCalculation? nativeFileCrop;
-    Size? nativeOutputSize;
-    CropCalculation? ffmpegFileCrop;
-
-    final needsCrop = controller.minCrop != Offset.zero ||
-        controller.maxCrop != const Offset(1.0, 1.0);
-
-    if (needsCrop) {
-      nativeDisplayCrop = VideoCropUtil.calculateDisplaySpaceCropRect(
-        controller: controller,
-      );
-      try {
-        nativeFileCrop = VideoCropUtil.calculateFileSpaceCrop(
-          controller: controller,
-        );
-      } catch (_) {
-        nativeFileCrop = null;
-      }
-
-      if (nativeFileCrop != null) {
-        nativeOutputSize = Size(
-          nativeFileCrop.width.toDouble(),
-          nativeFileCrop.height.toDouble(),
-        );
-        if (nativeRotateDegrees != null && nativeRotateDegrees % 180 != 0) {
-          nativeOutputSize = Size(
-            nativeOutputSize.height,
-            nativeOutputSize.width,
-          );
-        }
-      }
-
-      try {
-        ffmpegFileCrop = VideoCropUtil.calculateFileSpaceCrop(
-          controller: controller,
-        );
-      } catch (_) {
-        ffmpegFileCrop = null;
-      }
-    }
-
-    String? ffmpegCropFilter;
-    if (ffmpegFileCrop != null) {
-      ffmpegCropFilter = ffmpegFileCrop.toFFmpegFilter();
-    }
-
-    // Build approximate FFmpeg command for debugging
-    String? ffmpegCommand;
-    if (ffmpegCropFilter != null || trimStart != null || trimEnd != null) {
-      final List<String> cmdParts = ['ffmpeg -i input.mp4'];
-
-      if (trimStart != null || trimEnd != null) {
-        final ss = trimStart?.inMilliseconds ?? 0;
-        final to =
-            trimEnd?.inMilliseconds ?? controller.videoDuration.inMilliseconds;
-        cmdParts.add('-ss ${ss}ms -to ${to}ms');
-      }
-
-      final vfFilters = <String>[];
-      if (ffmpegCropFilter != null) {
-        vfFilters.add(ffmpegCropFilter);
-      }
-      vfFilters.add('setpts=PTS-STARTPTS');
-
-      cmdParts.add('-vf "${vfFilters.join(',')}"');
-      cmdParts.add('-c:v libx264 -preset ultrafast -c:a copy output.mp4');
-
-      ffmpegCommand = cmdParts.join(' ');
-    }
-
-    return DebugExportSummary(
-      videoSize: videoSize,
-      trimStart: trimStart,
-      trimEnd: trimEnd,
-      nativeRotateDegrees: nativeRotateDegrees,
-      nativeDisplayCrop: nativeDisplayCrop,
-      nativeFileCrop: nativeFileCrop,
-      nativeOutputSize: nativeOutputSize,
-      ffmpegFileCrop: ffmpegFileCrop,
-      ffmpegCropFilter: ffmpegCropFilter,
-      ffmpegCommand: ffmpegCommand,
-    );
-  }
-
-  /// Export video using native operations
+  /// Export video using native operations.
   ///
   /// [allowFfmpegFallback] - If true (default), automatically falls back to
   /// FFmpeg if native export fails quickly. Set to false to test native-only
@@ -190,7 +69,8 @@ class NativeVideoExportService {
     // Use the combined native path only when needed; otherwise do a fast copy.
     // Note: despite legacy comments, Android cropping is supported via Media3
     // Transformer, so we keep native for crop/trim/rotate combinations.
-    final needsCrop = controller.minCrop != Offset.zero ||
+    final needsCrop =
+        controller.minCrop != Offset.zero ||
         controller.maxCrop != const Offset(1.0, 1.0);
     final needsRotate = controller.rotation != 0;
     final needsTrim = controller.isTrimmed;
