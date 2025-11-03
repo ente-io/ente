@@ -757,7 +757,7 @@ class FileUploader {
       List<String>? partMd5s;
 
       if (fileAttributes == null) {
-        final result = flagService.internalUser
+        final result = flagService.enableUploadV2
             ? (await CryptoUtil.encryptFileWithMD5(
                 mediaUploadData.sourceFile!.path,
                 encryptedFilePath,
@@ -804,11 +804,11 @@ class FileUploader {
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
       encThumbSize = await encryptedThumbnailFile.length();
       String? thumbnailMd5;
-      if (flagService.internalUser) {
+      if (flagService.enableUploadV2) {
         thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
       }
       final bool useChecksumThumbnailUpload =
-          flagService.internalUser && thumbnailMd5?.isNotEmpty == true;
+          flagService.enableUploadV2 && thumbnailMd5?.isNotEmpty == true;
 
       // Calculate the number of parts for the file.
       final count = _multiPartUploader.calculatePartCount(encFileSize);
@@ -837,7 +837,7 @@ class FileUploader {
           "[UPLOAD-DEBUG] Thumbnail uploaded successfully! Now getting file upload URL...",
         );
         final useChecksumUpload =
-            flagService.internalUser && fileMd5?.isNotEmpty == true;
+            flagService.enableUploadV2 && fileMd5?.isNotEmpty == true;
         final fileUploadURL = await _getUploadURL(
           contentLength: useChecksumUpload ? encFileSize : null,
           contentMd5: useChecksumUpload ? fileMd5 : null,
@@ -875,7 +875,7 @@ class FileUploader {
             count: count,
             contentLength: encFileSize,
             partLength: multipartPartLength,
-            partMd5s: flagService.internalUser ? partMd5s : null,
+            partMd5s: flagService.enableUploadV2 ? partMd5s : null,
           );
           final encFileName = encryptedFile.path.split('/').last;
           await _multiPartUploader.createTableEntry(
@@ -1507,7 +1507,7 @@ class FileUploader {
     int? contentLength,
     String? contentMd5,
   }) async {
-    final bool useSingleEndpoint = flagService.internalUser &&
+    final bool useSingleEndpoint = flagService.enableUploadV2 &&
         contentLength != null &&
         contentMd5 != null &&
         contentMd5.isNotEmpty;

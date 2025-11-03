@@ -16,6 +16,7 @@ RUN yarn build:photos
 RUN yarn build:accounts
 RUN yarn build:auth
 RUN yarn build:cast
+RUN yarn build:share
 
 FROM nginx
 
@@ -25,6 +26,7 @@ COPY --from=builder /build/apps/photos/out /out/photos
 COPY --from=builder /build/apps/accounts/out /out/accounts
 COPY --from=builder /build/apps/auth/out /out/auth
 COPY --from=builder /build/apps/cast/out /out/cast
+COPY --from=builder /build/apps/share/out /out/share
 
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
@@ -47,6 +49,11 @@ server {
     listen 3004; root /out/cast;
     location / { try_files \$uri \$uri.html /index.html; }
 }
+server {
+    listen 3005; root /out/share;
+    location = / { try_files /index.html =404; }
+    location / { try_files \$uri \$uri.html /404.html; }
+}
 EOF
 
 EXPOSE 3000
@@ -54,6 +61,7 @@ EXPOSE 3001
 EXPOSE 3002
 EXPOSE 3003
 EXPOSE 3004
+EXPOSE 3005
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
 ENV ENTE_ALBUMS_ORIGIN=https://localhost:3002
