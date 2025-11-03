@@ -39,11 +39,17 @@ type FeatureFlagResponse struct {
 	InternalUser        bool    `json:"internalUser"`
 	BetaUser            bool    `json:"betaUser"`
 	EnableMobMultiPart  bool    `json:"enableMobMultiPart"`
+	ServerApiFlag       int64   `json:"serverApiFlag"`
 	CastUrl             string  `json:"castUrl"`
 	EmbedUrl            string  `json:"embedUrl"`
 	CustomDomain        *string `json:"customDomain,omitempty"`
 	CustomDomainCNAME   string  `json:"customDomainCNAME,omitempty"`
 }
+
+const (
+	// UploadV2 marks availability of the upload v2 APIs in the binary.
+	UploadV2 int64 = 1 << 0
+)
 
 type FlagKey string
 
