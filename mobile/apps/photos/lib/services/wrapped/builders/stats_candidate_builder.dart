@@ -316,15 +316,14 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
 
     const List<String> detailChips = <String>[];
 
-    final List<String> subtitleHighlights = <String>[];
-    if (streakSummary != null) {
-      subtitleHighlights.add(streakSummary);
+    String subtitleText = "";
+    if (streakSummary != null && activeDaysSummary != null) {
+      subtitleText = "You achieved a $streakSummary over $activeDaysSummary.";
+    } else if (streakSummary != null) {
+      subtitleText = "You achieved a $streakSummary.";
+    } else if (activeDaysSummary != null) {
+      subtitleText = "You captured memories on $activeDaysSummary.";
     }
-    if (activeDaysSummary != null) {
-      subtitleHighlights.add(activeDaysSummary);
-    }
-    final String subtitleSuffix =
-        subtitleHighlights.isEmpty ? "" : "\n${subtitleHighlights.join(" · ")}";
     final Map<String, Object?> meta = <String, Object?>{
       "weekdayLabels": snapshot.heatmapWeekdayLabels,
       "grid": heatmapData.grid,
@@ -344,7 +343,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       WrappedCard(
         type: WrappedCardType.statsHeatmap,
         title: "Season rhythm",
-        subtitle: "Week by week, here's how the year flowed.$subtitleSuffix",
+        subtitle: subtitleText,
         meta: meta,
       ),
     ];
