@@ -456,8 +456,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         },
       );
 
+      final startTime = DateTime.now();
       try {
-        final startTime = DateTime.now();
         return await _runFfmpegExportAttempt(
           config: config,
           dialogKey: dialogKey,
