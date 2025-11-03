@@ -342,7 +342,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     return <WrappedCard>[
       WrappedCard(
         type: WrappedCardType.statsHeatmap,
-        title: "Season rhythm",
+        title: "Weekly pulse",
         subtitle: subtitleText,
         meta: meta,
       ),

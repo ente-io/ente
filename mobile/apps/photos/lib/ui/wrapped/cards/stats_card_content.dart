@@ -1023,13 +1023,16 @@ class _HeatmapCardContent extends StatelessWidget {
             colorScheme: colorScheme,
           )
         else
-          _YearHeatmap(
-            grid: grid,
-            weekLabels: weekLabels,
-            weekdayLabels: weekdayLabels,
-            maxCount: maxCount,
+          _HeatmapBackground(
             colorScheme: colorScheme,
-            textTheme: textTheme,
+            child: _YearHeatmap(
+              grid: grid,
+              weekLabels: weekLabels,
+              weekdayLabels: weekdayLabels,
+              maxCount: maxCount,
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            ),
           ),
         if (chips.isNotEmpty) ...[
           const SizedBox(height: 16),
@@ -1209,6 +1212,36 @@ class _YearHeatmap extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _HeatmapBackground extends StatelessWidget {
+  const _HeatmapBackground({
+    required this.child,
+    required this.colorScheme,
+  });
+
+  final Widget child;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color base = Colors.black.withValues(alpha: 0.32);
+    final Color border = Colors.white.withValues(alpha: 0.16);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: base,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: border,
+          strokeAlign: BorderSide.strokeAlignInside,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+        child: child,
+      ),
     );
   }
 }
