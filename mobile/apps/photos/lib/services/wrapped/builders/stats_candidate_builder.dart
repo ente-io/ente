@@ -256,9 +256,9 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       return const <WrappedCard>[];
     }
 
-    final List<Map<String, Object?>> quarterBlocks =
-        _QuarterHeatmapData.fromSnapshot(snapshot);
-    if (quarterBlocks.isEmpty) {
+    final _HeatmapGridData? heatmapData =
+        _HeatmapGridData.fromSnapshot(snapshot);
+    if (heatmapData == null || heatmapData.grid.isEmpty) {
       return const <WrappedCard>[];
     }
 
@@ -313,7 +313,8 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     ]);
     final Map<String, Object?> meta = <String, Object?>{
       "weekdayLabels": snapshot.heatmapWeekdayLabels,
-      "quarters": quarterBlocks,
+      "grid": heatmapData.grid,
+      "weekLabels": heatmapData.weekLabels,
       "maxCount": snapshot.heatmapMaxCount,
       "detailChips": detailChips,
     };
@@ -772,10 +773,18 @@ class _DayAggregate {
   final List<int> uploadedFileIDs = <int>[];
 }
 
-class _QuarterHeatmapData {
-  static List<Map<String, Object?>> fromSnapshot(_StatsSnapshot snapshot) {
+class _HeatmapGridData {
+  const _HeatmapGridData({
+    required this.grid,
+    required this.weekLabels,
+  });
+
+  final List<List<int>> grid;
+  final List<String> weekLabels;
+
+  static _HeatmapGridData? fromSnapshot(_StatsSnapshot snapshot) {
     if (snapshot.heatmapRows.isEmpty) {
-      return const <Map<String, Object?>>[];
+      return null;
     }
     final DateFormat monthFormat = DateFormat("MMM");
     final DateTime lastVisibleDay = _atLocalMidnight(
@@ -783,25 +792,22 @@ class _QuarterHeatmapData {
           ? snapshot.periodEndDay
           : snapshot.heatmapEnd,
     );
-    final List<List<List<int>>> quarterWeeks =
-        List<List<List<int>>>.generate(4, (_) => <List<int>>[]);
-    final List<List<DateTime>> quarterWeekDates =
-        List<List<DateTime>>.generate(4, (_) => <DateTime>[]);
-
-    for (int index = 0;
-        index < snapshot.heatmapRows.length &&
-            index < snapshot.heatmapWeekStartDates.length;
-        index += 1) {
+    final DateTime yearStart = DateTime(snapshot.year, 1, 1);
+    final int cappedLength = math.min(
+      snapshot.heatmapRows.length,
+      snapshot.heatmapWeekStartDates.length,
+    );
+    final List<List<int>> sanitizedRows = <List<int>>[];
+    final List<DateTime?> rowLastValidDays = <DateTime?>[];
+    for (int index = 0; index < cappedLength; index += 1) {
       final DateTime weekStart =
           _atLocalMidnight(snapshot.heatmapWeekStartDates[index]);
-      final int quarterIndex = ((weekStart.month - 1) ~/ 3).clamp(0, 3);
       final List<int> counts = snapshot.heatmapRows[index];
       final List<int> sanitized = List<int>.filled(7, 0);
-      final DateTime yearStart = DateTime(snapshot.year, 1, 1);
+      DateTime? lastValidDay;
       for (int dayOffset = 0; dayOffset < 7; dayOffset += 1) {
-        final DateTime day = _atLocalMidnight(
-          weekStart.add(Duration(days: dayOffset)),
-        );
+        final DateTime day =
+            _atLocalMidnight(weekStart.add(Duration(days: dayOffset)));
         if (day.isAfter(lastVisibleDay)) {
           sanitized[dayOffset] = kWrappedHeatmapFutureValue;
         } else if (day.isBefore(yearStart)) {
@@ -809,88 +815,52 @@ class _QuarterHeatmapData {
         } else {
           sanitized[dayOffset] =
               dayOffset < counts.length ? counts[dayOffset] : 0;
+          lastValidDay = day;
         }
       }
-      quarterWeeks[quarterIndex].add(sanitized);
-      quarterWeekDates[quarterIndex].add(weekStart);
+      sanitizedRows.add(List<int>.unmodifiable(sanitized));
+      rowLastValidDays.add(lastValidDay);
     }
-
-    final List<Map<String, Object?>> blocks = <Map<String, Object?>>[];
-    for (int quarter = 0; quarter < quarterWeeks.length; quarter += 1) {
-      final List<List<int>> weeks = quarterWeeks[quarter];
-      if (weeks.isEmpty) {
-        continue;
+    if (sanitizedRows.isEmpty) {
+      return null;
+    }
+    int lastValidIndex = sanitizedRows.length - 1;
+    while (lastValidIndex >= 0) {
+      final List<int> row = sanitizedRows[lastValidIndex];
+      final bool hasCurrentYearValue = row.any((int value) => value >= 0);
+      if (hasCurrentYearValue) {
+        break;
       }
-      final List<List<int>> grid = _transposeWeeks(weeks);
-      final List<String> columnLabels =
-          _buildColumnLabels(quarterWeekDates[quarter], monthFormat);
-      blocks.add(<String, Object?>{
-        "label": _quarterLabel(quarter),
-        "grid": grid
-            .map((List<int> row) => List<int>.unmodifiable(row))
-            .toList(growable: false),
-        "columnLabels": columnLabels,
-      });
+      lastValidIndex -= 1;
     }
-    return blocks;
-  }
-
-  static List<List<int>> _transposeWeeks(List<List<int>> weeks) {
-    if (weeks.isEmpty) {
-      return List<List<int>>.generate(
-        7,
-        (_) => const <int>[],
-        growable: false,
-      );
+    if (lastValidIndex < 0) {
+      return null;
     }
-    final int columnCount = weeks.length;
-    final int rowCount = weeks.first.length;
-    return List<List<int>>.generate(
-      rowCount,
-      (int dayIndex) => List<int>.generate(
-        columnCount,
-        (int columnIndex) => weeks[columnIndex][dayIndex],
-        growable: false,
-      ),
+    final List<List<int>> trimmedRows =
+        sanitizedRows.sublist(0, lastValidIndex + 1);
+    final List<DateTime?> trimmedLastValidDays =
+        rowLastValidDays.sublist(0, lastValidIndex + 1);
+    int? lastLabeledMonth;
+    final List<String> weekLabels = List<String>.generate(
+      trimmedRows.length,
+      (int index) {
+        final DateTime? labelDay = trimmedLastValidDays[index];
+        if (labelDay == null) {
+          return "";
+        }
+        final int month = labelDay.month;
+        if (lastLabeledMonth == null || month != lastLabeledMonth) {
+          lastLabeledMonth = month;
+          return monthFormat.format(labelDay);
+        }
+        return "";
+      },
       growable: false,
     );
-  }
-
-  static List<String> _buildColumnLabels(
-    List<DateTime> weekStarts,
-    DateFormat monthFormat,
-  ) {
-    final List<String> labels = <String>[];
-    int? lastMonth;
-    for (final DateTime start in weekStarts) {
-      final int month = start.month;
-      final bool isNewMonth = labels.isEmpty || month != lastMonth;
-      final bool isQuarterStart = start.day <= 7;
-      if (isNewMonth && isQuarterStart) {
-        final String monthLabel = monthFormat.format(start);
-        final String singleChar =
-            monthLabel.isEmpty ? "" : monthLabel.substring(0, 1);
-        labels.add(singleChar.toUpperCase());
-        lastMonth = month;
-      } else {
-        labels.add("");
-      }
-    }
-    return List<String>.unmodifiable(labels);
-  }
-
-  static String _quarterLabel(int index) {
-    switch (index) {
-      case 0:
-        return "Jan – Mar";
-      case 1:
-        return "Apr – Jun";
-      case 2:
-        return "Jul – Sep";
-      case 3:
-      default:
-        return "Oct – Dec";
-    }
+    return _HeatmapGridData(
+      grid: List<List<int>>.unmodifiable(trimmedRows),
+      weekLabels: List<String>.unmodifiable(weekLabels),
+    );
   }
 }
 
