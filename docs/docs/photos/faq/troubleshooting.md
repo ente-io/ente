@@ -505,7 +505,7 @@ This deletes temporary files such as thumbnails and preloaded images that can be
 **Automatic cache cleanup:**
 
 - Ente clears upload-related temporary files every 6 hours.
-- If the cache has not cleared after 6 hours, reopen the app to trigger a manual cleanup.
+- If the cache has not cleared after 6 hours, reopen the app (you might need to kill and reopen the app to force the manual cleanup) to trigger a manual cleanup.
 
 ## Getting Help
 
