@@ -93,7 +93,7 @@ class _JumpToDateGalleryState extends State<JumpToDateGallery> {
     });
 
     // Wait for gallery to build, then make it visible
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         setState(() {
           _loadState = GalleryLoadState.galleryReady;

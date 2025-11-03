@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -576,13 +577,19 @@ class GalleryState extends State<Gallery> {
         !_completedJumpToDate &&
         _allFilesLoaded &&
         groupHeaderExtent != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (mounted) {
           final offset = galleryGroups
               .getOffsetOfGroupContainingFile(widget.fileToJumpTo!);
           if (offset != null) {
             _logger.info("Jumping to date at offset: $offset");
-            _scrollController.jumpTo(offset);
+            _scrollController.jumpTo(offset - 50);
+            await Future.delayed(16.milliseconds);
+            await _scrollController.animateTo(
+              offset,
+              duration: 300.milliseconds,
+              curve: Curves.easeOutQuint,
+            );
             _completedJumpToDate = true;
           } else {
             _logger.warning(
