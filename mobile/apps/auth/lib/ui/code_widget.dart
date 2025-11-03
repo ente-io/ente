@@ -346,6 +346,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                     _getFormattedCode(value),
                     style: TextStyle(fontSize: widget.isCompactMode ? 14 : 24),
                     maxLines: 1,
+                    textDirection: TextDirection.ltr,
                   ),
                 );
               },
@@ -375,6 +376,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                                 fontSize: widget.isCompactMode ? 12 : 18,
                                 color: Colors.grey,
                               ),
+                              textDirection: TextDirection.ltr,
                             ),
                           );
                         },
