@@ -137,6 +137,7 @@ dependencies:
   media_kit_libs_ios_video:
   media_kit_libs_video:
   media_kit_video:
+  mesh_gradient: ^1.3.8
   ml_linalg: ^13.11.31
   mobile_ocr:
     git:

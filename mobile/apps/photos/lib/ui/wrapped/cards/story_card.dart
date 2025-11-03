@@ -47,16 +47,20 @@ class _StoryCard extends StatelessWidget {
     required this.colorScheme,
     required this.textTheme,
     required this.isActive,
+    required this.gradientVariantIndex,
   });
 
   final WrappedCard card;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
   final bool isActive;
+  final int gradientVariantIndex;
 
   @override
   Widget build(BuildContext context) {
-    final bool isBadge = card.type == WrappedCardType.badge;
+    final bool isBadge = card.type == WrappedCardType.badge ||
+        card.type == WrappedCardType.badgeDebug;
+    final bool showMeshGradient = _shouldApplyMeshGradient(card);
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: isActive ? 1.0 : 0.6,
@@ -82,6 +86,10 @@ class _StoryCard extends StatelessWidget {
                       card: card,
                       colorScheme: colorScheme,
                     ),
+                    if (showMeshGradient)
+                      _MeshGradientOverlay(
+                        variantIndex: gradientVariantIndex,
+                      ),
                     Positioned.fill(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
@@ -115,6 +123,117 @@ class _StoryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _shouldApplyMeshGradient(WrappedCard card) {
+  switch (card.type) {
+    case WrappedCardType.badge:
+    case WrappedCardType.badgeDebug:
+    case WrappedCardType.yearInColor:
+    case WrappedCardType.monochrome:
+      return false;
+    default:
+      return true;
+  }
+}
+
+class _MeshGradientOverlay extends StatelessWidget {
+  const _MeshGradientOverlay({
+    required this.variantIndex,
+  });
+
+  final int variantIndex;
+
+  static const List<Color> _palette = <Color>[
+    Color(0xFF43D681),
+    Color(0xFFF0FF03),
+    Color(0xFF0E9297),
+    Color(0xFFA0FFBF),
+  ];
+
+  static final List<MeshGradientPoint> _points = <MeshGradientPoint>[
+    MeshGradientPoint(
+      position: const Offset(-0.3, 0.2),
+      color: _palette[0],
+    ),
+    MeshGradientPoint(
+      position: const Offset(0.2, -0.2),
+      color: _palette[1],
+    ),
+    MeshGradientPoint(
+      position: const Offset(0.9, 0.5),
+      color: _palette[2],
+    ),
+    MeshGradientPoint(
+      position: const Offset(0.4, 1.2),
+      color: _palette[3],
+    ),
+  ];
+
+  static const List<_MeshGradientVariant> _variants = <_MeshGradientVariant>[
+    _MeshGradientVariant(horizontalFactor: -1, verticalFactor: -1),
+    _MeshGradientVariant(horizontalFactor: 1, verticalFactor: -1),
+    _MeshGradientVariant(horizontalFactor: 1, verticalFactor: 1),
+    _MeshGradientVariant(horizontalFactor: -1, verticalFactor: 1),
+  ];
+
+  static final MeshGradientOptions _options = MeshGradientOptions(
+    blend: 3.4,
+    noiseIntensity: 0.08,
+  );
+
+  static const double _kCanvasScale = 3.0;
+  static const double _kTranslationSafetyFactor = 0.94;
+
+  @override
+  Widget build(BuildContext context) {
+    final _MeshGradientVariant variant =
+        _variants[variantIndex % _variants.length];
+    const double maxTranslation =
+        ((_kCanvasScale - 1.0) / (2 * _kCanvasScale)) *
+            _kTranslationSafetyFactor;
+    final Offset translation = Offset(
+      variant.horizontalFactor * maxTranslation,
+      variant.verticalFactor * maxTranslation,
+    );
+    return IgnorePointer(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double width = constraints.maxWidth;
+          final double height = constraints.maxHeight;
+          final double canvasWidth = width * _kCanvasScale;
+          final double canvasHeight = height * _kCanvasScale;
+          return OverflowBox(
+            alignment: Alignment.center,
+            minWidth: canvasWidth,
+            minHeight: canvasHeight,
+            maxWidth: canvasWidth,
+            maxHeight: canvasHeight,
+            child: FractionalTranslation(
+              translation: translation,
+              child: Opacity(
+                opacity: 0.62,
+                child: MeshGradient(
+                  points: _points,
+                  options: _options,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MeshGradientVariant {
+  const _MeshGradientVariant({
+    required this.horizontalFactor,
+    required this.verticalFactor,
+  });
+
+  final double horizontalFactor;
+  final double verticalFactor;
 }
 
 class _StoryCardBackground extends StatelessWidget {

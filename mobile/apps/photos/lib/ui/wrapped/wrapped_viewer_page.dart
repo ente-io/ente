@@ -10,6 +10,7 @@ import "package:flutter/services.dart";
 import "package:intl/intl.dart";
 import "package:just_audio/just_audio.dart";
 import "package:logging/logging.dart";
+import "package:mesh_gradient/mesh_gradient.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file/file.dart";
@@ -580,6 +581,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                                       colorScheme: enteColorScheme,
                                       textTheme: textTheme,
                                       isActive: index == _currentIndex,
+                                      gradientVariantIndex: index,
                                     );
                                   },
                                 ),
