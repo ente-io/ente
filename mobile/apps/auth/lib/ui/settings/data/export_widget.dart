@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/export/ente.dart'; 
+import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -144,7 +144,6 @@ Future<void> _exportCodes(
   String exportFileName = 'ente-auth-codes-$formattedDate';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
-  await PlatformUtil.refocusWindows();
   if (!hasAuthenticated) {
     return;
   }
