@@ -345,6 +345,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               _logger.severe("Error exporting video with native", e, s);
             }
           },
+          allowFfmpegFallback: false,
         );
       } catch (nativeError, _) {
         if (nativeError is NativeVideoEditorException) {
