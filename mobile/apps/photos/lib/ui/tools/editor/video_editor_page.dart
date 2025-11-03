@@ -335,14 +335,29 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             }
           },
           onError: (e, s) {
-            _logger.severe("Error exporting video with native", e, s);
+            if (e is NativeVideoEditorException) {
+              _logger.severe(
+                "Error exporting video with native (code=${e.code}, details=${e.details})",
+                e,
+                s,
+              );
+            } else {
+              _logger.severe("Error exporting video with native", e, s);
+            }
           },
         );
       } catch (nativeError, _) {
-        _logger.warning(
-          "Native export failed, attempting FFmpeg fallback",
-          nativeError,
-        );
+        if (nativeError is NativeVideoEditorException) {
+          _logger.warning(
+            "Native export failed, attempting FFmpeg fallback (code=${nativeError.code}, details=${nativeError.details})",
+            nativeError,
+          );
+        } else {
+          _logger.warning(
+            "Native export failed, attempting FFmpeg fallback",
+            nativeError,
+          );
+        }
 
         if (flagService.internalUser && mounted) {
           showShortToast(context, "(i) Switching to FFmpeg fallback");

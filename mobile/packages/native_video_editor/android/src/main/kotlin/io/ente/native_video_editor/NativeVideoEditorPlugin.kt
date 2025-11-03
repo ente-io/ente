@@ -78,7 +78,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                     } catch (e: Exception) {
                         // Log.e(TAG, "Trim failed", e)
                         withContext(Dispatchers.Main) {
-                            result.error("TRIM_ERROR", e.message, null)
+                            result.error("TRIM_ERROR", e.message, buildErrorDetails(e))
                         }
                     } finally {
                         currentJob = null
@@ -118,7 +118,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                     } catch (e: Exception) {
                         // Log.e(TAG, "Rotation failed", e)
                         withContext(Dispatchers.Main) {
-                            result.error("ROTATE_ERROR", e.message, null)
+                            result.error("ROTATE_ERROR", e.message, buildErrorDetails(e))
                         }
                     } finally {
                         currentJob = null
@@ -164,7 +164,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                     } catch (e: Exception) {
                         // Log.e(TAG, "Crop failed", e)
                         withContext(Dispatchers.Main) {
-                            result.error("CROP_ERROR", e.message, null)
+                            result.error("CROP_ERROR", e.message, buildErrorDetails(e))
                         }
                     } finally {
                         currentJob = null
@@ -186,7 +186,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                         }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
-                            result.error("INFO_ERROR", e.message, null)
+                            result.error("INFO_ERROR", e.message, buildErrorDetails(e))
                         }
                     } finally {
                         currentJob = null
@@ -318,7 +318,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
             } catch (e: Exception) {
                 // Log.e(TAG, "Process video failed", e)
                 withContext(Dispatchers.Main) {
-                    result.error("PROCESS_ERROR", e.message, null)
+                    result.error("PROCESS_ERROR", e.message, buildErrorDetails(e))
                 }
             } finally {
                 currentJob = null
@@ -338,5 +338,30 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
 
     override fun onCancel(arguments: Any?) {
         progressEventSink = null
+    }
+
+    private fun buildErrorDetails(throwable: Throwable): Map<String, Any?> {
+        val details = mutableMapOf<String, Any?>(
+            "type" to throwable::class.java.simpleName,
+            "message" to (throwable.message ?: "")
+        )
+
+        val exportException = when {
+            throwable is ExportException -> throwable
+            throwable.cause is ExportException -> throwable.cause as ExportException
+            else -> null
+        }
+
+        exportException?.let {
+            details["errorCode"] = it.errorCode
+        }
+
+        val rootCause = throwable.cause ?: exportException?.cause
+        rootCause?.let {
+            details["causeType"] = it::class.java.simpleName
+            details["causeMessage"] = it.message ?: ""
+        }
+
+        return details
     }
 }

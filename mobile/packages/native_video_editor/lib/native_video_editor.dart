@@ -3,6 +3,24 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
+class NativeVideoEditorException implements Exception {
+  NativeVideoEditorException(
+    this.message, {
+    this.code,
+    this.details,
+    this.cause,
+  });
+
+  final String message;
+  final String? code;
+  final Object? details;
+  final Object? cause;
+
+  @override
+  String toString() =>
+      'NativeVideoEditorException(message: $message, code: $code, details: $details)';
+}
+
 class VideoEditResult {
   final String outputPath;
   final bool isReEncoded;
@@ -29,11 +47,11 @@ class VideoTrimParams {
   });
 
   Map<String, dynamic> toMap() => {
-        'inputPath': inputPath,
-        'outputPath': outputPath,
-        'startTimeMs': startTime.inMilliseconds,
-        'endTimeMs': endTime.inMilliseconds,
-      };
+    'inputPath': inputPath,
+    'outputPath': outputPath,
+    'startTimeMs': startTime.inMilliseconds,
+    'endTimeMs': endTime.inMilliseconds,
+  };
 }
 
 class VideoRotateParams {
@@ -48,10 +66,10 @@ class VideoRotateParams {
   }) : assert(degrees == 90 || degrees == 180 || degrees == 270);
 
   Map<String, dynamic> toMap() => {
-        'inputPath': inputPath,
-        'outputPath': outputPath,
-        'degrees': degrees,
-      };
+    'inputPath': inputPath,
+    'outputPath': outputPath,
+    'degrees': degrees,
+  };
 }
 
 class VideoCropParams {
@@ -74,20 +92,21 @@ class VideoCropParams {
   });
 
   Map<String, dynamic> toMap() => {
-        'inputPath': inputPath,
-        'outputPath': outputPath,
-        'x': x,
-        'y': y,
-        'width': width,
-        'height': height,
-        'forceReEncode': forceReEncode,
-      };
+    'inputPath': inputPath,
+    'outputPath': outputPath,
+    'x': x,
+    'y': y,
+    'width': width,
+    'height': height,
+    'forceReEncode': forceReEncode,
+  };
 }
 
 class NativeVideoEditor {
   static const MethodChannel _channel = MethodChannel('native_video_editor');
-  static const EventChannel _progressChannel =
-      EventChannel('native_video_editor/progress');
+  static const EventChannel _progressChannel = EventChannel(
+    'native_video_editor/progress',
+  );
 
   /// Trim video without re-encoding when possible
   /// Returns the output file path
@@ -117,7 +136,12 @@ class NativeVideoEditor {
         processingTime: stopwatch.elapsed,
       );
     } on PlatformException catch (e) {
-      throw Exception('Failed to trim video: ${e.message}');
+      throw NativeVideoEditorException(
+        'Failed to trim video: ${e.message}',
+        code: e.code,
+        details: e.details,
+        cause: e,
+      );
     }
   }
 
@@ -147,7 +171,12 @@ class NativeVideoEditor {
         processingTime: stopwatch.elapsed,
       );
     } on PlatformException catch (e) {
-      throw Exception('Failed to rotate video: ${e.message}');
+      throw NativeVideoEditorException(
+        'Failed to rotate video: ${e.message}',
+        code: e.code,
+        details: e.details,
+        cause: e,
+      );
     }
   }
 
@@ -176,7 +205,12 @@ class NativeVideoEditor {
         processingTime: stopwatch.elapsed,
       );
     } on PlatformException catch (e) {
-      throw Exception('Failed to crop video: ${e.message}');
+      throw NativeVideoEditorException(
+        'Failed to crop video: ${e.message}',
+        code: e.code,
+        details: e.details,
+        cause: e,
+      );
     }
   }
 
@@ -261,7 +295,12 @@ class NativeVideoEditor {
         await progressSubscription?.cancel();
       }
     } on PlatformException catch (e) {
-      throw Exception('Failed to process video: ${e.message}');
+      throw NativeVideoEditorException(
+        'Failed to process video: ${e.message}',
+        code: e.code,
+        details: e.details,
+        cause: e,
+      );
     }
   }
 
@@ -279,7 +318,12 @@ class NativeVideoEditor {
 
       return Map<String, dynamic>.from(result);
     } on PlatformException catch (e) {
-      throw Exception('Failed to get video info: ${e.message}');
+      throw NativeVideoEditorException(
+        'Failed to get video info: ${e.message}',
+        code: e.code,
+        details: e.details,
+        cause: e,
+      );
     }
   }
 
@@ -288,7 +332,12 @@ class NativeVideoEditor {
     try {
       await _channel.invokeMethod('cancelProcessing');
     } on PlatformException catch (e) {
-      throw Exception('Failed to cancel processing: ${e.message}');
+      throw NativeVideoEditorException(
+        'Failed to cancel processing: ${e.message}',
+        code: e.code,
+        details: e.details,
+        cause: e,
+      );
     }
   }
 
