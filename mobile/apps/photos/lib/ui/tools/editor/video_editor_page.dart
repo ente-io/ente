@@ -109,10 +109,13 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             }
             setState(() {});
           })
-          .catchError((error) {
-            // handle minumum duration bigger than video duration error
-            Navigator.pop(context);
-          }, test: (e) => e is VideoMinDurationError);
+          .catchError(
+            (error) {
+              // handle minimum duration bigger than video duration error
+              Navigator.pop(context);
+            },
+            test: (e) => e is VideoMinDurationError,
+          );
     });
   }
 
@@ -422,11 +425,14 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           continue;
         }
 
-        throw error;
+        rethrow;
       }
     }
 
-    throw lastError ?? Exception("Unknown native export failure");
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
+    }
+    throw Exception("Unknown native export failure");
   }
 
   Future<File> _runFfmpegExportWithRetry({
@@ -485,11 +491,14 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           continue;
         }
 
-        throw error;
+        rethrow;
       }
     }
 
-    throw lastError ?? Exception("Unknown FFmpeg export failure");
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
+    }
+    throw Exception("Unknown FFmpeg export failure");
   }
 
   Future<File> _runFfmpegExportAttempt({
@@ -646,7 +655,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         "${controller.preferredCropAspectRatio != null ? ", aspectRatio=${controller.preferredCropAspectRatio!.toStringAsFixed(3)}" : ""}";
 
     _logger.info(
-      "Export starting (native=$shouldUseNative) rotation=${rotation}°, "
+      "Export starting (native=$shouldUseNative) rotation=$rotation°, "
       "trim={startMs:$startTrimMs, endMs:$endTrimMs, durationMs:$trimmedDurationMs, "
       "min:${minTrim.toStringAsFixed(3)}, max:${maxTrim.toStringAsFixed(3)}, "
       "videoDurationMs:$videoDurationMs} "

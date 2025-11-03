@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter/ffmpeg_session.dart';
-import 'package:ffmpeg_kit_flutter/log.dart';
 import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:ffmpeg_kit_flutter/session_state.dart';
 import 'package:ffmpeg_kit_flutter/statistics.dart';
