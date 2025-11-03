@@ -1,4 +1,4 @@
-import "package:ente_ui/components/buttons/models/button_result.dart";
+import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
@@ -454,8 +454,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   Future<void> _showEditDialog(BuildContext context, EnteFile file) async {
     final allCollections = await CollectionService.instance.getCollections();
-    final dedupedCollections =
-        uniqueCollectionsById(allCollections, logger: _logger);
+    final dedupedCollections = uniqueCollectionsById(allCollections);
 
     final result = await showFileEditDialog(
       context,
@@ -552,8 +551,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       'Opening add-to dialog for ${files.length} file(s); fetching collections.',
     );
     final allCollections = await CollectionService.instance.getCollections();
-    final dedupedCollections =
-        uniqueCollectionsById(allCollections, logger: _logger);
+    final dedupedCollections = uniqueCollectionsById(allCollections);
     _logger.info(
       'Presenting ${dedupedCollections.length} unique collection option(s) '
       'to add files to.',
