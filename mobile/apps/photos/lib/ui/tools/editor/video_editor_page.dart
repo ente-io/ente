@@ -96,23 +96,23 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         ),
       );
 
-      _controller!.initialize().then((_) {
-        // Apply metadata rotation to the video player
-        if (_quarterTurnsForRotationCorrection != null &&
-            _quarterTurnsForRotationCorrection! != 0) {
-          final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
-          _controller!.video.value = _controller!.video.value.copyWith(
-            rotationCorrection: rotationDegrees,
-          );
-        }
-        setState(() {});
-      }).catchError(
-        (error) {
-          // handle minumum duration bigger than video duration error
-          Navigator.pop(context);
-        },
-        test: (e) => e is VideoMinDurationError,
-      );
+      _controller!
+          .initialize()
+          .then((_) {
+            // Apply metadata rotation to the video player
+            if (_quarterTurnsForRotationCorrection != null &&
+                _quarterTurnsForRotationCorrection! != 0) {
+              final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
+              _controller!.video.value = _controller!.video.value.copyWith(
+                rotationCorrection: rotationDegrees,
+              );
+            }
+            setState(() {});
+          })
+          .catchError((error) {
+            // handle minumum duration bigger than video duration error
+            Navigator.pop(context);
+          }, test: (e) => e is VideoMinDurationError);
     });
   }
 
@@ -139,7 +139,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       child: ValueListenableBuilder<bool>(
         valueListenable: _isExporting,
         builder: (context, isExporting, _) {
-          final isReady = _controller != null &&
+          final isReady =
+              _controller != null &&
               _controller!.initialized &&
               _quarterTurnsForRotationCorrection != null;
 
@@ -206,8 +207,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 children: [
                                   Text(
                                     "Native (i)",
-                                    style: getEnteTextTheme(context)
-                                        .mini
+                                    style: getEnteTextTheme(context).mini
                                         .copyWith(color: colorScheme.textMuted),
                                   ),
                                   const SizedBox(width: 4),
@@ -236,9 +236,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 svgPath:
                                     "assets/video-editor/video-editor-trim-action.svg",
                                 onPressed: () => _openSubEditor(
-                                  VideoTrimPage(
-                                    controller: _controller!,
-                                  ),
+                                  VideoTrimPage(controller: _controller!),
                                 ),
                               ),
                               const SizedBox(width: 24),
@@ -247,9 +245,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 svgPath:
                                     "assets/video-editor/video-editor-crop-action.svg",
                                 onPressed: () => _openSubEditor(
-                                  VideoCropPage(
-                                    controller: _controller!,
-                                  ),
+                                  VideoCropPage(controller: _controller!),
                                 ),
                               ),
                               const SizedBox(width: 24),
@@ -258,9 +254,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 svgPath:
                                     "assets/video-editor/video-editor-rotate-action.svg",
                                 onPressed: () => _openSubEditor(
-                                  VideoRotatePage(
-                                    controller: _controller!,
-                                  ),
+                                  VideoRotatePage(controller: _controller!),
                                 ),
                               ),
                             ],
@@ -368,6 +362,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
     const maxAttempts = 2;
+    const retryThreshold = Duration(seconds: 1);
     Object? lastError;
     StackTrace? lastStackTrace;
 
@@ -381,6 +376,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         dialogKey.currentState!.setProgress(0.0);
       }
 
+      final startTime = DateTime.now();
       try {
         return await NativeVideoExportService.exportVideo(
           controller: _controller!,
@@ -406,8 +402,18 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       } catch (error, stackTrace) {
         lastError = error;
         lastStackTrace = stackTrace;
+        final elapsed = DateTime.now().difference(startTime);
 
         if (attempt < maxAttempts - 1) {
+          if (elapsed > retryThreshold) {
+            _logger.info(
+              "Native export attempt ${attempt + 1} failed after ${elapsed.inMilliseconds}ms, skipping retry",
+              error,
+              stackTrace,
+            );
+            break;
+          }
+
           _logger.info(
             "Native export attempt ${attempt + 1} failed, retrying with fresh output path",
             error,
@@ -431,6 +437,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
     const maxAttempts = 2;
+    const retryThreshold = Duration(seconds: 1);
     Object? lastError;
     StackTrace? lastStackTrace;
 
@@ -454,6 +461,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       );
 
       try {
+        final startTime = DateTime.now();
         return await _runFfmpegExportAttempt(
           config: config,
           dialogKey: dialogKey,
@@ -461,8 +469,18 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       } catch (error, stackTrace) {
         lastError = error;
         lastStackTrace = stackTrace;
+        final elapsed = DateTime.now().difference(startTime);
 
         if (attempt < maxAttempts - 1) {
+          if (elapsed > retryThreshold) {
+            _logger.info(
+              "FFmpeg export attempt ${attempt + 1} failed after ${elapsed.inMilliseconds}ms, skipping retry",
+              error,
+              stackTrace,
+            );
+            break;
+          }
+
           _logger.info(
             "FFmpeg export attempt ${attempt + 1} failed, retrying with fresh output path",
             error,
@@ -676,22 +694,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
 class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
   _VideoEditorSubPageRoute(this.child)
-      : super(
-          fullscreenDialog: true,
-          transitionDuration: const Duration(milliseconds: 220),
-          reverseTransitionDuration: const Duration(milliseconds: 180),
-          pageBuilder: (_, __, ___) => child,
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-                reverseCurve: Curves.easeInCubic,
-              ),
-              child: child,
-            );
-          },
-        );
+    : super(
+        fullscreenDialog: true,
+        transitionDuration: const Duration(milliseconds: 220),
+        reverseTransitionDuration: const Duration(milliseconds: 180),
+        pageBuilder: (_, __, ___) => child,
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            ),
+            child: child,
+          );
+        },
+      );
 
   final Widget child;
 }
