@@ -46,6 +46,7 @@ class ItemListView extends StatefulWidget {
   final SelectedCollections? selectedCollections;
   final SelectedFiles? selectedFiles;
   final ItemViewType viewType;
+  final ScrollPhysics? physics;
 
   const ItemListView({
     super.key,
@@ -57,6 +58,7 @@ class ItemListView extends StatefulWidget {
     this.selectedCollections,
     this.selectedFiles,
     this.viewType = ItemViewType.listView,
+    this.physics = const NeverScrollableScrollPhysics(),
   });
 
   @override
@@ -121,24 +123,19 @@ class _ItemListViewState extends State<ItemListView> {
   }
 
   Widget _buildListView() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ListView.separated(
-          separatorBuilder: (context, index) => const SizedBox(height: 8),
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _sortedItems.length,
-          itemBuilder: (context, index) => _buildItem(index),
-        ),
-      ],
+    return ListView.separated(
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      shrinkWrap: true,
+      physics: widget.physics,
+      itemCount: _sortedItems.length,
+      itemBuilder: (context, index) => _buildItem(index),
     );
   }
 
   Widget _buildGridView() {
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: widget.physics,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,

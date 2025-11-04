@@ -233,15 +233,17 @@ class _HomePageState extends UploaderPageState<HomePage>
     List<Collection> collections,
     List<EnteFile> files,
   ) {
-    setState(() {
-      _filteredCollections = _filterOutUncategorized(collections);
-      _filteredFiles = files;
-    });
+    if (mounted) {
+      setState(() {
+        _filteredCollections = _filterOutUncategorized(collections);
+        _filteredFiles = files;
+      });
+    }
   }
 
   @override
   void onSearchStateChanged(bool isActive) {
-    if (!isActive) {
+    if (!isActive && mounted) {
       setState(() {
         _filteredCollections = _filterOutUncategorized(_collections);
         _filteredFiles = _recentFiles;
@@ -452,7 +454,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _collections.isEmpty && _recentFiles.isEmpty && !_isLoading;
 
     try {
-      if (shouldShowLoading || _error != null) {
+      if (mounted && (shouldShowLoading || _error != null)) {
         setState(() {
           if (shouldShowLoading) {
             _isLoading = true;
@@ -470,21 +472,25 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sharedCollections =
           await CollectionService.instance.getSharedCollections();
 
-      setState(() {
-        homeCollections = getOnEnteCollections(sortedCollections);
-        _collections = sortedCollections;
-        _filteredCollections = _filterOutUncategorized(sortedCollections);
-        _filteredFiles = _recentFiles;
-        incomingCollections = sharedCollections.incoming;
-        outgoingCollections = sharedCollections.outgoing;
-        quickLinks = sharedCollections.quickLinks;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          homeCollections = getOnEnteCollections(sortedCollections);
+          _collections = sortedCollections;
+          _filteredCollections = _filterOutUncategorized(sortedCollections);
+          _filteredFiles = _recentFiles;
+          incomingCollections = sharedCollections.incoming;
+          outgoingCollections = sharedCollections.outgoing;
+          quickLinks = sharedCollections.quickLinks;
+          _isLoading = false;
+        });
+      }
     } catch (error) {
-      setState(() {
-        _error = 'Error fetching collections: $error';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Error fetching collections: $error';
+          _isLoading = false;
+        });
+      }
     }
   }
 

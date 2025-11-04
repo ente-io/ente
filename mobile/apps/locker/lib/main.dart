@@ -152,36 +152,40 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _init(bool bool, {String? via}) async {
-  final SharedPreferences preferences = await SharedPreferences.getInstance();
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  try {
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-  await CryptoUtil.init();
+    await CryptoUtil.init();
 
-  await CollectionDB.instance.init();
-  await TrashDB.instance.init();
+    await CollectionDB.instance.init();
+    await TrashDB.instance.init();
 
-  await Configuration.instance.init([
-    CollectionDB.instance,
-    TrashDB.instance,
-  ]);
+    await Configuration.instance.init([
+      CollectionDB.instance,
+      TrashDB.instance,
+    ]);
 
-  await Network.instance.init(Configuration.instance);
-  await UserService.instance.init(Configuration.instance, const HomePage());
-  await LockScreenSettings.instance.init(Configuration.instance);
-  await CollectionApiClient.instance.init();
-  await CollectionService.instance.init();
-  await FavoritesService.instance.init();
-  await LinksClient.instance.init();
-  await LinksService.instance.init();
-  await ServiceLocator.instance.init(
-    preferences,
-    Network.instance.enteDio,
-    Network.instance.getDio(),
-    packageInfo,
-  );
-  await TrashService.instance.init(preferences);
-  await EmergencyContactService.instance.init(
-    UserService.instance,
-    Configuration.instance,
-  );
+    await Network.instance.init(Configuration.instance);
+    await UserService.instance.init(Configuration.instance, const HomePage());
+    await LockScreenSettings.instance.init(Configuration.instance);
+    await CollectionApiClient.instance.init();
+    await CollectionService.instance.init();
+    await FavoritesService.instance.init();
+    await LinksClient.instance.init();
+    await LinksService.instance.init();
+    await ServiceLocator.instance.init(
+      preferences,
+      Network.instance.enteDio,
+      Network.instance.getDio(),
+      packageInfo,
+    );
+    await TrashService.instance.init(preferences);
+    await EmergencyContactService.instance.init(
+      UserService.instance,
+      Configuration.instance,
+    );
+  } catch (e) {
+    _logger.severe("Error during initialization", e);
+  }
 }

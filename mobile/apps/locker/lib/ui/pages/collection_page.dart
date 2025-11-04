@@ -411,23 +411,26 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             ],
           ),
         ),
-        SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: _displayedFiles.isEmpty
-              ? const Center(
-                  child: EmptyStateWidget(
-                    assetPath: 'assets/empty_state.png',
-                    title: "Nothing to see here",
-                    subtitle:
-                        "Upload files to this collection to see them here",
-                    showBorder: false,
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: _displayedFiles.isEmpty
+                ? const Center(
+                    child: EmptyStateWidget(
+                      assetPath: 'assets/empty_state.png',
+                      title: "Nothing to see here",
+                      subtitle:
+                          "Upload files to this collection to see them here",
+                      showBorder: false,
+                    ),
+                  )
+                : ItemListView(
+                    key: ValueKey(_displayedFiles.length),
+                    files: _displayedFiles,
+                    selectedFiles: _selectedFiles,
+                    physics: const BouncingScrollPhysics(),
                   ),
-                )
-              : ItemListView(
-                  key: ValueKey(_displayedFiles.length),
-                  files: _displayedFiles,
-                  selectedFiles: _selectedFiles,
-                ),
+          ),
         ),
       ],
     );

@@ -78,7 +78,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
       if (widget.viewType == UISectionType.homeCollections) {
         collections = await CollectionService.instance.getCollections();
-      } else {
+      } else if (widget.viewType == UISectionType.outgoingCollections ||
+          widget.viewType == UISectionType.incomingCollections) {
         final sharedCollections =
             await CollectionService.instance.getSharedCollections();
         if (widget.viewType == UISectionType.outgoingCollections) {
@@ -171,6 +172,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       );
     }
 
+    //TODO: Fix issue when this is true
     if (_error != null) {
       return Center(
         child: Column(
@@ -233,10 +235,11 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
             style: textTheme.smallMuted,
           ),
           const SizedBox(height: 20),
-          Flexible(
+          Expanded(
             child: ItemListView(
               collections: _sortedCollections,
               selectedCollections: widget.selectedCollections,
+              physics: const BouncingScrollPhysics(),
             ),
           ),
           if (_uncategorizedCollection != null && showUncategorized)
@@ -251,7 +254,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+      margin: const EdgeInsets.only(top: 4.0, bottom: 16.0),
       child: InkWell(
         onTap: _openTrash,
         borderRadius: BorderRadius.circular(12.0),
@@ -313,7 +316,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
       child: InkWell(
         onTap: () => _openUncategorized(),
         borderRadius: BorderRadius.circular(12.0),

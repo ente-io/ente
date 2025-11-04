@@ -264,22 +264,10 @@ class _TrashPageState extends State<TrashPage> {
                   showBorder: false,
                 )
               : Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
-                          ),
-                          child: ItemListView(
-                            files: _sortedTrashFiles.cast<EnteFile>(),
-                            fileOverflowActions: _getFileOverflowActions(),
-                          ),
-                        ),
-                      );
-                    },
+                  child: ItemListView(
+                    files: _sortedTrashFiles.cast<EnteFile>(),
+                    fileOverflowActions: _getFileOverflowActions(),
+                    physics: const BouncingScrollPhysics(),
                   ),
                 ),
         ],
