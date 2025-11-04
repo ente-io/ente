@@ -294,7 +294,7 @@
     "enabled": "Aktiviert",
     "lost_2fa_device": "Zwei-Faktor-Gerät verloren",
     "incorrect_code": "Falscher Code",
-    "two_factor_info": "Fügen Sie eine zusätzliche Sicherheitsebene hinzu, indem Sie mehr als Ihre E-Mail und Ihr Passwort benötigen, um sich mit Ihrem Account anzumelden",
+    "two_factor_info": "Stärke die Sicherheit deines Account, indem du mehr als E-Mail und Passwort für die Anmeldung abfragst",
     "disable": "Deaktivieren",
     "reconfigure": "Neu einrichten",
     "reconfigure_two_factor_hint": "Authentifizierungsgerät aktualisieren",
@@ -498,7 +498,7 @@
     "change_folder": "Ordner ändern",
     "view_logs": "Protokolle anzeigen",
     "view_logs_message": "<p>Dies wird Debug-Protokolle anzeigen, welche Sie uns per E-Mail zusenden können, um ihr Problem zu analysieren.</p><p>Beachten Sie, dass Dateinamen enthalten sind um Probleme mit spezifischen Dateien nachvollziehen zu können.</p>",
-    "weak_device_hint": "Dein Browser ist nicht leistungsstark genug, um deine Bilder zu verschlüsseln. Versuche, dich an einem Computer bei Ente anzumelden, oder lade dir die Ente-App für dein Gerät (Handy oder Desktop) herunter.",
+    "weak_device_hint": "Dein Browser ist nicht leistungsstark genug, um deine Bilder zu verschlüsseln. Verwende ein anderes Gerät, oder installiere die Ente-App für Handy oder Desktop.",
     "drag_and_drop_hint": "Oder ziehe Dateien per Drag-and-Drop in das Ente-Fenster",
     "authenticate": "Authentifizieren",
     "uploaded_to_single_collection": "In einzelnes Album hochgeladen",
@@ -703,5 +703,5 @@
     "continuous": "",
     "trip": "",
     "album_layout": "",
-    "maps_privacy_notice": ""
+    "maps_privacy_notice": "Ungefähre Koordinaten werden an Drittanbieter, die deine Privatsphäre respektieren, beispielsweise OpenStreetMap, weitergeleitet."
 }

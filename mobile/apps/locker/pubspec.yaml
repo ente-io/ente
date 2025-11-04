@@ -9,6 +9,7 @@ dependencies:
   adaptive_theme: ^3.6.0
   bip39: ^1.0.6
   collection: ^1.18.0
+  convert: ^3.1.1
   crypto: ^3.0.6
   dio: ^5.8.0+1 
   dotted_border: ^3.1.0

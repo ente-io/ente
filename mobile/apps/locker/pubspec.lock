@@ -122,7 +122,7 @@ packages:
     source: hosted
     version: "1.19.1"
   convert:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: convert
       sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
@@ -243,7 +243,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: f91e1545f8263df127762240c4da54a0c42835b2
+      resolved-ref: "7fc9a9709ab818e4cfff23866c60285ba305f0dd"
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"

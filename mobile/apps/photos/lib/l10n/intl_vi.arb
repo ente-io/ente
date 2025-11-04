@@ -28,7 +28,7 @@
   "deleteRequestSLAText": "Yêu cầu của bạn sẽ được xử lý trong vòng 72 giờ.",
   "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.io</warning> từ địa chỉ email đã đăng ký của bạn.",
   "entePhotosPerm": "Ente <i>cần quyền để</i> lưu giữ ảnh của bạn",
-  "ok": "Được",
+  "ok": "OK",
   "createAccount": "Tạo tài khoản",
   "createNewAccount": "Tạo tài khoản mới",
   "password": "Mật khẩu",
