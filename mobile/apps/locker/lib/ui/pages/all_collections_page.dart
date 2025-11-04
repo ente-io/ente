@@ -172,6 +172,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       );
     }
 
+    //TODO: Fix issue when this is true
     if (_error != null) {
       return Center(
         child: Column(
