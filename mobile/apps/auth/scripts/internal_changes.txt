@@ -1,14 +1,5 @@
 - Ashil: Update auth icons
-- a5xwin: Auto backup feature for 2FA codes with encryption support
 - a5xwin: Import 2FA codes from gallery using QR image scanning
 - Tristan: Minimize to tray on Windows, macOS, and Linux
-- Adri�n: Fix manual app lock with macOS Touch ID
-- Adri�n: Fix "Copied to Clipboard" notification visibility
-- Aman: Fix white flash when switching tabs with lock screen
-- Tristan: Fix app crash on window close for Windows
-- Neeraj: Add in-app log viewer with search and filtering
+- Adrián: Fix "Copied to Clipboard" notification visibility
 - Neeraj: Fix iOS password AutoFill for auth.ente.io
-- Prateek: Upgrade to Flutter 3.32.8
-- Prateek: Update Android target SDK to 35 and compile SDK to 36
-- Aman: Replace QR code scanner library with qr_code_scanner_plus for better compatibility
-- Aman: Update Android minSdkVersion to 22
