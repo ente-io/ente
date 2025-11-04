@@ -545,6 +545,7 @@ class _HomePageState extends State<HomePage> {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
+          onImportFromGalleryTap: _importFromGalleryNative,
         );
       } else {
         final anyCodeHasError =
