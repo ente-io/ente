@@ -33,6 +33,12 @@ class Code {
   final Object? err;
   bool get hasError => err != null;
 
+  /// Stable identifier for UI state (selection, animations, etc.).
+  /// Prefer generatedID since it is unique per stored code; fall back to rawData
+  /// when the code has not been persisted yet.
+  String get selectionKey =>
+      generatedID != null ? generatedID!.toString() : rawData;
+
   String get issuerAccount =>
       account.isNotEmpty ? '$issuer ($account)' : issuer;
 

@@ -23,25 +23,38 @@ class DeduplicationService {
   Future<List<DuplicateCodes>> _getDuplicateCodes() async {
     final codes = await CodeStore.instance.getAllCodes();
     final List<DuplicateCodes> duplicateCodes = [];
-    Map<String, List<Code>> uniqueCodes = {};
+    final Map<String, List<Code>> groupedCodes = {};
 
     for (final code in codes) {
       if (code.hasError || code.isTrashed) continue;
 
-      final uniqueKey = "${code.secret}_${code.issuer}_${code.account}";
+      final uniqueKey = _buildDuplicateKey(code);
 
-      if (uniqueCodes.containsKey(uniqueKey)) {
-        uniqueCodes[uniqueKey]!.add(code);
+      if (groupedCodes.containsKey(uniqueKey)) {
+        groupedCodes[uniqueKey]!.add(code);
       } else {
-        uniqueCodes[uniqueKey] = [code];
+        groupedCodes[uniqueKey] = [code];
       }
     }
-    for (final key in uniqueCodes.keys) {
-      if (uniqueCodes[key]!.length > 1) {
-        duplicateCodes.add(DuplicateCodes(key, uniqueCodes[key]!));
+    for (final entry in groupedCodes.entries) {
+      if (entry.value.length > 1) {
+        duplicateCodes.add(DuplicateCodes(entry.key, entry.value));
       }
     }
     return duplicateCodes;
+  }
+
+  String _buildDuplicateKey(Code code) {
+    final normalizedIssuer = code.issuer.trim().toLowerCase();
+    final normalizedSecret = code.secret.trim();
+    return [
+      normalizedSecret,
+      normalizedIssuer,
+      code.type.name,
+      code.algorithm.name,
+      code.digits.toString(),
+      code.period.toString(),
+    ].join("_");
   }
 }
 

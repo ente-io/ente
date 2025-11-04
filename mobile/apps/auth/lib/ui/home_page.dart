@@ -96,6 +96,7 @@ class _HomePageState extends State<HomePage> {
   bool hasTrashedCodes = false;
   bool hasNonTrashedCodes = false;
   bool isCompactMode = false;
+  int _currentGridColumns = 1;
 
   late CodeSortKey _codeSortKey;
   final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
@@ -130,7 +131,9 @@ class _HomePageState extends State<HomePage> {
 
   void _onAddTagPressed() {
   final selectedIds = _codeDisplayStore.selectedCodeIds.value;
-  final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+  final selectedCodes =
+      _allCodes?.where((c) => selectedIds.contains(c.selectionKey)).toList() ??
+          [];
 
   if (selectedCodes.isEmpty) return;
 
@@ -152,7 +155,10 @@ Future<void> _onRestoreSelectedPressed() async {
   FocusScope.of(context).requestFocus();
 
   try {
-    final codesToRestore = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+    final codesToRestore = _allCodes
+            ?.where((c) => selectedIds.contains(c.selectionKey))
+            .toList() ??
+        [];
     for (final code in codesToRestore) {
       final updatedCode = code.copyWith(display: code.display.copyWith(trashed: false));
       unawaited(CodeStore.instance.addCode(updatedCode));
@@ -188,7 +194,10 @@ Future<void> _onDeleteForeverPressed() async {
     isCritical: true,
     firstButtonOnTap: () async {
       try {
-        final codesToDelete = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+        final codesToDelete = _allCodes
+                ?.where((c) => selectedIds.contains(c.selectionKey))
+                .toList() ??
+            [];
         for (final code in codesToDelete) {
           await CodeStore.instance.removeCode(code);
         }
@@ -239,11 +248,31 @@ Widget _buildTrashSelectActions() {
   );
 }
 
+  List<Code> _selectedCodesForContextMenu() {
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  if (selectedIds.isEmpty) return const <Code>[];
+
+  return _allCodes
+          ?.where((code) => selectedIds.contains(code.selectionKey))
+          .toList() ??
+      const <Code>[];
+}
+
+  int _calculateGridColumnCount(BuildContext context) {
+  final double width = MediaQuery.sizeOf(context).width;
+  final double tileWidth = isCompactMode ? 320 : 400;
+  final int computedCount = width ~/ tileWidth;
+  return computedCount <= 0 ? 1 : computedCount;
+}
+
   Future<void> _onPinSelectedPressed() async {
   final selectedIds = _codeDisplayStore.selectedCodeIds.value;
   if (selectedIds.isEmpty) return;
 
-  final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+  final codesToUpdate = _allCodes
+          ?.where((c) => selectedIds.contains(c.selectionKey))
+          .toList() ??
+      [];
   if (codesToUpdate.isEmpty) return;
 
   // Determine the state of the current selection (pinned/unpinned)
@@ -287,7 +316,10 @@ Widget _buildTrashSelectActions() {
   final selectedIds = _codeDisplayStore.selectedCodeIds.value;
   if (selectedIds.isEmpty) return;
 
-  final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+  final codesToUpdate = _allCodes
+          ?.where((c) => selectedIds.contains(c.selectionKey))
+          .toList() ??
+      [];
   if (codesToUpdate.isEmpty) return;
 
   int unpinnedCount = 0;
@@ -330,7 +362,8 @@ Widget _buildTrashSelectActions() {
 
     body: ((){
       if (selectedIds.length == 1){
-        final code = _allCodes!.firstWhere((c) => c.secret == selectedIds.first);
+        final code = _allCodes!
+            .firstWhere((c) => c.selectionKey == selectedIds.first);
         final issuerAccount = code.account.isNotEmpty ? '${code.issuer} (${code.account})' : code.issuer;
         return l10n.trashCodeMessage(issuerAccount);
       } 
@@ -343,7 +376,10 @@ Widget _buildTrashSelectActions() {
     isCritical: true, 
     firstButtonOnTap: () async {
       try {
-        final codesToTrash = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+        final codesToTrash = _allCodes
+                ?.where((c) => selectedIds.contains(c.selectionKey))
+                .toList() ??
+            [];
 
         for (final code in codesToTrash) {
           final updatedCode = code.copyWith(
@@ -491,7 +527,10 @@ Widget _buildSingleSelectActions(Code code) {
               valueListenable: _codeDisplayStore.selectedCodeIds,
               builder: (context, selectedIds, child) {
                 if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
-                final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+                final selectedCodes = _allCodes
+                        ?.where((c) => selectedIds.contains(c.selectionKey))
+                        .toList() ??
+                    [];
                 if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
                 final bool allArePinned = selectedCodes.every((code) => code.isPinned);
                 
@@ -548,7 +587,10 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
       builder: (context, selectedIds, child) {
         if (selectedIds.isEmpty) return const SizedBox.shrink();
 
-        final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+        final selectedCodes = _allCodes
+                ?.where((c) => selectedIds.contains(c.selectionKey))
+                .toList() ??
+            [];
         if (selectedCodes.isEmpty) return const SizedBox.shrink();
 
         final bool allArePinned = selectedCodes.every((code) => code.isPinned);
@@ -693,7 +735,7 @@ Widget _buildActionButtons() {
       final Widget actionWidget;
       if (selectedIds.length == 1) {
         final selectedCode = _allCodes?.firstWhereOrNull(
-          (c) => c.secret == selectedIds.first,
+          (c) => c.selectionKey == selectedIds.first,
         );
         if (selectedCode == null) return const SizedBox.shrink();
         actionWidget = _buildSingleSelectActions(selectedCode);
@@ -750,7 +792,9 @@ Widget _buildActionButtons() {
           width: 1,
         ),
       ),
-      shadowColor: isDarkMode ? Colors.black.withOpacity(0.7) : Colors.grey.withOpacity(0.5),
+      shadowColor: isDarkMode
+          ? Colors.black.withValues(alpha: 0.7)
+          : Colors.grey.withValues(alpha: 0.5),
       elevation: 4,
       color: isDarkMode
           ? colorScheme.fillFaint
@@ -773,7 +817,9 @@ Widget _buildActionButtons() {
                     child: InkWell(
                       onTap: () {
                         final allVisibleCodeIds =
-                            _filteredCodes.map((c) => c.secret).toSet();
+                            _filteredCodes
+                                .map((c) => c.selectionKey)
+                                .toSet();
                         _codeDisplayStore.selectedCodeIds.value = allVisibleCodeIds;
                       },
                       child: Padding(
@@ -805,7 +851,9 @@ Widget _buildActionButtons() {
                           return const SizedBox.shrink();
                         }
                         final selectedCodes = _allCodes
-                                ?.where((c) => selectedIds.contains(c.secret))
+                                ?.where(
+                                  (c) => selectedIds.contains(c.selectionKey),
+                                )
                                 .toList() ??
                             [];
                         final codesToShow = selectedCodes.take(3).toList();
@@ -1198,6 +1246,10 @@ Widget build(BuildContext context) {
   return ValueListenableBuilder<bool>(
     valueListenable: _codeDisplayStore.isSelectionModeActive,
     builder: (context, isSelecting, child) {
+      final bool isDesktop = PlatformUtil.isDesktop();
+      final appBar = isDesktop && isSelecting && _currentGridColumns > 1
+          ? _buildDesktopSelectionAppBar(l10n)
+          : _buildStandardAppBar(l10n, isDesktop);
       return PopScope(
         canPop: false,
         onPopInvokedWithResult: (_, result) async {
@@ -1231,81 +1283,11 @@ Widget build(BuildContext context) {
             },
           ),
           ),
-          bottomNavigationBar: isSelecting ? _buildSelectionActionBar() : null,
+          bottomNavigationBar: isSelecting && (!isDesktop || _currentGridColumns <= 1)
+              ? _buildSelectionActionBar()
+              : null,
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
-            title: !_showSearchBox
-                ? const Text('Ente Auth', style: brandStyleMedium)
-                : TextField(
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    autofocus: _autoFocusSearch,
-                    controller: _textController,
-                    onChanged: (val) {
-                      _searchText = val;
-                      _applyFilteringAndRefresh();
-                    },
-                    decoration: InputDecoration(
-                      hintText: l10n.searchHint,
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                    ),
-                    focusNode: searchBoxFocusNode,
-                  ),
-            centerTitle: PlatformUtil.isDesktop() ? false : true,
-            actions: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SortCodeMenuWidget(
-                  currentKey: PreferenceService.instance.codeSortKey(),
-                  onSelected: (newOrder) async {
-                    await PreferenceService.instance.setCodeSortKey(newOrder);
-                    if (newOrder == CodeSortKey.manual &&
-                        newOrder == _codeSortKey) {
-                      await navigateToReorderPage(_allCodes!);
-                    }
-                    setState(() {
-                      _codeSortKey = newOrder;
-                    });
-                    if (mounted) {
-                      _applyFilteringAndRefresh();
-                    }
-                  },
-                ),
-              ),
-              if (PlatformUtil.isDesktop())
-                IconButton(
-                  icon: const Icon(Icons.lock),
-                  tooltip: l10n.appLock,
-                  padding: const EdgeInsets.all(8.0),
-                  onPressed: () async {
-                    await navigateToLockScreen();
-                  },
-                ),
-              IconButton(
-                icon: _showSearchBox
-                    ? const Icon(Icons.clear)
-                    : const Icon(Icons.search),
-                tooltip: l10n.search,
-                padding: const EdgeInsets.all(8.0),
-                onPressed: () {
-                  setState(() {
-                    _showSearchBox = !_showSearchBox;
-                    if (!_showSearchBox) {
-                      _textController.clear();
-                      _searchText = "";
-                    } else {
-                      _searchText = _textController.text;
-                      searchBoxFocusNode.requestFocus();
-                    }
-                    _applyFilteringAndRefresh();
-                  });
-                },
-              ),
-            ],
-          ),
+          appBar: appBar,
           floatingActionButton: isSelecting
               ? null
               : (!_hasLoaded ||
@@ -1319,13 +1301,151 @@ Widget build(BuildContext context) {
   );
 }
 
+PreferredSizeWidget _buildStandardAppBar(
+  AppLocalizations l10n,
+  bool isDesktop,
+) {
+  return AppBar(
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    surfaceTintColor: Colors.transparent,
+    title: !_showSearchBox
+        ? const Text('Ente Auth', style: brandStyleMedium)
+        : TextField(
+            autocorrect: false,
+            enableSuggestions: false,
+            autofocus: _autoFocusSearch,
+            controller: _textController,
+            onChanged: (val) {
+              _searchText = val;
+              _applyFilteringAndRefresh();
+            },
+            decoration: InputDecoration(
+              hintText: l10n.searchHint,
+              border: InputBorder.none,
+              focusedBorder: InputBorder.none,
+            ),
+            focusNode: searchBoxFocusNode,
+          ),
+    centerTitle: isDesktop ? false : true,
+    actions: <Widget>[
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SortCodeMenuWidget(
+          currentKey: PreferenceService.instance.codeSortKey(),
+          onSelected: (newOrder) async {
+            await PreferenceService.instance.setCodeSortKey(newOrder);
+            if (newOrder == CodeSortKey.manual && newOrder == _codeSortKey) {
+              await navigateToReorderPage(_allCodes!);
+            }
+            setState(() {
+              _codeSortKey = newOrder;
+            });
+            if (mounted) {
+              _applyFilteringAndRefresh();
+            }
+          },
+        ),
+      ),
+      if (isDesktop)
+        IconButton(
+          icon: const Icon(Icons.lock),
+          tooltip: l10n.appLock,
+          padding: const EdgeInsets.all(8.0),
+          onPressed: () async {
+            await navigateToLockScreen();
+          },
+        ),
+      IconButton(
+        icon:
+            _showSearchBox ? const Icon(Icons.clear) : const Icon(Icons.search),
+        tooltip: l10n.search,
+        padding: const EdgeInsets.all(8.0),
+        onPressed: () {
+          setState(() {
+            _showSearchBox = !_showSearchBox;
+            if (!_showSearchBox) {
+              _textController.clear();
+              _searchText = "";
+            } else {
+              _searchText = _textController.text;
+              searchBoxFocusNode.requestFocus();
+            }
+            _applyFilteringAndRefresh();
+          });
+        },
+      ),
+    ],
+  );
+}
+
+PreferredSizeWidget _buildDesktopSelectionAppBar(
+  AppLocalizations l10n,
+) {
+  final visibleIds = _filteredCodes.map((c) => c.selectionKey).toSet();
+  return PreferredSize(
+    preferredSize: const Size.fromHeight(kToolbarHeight),
+    child: ValueListenableBuilder<Set<String>>(
+      valueListenable: _codeDisplayStore.selectedCodeIds,
+      builder: (context, selectedIds, _) {
+        final bool allVisibleSelected =
+            visibleIds.isNotEmpty && selectedIds.containsAll(visibleIds);
+        return AppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          surfaceTintColor: Colors.transparent,
+          leadingWidth: 220,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  tooltip: l10n.cancel,
+                  onPressed: () => _codeDisplayStore.clearSelection(),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${selectedIds.length} ${l10n.selected}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          title: _buildDesktopActionRow(context),
+          centerTitle: true,
+          actions: [
+            _buildSelectAllChip(
+              context: context,
+              enabled: !allVisibleSelected,
+              onPressed: allVisibleSelected
+                  ? null
+                  : () {
+                      final newSelection = Set<String>.from(visibleIds);
+                      _codeDisplayStore.selectedCodeIds.value = newSelection;
+                      _codeDisplayStore.isSelectionModeActive.value =
+                          newSelection.isNotEmpty;
+                    },
+            ),
+            const SizedBox(width: 12),
+          ],
+        );
+      },
+    ),
+  );
+}
+
   Widget _getBody() {
     final l10n = context.l10n;
-    if (_hasLoaded) {
-      if (_filteredCodes.isEmpty && _searchText.isEmpty) {
-        return HomeEmptyStateWidget(
-          onScanTap: _redirectToScannerPage,
-          onManuallySetupTap: _redirectToManualEntryPage,
+  final crossAxisCount = _calculateGridColumnCount(context);
+  _currentGridColumns = crossAxisCount;
+  if (_hasLoaded) {
+    if (_filteredCodes.isEmpty && _searchText.isEmpty) {
+      return HomeEmptyStateWidget(
+        onScanTap: _redirectToScannerPage,
+        onManuallySetupTap: _redirectToManualEntryPage,
         );
       } else {
         final anyCodeHasError =
@@ -1410,9 +1530,7 @@ Widget build(BuildContext context) {
               ),
             Expanded(
               child: AlignedGridView.count(
-                crossAxisCount: (MediaQuery.sizeOf(context).width ~/ 400)
-                    .clamp(1, double.infinity)
-                    .toInt(),
+                crossAxisCount: crossAxisCount,
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.only(bottom: 80),
                 itemBuilder: ((context, index) {
@@ -1436,6 +1554,14 @@ Widget build(BuildContext context) {
                       code,
                       isCompactMode: isCompactMode,
                       sortKey: _codeSortKey,
+                      enableDesktopContextActions: PlatformUtil.isDesktop(),
+                      selectedCodesBuilder: _selectedCodesForContextMenu,
+                      onMultiPinToggle: _onPinSelectedPressed,
+                      onMultiUnpin: _onUnpinSelectedPressed,
+                      onMultiAddTag: () async => _onAddTagPressed(),
+                      onMultiTrash: _onTrashSelectedPressed,
+                      onMultiRestore: _onRestoreSelectedPressed,
+                      onMultiDeleteForever: _onDeleteForeverPressed,
                     ),
                   );
                 }),
@@ -1446,21 +1572,19 @@ Widget build(BuildContext context) {
         );
         if (!PreferenceService.instance.hasShownCoachMark()) {
           return Stack(
+            fit: StackFit.expand,
             children: [
-              list,
+              Positioned.fill(child: list),
               const CoachMarkWidget(),
             ],
           );
         } else if (_showSearchBox) {
-          return Column(
+          final searchContent = Column(
             children: [
               Expanded(
                 child: _filteredCodes.isNotEmpty
                     ? AlignedGridView.count(
-                        crossAxisCount:
-                            (MediaQuery.sizeOf(context).width ~/ 400)
-                                .clamp(1, double.infinity)
-                                .toInt(),
+                        crossAxisCount: crossAxisCount,
                         padding: const EdgeInsets.only(bottom: 80),
                         itemBuilder: ((context, index) {
                           final codeState = _filteredCodes[index];
@@ -1469,6 +1593,15 @@ Widget build(BuildContext context) {
                             codeState,
                             isCompactMode: isCompactMode,
                             sortKey: _codeSortKey,
+                            enableDesktopContextActions:
+                                PlatformUtil.isDesktop(),
+                            selectedCodesBuilder: _selectedCodesForContextMenu,
+                            onMultiPinToggle: _onPinSelectedPressed,
+                            onMultiUnpin: _onUnpinSelectedPressed,
+                            onMultiAddTag: () async => _onAddTagPressed(),
+                            onMultiTrash: _onTrashSelectedPressed,
+                            onMultiRestore: _onRestoreSelectedPressed,
+                            onMultiDeleteForever: _onDeleteForeverPressed,
                           );
                         }),
                         itemCount: _filteredCodes.length,
@@ -1477,6 +1610,7 @@ Widget build(BuildContext context) {
               ),
             ],
           );
+          return searchContent;
         } else {
           return list;
         }
@@ -1555,6 +1689,170 @@ Widget build(BuildContext context) {
     _textController.text = newCode.account;
     _searchText = newCode.account;
     _applyFilteringAndRefresh();
+  }
+
+  Widget _buildDesktopActionRow(BuildContext context) {
+    final selectedCodes = _selectedCodesForContextMenu();
+    if (selectedCodes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final bool allTrashed = selectedCodes.every((code) => code.isTrashed);
+    final bool allPinned = selectedCodes.every((code) => code.isPinned);
+    final bool anyPinned = selectedCodes.any((code) => code.isPinned);
+    final bool isMixedPinned = anyPinned && !allPinned;
+    final bool singleSelection = selectedCodes.length == 1;
+    final Code? singleCode = singleSelection ? selectedCodes.first : null;
+
+    final List<Widget> actionButtons = [];
+
+  void addButton(String tooltip, IconData icon, VoidCallback? onPressed, {Widget? iconWidget}) {
+      if (actionButtons.isNotEmpty) {
+        actionButtons.add(const SizedBox(width: 12));
+      }
+      actionButtons.add(
+        _buildSelectionIconButton(
+          context: context,
+          tooltip: tooltip,
+          icon: icon,
+          iconWidget: iconWidget,
+          onPressed: onPressed,
+        ),
+      );
+    }
+
+    if (!allTrashed) {
+      if (isMixedPinned) {
+        addButton(context.l10n.pinText, Icons.push_pin, () => _onPinSelectedPressed());
+        addButton(
+          context.l10n.unpinText,
+          Icons.push_pin,
+          () => _onUnpinSelectedPressed(),
+          iconWidget: _buildUnpinIcon(context),
+        );
+      } else if (allPinned) {
+        addButton(
+          context.l10n.unpinText,
+          Icons.push_pin,
+          () => _onUnpinSelectedPressed(),
+          iconWidget: _buildUnpinIcon(context),
+        );
+      } else {
+        addButton(context.l10n.pinText, Icons.push_pin, () => _onPinSelectedPressed());
+      }
+
+      addButton(context.l10n.addTag, Icons.local_offer_outlined, _onAddTagPressed);
+      addButton(context.l10n.trash, Icons.delete_outline, () => _onTrashSelectedPressed());
+
+      if (singleCode != null) {
+        addButton(context.l10n.share, Icons.adaptive.share_outlined, () => _onSharePressed(singleCode));
+        addButton(context.l10n.qr, Icons.qr_code_2_outlined, () => _onShowQrPressed(singleCode));
+        addButton(context.l10n.edit, Icons.edit_outlined, () => _onEditPressed(singleCode));
+      }
+    } else {
+      addButton(context.l10n.restore, Icons.restore_outlined, () => _onRestoreSelectedPressed());
+      addButton(context.l10n.delete, Icons.delete_forever_outlined, () => _onDeleteForeverPressed());
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: actionButtons,
+    );
+  }
+
+  Widget _buildSelectionIconButton({
+    required BuildContext context,
+    required String tooltip,
+    required IconData icon,
+    Widget? iconWidget,
+    required VoidCallback? onPressed,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    final bool enabled = onPressed != null;
+    final Color iconColor = enabled
+        ? colorScheme.textBase
+        : colorScheme.textMuted.withValues(alpha: 0.5);
+    final Color backgroundColor = enabled
+        ? colorScheme.fillFaint
+        : colorScheme.fillFaint.withValues(alpha: 0.6);
+    return Tooltip(
+      message: tooltip,
+      waitDuration: const Duration(milliseconds: 300),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          onTap: onPressed,
+          child: Container(
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(8),
+            child: iconWidget ?? Icon(icon, size: 24, color: iconColor),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUnpinIcon(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Icon(Icons.push_pin_outlined, size: 24, color: colorScheme.textBase),
+        Transform.rotate(
+          angle: 0.785398, // 45 degrees in radians
+          child: Container(
+            width: 18,
+            height: 2,
+            color: colorScheme.textBase,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSelectAllChip({
+    required BuildContext context,
+    required bool enabled,
+    required VoidCallback? onPressed,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textColor = enabled
+        ? colorScheme.textBase
+        : colorScheme.textMuted.withValues(alpha: 0.6);
+    return Material(
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: colorScheme.strokeMuted.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      color: colorScheme.backgroundElevated2,
+      child: InkWell(
+        onTap: enabled ? onPressed : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.l10n.selectAll,
+                style: TextStyle(fontSize: 12, color: textColor),
+              ),
+              const SizedBox(width: 6),
+              Icon(
+                Icons.done_all,
+                size: 18,
+                color: textColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _getFab() {
