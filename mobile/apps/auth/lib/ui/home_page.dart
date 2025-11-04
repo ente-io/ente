@@ -1552,43 +1552,62 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             Expanded(
-              child: AlignedGridView.count(
-                crossAxisCount: crossAxisCount,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 80),
-                itemBuilder: ((context, index) {
-                  if (index == 0 && anyCodeHasError) {
-                    return CodeErrorWidget(
-                      errors: _allCodes
-                              ?.where((element) => element.hasError)
-                              .toList() ??
-                          [],
+              child: Builder(
+                builder: (context) {
+                  final gridView = AlignedGridView.count(
+                    crossAxisCount: crossAxisCount,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemBuilder: ((context, index) {
+                      if (index == 0 && anyCodeHasError) {
+                        return CodeErrorWidget(
+                          errors: _allCodes
+                                  ?.where((element) => element.hasError)
+                                  .toList() ??
+                              [],
+                        );
+                      }
+                      final newIndex = index - indexOffset;
+
+                      final code = _filteredCodes[newIndex];
+
+                      return ClipRect(
+                        child: CodeWidget(
+                          key: ValueKey(
+                            '${code.hashCode}_${newIndex}_$_codeSortKey',
+                          ),
+                          code,
+                          isCompactMode: isCompactMode,
+                          sortKey: _codeSortKey,
+                          enableDesktopContextActions: PlatformUtil.isDesktop(),
+                          selectedCodesBuilder: _selectedCodesForContextMenu,
+                          onMultiPinToggle: _onPinSelectedPressed,
+                          onMultiUnpin: _onUnpinSelectedPressed,
+                          onMultiAddTag: () async => _onAddTagPressed(),
+                          onMultiTrash: _onTrashSelectedPressed,
+                          onMultiRestore: _onRestoreSelectedPressed,
+                          onMultiDeleteForever: _onDeleteForeverPressed,
+                        ),
+                      );
+                    }),
+                    itemCount: _filteredCodes.length + indexOffset,
+                  );
+
+                  if (PlatformUtil.isDesktop() && crossAxisCount > 1) {
+                    return GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTapUp: (_) {
+                        if (_codeDisplayStore
+                            .selectedCodeIds.value.isNotEmpty) {
+                          _codeDisplayStore.clearSelection();
+                        }
+                      },
+                      child: gridView,
                     );
                   }
-                  final newIndex = index - indexOffset;
 
-                  final code = _filteredCodes[newIndex];
-
-                  return ClipRect(
-                    child: CodeWidget(
-                      key: ValueKey(
-                        '${code.hashCode}_${newIndex}_$_codeSortKey',
-                      ),
-                      code,
-                      isCompactMode: isCompactMode,
-                      sortKey: _codeSortKey,
-                      enableDesktopContextActions: PlatformUtil.isDesktop(),
-                      selectedCodesBuilder: _selectedCodesForContextMenu,
-                      onMultiPinToggle: _onPinSelectedPressed,
-                      onMultiUnpin: _onUnpinSelectedPressed,
-                      onMultiAddTag: () async => _onAddTagPressed(),
-                      onMultiTrash: _onTrashSelectedPressed,
-                      onMultiRestore: _onRestoreSelectedPressed,
-                      onMultiDeleteForever: _onDeleteForeverPressed,
-                    ),
-                  );
-                }),
-                itemCount: _filteredCodes.length + indexOffset,
+                  return gridView;
+                },
               ),
             ),
           ],
