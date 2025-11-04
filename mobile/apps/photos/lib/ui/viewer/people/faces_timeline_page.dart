@@ -674,6 +674,7 @@ class _FacesTimelineCard extends StatelessWidget {
     final yOffset = _calculateYOffset(distance);
     final opacity = _calculateOpacity(distance);
     final blurSigma = _calculateBlur(distance);
+    final rotation = _calculateRotation(distance);
     final overlayOpacity =
         distance > 0 ? math.min(0.45, 0.12 + distance * 0.12) : 0.0;
 
@@ -708,15 +709,18 @@ class _FacesTimelineCard extends StatelessWidget {
           opacity: opacity,
           child: Transform.translate(
             offset: Offset(0, yOffset),
-            child: Transform.scale(
-              scale: scale,
-              alignment: Alignment.center,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(_cardRadius),
-                  boxShadow: cardShadow,
+            child: Transform.rotate(
+              angle: rotation,
+              child: Transform.scale(
+                scale: scale,
+                alignment: Alignment.center,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(_cardRadius),
+                    boxShadow: cardShadow,
+                  ),
+                  child: cardContent,
                 ),
-                child: cardContent,
               ),
             ),
           ),
@@ -797,6 +801,16 @@ class _FacesTimelineCard extends StatelessWidget {
       return 0;
     }
     return math.min(20, (distance + 0.3) * 6);
+  }
+
+  double _calculateRotation(double distance) {
+    if (distance <= 0) {
+      return 0;
+    }
+    final clamped = distance.clamp(0.0, 3.0);
+    const double base = 0.035; // ~2 degrees
+    final falloff = math.max(0.2, 1 - clamped * 0.18);
+    return base * clamped * falloff;
   }
 
   double _calculateOpacity(double distance) {
