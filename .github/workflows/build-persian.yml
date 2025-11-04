@@ -41,22 +41,10 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Install Rust (with optimized targets)
+      - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
-
-      - name: Configure Rust for compatibility
-        run: |
-          # غیرفعال کردن AVX-512 features
-          mkdir -p mobile/apps/photos/rust/.cargo
-          cat > mobile/apps/photos/rust/.cargo/config.toml << 'EOF'
-          [build]
-          rustflags = ["-C", "target-cpu=x86-64", "-C", "opt-level=2"]
-          
-          [target.x86_64-unknown-linux-gnu]
-          rustflags = ["-C", "target-cpu=x86-64"]
-          EOF
 
       - name: Verify Rust bindings exist
         run: |
@@ -85,11 +73,6 @@ jobs:
 
       - name: Build APK
         working-directory: mobile/apps/photos
-        env:
-          # غیرفعال کردن advanced CPU features
-          RUSTFLAGS: "-C target-cpu=x86-64 -C opt-level=2"
-          SIMSIMD_TARGET_AVX512: "0"
-          USEARCH_USE_NATIVE: "0"
         run: |
           flutter build apk \
             --release \
