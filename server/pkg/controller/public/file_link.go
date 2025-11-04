@@ -33,11 +33,22 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
 	accessToken := shortuuid.New()[0:AccessTokenLength]
-	_, err = c.FileLinkRepo.Insert(ctx, req.FileID, actorUserID, accessToken, app)
+	_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
 	if err == nil || err == ente.ErrActiveLinkAlreadyExists {
 		row, rowErr := c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
 		if rowErr != nil {
 			return nil, stacktrace.Propagate(rowErr, "failed to get active file url token")
+		}
+		if err == ente.ErrActiveLinkAlreadyExists {
+			updateErr := c.FileLinkRepo.UpdateLinkSecretIfEmpty(ctx, row.LinkID, req)
+			if updateErr != nil {
+				return nil, stacktrace.Propagate(updateErr, "failed to update link secret")
+			}
+			// Re-fetch to include any values that might have been updated.
+			row, rowErr = c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
+			if rowErr != nil {
+				return nil, stacktrace.Propagate(rowErr, "failed to get active file url token after updating secret")
+			}
 		}
 		return c.mapRowToFileUrl(ctx, row), nil
 	}
@@ -110,9 +121,17 @@ func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFi
 	return c.mapRowToFileUrl(ctx, fileLinkRow), nil
 }
 
-func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, error) {
+func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, *ente.FileUrl, error) {
 	accessContext := auth.MustGetFileLinkAccessContext(ctx)
-	return c.FileRepo.GetFileAttributes(accessContext.FileID)
+	file, err := c.FileRepo.GetFileAttributes(accessContext.FileID)
+	if err != nil {
+		return nil, nil, stacktrace.Propagate(err, "failed to get file attributes")
+	}
+	row, err := c.FileLinkRepo.GetFileUrlRowByFileID(ctx, accessContext.FileID)
+	if err != nil {
+		return nil, nil, stacktrace.Propagate(err, "failed to get file link row")
+	}
+	return file, c.mapRowToFileUrl(ctx, row), nil
 }
 
 func (c *FileLinkController) PassInfo(ctx *gin.Context) (*ente.FileLinkRow, error) {
@@ -142,17 +161,23 @@ func (c *FileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLin
 	url := c.FileLinkRepo.FileLink(app, row.Token)
 
 	return &ente.FileUrl{
-		LinkID:          row.LinkID,
-		FileID:          row.FileID,
-		URL:             url,
-		OwnerID:         row.OwnerID,
-		ValidTill:       row.ValidTill,
-		DeviceLimit:     row.DeviceLimit,
-		PasswordEnabled: row.PassHash != nil,
-		Nonce:           row.Nonce,
-		OpsLimit:        row.OpsLimit,
-		MemLimit:        row.MemLimit,
-		EnableDownload:  row.EnableDownload,
-		CreatedAt:       row.CreatedAt,
+		LinkID:                row.LinkID,
+		FileID:                row.FileID,
+		URL:                   url,
+		OwnerID:               row.OwnerID,
+		ValidTill:             row.ValidTill,
+		DeviceLimit:           row.DeviceLimit,
+		PasswordEnabled:       row.PassHash != nil,
+		Nonce:                 row.Nonce,
+		OpsLimit:              row.OpsLimit,
+		MemLimit:              row.MemLimit,
+		EnableDownload:        row.EnableDownload,
+		CreatedAt:             row.CreatedAt,
+		EncryptedFileKey:      row.EncryptedFileKey,
+		EncryptedFileKeyNonce: row.EncryptedFileKeyNonce,
+		KdfNonce:              row.KdfNonce,
+		KdfMemLimit:           row.KdfMemLimit,
+		KdfOpsLimit:           row.KdfOpsLimit,
+		EncryptedShareKey:     row.EncryptedShareKey,
 	}
 }
