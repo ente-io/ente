@@ -8,34 +8,57 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: "zulu"
           java-version: "17"
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.3"
+          flutter-version: "3.35.7"
           channel: "stable"
+          cache: true
+
+      - name: Get dependencies
+        working-directory: mobile/apps/photos
+        run: flutter pub get
+
+      - name: Generate l10n
+        working-directory: mobile/apps/photos
+        run: flutter gen-l10n || true
 
       - name: Build APK
         working-directory: mobile/apps/photos
         run: |
-          flutter pub get
-          flutter gen-l10n
           flutter build apk \
             --release \
             --flavor independent \
             --dart-define=endpoint=https://api.photos.degoogle.ir \
-            --dart-define=cronetHttpNoPlay=true
+            --dart-define=cronetHttpNoPlay=true \
+            --no-tree-shake-icons
 
-      - uses: actions/upload-artifact@v4
+      - name: Rename APK
+        run: |
+          cd mobile/apps/photos/build/app/outputs/flutter-apk
+          mv app-independent-release.apk ente-$(date +%Y%m%d-%H%M%S).apk
+          sha256sum ente-*.apk > checksums.txt
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: ente-apk
-          path: mobile/apps/photos/build/app/outputs/flutter-apk/*.apk
+          path: |
+            mobile/apps/photos/build/app/outputs/flutter-apk/*.apk
+            mobile/apps/photos/build/app/outputs/flutter-apk/checksums.txt
+          retention-days: 90
 
