@@ -359,10 +359,42 @@ class _CodeWidgetState extends State<CodeWidget> {
           ),
           const SizedBox(width: 8),
           widget.code.type.isTOTPCompatible
-              ? GestureDetector(
-                  onTap: () {
-                    _copyNextToClipboard();
-                  },
+              ? IgnorePointer(
+                  ignoring:
+                      CodeDisplayStore.instance.isSelectionModeActive.value,
+                  child: GestureDetector(
+                    onTap: () {
+                      _copyNextToClipboard();
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          l10n.nextTotpTitle,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        ValueListenableBuilder<String>(
+                          valueListenable: _nextCode,
+                          builder: (context, value, child) {
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: Text(
+                                _getFormattedCode(value),
+                                style: TextStyle(
+                                  fontSize: widget.isCompactMode ? 12 : 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : IgnorePointer(
+                  ignoring:
+                      CodeDisplayStore.instance.isSelectionModeActive.value,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -370,40 +402,16 @@ class _CodeWidgetState extends State<CodeWidget> {
                         l10n.nextTotpTitle,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: _nextCode,
-                        builder: (context, value, child) {
-                          return Material(
-                            type: MaterialType.transparency,
-                            child: Text(
-                              _getFormattedCode(value),
-                              style: TextStyle(
-                                fontSize: widget.isCompactMode ? 12 : 18,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
+                      InkWell(
+                        onTap: _onNextHotpTapped,
+                        child: const Icon(
+                          Icons.forward_outlined,
+                          size: 32,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      l10n.nextTotpTitle,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    InkWell(
-                      onTap: _onNextHotpTapped,
-                      child: const Icon(
-                        Icons.forward_outlined,
-                        size: 32,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
                 ),
         ],
       ),
