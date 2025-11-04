@@ -76,7 +76,13 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.2.13
-  flutter_secure_storage: ^9.0.0
+  # Do not upgrade this package unless this issue is resolved:
+  # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
+  # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
+  # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870#issuecomment-2777447937
+  # Let's wait till the issue is resolved by the package maintainer.
+  # If not resolved and we need to upgrade, write a migration script.
+  flutter_secure_storage: 9.0.0
   flutter_speed_dial: ^7.0.0
   flutter_staggered_grid_view: ^0.7.0
   flutter_svg: ^2.0.16
