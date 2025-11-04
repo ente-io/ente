@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.24.3"  # نسخه‌ای که Ente خودش استفاده می‌کنه
+  FLUTTER_VERSION: "3.27.1"
   JAVA_VERSION: "17"
   API_ENDPOINT: "https://api.photos.degoogle.ir"
 
@@ -21,7 +21,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-          
+
       - name: Free up disk space
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -67,15 +67,15 @@ jobs:
             echo "⚠️ Need to generate Rust bindings"
           fi
 
-      # فقط در صورت نبود فایل‌ها، generate کن
+      # فقط در صورت نبود فایل‌ها، نسخه قدیمی رو نصب کن
       - name: Install flutter_rust_bridge_codegen
         if: steps.check_rust.outputs.rust_exists == 'false'
-        run: cargo install flutter_rust_bridge_codegen --version 2.0.0
+        run: cargo install flutter_rust_bridge_codegen --version 1.82.6 --locked
 
       - name: Generate Rust bindings
         if: steps.check_rust.outputs.rust_exists == 'false'
-        run: flutter_rust_bridge_codegen generate
         working-directory: mobile/apps/photos
+        run: flutter_rust_bridge_codegen generate
 
       # ============================================
       # Fix Dependencies
@@ -83,17 +83,17 @@ jobs:
       - name: Check and fix dependencies
         run: |
           cd mobile/apps/photos
-          
+
           # بررسی نسخه mockito
           MOCKITO_VERSION=$(grep "mockito:" pubspec.yaml | grep -oP '\d+\.\d+\.\d+' || echo "not_found")
           echo "Current mockito version: $MOCKITO_VERSION"
-          
+
           # اگه mockito >= 5.4.6 بود، downgrade کن
           if [[ "$MOCKITO_VERSION" > "5.4.5" ]] || [[ "$MOCKITO_VERSION" == "not_found" ]]; then
             echo "⚠️ Downgrading mockito to 5.4.5 for Dart compatibility"
             sed -i '/dev_dependencies:/,/^[^ ]/ s/mockito: .*/  mockito: 5.4.5/' pubspec.yaml
           fi
-          
+
           echo "📦 Final pubspec.yaml dependencies:"
           grep -A 5 "dev_dependencies:" pubspec.yaml
 
@@ -131,7 +131,7 @@ jobs:
           APK_NAME="ente-persian-$(date +%Y%m%d-%H%M%S).apk"
           mv app-independent-release.apk "$APK_NAME"
           sha256sum "$APK_NAME" > checksums.txt
-          
+
           echo "✅ Build completed successfully!"
           echo "📦 APK: $APK_NAME"
           cat checksums.txt
