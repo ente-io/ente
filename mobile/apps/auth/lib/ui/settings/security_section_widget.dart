@@ -20,7 +20,6 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
-import 'package:ente_lock_screen/auth_util.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/lock_screen_options.dart';
@@ -163,21 +162,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               return;
             }
           }
-          if (await LockScreenSettings.instance.shouldShowLockScreen()) {
-            final bool result = await requestAuthentication(
-              context,
-              context.l10n.authToChangeLockscreenSetting,
-            );
-            if (result) {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const LockScreenOptions();
-                  },
-                ),
-              );
-            }
-          } else {
+          final hasAuthenticated = await LocalAuthenticationService.instance
+              .requestLocalAuthentication(
+            context,
+            context.l10n.authToChangeLockscreenSetting,
+          );
+          if (hasAuthenticated) {
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
