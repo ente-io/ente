@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.35.7"  # ✅ FIX: Update to latest
+  FLUTTER_VERSION: "3.35.7"
   JAVA_VERSION: "17"
   API_ENDPOINT: "https://api.photos.degoogle.ir"
 
@@ -68,16 +68,22 @@ jobs:
           fi
 
       # ============================================
-      # اضافه کردن ffi (فقط در صورت نیاز)
+      # اصلاح pubspec.yaml (فقط در صورت نیاز به generate)
       # ============================================
-      - name: Add ffi dependency
+      - name: Fix pubspec.yaml dependencies
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: |
+          echo "🔧 Fixing pubspec.yaml..."
+          
+          # اضافه کردن ffi (اگه نداره)
           if ! grep -q "^  ffi:" pubspec.yaml; then
-            echo "⚠️ Adding ffi dependency"
             sed -i '/^dependencies:/a\  ffi: ^2.1.0' pubspec.yaml
+            echo "✅ Added ffi"
           fi
+          
+          echo "📦 Dependencies section:"
+          sed -n '/^dependencies:/,/^dev_dependencies:/p' pubspec.yaml
 
       # ============================================
       # نصب ابزارهای Rust (فقط در صورت نیاز)
@@ -91,40 +97,47 @@ jobs:
           echo "📦 Installing flutter_rust_bridge_codegen 1.82.6..."
           cargo install flutter_rust_bridge_codegen --version 1.82.6 --locked
 
+      # ============================================
+      # Get dependencies (قبل از generate)
+      # ============================================
       - name: Get dependencies (pre-generate)
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: flutter pub get
 
+      # ============================================
+      # Generate Rust bindings
+      # ============================================
       - name: Generate Rust bindings
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: |
-          echo "🔨 Generating Rust bindings with CLI parameters"
+          echo "🔨 Generating Rust bindings..."
           flutter_rust_bridge_codegen \
             --rust-input rust/src/api.rs \
             --dart-output lib/src/rust \
             --rust-crate-dir rust
 
+      # ============================================
+      # بقیه مراحل Build (همیشه اجرا می‌شه)
+      # ============================================
       - name: Flutter doctor
         run: flutter doctor -v
 
       - name: Generate l10n
-        run: flutter gen-l10n
         working-directory: mobile/apps/photos
+        run: flutter gen-l10n
 
       - name: Get dependencies (final)
-        run: flutter pub get
         working-directory: mobile/apps/photos
+        run: flutter pub get
 
       - name: Clean build
-        run: flutter clean
         working-directory: mobile/apps/photos
+        run: flutter clean
 
-      # ============================================
-      # Build APK
-      # ============================================
       - name: Build APK
+        working-directory: mobile/apps/photos
         run: |
           flutter build apk \
             --release \
@@ -132,7 +145,6 @@ jobs:
             --dart-define=endpoint=${{ env.API_ENDPOINT }} \
             --dart-define=cronetHttpNoPlay=true \
             --no-tree-shake-icons
-        working-directory: mobile/apps/photos
 
       - name: Rename and organize APK
         run: |
@@ -140,8 +152,7 @@ jobs:
           APK_NAME="ente-persian-$(date +%Y%m%d-%H%M%S).apk"
           mv app-independent-release.apk "$APK_NAME"
           sha256sum "$APK_NAME" > checksums.txt
-
-          echo "✅ Build completed successfully!"
+          echo "✅ Build completed!"
           echo "📦 APK: $APK_NAME"
           cat checksums.txt
 
