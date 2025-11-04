@@ -1,4 +1,4 @@
-name: Build Persian APK
+name: Build Ente Persian APK
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
   workflow_dispatch:
 
 env:
+  FLUTTER_VERSION: "3.24.3"  # نسخه‌ای که Ente خودش استفاده می‌کنه
   JAVA_VERSION: "17"
-  FLUTTER_VERSION: "3.27.1"
   API_ENDPOINT: "https://api.photos.degoogle.ir"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
 
     steps:
       - name: Checkout repository
@@ -21,7 +21,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
+          
       - name: Free up disk space
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -43,91 +43,105 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Verify Flutter and Dart
-        run: |
-          flutter --version
-          dart --version
-
-      - name: Install Rust
+      - name: Install Rust (Stable)
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
       - name: Setup Rust cache
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: |
-            mobile/apps/photos/rust
+          workspaces: mobile/apps/photos/rust
 
+      # ============================================
+      # کلید اصلی: بررسی وجود فایل‌های Rust
+      # ============================================
+      - name: Check if Rust files exist
+        id: check_rust
+        run: |
+          if [ -d "mobile/apps/photos/lib/src/rust" ]; then
+            echo "rust_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Rust files already exist"
+          else
+            echo "rust_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Need to generate Rust bindings"
+          fi
+
+      # فقط در صورت نبود فایل‌ها، generate کن
       - name: Install flutter_rust_bridge_codegen
-        run: cargo install flutter_rust_bridge_codegen
+        if: steps.check_rust.outputs.rust_exists == 'false'
+        run: cargo install flutter_rust_bridge_codegen --version 2.0.0
 
-      # ============================================
-      # FIX: اجرا از دایرکتوری صحیح (apps/photos)
-      # ============================================
       - name: Generate Rust bindings
+        if: steps.check_rust.outputs.rust_exists == 'false'
         run: flutter_rust_bridge_codegen generate
         working-directory: mobile/apps/photos
 
       # ============================================
-      # COMMENTED: Translation steps
+      # Fix Dependencies
       # ============================================
-      # - name: Setup Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: '3.11'
-      #     cache: 'pip'
+      - name: Check and fix dependencies
+        run: |
+          cd mobile/apps/photos
+          
+          # بررسی نسخه mockito
+          MOCKITO_VERSION=$(grep "mockito:" pubspec.yaml | grep -oP '\d+\.\d+\.\d+' || echo "not_found")
+          echo "Current mockito version: $MOCKITO_VERSION"
+          
+          # اگه mockito >= 5.4.6 بود، downgrade کن
+          if [[ "$MOCKITO_VERSION" > "5.4.5" ]] || [[ "$MOCKITO_VERSION" == "not_found" ]]; then
+            echo "⚠️ Downgrading mockito to 5.4.5 for Dart compatibility"
+            sed -i '/dev_dependencies:/,/^[^ ]/ s/mockito: .*/  mockito: 5.4.5/' pubspec.yaml
+          fi
+          
+          echo "📦 Final pubspec.yaml dependencies:"
+          grep -A 5 "dev_dependencies:" pubspec.yaml
 
-      # - name: Install Python dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install openai python-dotenv requests
-      #   working-directory: mobile/apps/photos
+      - name: Flutter doctor
+        run: flutter doctor -v
 
-      # - name: Run translation script
-      #   env:
-      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      #   run: python translate_arb.py
-      #   working-directory: mobile/apps/photos
-
-      # - name: Merge translations
-      #   run: python merge_translations.py
-      #   working-directory: mobile/apps/photos
-
-      - name: Generate Flutter l10n
+      - name: Generate l10n
         run: flutter gen-l10n
         working-directory: mobile/apps/photos
 
-      - name: Get Flutter dependencies
+      - name: Get dependencies
         run: flutter pub get
         working-directory: mobile/apps/photos
 
+      - name: Clean build
+        run: flutter clean
+        working-directory: mobile/apps/photos
+
+      # ============================================
+      # Build APK
+      # ============================================
       - name: Build APK
         run: |
           flutter build apk \
             --release \
             --flavor independent \
             --dart-define=endpoint=${{ env.API_ENDPOINT }} \
-            --dart-define=cronetHttpNoPlay=true
+            --dart-define=cronetHttpNoPlay=true \
+            --no-tree-shake-icons
         working-directory: mobile/apps/photos
 
-      - name: Rename APK
+      - name: Rename and organize APK
         run: |
-          mv build/app/outputs/flutter-apk/app-independent-release.apk \
-             build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
-        working-directory: mobile/apps/photos
-
-      - name: Generate checksums
-        run: |
-          cd build/app/outputs/flutter-apk
-          sha256sum ente-persian-${{ github.sha }}.apk > checksums.txt
+          cd mobile/apps/photos/build/app/outputs/flutter-apk
+          APK_NAME="ente-persian-$(date +%Y%m%d-%H%M%S).apk"
+          mv app-independent-release.apk "$APK_NAME"
+          sha256sum "$APK_NAME" > checksums.txt
+          
+          echo "✅ Build completed successfully!"
+          echo "📦 APK: $APK_NAME"
           cat checksums.txt
-        working-directory: mobile/apps/photos
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ente-persian-${{ github.sha }}
+          name: ente-persian-build
           path: |
-            mobile/apps/photos/build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
+            mobile/apps/photos/build/app/outputs/flutter-apk/*.apk
             mobile/apps/photos/build/app/outputs/flutter-apk/checksums.txt
-          retention-days: 30
+          retention-days: 90
 
