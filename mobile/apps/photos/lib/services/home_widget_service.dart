@@ -7,7 +7,6 @@ import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:home_widget/home_widget.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
@@ -22,7 +21,6 @@ import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
-import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 import 'package:synchronized/synchronized.dart';
@@ -163,7 +161,7 @@ class HomeWidgetService {
     return relevantWidgets.length;
   }
 
-  Future<List<HomeWidgetInfo>> getInstalledWidgets() async {
+  Future<List<hw.HomeWidgetInfo>> getInstalledWidgets() async {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
@@ -214,8 +212,10 @@ class HomeWidgetService {
       final subText = await SmartMemoriesService.getDateFormattedLocale(
         creationTime: file.creationTime!,
       );
-      final String resolvedSubText = kDebugMode
-          ? '$subText · ${processed.finalWidth}x${processed.finalHeight}'
+      // TODO: Remove dimension display after confirmation that widget v2 works correctly
+      final bool showDimensions = kDebugMode || flagService.internalUser;
+      final String resolvedSubText = showDimensions
+          ? '$subText · ${processed.finalWidth}x${processed.finalHeight} · ${source.sourceLabel}'
           : subText;
       final Map<String, dynamic> metadata = {
         "title": title,
@@ -241,8 +241,6 @@ class HomeWidgetService {
         stackTrace,
       );
       return null;
-    } finally {
-      await source.dispose();
     }
   }
 
@@ -331,45 +329,37 @@ class HomeWidgetService {
         (file.isRemoteFile ||
             file.fileType == FileType.image ||
             file.fileType == FileType.livePhoto)) {
-      if (file.fileType == FileType.livePhoto) {
+      // Check file size before downloading (skip very large files)
+      const int maxFileSizeForWidget = 50 * 1024 * 1024; // 50MB
+      if (file.fileSize != null && file.fileSize! > maxFileSizeForWidget) {
+        _logger.info(
+          "[widget_capture_v2] Skipping large file (${file.fileSize} bytes) for ${file.displayName}",
+        );
+        // Fall through to thumbnail fallback
+      } else {
+        // Use getFileFromServer to maintain caching behavior
+        // This caches downloaded files so subsequent widget syncs can reuse them
         try {
-          final File? livePhotoImage = await getFileFromServer(file);
-          if (livePhotoImage != null && await livePhotoImage.exists()) {
-            final Uint8List livePhotoBytes = await livePhotoImage.readAsBytes();
-            if (livePhotoBytes.isNotEmpty) {
+          final File? cachedFile = await getFileFromServer(file);
+          if (cachedFile != null && await cachedFile.exists()) {
+            final Uint8List fileBytes = await cachedFile.readAsBytes();
+            if (fileBytes.isNotEmpty) {
+              final String sourceLabel = file.fileType == FileType.livePhoto
+                  ? 'cached-live-image'
+                  : 'cached-full';
               return _WidgetSourceBytes(
-                bytes: livePhotoBytes,
-                sourceLabel: 'downloaded-live-image',
+                bytes: fileBytes,
+                sourceLabel: sourceLabel,
               );
             }
           }
         } catch (error, stackTrace) {
-          _logger.fine(
-            "[widget_capture_v2] Live photo fetch failed for ${file.displayName}",
+          _logger.warning(
+            "[widget_capture_v2] Download failed for ${file.displayName}",
             error,
             stackTrace,
           );
         }
-      }
-
-      try {
-        final File? downloaded = await downloadAndDecrypt(file);
-        if (downloaded != null && await downloaded.exists()) {
-          final Uint8List bytes = await downloaded.readAsBytes();
-          if (bytes.isNotEmpty) {
-            return _WidgetSourceBytes(
-              bytes: bytes,
-              sourceLabel: 'downloaded-full',
-              tempFile: downloaded,
-            );
-          }
-        }
-      } catch (error, stackTrace) {
-        _logger.warning(
-          "[widget_capture_v2] Download failed for ${file.displayName}",
-          error,
-          stackTrace,
-        );
       }
     }
 
@@ -587,91 +577,77 @@ class _WidgetImageProcessResult {
 Future<Map<String, dynamic>?> _processWidgetImage(
   Map<String, dynamic> param,
 ) async {
-  final Uint8List bytes = param['bytes'] as Uint8List;
-  final int targetSize = param['targetSize'] as int;
+  try {
+    final Uint8List bytes = param['bytes'] as Uint8List;
+    final int targetSize = param['targetSize'] as int;
 
-  final img.Image? decoded = img.decodeImage(bytes);
-  if (decoded == null) {
+    final img.Image? decoded = img.decodeImage(bytes);
+    if (decoded == null) {
+      return null;
+    }
+
+    // Apply EXIF orientation before cropping to prevent portrait photos from being rotated incorrectly
+    final img.Image oriented = img.bakeOrientation(decoded);
+
+    final int originalWidth = oriented.width;
+    final int originalHeight = oriented.height;
+    final int minSide = math.min(originalWidth, originalHeight);
+    if (minSide <= 0) {
+      return null;
+    }
+
+    img.Image working = oriented;
+    bool croppedToSquare = false;
+    if (originalWidth != originalHeight) {
+      final int cropSize = minSide;
+      final int left = ((originalWidth - cropSize) / 2).round();
+      final int top = ((originalHeight - cropSize) / 2).round();
+      working = img.copyCrop(
+        oriented,
+        x: math.max(0, left),
+        y: math.max(0, top),
+        width: cropSize,
+        height: cropSize,
+      );
+      croppedToSquare = true;
+    }
+
+    img.Image finalImage = working;
+    bool downscaled = false;
+    if (working.width > targetSize) {
+      finalImage = img.copyResize(
+        working,
+        width: targetSize,
+        height: targetSize,
+        interpolation: img.Interpolation.linear,
+      );
+      downscaled = true;
+    }
+
+    final Uint8List pngBytes =
+        Uint8List.fromList(img.encodePng(finalImage, level: 0));
+
+    return <String, dynamic>{
+      'pngBytes': pngBytes,
+      'originalWidth': originalWidth,
+      'originalHeight': originalHeight,
+      'finalWidth': finalImage.width,
+      'finalHeight': finalImage.height,
+      'croppedToSquare': croppedToSquare,
+      'downscaled': downscaled,
+    };
+  } catch (e) {
+    // Catch errors from copyCrop, copyResize, encodePng (malformed images, OOM, etc.)
     return null;
   }
-
-  // Apply EXIF orientation before cropping to prevent portrait photos from being rotated incorrectly
-  final img.Image oriented = img.bakeOrientation(decoded);
-
-  final int originalWidth = oriented.width;
-  final int originalHeight = oriented.height;
-  final int minSide = math.min(originalWidth, originalHeight);
-  if (minSide <= 0) {
-    return null;
-  }
-
-  img.Image working = oriented;
-  bool croppedToSquare = false;
-  if (originalWidth != originalHeight) {
-    final int cropSize = minSide;
-    final int left = ((originalWidth - cropSize) / 2).round();
-    final int top = ((originalHeight - cropSize) / 2).round();
-    working = img.copyCrop(
-      oriented,
-      x: math.max(0, left),
-      y: math.max(0, top),
-      width: cropSize,
-      height: cropSize,
-    );
-    croppedToSquare = true;
-  }
-
-  img.Image finalImage = working;
-  bool downscaled = false;
-  if (working.width > targetSize) {
-    finalImage = img.copyResize(
-      working,
-      width: targetSize,
-      height: targetSize,
-      interpolation: img.Interpolation.linear,
-    );
-    downscaled = true;
-  }
-
-  final Uint8List pngBytes =
-      Uint8List.fromList(img.encodePng(finalImage, level: 0));
-
-  return <String, dynamic>{
-    'pngBytes': pngBytes,
-    'originalWidth': originalWidth,
-    'originalHeight': originalHeight,
-    'finalWidth': finalImage.width,
-    'finalHeight': finalImage.height,
-    'croppedToSquare': croppedToSquare,
-    'downscaled': downscaled,
-  };
 }
 
 class _WidgetSourceBytes {
   const _WidgetSourceBytes({
     required this.bytes,
     required this.sourceLabel,
-    this.tempFile,
   });
 
   final Uint8List bytes;
   final String sourceLabel;
-  final File? tempFile;
-
-  Future<void> dispose() async {
-    if (tempFile == null) {
-      return;
-    }
-    try {
-      if (await tempFile!.exists()) {
-        await tempFile!.delete();
-      }
-    } catch (error, stackTrace) {
-      Logger('_WidgetSourceBytes').fine(
-        'Failed to delete temp file ${tempFile!.path}',
-        error,
-        stackTrace,
-      );
-    }
-  }
 }

@@ -395,6 +395,7 @@ class AlbumHomeWidgetService {
     final random = Random();
 
     final Set<String> renderedKeys = <String>{};
+    final Set<String> failedKeys = <String>{};
 
     while (renderedCount < renderTarget && attemptsCount < maxAttempts) {
       final randomEntry =
@@ -413,7 +414,8 @@ class AlbumHomeWidgetService {
       final albumName = randomEntry.value.$1;
 
       final String renderKey = '${albumId}_${randomAlbumFile.generatedID}';
-      if (!renderedKeys.add(renderKey)) {
+      // Skip if already rendered or previously failed
+      if (!renderedKeys.add(renderKey) || failedKeys.contains(renderKey)) {
         attemptsCount++;
         continue;
       }
@@ -450,7 +452,9 @@ class AlbumHomeWidgetService {
         renderedCount++;
         attemptsCount++;
       } else {
+        // Track failed renders to avoid retrying known-bad files
         renderedKeys.remove(renderKey);
+        failedKeys.add(renderKey);
         attemptsCount++;
       }
     }
