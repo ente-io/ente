@@ -301,6 +301,10 @@ export const decryptFileInfo = async (
             lockerInfoData: infoObject?.data,
         };
     } catch {
+        const fallbackKey =
+            keyMaterial.type === "secret"
+                ? keyMaterial.passphrase
+                : keyMaterial.fileKey;
         // Return partial info if decryption fails
         if (!fileLinkInfo.file) {
             return {
@@ -311,7 +315,7 @@ export const decryptFileInfo = async (
                 ownerName: fileLinkInfo.ownerName,
                 fileDecryptionHeader: undefined,
                 fileNonce: undefined,
-                fileKey: linkKey,
+                fileKey: fallbackKey,
             };
         }
 
@@ -324,7 +328,7 @@ export const decryptFileInfo = async (
             ownerName: fileLinkInfo.ownerName,
             fileDecryptionHeader: file.file?.decryptionHeader,
             fileNonce: undefined,
-            fileKey: linkKey,
+            fileKey: fallbackKey,
         };
     }
 };
