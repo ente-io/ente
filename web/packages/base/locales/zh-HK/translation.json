@@ -158,6 +158,7 @@
     "logout": "登出",
     "logout_message": "確定要登出嗎？",
     "delete_account": "刪除帳戶",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "",
     "change_email": "更改電子郵件",
     "ok": "確定",

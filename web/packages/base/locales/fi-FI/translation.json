@@ -158,6 +158,7 @@
     "logout": "Kirjaudu ulos",
     "logout_message": "Oletko varma, että haluat kirjautua ulos?",
     "delete_account": "Poista tili",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>Ole hyvä ja lähetä sähköpostia osoitteeseen <a>{{emailID}}</a> omasta rekisteröidystä sähköpostiosoitteestasi.</p><p>Pyyntösi käsitellään 72 tunnin kuluessa.</p>",
     "change_email": "Vaihda sähköpostiosoite",
     "ok": "OK",
