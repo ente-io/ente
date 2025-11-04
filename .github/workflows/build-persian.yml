@@ -46,15 +46,25 @@ jobs:
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
-      - name: Verify Rust bindings exist
+      - name: Install Rust tools
         run: |
-          if [ ! -d "mobile/apps/photos/lib/src/rust" ]; then
-            echo "❌ Error: Rust bindings not found!"
-            echo "Make sure you pushed the generated files."
-            exit 1
-          fi
-          echo "✅ Rust bindings found"
+          cargo install flutter_rust_bridge_codegen@2.11.1 --locked
+          cargo install cargo-expand --locked
+
+      - name: Generate Rust bindings
+        working-directory: mobile/apps/photos
+        run: |
+          flutter_rust_bridge_codegen \
+            --rust-input rust/src/api/mod.rs \
+            --dart-output lib/src/rust \
+            --rust-crate-dir rust \
+            --class-name RustLib \
+            --dart-format-line-length 120
+
+      - name: Verify bindings
+        run: |
           ls -la mobile/apps/photos/lib/src/rust/
+          ls -la mobile/apps/photos/rust/src/bridge_generated*
 
       - name: Flutter doctor
         run: flutter doctor -v
