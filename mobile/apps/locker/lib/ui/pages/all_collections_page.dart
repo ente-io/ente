@@ -235,10 +235,11 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
             style: textTheme.smallMuted,
           ),
           const SizedBox(height: 20),
-          Flexible(
+          Expanded(
             child: ItemListView(
               collections: _sortedCollections,
               selectedCollections: widget.selectedCollections,
+              physics: const BouncingScrollPhysics(),
             ),
           ),
           if (_uncategorizedCollection != null && showUncategorized)
