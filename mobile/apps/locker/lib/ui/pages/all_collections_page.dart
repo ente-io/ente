@@ -254,7 +254,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
+      margin: const EdgeInsets.only(top: 4.0, bottom: 16.0),
       child: InkWell(
         onTap: _openTrash,
         borderRadius: BorderRadius.circular(12.0),
@@ -316,7 +316,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
       child: InkWell(
         onTap: () => _openUncategorized(),
         borderRadius: BorderRadius.circular(12.0),
