@@ -509,6 +509,12 @@ abstract class StringsLocalizations {
   /// **'No, delete account'**
   String get noDeleteAccountAction;
 
+  /// Warning message shown before account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete your Ente Auth, Ente Photos and Ente Locker account.'**
+  String get deleteAccountWarning;
+
   /// Title for authentication dialog before account deletion
   ///
   /// In en, this message translates to:
