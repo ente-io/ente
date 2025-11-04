@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.27.1"
+  FLUTTER_VERSION: "3.35.7"  # ✅ FIX: Update to latest
   JAVA_VERSION: "17"
   API_ENDPOINT: "https://api.photos.degoogle.ir"
 
@@ -68,34 +68,16 @@ jobs:
           fi
 
       # ============================================
-      # Fix Dependencies FIRST (قبل از pub get)
+      # اضافه کردن ffi (فقط در صورت نیاز)
       # ============================================
-      - name: Fix dependencies in pubspec.yaml
+      - name: Add ffi dependency
+        if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: |
-          echo "🔧 Fixing dependencies..."
-          
-          # 1. Fix mockito version
-          MOCKITO_VERSION=$(grep "mockito:" pubspec.yaml | grep -oP '\d+\.\d+\.\d+' || echo "not_found")
-          echo "Current mockito version: $MOCKITO_VERSION"
-          
-          if [[ "$MOCKITO_VERSION" > "5.4.5" ]] || [[ "$MOCKITO_VERSION" == "not_found" ]]; then
-            echo "⚠️ Downgrading mockito to 5.4.5"
-            sed -i 's/mockito: .*/mockito: 5.4.5/' pubspec.yaml
-          fi
-          
-          # 2. Add ffi if needed (for Rust bindings)
           if ! grep -q "^  ffi:" pubspec.yaml; then
             echo "⚠️ Adding ffi dependency"
             sed -i '/^dependencies:/a\  ffi: ^2.1.0' pubspec.yaml
           fi
-          
-          echo "✅ Dependencies fixed!"
-          echo "📋 Current dependencies:"
-          grep -A 15 "^dependencies:" pubspec.yaml
-          echo ""
-          echo "📋 Dev dependencies:"
-          grep -A 10 "^dev_dependencies:" pubspec.yaml
 
       # ============================================
       # نصب ابزارهای Rust (فقط در صورت نیاز)
@@ -112,9 +94,7 @@ jobs:
       - name: Get dependencies (pre-generate)
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
-        run: |
-          echo "📦 Running flutter pub get..."
-          flutter pub get
+        run: flutter pub get
 
       - name: Generate Rust bindings
         if: steps.check_rust.outputs.rust_exists == 'false'
