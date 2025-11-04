@@ -12,6 +12,12 @@ class ShareableLink {
   final bool enableDownload;
   final int createdAt;
   String? fullURL;
+  final String? encryptedFileKey;
+  final String? encryptedFileKeyNonce;
+  final String? kdfNonce;
+  final int? kdfMemLimit;
+  final int? kdfOpsLimit;
+  final String? encryptedShareKey;
 
   ShareableLink({
     required this.linkID,
@@ -26,6 +32,12 @@ class ShareableLink {
     this.opsLimit,
     required this.enableDownload,
     required this.createdAt,
+    this.encryptedFileKey,
+    this.encryptedFileKeyNonce,
+    this.kdfNonce,
+    this.kdfMemLimit,
+    this.kdfOpsLimit,
+    this.encryptedShareKey,
   });
 
   factory ShareableLink.fromJson(Map<String, dynamic> json) {
@@ -42,6 +54,12 @@ class ShareableLink {
       opsLimit: json['opsLimit'] as int?,
       enableDownload: json['enableDownload'] as bool,
       createdAt: json['createdAt'] as int,
+      encryptedFileKey: json['encryptedFileKey'] as String?,
+      encryptedFileKeyNonce: json['encryptedFileKeyNonce'] as String?,
+      kdfNonce: json['kdfNonce'] as String?,
+      kdfMemLimit: json['kdfMemLimit'] as int?,
+      kdfOpsLimit: json['kdfOpsLimit'] as int?,
+      encryptedShareKey: json['encryptedShareKey'] as String?,
     );
   }
 
@@ -59,6 +77,13 @@ class ShareableLink {
       if (opsLimit != null) 'opsLimit': opsLimit,
       'enableDownload': enableDownload,
       'createdAt': createdAt,
+      if (encryptedFileKey != null) 'encryptedFileKey': encryptedFileKey,
+      if (encryptedFileKeyNonce != null)
+        'encryptedFileKeyNonce': encryptedFileKeyNonce,
+      if (kdfNonce != null) 'kdfNonce': kdfNonce,
+      if (kdfMemLimit != null) 'kdfMemLimit': kdfMemLimit,
+      if (kdfOpsLimit != null) 'kdfOpsLimit': kdfOpsLimit,
+      if (encryptedShareKey != null) 'encryptedShareKey': encryptedShareKey,
     };
   }
 
@@ -77,7 +102,13 @@ class ShareableLink {
         other.memLimit == memLimit &&
         other.opsLimit == opsLimit &&
         other.enableDownload == enableDownload &&
-        other.createdAt == createdAt;
+        other.createdAt == createdAt &&
+        other.encryptedFileKey == encryptedFileKey &&
+        other.encryptedFileKeyNonce == encryptedFileKeyNonce &&
+        other.kdfNonce == kdfNonce &&
+        other.kdfMemLimit == kdfMemLimit &&
+        other.kdfOpsLimit == kdfOpsLimit &&
+        other.encryptedShareKey == encryptedShareKey;
   }
 
   @override
@@ -95,6 +126,12 @@ class ShareableLink {
       opsLimit,
       enableDownload,
       createdAt,
+      encryptedFileKey,
+      encryptedFileKeyNonce,
+      kdfNonce,
+      kdfMemLimit,
+      kdfOpsLimit,
+      encryptedShareKey,
     );
   }
 
@@ -112,7 +149,13 @@ class ShareableLink {
         'memLimit: $memLimit, '
         'opsLimit: $opsLimit, '
         'enableDownload: $enableDownload, '
-        'createdAt: $createdAt'
+        'createdAt: $createdAt, '
+        'encryptedFileKey: $encryptedFileKey, '
+        'encryptedFileKeyNonce: $encryptedFileKeyNonce, '
+        'kdfNonce: $kdfNonce, '
+        'kdfMemLimit: $kdfMemLimit, '
+        'kdfOpsLimit: $kdfOpsLimit, '
+        'encryptedShareKey: $encryptedShareKey'
         ')';
   }
 
@@ -129,6 +172,12 @@ class ShareableLink {
     int? opsLimit,
     bool? enableDownload,
     int? createdAt,
+    String? encryptedFileKey,
+    String? encryptedFileKeyNonce,
+    String? kdfNonce,
+    int? kdfMemLimit,
+    int? kdfOpsLimit,
+    String? encryptedShareKey,
   }) {
     return ShareableLink(
       linkID: linkID ?? this.linkID,
@@ -143,6 +192,13 @@ class ShareableLink {
       opsLimit: opsLimit ?? this.opsLimit,
       enableDownload: enableDownload ?? this.enableDownload,
       createdAt: createdAt ?? this.createdAt,
+      encryptedFileKey: encryptedFileKey ?? this.encryptedFileKey,
+      encryptedFileKeyNonce:
+          encryptedFileKeyNonce ?? this.encryptedFileKeyNonce,
+      kdfNonce: kdfNonce ?? this.kdfNonce,
+      kdfMemLimit: kdfMemLimit ?? this.kdfMemLimit,
+      kdfOpsLimit: kdfOpsLimit ?? this.kdfOpsLimit,
+      encryptedShareKey: encryptedShareKey ?? this.encryptedShareKey,
     );
   }
 }
