@@ -31,3 +31,6 @@ startup_notify: false
 
 supported_mime_type:
   - x-scheme-handler/enteauth
+
+spec_flags:
+  - '%global __requires_exclude ^libcurl.so.4\(CURL_OPENSSL_4\).*'
