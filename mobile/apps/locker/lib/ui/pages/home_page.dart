@@ -454,7 +454,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _collections.isEmpty && _recentFiles.isEmpty && !_isLoading;
 
     try {
-      if (mounted && shouldShowLoading || _error != null) {
+      if (mounted && (shouldShowLoading || _error != null)) {
         setState(() {
           if (shouldShowLoading) {
             _isLoading = true;
