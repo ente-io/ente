@@ -18,25 +18,70 @@ class CodeDisplayStore {
   final ValueNotifier<Set<String>> selectedCodeIds = ValueNotifier(<String>{});
 
   // toggles the selection status of a code
-  void toggleSelection(String codeId){
+  void toggleSelection(String codeId) {
     final newSelection = Set<String>.from(selectedCodeIds.value);
 
-    if(newSelection.contains(codeId)){
+    if (newSelection.contains(codeId)) {
       newSelection.remove(codeId);
-    } 
-  
-    else{
+    } else {
       newSelection.add(codeId);
     }
 
-    selectedCodeIds.value = newSelection; //if we selected atleast one code, then we're in selection mode.. else: exit selection mode
+    selectedCodeIds.value =
+        newSelection; //if we selected atleast one code, then we're in selection mode.. else: exit selection mode
     isSelectionModeActive.value = newSelection.isNotEmpty;
   }
 
   //method to clear the entire selection
-  void clearSelection(){
+  void clearSelection() {
     selectedCodeIds.value = <String>{};
     isSelectionModeActive.value = false;
+  }
+
+  /// Reconcile current selections with the provided list of codes.
+  /// This keeps the selection state consistent when codes receive a
+  /// generatedID during sync or are removed locally.
+  void reconcileSelections(Iterable<Code> codes) {
+    final currentSelection = selectedCodeIds.value;
+    if (currentSelection.isEmpty) {
+      return;
+    }
+
+    final Set<String> validSelectionKeys = <String>{};
+    final Map<String, String> fallbackSelectionKeys = <String, String>{};
+
+    for (final code in codes) {
+      if (code.hasError) {
+        continue;
+      }
+      final key = code.selectionKey;
+      validSelectionKeys.add(key);
+      fallbackSelectionKeys[code.rawData] = key;
+      final generatedID = code.generatedID;
+      if (generatedID != null) {
+        fallbackSelectionKeys[generatedID.toString()] = key;
+      }
+    }
+
+    bool hasChanges = false;
+    final Set<String> updatedSelection = <String>{};
+
+    for (final selectedKey in currentSelection) {
+      if (validSelectionKeys.contains(selectedKey)) {
+        updatedSelection.add(selectedKey);
+        continue;
+      }
+      final remappedKey = fallbackSelectionKeys[selectedKey];
+      if (remappedKey != null) {
+        updatedSelection.add(remappedKey);
+      }
+      hasChanges = true;
+    }
+
+    if (hasChanges) {
+      selectedCodeIds.value = updatedSelection;
+      isSelectionModeActive.value = updatedSelection.isNotEmpty;
+    }
   }
 
   Future<void> init() async {
