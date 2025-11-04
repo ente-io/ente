@@ -6,6 +6,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
@@ -23,6 +24,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -38,12 +40,6 @@ class CodeWidget extends StatefulWidget {
   final bool isReordering;
   final bool enableDesktopContextActions;
   final List<Code> Function()? selectedCodesBuilder;
-  final Future<void> Function()? onMultiPinToggle;
-  final Future<void> Function()? onMultiUnpin;
-  final Future<void> Function()? onMultiAddTag;
-  final Future<void> Function()? onMultiTrash;
-  final Future<void> Function()? onMultiRestore;
-  final Future<void> Function()? onMultiDeleteForever;
 
   const CodeWidget(
     this.code, {
@@ -53,12 +49,6 @@ class CodeWidget extends StatefulWidget {
     this.isReordering = false,
     this.enableDesktopContextActions = false,
     this.selectedCodesBuilder,
-    this.onMultiPinToggle,
-    this.onMultiUnpin,
-    this.onMultiAddTag,
-    this.onMultiTrash,
-    this.onMultiRestore,
-    this.onMultiDeleteForever,
   });
 
   @override
@@ -236,8 +226,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       return ValueListenableBuilder<Set<String>>(
         valueListenable: CodeDisplayStore.instance.selectedCodeIds,
         builder: (context, selectedIds, child) {
-          final isSelected =
-              selectedIds.contains(widget.code.selectionKey);
+          final isSelected = selectedIds.contains(widget.code.selectionKey);
 
           return Stack(
             children: [
@@ -553,8 +542,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       return _buildSingleSelectionMenu(l10n);
     }
 
-    final multiEntries =
-        _buildMultiSelectionContextMenu(l10n, selectedIds);
+    final multiEntries = _buildMultiSelectionContextMenu(l10n, selectedIds);
     if (multiEntries != null) {
       return multiEntries;
     }
@@ -588,9 +576,10 @@ class _CodeWidgetState extends State<CodeWidget> {
           label: l10n.addTag,
           icon: Icons.local_offer_outlined,
           onSelected: () {
-            CodeDisplayStore.instance.selectedCodeIds.value =
-                {widget.code.selectionKey};
-            widget.onMultiAddTag?.call();
+            CodeDisplayStore.instance.selectedCodeIds.value = {
+              widget.code.selectionKey,
+            };
+            _triggerMultiAction(MultiSelectAction.addTag);
           },
         ),
       );
@@ -610,9 +599,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       entries.add(
         MenuItem(
           label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-          icon: widget.code.isPinned
-              ? Icons.push_pin
-              : Icons.push_pin_outlined,
+          icon: widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
           onSelected: () => _onPinPressed(null),
         ),
       );
@@ -669,25 +656,21 @@ class _CodeWidgetState extends State<CodeWidget> {
     final bool allTrashed = selectedCodes.every((code) => code.isTrashed);
 
     if (allTrashed) {
-      if (widget.onMultiRestore != null) {
-        entries.add(
-          MenuItem(
-            label: l10n.restore,
-            icon: Icons.restore_outlined,
-            onSelected: () => _invokeMultiAction(widget.onMultiRestore),
-          ),
-        );
-      }
-      if (widget.onMultiDeleteForever != null) {
-        entries.add(
-          MenuItem(
-            label: l10n.delete,
-            icon: Icons.delete_forever,
-            onSelected: () =>
-                _invokeMultiAction(widget.onMultiDeleteForever),
-          ),
-        );
-      }
+      entries.add(
+        MenuItem(
+          label: l10n.restore,
+          icon: Icons.restore_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.restore),
+        ),
+      );
+      entries.add(
+        MenuItem(
+          label: l10n.delete,
+          icon: Icons.delete_forever,
+          onSelected: () =>
+              _triggerMultiAction(MultiSelectAction.deleteForever),
+        ),
+      );
       return entries.isEmpty ? null : entries;
     }
 
@@ -696,62 +679,51 @@ class _CodeWidgetState extends State<CodeWidget> {
     final bool isMixedPinned = anyPinned && !allPinned;
 
     if (isMixedPinned) {
-      if (widget.onMultiPinToggle != null) {
-        entries.add(
-          MenuItem(
-            label: l10n.pinText,
-            icon: Icons.push_pin_outlined,
-            onSelected: () => _invokeMultiAction(widget.onMultiPinToggle),
-          ),
-        );
-      }
-      if (widget.onMultiUnpin != null) {
-        entries.add(
-          MenuItem(
-            label: l10n.unpinText,
-            icon: Icons.push_pin,
-            onSelected: () => _invokeMultiAction(widget.onMultiUnpin),
-          ),
-        );
-      }
+      entries.add(
+        MenuItem(
+          label: l10n.pinText,
+          icon: Icons.push_pin_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.pinToggle),
+        ),
+      );
+      entries.add(
+        MenuItem(
+          label: l10n.unpinText,
+          icon: Icons.push_pin,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.unpin),
+        ),
+      );
     } else {
-      if (widget.onMultiPinToggle != null) {
-        entries.add(
-          MenuItem(
-            label: allPinned ? l10n.unpinText : l10n.pinText,
-            icon: allPinned ? Icons.push_pin : Icons.push_pin_outlined,
-            onSelected: () => _invokeMultiAction(widget.onMultiPinToggle),
-          ),
-        );
-      }
-    }
-
-    if (widget.onMultiAddTag != null) {
       entries.add(
         MenuItem(
-          label: l10n.addTag,
-          icon: Icons.local_offer_outlined,
-          onSelected: () => _invokeMultiAction(widget.onMultiAddTag),
+          label: allPinned ? l10n.unpinText : l10n.pinText,
+          icon: allPinned ? Icons.push_pin : Icons.push_pin_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.pinToggle),
         ),
       );
     }
 
-    if (widget.onMultiTrash != null) {
-      entries.add(
-        MenuItem(
-          label: l10n.trash,
-          icon: Icons.delete_outline,
-          onSelected: () => _invokeMultiAction(widget.onMultiTrash),
-        ),
-      );
-    }
+    entries.add(
+      MenuItem(
+        label: l10n.addTag,
+        icon: Icons.local_offer_outlined,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.addTag),
+      ),
+    );
+
+    entries.add(
+      MenuItem(
+        label: l10n.trash,
+        icon: Icons.delete_outline,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.trash),
+      ),
+    );
 
     return entries.isEmpty ? null : entries;
   }
 
-  void _invokeMultiAction(Future<void> Function()? action) {
-    if (action == null) return;
-    unawaited(action());
+  void _triggerMultiAction(MultiSelectAction action) {
+    Bus.instance.fire(MultiSelectActionRequestedEvent(action));
   }
 
   Widget _getIcon() {

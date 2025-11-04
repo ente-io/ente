@@ -8,6 +8,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
+import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
@@ -91,6 +92,8 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
+  StreamSubscription<MultiSelectActionRequestedEvent>?
+      _multiSelectActionSubscription;
   String selectedTag = "";
   bool _isTrashOpen = false;
   bool hasTrashedCodes = false;
@@ -110,6 +113,9 @@ class _HomePageState extends State<HomePage> {
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
     });
+    _multiSelectActionSubscription = Bus.instance
+        .on<MultiSelectActionRequestedEvent>()
+        .listen(_handleMultiSelectAction);
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
@@ -286,8 +292,10 @@ class _HomePageState extends State<HomePage> {
       }
 
       if (codesToUpdate.length == 1) {
-        showToast(context,
-            context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer));
+        showToast(
+          context,
+          context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer),
+        );
       } else {
         showToast(context, 'Unpinned ${codesToUpdate.length} item(s)');
       }
@@ -468,9 +476,11 @@ class _HomePageState extends State<HomePage> {
             children: [
               iconWidget ?? Icon(icon!, color: colorScheme.textBase, size: 21),
               const SizedBox(height: 8),
-              Text(label,
-                  style: textTheme.small
-                      .copyWith(color: colorScheme.textBase, fontSize: 11)),
+              Text(
+                label,
+                style: textTheme.small
+                    .copyWith(color: colorScheme.textBase, fontSize: 11),
+              ),
             ],
           ),
         ),
@@ -530,14 +540,16 @@ class _HomePageState extends State<HomePage> {
               ValueListenableBuilder<Set<String>>(
                 valueListenable: _codeDisplayStore.selectedCodeIds,
                 builder: (context, selectedIds, child) {
-                  if (selectedIds.isEmpty)
+                  if (selectedIds.isEmpty) {
                     return const Expanded(child: SizedBox.shrink());
+                  }
                   final selectedCodes = _allCodes
                           ?.where((c) => selectedIds.contains(c.selectionKey))
                           .toList() ??
                       [];
-                  if (selectedCodes.isEmpty)
+                  if (selectedCodes.isEmpty) {
                     return const Expanded(child: SizedBox.shrink());
+                  }
                   final bool allArePinned =
                       selectedCodes.every((code) => code.isPinned);
 
@@ -824,7 +836,9 @@ class _HomePageState extends State<HomePage> {
                     Material(
                       shape: StadiumBorder(
                         side: BorderSide(
-                            color: colorScheme.strokeMuted, width: 0.5),
+                          color: colorScheme.strokeMuted,
+                          width: 0.5,
+                        ),
                       ),
                       color: colorScheme.backgroundElevated2,
                       clipBehavior: Clip.antiAlias,
@@ -837,7 +851,9 @@ class _HomePageState extends State<HomePage> {
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 8.0),
+                            horizontal: 12.0,
+                            vertical: 8.0,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -881,10 +897,13 @@ class _HomePageState extends State<HomePage> {
                                     : code.issuer;
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 4.0),
+                                    horizontal: 4.0,
+                                  ),
                                   child: IconUtils.instance.getIcon(
-                                      context, iconData.trim(),
-                                      width: 17),
+                                    context,
+                                    iconData.trim(),
+                                    width: 17,
+                                  ),
                                 );
                               }),
                               if (selectedIds.length > 3)
@@ -1086,6 +1105,7 @@ class _HomePageState extends State<HomePage> {
     _streamSubscription?.cancel();
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
+    _multiSelectActionSubscription?.cancel();
     _textController.dispose();
     _textController.removeListener(_applyFilteringAndRefresh);
     ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
@@ -1581,12 +1601,6 @@ class _HomePageState extends State<HomePage> {
                           sortKey: _codeSortKey,
                           enableDesktopContextActions: PlatformUtil.isDesktop(),
                           selectedCodesBuilder: _selectedCodesForContextMenu,
-                          onMultiPinToggle: _onPinSelectedPressed,
-                          onMultiUnpin: _onUnpinSelectedPressed,
-                          onMultiAddTag: () async => _onAddTagPressed(),
-                          onMultiTrash: _onTrashSelectedPressed,
-                          onMultiRestore: _onRestoreSelectedPressed,
-                          onMultiDeleteForever: _onDeleteForeverPressed,
                         ),
                       );
                     }),
@@ -1638,12 +1652,6 @@ class _HomePageState extends State<HomePage> {
                             enableDesktopContextActions:
                                 PlatformUtil.isDesktop(),
                             selectedCodesBuilder: _selectedCodesForContextMenu,
-                            onMultiPinToggle: _onPinSelectedPressed,
-                            onMultiUnpin: _onUnpinSelectedPressed,
-                            onMultiAddTag: () async => _onAddTagPressed(),
-                            onMultiTrash: _onTrashSelectedPressed,
-                            onMultiRestore: _onRestoreSelectedPressed,
-                            onMultiDeleteForever: _onDeleteForeverPressed,
                           );
                         }),
                         itemCount: _filteredCodes.length,
@@ -1746,10 +1754,14 @@ class _HomePageState extends State<HomePage> {
     final bool singleSelection = selectedCodes.length == 1;
     final Code? singleCode = singleSelection ? selectedCodes.first : null;
 
-    final List<Widget> actionButtons = [];
+    final List<Widget> actionButtons = <Widget>[];
 
-    void addButton(String tooltip, IconData icon, VoidCallback? onPressed,
-        {Widget? iconWidget}) {
+    void addButton(
+      String tooltip,
+      IconData icon,
+      VoidCallback? onPressed, {
+      Widget? iconWidget,
+    }) {
       if (actionButtons.isNotEmpty) {
         actionButtons.add(const SizedBox(width: 12));
       }
@@ -1766,8 +1778,11 @@ class _HomePageState extends State<HomePage> {
 
     if (!allTrashed) {
       if (isMixedPinned) {
-        addButton(context.l10n.pinText, Icons.push_pin,
-            () => _onPinSelectedPressed());
+        addButton(
+          context.l10n.pinText,
+          Icons.push_pin,
+          () => _onPinSelectedPressed(),
+        );
         addButton(
           context.l10n.unpinText,
           Icons.push_pin,
@@ -1782,28 +1797,52 @@ class _HomePageState extends State<HomePage> {
           iconWidget: _buildUnpinIcon(context),
         );
       } else {
-        addButton(context.l10n.pinText, Icons.push_pin,
-            () => _onPinSelectedPressed());
+        addButton(
+          context.l10n.pinText,
+          Icons.push_pin,
+          () => _onPinSelectedPressed(),
+        );
       }
 
       addButton(
-          context.l10n.addTag, Icons.local_offer_outlined, _onAddTagPressed);
-      addButton(context.l10n.trash, Icons.delete_outline,
-          () => _onTrashSelectedPressed());
+        context.l10n.addTag,
+        Icons.local_offer_outlined,
+        _onAddTagPressed,
+      );
+      addButton(
+        context.l10n.trash,
+        Icons.delete_outline,
+        () => _onTrashSelectedPressed(),
+      );
 
       if (singleCode != null) {
-        addButton(context.l10n.share, Icons.adaptive.share_outlined,
-            () => _onSharePressed(singleCode));
-        addButton(context.l10n.qr, Icons.qr_code_2_outlined,
-            () => _onShowQrPressed(singleCode));
-        addButton(context.l10n.edit, Icons.edit_outlined,
-            () => _onEditPressed(singleCode));
+        addButton(
+          context.l10n.share,
+          Icons.adaptive.share_outlined,
+          () => _onSharePressed(singleCode),
+        );
+        addButton(
+          context.l10n.qr,
+          Icons.qr_code_2_outlined,
+          () => _onShowQrPressed(singleCode),
+        );
+        addButton(
+          context.l10n.edit,
+          Icons.edit_outlined,
+          () => _onEditPressed(singleCode),
+        );
       }
     } else {
-      addButton(context.l10n.restore, Icons.restore_outlined,
-          () => _onRestoreSelectedPressed());
-      addButton(context.l10n.delete, Icons.delete_forever_outlined,
-          () => _onDeleteForeverPressed());
+      addButton(
+        context.l10n.restore,
+        Icons.restore_outlined,
+        () => _onRestoreSelectedPressed(),
+      );
+      addButton(
+        context.l10n.delete,
+        Icons.delete_forever_outlined,
+        () => _onDeleteForeverPressed(),
+      );
     }
 
     return Row(
@@ -1955,5 +1994,30 @@ class _HomePageState extends State<HomePage> {
           ),
       ],
     );
+  }
+
+  void _handleMultiSelectAction(
+    MultiSelectActionRequestedEvent event,
+  ) {
+    switch (event.action) {
+      case MultiSelectAction.pinToggle:
+        unawaited(_onPinSelectedPressed());
+        break;
+      case MultiSelectAction.unpin:
+        unawaited(_onUnpinSelectedPressed());
+        break;
+      case MultiSelectAction.addTag:
+        _onAddTagPressed();
+        break;
+      case MultiSelectAction.trash:
+        unawaited(_onTrashSelectedPressed());
+        break;
+      case MultiSelectAction.restore:
+        unawaited(_onRestoreSelectedPressed());
+        break;
+      case MultiSelectAction.deleteForever:
+        unawaited(_onDeleteForeverPressed());
+        break;
+    }
   }
 }
