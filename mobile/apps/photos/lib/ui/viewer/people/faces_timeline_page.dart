@@ -12,7 +12,7 @@ import "package:photos/models/faces_timeline/faces_timeline_models.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/faces_timeline/faces_timeline_service.dart";
-import "package:photos/theme/colors.dart";
+import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
@@ -31,6 +31,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 
   final Logger _logger = Logger("FacesTimelinePage");
   int _frameViewVersion = 0;
+  _TransitionDirection _transitionDirection = _TransitionDirection.forward;
 
   late Future<List<_TimelineFrame>> _framesFuture;
   final List<_TimelineFrame> _frames = [];
@@ -76,6 +77,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _currentIndex = 0;
         _sliderValue = 0;
         _frameViewVersion = 0;
+        _transitionDirection = _TransitionDirection.forward;
         _currentCaptionValue = frames.first.captionValue;
         _previousCaptionValue = _currentCaptionValue;
         _currentCaptionType = frames.first.captionType;
@@ -188,6 +190,13 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       return;
     }
     final frame = _frames[index];
+    if (_currentIndex == index) {
+      setState(() {
+        _sliderValue = index.toDouble();
+      });
+      return;
+    }
+    final direction = _directionForIndex(index);
     setState(() {
       if (_currentIndex != index) {
         _previousCaptionValue = _currentCaptionValue;
@@ -195,6 +204,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _currentCaptionType = frame.captionType;
         _currentIndex = index;
         _frameViewVersion++;
+        _transitionDirection = direction;
       }
       _sliderValue = index.toDouble();
     });
@@ -276,24 +286,60 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                         children: [
                           Positioned.fill(
                             child: AnimatedSwitcher(
-                              duration: _isPlaying
-                                  ? const Duration(milliseconds: 400)
-                                  : Duration.zero,
-                              reverseDuration: _isPlaying
-                                  ? const Duration(milliseconds: 400)
-                                  : Duration.zero,
-                              switchInCurve: Curves.easeInOut,
-                              switchOutCurve: Curves.easeInOut,
-                              transitionBuilder: (child, animation) {
-                                if (!_isPlaying) {
-                                  return child;
-                                }
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
+                              duration: const Duration(milliseconds: 500),
+                              reverseDuration:
+                                  const Duration(milliseconds: 450),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeInCubic,
+                              layoutBuilder: (currentChild, previousChildren) {
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    if (currentChild != null) currentChild,
+                                    ...previousChildren,
+                                  ],
                                 );
                               },
-                              child: _buildFrameView(colorScheme),
+                              transitionBuilder: (child, animation) {
+                                final isIncoming = child.key ==
+                                    ValueKey<int>(_frameViewVersion);
+                                if (isIncoming) {
+                                  final curved = CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeOutCubic,
+                                  );
+                                  final beginOffset = _transitionDirection ==
+                                          _TransitionDirection.forward
+                                      ? const Offset(0, -0.35)
+                                      : const Offset(0, 0.8);
+                                  final position = Tween<Offset>(
+                                    begin: beginOffset,
+                                    end: Offset.zero,
+                                  ).animate(curved);
+                                  return SlideTransition(
+                                    position: position,
+                                    child: child,
+                                  );
+                                } else {
+                                  final curved = CurvedAnimation(
+                                    parent: ReverseAnimation(animation),
+                                    curve: Curves.easeInCubic,
+                                  );
+                                  final targetOffset = _transitionDirection ==
+                                          _TransitionDirection.forward
+                                      ? const Offset(0, 1.05)
+                                      : const Offset(0, -1.05);
+                                  final position = Tween<Offset>(
+                                    begin: Offset.zero,
+                                    end: targetOffset,
+                                  ).animate(curved);
+                                  return SlideTransition(
+                                    position: position,
+                                    child: child,
+                                  );
+                                }
+                              },
+                              child: _buildFrameView(context),
                             ),
                           ),
                           Positioned(
@@ -343,33 +389,75 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     );
   }
 
-  Widget _buildFrameView(EnteColorScheme colorScheme) {
+  Widget _buildFrameView(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final List<BoxShadow> cardShadow =
+        isDark ? shadowFloatDark : shadowFloatLight;
     if (_frames.isEmpty) {
-      return Container(color: colorScheme.backgroundBase);
-    }
-    final frame = _frames[_currentIndex];
-    final key = ValueKey<int>(_frameViewVersion);
-    if (frame.image != null) {
-      return Container(
-        key: key,
-        color: colorScheme.backgroundBase,
-        child: Image(
-          image: frame.image!,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          gaplessPlayback: true,
+      return Center(
+        key: const ValueKey<String>("faces_timeline_empty"),
+        child: FractionallySizedBox(
+          widthFactor: 0.82,
+          heightFactor: 0.78,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevated,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: cardShadow,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: ColoredBox(
+                color: colorScheme.backgroundElevated2,
+                child: Center(
+                  child: Icon(
+                    Icons.person_outline,
+                    size: 72,
+                    color: colorScheme.strokeMuted,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       );
     }
-    return Container(
+    final frame = _frames[_currentIndex];
+    final key = ValueKey<int>(_frameViewVersion);
+    return Center(
       key: key,
-      color: colorScheme.backgroundElevated2,
-      alignment: Alignment.center,
-      child: Icon(
-        Icons.person_outline,
-        size: 72,
-        color: colorScheme.strokeMuted,
+      child: FractionallySizedBox(
+        widthFactor: 0.82,
+        heightFactor: 0.78,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundElevated,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: cardShadow,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: frame.image != null
+                ? Image(
+                    image: frame.image!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    gaplessPlayback: true,
+                  )
+                : ColoredBox(
+                    color: colorScheme.backgroundElevated2,
+                    child: Center(
+                      child: Icon(
+                        Icons.person_outline,
+                        size: 72,
+                        color: colorScheme.strokeMuted,
+                      ),
+                    ),
+                  ),
+          ),
+        ),
       ),
     );
   }
@@ -452,6 +540,24 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     }
     _startPlayback();
   }
+
+  _TransitionDirection _directionForIndex(int nextIndex) {
+    if (_frames.length <= 1) {
+      return _TransitionDirection.forward;
+    }
+    if (_currentIndex == nextIndex) {
+      return _transitionDirection;
+    }
+    if (_currentIndex == _frames.length - 1 && nextIndex == 0) {
+      return _TransitionDirection.forward;
+    }
+    if (_currentIndex == 0 && nextIndex == _frames.length - 1) {
+      return _TransitionDirection.backward;
+    }
+    return nextIndex > _currentIndex
+        ? _TransitionDirection.forward
+        : _TransitionDirection.backward;
+  }
 }
 
 class _TimelineFrame {
@@ -469,6 +575,8 @@ class _TimelineFrame {
     required this.captionValue,
   });
 }
+
+enum _TransitionDirection { forward, backward }
 
 enum _CaptionType { age, yearsAgo }
 
