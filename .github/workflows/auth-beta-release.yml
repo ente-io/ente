@@ -195,7 +195,7 @@ jobs:
             - name: Build desktop app
               run: |
                   flutter config --enable-linux-desktop
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
+                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref claude/add-rpm-config-flags-011CUo11P4BDVEKC88DufLBd --git-path packages/flutter_distributor
                   # RPM
                   flutter_distributor package --platform=linux --targets=rpm --skip-clean
                   mv dist/**/*-*-linux.rpm artifacts/ente-auth-v${{ env.VERSION_NAME }}-beta-x86_64.rpm
