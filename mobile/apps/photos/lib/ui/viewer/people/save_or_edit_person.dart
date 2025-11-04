@@ -546,12 +546,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
     // Get all cluster embeddings
     final persons = _cachedPersons.map((e) => e.$1).toList();
-    final clusterToPerson = <String, String>{};
-    for (final person in persons) {
-      for (final cluster in person.data.assigned) {
-        clusterToPerson[cluster.id] = person.remoteID;
-      }
-    }
+    final personIDs = persons.map((person) => person.remoteID).toSet();
+    final clusterToPerson = await MLDataDB.instance.getClusterIDToPersonID();
+    clusterToPerson.removeWhere((_, personID) => !personIDs.contains(personID));
     allClusterSummary
         .removeWhere((key, value) => !clusterToPerson.containsKey(key));
     final Map<String, ml.Vector> allClusterEmbeddings = allClusterSummary.map(
