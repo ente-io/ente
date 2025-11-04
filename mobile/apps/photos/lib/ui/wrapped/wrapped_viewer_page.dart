@@ -179,7 +179,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       return <WrappedCard>[];
     }
     final List<WrappedCard> cards = List<WrappedCard>.from(source);
-    if (kReleaseMode) {
+    if (!kDebugMode) {
       return cards;
     }
 
@@ -205,6 +205,68 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         .toList(growable: false);
     if (candidates.isEmpty) {
       return cards;
+    }
+
+    final String? primaryBadgeKey = badgeCard.meta["badgeKey"] as String?;
+    final int badgeIndex = cards.indexOf(badgeCard);
+    final int insertionIndex = badgeIndex >= 0 ? badgeIndex + 1 : cards.length;
+    final List<WrappedCard> previewCards = <WrappedCard>[];
+
+    for (final Map<String, Object?> candidate in candidates) {
+      final String? candidateKey = candidate["key"] as String?;
+      if (candidateKey == null) {
+        continue;
+      }
+      if (candidateKey == primaryBadgeKey) {
+        continue;
+      }
+
+      final Map<String, Object?> meta = Map<String, Object?>.from(candidate)
+        ..["badgeKey"] = candidateKey;
+      final List<int> uploadedIDs =
+          (meta.remove("uploadedFileIDs") as List<dynamic>?)
+                  ?.map(
+                    (dynamic value) =>
+                        value is num ? value.toInt() : int.tryParse("$value"),
+                  )
+                  .whereType<int>()
+                  .where((int id) => id > 0)
+                  .toList(growable: false) ??
+              const <int>[];
+      final List<MediaRef> mediaRefs = uploadedIDs.isNotEmpty
+          ? uploadedIDs.map(MediaRef.new).toList(growable: false)
+          : badgeCard.media;
+
+      final String? candidateTitle = (meta.remove("title") as String?)?.trim();
+      final String title = (candidateTitle != null && candidateTitle.isNotEmpty)
+          ? candidateTitle
+          : badgeCard.title;
+      final String? candidateSubtitle =
+          (meta.remove("subtitle") as String?)?.trim();
+      final String? subtitleValue =
+          (candidateSubtitle != null && candidateSubtitle.isNotEmpty)
+              ? candidateSubtitle
+              : badgeCard.subtitle;
+
+      meta["uploadedFileIDs"] = uploadedIDs;
+      meta["detailChips"] ??= badgeCard.meta["detailChips"];
+      meta["gradient"] ??= badgeCard.meta["gradient"];
+      meta["emoji"] ??= badgeCard.meta["emoji"];
+      meta["debugPreview"] = true;
+
+      previewCards.add(
+        WrappedCard(
+          type: WrappedCardType.badge,
+          title: title,
+          subtitle: subtitleValue,
+          media: mediaRefs,
+          meta: meta,
+        ),
+      );
+    }
+
+    if (previewCards.isNotEmpty) {
+      cards.insertAll(insertionIndex, previewCards);
     }
 
     cards.add(
