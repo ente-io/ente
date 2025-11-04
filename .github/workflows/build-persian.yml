@@ -84,9 +84,9 @@ jobs:
           #run: python translate_arb.py
           #working-directory: mobile
 
-      - name: Merge translations
-        run: python merge_translations.py
-        working-directory: mobile
+          #- name: Merge translations
+          #run: python merge_translations.py
+          #working-directory: mobile
 
       - name: Generate Flutter l10n
         run: flutter gen-l10n
