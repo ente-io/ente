@@ -1288,9 +1288,7 @@ class _HomePageState extends State<HomePage> {
       valueListenable: _codeDisplayStore.isSelectionModeActive,
       builder: (context, isSelecting, child) {
         final bool isDesktop = PlatformUtil.isDesktop();
-        final appBar = isDesktop && isSelecting && _currentGridColumns > 1
-            ? _buildDesktopSelectionAppBar(l10n)
-            : _buildStandardAppBar(l10n, isDesktop);
+        final appBar = _buildStandardAppBar(l10n, isDesktop);
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (_, result) async {
@@ -1324,10 +1322,11 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-            bottomNavigationBar:
-                isSelecting && (!isDesktop || _currentGridColumns <= 1)
-                    ? _buildSelectionActionBar()
-                    : null,
+            bottomNavigationBar: isSelecting
+                ? (isDesktop && _currentGridColumns > 1
+                    ? _buildDesktopSelectionBottomBar()
+                    : _buildSelectionActionBar())
+                : null,
             resizeToAvoidBottomInset: false,
             appBar: appBar,
             floatingActionButton: isSelecting
@@ -1421,45 +1420,62 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  PreferredSizeWidget _buildDesktopSelectionAppBar(
-    AppLocalizations l10n,
-  ) {
+  Widget _buildDesktopSelectionBottomBar() {
+    final l10n = context.l10n;
     final visibleIds = _filteredCodes.map((c) => c.selectionKey).toSet();
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(kToolbarHeight),
-      child: ValueListenableBuilder<Set<String>>(
-        valueListenable: _codeDisplayStore.selectedCodeIds,
-        builder: (context, selectedIds, _) {
-          final bool allVisibleSelected =
-              visibleIds.isNotEmpty && selectedIds.containsAll(visibleIds);
-          return AppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
-            leadingWidth: 220,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    tooltip: l10n.cancel,
-                    onPressed: () => _codeDisplayStore.clearSelection(),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${selectedIds.length} ${l10n.selected}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                ],
+    final colorScheme = getEnteColorScheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return ValueListenableBuilder<Set<String>>(
+      valueListenable: _codeDisplayStore.selectedCodeIds,
+      builder: (context, selectedIds, _) {
+        final bool allVisibleSelected =
+            visibleIds.isNotEmpty && selectedIds.containsAll(visibleIds);
+        return Container(
+          decoration: BoxDecoration(
+            color: isDarkMode
+                ? colorScheme.fillFaint
+                : colorScheme.backgroundElevated2,
+            border: Border(
+              top: BorderSide(
+                color: colorScheme.strokeMuted.withValues(alpha: 0.1),
+                width: 1,
               ),
             ),
-            title: _buildDesktopActionRow(context),
-            centerTitle: true,
-            actions: [
+            boxShadow: [
+              BoxShadow(
+                color: isDarkMode
+                    ? Colors.black.withValues(alpha: 0.4)
+                    : Colors.grey.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.fromLTRB(24, 20, 24, 20 + bottomPadding),
+          child: Row(
+            children: [
+              // Close button and count
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: l10n.cancel,
+                onPressed: () => _codeDisplayStore.clearSelection(),
+                padding: const EdgeInsets.all(12),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${selectedIds.length} ${l10n.selected}',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const Spacer(),
+              // Action buttons in center
+              _buildDesktopActionRow(context),
+              const Spacer(),
+              // Select all chip
               _buildSelectAllChip(
                 context: context,
                 enabled: !allVisibleSelected,
@@ -1472,11 +1488,10 @@ class _HomePageState extends State<HomePage> {
                             newSelection.isNotEmpty;
                       },
               ),
-              const SizedBox(width: 12),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -1763,7 +1778,7 @@ class _HomePageState extends State<HomePage> {
       Widget? iconWidget,
     }) {
       if (actionButtons.isNotEmpty) {
-        actionButtons.add(const SizedBox(width: 12));
+        actionButtons.add(const SizedBox(width: 16));
       }
       actionButtons.add(
         _buildSelectionIconButton(
@@ -1880,7 +1895,7 @@ class _HomePageState extends State<HomePage> {
               color: backgroundColor,
               borderRadius: BorderRadius.circular(10),
             ),
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(12),
             child: iconWidget ?? Icon(icon, size: 24, color: iconColor),
           ),
         ),
