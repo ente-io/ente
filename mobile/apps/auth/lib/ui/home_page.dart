@@ -297,7 +297,7 @@ class _HomePageState extends State<HomePage> {
           context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer),
         );
       } else {
-        showToast(context, 'Unpinned ${codesToUpdate.length} item(s)');
+        showToast(context, context.l10n.unpinnedCount(codesToUpdate.length));
       }
     } else {
       int pinnedCount = 0;
@@ -315,7 +315,7 @@ class _HomePageState extends State<HomePage> {
         final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
         showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
       } else if (pinnedCount > 0) {
-        showToast(context, 'Pinned $pinnedCount item(s)');
+        showToast(context, context.l10n.pinnedCount(pinnedCount));
       }
     }
 
@@ -347,7 +347,7 @@ class _HomePageState extends State<HomePage> {
       final unpinnedCode = codesToUpdate.firstWhere((c) => c.isPinned);
       showToast(context, context.l10n.unpinnedCodeMessage(unpinnedCode.issuer));
     } else if (unpinnedCount > 0) {
-      showToast(context, 'Unpinned $unpinnedCount item(s)');
+      showToast(context, context.l10n.unpinnedCount(unpinnedCount));
     }
 
     _codeDisplayStore.clearSelection();
@@ -946,7 +946,7 @@ class _HomePageState extends State<HomePage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    '${selectedIds.length} selected',
+                                    context.l10n.nSelected(selectedIds.length),
                                     style: const TextStyle(fontSize: 11),
                                   ),
                                   const SizedBox(width: 6),

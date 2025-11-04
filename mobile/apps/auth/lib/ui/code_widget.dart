@@ -561,7 +561,22 @@ class _CodeWidgetState extends State<CodeWidget> {
   List<ContextMenuEntry> _buildSingleSelectionMenu(AppLocalizations l10n) {
     final entries = <ContextMenuEntry>[];
 
-    if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible) {
+    _addNonTrashedMenuItems(entries, l10n);
+    _addEditOrRestoreMenuItem(entries, l10n);
+    entries.add(const MenuDivider());
+    _addDeleteOrTrashMenuItem(entries, l10n);
+
+    return entries;
+  }
+
+  /// Adds menu items for non-trashed codes (share, QR, tag, notes, pin).
+  void _addNonTrashedMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    if (widget.code.isTrashed) return;
+
+    if (widget.code.type.isTOTPCompatible) {
       entries.add(
         MenuItem(
           label: l10n.share,
@@ -571,27 +586,26 @@ class _CodeWidgetState extends State<CodeWidget> {
       );
     }
 
-    if (!widget.code.isTrashed) {
-      entries.add(
-        MenuItem(
-          label: l10n.qr,
-          icon: Icons.qr_code_2_outlined,
-          onSelected: () => _onShowQrPressed(null),
-        ),
-      );
-      entries.add(
-        MenuItem(
-          label: l10n.addTag,
-          icon: Icons.local_offer_outlined,
-          onSelected: () {
-            CodeDisplayStore.instance.selectedCodeIds.value = {
-              widget.code.selectionKey,
-            };
-            _triggerMultiAction(MultiSelectAction.addTag);
-          },
-        ),
-      );
-    }
+    entries.add(
+      MenuItem(
+        label: l10n.qr,
+        icon: Icons.qr_code_2_outlined,
+        onSelected: () => _onShowQrPressed(null),
+      ),
+    );
+
+    entries.add(
+      MenuItem(
+        label: l10n.addTag,
+        icon: Icons.local_offer_outlined,
+        onSelected: () {
+          CodeDisplayStore.instance.selectedCodeIds.value = {
+            widget.code.selectionKey,
+          };
+          _triggerMultiAction(MultiSelectAction.addTag);
+        },
+      ),
+    );
 
     if (widget.code.note.isNotEmpty) {
       entries.add(
@@ -603,7 +617,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       );
     }
 
-    if (!widget.code.isTrashed && !ignorePin) {
+    if (!ignorePin) {
       entries.add(
         MenuItem(
           label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
@@ -612,7 +626,13 @@ class _CodeWidgetState extends State<CodeWidget> {
         ),
       );
     }
+  }
 
+  /// Adds edit menu item for non-trashed codes or restore for trashed codes.
+  void _addEditOrRestoreMenuItem(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
     if (!widget.code.isTrashed) {
       entries.add(
         MenuItem(
@@ -630,8 +650,13 @@ class _CodeWidgetState extends State<CodeWidget> {
         ),
       );
     }
+  }
 
-    entries.add(const MenuDivider());
+  /// Adds delete (forever) or trash menu item based on code state.
+  void _addDeleteOrTrashMenuItem(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
     entries.add(
       MenuItem(
         label: widget.code.isTrashed ? l10n.delete : l10n.trash,
@@ -642,8 +667,6 @@ class _CodeWidgetState extends State<CodeWidget> {
             : _onTrashPressed(null),
       ),
     );
-
-    return entries;
   }
 
   List<ContextMenuEntry>? _buildMultiSelectionContextMenu(
@@ -664,29 +687,49 @@ class _CodeWidgetState extends State<CodeWidget> {
     final bool allTrashed = selectedCodes.every((code) => code.isTrashed);
 
     if (allTrashed) {
-      entries.add(
-        MenuItem(
-          label: l10n.restore,
-          icon: Icons.restore_outlined,
-          onSelected: () => _triggerMultiAction(MultiSelectAction.restore),
-        ),
-      );
-      entries.add(
-        MenuItem(
-          label: l10n.delete,
-          icon: Icons.delete_forever,
-          onSelected: () =>
-              _triggerMultiAction(MultiSelectAction.deleteForever),
-        ),
-      );
+      _addTrashedMultiSelectMenuItems(entries, l10n);
       return entries.isEmpty ? null : entries;
     }
 
+    _addPinMenuItems(entries, l10n, selectedCodes);
+    _addTagAndTrashMenuItems(entries, l10n);
+
+    return entries.isEmpty ? null : entries;
+  }
+
+  /// Adds menu items for multi-selected trashed codes (restore, delete).
+  void _addTrashedMultiSelectMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: l10n.restore,
+        icon: Icons.restore_outlined,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.restore),
+      ),
+    );
+    entries.add(
+      MenuItem(
+        label: l10n.delete,
+        icon: Icons.delete_forever,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.deleteForever),
+      ),
+    );
+  }
+
+  /// Adds pin/unpin menu items based on selection pin state.
+  void _addPinMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+    List<Code> selectedCodes,
+  ) {
     final bool allPinned = selectedCodes.every((code) => code.isPinned);
     final bool anyPinned = selectedCodes.any((code) => code.isPinned);
     final bool isMixedPinned = anyPinned && !allPinned;
 
     if (isMixedPinned) {
+      // Show both pin and unpin options for mixed state
       entries.add(
         MenuItem(
           label: l10n.pinText,
@@ -702,6 +745,7 @@ class _CodeWidgetState extends State<CodeWidget> {
         ),
       );
     } else {
+      // Show single toggle option for uniform state
       entries.add(
         MenuItem(
           label: allPinned ? l10n.unpinText : l10n.pinText,
@@ -710,7 +754,13 @@ class _CodeWidgetState extends State<CodeWidget> {
         ),
       );
     }
+  }
 
+  /// Adds tag and trash menu items for multi-selection.
+  void _addTagAndTrashMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
     entries.add(
       MenuItem(
         label: l10n.addTag,
@@ -726,8 +776,6 @@ class _CodeWidgetState extends State<CodeWidget> {
         onSelected: () => _triggerMultiAction(MultiSelectAction.trash),
       ),
     );
-
-    return entries.isEmpty ? null : entries;
   }
 
   void _triggerMultiAction(MultiSelectAction action) {

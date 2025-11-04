@@ -38,47 +38,67 @@ class CodeDisplayStore {
     isSelectionModeActive.value = false;
   }
 
-  /// Reconcile current selections with the provided list of codes.
-  /// This keeps the selection state consistent when codes receive a
-  /// generatedID during sync or are removed locally.
+  /// Reconciles current selections with the provided list of codes.
+  ///
+  /// This ensures selection state remains valid when:
+  /// - Codes transition from local to synced (rawData → generatedID)
+  /// - Codes are deleted or removed from the list
+  /// - Codes are marked with errors and become invalid for selection
+  ///
+  /// **How it works:**
+  /// 1. Builds a set of valid selection keys from non-error codes
+  /// 2. Creates a remapping table for old keys (rawData, old generatedID) → new keys
+  /// 3. Updates current selection by keeping valid keys and remapping changed keys
+  /// 4. Removes selections for codes that no longer exist or have errors
+  ///
+  /// **Performance:** O(n + m) where n = number of codes, m = number of selected items
+  ///
+  /// **Example scenario:**
+  /// ```dart
+  /// // User selects code with rawData="abc123" (not yet synced)
+  /// selectedCodeIds = {"abc123"}
+  ///
+  /// // After sync, code gets generatedID=42
+  /// // reconcileSelections maps "abc123" → "42"
+  /// selectedCodeIds = {"42"}  // Selection preserved!
+  /// ```
   void reconcileSelections(Iterable<Code> codes) {
     final currentSelection = selectedCodeIds.value;
     if (currentSelection.isEmpty) {
       return;
     }
 
-    final Set<String> validSelectionKeys = <String>{};
-    final Map<String, String> fallbackSelectionKeys = <String, String>{};
+    // Build lookup structures in a single pass - O(n)
+    final validKeys = <String>{};
+    final keyRemapping = <String, String>{};
 
     for (final code in codes) {
       if (code.hasError) {
         continue;
       }
+
       final key = code.selectionKey;
-      validSelectionKeys.add(key);
-      fallbackSelectionKeys[code.rawData] = key;
+      validKeys.add(key);
+
+      // Map old keys to current key to handle transitions
+      keyRemapping[code.rawData] = key;
       final generatedID = code.generatedID;
       if (generatedID != null) {
-        fallbackSelectionKeys[generatedID.toString()] = key;
+        keyRemapping[generatedID.toString()] = key;
       }
     }
 
-    bool hasChanges = false;
-    final Set<String> updatedSelection = <String>{};
+    // Update selection in one pass - O(m)
+    final updatedSelection = currentSelection
+        .map(
+          (oldKey) =>
+              validKeys.contains(oldKey) ? oldKey : keyRemapping[oldKey],
+        )
+        .whereType<String>()
+        .toSet();
 
-    for (final selectedKey in currentSelection) {
-      if (validSelectionKeys.contains(selectedKey)) {
-        updatedSelection.add(selectedKey);
-        continue;
-      }
-      final remappedKey = fallbackSelectionKeys[selectedKey];
-      if (remappedKey != null) {
-        updatedSelection.add(remappedKey);
-      }
-      hasChanges = true;
-    }
-
-    if (hasChanges) {
+    // Only update if selection changed
+    if (updatedSelection != currentSelection) {
       selectedCodeIds.value = updatedSelection;
       isSelectionModeActive.value = updatedSelection.isNotEmpty;
     }
