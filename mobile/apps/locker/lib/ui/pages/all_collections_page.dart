@@ -78,7 +78,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
       if (widget.viewType == UISectionType.homeCollections) {
         collections = await CollectionService.instance.getCollections();
-      } else {
+      } else if (widget.viewType == UISectionType.outgoingCollections ||
+          widget.viewType == UISectionType.incomingCollections) {
         final sharedCollections =
             await CollectionService.instance.getSharedCollections();
         if (widget.viewType == UISectionType.outgoingCollections) {
