@@ -75,7 +75,17 @@ jobs:
       - name: Generate Rust bindings
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
-        run: flutter_rust_bridge_codegen generate
+        run: |
+          # استفاده از فایل config موجود در پروژه
+          if [ -f "flutter_rust_bridge.yaml" ]; then
+            echo "📄 Using flutter_rust_bridge.yaml config file"
+            flutter_rust_bridge_codegen
+          else
+            echo "⚠️ Config file not found, using manual parameters"
+            flutter_rust_bridge_codegen \
+              --rust-input rust/src/api.rs \
+              --dart-output lib/src/rust
+          fi
 
       # ============================================
       # Fix Dependencies
