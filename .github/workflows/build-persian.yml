@@ -1,145 +1,129 @@
 name: Build Persian APK
 
 on:
-  workflow_dispatch:
   push:
-    branches: [persian-localized]
+    branches: [ persian-localized ]
+  workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.24.3"
+  JAVA_VERSION: "17"
+  FLUTTER_VERSION: "3.27.1"  # ← FIX: از latest stable استفاده کن
   API_ENDPOINT: "https://api.photos.degoogle.ir"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: mobile
+    timeout-minutes: 90
 
     steps:
-      - name: Checkout code and submodules
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: persian-localized
           submodules: recursive
+          fetch-depth: 0
 
       - name: Free up disk space
         run: |
-          echo "🧹 Freeing disk space..."
           sudo rm -rf /usr/share/dotnet
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          df -h /
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo apt-get clean
+          df -h
 
-      - name: Setup JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "zulu"
+          java-version: ${{ env.JAVA_VERSION }}
 
-      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
           flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
           cache: true
 
-      - name: Setup Python 3.12
+      - name: Verify Dart SDK version
+        run: |
+          echo "Flutter version:"
+          flutter --version
+          echo "Dart SDK version:"
+          dart --version
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            mobile/rust
+
+      - name: Install flutter_rust_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen
+
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
           cache: 'pip'
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Install Flutter Rust Bridge
-        run: cargo install flutter_rust_bridge_codegen --force
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai python-dotenv requests
+        working-directory: mobile
 
       - name: Generate Rust bindings
-        working-directory: mobile/apps/photos
         run: flutter_rust_bridge_codegen generate
+        working-directory: mobile
 
-      - name: Apply Persian translations
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          if ! grep -r "به\|از\|در" apps/photos/lib/l10n/arb --include="*.arb" > /dev/null 2>&1; then
-            echo "🔄 Translating ARB files..."
-            python -m pip install --upgrade pip
-            python -m pip install --upgrade pip
-              if [ -f requirements.txt ]; then
-                pip install -r requirements.txt
-              else
-                pip install openai python-dotenv requests
-              fi 
-              #python3 translate_arb.py
-            
-            if [ -f "merge_translations.py" ]; then
-              echo "🔀 Merging translations..."
-              #python3 merge_translations.py
-            fi
-            
-            echo "✅ Translation completed!"
-          else
-            echo "✅ Translations already exist!"
-          fi
+          #- name: Run translation script
+          #env:
+          #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          #run: python translate_arb.py
+          #working-directory: mobile
 
-      - name: Generate localization files
-        working-directory: mobile/apps/photos
-        run: |
-          echo "🌍 Generating l10n..."
-          flutter gen-l10n
+      - name: Merge translations
+        run: python merge_translations.py
+        working-directory: mobile
 
-      - name: Flutter pub get
-        working-directory: mobile/apps/photos
+      - name: Generate Flutter l10n
+        run: flutter gen-l10n
+        working-directory: mobile
+
+      - name: Get Flutter dependencies
         run: flutter pub get
+        working-directory: mobile
 
-      - name: Build Release APK
-        working-directory: mobile/apps/photos
+      - name: Build APK
         run: |
-          echo "🏗️ Building APK with custom endpoint..."
           flutter build apk \
-            --dart-define=endpoint=${{ env.API_ENDPOINT }} \
-            --dart-define=cronetHttpNoPlay=true \
             --release \
-            --flavor independent
-          
-          BUILD_DATE=$(date +%Y%m%d-%H%M)
-          mv build/app/outputs/flutter-apk/app-independent-release.apk \
-             build/app/outputs/flutter-apk/ente-persian-${BUILD_DATE}.apk
-          
-          echo "✅ APK built successfully!"
+            --flavor independent \
+            --dart-define=endpoint=${{ env.API_ENDPOINT }} \
+            --dart-define=cronetHttpNoPlay=true
+        working-directory: mobile
 
-      - name: Generate Checksum
-        working-directory: mobile/apps/photos
+      - name: Rename APK
         run: |
-          cd build/app/outputs/flutter-apk/
-          sha256sum ente-persian-*.apk | tee sha256sum.txt
+          mv build/app/outputs/flutter-apk/app-independent-release.apk \
+             build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
+        working-directory: mobile
 
-      - name: Upload APK
+      - name: Generate checksums
+        run: |
+          cd build/app/outputs/flutter-apk
+          sha256sum ente-persian-${{ github.sha }}.apk > checksums.txt
+          cat checksums.txt
+        working-directory: mobile
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ente-persian-apk
+          name: ente-persian-${{ github.sha }}
           path: |
-            mobile/apps/photos/build/app/outputs/flutter-apk/ente-persian-*.apk
-            mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum.txt
-          retention-days: 90
-
-      - name: Build Summary
-        working-directory: mobile/apps/photos
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "✅ Persian Build Completed!"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🌐 API Endpoint: ${{ env.API_ENDPOINT }}"
-          echo "📦 APK:"
-          ls -lh build/app/outputs/flutter-apk/ente-persian-*.apk
-          echo ""
-          echo "🔒 Checksum:"
-          cat build/app/outputs/flutter-apk/sha256sum.txt
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            mobile/build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
+            mobile/build/app/outputs/flutter-apk/checksums.txt
+          retention-days: 30
 
