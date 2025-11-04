@@ -76,10 +76,10 @@ jobs:
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: |
-          # استفاده از فایل config موجود در پروژه
+          # بررسی وجود config file و استفاده از مسیر صریح
           if [ -f "flutter_rust_bridge.yaml" ]; then
             echo "📄 Using flutter_rust_bridge.yaml config file"
-            flutter_rust_bridge_codegen
+            flutter_rust_bridge_codegen flutter_rust_bridge.yaml
           else
             echo "⚠️ Config file not found, using manual parameters"
             flutter_rust_bridge_codegen \
