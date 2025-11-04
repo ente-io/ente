@@ -1,0 +1,41 @@
+name: Build Ente APK
+
+on:
+  push:
+    branches: [ main, persian-localized ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "zulu"
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.3"
+          channel: "stable"
+
+      - name: Build APK
+        working-directory: mobile/apps/photos
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          flutter build apk \
+            --release \
+            --flavor independent \
+            --dart-define=endpoint=https://api.photos.degoogle.ir \
+            --dart-define=cronetHttpNoPlay=true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ente-apk
+          path: mobile/apps/photos/build/app/outputs/flutter-apk/*.apk
+
