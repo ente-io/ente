@@ -7,7 +7,7 @@ on:
 
 env:
   JAVA_VERSION: "17"
-  FLUTTER_VERSION: "3.27.1"  # ← FIX: از latest stable استفاده کن
+  FLUTTER_VERSION: "3.27.1"
   API_ENDPOINT: "https://api.photos.degoogle.ir"
 
 jobs:
@@ -43,11 +43,9 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Verify Dart SDK version
+      - name: Verify Flutter and Dart
         run: |
-          echo "Flutter version:"
           flutter --version
-          echo "Dart SDK version:"
           dart --version
 
       - name: Install Rust
@@ -57,44 +55,50 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            mobile/rust
+            mobile/apps/photos/rust
 
       - name: Install flutter_rust_bridge_codegen
         run: cargo install flutter_rust_bridge_codegen
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install openai python-dotenv requests
-        working-directory: mobile
-
+      # ============================================
+      # FIX: اجرا از دایرکتوری صحیح (apps/photos)
+      # ============================================
       - name: Generate Rust bindings
         run: flutter_rust_bridge_codegen generate
-        working-directory: mobile
+        working-directory: mobile/apps/photos
 
-          #- name: Run translation script
-          #env:
-          #OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          #run: python translate_arb.py
-          #working-directory: mobile
+      # ============================================
+      # COMMENTED: Translation steps
+      # ============================================
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.11'
+      #     cache: 'pip'
 
-          #- name: Merge translations
-          #run: python merge_translations.py
-          #working-directory: mobile
+      # - name: Install Python dependencies
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install openai python-dotenv requests
+      #   working-directory: mobile/apps/photos
+
+      # - name: Run translation script
+      #   env:
+      #     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      #   run: python translate_arb.py
+      #   working-directory: mobile/apps/photos
+
+      # - name: Merge translations
+      #   run: python merge_translations.py
+      #   working-directory: mobile/apps/photos
 
       - name: Generate Flutter l10n
         run: flutter gen-l10n
-        working-directory: mobile
+        working-directory: mobile/apps/photos
 
       - name: Get Flutter dependencies
         run: flutter pub get
-        working-directory: mobile
+        working-directory: mobile/apps/photos
 
       - name: Build APK
         run: |
@@ -103,27 +107,27 @@ jobs:
             --flavor independent \
             --dart-define=endpoint=${{ env.API_ENDPOINT }} \
             --dart-define=cronetHttpNoPlay=true
-        working-directory: mobile
+        working-directory: mobile/apps/photos
 
       - name: Rename APK
         run: |
           mv build/app/outputs/flutter-apk/app-independent-release.apk \
              build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
-        working-directory: mobile
+        working-directory: mobile/apps/photos
 
       - name: Generate checksums
         run: |
           cd build/app/outputs/flutter-apk
           sha256sum ente-persian-${{ github.sha }}.apk > checksums.txt
           cat checksums.txt
-        working-directory: mobile
+        working-directory: mobile/apps/photos
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ente-persian-${{ github.sha }}
           path: |
-            mobile/build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
-            mobile/build/app/outputs/flutter-apk/checksums.txt
+            mobile/apps/photos/build/app/outputs/flutter-apk/ente-persian-${{ github.sha }}.apk
+            mobile/apps/photos/build/app/outputs/flutter-apk/checksums.txt
           retention-days: 30
 
