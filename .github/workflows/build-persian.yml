@@ -67,15 +67,22 @@ jobs:
             echo "⚠️ Need to generate Rust bindings"
           fi
 
-      - name: Install flutter_rust_bridge_codegen
+      # ============================================
+      # نصب ابزارهای Rust مورد نیاز
+      # ============================================
+      - name: Install Rust tools
         if: steps.check_rust.outputs.rust_exists == 'false'
-        run: cargo install flutter_rust_bridge_codegen --version 1.82.6 --locked
+        run: |
+          echo "📦 Installing cargo-expand..."
+          cargo install cargo-expand --locked
+          
+          echo "📦 Installing flutter_rust_bridge_codegen 1.82.6..."
+          cargo install flutter_rust_bridge_codegen --version 1.82.6 --locked
 
       - name: Generate Rust bindings
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: |
-          # استفاده از CLI بدون config file
           echo "🔨 Generating Rust bindings with CLI parameters"
           flutter_rust_bridge_codegen \
             --rust-input rust/src/api.rs \
