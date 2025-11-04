@@ -518,13 +518,37 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
             value: sliderValue.toDouble(),
             min: 0.0,
             max: frameCount > 1 ? maxValue : 0.0,
-            divisions: frameCount > 1 ? frameCount - 1 : null,
-            onChangeStart: frameCount > 1 ? (value) => _pausePlayback() : null,
+            divisions: frameCount > 1 ? (frameCount - 1) * 4 : null,
+            onChangeStart: frameCount > 1
+                ? (value) {
+                    _pausePlayback();
+                    _isAnimatingCard = false;
+                    _cardTransitionController.stop();
+                  }
+                : null,
             onChanged: frameCount > 1
                 ? (value) {
-                    final index =
+                    final clamped = value.clamp(0.0, maxValue);
+                    setState(() {
+                      _sliderValue = clamped;
+                      _stackProgress = clamped;
+                      _currentIndex = clamped.round().clamp(0, frameCount - 1);
+                      final frame = _frames[_currentIndex];
+                      _previousCaptionValue = _currentCaptionValue;
+                      _currentCaptionValue = frame.captionValue;
+                      _currentCaptionType = frame.captionType;
+                    });
+                  }
+                : null,
+            onChangeEnd: frameCount > 1
+                ? (value) {
+                    final target =
                         value.round().clamp(0, frameCount - 1).toInt();
-                    _setCurrentFrame(index);
+                    setState(() {
+                      _currentIndex = target;
+                      _sliderValue = target.toDouble();
+                      _stackProgress = _sliderValue;
+                    });
                   }
                 : null,
           ),
