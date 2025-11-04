@@ -544,6 +544,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       return const SizedBox.shrink();
     }
 
+    final bool isCurrentCardBadge =
+        _cards[_currentIndex].type == WrappedCardType.badge ||
+            _cards[_currentIndex].type == WrappedCardType.badgeDebug;
+
     return Theme(
       data: darkThemeData,
       child: Builder(
@@ -654,47 +658,49 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                       ),
                     ],
                   ),
-                  Positioned(
-                    right: 20,
-                    bottom: bottomPadding + 24,
-                    child: GestureDetector(
-                      key: _shareButtonKey,
-                      behavior: HitTestBehavior.translucent,
-                      onTap: _handleShare,
-                      child: Container(
-                        width: 56,
-                        height: 56,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.share,
-                          size: 28,
-                          color:
-                              enteColorScheme.textMuted.withValues(alpha: 0.7),
+                  if (!isCurrentCardBadge) ...[
+                    Positioned(
+                      right: 20,
+                      bottom: bottomPadding + 24,
+                      child: GestureDetector(
+                        key: _shareButtonKey,
+                        behavior: HitTestBehavior.translucent,
+                        onTap: _handleShare,
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.share,
+                            size: 28,
+                            color: enteColorScheme.textMuted
+                                .withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    bottom: bottomPadding + 24,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () => unawaited(_handleMusicToggle()),
-                      child: Container(
-                        width: 56,
-                        height: 56,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          (_isMusicMuted || !_isMusicPlaying)
-                              ? Icons.volume_off
-                              : Icons.volume_up,
-                          size: 28,
-                          color:
-                              enteColorScheme.textMuted.withValues(alpha: 0.7),
+                    Positioned(
+                      left: 20,
+                      bottom: bottomPadding + 24,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => unawaited(_handleMusicToggle()),
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            (_isMusicMuted || !_isMusicPlaying)
+                                ? Icons.volume_off
+                                : Icons.volume_up,
+                            size: 28,
+                            color: enteColorScheme.textMuted
+                                .withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
@@ -702,6 +708,12 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         },
       ),
     );
+  }
+
+  GlobalKey get shareButtonKey => _shareButtonKey;
+
+  Future<void> shareCurrentCard() async {
+    await _handleShare();
   }
 
   Future<void> _handleShare() async {

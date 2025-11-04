@@ -28,211 +28,239 @@ class _BadgeCardContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> gradient = _stringListFromMeta(card.meta, "gradient");
-    final Color primaryColor = gradient.length >= 2
-        ? _colorFromHex(gradient.first, colorScheme.primary500)
-        : colorScheme.primary500;
-    final BoxDecoration decoration = gradient.length >= 2
-        ? BoxDecoration(
-            gradient: LinearGradient(
-              colors: gradient
-                  .take(2)
-                  .map((String hex) => _colorFromHex(hex, primaryColor))
-                  .toList(growable: false),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          )
-        : BoxDecoration(
-            color: primaryColor,
-          );
+    final _BadgeVisuals visuals = _badgeVisualsFor(card);
+    final _WrappedViewerPageState? viewerState =
+        context.findAncestorStateOfType<_WrappedViewerPageState>();
+    final GlobalKey? shareKey = viewerState?.shareButtonKey;
 
-    return Container(
-      decoration: decoration,
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.center,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.center,
-                child: Text(
-                  card.title,
-                  style: textTheme.h1Bold.copyWith(
-                    color: Colors.white,
-                    height: 1.05,
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double cardHeight = constraints.maxHeight.isFinite
+            ? math.max(constraints.maxHeight, 360)
+            : 520;
+        final double panelTopUpperBound = math.max(cardHeight - 190.0, 140.0);
+        final double panelTop = math.min(
+          math.max(cardHeight * 0.30, 110.0),
+          panelTopUpperBound,
+        );
+        final double width =
+            constraints.maxWidth.isFinite ? constraints.maxWidth : 360;
+        final double artWidth = math.max(math.min(width - 72, 280), 180);
+        final double artTopPadding = math.max(panelTop - 140, 4);
+
+        return Container(
+          color: Colors.white,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                left: 16,
+                right: 16,
+                top: panelTop,
+                bottom: 16,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _kBadgeBaseGreen,
+                    borderRadius: BorderRadius.circular(40),
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Center(
+              Positioned(
+                left: 24,
+                right: 24,
+                top: panelTop - 80,
+                child: IgnorePointer(
+                  child: Opacity(
+                    opacity: 0.45,
+                    child: Image.asset(
+                      _BadgeVisualAssets.rays,
+                      fit: BoxFit.contain,
+                      height: 180,
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 24,
+                right: 24,
+                top: panelTop - 48,
+                child: IgnorePointer(
+                  child: Image.asset(
+                    _BadgeVisualAssets.cloud,
+                    fit: BoxFit.contain,
+                    height: 150,
+                    color: Colors.white.withValues(alpha: 0.15),
+                    colorBlendMode: BlendMode.srcATop,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (card.media.isNotEmpty)
-                      _BadgeMediaMosaic(
-                        media: card.media,
-                        colorScheme: colorScheme,
-                      )
-                    else
-                      _MediaPlaceholder(
-                        colorScheme: colorScheme,
-                        borderRadius: 20,
-                      ),
-                    if (card.subtitle != null && card.subtitle!.isNotEmpty) ...[
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          card.subtitle!,
-                          textAlign: TextAlign.center,
-                          style: textTheme.body.copyWith(
-                            color: Colors.white.withValues(alpha: 0.92),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: artTopPadding),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: artWidth,
+                            ),
+                            child: Image.asset(
+                              visuals.illustrationAsset,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                            ),
                           ),
                         ),
                       ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BadgeMediaMosaic extends StatelessWidget {
-  const _BadgeMediaMosaic({
-    required this.media,
-    required this.colorScheme,
-  });
-
-  final List<MediaRef> media;
-  final EnteColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<MediaRef> items = media.take(9).toList(growable: false);
-    if (items.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        const double gap = 12;
-        final double maxWidth =
-            constraints.maxWidth.isFinite ? constraints.maxWidth : 320;
-
-        Widget squareTile(MediaRef ref, double size) {
-          return SizedBox(
-            width: size,
-            height: size,
-            child: _MediaTile(
-              mediaRef: ref,
-              borderRadius: 20,
-              aspectRatio: 1,
-            ),
-          );
-        }
-
-        if (items.length == 1) {
-          final double size = math.min(maxWidth, 220);
-          return Center(child: squareTile(items.first, size));
-        }
-
-        if (items.length == 2) {
-          final double usableWidth = math.max(maxWidth - gap, 0);
-          final double size = math.min(usableWidth / 2, 180);
-          final double totalWidth = (size * 2) + gap;
-          return SizedBox(
-            height: size,
-            child: Center(
-              child: SizedBox(
-                width: totalWidth,
-                child: Row(
-                  children: [
-                    squareTile(items[0], size),
-                    const SizedBox(width: gap),
-                    squareTile(items[1], size),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-
-        if (items.length == 3) {
-          final double usableWidth = math.max(maxWidth - (gap * 2), 0);
-          final double columnWidth = math.min(usableWidth / 3, 140);
-          final double largeSize = (columnWidth * 2) + gap;
-          final double totalWidth = (columnWidth * 3) + (gap * 2);
-          final double height = (columnWidth * 2) + gap;
-          return SizedBox(
-            height: height,
-            child: Center(
-              child: SizedBox(
-                width: totalWidth,
-                height: height,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    squareTile(items[0], largeSize),
-                    const SizedBox(width: gap),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
+                    ),
+                    const SizedBox(height: 18),
+                    buildWrappedCardTitle(
+                      card.title,
+                      textTheme.h2Bold.copyWith(color: Colors.white),
+                    ),
+                    if (card.subtitle != null && card.subtitle!.isNotEmpty)
+                      buildWrappedCardSubtitle(
+                        card.subtitle!,
+                        textTheme.bodyMuted.copyWith(
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                        padding: const EdgeInsets.only(top: 12),
+                      ),
+                    const SizedBox(height: 22),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        squareTile(items[1], columnWidth),
-                        const SizedBox(height: gap),
-                        squareTile(items[2], columnWidth),
+                        const _BadgeBrandLogo(),
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 14, bottom: 12),
+                          child: _BadgeSharePill(
+                            labelStyle: textTheme.h3Bold.copyWith(
+                              color: _kBadgeBaseGreen,
+                              fontSize: 24,
+                              height: 1.0,
+                            ),
+                            onTap: viewerState == null
+                                ? null
+                                : () =>
+                                    unawaited(viewerState.shareCurrentCard()),
+                            shareButtonKey: shareKey,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-            ),
-          );
-        }
-
-        const int columns = 3;
-        final double tileSize = (maxWidth - gap * (columns - 1)) / columns;
-        final int rows = (items.length + columns - 1) ~/ columns;
-        final double height =
-            (tileSize * rows) + (rows > 1 ? gap * (rows - 1) : 0);
-        return SizedBox(
-          height: height,
-          width: double.infinity,
-          child: GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columns,
-              mainAxisSpacing: gap,
-              crossAxisSpacing: gap,
-              childAspectRatio: 1,
-            ),
-            itemCount: items.length,
-            itemBuilder: (BuildContext context, int index) {
-              return _MediaTile(
-                mediaRef: items[index],
-                borderRadius: 20,
-                aspectRatio: 1,
-              );
-            },
+            ],
           ),
         );
       },
     );
   }
 }
+
+class _BadgeVisuals {
+  const _BadgeVisuals({
+    required this.illustrationAsset,
+  });
+
+  final String illustrationAsset;
+}
+
+class _BadgeVisualAssets {
+  static const String cloud = "assets/rewind_badges/cloud-effect.png";
+  static const String rays = "assets/rewind_badges/rays.png";
+  static const String logo = "assets/rewind_badges/simple_logo.png";
+  static const String peoplePerson = "assets/rewind_badges/people_person.png";
+  static const String consistencyChamp =
+      "assets/rewind_badges/consistency_champ.png";
+  static const String globetrotter = "assets/rewind_badges/globetrotter.png";
+  static const String petParent = "assets/rewind_badges/pet_parent.png";
+  static const String minimalist =
+      "assets/rewind_badges/minimalist_shooter.png";
+  static const String portraitPro = "assets/rewind_badges/portrait_pro.png";
+}
+
+const Map<String, String> _kBadgeIllustrations = <String, String>{
+  "people_person": _BadgeVisualAssets.peoplePerson,
+  "consistency_champ": _BadgeVisualAssets.consistencyChamp,
+  "globetrotter": _BadgeVisualAssets.globetrotter,
+  "pet_parent": _BadgeVisualAssets.petParent,
+  "minimalist_shooter": _BadgeVisualAssets.minimalist,
+  "portrait_pro": _BadgeVisualAssets.portraitPro,
+};
+
+_BadgeVisuals _badgeVisualsFor(WrappedCard card) {
+  final String badgeKey =
+      (card.meta["badgeKey"] as String?)?.toLowerCase() ?? "";
+  final String asset =
+      _kBadgeIllustrations[badgeKey] ?? _BadgeVisualAssets.peoplePerson;
+  return _BadgeVisuals(illustrationAsset: asset);
+}
+
+class _BadgeBrandLogo extends StatelessWidget {
+  const _BadgeBrandLogo();
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.rotate(
+      angle: _kBadgeLogoRotationRadians,
+      child: Image.asset(
+        _BadgeVisualAssets.logo,
+        width: 40,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+}
+
+class _BadgeSharePill extends StatelessWidget {
+  const _BadgeSharePill({
+    required this.labelStyle,
+    this.onTap,
+    this.shareButtonKey,
+  });
+
+  final TextStyle labelStyle;
+  final VoidCallback? onTap;
+  final GlobalKey? shareButtonKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        key: shareButtonKey,
+        width: 122,
+        height: 56,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.10),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Text(
+          "Share",
+          style: labelStyle,
+        ),
+      ),
+    );
+  }
+}
+
+const Color _kBadgeBaseGreen = Color(0xFF08C225);
+const double _kBadgeLogoRotationRadians = 9.91 * math.pi / 180;
 
 Widget? buildBadgeDebugCardContent(
   WrappedCard card,
