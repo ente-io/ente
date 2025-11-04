@@ -14,13 +14,13 @@ import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/menu_item_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
+import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 
 class FilePopupMenuWidget extends StatelessWidget {
   final EnteFile file;
   final List<OverflowMenuAction>? overflowActions;
   final Widget? child;
-
   const FilePopupMenuWidget({
     super.key,
     required this.file,
@@ -239,14 +239,13 @@ class FilePopupMenuWidget extends StatelessWidget {
 
   Future<void> _showEditDialog(BuildContext context) async {
     final allCollections = await CollectionService.instance.getCollections();
-    allCollections.removeWhere(
-      (c) => c.type == CollectionType.uncategorized,
-    );
+    final dedupedCollections = uniqueCollectionsById(allCollections);
 
     final result = await showFileEditDialog(
       context,
       file: file,
-      collections: allCollections,
+      collections: dedupedCollections,
+      snackBarContext: context,
     );
 
     if (result != null && context.mounted) {
@@ -259,18 +258,17 @@ class FilePopupMenuWidget extends StatelessWidget {
       }
 
       final currentCollectionsSet = currentCollections.toSet();
-      final newCollectionsSet = result.selectedCollections.toSet();
+      final selectedCollectionsSet = result.selectedCollections.toSet();
       final collectionsToAdd =
-          newCollectionsSet.difference(currentCollectionsSet).toList();
-      final collectionsToRemove =
-          currentCollectionsSet.difference(newCollectionsSet).toList();
+          selectedCollectionsSet.difference(currentCollectionsSet).toList();
+      final hasCollectionAdds = collectionsToAdd.isNotEmpty;
 
       final currentTitle = file.displayName;
       final currentCaption = file.caption ?? '';
       final hasMetadataChanged =
           result.title != currentTitle || result.caption != currentCaption;
 
-      if (hasMetadataChanged || currentCollectionsSet != newCollectionsSet) {
+      if (hasMetadataChanged || hasCollectionAdds) {
         final dialog = createProgressDialog(
           context,
           context.l10n.pleaseWait,
@@ -294,13 +292,6 @@ class FilePopupMenuWidget extends StatelessWidget {
           }
 
           final List<Future<void>> apiCalls = [];
-
-          for (final collection in collectionsToRemove) {
-            apiCalls.add(
-              CollectionService.instance
-                  .move(file, collection, newCollectionsSet.first),
-            );
-          }
           if (hasMetadataChanged) {
             apiCalls.add(
               MetadataUpdaterService.instance
@@ -311,12 +302,18 @@ class FilePopupMenuWidget extends StatelessWidget {
 
           await dialog.hide();
 
+          if (!context.mounted) {
+            return;
+          }
           SnackBarUtils.showInfoSnackBar(
             context,
             context.l10n.fileUpdatedSuccessfully,
           );
         } catch (e) {
           await dialog.hide();
+          if (!context.mounted) {
+            return;
+          }
 
           SnackBarUtils.showWarningSnackBar(
             context,
@@ -324,6 +321,9 @@ class FilePopupMenuWidget extends StatelessWidget {
           );
         }
       } else {
+        if (!context.mounted) {
+          return;
+        }
         SnackBarUtils.showWarningSnackBar(
           context,
           context.l10n.noChangesWereMade,

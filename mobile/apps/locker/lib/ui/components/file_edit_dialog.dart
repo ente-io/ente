@@ -5,6 +5,7 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
+import 'package:locker/utils/collection_list_util.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
 
 class FileEditDialogResult {
@@ -22,11 +23,13 @@ class FileEditDialogResult {
 class FileEditDialog extends StatefulWidget {
   final EnteFile file;
   final List<Collection> collections;
+  final BuildContext snackBarContext;
 
   const FileEditDialog({
     super.key,
     required this.file,
     required this.collections,
+    required this.snackBarContext,
   });
 
   @override
@@ -43,7 +46,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
   void initState() {
     super.initState();
 
-    _availableCollections = List.from(widget.collections);
+    _availableCollections = uniqueCollectionsById(widget.collections);
 
     _titleController.text = widget.file.displayName;
 
@@ -68,7 +71,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
   void _onCollectionsUpdated(List<Collection> updatedCollections) {
     setState(() {
-      _availableCollections = updatedCollections;
+      _availableCollections = uniqueCollectionsById(updatedCollections);
     });
   }
 
@@ -83,8 +86,8 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
     if (selectedCollections.isEmpty) {
       SnackBarUtils.showWarningSnackBar(
-        context,
-        context.l10n.pleaseSelectAtLeastOneCollection,
+        widget.snackBarContext,
+        widget.snackBarContext.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -203,9 +206,8 @@ class _FileEditDialogState extends State<FileEditDialog> {
               selectedCollectionIds: _selectedCollectionIds,
               onToggleCollection: _toggleCollection,
               onCollectionsUpdated: _onCollectionsUpdated,
-              singleSelectionMode: true,
               titleWidget: Text(
-                "Move to collection",
+                "Add to collection",
                 style: textTheme.largeBold,
               ),
             ),
@@ -230,12 +232,14 @@ Future<FileEditDialogResult?> showFileEditDialog(
   BuildContext context, {
   required EnteFile file,
   required List<Collection> collections,
+  BuildContext? snackBarContext,
 }) async {
   return showDialog<FileEditDialogResult>(
     context: context,
-    builder: (context) => FileEditDialog(
+    builder: (dialogContext) => FileEditDialog(
       file: file,
       collections: collections,
+      snackBarContext: snackBarContext ?? context,
     ),
   );
 }

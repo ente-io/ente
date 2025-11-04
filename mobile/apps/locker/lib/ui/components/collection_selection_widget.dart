@@ -1,10 +1,12 @@
-import "package:dotted_border/dotted_border.dart";
-import "package:ente_ui/components/title_bar_title_widget.dart";
+import 'package:collection/collection.dart' show IterableExtension;
+import 'package:dotted_border/dotted_border.dart';
+import 'package:ente_ui/components/title_bar_title_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/utils/collection_actions.dart';
+import 'package:locker/utils/collection_list_util.dart';
 
 class CollectionSelectionWidget extends StatefulWidget {
   final List<Collection> collections;
@@ -31,18 +33,31 @@ class CollectionSelectionWidget extends StatefulWidget {
 
 class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
   List<Collection> _availableCollections = [];
+  Collection? _uncategorizedCollection;
 
   @override
   void initState() {
     super.initState();
-    _availableCollections = List.from(widget.collections);
+    _availableCollections = uniqueCollectionsById(widget.collections);
+    _uncategorizedCollection = _availableCollections.firstWhereOrNull(
+      (collection) => collection.type == CollectionType.uncategorized,
+    );
+    _availableCollections.removeWhere(
+      (collection) => collection.type == CollectionType.uncategorized,
+    );
   }
 
   @override
   void didUpdateWidget(CollectionSelectionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.collections != widget.collections) {
-      _availableCollections = List.from(widget.collections);
+      _availableCollections = uniqueCollectionsById(widget.collections);
+      _uncategorizedCollection = _availableCollections.firstWhereOrNull(
+        (collection) => collection.type == CollectionType.uncategorized,
+      );
+      _availableCollections.removeWhere(
+        (collection) => collection.type == CollectionType.uncategorized,
+      );
     }
   }
 
@@ -68,14 +83,6 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     }
   }
 
-  void _onUncategorizedSelected() {
-    // Clear all selected collections when uncategorized is selected
-    final collectionIdsCopy = Set<int>.from(widget.selectedCollectionIds);
-    for (final id in collectionIdsCopy) {
-      widget.onToggleCollection(id);
-    }
-  }
-
   void _onCollectionTap(int collectionId) {
     if (widget.singleSelectionMode) {
       // In single selection mode, clear other selections first
@@ -93,6 +100,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final containsUncategorized = _uncategorizedCollection != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,13 +114,19 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
           spacing: 8,
           runSpacing: 12,
           children: [
-            _buildUncategorizedChip(
-              context.l10n.uncategorized,
-              widget.selectedCollectionIds.isEmpty,
-              _onUncategorizedSelected,
-              colorScheme,
-              textTheme,
-            ),
+            if (containsUncategorized)
+              _buildUncategorizedChip(
+                name: context.l10n.uncategorized,
+                isSelected: widget.selectedCollectionIds
+                    .contains(_uncategorizedCollection?.id ?? -1),
+                onTap: () {
+                  if (_uncategorizedCollection != null) {
+                    _onCollectionTap(_uncategorizedCollection!.id);
+                  }
+                },
+                colorScheme: colorScheme,
+                textTheme: textTheme,
+              ),
             for (final collection in _availableCollections)
               _buildCollectionChip(
                 collection: collection,
@@ -166,13 +180,13 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     );
   }
 
-  Widget _buildUncategorizedChip(
-    String name,
-    bool isSelected,
-    VoidCallback onTap,
-    colorScheme,
-    textTheme,
-  ) {
+  Widget _buildUncategorizedChip({
+    required String name,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required colorScheme,
+    required textTheme,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(

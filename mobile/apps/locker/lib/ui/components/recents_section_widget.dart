@@ -60,6 +60,8 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     if (oldWidget.recentFiles != widget.recentFiles ||
         oldWidget.collections != widget.collections) {
       _handleCollectionUpdates();
+      _fileCollectionsCache.clear();
+      _fileCollectionsRequests.clear();
       setState(() {
         _originalCollectionOrder = List.from(widget.collections);
         if (!_hasActiveFilters) {
@@ -276,8 +278,10 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       return;
     }
 
-    final fileCollections =
-        await _ensureCollectionsForFiles(widget.recentFiles);
+    final fileCollections = await _ensureCollectionsForFiles(
+      widget.recentFiles,
+      refresh: hasCollectionFilters,
+    );
 
     if (!mounted || computationId != _filtersComputationId) {
       return;
@@ -335,14 +339,21 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   Future<Map<int, List<Collection>>> _ensureCollectionsForFiles(
-    List<EnteFile> files,
-  ) async {
+    List<EnteFile> files, {
+    bool refresh = false,
+  }) async {
     final List<Future<void>> pending = [];
 
     for (final file in files) {
       final fileId = file.uploadedFileID;
       if (fileId == null) {
         continue;
+      }
+
+      if (refresh) {
+        _fileCollectionsCache.remove(fileId);
+        // Drop any in-flight request so a fresh fetch is triggered.
+        final _ = _fileCollectionsRequests.remove(fileId);
       }
 
       if (_fileCollectionsCache.containsKey(fileId)) {
