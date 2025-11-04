@@ -46,10 +46,10 @@ export const useFileShare = (): UseFileShareResult => {
                 }
 
                 const currentURL = new URL(window.location.href);
-                const key = await extractFileKeyFromURL(currentURL);
+                const keyMaterial = await extractFileKeyFromURL(currentURL);
 
-                if (!key) {
-                    setError("Invalid file link. Missing file key.");
+                if (!keyMaterial) {
+                    setError("Invalid file link. Missing secret.");
                     setLoading(false);
                     return;
                 }
@@ -57,7 +57,10 @@ export const useFileShare = (): UseFileShareResult => {
                 setAccessToken(token);
 
                 const encryptedInfo = await fetchFileInfo(token);
-                const decryptedInfo = await decryptFileInfo(encryptedInfo, key);
+                const decryptedInfo = await decryptFileInfo(
+                    encryptedInfo,
+                    keyMaterial,
+                );
 
                 // Check if decryption failed (invalid key)
                 if (
