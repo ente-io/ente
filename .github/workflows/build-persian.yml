@@ -68,6 +68,31 @@ jobs:
           fi
 
       # ============================================
+      # اضافه کردن ffi به pubspec.yaml
+      # ============================================
+      - name: Add ffi dependency
+        if: steps.check_rust.outputs.rust_exists == 'false'
+        working-directory: mobile/apps/photos
+        run: |
+          echo "📦 Checking ffi in pubspec.yaml..."
+          
+          # بررسی وجود ffi
+          if ! grep -q "ffi:" pubspec.yaml; then
+            echo "⚠️ ffi not found, adding it..."
+            
+            # پیدا کردن خط dependencies و اضافه کردن ffi بعد از اون
+            sed -i '/^dependencies:/a\  ffi: ^2.1.0' pubspec.yaml
+            
+            echo "✅ ffi added to pubspec.yaml"
+          else
+            echo "✅ ffi already exists"
+          fi
+          
+          # نمایش dependencies
+          echo "📋 Current dependencies:"
+          grep -A 10 "^dependencies:" pubspec.yaml
+
+      # ============================================
       # نصب ابزارهای Rust مورد نیاز
       # ============================================
       - name: Install Rust tools
@@ -78,6 +103,13 @@ jobs:
           
           echo "📦 Installing flutter_rust_bridge_codegen 1.82.6..."
           cargo install flutter_rust_bridge_codegen --version 1.82.6 --locked
+
+      - name: Get dependencies (pre-generate)
+        if: steps.check_rust.outputs.rust_exists == 'false'
+        working-directory: mobile/apps/photos
+        run: |
+          echo "📦 Running flutter pub get with ffi..."
+          flutter pub get
 
       - name: Generate Rust bindings
         if: steps.check_rust.outputs.rust_exists == 'false'
@@ -116,7 +148,7 @@ jobs:
         run: flutter gen-l10n
         working-directory: mobile/apps/photos
 
-      - name: Get dependencies
+      - name: Get dependencies (final)
         run: flutter pub get
         working-directory: mobile/apps/photos
 
