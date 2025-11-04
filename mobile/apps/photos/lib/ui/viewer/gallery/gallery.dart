@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -91,6 +92,10 @@ class Gallery extends StatefulWidget {
   final bool disablePinnedGroupHeader;
   final bool disableVerticalPaddingForScrollbar;
 
+  /// File to jump to when gallery is loaded. The gallery will scroll to the
+  /// group containing this file.
+  final EnteFile? fileToJumpTo;
+
   const Gallery({
     required this.asyncLoader,
     required this.tagPrefix,
@@ -119,6 +124,7 @@ class Gallery extends StatefulWidget {
     this.galleryType,
     this.disableVerticalPaddingForScrollbar = false,
     this.showGallerySettingsCTA = false,
+    this.fileToJumpTo,
     super.key,
   });
 
@@ -135,6 +141,8 @@ class GalleryState extends State<Gallery> {
 
   late Logger _logger;
   bool _hasLoadedFiles = false;
+  bool _allFilesLoaded = false;
+  bool _completedJumpToDate = false;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
@@ -242,12 +250,11 @@ class GalleryState extends State<Gallery> {
     _loadFiles(limit: kInitialLoadLimit).then((result) async {
       _setFilesAndReload(result.files);
       if (result.hasMore) {
-        // _setScrollController(allFilesLoaded: false);
         final result = await _loadFiles();
         _setFilesAndReload(result.files);
-        // _setScrollController(allFilesLoaded: true);
+        _allFilesLoaded = true;
       } else {
-        // _setScrollController(allFilesLoaded: true);
+        _allFilesLoaded = true;
       }
     });
 
@@ -564,6 +571,34 @@ class GalleryState extends State<Gallery> {
             ?.setScrollController(_scrollController);
       }
     });
+
+    // Jump to date logic
+    if (widget.fileToJumpTo != null &&
+        !_completedJumpToDate &&
+        _allFilesLoaded &&
+        groupHeaderExtent != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (mounted) {
+          final offset = galleryGroups
+              .getOffsetOfGroupContainingFile(widget.fileToJumpTo!);
+          if (offset != null) {
+            _logger.info("Jumping to date at offset: $offset");
+            _scrollController.jumpTo(offset - 50);
+            await Future.delayed(16.milliseconds);
+            await _scrollController.animateTo(
+              offset,
+              duration: 300.milliseconds,
+              curve: Curves.easeOutQuint,
+            );
+            _completedJumpToDate = true;
+          } else {
+            _logger.warning(
+              "Could not find offset for file to jump to: ${widget.fileToJumpTo!.tag}",
+            );
+          }
+        }
+      });
+    }
 
     final widthAvailable = MediaQuery.sizeOf(context).width;
     final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;

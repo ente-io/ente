@@ -1,3 +1,4 @@
+- Ashil: (i) Jump to date
 - Prateek: Add native video editor to boost performance
 - Neeraj: Report stacktraces to Sentry & skip noisy TaskQueue exception
 - Neeraj: Prevent concurrent modification when trashing multiple albums
