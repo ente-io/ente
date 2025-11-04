@@ -1,6 +1,7 @@
 import json
 import requests
 import time
+import os
 
 print("=== Starting Persian Translation ===")
 

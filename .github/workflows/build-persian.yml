@@ -69,13 +69,18 @@ jobs:
         run: |
           if ! grep -r "به\|از\|در" apps/photos/lib/l10n/arb --include="*.arb" > /dev/null 2>&1; then
             echo "🔄 Translating ARB files..."
-            pip install openai python-dotenv
-            
-            python3 translate_arb.py
+            python -m pip install --upgrade pip
+            python -m pip install --upgrade pip
+              if [ -f requirements.txt ]; then
+                pip install -r requirements.txt
+              else
+                pip install openai python-dotenv requests
+              fi 
+              #python3 translate_arb.py
             
             if [ -f "merge_translations.py" ]; then
               echo "🔀 Merging translations..."
-              python3 merge_translations.py
+              #python3 merge_translations.py
             fi
             
             echo "✅ Translation completed!"
