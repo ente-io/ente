@@ -13,20 +13,18 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0
 
       - name: Free up disk space
         run: |
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
           sudo apt-get clean
           df -h
 
@@ -43,101 +41,55 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Install Rust (Stable)
+      - name: Install Rust (with optimized targets)
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
-      - name: Setup Rust cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: mobile/apps/photos/rust
-
-      # ============================================
-      # بررسی وجود فایل‌های Rust
-      # ============================================
-      - name: Check if Rust files exist
-        id: check_rust
+      - name: Configure Rust for compatibility
         run: |
-          if [ -d "mobile/apps/photos/lib/src/rust" ]; then
-            echo "rust_exists=true" >> $GITHUB_OUTPUT
-            echo "✅ Rust files already exist"
-          else
-            echo "rust_exists=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Need to generate Rust bindings"
+          # غیرفعال کردن AVX-512 features
+          mkdir -p mobile/apps/photos/rust/.cargo
+          cat > mobile/apps/photos/rust/.cargo/config.toml << 'EOF'
+          [build]
+          rustflags = ["-C", "target-cpu=x86-64", "-C", "opt-level=2"]
+          
+          [target.x86_64-unknown-linux-gnu]
+          rustflags = ["-C", "target-cpu=x86-64"]
+          EOF
+
+      - name: Verify Rust bindings exist
+        run: |
+          if [ ! -d "mobile/apps/photos/lib/src/rust" ]; then
+            echo "❌ Error: Rust bindings not found!"
+            echo "Make sure you pushed the generated files."
+            exit 1
           fi
+          echo "✅ Rust bindings found"
+          ls -la mobile/apps/photos/lib/src/rust/
 
-      # ============================================
-      # اصلاح pubspec.yaml (فقط در صورت نیاز به generate)
-      # ============================================
-      - name: Fix pubspec.yaml dependencies
-        if: steps.check_rust.outputs.rust_exists == 'false'
-        working-directory: mobile/apps/photos
-        run: |
-          echo "🔧 Fixing pubspec.yaml..."
-          
-          # اضافه کردن ffi (اگه نداره)
-          if ! grep -q "^  ffi:" pubspec.yaml; then
-            sed -i '/^dependencies:/a\  ffi: ^2.1.0' pubspec.yaml
-            echo "✅ Added ffi"
-          fi
-          
-          echo "📦 Dependencies section:"
-          sed -n '/^dependencies:/,/^dev_dependencies:/p' pubspec.yaml
-
-      # ============================================
-      # نصب ابزارهای Rust (فقط در صورت نیاز)
-      # ============================================
-      - name: Install Rust tools
-        if: steps.check_rust.outputs.rust_exists == 'false'
-        run: |
-          echo "📦 Installing cargo-expand..."
-          cargo install cargo-expand --locked
-          
-          echo "📦 Installing flutter_rust_bridge_codegen 1.82.6..."
-          cargo install flutter_rust_bridge_codegen --version 1.82.6 --locked
-
-      # ============================================
-      # Get dependencies (قبل از generate)
-      # ============================================
-      - name: Get dependencies (pre-generate)
-        if: steps.check_rust.outputs.rust_exists == 'false'
-        working-directory: mobile/apps/photos
-        run: flutter pub get
-
-      # ============================================
-      # Generate Rust bindings
-      # ============================================
-      - name: Generate Rust bindings
-        if: steps.check_rust.outputs.rust_exists == 'false'
-        working-directory: mobile/apps/photos
-        run: |
-          echo "🔨 Generating Rust bindings..."
-          flutter_rust_bridge_codegen \
-            --rust-input rust/src/api.rs \
-            --dart-output lib/src/rust \
-            --rust-crate-dir rust
-
-      # ============================================
-      # بقیه مراحل Build (همیشه اجرا می‌شه)
-      # ============================================
       - name: Flutter doctor
         run: flutter doctor -v
+
+      - name: Get dependencies
+        working-directory: mobile/apps/photos
+        run: flutter pub get
 
       - name: Generate l10n
         working-directory: mobile/apps/photos
         run: flutter gen-l10n
 
-      - name: Get dependencies (final)
-        working-directory: mobile/apps/photos
-        run: flutter pub get
-
-      - name: Clean build
+      - name: Clean build cache
         working-directory: mobile/apps/photos
         run: flutter clean
 
       - name: Build APK
         working-directory: mobile/apps/photos
+        env:
+          # غیرفعال کردن advanced CPU features
+          RUSTFLAGS: "-C target-cpu=x86-64 -C opt-level=2"
+          SIMSIMD_TARGET_AVX512: "0"
+          USEARCH_USE_NATIVE: "0"
         run: |
           flutter build apk \
             --release \
@@ -146,14 +98,13 @@ jobs:
             --dart-define=cronetHttpNoPlay=true \
             --no-tree-shake-icons
 
-      - name: Rename and organize APK
+      - name: Rename APK
         run: |
           cd mobile/apps/photos/build/app/outputs/flutter-apk
           APK_NAME="ente-persian-$(date +%Y%m%d-%H%M%S).apk"
           mv app-independent-release.apk "$APK_NAME"
           sha256sum "$APK_NAME" > checksums.txt
-          echo "✅ Build completed!"
-          echo "📦 APK: $APK_NAME"
+          echo "✅ APK: $APK_NAME"
           cat checksums.txt
 
       - name: Upload APK
