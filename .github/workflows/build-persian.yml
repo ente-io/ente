@@ -5,36 +5,136 @@ on:
   push:
     branches: [persian-localized]
 
+env:
+  FLUTTER_VERSION: "3.24.3"
+  API_ENDPOINT: "https://api.photos.degoogle.ir"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     
+    defaults:
+      run:
+        working-directory: mobile
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code and submodules
+        uses: actions/checkout@v4
         with:
           ref: persian-localized
-      
-      - uses: actions/setup-java@v4
+          submodules: recursive
+
+      - name: Free up disk space
+        run: |
+          echo "🧹 Freeing disk space..."
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          df -h /
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      
-      - uses: subosito/flutter-action@v2
+
+      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.7'
           channel: 'stable'
-      
-      - name: Get Dependencies
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install Flutter Rust Bridge
+        run: cargo install flutter_rust_bridge_codegen --force
+
+      - name: Generate Rust bindings
         working-directory: mobile/apps/photos
-        run: flutter pub get
-      
-      - name: Build APK
+        run: flutter_rust_bridge_codegen generate
+
+      - name: Apply Persian translations
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if ! grep -r "به\|از\|در" apps/photos/lib/l10n/arb --include="*.arb" > /dev/null 2>&1; then
+            echo "🔄 Translating ARB files..."
+            pip install openai python-dotenv
+            
+            python3 translate_arb.py
+            
+            if [ -f "merge_translations.py" ]; then
+              echo "🔀 Merging translations..."
+              python3 merge_translations.py
+            fi
+            
+            echo "✅ Translation completed!"
+          else
+            echo "✅ Translations already exist!"
+          fi
+
+      - name: Generate localization files
         working-directory: mobile/apps/photos
         run: |
-          flutter build apk --release \
-            --dart-define=endpoint=https://api.photos.degoogle.ir
-      
-      - uses: actions/upload-artifact@v4
+          echo "🌍 Generating l10n..."
+          flutter gen-l10n
+
+      - name: Flutter pub get
+        working-directory: mobile/apps/photos
+        run: flutter pub get
+
+      - name: Build Release APK
+        working-directory: mobile/apps/photos
+        run: |
+          echo "🏗️ Building APK with custom endpoint..."
+          flutter build apk \
+            --dart-define=endpoint=${{ env.API_ENDPOINT }} \
+            --dart-define=cronetHttpNoPlay=true \
+            --release \
+            --flavor independent
+          
+          BUILD_DATE=$(date +%Y%m%d-%H%M)
+          mv build/app/outputs/flutter-apk/app-independent-release.apk \
+             build/app/outputs/flutter-apk/ente-persian-${BUILD_DATE}.apk
+          
+          echo "✅ APK built successfully!"
+
+      - name: Generate Checksum
+        working-directory: mobile/apps/photos
+        run: |
+          cd build/app/outputs/flutter-apk/
+          sha256sum ente-persian-*.apk | tee sha256sum.txt
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: ente-persian-apk
-          path: mobile/apps/photos/build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            mobile/apps/photos/build/app/outputs/flutter-apk/ente-persian-*.apk
+            mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum.txt
+          retention-days: 90
+
+      - name: Build Summary
+        working-directory: mobile/apps/photos
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Persian Build Completed!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🌐 API Endpoint: ${{ env.API_ENDPOINT }}"
+          echo "📦 APK:"
+          ls -lh build/app/outputs/flutter-apk/ente-persian-*.apk
+          echo ""
+          echo "🔒 Checksum:"
+          cat build/app/outputs/flutter-apk/sha256sum.txt
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+

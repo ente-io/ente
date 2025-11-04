@@ -10,7 +10,9 @@ arb_files = [
     ("apps/photos/lib/l10n/intl_en.arb", "apps/photos/lib/l10n/intl_fa.arb")
 ]
 
-api_key = "sk-CAZ0fuUNAjLTv851y6cq8gLXFfI9youMWercFBpYrFFVeK2G"
+api_key = os.getenv('OPENAI_API_KEY')
+if not api_key:
+    raise ValueError("❌ OPENAI_API_KEY environment variable not set!")
 api_url = "https://api.gapgpt.app/v1/chat/completions"
 all_results = {}
 
