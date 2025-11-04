@@ -13,7 +13,6 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/faces_timeline/faces_timeline_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 class FacesTimelinePage extends StatefulWidget {
@@ -40,6 +39,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   bool _loggedPlaybackStart = false;
 
   int _currentIndex = 0;
+  double _sliderValue = 0;
   double _previousCaptionValue = 0;
   double _currentCaptionValue = 0;
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
@@ -68,14 +68,17 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       frames.add(await _buildFrame(entry));
     }
     if (frames.isNotEmpty && mounted) {
-      _frames
-        ..clear()
-        ..addAll(frames);
-      _currentIndex = 0;
-      _frameViewVersion = 0;
-      _currentCaptionValue = frames.first.captionValue;
-      _previousCaptionValue = _currentCaptionValue;
-      _currentCaptionType = frames.first.captionType;
+      setState(() {
+        _frames
+          ..clear()
+          ..addAll(frames);
+        _currentIndex = 0;
+        _sliderValue = 0;
+        _frameViewVersion = 0;
+        _currentCaptionValue = frames.first.captionValue;
+        _previousCaptionValue = _currentCaptionValue;
+        _currentCaptionType = frames.first.captionType;
+      });
       _startPlayback();
       _logPlaybackStart(frames.length);
     }
@@ -169,37 +172,30 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     });
   }
 
-  void _togglePlayback() {
-    if (_isPlaying) {
-      _pausePlayback();
-    } else {
-      _startPlayback();
-    }
-  }
-
   void _showNextFrame() {
     if (_frames.isEmpty) return;
-    final nextIndex = (_currentIndex + 1) % _frames.length;
+    if (_currentIndex >= _frames.length - 1) {
+      _pausePlayback();
+      return;
+    }
+    final nextIndex = _currentIndex + 1;
     _setCurrentFrame(nextIndex);
   }
 
-  void _showPreviousFrame() {
-    if (_frames.isEmpty) return;
-    final previousIndex = (_currentIndex - 1 + _frames.length) % _frames.length;
-    _setCurrentFrame(previousIndex);
-  }
-
   void _setCurrentFrame(int index) {
-    if (index < 0 || index >= _frames.length || index == _currentIndex) {
+    if (index < 0 || index >= _frames.length) {
       return;
     }
     final frame = _frames[index];
     setState(() {
-      _previousCaptionValue = _currentCaptionValue;
-      _currentCaptionValue = frame.captionValue;
-      _currentCaptionType = frame.captionType;
-      _currentIndex = index;
-      _frameViewVersion++;
+      if (_currentIndex != index) {
+        _previousCaptionValue = _currentCaptionValue;
+        _currentCaptionValue = frame.captionValue;
+        _currentCaptionType = frame.captionType;
+        _currentIndex = index;
+        _frameViewVersion++;
+      }
+      _sliderValue = index.toDouble();
     });
   }
 
@@ -252,9 +248,23 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                   children: [
                     Positioned.fill(
                       child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 800),
+                        duration: _isPlaying
+                            ? const Duration(milliseconds: 400)
+                            : Duration.zero,
+                        reverseDuration: _isPlaying
+                            ? const Duration(milliseconds: 400)
+                            : Duration.zero,
                         switchInCurve: Curves.easeInOut,
                         switchOutCurve: Curves.easeInOut,
+                        transitionBuilder: (child, animation) {
+                          if (!_isPlaying) {
+                            return child;
+                          }
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
                         child: _buildFrameView(colorScheme),
                       ),
                     ),
@@ -358,54 +368,58 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 
   Widget _buildControls(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final frameCount = _frames.length;
+    final maxValue = frameCount > 1 ? (frameCount - 1).toDouble() : 0.0;
+    final sliderValue =
+        frameCount > 1 ? _sliderValue.clamp(0.0, maxValue) : 0.0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Tooltip(
-          message: context.l10n.facesTimelinePlaybackPrevious,
-          child: IconButtonWidget(
-            icon: Icons.skip_previous,
-            iconButtonType: IconButtonType.primary,
-            onTap: _frames.isEmpty ? null : _showPreviousFrame,
-            iconColor: colorScheme.strokeBase,
-            defaultColor: colorScheme.fillFaint,
-            pressedColor: colorScheme.fillMuted,
-            size: 24,
-            roundedIcon: true,
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: colorScheme.primary500,
+            thumbColor: colorScheme.primary500,
+            inactiveTrackColor: colorScheme.fillMuted,
+          ),
+          child: Slider(
+            value: sliderValue.toDouble(),
+            min: 0.0,
+            max: frameCount > 1 ? maxValue : 0.0,
+            divisions: frameCount > 1 ? frameCount - 1 : null,
+            onChangeStart: frameCount > 1 ? (value) => _pausePlayback() : null,
+            onChanged: frameCount > 1
+                ? (value) {
+                    final index =
+                        value.round().clamp(0, frameCount - 1).toInt();
+                    _setCurrentFrame(index);
+                  }
+                : null,
           ),
         ),
-        const SizedBox(width: 8),
-        Tooltip(
-          message: _isPlaying
-              ? context.l10n.facesTimelinePlaybackPause
-              : context.l10n.facesTimelinePlaybackPlay,
-          child: IconButtonWidget(
-            icon: _isPlaying ? Icons.pause : Icons.play_arrow,
-            iconButtonType: IconButtonType.primary,
-            onTap: _frames.isEmpty ? null : _togglePlayback,
-            iconColor: colorScheme.strokeBase,
-            defaultColor: colorScheme.fillFaint,
-            pressedColor: colorScheme.fillMuted,
-            size: 28,
-            roundedIcon: true,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Tooltip(
-          message: context.l10n.facesTimelinePlaybackNext,
-          child: IconButtonWidget(
-            icon: Icons.skip_next,
-            iconButtonType: IconButtonType.primary,
-            onTap: _frames.isEmpty ? null : _showNextFrame,
-            iconColor: colorScheme.strokeBase,
-            defaultColor: colorScheme.fillFaint,
-            pressedColor: colorScheme.fillMuted,
-            size: 24,
-            roundedIcon: true,
+        const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Tooltip(
+            message: context.l10n.facesTimelinePlaybackPlay,
+            child: TextButton.icon(
+              onPressed: _frames.isEmpty || _isPlaying ? null : _resumeAutoPlay,
+              icon: const Icon(Icons.play_arrow),
+              label: Text(context.l10n.facesTimelinePlaybackPlay),
+            ),
           ),
         ),
       ],
     );
+  }
+
+  void _resumeAutoPlay() {
+    if (_frames.isEmpty) {
+      return;
+    }
+    if (_currentIndex >= _frames.length - 1) {
+      _setCurrentFrame(0);
+    }
+    _startPlayback();
   }
 }
 
