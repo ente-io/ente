@@ -2,7 +2,7 @@ name: Build Ente APK
 
 on:
   push:
-    branches: [ main, persian-localized ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
