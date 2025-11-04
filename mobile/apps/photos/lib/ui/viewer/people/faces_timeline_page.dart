@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/ente_theme_data.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/faces_timeline/faces_timeline_models.dart";
 import "package:photos/models/ml/face/face.dart";
@@ -199,7 +200,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     });
   }
 
-  void _onSharePressed() {
+  void _onSharePressed(BuildContext context) {
     _logger.info("share_attempt person=${widget.person.remoteID}");
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.l10n.facesTimelineShareComingSoon)),
@@ -208,104 +209,134 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 
   @override
   Widget build(BuildContext context) {
-    final title = context.l10n.facesTimelineAppBarTitle(
-      name: widget.person.data.name,
-    );
-    final colorScheme = getEnteColorScheme(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            onPressed: _onSharePressed,
-            icon: const Icon(Icons.ios_share),
-            tooltip: context.l10n.facesTimelineShareComingSoon,
-          ),
-        ],
-      ),
-      body: FutureBuilder<List<_TimelineFrame>>(
-        future: _framesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            _logger.severe(
-              "Faces timeline failed to load",
-              snapshot.error,
-              snapshot.stackTrace,
-            );
-            return Center(child: Text(context.l10n.facesTimelineUnavailable));
-          }
-          final frames = snapshot.data ?? [];
-          if (frames.isEmpty) {
-            return Center(child: Text(context.l10n.facesTimelineUnavailable));
-          }
-          return Column(
-            children: [
-              Expanded(
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: AnimatedSwitcher(
-                        duration: _isPlaying
-                            ? const Duration(milliseconds: 400)
-                            : Duration.zero,
-                        reverseDuration: _isPlaying
-                            ? const Duration(milliseconds: 400)
-                            : Duration.zero,
-                        switchInCurve: Curves.easeInOut,
-                        switchOutCurve: Curves.easeInOut,
-                        transitionBuilder: (child, animation) {
-                          if (!_isPlaying) {
-                            return child;
-                          }
-                          return FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          );
-                        },
-                        child: _buildFrameView(colorScheme),
+    return Theme(
+      data: darkThemeData,
+      child: Builder(
+        builder: (context) {
+          final l10n = context.l10n;
+          final title = l10n.facesTimelineAppBarTitle(
+            name: widget.person.data.name,
+          );
+          final colorScheme = getEnteColorScheme(context);
+          final textTheme = getEnteTextTheme(context);
+          return Scaffold(
+            backgroundColor: colorScheme.backgroundBase,
+            appBar: AppBar(
+              backgroundColor: colorScheme.backgroundBase,
+              foregroundColor: colorScheme.textBase,
+              title: Text(title),
+              actions: [
+                IconButton(
+                  onPressed: () => _onSharePressed(context),
+                  icon: const Icon(Icons.ios_share),
+                  tooltip: l10n.facesTimelineShareComingSoon,
+                ),
+              ],
+            ),
+            body: FutureBuilder<List<_TimelineFrame>>(
+              future: _framesFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        colorScheme.primary500,
                       ),
                     ),
-                    Positioned(
-                      top: 24,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 6,
-                            horizontal: 12,
+                  );
+                }
+                if (snapshot.hasError) {
+                  _logger.severe(
+                    "Faces timeline failed to load",
+                    snapshot.error,
+                    snapshot.stackTrace,
+                  );
+                  return Center(
+                    child: Text(
+                      l10n.facesTimelineUnavailable,
+                      style: textTheme.body,
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                final frames = snapshot.data ?? [];
+                if (frames.isEmpty) {
+                  return Center(
+                    child: Text(
+                      l10n.facesTimelineUnavailable,
+                      style: textTheme.body,
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                return Column(
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: AnimatedSwitcher(
+                              duration: _isPlaying
+                                  ? const Duration(milliseconds: 400)
+                                  : Duration.zero,
+                              reverseDuration: _isPlaying
+                                  ? const Duration(milliseconds: 400)
+                                  : Duration.zero,
+                              switchInCurve: Curves.easeInOut,
+                              switchOutCurve: Curves.easeInOut,
+                              transitionBuilder: (child, animation) {
+                                if (!_isPlaying) {
+                                  return child;
+                                }
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              child: _buildFrameView(colorScheme),
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.fillFaint,
-                            borderRadius: BorderRadius.circular(24),
+                          Positioned(
+                            top: 24,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.fillFaint,
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Text(
+                                  _frames[_currentIndex].entry.year.toString(),
+                                  style: getEnteTextTheme(context).bodyMuted,
+                                ),
+                              ),
+                            ),
                           ),
-                          child: Text(
-                            _frames[_currentIndex].entry.year.toString(),
-                            style: getEnteTextTheme(context).bodyMuted,
-                          ),
-                        ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 20,
+                      ),
+                      child: Column(
+                        children: [
+                          _buildCaption(context),
+                          const SizedBox(height: 20),
+                          _buildControls(context),
+                        ],
                       ),
                     ),
                   ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
-                ),
-                child: Column(
-                  children: [
-                    _buildCaption(context),
-                    const SizedBox(height: 20),
-                    _buildControls(context),
-                  ],
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           );
         },
       ),
