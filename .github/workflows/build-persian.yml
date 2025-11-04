@@ -68,32 +68,37 @@ jobs:
           fi
 
       # ============================================
-      # اضافه کردن ffi به pubspec.yaml
+      # Fix Dependencies FIRST (قبل از pub get)
       # ============================================
-      - name: Add ffi dependency
-        if: steps.check_rust.outputs.rust_exists == 'false'
+      - name: Fix dependencies in pubspec.yaml
         working-directory: mobile/apps/photos
         run: |
-          echo "📦 Checking ffi in pubspec.yaml..."
+          echo "🔧 Fixing dependencies..."
           
-          # بررسی وجود ffi
-          if ! grep -q "ffi:" pubspec.yaml; then
-            echo "⚠️ ffi not found, adding it..."
-            
-            # پیدا کردن خط dependencies و اضافه کردن ffi بعد از اون
-            sed -i '/^dependencies:/a\  ffi: ^2.1.0' pubspec.yaml
-            
-            echo "✅ ffi added to pubspec.yaml"
-          else
-            echo "✅ ffi already exists"
+          # 1. Fix mockito version
+          MOCKITO_VERSION=$(grep "mockito:" pubspec.yaml | grep -oP '\d+\.\d+\.\d+' || echo "not_found")
+          echo "Current mockito version: $MOCKITO_VERSION"
+          
+          if [[ "$MOCKITO_VERSION" > "5.4.5" ]] || [[ "$MOCKITO_VERSION" == "not_found" ]]; then
+            echo "⚠️ Downgrading mockito to 5.4.5"
+            sed -i 's/mockito: .*/mockito: 5.4.5/' pubspec.yaml
           fi
           
-          # نمایش dependencies
+          # 2. Add ffi if needed (for Rust bindings)
+          if ! grep -q "^  ffi:" pubspec.yaml; then
+            echo "⚠️ Adding ffi dependency"
+            sed -i '/^dependencies:/a\  ffi: ^2.1.0' pubspec.yaml
+          fi
+          
+          echo "✅ Dependencies fixed!"
           echo "📋 Current dependencies:"
-          grep -A 10 "^dependencies:" pubspec.yaml
+          grep -A 15 "^dependencies:" pubspec.yaml
+          echo ""
+          echo "📋 Dev dependencies:"
+          grep -A 10 "^dev_dependencies:" pubspec.yaml
 
       # ============================================
-      # نصب ابزارهای Rust مورد نیاز
+      # نصب ابزارهای Rust (فقط در صورت نیاز)
       # ============================================
       - name: Install Rust tools
         if: steps.check_rust.outputs.rust_exists == 'false'
@@ -108,7 +113,7 @@ jobs:
         if: steps.check_rust.outputs.rust_exists == 'false'
         working-directory: mobile/apps/photos
         run: |
-          echo "📦 Running flutter pub get with ffi..."
+          echo "📦 Running flutter pub get..."
           flutter pub get
 
       - name: Generate Rust bindings
@@ -120,26 +125,6 @@ jobs:
             --rust-input rust/src/api.rs \
             --dart-output lib/src/rust \
             --rust-crate-dir rust
-
-      # ============================================
-      # Fix Dependencies
-      # ============================================
-      - name: Check and fix dependencies
-        run: |
-          cd mobile/apps/photos
-
-          # بررسی نسخه mockito
-          MOCKITO_VERSION=$(grep "mockito:" pubspec.yaml | grep -oP '\d+\.\d+\.\d+' || echo "not_found")
-          echo "Current mockito version: $MOCKITO_VERSION"
-
-          # اگه mockito >= 5.4.6 بود، downgrade کن
-          if [[ "$MOCKITO_VERSION" > "5.4.5" ]] || [[ "$MOCKITO_VERSION" == "not_found" ]]; then
-            echo "⚠️ Downgrading mockito to 5.4.5 for Dart compatibility"
-            sed -i '/dev_dependencies:/,/^[^ ]/ s/mockito: .*/  mockito: 5.4.5/' pubspec.yaml
-          fi
-
-          echo "📦 Final pubspec.yaml dependencies:"
-          grep -A 5 "dev_dependencies:" pubspec.yaml
 
       - name: Flutter doctor
         run: flutter doctor -v
