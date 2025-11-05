@@ -37,9 +37,7 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 **What happens next:**
 
 - Videos captured in the last 60 days and under 1 minute will start processing automatically
-- Both local and remote videos will be processed
-- This may consume bandwidth for downloading remote files and uploading generated streams
-- Processing continues in the background
+- Local videos will be processed
 
 **For older or longer videos:**
 
