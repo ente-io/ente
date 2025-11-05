@@ -12,6 +12,8 @@ import "package:shared_preferences/shared_preferences.dart";
 import "model.dart";
 
 class FlagService {
+  static const int _uploadV2Flag = 1 << 0;
+
   final SharedPreferences _prefs;
   final Dio _enteDio;
 
@@ -50,6 +52,8 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
+  bool get enteWrapped => internalUser;
+
   bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
@@ -58,15 +62,24 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
+  bool get enableUploadV2 =>
+      internalUser && ((flags.serverApiFlag & _uploadV2Flag) != 0);
+
   bool get enableVectorDb => hasGrantedMLConsent;
 
   String get castUrl => flags.castUrl;
 
   String get customDomain => flags.customDomain;
 
-  bool get textDetection => internalUser && Platform.isIOS;
+  String get embedUrl => flags.embedUrl;
 
   bool get addToAlbumFeature => internalUser;
+
+  bool get widgetSharedAlbums => internalUser;
+
+  bool get useNativeVideoEditor => true;
+
+  bool get useWidgetV2 => kDebugMode;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

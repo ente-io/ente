@@ -45,14 +45,8 @@ class LocalSettings {
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
-
-  // Thumbnail queue configuration keys
-  static const kSmallQueueMaxConcurrent = "small_queue_max_concurrent";
-  static const kSmallQueueTimeout = "small_queue_timeout_seconds";
-  static const kSmallQueueMaxSize = "small_queue_max_size";
-  static const kLargeQueueMaxConcurrent = "large_queue_max_concurrent";
-  static const kLargeQueueTimeout = "large_queue_timeout_seconds";
-  static const kLargeQueueMaxSize = "large_queue_max_size";
+  static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
+  static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
 
   final SharedPreferences _prefs;
 
@@ -244,53 +238,23 @@ class LocalSettings {
     await _prefs.setBool(kEnableDatabaseLogging, value);
   }
 
-  // Thumbnail queue configuration - Small queue
-  int get smallQueueMaxConcurrent =>
-      _prefs.getInt(kSmallQueueMaxConcurrent) ?? 15;
-
-  int get smallQueueTimeoutSeconds => _prefs.getInt(kSmallQueueTimeout) ?? 60;
-
-  int get smallQueueMaxSize => _prefs.getInt(kSmallQueueMaxSize) ?? 200;
-
-  Future<void> setSmallQueueMaxConcurrent(int value) async {
-    await _prefs.setInt(kSmallQueueMaxConcurrent, value);
+  int wrapped2025ResumeIndex() {
+    return _prefs.getInt(_kWrapped2025ResumeIndex) ?? 0;
   }
 
-  Future<void> setSmallQueueTimeout(int seconds) async {
-    await _prefs.setInt(kSmallQueueTimeout, seconds);
+  Future<void> setWrapped2025ResumeIndex(int index) async {
+    await _prefs.setInt(_kWrapped2025ResumeIndex, index);
   }
 
-  Future<void> setSmallQueueMaxSize(int value) async {
-    await _prefs.setInt(kSmallQueueMaxSize, value);
+  bool wrapped2025Complete() {
+    return _prefs.getBool(_kWrapped2025Complete) ?? false;
   }
 
-  // Thumbnail queue configuration - Large queue
-  int get largeQueueMaxConcurrent =>
-      _prefs.getInt(kLargeQueueMaxConcurrent) ?? 5;
-
-  int get largeQueueTimeoutSeconds => _prefs.getInt(kLargeQueueTimeout) ?? 60;
-
-  int get largeQueueMaxSize => _prefs.getInt(kLargeQueueMaxSize) ?? 200;
-
-  Future<void> setLargeQueueMaxConcurrent(int value) async {
-    await _prefs.setInt(kLargeQueueMaxConcurrent, value);
+  Future<void> setWrapped2025Complete() async {
+    await _prefs.setBool(_kWrapped2025Complete, true);
   }
 
-  Future<void> setLargeQueueTimeout(int seconds) async {
-    await _prefs.setInt(kLargeQueueTimeout, seconds);
-  }
-
-  Future<void> setLargeQueueMaxSize(int value) async {
-    await _prefs.setInt(kLargeQueueMaxSize, value);
-  }
-
-  // Reset thumbnail queue settings to defaults
-  Future<void> resetThumbnailQueueSettings() async {
-    await _prefs.remove(kSmallQueueMaxConcurrent);
-    await _prefs.remove(kSmallQueueTimeout);
-    await _prefs.remove(kSmallQueueMaxSize);
-    await _prefs.remove(kLargeQueueMaxConcurrent);
-    await _prefs.remove(kLargeQueueTimeout);
-    await _prefs.remove(kLargeQueueMaxSize);
+  Future<void> resetWrapped2025Complete() async {
+    await _prefs.setBool(_kWrapped2025Complete, false);
   }
 }

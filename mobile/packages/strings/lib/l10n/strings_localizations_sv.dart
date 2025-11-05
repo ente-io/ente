@@ -191,6 +191,10 @@ class StringsLocalizationsSv extends StringsLocalizations {
   String get noDeleteAccountAction => 'Nej, radera konto';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'Vänligen autentisera för att initiera borttagning av konto';
 

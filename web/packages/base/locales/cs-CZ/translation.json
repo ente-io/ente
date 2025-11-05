@@ -46,6 +46,7 @@
     "new_album": "Nové album",
     "create_albums": "Vytvořit alba",
     "album_name": "Název alba",
+    "album_created": "",
     "close": "Zavřít",
     "yes": "Ano",
     "no": "Ne",
@@ -235,6 +236,7 @@
     "search_results": "Výsledky hledání",
     "no_results": "Nebyly nalezeny žádné výsledky",
     "search_hint": "Hledat alba, data, popisy, ...",
+    "albums_search_hint": "",
     "album": "Album",
     "date": "Datum",
     "description": "Popis",
@@ -276,11 +278,7 @@
     "view_on_map": "Zobrazit na OpenStreetMap",
     "map": "Mapa",
     "enable_map": "Povolit mapu",
-    "enable_maps_confirm": "Povolit mapu?",
-    "enable_maps_confirm_message": "<p>Zobrazí vaše fotografie na mapě světa.</p><p>Mapa je hostována službou <a>OpenStreetMap</a> a přesné umístění vašich fotografií není nikdy sdíleno.</p><p>Tuto funkci můžete kdykoli deaktivovat v nastavení.</p>",
     "disable_map": "Zakázat mapu",
-    "disable_maps_confirm": "Zakázat mapy?",
-    "disable_maps_confirm_message": "<p>Toto zakáže zobrazení vašich fotografií na mapě světa.</p><p>Tuto funkci můžete kdykoli zapnout v nastavení.</p>",
     "details": "Podrobnosti",
     "view_exif": "Zobrazit všechna Exif data",
     "no_exif": "Žádná Exif data",
@@ -327,6 +325,8 @@
     "thumbnail_generation_failed_hint": "Tyto soubory byly nahrány, ale bohužel jsme pro ně nemohli vygenerovat miniatury.",
     "unsupported_files": "Nepodporované soubory",
     "unsupported_files_hint": "Ente zatím nepodporuje tyto formáty souborů",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Zablokované nahrávání",
     "blocked_uploads_hint": "Váš prohlížeč nebo doplněk brání Ente v používání <code>eTags</code> k nahrávání velkých souborů.",
     "large_files": "Velké soubory",
@@ -433,6 +433,7 @@
         "year": "Po roce"
     },
     "copy_link": "Kopírovat odkaz",
+    "copy_embed_html": "",
     "done": "Hotovo",
     "share_link_section_title": "Nebo sdílet odkaz",
     "remove_link": "Odstranit odkaz",
@@ -701,5 +702,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

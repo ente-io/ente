@@ -1,10 +1,6 @@
 import { startTransition } from "react";
 
-import {
-    calculateDistance,
-    getLocationPosition,
-    getLocationPositionAtZoom,
-} from "../mapHelpers";
+import { calculateDistance, getLocationPosition } from "../mapHelpers";
 import type { JourneyPoint } from "../types";
 
 export interface PositionInfo {
@@ -45,22 +41,8 @@ export interface HandleTimelineScrollParams {
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
     previousActiveLocationRef: React.RefObject<number>;
-    isTouchDevice: boolean;
+    isMobileOrTablet: boolean;
     setTargetZoom: (zoom: number | null) => void;
-    previousSuperClusterStateRef: React.RefObject<{
-        isInSuperCluster: boolean;
-        superClusterIndex: number | null;
-    }>;
-    superClusterInfo: {
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    };
 }
 
 export const handleTimelineScroll = ({
@@ -72,10 +54,8 @@ export const handleTimelineScroll = ({
     setHasUserScrolled,
     setScrollProgress,
     previousActiveLocationRef,
-    isTouchDevice,
+    isMobileOrTablet,
     setTargetZoom,
-    previousSuperClusterStateRef,
-    superClusterInfo,
 }: HandleTimelineScrollParams) => {
     if (
         !timelineRef.current ||
@@ -116,7 +96,7 @@ export const handleTimelineScroll = ({
     // Calculate current active location index based on scroll progress
     let currentActiveLocationIndex = -1; // Start with no location selected
     if (photoClusters.length > 0) {
-        if (isTouchDevice) {
+        if (isMobileOrTablet) {
             // Mobile: Slower progression - stay on each location longer
             currentActiveLocationIndex = Math.floor(
                 clampedProgress * (photoClusters.length - 0.5),
@@ -159,7 +139,6 @@ export const handleTimelineScroll = ({
 
         // Check if this is a distant location (>500km from previous)
         let isDistantLocation = false;
-        const isFirstLocationEver = previousActiveLocationIndex === -1;
         if (
             previousActiveLocationIndex !== -1 &&
             previousActiveLocationIndex !== currentActiveLocationIndex
@@ -176,91 +155,18 @@ export const handleTimelineScroll = ({
             }
         }
 
-        const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
-
-        // Use pre-calculated super cluster info instead of recalculating
-        const currentSuperClusterIndex =
-            superClusterInfo.clusterToSuperClusterMap.get(
-                currentActiveLocationIndex,
-            ) ?? -1;
-        const isInSuperCluster = currentSuperClusterIndex !== -1;
-
-        // Check previous super cluster state
-        const previousState = previousSuperClusterStateRef.current;
-        const wasInSuperCluster = previousState.isInSuperCluster;
-        const previousSuperClusterIndex = previousState.superClusterIndex;
-        const isSameSuperCluster =
-            isInSuperCluster &&
-            wasInSuperCluster &&
-            currentSuperClusterIndex === previousSuperClusterIndex;
+        const targetZoom = isMobileOrTablet ? 8 : 10; // Touch device-aware zoom level
 
         try {
-            // Handle super cluster zoom logic - check distant locations first!
-            if (isInSuperCluster && !wasInSuperCluster && isFirstLocationEver) {
-                // First location ever and it's in a super cluster - directly zoom to super cluster level
-                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                    targetCluster.lat,
-                    targetCluster.lng,
-                    superClusterZoom,
-                );
-                setTargetZoom(superClusterZoom);
-                mapRef.setView([zoomAwareLat, zoomAwareLng], superClusterZoom);
-            } else if (
-                isInSuperCluster &&
-                !wasInSuperCluster &&
-                isDistantLocation
-            ) {
-                // Entering super cluster from distant location - full zoom out → pan → zoom in
-                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
-                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                    targetCluster.lat,
-                    targetCluster.lng,
-                    superClusterZoom,
-                );
+            // Super cluster logic disabled - simple zoom transitions
+            if (isDistantLocation) {
+                // For distant locations not in super cluster: zoom out → pan → zoom in
+                const intermediateZoom = isMobileOrTablet ? 2 : 4;
 
-                // First zoom out far for distant locations
-                mapRef.flyTo([zoomAwareLat, zoomAwareLng], intermediateZoom, {
-                    animate: true,
-                    duration: 1.5,
-                    easeLinearity: 0.25,
-                });
-
-                // Then zoom back in to super cluster level
-                setTimeout(() => {
-                    setTargetZoom(superClusterZoom);
-                    mapRef.flyTo(
-                        [zoomAwareLat, zoomAwareLng],
-                        superClusterZoom,
-                        { animate: true, duration: 1.2, easeLinearity: 0.25 },
-                    );
-                }, 1600);
-            } else if (isInSuperCluster && !wasInSuperCluster) {
-                // Entering super cluster from nearby location - direct zoom in
-                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                    targetCluster.lat,
-                    targetCluster.lng,
-                    superClusterZoom,
-                );
-                setTargetZoom(superClusterZoom);
-                mapRef.flyTo([zoomAwareLat, zoomAwareLng], superClusterZoom, {
-                    animate: true,
-                    duration: 1.2,
-                    easeLinearity: 0.3,
-                });
-            } else if (!isInSuperCluster && wasInSuperCluster) {
-                // Leaving super cluster - check if distant location
-                if (isDistantLocation) {
-                    // Distant location: full zoom out → pan → zoom in
-                    const intermediateZoom = isTouchDevice ? 2 : 4;
-                    mapRef.flyTo(
-                        [positionedLat, positionedLng],
-                        intermediateZoom,
-                        { animate: true, duration: 1.5, easeLinearity: 0.25 },
-                    );
-
+                // Use event listener for smoother animation chaining with pause
+                const onZoomEnd = () => {
+                    mapRef.off("zoomend", onZoomEnd);
+                    // Small pause to let user see the zoomed out view
                     setTimeout(() => {
                         setTargetZoom(targetZoom);
                         mapRef.flyTo(
@@ -269,129 +175,19 @@ export const handleTimelineScroll = ({
                             {
                                 animate: true,
                                 duration: 1.2,
-                                easeLinearity: 0.25,
+                                easeLinearity: 0.2,
                             },
                         );
-                    }, 1600);
-                } else {
-                    // Nearby location: direct zoom out to normal view
-                    setTargetZoom(targetZoom);
-                    mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                        animate: true,
-                        duration: 1.2,
-                        easeLinearity: 0.3,
-                    });
-                }
-            } else if (isSameSuperCluster) {
-                // Moving within same super cluster - pan to zoom-aware positioned location, keep zoom
-                const currentMapZoom = mapRef.getZoom();
-                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                    targetCluster.lat,
-                    targetCluster.lng,
-                    currentMapZoom,
-                );
-                mapRef.panTo([zoomAwareLat, zoomAwareLng], {
-                    animate: true,
-                    duration: 0.6,
-                    easeLinearity: 0.3,
-                });
-            } else if (isInSuperCluster) {
-                // In super cluster but different from previous - treat as distant location
-                // Check if we're switching between different super clusters
-                const isDifferentSuperCluster =
-                    wasInSuperCluster &&
-                    currentSuperClusterIndex !== previousSuperClusterIndex;
+                    }, 150);
+                };
 
-                if (isDistantLocation) {
-                    // Distant location from super cluster: full zoom out → pan → zoom in
-                    // Since we're in the isInSuperCluster block, destination is always a super cluster
-                    const finalZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                    const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
-                    const [zoomAwareLat, zoomAwareLng] =
-                        getLocationPositionAtZoom(
-                            targetCluster.lat,
-                            targetCluster.lng,
-                            finalZoom,
-                        );
-
-                    // First zoom out far for distant locations
-                    mapRef.flyTo(
-                        [zoomAwareLat, zoomAwareLng],
-                        intermediateZoom,
-                        { animate: true, duration: 1.5, easeLinearity: 0.25 },
-                    );
-
-                    // Then zoom back in to appropriate level (super cluster or normal)
-                    setTimeout(() => {
-                        setTargetZoom(finalZoom);
-                        mapRef.flyTo([zoomAwareLat, zoomAwareLng], finalZoom, {
-                            animate: true,
-                            duration: 1.2,
-                            easeLinearity: 0.25,
-                        });
-                    }, 1600);
-                } else if (isDifferentSuperCluster) {
-                    // Different super cluster (not distant): moderate zoom out → pan → zoom in
-                    const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                    const intermediateZoom = isTouchDevice ? 8 : 10; // Moderate zoom out for nearby super clusters
-                    const [zoomAwareLat, zoomAwareLng] =
-                        getLocationPositionAtZoom(
-                            targetCluster.lat,
-                            targetCluster.lng,
-                            superClusterZoom,
-                        );
-
-                    // First zoom out moderately
-                    mapRef.flyTo(
-                        [zoomAwareLat, zoomAwareLng],
-                        intermediateZoom,
-                        { animate: true, duration: 0.8, easeLinearity: 0.25 },
-                    );
-
-                    // Then zoom back in to super cluster level
-                    setTimeout(() => {
-                        setTargetZoom(superClusterZoom);
-                        mapRef.flyTo(
-                            [zoomAwareLat, zoomAwareLng],
-                            superClusterZoom,
-                            {
-                                animate: true,
-                                duration: 0.8,
-                                easeLinearity: 0.25,
-                            },
-                        );
-                    }, 900);
-                } else {
-                    // Same super cluster, different location - just pan with zoom-aware positioning
-                    const currentMapZoom = mapRef.getZoom();
-                    const [zoomAwareLat, zoomAwareLng] =
-                        getLocationPositionAtZoom(
-                            targetCluster.lat,
-                            targetCluster.lng,
-                            currentMapZoom,
-                        );
-                    mapRef.panTo([zoomAwareLat, zoomAwareLng], {
-                        animate: true,
-                        duration: 0.6,
-                        easeLinearity: 0.3,
-                    });
-                }
-            } else if (isDistantLocation) {
-                // For distant locations not in super cluster: zoom out → pan → zoom in
-                const intermediateZoom = isTouchDevice ? 2 : 4;
+                mapRef.once("zoomend", onZoomEnd);
+                setTargetZoom(intermediateZoom);
                 mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
                     animate: true,
-                    duration: 1.5,
-                    easeLinearity: 0.25,
+                    duration: 1.2,
+                    easeLinearity: 0.2,
                 });
-
-                setTimeout(() => {
-                    mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                        animate: true,
-                        duration: 1.2,
-                        easeLinearity: 0.25,
-                    });
-                }, 1600);
             } else {
                 // For nearby locations not in super cluster: simple pan to target location
                 const currentMapZoom = mapRef.getZoom();
@@ -409,12 +205,6 @@ export const handleTimelineScroll = ({
                     });
                 }
             }
-
-            // Update super cluster state
-            previousSuperClusterStateRef.current = {
-                isInSuperCluster,
-                superClusterIndex: currentSuperClusterIndex,
-            };
         } catch (error) {
             console.warn("Map operation failed:", error);
         }
@@ -426,6 +216,7 @@ export interface ScrollTimelineToLocationParams {
     locationIndex: number;
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
+    isMobileOrTablet: boolean;
 }
 
 export const scrollTimelineToLocation = ({
@@ -433,6 +224,7 @@ export const scrollTimelineToLocation = ({
     locationIndex,
     photoClusters,
     locationPositions,
+    isMobileOrTablet,
 }: ScrollTimelineToLocationParams) => {
     if (
         !timelineRef.current ||
@@ -447,14 +239,9 @@ export const scrollTimelineToLocation = ({
     const clientHeight = timelineContainer.clientHeight;
     const maxScrollableDistance = scrollHeight - clientHeight;
 
-    // Check if we're on a touch device
-    const isTouchDevice =
-        typeof window !== "undefined" &&
-        ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
     // Calculate target progress using the same formula as scroll progress calculation
     let targetProgress;
-    if (isTouchDevice) {
+    if (isMobileOrTablet) {
         // Mobile: Use inverse of the slower progression formula
         // If active index = Math.floor(progress * (length - 0.5))
         // Then progress = (index + 0.5) / (length - 0.5) for accurate inverse
@@ -486,18 +273,9 @@ export interface HandleMarkerClickParams {
     setScrollProgress: (progress: number) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     scrollTimelineToLocation: (locationIndex: number) => void;
-    isTouchDevice: boolean;
-    superClusterInfo?: {
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    };
-    scrollProgress: number;
+    isMobileOrTablet: boolean;
+    setTargetZoom: (zoom: number | null) => void;
+    previousActiveLocationRef: React.RefObject<number>;
 }
 
 export const handleMarkerClick = ({
@@ -511,9 +289,9 @@ export const handleMarkerClick = ({
     setScrollProgress,
     setHasUserScrolled,
     scrollTimelineToLocation,
-    isTouchDevice,
-    superClusterInfo,
-    scrollProgress,
+    isMobileOrTablet,
+    setTargetZoom,
+    previousActiveLocationRef,
 }: HandleMarkerClickParams) => {
     const targetProgress = clusterIndex / Math.max(1, photoClusters.length - 1);
 
@@ -525,65 +303,32 @@ export const handleMarkerClick = ({
     setScrollProgress(targetProgress);
     setHasUserScrolled(true);
 
-    // Calculate current active location index
-    let currentActiveLocationIndex = -1;
-    if (photoClusters.length > 0) {
-        if (isTouchDevice) {
-            currentActiveLocationIndex = Math.floor(
-                scrollProgress * (photoClusters.length - 0.5),
-            );
-        } else {
-            currentActiveLocationIndex = Math.round(
-                scrollProgress * Math.max(0, photoClusters.length - 1),
-            );
-        }
-    }
-
-    // Check if both current and target locations are in the same super cluster
-    let shouldJustPan = false;
-    if (superClusterInfo && currentActiveLocationIndex >= 0) {
-        const currentSuperClusterIndex =
-            superClusterInfo.clusterToSuperClusterMap.get(
-                currentActiveLocationIndex,
-            );
-        const targetSuperClusterIndex =
-            superClusterInfo.clusterToSuperClusterMap.get(clusterIndex);
-
-        // If both locations are in super clusters and they're the same super cluster
-        shouldJustPan =
-            currentSuperClusterIndex !== undefined &&
-            targetSuperClusterIndex !== undefined &&
-            currentSuperClusterIndex === targetSuperClusterIndex;
-    }
+    // Update the previous active location to the target cluster
+    previousActiveLocationRef.current = clusterIndex;
 
     if (mapRef?.getContainer()) {
         try {
-            if (shouldJustPan) {
-                // Just pan to the location with zoom-aware positioning, keeping current zoom
-                const currentMapZoom = mapRef.getZoom();
-                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                    clusterLat,
-                    clusterLng,
-                    currentMapZoom,
-                );
-                mapRef.panTo([zoomAwareLat, zoomAwareLng], {
-                    animate: true,
-                    duration: 0.6,
-                    easeLinearity: 0.3,
-                });
-            } else {
-                // Normal behavior: fly to with zoom
-                const [positionedLat, positionedLng] = getLocationPosition(
-                    clusterLat,
-                    clusterLng,
-                );
-                const targetZoom = isTouchDevice ? 8 : 10;
-                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                    animate: true,
-                    duration: 1.0,
-                    easeLinearity: 0.3,
-                });
-            }
+            // Super cluster logic disabled - simple fly to target with standard zoom
+            const [positionedLat, positionedLng] = getLocationPosition(
+                clusterLat,
+                clusterLng,
+            );
+            const targetZoomLevel = isMobileOrTablet ? 8 : 10;
+            // Set target zoom before animation
+            setTargetZoom(targetZoomLevel);
+
+            // Clear target zoom after animation completes
+            const onMoveEnd = () => {
+                mapRef.off("moveend", onMoveEnd);
+                setTargetZoom(null);
+            };
+            mapRef.once("moveend", onMoveEnd);
+
+            mapRef.flyTo([positionedLat, positionedLng], targetZoomLevel, {
+                animate: true,
+                duration: 1.0,
+                easeLinearity: 0.3,
+            });
         } catch (error) {
             console.warn("Map operation failed:", error);
         }

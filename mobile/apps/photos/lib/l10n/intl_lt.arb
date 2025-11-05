@@ -1170,7 +1170,6 @@
   },
   "maps": "Žemėlapiai",
   "enableMaps": "Įjungti žemėlapius",
-  "enableMapsDesc": "Tai parodys jūsų nuotraukas pasaulio žemėlapyje.\n\nŠį žemėlapį talpina „OpenStreetMap“, o tiksliomis nuotraukų vietovėmis niekada nebendrinama.\n\nŠią funkciją bet kada galite išjungti iš nustatymų.",
   "quickLinks": "Sparčios nuorodos",
   "selectItemsToAdd": "Pasirinkite elementus įtraukti",
   "addSelected": "Pridėti pasirinktus",
@@ -1588,7 +1587,6 @@
   },
   "legacyInvite": "{email} pakvietė jus būti patikimu kontaktu",
   "authToManageLegacy": "Nustatykite tapatybę, kad tvarkytumėte patikimus kontaktus",
-  "useDifferentPlayerInfo": "Turite problemų paleidžiant šį vaizdo įrašą? Ilgai paspauskite čia, kad išbandytumėte kitą leistuvę.",
   "hideSharedItemsFromHomeGallery": "Slėpti bendrinamus elementus iš pagrindinės galerijos",
   "gallery": "Galerija",
   "joinAlbum": "Junkitės prie albumo",
@@ -1800,7 +1798,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Mes automatiškai išanalizuosime grupavimą, kad nustatytume, ar yra keli asmenys, ir vėl juos atskirsime. Tai gali užtrukti keletą sekundžių.",
   "layout": "Išdėstymas",
   "day": "Diena",
-  "peopleAutoAddDesc": "Pasirinkite asmenis, kuriuos norite automatiškai įtraukti į albumą.",
   "undo": "Anuliuoti",
   "redo": "Grąžinti",
   "filter": "Filtruoti",
@@ -1855,11 +1852,5 @@
   "related": "Susiję",
   "hoorayyyy": "Puiiiiku!",
   "nothingToTidyUpHere": "Čia nėra ko tvarkyti.",
-  "deletingDash": "Ištrinama - ",
-  "cLTitle1": "Panašūs vaizdai",
-  "cLDesc1": "Pristatome naują MM sistemą, skirtą aptikti panašius vaizdus, kurią naudojant galite išvalyti savo biblioteką. Pasiekiama Nustatymuose -> Atsarginė kopija -> Atlaisvinti vietą.",
-  "cLTitle2": "Vaizdo įrašų srautinio perdavimo patobulinimai",
-  "cLDesc2": "Dabar galite rankiniu būdu paleisti vaizdo įrašų srauto perdavimo generavimą tiesiai iš programos. Taip pat pridėjome naują vaizdo įrašų srauto perdavimo nustatymų ekraną, kuriame bus rodomas procentinis vaizdo įrašų skaičius, apdorotų srauto perdavimui.",
-  "cLTitle3": "Našumo patobulinimai",
-  "cLDesc3": "Daugybė patobulinimų, įskaitant geresnį podėlio naudojimą ir sklandesnį slinkimo patirtį."
+  "deletingDash": "Ištrinama - "
 }

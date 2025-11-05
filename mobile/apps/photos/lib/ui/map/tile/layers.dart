@@ -7,7 +7,8 @@ import "package:photos/ui/map/tile/cache.dart";
 import "package:url_launcher/url_launcher.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
-const String _userAgent = "io.ente.photos";
+const String _userAgent =
+    "Ente Photos/1.2 (+https://ente.io; contact: team@ente.io)";
 
 class MapAttributionOptions {
   final double permanentHeight;
@@ -47,6 +48,39 @@ class OSMFranceTileLayer extends StatelessWidget {
       tileProvider: CachedNetworkTileProvider(),
       userAgentPackageName: _userAgent,
       panBuffer: 1,
+    );
+  }
+}
+
+class OSMTileAttributes extends StatelessWidget {
+  final MapAttributionOptions options;
+  const OSMTileAttributes({
+    this.options = const MapAttributionOptions(),
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context).tinyBold;
+    return MapAttributionWidget(
+      alignment: AttributionAlignment.bottomLeft,
+      showFlutterMapAttribution: false,
+      permanentHeight: options.permanentHeight,
+      popupBackgroundColor: getEnteColorScheme(context).backgroundElevated,
+      popupBorderRadius: options.popupBorderRadius,
+      iconSize: options.iconSize,
+      attributions: [
+        TextSourceAttribution(
+          AppLocalizations.of(context).openstreetmapContributors,
+          textStyle: textTheme,
+          onTap: () => launchUrlString('https://openstreetmap.org/copyright'),
+        ),
+        TextSourceAttribution(
+          'HOT Tiles',
+          textStyle: textTheme,
+          onTap: () => launchUrl(Uri.parse('https://www.hotosm.org/')),
+        ),
+      ],
     );
   }
 }

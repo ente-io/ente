@@ -1,9 +1,10 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
+import 'package:photos/ui/notification/toast.dart';
 
 //Used for empty state of location section
 class GoToMap extends StatelessWidget {
@@ -13,17 +14,25 @@ class GoToMap extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final bool result = await requestForMapEnable(context);
-        if (result) {
-          // ignore: unawaited_futures
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => MapScreen(
-                filesFutureFn: SearchService.instance.getAllFilesForSearch,
-              ),
-            ),
-          );
+        if (!flagService.mapEnabled) {
+          try {
+            await flagService.setMapEnabled(true);
+          } catch (e) {
+            showShortToast(
+              context,
+              AppLocalizations.of(context).somethingWentWrong,
+            );
+            return;
+          }
         }
+        // ignore: unawaited_futures
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => MapScreen(
+              filesFutureFn: SearchService.instance.getAllFilesForSearch,
+            ),
+          ),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 14, 8, 0),

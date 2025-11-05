@@ -44,8 +44,8 @@ enum SortKey {
 }
 
 enum TabFilter {
-  same,
   close,
+  similar,
   related,
 }
 
@@ -62,8 +62,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     with SingleTickerProviderStateMixin {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
-  static const double _closeThreshold = 0.02;
-  static const double _sameThreshold = 0.001;
+  static const double _similarThreshold = 0.02;
+  static const double _closeThreshold = 0.001;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -75,7 +75,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
   SortKey _sortKey = SortKey.size;
   bool _exactSearch = false;
   bool _fullRefresh = false;
-  TabFilter _selectedTab = TabFilter.same;
+  TabFilter _selectedTab = TabFilter.close;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
@@ -85,24 +85,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
   List<SimilarFiles> get _filteredGroups {
     final filteredGroups = <SimilarFiles>[];
     switch (_selectedTab) {
-      case TabFilter.same:
-        for (final group in _similarFilesList) {
-          final distance = group.furthestDistance;
-          if (distance <= _sameThreshold) {
-            filteredGroups.add(group);
-          }
-        }
       case TabFilter.close:
         for (final group in _similarFilesList) {
           final distance = group.furthestDistance;
-          if (distance > _sameThreshold && distance <= _closeThreshold) {
+          if (distance <= _closeThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+      case TabFilter.similar:
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _closeThreshold && distance <= _similarThreshold) {
             filteredGroups.add(group);
           }
         }
       case TabFilter.related:
         for (final group in _similarFilesList) {
           final distance = group.furthestDistance;
-          if (distance > _closeThreshold) {
+          if (distance > _similarThreshold) {
             filteredGroups.add(group);
           }
         }
@@ -436,15 +436,15 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
       child: Row(
         children: [
           _buildTabButton(
-            TabFilter.same,
-            AppLocalizations.of(context).same,
+            TabFilter.close,
+            AppLocalizations.of(context).closeBy,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.close,
-            AppLocalizations.of(context).closeBy,
+            TabFilter.similar,
+            AppLocalizations.of(context).similar,
             colorScheme,
             textTheme,
           ),
@@ -828,31 +828,28 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                       tag: "similar_images_" + file.tag,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: isSelected
-                            ? ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black.withAlpha((0.4 * 255).toInt()),
-                                  BlendMode.darken,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ThumbnailWidget(
+                              file,
+                              diskLoadDeferDuration:
+                                  galleryThumbnailDiskLoadDeferDuration,
+                              serverLoadDeferDuration:
+                                  galleryThumbnailServerLoadDeferDuration,
+                              shouldShowLivePhotoOverlay: true,
+                              key: Key("similar_images_" + file.tag),
+                            ),
+                            if (isSelected)
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.black
+                                      .withAlpha((0.4 * 255).toInt()),
                                 ),
-                                child: ThumbnailWidget(
-                                  file,
-                                  diskLoadDeferDuration:
-                                      galleryThumbnailDiskLoadDeferDuration,
-                                  serverLoadDeferDuration:
-                                      galleryThumbnailServerLoadDeferDuration,
-                                  shouldShowLivePhotoOverlay: true,
-                                  key: Key("similar_images_" + file.tag),
-                                ),
-                              )
-                            : ThumbnailWidget(
-                                file,
-                                diskLoadDeferDuration:
-                                    galleryThumbnailDiskLoadDeferDuration,
-                                serverLoadDeferDuration:
-                                    galleryThumbnailServerLoadDeferDuration,
-                                shouldShowLivePhotoOverlay: true,
-                                key: Key("similar_images_" + file.tag),
                               ),
+                          ],
+                        ),
                       ),
                     ),
                     Positioned(

@@ -96,7 +96,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: AppLocalizations.of(context).people,
             ),
-            expandedHeight: MediaQuery.textScalerOf(context).scale(120),
+            expandedHeight: MediaQuery.textScalerOf(context).scale(136),
             flexibleSpaceCaption: hasInstalledAny
                 ? AppLocalizations.of(context).peopleWidgetDesc
                 : context.l10n.addPeopleWidgetPrompt,

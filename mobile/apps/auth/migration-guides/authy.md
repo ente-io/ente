@@ -1,2 +1,2 @@
 Moved to
-[help.ente.io/auth/migration-guides/authy](https://help.ente.io/auth/migration-guides/authy/)
+[ente.io/help/auth/migration-guides/authy](https://ente.io/help/auth/migration-guides/authy/)

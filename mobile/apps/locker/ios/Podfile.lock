@@ -75,9 +75,9 @@ PODS:
     - FlutterMacOS
   - privacy_screen (0.0.1):
     - Flutter
-  - SDWebImage (5.21.1):
-    - SDWebImage/Core (= 5.21.1)
-  - SDWebImage/Core (5.21.1)
+  - SDWebImage (5.21.3):
+    - SDWebImage/Core (= 5.21.3)
+  - SDWebImage/Core (5.21.3)
   - Sentry/HybridSDK (8.46.0)
   - sentry_flutter (8.14.2):
     - Flutter
@@ -209,7 +209,7 @@ SPEC CHECKSUMS:
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
-  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 2df8b0aab7e4aba81261c230cbea31c82a62dd1b
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f

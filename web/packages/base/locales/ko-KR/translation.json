@@ -46,6 +46,7 @@
     "new_album": "새 앨범",
     "create_albums": "앨범 만들기",
     "album_name": "앨범 이름",
+    "album_created": "",
     "close": "닫기",
     "yes": "예",
     "no": "아니요",
@@ -235,6 +236,7 @@
     "search_results": "",
     "no_results": "",
     "search_hint": "",
+    "albums_search_hint": "",
     "album": "",
     "date": "",
     "description": "",
@@ -276,11 +278,7 @@
     "view_on_map": "",
     "map": "",
     "enable_map": "",
-    "enable_maps_confirm": "",
-    "enable_maps_confirm_message": "",
     "disable_map": "",
-    "disable_maps_confirm": "",
-    "disable_maps_confirm_message": "",
     "details": "",
     "view_exif": "",
     "no_exif": "",
@@ -327,6 +325,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "",
     "blocked_uploads_hint": "",
     "large_files": "",
@@ -433,6 +433,7 @@
         "year": ""
     },
     "copy_link": "",
+    "copy_embed_html": "",
     "done": "",
     "share_link_section_title": "",
     "remove_link": "",
@@ -701,5 +702,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

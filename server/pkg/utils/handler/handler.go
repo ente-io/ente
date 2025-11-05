@@ -31,6 +31,7 @@ func Error(c *gin.Context, err error) {
 	if errors.Is(err, ente.ErrStorageLimitExceeded) ||
 		errors.Is(err, ente.ErrNoActiveSubscription) ||
 		errors.Is(err, ente.ErrInvalidPassword) ||
+		errors.Is(err, ente.ErrUserDeleted) ||
 		errors.Is(err, io.ErrUnexpectedEOF) ||
 		errors.Is(err, syscall.EPIPE) ||
 		errors.Is(err, syscall.ECONNRESET) {
@@ -84,7 +85,8 @@ func httpStatusCode(err error) int {
 		errors.Is(err, ente.ErrInvalidPassword) ||
 		errors.Is(err, ente.ErrAuthenticationRequired):
 		return http.StatusUnauthorized
-	case errors.Is(err, ente.ErrExpiredOTT):
+	case errors.Is(err, ente.ErrExpiredOTT) ||
+		errors.Is(err, ente.ErrUserDeleted):
 		return http.StatusGone
 	case errors.Is(err, ente.ErrNoActiveSubscription) ||
 		errors.Is(err, ente.ErrSharingDisabledForFreeAccounts):

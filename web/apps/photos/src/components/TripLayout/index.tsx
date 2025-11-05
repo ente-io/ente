@@ -56,7 +56,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
     // Use media query for mobile/tablet detection (up to 960px)
     const theme = useTheme();
-    const isTouchDevice = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
+    const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
 
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
@@ -90,7 +90,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [currentZoom, setCurrentZoom] = useState(7); // Default zoom, will be updated by MapEvents and optimalZoom
     const [mapRef, setMapRef] = useState<import("leaflet").Map | null>(null);
-    const [targetZoom, setTargetZoom] = useState<number | null>(null);
+    const [, setTargetZoom] = useState<number | null>(null); // Only setter is used by child components
     const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 representing scroll progress
     const [hasUserScrolled, setHasUserScrolled] = useState(false); // Track if user has actually scrolled
     const [showMobileCover, setShowMobileCover] = useState(true); // Track mobile cover state
@@ -108,43 +108,16 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
     const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
-    const previousSuperClusterStateRef = useRef<{
-        isInSuperCluster: boolean;
-        superClusterIndex: number | null;
-    }>({ isInSuperCluster: false, superClusterIndex: null }); // Track previous super cluster state for zoom logic
 
     const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
     const [optimalZoom, setOptimalZoom] = useState(7);
-    const [superClusterInfo, setSuperClusterInfo] = useState<{
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    }>({ superClusters: [], clusterToSuperClusterMap: new Map() });
     const [TripMapComponent, setTripMapComponent] =
         useState<React.ComponentType<{
             journeyData: JourneyPoint[];
             photoClusters: JourneyPoint[][];
             hasPhotoData: boolean;
             optimalZoom: number;
-            currentZoom: number;
-            targetZoom: number | null;
-            mapRef: import("leaflet").Map | null;
             scrollProgress: number;
-            superClusterInfo?: {
-                superClusters: {
-                    lat: number;
-                    lng: number;
-                    clusterCount: number;
-                    clustersInvolved: number[];
-                    image: string;
-                }[];
-                clusterToSuperClusterMap: Map<number, number>;
-            };
             setMapRef: (map: import("leaflet").Map | null) => void;
             setCurrentZoom: (zoom: number) => void;
             setTargetZoom: (zoom: number | null) => void;
@@ -166,11 +139,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             // Load mapHelpers and calculate clusters if we have data
             if (journeyData.length > 0) {
                 void import("./mapHelpers").then(
-                    ({
-                        clusterPhotosByProximity,
-                        calculateOptimalZoom,
-                        detectScreenCollisions,
-                    }) => {
+                    ({ clusterPhotosByProximity, calculateOptimalZoom }) => {
                         const clusters = clusterPhotosByProximity(journeyData);
 
                         // Sort clusters by their earliest timestamp to maintain chronological order
@@ -190,55 +159,13 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
                         const optimalZoomLevel = calculateOptimalZoom();
 
-                        // Calculate super clusters at optimal zoom level once
-                        const { superClusters } = detectScreenCollisions(
-                            sortedClusters,
-                            optimalZoomLevel,
-                            null,
-                            null,
-                            optimalZoomLevel,
-                            undefined, // No active cluster during initial calculation
-                        );
-
-                        // Create a map of cluster index to super cluster index
-                        const clusterToSuperClusterMap = new Map<
-                            number,
-                            number
-                        >();
-                        superClusters.forEach(
-                            (superCluster, superClusterIndex) => {
-                                superCluster.clustersInvolved.forEach(
-                                    (clusterIndex) => {
-                                        clusterToSuperClusterMap.set(
-                                            clusterIndex,
-                                            superClusterIndex,
-                                        );
-                                    },
-                                );
-                            },
-                        );
-
                         setPhotoClusters(sortedClusters);
-
-                        // Check if first location is in a super cluster and adjust initial zoom
-                        const firstLocationInSuperCluster =
-                            clusterToSuperClusterMap.has(0);
-                        const initialZoom = firstLocationInSuperCluster
-                            ? isTouchDevice
-                                ? 15
-                                : 14 // Super cluster zoom level
-                            : optimalZoomLevel;
-
-                        setOptimalZoom(initialZoom);
-                        setSuperClusterInfo({
-                            superClusters,
-                            clusterToSuperClusterMap,
-                        });
+                        setOptimalZoom(optimalZoomLevel);
                     },
                 );
             }
         }
-    }, [isClient, journeyData, isTouchDevice]);
+    }, [isClient, journeyData, isMobileOrTablet]);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
@@ -293,10 +220,11 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         clusterClickTimeoutRef,
         previousActiveLocationRef,
         setLocationPositions,
+        isMobileOrTablet,
         setHasUserScrolled: (scrolled: boolean) => {
             setHasUserScrolled(scrolled);
             if (
-                isTouchDevice &&
+                isMobileOrTablet &&
                 tripStartedRef.current &&
                 timelineRef.current
             ) {
@@ -317,9 +245,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         },
         setScrollProgress,
         setTargetZoom,
-        previousSuperClusterStateRef,
-        superClusterInfo,
-        scrollProgress,
     });
 
     // Only wait for client-side rendering (needed for maps), but show layout immediately
@@ -334,7 +259,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     return (
         <TripLayoutContainer>
             {!openFileViewer &&
-                (isTouchDevice ? (
+                (isMobileOrTablet ? (
                     <MobileNavBar
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
@@ -349,7 +274,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                     />
                 ))}
             {/* Mobile Layout */}
-            {isTouchDevice ? (
+            {isMobileOrTablet ? (
                 <MobileContainer>
                     {/* Map takes 60% of height */}
                     <MobileMapContainer>
@@ -359,11 +284,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                                 photoClusters={photoClusters}
                                 hasPhotoData={hasPhotoData}
                                 optimalZoom={optimalZoom}
-                                currentZoom={currentZoom}
-                                targetZoom={targetZoom}
-                                mapRef={mapRef}
                                 scrollProgress={scrollProgress}
-                                superClusterInfo={superClusterInfo}
                                 setMapRef={setMapRef}
                                 setCurrentZoom={setCurrentZoom}
                                 setTargetZoom={setTargetZoom}
@@ -375,7 +296,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             <MobileCoverOverlay show={showMobileCover}>
                                 <MobileCover
                                     journeyData={journeyData}
-                                    photoClusters={photoClusters}
                                     albumTitle={collectionTitle}
                                     coverImageUrl={coverImageUrl}
                                 />
@@ -478,7 +398,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                                 <div>
                                     <TripCover
                                         journeyData={journeyData}
-                                        photoClusters={photoClusters}
                                         albumTitle={collectionTitle}
                                         coverImageUrl={coverImageUrl}
                                     />
@@ -556,11 +475,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             photoClusters={photoClusters}
                             hasPhotoData={hasPhotoData}
                             optimalZoom={optimalZoom}
-                            currentZoom={currentZoom}
-                            targetZoom={targetZoom}
-                            mapRef={mapRef}
                             scrollProgress={scrollProgress}
-                            superClusterInfo={superClusterInfo}
                             setMapRef={setMapRef}
                             setCurrentZoom={setCurrentZoom}
                             setTargetZoom={setTargetZoom}
@@ -624,7 +539,7 @@ const TimelineSidebar = styled(Box)(({ theme }) => ({
     },
     scrollbarWidth: "thin",
     scrollbarColor: `${theme.palette.divider} transparent`,
-    [theme.breakpoints.up(1600)]: { width: "960px" },
+    [theme.breakpoints.up(1920)]: { width: "960px" },
 }));
 
 const TimelineContent = styled(Box)({

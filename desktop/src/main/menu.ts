@@ -30,7 +30,7 @@ export const createApplicationMenu = (mainWindow: BrowserWindow) => {
     };
 
     const handleHelp = () =>
-        void shell.openExternal("https://help.ente.io/photos/");
+        void shell.openExternal("https://ente.io/help/photos/");
 
     return Menu.buildFromTemplate([
         {

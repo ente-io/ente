@@ -46,6 +46,7 @@
     "new_album": "Nytt album",
     "create_albums": "Skapa album",
     "album_name": "Albumnamn",
+    "album_created": "",
     "close": "Stäng",
     "yes": "Ja",
     "no": "Nej",
@@ -235,6 +236,7 @@
     "search_results": "Sökresultat",
     "no_results": "Inga resultat hittades",
     "search_hint": "Sök efter album, datum, beskrivningar, ...",
+    "albums_search_hint": "",
     "album": "Album",
     "date": "Datum",
     "description": "Beskrivning",
@@ -276,11 +278,7 @@
     "view_on_map": "Visa på OpenStreetMap",
     "map": "Karta",
     "enable_map": "Aktivera karta",
-    "enable_maps_confirm": "Aktivera kartor?",
-    "enable_maps_confirm_message": "",
     "disable_map": "Inaktivera karta",
-    "disable_maps_confirm": "Inaktivera kartor?",
-    "disable_maps_confirm_message": "",
     "details": "",
     "view_exif": "Visa all Exif-data",
     "no_exif": "Ingen Exif-data",
@@ -327,6 +325,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "",
     "blocked_uploads_hint": "",
     "large_files": "",
@@ -433,6 +433,7 @@
         "year": ""
     },
     "copy_link": "Kopiera länk",
+    "copy_embed_html": "",
     "done": "Klar",
     "share_link_section_title": "Eller dela en länk",
     "remove_link": "",
@@ -701,5 +702,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

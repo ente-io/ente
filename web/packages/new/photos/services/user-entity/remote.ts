@@ -6,7 +6,7 @@ import {
     HTTPError,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { EntityType } from ".";
 
 /**

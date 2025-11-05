@@ -152,8 +152,8 @@ git clone https://github.com/ente-io/ente
     # Replace this with actual endpoint for Albums
     export NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002
     ```
-3. Build the needed applications (Photos, Accounts, Auth, Cast) as per your
-   needs:
+3. Build the needed applications (Photos, Accounts, Auth, Cast, Public Locker) as per
+   your needs:
 
     ```shell
     # These commands are executed inside web directory
@@ -168,6 +168,9 @@ git clone https://github.com/ente-io/ente
 
     # Build cast. Build output to be served is present at apps/cast/out
     yarn build:cast
+
+    # Build public locker. Build output to be served is present at apps/share/out
+    yarn build:share
     ```
 
 4. Copy the output files to `/var/www/ente/apps` for easier management.
@@ -183,6 +186,8 @@ git clone https://github.com/ente-io/ente
     sudo cp -r apps/auth/out /var/www/ente/apps/auth
     # Cast
     sudo cp -r apps/cast/out /var/www/ente/apps/cast
+    # Public Locker
+    sudo cp -r apps/share/out /var/www/ente/apps/share
     ```
 
 5. Set up file server using Caddy by editing `Caddyfile`, present at
@@ -218,6 +223,18 @@ git clone https://github.com/ente-io/ente
         root * /var/www/ente/apps/out/cast
         file_server
         try_files {path} {path}.html /index.html
+    }
+
+    :3005 {
+        root * /var/www/ente/apps/out/share
+        file_server
+        @root {
+            path /
+        }
+        handle @root {
+            try_files /index.html
+        }
+        try_files {path} {path}.html /404.html
     }
     ```
 

@@ -2,8 +2,20 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
+import 'package:photos/models/file/dummy_file.dart';
 import 'package:photos/models/file/file.dart';
 
+/// Manages the set of currently selected files in the gallery.
+///
+/// This class serves as the single source of truth for file selection state
+/// and automatically filters out [DummyFile] instances from all selection
+/// operations. Dummy files are used for gallery layout purposes and should
+/// never be selected.
+///
+/// All selection methods ([toggleSelection], [selectAll],
+/// [unSelectAll], [toggleGroupSelection]) automatically exclude dummy files.
+/// Calling code does not need to check for or filter out dummy files before
+/// calling these methods.
 class SelectedFiles extends ChangeNotifier {
   final files = <EnteFile>{};
 
@@ -14,6 +26,10 @@ class SelectedFiles extends ChangeNotifier {
   final lastSelectionOperationFiles = <EnteFile>{};
 
   void toggleSelection(EnteFile fileToToggle) {
+    // Skip dummy files - they should never be selected
+    if (fileToToggle is DummyFile) {
+      return;
+    }
     // To handle the cases, where the file might have changed due to upload
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
@@ -31,24 +47,35 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   void toggleGroupSelection(Set<EnteFile> filesToToggle) {
-    if (files.containsAll(filesToToggle)) {
-      unSelectAll(filesToToggle);
+    // Filter out dummy files before processing
+    final nonDummyFiles =
+        filesToToggle.where((file) => file is! DummyFile).toSet();
+    if (nonDummyFiles.isEmpty) {
+      return;
+    }
+    if (files.containsAll(nonDummyFiles)) {
+      unSelectAll(nonDummyFiles);
     } else {
-      selectAll(filesToToggle);
+      selectAll(nonDummyFiles);
     }
   }
 
   void selectAll(Set<EnteFile> filesToSelect) {
-    files.addAll(filesToSelect);
+    // Filter out dummy files before adding to selection
+    final nonDummyFiles =
+        filesToSelect.where((file) => file is! DummyFile).toSet();
+    files.addAll(nonDummyFiles);
     lastSelectionOperationFiles.clear();
-    lastSelectionOperationFiles.addAll(filesToSelect);
+    lastSelectionOperationFiles.addAll(nonDummyFiles);
     notifyListeners();
   }
 
   void unSelectAll(Set<EnteFile> filesToUnselect, {bool skipNotify = false}) {
     files.removeWhere((file) => filesToUnselect.contains(file));
     lastSelectionOperationFiles.clear();
-    lastSelectionOperationFiles.addAll(filesToUnselect);
+    // Filter out dummy files before adding to lastSelectionOperationFiles
+    lastSelectionOperationFiles
+        .addAll(filesToUnselect.where((file) => file is! DummyFile));
     if (!skipNotify) {
       notifyListeners();
     }

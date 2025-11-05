@@ -7,7 +7,7 @@ import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
     fetchFeatureFlags,
     updateRemoteFlag,
@@ -72,6 +72,17 @@ export interface Settings {
     castURL: string;
 
     /**
+     * The URL for the embed app used for embedded sharing.
+     *
+     * Changing this only ever makes sense for self-hosters, who might want to
+     * point to their own self hosted embed app (See `apps.embed-albums` in
+     * `local.yaml` in the museum code).
+     *
+     * Default: "https://embed.ente.io"
+     */
+    embedURL: string;
+
+    /**
      * Set to the domain (host, e.g. "photos.example.org") that the user wishes
      * to use for sharing their public albums.
      *
@@ -95,6 +106,7 @@ const createDefaultSettings = (): Settings => ({
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
+    embedURL: "https://embed.ente.io",
     customDomainCNAME: "my.ente.io",
 });
 
@@ -170,6 +182,7 @@ const FeatureFlags = z.object({
     betaUser: z.boolean().nullish().transform(nullToUndefined),
     mapEnabled: z.boolean().nullish().transform(nullToUndefined),
     castUrl: z.string().nullish().transform(nullToUndefined),
+    embedUrl: z.string().nullish().transform(nullToUndefined),
     customDomain: z.string().nullish().transform(nullToUndefined),
     customDomainCNAME: z.string().nullish().transform(nullToUndefined),
 });
@@ -183,6 +196,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
+    if (flags?.embedUrl) settings.embedURL = flags.embedUrl;
     if (flags?.customDomain) settings.customDomain = flags.customDomain;
     if (flags?.customDomainCNAME)
         settings.customDomainCNAME = flags.customDomainCNAME;
@@ -241,8 +255,18 @@ export const updateCustomDomain = async (customDomain: string) => {
  * Persist the user's map enabled preference both locally and on remote.
  */
 export const updateMapEnabled = async (isEnabled: boolean) => {
-    await updateRemoteFlag("mapEnabled", isEnabled);
-    return pullSettings();
+    const previousSnapshot = _state.settingsSnapshot;
+
+    setSettingsSnapshot({ ...previousSnapshot, mapEnabled: isEnabled });
+
+    try {
+        await updateRemoteFlag("mapEnabled", isEnabled);
+        await pullSettings();
+    } catch (e) {
+        log.error("Failed to update map setting", e);
+        setSettingsSnapshot(previousSnapshot);
+        throw e;
+    }
 };
 
 const cfProxyDisabledKey = "cfProxyDisabled";

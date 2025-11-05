@@ -119,7 +119,6 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
-		log.Info("Added ott for " + emailHash + ": " + ott)
 		err = emailOTT(app, email, ott, purpose, mobile)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
@@ -233,7 +232,6 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 	}
 
 	otts, err := c.UserAuthRepo.GetValidOTTs(emailHash, app)
-	log.Infof("Valid ott (app: %s) for %s are %s", app, emailHash, strings.Join(otts, ","))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -485,7 +483,8 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	encryptedToken, err := crypto.GetEncryptedToken(token, keyAttributes.PublicKey)
+	var encryptedToken string
+	encryptedToken, err = crypto.GetEncryptedTokenNative(token, keyAttributes.PublicKey)
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}

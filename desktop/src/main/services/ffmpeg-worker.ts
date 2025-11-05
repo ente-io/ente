@@ -12,7 +12,7 @@ import fs_ from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { FFmpegCommand } from "../../types/ipc";
 import log from "../log-worker";
 import { messagePortMainEndpoint } from "../utils/comlink";
@@ -934,6 +934,7 @@ export const getFilePreviewDataUploadURL = async (
     const params = new URLSearchParams({
         fileID: fileID.toString(),
         type: "vid_preview",
+        ts: Date.now().toString(),
     });
     if (partCount > 1) {
         params.set("isMultiPart", "true");

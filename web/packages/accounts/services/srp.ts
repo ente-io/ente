@@ -12,7 +12,7 @@ import { apiURL } from "ente-base/origins";
 import { ensure } from "ente-utils/ensure";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { saveSRPAttributes } from "./accounts-db";
 import {
     RemoteSRPVerificationResponse,

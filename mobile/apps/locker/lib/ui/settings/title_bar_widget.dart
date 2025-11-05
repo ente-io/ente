@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import "package:locker/l10n/l10n.dart";
 

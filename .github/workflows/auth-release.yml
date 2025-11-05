@@ -48,6 +48,38 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Free up disk space
+              run: |
+                  echo "Initial disk usage:"
+                  df -h /
+                  # Get available space in KB
+                  INITIAL=$(df / | awk 'NR==2 {print $4}')
+
+                  echo -e "\n=== Removing .NET SDK (~20-25GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
+                  START=$(date +%s)
+                  sudo rm -rf /usr/share/dotnet
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))  # Convert KB to GB
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
+
+                  echo -e "\n=== Removing cached tools (~5-10GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
+                  START=$(date +%s)
+                  sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
+
+                  echo -e "\n=== Final Summary ==="
+                  FINAL=$(df / | awk 'NR==2 {print $4}')
+                  TOTAL_FREED=$(( (FINAL - INITIAL) / 1048576 ))
+                  echo "Total space freed: ${TOTAL_FREED}GB"
+                  echo "Final disk usage:"
+                  df -h /
+
             - name: Setup JDK 17
               uses: actions/setup-java@v1
               with:
@@ -59,6 +91,24 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Update Linux AppData metadata
+              run: |
+                  APPDATA_FILE="linux/packaging/enteauth.appdata.xml"
+                  RELEASE_DATE=$(date -u +%Y-%m-%d)
+
+                  # Extract version from tag (e.g., auth-v4.4.8 -> 4.4.8)
+                  VERSION_NAME=$(echo "${{ github.ref_name }}" | sed 's/^auth-v//')
+
+                  # Create new release entry
+                  NEW_RELEASE="        <release version=\"${VERSION_NAME}\" date=\"${RELEASE_DATE}\" />"
+
+                  # Insert new release entry after <releases> tag
+                  sed -i "/<releases>/a\\${NEW_RELEASE}" "$APPDATA_FILE"
+
+                  echo "✅ Updated $APPDATA_FILE with version ${VERSION_NAME}"
+                  echo "Release entry added:"
+                  echo "$NEW_RELEASE"
 
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
@@ -168,12 +218,15 @@ jobs:
                   flutter config --enable-windows-desktop
                   # dart pub global activate flutter_distributor
                   dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  make innoinstall
-                  flutter_distributor package --platform=windows --targets=exe --skip-clean
+                  choco install innosetup -y
+                  flutter_distributor.bat package --platform=windows --targets=exe --skip-clean
+                  shopt -s globstar
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+              shell: bash
 
             - name: Retain Windows EXE and DLLs
               run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
+              shell: bash
 
             - name: Sign files with Trusted Signing
               uses: azure/trusted-signing-action@v0
@@ -194,9 +247,11 @@ jobs:
 
             - name: Zip Windows EXE and DLLs
               run: tar.exe -a -c -f artifacts/ente-${{ github.ref_name }}-windows.zip ente-${{ github.ref_name }}-windows
+              shell: bash
 
             - name: Generate checksums
               run: sha256sum artifacts/ente-* > artifacts/sha256sum-windows
+              shell: bash
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1

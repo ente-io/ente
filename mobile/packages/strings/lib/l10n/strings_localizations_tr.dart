@@ -191,6 +191,10 @@ class StringsLocalizationsTr extends StringsLocalizations {
   String get noDeleteAccountAction => 'Hayır, hesabı sil';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'Hesap silme işlemini yapabilmek için lütfen kimliğinizi doğrulayın';
 

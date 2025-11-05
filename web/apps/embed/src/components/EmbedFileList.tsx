@@ -27,12 +27,17 @@ export interface EmbedFileListProps {
 
 const THUMBNAIL_SIZE = 200;
 const THUMBNAIL_GAP = 4;
+const CONTAINER_PADDING = 4;
 
 export const EmbedFileList: React.FC<EmbedFileListProps> = memo(
     ({ width, height, annotatedFiles, onItemClick, header, footer }) => {
-        const columns = Math.floor(width / (THUMBNAIL_SIZE + THUMBNAIL_GAP));
+        const availableWidth = width - 2 * CONTAINER_PADDING;
+        const columns = Math.max(
+            1,
+            Math.floor(availableWidth / (THUMBNAIL_SIZE + THUMBNAIL_GAP)),
+        );
         const actualThumbnailSize =
-            (width - (columns - 1) * THUMBNAIL_GAP) / columns;
+            (availableWidth - (columns - 1) * THUMBNAIL_GAP) / columns;
 
         return (
             <Container style={{ width, height }}>
@@ -139,12 +144,16 @@ const EmbedFileTile: React.FC<EmbedFileTileProps> = memo(
 
 EmbedFileTile.displayName = "EmbedFileTile";
 
-const Container = styled("div")({ overflow: "auto", padding: THUMBNAIL_GAP });
+const Container = styled("div")({
+    overflow: "auto",
+    padding: `${CONTAINER_PADDING}px`,
+});
 
 const Grid = styled("div")<{ columns: number; gap: number }>(
     ({ columns, gap }) => ({
         display: "grid",
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
+        gridAutoRows: "min-content",
         gap: `${gap}px`,
     }),
 );

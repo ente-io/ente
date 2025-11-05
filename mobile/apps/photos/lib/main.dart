@@ -75,16 +75,10 @@ void main() async {
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0x00010000),
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
 
-  unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
-  );
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -134,61 +128,96 @@ Future<void> runBackgroundTask(
   TimeLogger tlog, {
   String mode = 'normal',
 }) async {
+  // Check if foreground is recently active to avoid conflicts
+  final isRunningInFG = await _isRunningInForeground();
+
+  // If FG was active in last 30 seconds, skip BG work
+  if (isRunningInFG) {
+    _logger.info(
+      "[BG TASK] Foreground recently active, skipping background work",
+    );
+    return;
+  }
+
+  _logger.info(
+    "[BG TASK] No recent foreground activity, proceeding with background work",
+  );
+
+  // Mark BG as active
+
   await _runMinimally(taskId, tlog);
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  try {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _scheduleHeartBeat(prefs, true);
 
-  await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration init $tlog");
+    await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration done $tlog");
 
-  // App LifeCycle
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
+    // App LifeCycle
+    AppLifecycleService.instance.init(prefs);
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
-  // Crypto rel.
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
+    // Crypto rel.
+    await Computer.shared().turnOn(workersCount: 4);
+    CryptoUtil.init();
 
-  // Init Network Utils
-  await NetworkClient.instance.init(packageInfo);
+    // Init Network Utils
+    await NetworkClient.instance.init(packageInfo);
 
-  // Global Services
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
+    // Global Services
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
 
-  await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init $tlog");
+    await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init done $tlog");
 
-  // Upload & Sync Related
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
+    // Upload & Sync Related
+    await FileUploader.instance.init(prefs, true);
+    LocalFileUpdateService.instance.init(prefs);
+    await LocalSyncService.instance.init(prefs);
+    RemoteSyncService.instance.init(prefs);
+    await SyncService.instance.init(prefs);
 
-  // Misc Services
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
+    // Misc Services
+    await UserService.instance.init();
+    NotificationService.instance.init(prefs);
 
-  // Begin Execution
-  // only runs for android
-  updateService.showUpdateNotification().ignore();
-  await _sync('bgTaskActiveProcess');
+    // Begin Execution
+    // only runs for android
+    _logger.info("[BG TASK] update notification");
+    updateService.showUpdateNotification().ignore();
+    _logger.info("[BG TASK] sync starting");
+    await _sync('bgTaskActiveProcess');
+    _logger.info("[BG TASK] sync completed");
 
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-  // only runs for android
-  await _homeWidgetSync(true);
+    _logger.info("[BG TASK] locale fetch");
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+    // only runs for android
+    _logger.info("[BG TASK] home widget sync");
+    await _homeWidgetSync(true);
 
-  // await MLService.instance.init();
-  // await PersonService.init(entityService, MLDataDB.instance, prefs);
-  // await MLService.instance.runAllML(force: true);
-  await smartAlbumsService.syncSmartAlbums();
+    // await MLService.instance.init();
+    // await PersonService.init(entityService, MLDataDB.instance, prefs);
+    // await MLService.instance.runAllML(force: true);
+    _logger.info("[BG TASK] smart albums sync");
+    await smartAlbumsService.syncSmartAlbums();
+
+    _logger.info("[BG TASK] $taskId completed");
+  } catch (e, s) {
+    _logger.severe("[BG TASK] $taskId error", e, s);
+  }
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
@@ -282,12 +311,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
+    await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
+    wrappedService.scheduleInitialLoad();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -405,18 +431,28 @@ Future<bool> _isRunningInForeground() async {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final bool isRunningInFG = await _isRunningInForeground(); // hb
   final bool isInForeground = AppLifecycleService.instance.isForeground;
-  if (await _isRunningInForeground()) {
+  if (isRunningInFG) {
     _logger.info(
-      "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
+      "Background push received when app is alive and runningInFG: $isRunningInFG inForeground: $isInForeground",
     );
     if (PushService.shouldSync(message)) {
-      await _sync('firebaseBgSyncActiveProcess');
+      // FG is active, let it handle the sync
+      _logger.info("Foreground is active, skipping background sync from push");
+      // Could optionally trigger a sync event that FG can handle
     }
   } else {
-    // App is dead
+    // App is dead or FG is not active
     runWithLogs(
       () async {
-        _logger.info("Background push received");
+        _logger.info("Background push received, no active foreground");
+
+        // Mark BG as active before starting
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(
+          kLastBGTaskHeartBeatTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
+
         await _init(true, via: 'firebasePush');
         if (PushService.shouldSync(message)) {
           await _sync('firebaseBgSyncNoActiveProcess');

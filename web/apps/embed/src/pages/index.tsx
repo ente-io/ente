@@ -12,6 +12,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
+import { isCustomAlbumsAppOrigin } from "ente-base/origins";
 import { downloadManager } from "ente-gallery/services/download";
 import { extractCollectionKeyFromShareURL } from "ente-gallery/services/share";
 import { sortFiles } from "ente-gallery/utils/file";
@@ -130,8 +131,11 @@ export default function EmbedGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    window.location.href = "https://ente.io";
-                    redirectingToWebsite = true;
+                    // Only redirect to ente.io if this is NOT a custom/self-hosted instance
+                    if (!isCustomAlbumsAppOrigin) {
+                        window.location.href = "https://ente.io";
+                        redirectingToWebsite = true;
+                    }
                 }
                 if (!t || !ck) {
                     return;

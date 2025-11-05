@@ -21,10 +21,12 @@ class VideoEditorPlayerControl extends StatelessWidget {
         ]),
         builder: (_, __) {
           final duration = controller.trimmedDuration;
-          final pos = Duration(
-            seconds: (controller.videoPosition.inSeconds -
-                controller.startTrim.inSeconds),
-          );
+          Duration pos = controller.videoPosition - controller.startTrim;
+          if (pos.isNegative) {
+            pos = Duration.zero;
+          } else if (pos > duration) {
+            pos = duration;
+          }
           final isPlaying = controller.isPlaying;
 
           return GestureDetector(
@@ -36,29 +38,29 @@ class VideoEditorPlayerControl extends StatelessWidget {
               }
             },
             child: Container(
-              height: 28,
               margin: const EdgeInsets.only(top: 24, bottom: 28),
               padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 4,
+                horizontal: 14,
+                vertical: 8,
               ),
+              constraints: const BoxConstraints(minHeight: 36),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(56),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(
                     !isPlaying ? Icons.play_arrow : Icons.pause,
-                    size: 21,
+                    size: 20,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 6),
                   Text(
                     "${formatter(pos)} / ${formatter(duration)}",
-                    // ignore: prefer_const_constructors
-                    style: TextStyle(
-                      fontSize: 12,
+                    style: const TextStyle(
+                      fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

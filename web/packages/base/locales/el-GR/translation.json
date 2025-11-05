@@ -46,6 +46,7 @@
     "new_album": "Νέο άλμπουμ",
     "create_albums": "",
     "album_name": "Όνομα άλμπουμ",
+    "album_created": "",
     "close": "Κλείσιμο",
     "yes": "",
     "no": "Όχι",
@@ -235,6 +236,7 @@
     "search_results": "Αποτελέσματα αναζήτησης",
     "no_results": "Δε βρέθηκαν αποτελέσματα",
     "search_hint": "",
+    "albums_search_hint": "",
     "album": "Άλμπουμ",
     "date": "Ημερομηνία",
     "description": "Περιγραφή",
@@ -276,11 +278,7 @@
     "view_on_map": "Προβολή στο OpenStreetMap",
     "map": "Χάρτης",
     "enable_map": "Ενεργοποίηση χάρτη",
-    "enable_maps_confirm": "Ενεργοποίηση Χαρτών;",
-    "enable_maps_confirm_message": "",
     "disable_map": "Απενεργοποίηση χάρτη",
-    "disable_maps_confirm": "Απενεργοποίηση Χαρτών;",
-    "disable_maps_confirm_message": "",
     "details": "Λεπτομέρειες",
     "view_exif": "Προβολή όλων των δεδομένων Exif",
     "no_exif": "Χωρίς δεδομένα Exif",
@@ -327,6 +325,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "Μη υποστηριζόμενα αρχεία",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Αποκλεισμένες μεταφορτώσεις",
     "blocked_uploads_hint": "",
     "large_files": "Μεγάλα αρχεία",
@@ -433,6 +433,7 @@
         "year": "Μετά από ένα έτος"
     },
     "copy_link": "Αντιγραφή συνδέσμου",
+    "copy_embed_html": "",
     "done": "Ολοκληρώθηκε",
     "share_link_section_title": "Ή μοιραστείτε έναν σύνδεσμο",
     "remove_link": "Αφαίρεση συνδέσμου",
@@ -701,5 +702,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

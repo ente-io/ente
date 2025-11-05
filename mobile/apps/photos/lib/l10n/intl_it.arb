@@ -1162,7 +1162,6 @@
   },
   "maps": "Mappe",
   "enableMaps": "Abilita le Mappe",
-  "enableMapsDesc": "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni.",
   "quickLinks": "Collegamenti rapidi",
   "selectItemsToAdd": "Seleziona gli elementi da aggiungere",
   "addSelected": "Aggiungi selezionate",
@@ -1580,7 +1579,6 @@
   },
   "legacyInvite": "{email} ti ha invitato a essere un contatto fidato",
   "authToManageLegacy": "Autenticati per gestire i tuoi contatti fidati",
-  "useDifferentPlayerInfo": "Hai problemi a riprodurre questo video? Premi a lungo qui per provare un altro lettore.",
   "hideSharedItemsFromHomeGallery": "Nascondi gli elementi condivisi dalla galleria principale",
   "gallery": "Galleria",
   "joinAlbum": "Unisciti all'album",
@@ -1792,7 +1790,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Analizzeremo automaticamente il raggruppamento per determinare se ci sono più persone presenti, e li separeremo di nuovo. Questo potrebbe richiedere alcuni secondi.",
   "layout": "Disposizione",
   "day": "Giorno",
-  "peopleAutoAddDesc": "Seleziona le persone che vuoi aggiungere automaticamente all'album",
   "undo": "Annulla",
   "redo": "Ripristina",
   "filter": "﻿Filtra",
@@ -1830,7 +1827,34 @@
   "noSimilarImagesFound": "Nessuna immagine simile trovata",
   "yourPhotosLookUnique": "Le tue foto sembrano uniche",
   "reviewAndRemoveSimilarImages": "Controlla e rimuovi immagini simili",
+  "deletePhotosWithSize": "Elimina {count} foto ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "clearSelection": "Annulla selezione",
+  "similarImagesCount": "{count} immagini simili",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Elimina ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteFiles": "Elimina file",
   "areYouSureDeleteFiles": "Sei sicuro di voler eliminare questi file?",
   "greatJob": "Ottimo lavoro!",
@@ -1853,12 +1877,11 @@
   "all": "Tutti",
   "similar": "Simili",
   "identical": "Identici",
-  "related": "Correlati",
+  "related": "Correlate",
   "hoorayyyy": "Evviva!",
   "nothingToTidyUpHere": "Niente da sistemare qui",
-  "cLTitle1": "Immagini simili",
-  "cLDesc1": "Stiamo introducendo un nuovo sistema basato su ML per rilevare immagini simili e poter ripulire la tua libreria. Disponibile in Impostazioni -> Backup -> Libera spazio",
-  "cLTitle2": "Miglioramenti dello streaming video",
-  "cLDesc2": "Ora puoi attivare manualmente la generazione di stream per i video direttamente dall'app. Abbiamo anche aggiunto una nuova schermata delle impostazioni che ti mostrerà quale percentuale dei tuoi video sono stati elaborati per lo streaming",
-  "cLTitle3": "Miglioramento delle performance"
+  "closeBy": "Vicine",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

@@ -3,11 +3,13 @@ import "dart:core";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/gallery/fixed_extent_grid_row.dart";
 import "package:photos/models/gallery/fixed_extent_section_layout.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/ui/viewer/gallery/component/dummy_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
@@ -29,7 +31,6 @@ class GalleryGroups {
   final bool sortOrderAsc;
   final double widthAvailable;
   final double groupHeaderExtent;
-  final EnteFile? fileToJumpScrollTo;
   GalleryGroups({
     required this.allFiles,
     required this.groupType,
@@ -42,7 +43,6 @@ class GalleryGroups {
     required this.groupHeaderExtent,
     required this.showSelectAll,
     this.limitSelectionToOne = false,
-    this.fileToJumpScrollTo,
     this.showGallerySettingsCTA = false,
   }) {
     init();
@@ -59,6 +59,7 @@ class GalleryGroups {
 
   late final int crossAxisCount;
   late final List<FixedExtentSectionLayout> _groupLayouts;
+  final List<EnteFile> _allFilesWithDummies = [];
 
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
@@ -84,7 +85,11 @@ class GalleryGroups {
   List<({String groupID, String title})> get scrollbarDivisions =>
       _scrollbarDivisions;
 
-  double? getOffsetOfFile(EnteFile file) {
+  /// Returns allFiles with dummy entries added at appropriate positions to fill
+  /// incomplete rows in each group.
+  List<EnteFile> get allFilesWithDummies => _allFilesWithDummies;
+
+  double? getOffsetOfGroupContainingFile(EnteFile file) {
     final creationTime = file.creationTime;
     if (creationTime == null) {
       _logger.warning('Cannot scroll to file with null creation time');
@@ -94,7 +99,7 @@ class GalleryGroups {
     final groupId = _findGroupForCreationTime(creationTime);
     if (groupId == null) {
       _logger.warning(
-        'jumpToFile No group found for creation time: $creationTime',
+        'No group found for creation time: $creationTime',
       );
       return null;
     }
@@ -151,6 +156,7 @@ class GalleryGroups {
   void init() {
     crossAxisCount = localSettings.getPhotoGridSize();
     _buildGroups();
+
     _groupLayouts = _computeGroupLayouts();
 
     assert(groupIDs.length == _groupIdToFilesMap.length);
@@ -223,27 +229,41 @@ class GalleryGroups {
                 bool endOfListReached = false;
                 int i = 0;
                 while (!endOfListReached) {
-                  gridRowChildren.add(
-                    RepaintBoundary(
-                      key: ValueKey(
-                        tagPrefix +
-                            filesInGroup[firstIndexOfRowWrtFilesInGroup + i]
-                                .tag,
-                      ),
-                      child: GalleryFileWidget(
-                        file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
-                        selectedFiles: selectedFiles,
-                        limitSelectionToOne: limitSelectionToOne,
-                        tag: tagPrefix,
-                        photoGridSize: crossAxisCount,
-                        currentUserID: currentUserID,
-                      ),
-                    ),
-                  );
+                  final currentFile =
+                      filesInGroup[firstIndexOfRowWrtFilesInGroup + i];
 
-                  endOfListReached =
-                      filesInGroup[firstIndexOfRowWrtFilesInGroup + i] ==
-                          lastFile;
+                  if (currentFile is DummyFile) {
+                    // Add dummy widget for DummyFile
+                    gridRowChildren.add(
+                      RepaintBoundary(
+                        key: ValueKey(tagPrefix + currentFile.tag),
+                        child: DummyFileWidget(
+                          file: currentFile,
+                          selectedFiles: selectedFiles,
+                          limitSelectionToOne: limitSelectionToOne,
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Add normal GalleryFileWidget for real files
+                    gridRowChildren.add(
+                      RepaintBoundary(
+                        key: ValueKey(
+                          tagPrefix + currentFile.tag,
+                        ),
+                        child: GalleryFileWidget(
+                          file: currentFile,
+                          selectedFiles: selectedFiles,
+                          limitSelectionToOne: limitSelectionToOne,
+                          tag: tagPrefix,
+                          photoGridSize: crossAxisCount,
+                          currentUserID: currentUserID,
+                        ),
+                      ),
+                    );
+                  }
+
+                  endOfListReached = currentFile == lastFile;
                   i++;
                 }
               } else {
@@ -338,13 +358,41 @@ class GalleryGroups {
     Set<int> yearsInGroups,
   ) {
     final uuid = _uuid.v1();
+
+    // Save original last file before adding dummies to the end
+    final lastFile = groupFiles.last;
+
+    // Only add dummy files if swipe-to-select feature is enabled
+    // Dummy files are used for gesture tracking in swipe-to-select
+    if (!limitSelectionToOne) {
+      // Add dummy files to fill the last row if needed
+      final incompleteRowCount = groupFiles.length % crossAxisCount;
+      if (incompleteRowCount != 0) {
+        final dummiesNeeded = crossAxisCount - incompleteRowCount;
+        final filesWithDummies = List<EnteFile>.from(groupFiles);
+        for (int i = 0; i < dummiesNeeded; i++) {
+          filesWithDummies.add(
+            DummyFile(
+              groupID: uuid,
+              index: i,
+            ),
+          );
+        }
+        groupFiles = filesWithDummies;
+      }
+    }
+
     _groupIds.add(uuid);
     _groupIdToFilesMap[uuid] = groupFiles;
     _groupIdToGroupDataMap[uuid] = (
       groupType: groupType,
       startCreationTime: groupFiles.first.creationTime!,
-      endCreationTime: groupFiles.last.creationTime!
+      endCreationTime: lastFile.creationTime!
     );
+
+    if (!limitSelectionToOne) {
+      _allFilesWithDummies.addAll(groupFiles);
+    }
 
     // For scrollbar divisions
     if (groupType.timeGrouping()) {

@@ -34,6 +34,16 @@
   "password": "Mot de passe",
   "confirmPassword": "Confirmer le mot de passe",
   "activeSessions": "Sessions actives",
+  "ocrProcessingOverlayMessage": "Détection du texte...",
+  "ocrLoadingIndicatorLabel": "Détection du texte",
+  "ocrSelectionHint": "Glissez ou appuyez deux fois pour sélectionner ce que vous avez besoin",
+  "ocrNoTextDetected": "Aucun texte détecté",
+  "ocrRetryButtonLabel": "Réessayer",
+  "ocrModelsNetworkRequiredError": "Connexion réseau requise pour télécharger les modèles OCR lors de la première utilisation",
+  "ocrModelsPrepareFailed": "Impossible de préparer les modèles OCR",
+  "ocrImageNotFoundError": "Fichier image introuvable",
+  "ocrImageDecodeFailedError": "Impossible de lire le fichier image",
+  "ocrGenericDetectError": "Impossible de détecter le texte dans l'image",
   "oops": "Oups",
   "somethingWentWrongPleaseTryAgain": "Quelque chose s'est mal passé, veuillez recommencer",
   "thisWillLogYouOutOfThisDevice": "Cela vous déconnectera de cet appareil !",
@@ -186,6 +196,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Autoriser l'adhésion à l'album",
   "allowAddPhotosDescription": "Autorisez les personnes ayant le lien à ajouter des photos dans l'album partagé.",
   "passwordLock": "Verrouillage par mot de passe",
   "canNotOpenTitle": "Impossible d'ouvrir cet album",
@@ -198,6 +209,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Disposition de l'album",
+  "layoutGrouped": "Groupé",
+  "layoutContinuous": "En continu",
+  "layoutTrip": "Excursion",
+  "preview": "Aperçu",
   "linkExpiry": "Expiration du lien",
   "linkExpired": "Expiré",
   "linkEnabled": "Activé",
@@ -239,6 +255,7 @@
   "sendLink": "Envoyer le lien",
   "sendQrCode": "Envoyer le QR code",
   "copyLink": "Copier le lien",
+  "copyEmbedHtml": "Copier le code HTML intégré",
   "linkHasExpired": "Le lien a expiré",
   "publicLinkEnabled": "Lien public activé",
   "shareALink": "Partager le lien",
@@ -1170,8 +1187,8 @@
     "description": "Label for the map view"
   },
   "maps": "Carte",
+  "mapsPrivacyNotice": "Les coordonnées approximatives seront envoyées à des tiers soucieux de la vie privée comme OpenStreetMap pour afficher la carte et l'emplacement.",
   "enableMaps": "Activer la carte",
-  "enableMapsDesc": "Vos photos seront affichées sur une carte du monde.\n\nCette carte est hébergée par Open Street Map, et les emplacements exacts de vos photos ne sont jamais partagés.\n\nVous pouvez désactiver cette fonction à tout moment dans les Paramètres.",
   "quickLinks": "Liens rapides",
   "selectItemsToAdd": "Sélectionner les éléments à ajouter",
   "addSelected": "Ajouter la sélection",
@@ -1589,7 +1606,6 @@
   },
   "legacyInvite": "{email} vous a invité à être un contact de confiance",
   "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance",
-  "useDifferentPlayerInfo": "Vous avez des difficultés pour lire cette vidéo ? Appuyez longuement ici pour essayer un autre lecteur.",
   "hideSharedItemsFromHomeGallery": "Masquer les éléments partagés avec vous dans la galerie",
   "gallery": "Galerie",
   "joinAlbum": "Rejoindre l'album",
@@ -1801,7 +1817,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Nous analyserons automatiquement le regroupement pour déterminer s'il y a plusieurs personnes présentes et nous les séparerons à nouveau si tel est le cas. Cela peut prendre quelques secondes.",
   "layout": "Disposition",
   "day": "Jour",
-  "peopleAutoAddDesc": "Sélectionnez les personnes que vous souhaitez ajouter automatiquement à l'album",
   "undo": "Annuler",
   "redo": "Rétablir",
   "filter": "Filtres",
@@ -1839,6 +1854,14 @@
   "findSimilarImages": "Rechercher des images similaires",
   "noSimilarImagesFound": "Aucune image similaire trouvée",
   "yourPhotosLookUnique": "Vos photos semblent uniques",
+  "similarGroupsFound": "{count, plural, one {}=1{{count} groupe trouvé} other{{count} groupes trouvés}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewAndRemoveSimilarImages": "Examiner et supprimer les images similaires",
   "deletePhotosWithSize": "Supprimer {count} photos ({size})",
   "@deletePhotosWithSize": {
@@ -1925,14 +1948,49 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Images similaires",
-  "cLDesc1": "Nous introduisons un nouveau système basé sur le ML pour détecter des images similaires, en utilisant lesquelles vous pouvez nettoyer de votre bibliothèque. Disponible dans Paramètres->Sauvegarde->Espace libre",
-  "cLTitle2": "Améliorations du streaming vidéo",
-  "cLDesc2": "Vous pouvez maintenant déclencher manuellement la génération de flux vidéos directement depuis l'application. Nous avons également ajouté un nouvel écran de paramètres de streaming vidéo qui vous montrera quel pourcentage de vos vidéos ont été traitées pour le streaming",
-  "cLTitle3": "Amélioration des performances",
-  "cLDesc3": "Plusieurs améliorations invisibles, y compris une meilleure utilisation du cache et une expérience de défilement plus fluide",
+  "cLTitle1": "OCR ! Sélectionnez du texte dans les photos",
+  "cLDesc1": "Ente détectera si une photo ou une capture d'écran contient du texte et vous affichera un bouton pour passer en mode de sélection de texte. Chaque ligne de texte peut être sélectionnée individuellement.",
+  "cLTitle2": "Balayez pour sélectionner",
+  "cLDesc2": "Utilisez le geste de balayage pour sélectionner rapidement des photos dans votre galerie. Fonctionne parfaitement avec une utilisation à une main, sans avoir à lever le doigt !",
+  "cLTitle3": "Nouveaux souvenirs",
+  "cLDesc3": "\"Enfants qui jouent\", \"Aventures d'hiver\", \"Nuits sous les néons\", et plus encore.",
+  "cLTitle4": "Galerie paysage et plus encore",
+  "cLDesc4": "Prise en charge de la mise en page paysage dans la galerie principale de l'application. Affiche les personnes sans photos associées au lieu de les filtrer. Améliorer la détection d'aspect vidéo lorsque partagé à partir d'applications externes.",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "peopleAutoAddDesc": "Ajouter automatiquement les photos des personnes sélectionnées à cet album",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
+  },
+  "festivities": "Remerciements festifs",
+  "snowAdventures": "Aventures d'hiver",
+  "waterfalls": "Chasse aux chutes d'eau",
+  "wildlife": "Dans la nature",
+  "flowers": "Beautés florissantes",
+  "nightLights": "Soirées néon",
+  "architecture": "Icônes design",
+  "autumnColors": "Splendeur de l'Automne",
+  "desertDreams": "Rêves désertiques",
+  "stargazing": "Sous les étoiles",
+  "lakeside": "Calme du lac",
+  "rainyDays": "Sentiment de jour pluvieux",
+  "sportsAction": "Partie active",
+  "streetArt": "Histoires d'art de la rue",
+  "familyMoments": "Moment en famille",
+  "fireworks": "Grand final de feux d'artifices",
+  "historicSites": "Échos de l'histoire",
+  "tropicalParadise": "Évasions tropicales",
+  "forestTrails": "Promenades en forêt",
+  "citySunsets": "Coucher du soleil en ville",
+  "colorfulMarkets": "Marchés animés",
+  "cozyCafes": "Coins de café confortables",
+  "vintageVibes": "Vibes « vintage »",
+  "aerialViews": "Perspectives aériennes",
+  "artisticPortraits": "Portraits joyeux",
+  "streetFood": "Bouchés de la bouffe",
+  "riverCruises": "Vue sur le fleuve",
+  "playfulKids": "Enfants amusants",
+  "coastalCliffs": "Falaises au bord de mer"
 }

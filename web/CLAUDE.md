@@ -5,11 +5,19 @@
 When making commits, follow these rules:
 
 - Keep messages CONCISE (no walls of text)
-- Subject line under 72 chars (no body text - only Co-Authored-By line)
+- Subject line under 72 chars as a single sentence (no body text, no bullets, no lists - only Co-Authored-By line)
 - NO emojis
 - NO promotional text or links (except Co-Authored-By line)
 - Use ONLY "Co-Authored-By: Claude <noreply@anthropic.com>" for attribution
-- Run pre-commit checks (format, lint, typecheck, build) before committing
+- ONLY run pre-commit checks (format, lint, typecheck, build) when explicitly creating a commit
+
+Example:
+
+```
+Format markdown files with Prettier for consistent styling
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
 
 ## Commands
 
@@ -25,7 +33,7 @@ yarn dev:auth         # Auth app (port 3003)
 yarn dev:embed        # Embed app (port 3006)
 yarn dev:accounts     # Accounts app (port 3001)
 yarn dev:cast         # Cast app (port 3004)
-yarn dev:locker       # Locker app (port 3005)
+yarn dev:share       # Public Locker app (port 3005)
 
 # Production builds
 yarn build            # Photos app
@@ -34,7 +42,10 @@ yarn build:embed      # Embed app
 yarn build:accounts   # Accounts app
 yarn build:cast       # Cast app
 
-# Code quality - ALWAYS run before committing
+# Code quality - ONLY run when:
+# 1. Explicitly requested by user
+# 2. Before creating a commit (pre-commit)
+# DO NOT run automatically after file modifications
 yarn lint             # Check formatting, linting, and TypeScript types
 yarn lint-fix         # Auto-fix linting and formatting issues
 ```
@@ -59,7 +70,7 @@ web/
 │   ├── embed/         # Embeddable photo viewer (iframe-friendly)
 │   ├── accounts/      # Passkey support
 │   ├── cast/          # Chromecast/browser casting
-│   ├── locker/        # Document storage
+│   ├── share/         # Document storage
 │   └── payments/      # Subscription management
 │
 ├── packages/          # Shared code between apps
@@ -76,7 +87,7 @@ web/
 
 ## Important Notes
 
-- Always run `yarn lint` before committing changes
+- Always run `yarn lint` when explicitly requested or before committing (but not after file modifications)
 - Use Yarn (not npm) for package management
 - Respect the monorepo structure - shared code goes in packages/
 - Follow existing Material-UI theming patterns

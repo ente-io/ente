@@ -352,6 +352,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                     _getFormattedCode(value),
                     style: TextStyle(fontSize: widget.isCompactMode ? 14 : 24),
                     maxLines: 1,
+                    textDirection: TextDirection.ltr,
                   ),
                 );
               },
@@ -402,13 +403,21 @@ class _CodeWidgetState extends State<CodeWidget> {
                         l10n.nextTotpTitle,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      InkWell(
-                        onTap: _onNextHotpTapped,
-                        child: const Icon(
-                          Icons.forward_outlined,
-                          size: 32,
-                          color: Colors.grey,
-                        ),
+                      ValueListenableBuilder<String>(
+                        valueListenable: _nextCode,
+                        builder: (context, value, child) {
+                          return Material(
+                            type: MaterialType.transparency,
+                            child: Text(
+                              _getFormattedCode(value),
+                              style: TextStyle(
+                                fontSize: widget.isCompactMode ? 12 : 18,
+                                color: Colors.grey,
+                              ),
+                              textDirection: TextDirection.ltr,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -884,7 +893,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
-    await PlatformUtil.refocusWindows();
     if (!isAuthSuccessful) {
       return;
     }
@@ -906,7 +914,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
-    await PlatformUtil.refocusWindows();
     if (!isAuthSuccessful) {
       return;
     }
@@ -926,7 +933,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
-    await PlatformUtil.refocusWindows();
     if (!isAuthSuccessful) {
       return;
     }
