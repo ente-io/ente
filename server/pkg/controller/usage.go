@@ -27,7 +27,7 @@ type UsageController struct {
 	UploadResultCache map[int64]bool
 }
 
-const MaxLockerFiles = 10000
+const MaxLockerFiles = 1000
 const hundredMBInBytes = 100 * 1024 * 1024
 
 // CanUploadFile returns error if the file of given size (with StorageOverflowAboveSubscriptionLimit buffer) can be
@@ -59,11 +59,12 @@ func (c *UsageController) checkAndUpdateCache(ctx context.Context, userID int64,
 func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
 	// If app is Locker, limit to MaxLockerFiles files
 	if app == ente.Locker {
-		// Get file count
-		if fileCount, err := c.UserCacheCtrl.GetUserFileCountWithCache(userID, app); err != nil {
-			if fileCount >= MaxLockerFiles {
-				return stacktrace.Propagate(ente.ErrFileLimitReached, "")
-			}
+		fileCount, err := c.UserCacheCtrl.GetUserFileCountWithCache(userID, app)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to fetch locker file count")
+		}
+		if fileCount >= MaxLockerFiles {
+			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
 		}
 	}
 
