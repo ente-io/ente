@@ -116,15 +116,15 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/payments web/apps/payments/dist
 
-            - name: Build locker
-              run: yarn build:locker
+            - name: Build public locker
+              run: yarn build:share
 
-            - name: Publish locker
+            - name: Publish public locker
               uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/locker web/apps/locker/out
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/share web/apps/share/out
 
             - name: Build embed
               run: yarn build:embed

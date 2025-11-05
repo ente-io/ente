@@ -191,6 +191,10 @@ class StringsLocalizationsUk extends StringsLocalizations {
   String get noDeleteAccountAction => 'Ні, видаліть мій обліковий запис';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'Будь ласка, авторизуйтесь, щоб розпочати видалення облікового запису';
 

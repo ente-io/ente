@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## v1.7.15 (Unreleased)
+## v1.7.16 (unreleased)
+
+- .
+
+## v1.7.15
 
 - Support Czech translations.
 - Custom domain support for public album sharing.

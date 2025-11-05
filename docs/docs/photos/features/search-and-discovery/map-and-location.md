@@ -49,9 +49,6 @@ Open `Settings > Preferences > Advanced > Map` and toggle the map settings on or
 3. Select **Map**
 4. View only that album's photos on the map
 
-**On desktop:**
-Access map view through the search interface or album menus, similar to mobile.
-
 ### Privacy
 
 Your location data is end-to-end encrypted, just like your photos. When you view photos on the map:

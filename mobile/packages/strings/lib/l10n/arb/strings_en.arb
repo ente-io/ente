@@ -237,6 +237,10 @@
   "@noDeleteAccountAction": {
     "description": "Button to proceed with account deletion"
   },
+  "deleteAccountWarning": "This will delete your Ente Auth, Ente Photos and Ente Locker account.",
+  "@deleteAccountWarning": {
+    "description": "Warning message shown before account deletion"
+  },
   "initiateAccountDeleteTitle": "Please authenticate to initiate account deletion",
   "@initiateAccountDeleteTitle": {
     "description": "Title for authentication dialog before account deletion"

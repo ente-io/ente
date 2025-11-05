@@ -191,6 +191,10 @@ class StringsLocalizationsFa extends StringsLocalizations {
   String get noDeleteAccountAction => 'خیر، حساب کاربری را حذف کن';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'لطفا جهت شروع فرآیند حذف حساب کاربری، اعتبارسنجی کنید';
 

@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
+
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
 
 final storageUnits = ["bytes", "KB", "MB", "GB", "TB"];
 
@@ -60,4 +65,16 @@ num roundGBsToTBs(sizeInGBs) {
   } else {
     return sizeInTBs;
   }
+}
+
+/// Computes the MD5 hash of a file.
+///
+/// Returns base64-encoded MD5 hash suitable for HTTP Content-MD5 header.
+Future<String> computeMd5(String filePath) async {
+  final file = File(filePath);
+  final output = AccumulatorSink<Digest>();
+  final input = md5.startChunkedConversion(output);
+  await file.openRead().forEach(input.add);
+  input.close();
+  return base64Encode(output.events.single.bytes);
 }

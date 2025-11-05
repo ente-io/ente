@@ -1593,7 +1593,6 @@
   },
   "legacyInvite": "{email} 已邀请您成为可信联系人",
   "authToManageLegacy": "请验证身份以管理您的可信联系人",
-  "useDifferentPlayerInfo": "播放此视频时遇到问题了吗？长按此处可尝试使用其他播放器。",
   "hideSharedItemsFromHomeGallery": "隐藏主页图库中的共享项目",
   "gallery": "图库",
   "joinAlbum": "加入相册",
