@@ -29,6 +29,19 @@ class FacesTimelinePage extends StatefulWidget {
   State<FacesTimelinePage> createState() => _FacesTimelinePageState();
 }
 
+const LinearGradient _facesTimelineBackgroundGradient = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  colors: [
+    Color(0xFF03010A),
+    Color(0xFF16103C),
+    Color(0xFF401963),
+    Color(0xFF241348),
+    Color(0xFF03010A),
+  ],
+  stops: [0.0, 0.3, 0.52, 0.74, 1.0],
+);
+
 class _FacesTimelinePageState extends State<FacesTimelinePage>
     with TickerProviderStateMixin {
   static const _frameInterval = Duration(milliseconds: 800);
@@ -314,108 +327,114 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
           final titleStyle = textTheme.h2Bold.copyWith(
             letterSpacing: -2,
           );
-          return Scaffold(
-            backgroundColor: colorScheme.backgroundBase,
-            appBar: AppBar(
-              backgroundColor: colorScheme.backgroundBase,
-              foregroundColor: colorScheme.textBase,
-              title: Text(
-                title,
-                style: titleStyle,
-              ),
+          return DecoratedBox(
+            decoration: const BoxDecoration(
+              gradient: _facesTimelineBackgroundGradient,
             ),
-            body: FutureBuilder<List<_TimelineFrame>>(
-              future: _framesFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.primary500,
-                      ),
-                    ),
-                  );
-                }
-                if (snapshot.hasError) {
-                  _logger.severe(
-                    "Faces timeline failed to load",
-                    snapshot.error,
-                    snapshot.stackTrace,
-                  );
-                  return Center(
-                    child: Text(
-                      l10n.facesTimelineUnavailable,
-                      style: textTheme.body,
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-                final frames = snapshot.data ?? [];
-                if (frames.isEmpty) {
-                  return Center(
-                    child: Text(
-                      l10n.facesTimelineUnavailable,
-                      style: textTheme.body,
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-                final displayIndex =
-                    _stackProgress.round().clamp(0, frames.length - 1);
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final viewPadding = MediaQuery.of(context).viewPadding;
-                    final double bottomInset = viewPadding.bottom;
-                    final double bottomPadding = math.max(12, bottomInset);
-                    const double topPadding = 12;
-                    final double gapToTop = _cardGap + topPadding;
-                    const double desiredGap = _controlsDesiredGapToCard;
-                    final double overlap = math.max(0, gapToTop - desiredGap);
-                    final double controlsHeight = _controlsHeight > 0
-                        ? _controlsHeight
-                        : _controlsHeightFallback;
-                    final double reservedHeight =
-                        topPadding + bottomPadding + controlsHeight;
-                    final Widget controlsContent = KeyedSubtree(
-                      key: _controlsKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildCaption(context),
-                          const SizedBox(height: 16),
-                          _buildControls(context),
-                        ],
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              appBar: AppBar(
+                backgroundColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                foregroundColor: colorScheme.textBase,
+                title: Text(
+                  title,
+                  style: titleStyle,
+                ),
+              ),
+              body: FutureBuilder<List<_TimelineFrame>>(
+                future: _framesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorScheme.primary500,
+                        ),
                       ),
                     );
-                    _scheduleControlsHeightUpdate();
-                    return Stack(
-                      children: [
-                        Column(
+                  }
+                  if (snapshot.hasError) {
+                    _logger.severe(
+                      "Faces timeline failed to load",
+                      snapshot.error,
+                      snapshot.stackTrace,
+                    );
+                    return Center(
+                      child: Text(
+                        l10n.facesTimelineUnavailable,
+                        style: textTheme.body,
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  final frames = snapshot.data ?? [];
+                  if (frames.isEmpty) {
+                    return Center(
+                      child: Text(
+                        l10n.facesTimelineUnavailable,
+                        style: textTheme.body,
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final viewPadding = MediaQuery.of(context).viewPadding;
+                      final double bottomInset = viewPadding.bottom;
+                      final double bottomPadding = math.max(12, bottomInset);
+                      const double topPadding = 12;
+                      final double gapToTop = _cardGap + topPadding;
+                      const double desiredGap = _controlsDesiredGapToCard;
+                      final double overlap = math.max(0, gapToTop - desiredGap);
+                      final double controlsHeight = _controlsHeight > 0
+                          ? _controlsHeight
+                          : _controlsHeightFallback;
+                      final double reservedHeight =
+                          topPadding + bottomPadding + controlsHeight;
+                      final Widget controlsContent = KeyedSubtree(
+                        key: _controlsKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: _buildFrameView(context),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: reservedHeight),
+                            _buildCaption(context),
+                            const SizedBox(height: 16),
+                            _buildControls(context),
                           ],
                         ),
-                        Positioned(
-                          left: 24,
-                          right: 24,
-                          bottom: bottomPadding + overlap,
-                          child: controlsContent,
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+                      );
+                      _scheduleControlsHeightUpdate();
+                      return Stack(
+                        children: [
+                          Column(
+                            children: [
+                              Expanded(
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: _buildFrameView(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: reservedHeight),
+                            ],
+                          ),
+                          Positioned(
+                            left: 24,
+                            right: 24,
+                            bottom: bottomPadding + overlap,
+                            child: controlsContent,
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           );
         },
