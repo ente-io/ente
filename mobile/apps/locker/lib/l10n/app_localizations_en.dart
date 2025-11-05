@@ -1203,14 +1203,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Unlock Locker';
+  String get unlockLockerPaidPlanTitle => 'Coming soon!';
 
   @override
   String get unlockLockerPaidPlanBody =>
-      'Locker is available only to paid customers of Ente Photos. Upgrade to a paid plan from Photos to use Locker';
+      'Locker is available only to paid customers of Ente Photos right now.';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';
+
+  @override
+  String get okay => 'Okay';
 
   @override
   String get noAccountCta => 'I don\'t have an account';
@@ -1227,10 +1230,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featureShareAnytime => 'Share them anytime';
 
   @override
-  String get emailIdLabel => 'Email id';
+  String get emailIdLabel => 'Email';
 
   @override
-  String get emailIdHint => 'Enter your email id';
+  String get emailIdHint => 'Enter your email address';
 
   @override
   String get loginPasswordLabel => 'Password';
@@ -1239,7 +1242,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginPasswordHint => 'Enter your password';
 
   @override
-  String get forgotPassword => 'Forgot Password?';
+  String get forgotPassword => 'Forgot password?';
 
   @override
   String get logInAction => 'Log in';

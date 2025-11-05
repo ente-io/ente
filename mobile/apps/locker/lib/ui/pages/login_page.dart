@@ -232,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
       context,
       title: context.l10n.unlockLockerPaidPlanTitle,
       body: context.l10n.unlockLockerPaidPlanBody,
-      buttonLabel: context.l10n.checkoutEntePhotos,
+      buttonLabel: context.l10n.okay,
       assetPath: "assets/file_lock.png",
       icon: const SizedBox.shrink(),
     );

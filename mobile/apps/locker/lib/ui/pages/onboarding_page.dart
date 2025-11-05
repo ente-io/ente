@@ -132,7 +132,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       context,
                       title: l10n.unlockLockerPaidPlanTitle,
                       body: l10n.unlockLockerPaidPlanBody,
-                      buttonLabel: l10n.checkoutEntePhotos,
+                      buttonLabel: l10n.okay,
                       assetPath: "assets/file_lock.png",
                       icon: const SizedBox.shrink(),
                     );

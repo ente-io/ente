@@ -2095,13 +2095,13 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerPaidPlanTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unlock Locker'**
+  /// **'Coming soon!'**
   String get unlockLockerPaidPlanTitle;
 
   /// No description provided for @unlockLockerPaidPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is available only to paid customers of Ente Photos. Upgrade to a paid plan from Photos to use Locker'**
+  /// **'Locker is available only to paid customers of Ente Photos right now.'**
   String get unlockLockerPaidPlanBody;
 
   /// No description provided for @checkoutEntePhotos.
@@ -2109,6 +2109,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checkout Ente Photos'**
   String get checkoutEntePhotos;
+
+  /// No description provided for @okay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get okay;
 
   /// No description provided for @noAccountCta.
   ///
@@ -2137,13 +2143,13 @@ abstract class AppLocalizations {
   /// No description provided for @emailIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Email id'**
+  /// **'Email'**
   String get emailIdLabel;
 
   /// No description provided for @emailIdHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email id'**
+  /// **'Enter your email address'**
   String get emailIdHint;
 
   /// No description provided for @loginPasswordLabel.
@@ -2161,7 +2167,7 @@ abstract class AppLocalizations {
   /// No description provided for @forgotPassword.
   ///
   /// In en, this message translates to:
-  /// **'Forgot Password?'**
+  /// **'Forgot password?'**
   String get forgotPassword;
 
   /// No description provided for @logInAction.
