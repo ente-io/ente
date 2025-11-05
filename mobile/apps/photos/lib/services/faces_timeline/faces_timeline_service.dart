@@ -273,6 +273,7 @@ class FacesTimelineService {
     final fileMap = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
 
     final faces = <_TimelineFaceData>[];
+    final facesByFileId = <int, Map<String, Face>>{};
     for (final faceId in faceIds) {
       final fileId = getFileIdFromFaceId<int>(faceId);
       final file = fileMap[fileId];
@@ -283,6 +284,21 @@ class FacesTimelineService {
       if (creationTime == null || creationTime <= 0) {
         continue;
       }
+      Map<String, Face>? facesForFile = facesByFileId[fileId];
+      if (facesForFile == null) {
+        final fetchedFaces = await _mlDataDB.getFacesForGivenFileID(fileId);
+        if (fetchedFaces == null) {
+          facesForFile = {};
+        } else {
+          facesForFile = {
+            for (final face in fetchedFaces) face.faceID: face,
+          };
+        }
+        facesByFileId[fileId] = facesForFile;
+      }
+      final faceDetails = facesForFile[faceId];
+      final faceScore = faceDetails?.score ?? 0.0;
+      final blurScore = faceDetails?.blur ?? 0.0;
       final date = DateTime.fromMicrosecondsSinceEpoch(creationTime);
       faces.add(
         _TimelineFaceData(
@@ -290,6 +306,8 @@ class FacesTimelineService {
           fileId: fileId,
           creationTimeMicros: creationTime,
           year: date.year,
+          score: faceScore,
+          blur: blurScore,
         ),
       );
     }
@@ -422,12 +440,16 @@ class _TimelineFaceData {
   final int fileId;
   final int creationTimeMicros;
   final int year;
+  final double score;
+  final double blur;
 
   const _TimelineFaceData({
     required this.faceId,
     required this.fileId,
     required this.creationTimeMicros,
     required this.year,
+    required this.score,
+    required this.blur,
   });
 
   Map<String, dynamic> toJson() => {
@@ -435,6 +457,8 @@ class _TimelineFaceData {
         "fileId": fileId,
         "creationTime": creationTimeMicros,
         "year": year,
+        "score": score,
+        "blur": blur,
       };
 
   factory _TimelineFaceData.fromJson(Map<String, dynamic> json) {
@@ -443,8 +467,12 @@ class _TimelineFaceData {
       fileId: json["fileId"] as int,
       creationTimeMicros: json["creationTime"] as int,
       year: json["year"] as int,
+      score: (json["score"] as num?)?.toDouble() ?? 0.0,
+      blur: (json["blur"] as num?)?.toDouble() ?? 0.0,
     );
   }
+
+  bool get hasHighScore => score >= 0.8;
 }
 
 Map<String, dynamic> selectTimelineEntriesTask(Map<String, dynamic> param) {
@@ -497,56 +525,80 @@ Map<String, dynamic> selectTimelineEntriesTask(Map<String, dynamic> param) {
 }
 
 List<_TimelineFaceData> _pickFacesForYear(List<_TimelineFaceData> faces) {
-  if (faces.length <= 4) {
-    return List<_TimelineFaceData>.from(faces);
+  if (faces.isEmpty) {
+    return <_TimelineFaceData>[];
   }
 
-  final total = faces.length;
-  final targetPositions = <double>[
-    0,
-    (total - 1) / 3,
-    (total - 1) * 2 / 3,
-    total - 1,
-  ];
-  final selectedIndices = <int>{};
-  final picks = <_TimelineFaceData>[];
+  final sortedByQuality = List<_TimelineFaceData>.from(faces)
+    ..sort(_compareFaceQuality);
 
-  for (final position in targetPositions) {
-    int index = position.round().clamp(0, total - 1);
-    if (selectedIndices.contains(index)) {
-      int offset = 1;
-      bool assigned = false;
-      while (!assigned && (index - offset >= 0 || index + offset < total)) {
-        if (index - offset >= 0 && !selectedIndices.contains(index - offset)) {
-          index = index - offset;
-          assigned = true;
-          break;
-        }
-        if (index + offset < total &&
-            !selectedIndices.contains(index + offset)) {
-          index = index + offset;
-          assigned = true;
-          break;
-        }
-        offset++;
-      }
-      if (!assigned) {
+  final picks = <_TimelineFaceData>[];
+  final selectedIds = <String>{};
+  final usedDayKeys = <int>{};
+  final uniqueDayKeys = sortedByQuality
+      .map((face) => _dayKeyForMicros(face.creationTimeMicros))
+      .toSet();
+  final totalUniqueDays = uniqueDayKeys.length;
+  final targetUniqueDayCount = totalUniqueDays >= 4 ? 4 : totalUniqueDays;
+  final allowDuplicateDays = totalUniqueDays < 4;
+
+  if (targetUniqueDayCount > 0) {
+    for (final face in sortedByQuality) {
+      final dayKey = _dayKeyForMicros(face.creationTimeMicros);
+      if (usedDayKeys.contains(dayKey)) {
         continue;
       }
-    }
-    if (selectedIndices.add(index)) {
-      picks.add(faces[index]);
+      picks.add(face);
+      selectedIds.add(face.faceId);
+      usedDayKeys.add(dayKey);
+      if (picks.length == targetUniqueDayCount) {
+        break;
+      }
     }
   }
 
   if (picks.length < 4) {
-    for (var i = 0; i < total && picks.length < 4; i++) {
-      if (selectedIndices.add(i)) {
-        picks.add(faces[i]);
+    for (final face in sortedByQuality) {
+      if (selectedIds.contains(face.faceId)) {
+        continue;
+      }
+      final dayKey = _dayKeyForMicros(face.creationTimeMicros);
+      if (!allowDuplicateDays && usedDayKeys.contains(dayKey)) {
+        continue;
+      }
+      picks.add(face);
+      selectedIds.add(face.faceId);
+      usedDayKeys.add(dayKey);
+      if (picks.length == 4) {
+        break;
       }
     }
   }
 
   picks.sort((a, b) => a.creationTimeMicros.compareTo(b.creationTimeMicros));
   return picks;
+}
+
+int _compareFaceQuality(_TimelineFaceData a, _TimelineFaceData b) {
+  final highScoreComparison =
+      (b.hasHighScore ? 1 : 0) - (a.hasHighScore ? 1 : 0);
+  if (highScoreComparison != 0) {
+    return highScoreComparison;
+  }
+
+  final scoreComparison = b.score.compareTo(a.score);
+  if (scoreComparison != 0) {
+    return scoreComparison;
+  }
+
+  final blurComparison = b.blur.compareTo(a.blur);
+  if (blurComparison != 0) {
+    return blurComparison;
+  }
+
+  return a.creationTimeMicros.compareTo(b.creationTimeMicros);
+}
+
+int _dayKeyForMicros(int micros) {
+  return micros ~/ Duration.microsecondsPerDay;
 }
