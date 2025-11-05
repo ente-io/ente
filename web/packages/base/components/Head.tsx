@@ -1,7 +1,12 @@
 import Head from "next/head";
 import React from "react";
 import { haveWindow } from "../env";
-import { albumsAppOrigin, isCustomAlbumsAppOrigin } from "../origins";
+import {
+    albumsAppOrigin,
+    isCustomAlbumsAppOrigin,
+    isCustomShareAppOrigin,
+    shareAppOrigin,
+} from "../origins";
 
 interface CustomHeadProps {
     title: string;
@@ -97,7 +102,7 @@ export const CustomHeadPhotosOrAlbums: React.FC<CustomHeadProps> = ({
  * Similar to {@link CustomHeadAlbums}, this includes Open Graph meta tags with
  * absolute URLs for social media preview images.
  */
-export const CustomHeadShare: React.FC = () => (
+export const CustomHeadShareStatic: React.FC = () => (
     <Head>
         <title>Ente Locker</title>
         <link rel="icon" href="/images/favicon.png" type="image/png" />
@@ -117,3 +122,19 @@ export const CustomHeadShare: React.FC = () => (
         <meta name="referrer" content="strict-origin-when-cross-origin" />
     </Head>
 );
+
+/**
+ * A convenience fan out to conditionally show one of {@link CustomHead} or
+ * {@link CustomHeadShareStatic}.
+ *
+ * This component defaults to {@link CustomHeadShareStatic} during SSR unless a
+ * custom endpoint is defined, and then does a client side update when it
+ * detects that the origin it is being served on is not the share origin.
+ */
+export const CustomHeadShare: React.FC<CustomHeadProps> = ({ title }) =>
+    isCustomShareAppOrigin ||
+    (haveWindow() && new URL(window.location.href).origin != shareAppOrigin()) ? (
+        <CustomHead {...{ title }} />
+    ) : (
+        <CustomHeadShareStatic />
+    );

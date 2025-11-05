@@ -17,7 +17,7 @@ import { FileShareView } from "../components/file-share/FileShareView";
 const NotFoundPage: React.FC = () => {
     return (
         <>
-            <CustomHeadShare />
+            <CustomHeadShare title="Ente Locker" />
             <FileShareView />
         </>
     );
