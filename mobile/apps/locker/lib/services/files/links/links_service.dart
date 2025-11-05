@@ -86,27 +86,32 @@ class LinksService {
     _LinkSecretPayload payload,
   ) async {
     final encryptedShareKey = link.encryptedShareKey;
-    if (encryptedShareKey != null) {
-      try {
-        final keyAttributes = Configuration.instance.getKeyAttributes();
-        final secretKey = Configuration.instance.getSecretKey();
-        if (keyAttributes != null && secretKey != null) {
-          final decryptedBytes = CryptoUtil.openSealSync(
-            CryptoUtil.base642bin(encryptedShareKey),
-            CryptoUtil.base642bin(keyAttributes.publicKey),
-            secretKey,
-          );
-          final secretBase64 = utf8.decode(decryptedBytes);
-          final secret = utf8.decode(CryptoUtil.base642bin(secretBase64));
-          return secret;
-        }
-        _logger.warning("Missing key material to decrypt share secret");
-      } catch (e, s) {
-        _logger.severe("Failed to decrypt share secret", e, s);
-      }
+    if (encryptedShareKey == null) {
+      return payload.secret;
     }
 
-    return payload.secret;
+    final keyAttributes = Configuration.instance.getKeyAttributes();
+    final secretKey = Configuration.instance.getSecretKey();
+    if (keyAttributes == null || secretKey == null) {
+      _logger.severe(
+        "Missing key material to decrypt share secret for existing link",
+      );
+      throw StateError("Unable to decrypt share secret");
+    }
+
+    try {
+      final decryptedBytes = CryptoUtil.openSealSync(
+        CryptoUtil.base642bin(encryptedShareKey),
+        CryptoUtil.base642bin(keyAttributes.publicKey),
+        secretKey,
+      );
+      final secretBase64 = utf8.decode(decryptedBytes);
+      final secret = utf8.decode(CryptoUtil.base642bin(secretBase64));
+      return secret;
+    } catch (e, s) {
+      _logger.severe("Failed to decrypt share secret", e, s);
+      throw StateError("Unable to decrypt share secret");
+    }
   }
 
   String _generateBase62Secret(int length) {
