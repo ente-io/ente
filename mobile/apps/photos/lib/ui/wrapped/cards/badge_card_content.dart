@@ -200,8 +200,8 @@ const double _kDesignPanelRadius = 27.0;
 // The rays asset has a large transparent top margin. Offset it far enough so
 // the visible portion hugs the panel's top edge, and extend the height so the
 // lower edge stays aligned with the duck illustration.
-const double _kDesignRaysTopOffset = -106.0;
-const double _kDesignRaysHeight = 246.0;
+const double _kDesignRaysTopOffset = -108.0;
+const double _kDesignRaysHeight = 248.0;
 const double _kDesignRaysLeftInset = -18.0;
 const double _kDesignRaysRightInset = -18.0;
 const double _kDesignCloudInset = 0.0;
