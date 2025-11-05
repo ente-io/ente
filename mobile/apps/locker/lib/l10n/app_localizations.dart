@@ -2086,6 +2086,168 @@ abstract class AppLocalizations {
   /// **'Locker'**
   String get locker;
 
+  /// No description provided for @loginToEnteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to your Ente account'**
+  String get loginToEnteAccount;
+
+  /// No description provided for @unlockLockerPaidPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock locker with a paid plan'**
+  String get unlockLockerPaidPlanTitle;
+
+  /// No description provided for @unlockLockerPaidPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker is available only to paid customers of Ente Photos. Upgrade to a paid plan from Photos to use Locker'**
+  String get unlockLockerPaidPlanBody;
+
+  /// No description provided for @checkoutEntePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout Ente Photos'**
+  String get checkoutEntePhotos;
+
+  /// No description provided for @noAccountCta.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t have an account'**
+  String get noAccountCta;
+
+  /// No description provided for @featureSaveImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your important documents and credentials'**
+  String get featureSaveImportant;
+
+  /// No description provided for @featurePassAutomatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass them on automatically in emergencies'**
+  String get featurePassAutomatically;
+
+  /// No description provided for @featureShareAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Share them anytime'**
+  String get featureShareAnytime;
+
+  /// No description provided for @emailIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email id'**
+  String get emailIdLabel;
+
+  /// No description provided for @emailIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email id'**
+  String get emailIdHint;
+
+  /// No description provided for @loginPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get loginPasswordLabel;
+
+  /// No description provided for @loginPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get loginPasswordHint;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPassword;
+
+  /// No description provided for @logInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get logInAction;
+
+  /// No description provided for @dontHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get dontHaveAccount;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get signUp;
+
+  /// No description provided for @incorrectPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect Password'**
+  String get incorrectPassword;
+
+  /// No description provided for @pleaseTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again'**
+  String get pleaseTryAgain;
+
+  /// No description provided for @noInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get noInternetConnection;
+
+  /// No description provided for @checkInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your internet connection and try again'**
+  String get checkInternetConnection;
+
+  /// No description provided for @verificationFailedTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed, please try again'**
+  String get verificationFailedTryAgain;
+
+  /// No description provided for @recreatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Recreate password'**
+  String get recreatePassword;
+
+  /// No description provided for @deviceCannotVerifyPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device does not have enough memory to verify your password'**
+  String get deviceCannotVerifyPassword;
+
+  /// No description provided for @useRecoveryKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Use recovery key'**
+  String get useRecoveryKey;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Email'**
+  String get invalidEmail;
+
+  /// No description provided for @enterValidEmailFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address first'**
+  String get enterValidEmailFirst;
+
+  /// No description provided for @lockerLoginIssueSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker Login Issue'**
+  String get lockerLoginIssueSubject;
+
   /// No description provided for @unnamed.
   ///
   /// In en, this message translates to:

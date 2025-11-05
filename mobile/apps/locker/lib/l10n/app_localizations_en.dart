@@ -1200,6 +1200,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locker => 'Locker';
 
   @override
+  String get loginToEnteAccount => 'Log in to your Ente account';
+
+  @override
+  String get unlockLockerPaidPlanTitle => 'Unlock locker with a paid plan';
+
+  @override
+  String get unlockLockerPaidPlanBody =>
+      'Locker is available only to paid customers of Ente Photos. Upgrade to a paid plan from Photos to use Locker';
+
+  @override
+  String get checkoutEntePhotos => 'Checkout Ente Photos';
+
+  @override
+  String get noAccountCta => 'I don\'t have an account';
+
+  @override
+  String get featureSaveImportant =>
+      'Save your important documents and credentials';
+
+  @override
+  String get featurePassAutomatically =>
+      'Pass them on automatically in emergencies';
+
+  @override
+  String get featureShareAnytime => 'Share them anytime';
+
+  @override
+  String get emailIdLabel => 'Email id';
+
+  @override
+  String get emailIdHint => 'Enter your email id';
+
+  @override
+  String get loginPasswordLabel => 'Password';
+
+  @override
+  String get loginPasswordHint => 'Enter your password';
+
+  @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get logInAction => 'Log in';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account?';
+
+  @override
+  String get signUp => 'Sign up';
+
+  @override
+  String get incorrectPassword => 'Incorrect Password';
+
+  @override
+  String get pleaseTryAgain => 'Please try again';
+
+  @override
+  String get noInternetConnection => 'No Internet Connection';
+
+  @override
+  String get checkInternetConnection =>
+      'Please check your internet connection and try again';
+
+  @override
+  String get verificationFailedTryAgain =>
+      'Verification failed, please try again';
+
+  @override
+  String get recreatePassword => 'Recreate password';
+
+  @override
+  String get deviceCannotVerifyPassword =>
+      'Your device does not have enough memory to verify your password';
+
+  @override
+  String get useRecoveryKey => 'Use recovery key';
+
+  @override
+  String get invalidEmail => 'Invalid Email';
+
+  @override
+  String get enterValidEmailFirst => 'Please enter a valid email address first';
+
+  @override
+  String get lockerLoginIssueSubject => 'Locker Login Issue';
+
+  @override
   String get unnamed => 'Unnamed';
 
   @override

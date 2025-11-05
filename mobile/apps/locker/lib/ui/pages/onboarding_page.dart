@@ -65,16 +65,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Column(
                       children: [
                         const Padding(padding: EdgeInsets.all(12)),
-                        const Text(
-                          "Locker",
-                          style: TextStyle(
+                        Text(
+                          l10n.locker,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 32,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const Padding(padding: EdgeInsets.all(28)),
-                        _getFeatureSlider(),
+                        _getFeatureSlider(context),
                         const Padding(padding: EdgeInsets.all(12)),
                         DotsIndicator(
                           dotsCount: 3,
@@ -117,7 +117,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   onPressed: _navigateToSignInPage,
                   child: Text(
-                    "Log in to your Ente account",
+                    l10n.loginToEnteAccount,
                     style: getEnteTextTheme(context).bodyBold.copyWith(
                           color: colorScheme.primary700,
                         ),
@@ -130,16 +130,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   onPressed: () {
                     showCreateNewAccountDialog(
                       context,
-                      title: "Unlock locker with a paid plan",
-                      body:
-                          "Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker",
-                      buttonLabel: "Checkout Ente Photos",
+                      title: l10n.unlockLockerPaidPlanTitle,
+                      body: l10n.unlockLockerPaidPlanBody,
+                      buttonLabel: l10n.checkoutEntePhotos,
                       assetPath: "assets/file_lock.png",
                       icon: const SizedBox.shrink(),
                     );
                   },
                   child: Text(
-                    "I don't have an account",
+                    l10n.noAccountCta,
                     style: getEnteTextTheme(context).bodyBold.copyWith(
                           color: Colors.white,
                           decoration: TextDecoration.underline,
@@ -156,25 +155,23 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
-  Widget _getFeatureSlider() {
+  Widget _getFeatureSlider(BuildContext context) {
+    final l10n = context.l10n;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 420),
       child: PageView(
-        children: const [
+        children: [
           FeatureItemWidget(
             "assets/onboarding_lock.png",
-            "Save your important",
-            "documents and credentials",
+            l10n.featureSaveImportant,
           ),
           FeatureItemWidget(
             "assets/onboarding_file.png",
-            "Pass them on automatically in",
-            "emergencies",
+            l10n.featurePassAutomatically,
           ),
           FeatureItemWidget(
             "assets/onboarding_share.png",
-            "Share them anytime",
-            "",
+            l10n.featureShareAnytime,
           ),
         ],
         onPageChanged: (index) {
@@ -224,12 +221,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
 class FeatureItemWidget extends StatelessWidget {
   final String assetPath;
   final String featureTitleFirstLine;
-  final String featureTitleSecondLine;
 
   const FeatureItemWidget(
     this.assetPath,
-    this.featureTitleFirstLine,
-    this.featureTitleSecondLine, {
+    this.featureTitleFirstLine, {
     super.key,
   });
 
@@ -242,30 +237,23 @@ class FeatureItemWidget extends StatelessWidget {
           assetPath,
           height: 200,
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              featureTitleFirstLine,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                featureTitleFirstLine,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const Padding(padding: EdgeInsets.all(2)),
-            Text(
-              featureTitleSecondLine,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
