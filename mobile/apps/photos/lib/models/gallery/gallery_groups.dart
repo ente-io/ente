@@ -31,7 +31,6 @@ class GalleryGroups {
   final bool sortOrderAsc;
   final double widthAvailable;
   final double groupHeaderExtent;
-  final EnteFile? fileToJumpScrollTo;
   GalleryGroups({
     required this.allFiles,
     required this.groupType,
@@ -44,7 +43,6 @@ class GalleryGroups {
     required this.groupHeaderExtent,
     required this.showSelectAll,
     this.limitSelectionToOne = false,
-    this.fileToJumpScrollTo,
     this.showGallerySettingsCTA = false,
   }) {
     init();
@@ -91,7 +89,7 @@ class GalleryGroups {
   /// incomplete rows in each group.
   List<EnteFile> get allFilesWithDummies => _allFilesWithDummies;
 
-  double? getOffsetOfFile(EnteFile file) {
+  double? getOffsetOfGroupContainingFile(EnteFile file) {
     final creationTime = file.creationTime;
     if (creationTime == null) {
       _logger.warning('Cannot scroll to file with null creation time');
@@ -101,7 +99,7 @@ class GalleryGroups {
     final groupId = _findGroupForCreationTime(creationTime);
     if (groupId == null) {
       _logger.warning(
-        'jumpToFile No group found for creation time: $creationTime',
+        'No group found for creation time: $creationTime',
       );
       return null;
     }

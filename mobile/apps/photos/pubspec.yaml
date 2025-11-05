@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.14-beta+1213
+version: 1.2.16-beta+1216
 publish_to: none
 
 environment:
@@ -25,6 +25,7 @@ dependencies:
   app_links: ^6.4.0
   archive: ^4.0.7
   async: ^2.11.0
+  audio_session: ^0.1.21
   battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info
@@ -117,6 +118,7 @@ dependencies:
   image: ^4.0.17
   in_app_purchase: 3.2.1
   intl: ^0.19.0
+  just_audio: ^0.9.36
   latlong2: ^0.9.0
   launcher_icon_switcher: ^0.0.2
   like_button: ^2.0.5
@@ -135,11 +137,12 @@ dependencies:
   media_kit_libs_ios_video:
   media_kit_libs_video:
   media_kit_video:
+  mesh_gradient: ^1.3.8
   ml_linalg: ^13.11.31
   mobile_ocr:
     git:
       url: https://github.com/laurenspriem/mobile_ocr
-      ref: 71f74bd9e3d157c78ebed90c8f74cc8e685390c4
+      ref: f03711af19f72d993daf538ba203163cc63482aa
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -188,7 +191,7 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
-  rive: ^0.13.20
+  rive: 0.14.0-dev.13
   rust_lib_photos:
     path: rust_builder
   screenshot: ^3.0.0
@@ -343,6 +346,7 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
+    - assets/rewind_badges/
     - assets/video-editor/
     - assets/image-editor/
     - assets/icons/

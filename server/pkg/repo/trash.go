@@ -80,7 +80,7 @@ func (t *TrashRepository) GetDiff(userID int64, sinceTime int64, limit int, app 
 	rows, err := t.DB.Query(`
 	SELECT t.file_id, t.user_id, t.collection_id, cf.encrypted_key, cf.key_decryption_nonce, 
 		f.file_decryption_header, f.thumbnail_decryption_header, f.metadata_decryption_header, 
-		f.encrypted_metadata, f.magic_metadata, f.updation_time, f.info,
+		f.encrypted_metadata, f.magic_metadata,f.pub_magic_metadata, f.updation_time, f.info,
 		t.is_deleted, t.is_restored, t.created_at, t.updated_at, t.delete_by
 	FROM trash t 
 	JOIN collection_files cf ON t.file_id = cf.file_id AND t.collection_id = cf.collection_id
@@ -104,7 +104,7 @@ func (t *TrashRepository) GetFilesWithVersion(userID int64, updateAtTime int64) 
 	rows, err := t.DB.Query(`
 		SELECT t.file_id, t.user_id, t.collection_id, cf.encrypted_key, cf.key_decryption_nonce, 
 		       f.file_decryption_header, f.thumbnail_decryption_header, f.metadata_decryption_header, 
-		       f.encrypted_metadata, f.magic_metadata, f.updation_time, f.info,
+		       f.encrypted_metadata, f.magic_metadata, f.pub_magic_metadata, f.updation_time, f.info,
 		       t.is_deleted, t.is_restored, t.created_at, t.updated_at, t.delete_by
 		FROM trash t 
 		    JOIN collection_files cf ON t.file_id = cf.file_id AND t.collection_id = cf.collection_id
@@ -450,7 +450,7 @@ func convertRowsToTrash(rows *sql.Rows) ([]ente.Trash, error) {
 		)
 		err := rows.Scan(&trash.File.ID, &trash.File.OwnerID, &trash.File.CollectionID, &trash.File.EncryptedKey, &trash.File.KeyDecryptionNonce,
 			&trash.File.File.DecryptionHeader, &trash.File.Thumbnail.DecryptionHeader, &trash.File.Metadata.DecryptionHeader,
-			&trash.File.Metadata.EncryptedData, &trash.File.MagicMetadata, &trash.File.UpdationTime, &trash.File.Info, &trash.IsDeleted, &trash.IsRestored,
+			&trash.File.Metadata.EncryptedData, &trash.File.MagicMetadata, &trash.File.PubicMagicMetadata, &trash.File.UpdationTime, &trash.File.Info, &trash.IsDeleted, &trash.IsRestored,
 			&trash.CreatedAt, &trash.UpdatedAt, &trash.DeleteBy)
 		if err != nil {
 			return trashFiles, stacktrace.Propagate(err, "")

@@ -429,7 +429,6 @@ When your subscription expires, you enter a **30-day grace period** before your 
 **To avoid losing your data:**
 
 1. **Renew your subscription** before the grace period ends:
-
     - All your data will be immediately accessible again
     - Uploads will resume automatically
     - No data loss

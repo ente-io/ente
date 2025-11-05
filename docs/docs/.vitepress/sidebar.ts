@@ -203,6 +203,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/cli",
                             },
                             {
+                                text: "Detect Text (OCR)",
+                                link: "/photos/features/utilities/detect-text",
+                            },
+                            {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
                             },
@@ -216,6 +220,7 @@ export const sidebar = [
             },
             {
                 text: "FAQ",
+                link: "/photos/faq/",
                 collapsed: true,
                 items: [
                     {
@@ -241,6 +246,10 @@ export const sidebar = [
                     {
                         text: "Search and Discovery",
                         link: "/photos/faq/search-and-discovery",
+                    },
+                    {
+                        text: "Security and Privacy",
+                        link: "/photos/faq/security-and-privacy",
                     },
                     {
                         text: "Sharing and Collaboration",

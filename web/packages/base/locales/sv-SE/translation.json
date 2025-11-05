@@ -158,6 +158,7 @@
     "logout": "Logga ut",
     "logout_message": "Är du säker på att du vill logga ut?",
     "delete_account": "Radera konto",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "",
     "change_email": "Ändra e-postadress",
     "ok": "OK",

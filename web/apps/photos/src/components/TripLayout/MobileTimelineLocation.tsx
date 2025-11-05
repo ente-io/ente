@@ -90,6 +90,7 @@ const MobileLocationContainer = styled(Box)({
     width: "100%",
     height: "40svh",
     scrollSnapAlign: "start",
+    scrollSnapStop: "always",
     padding: "0",
 });
 

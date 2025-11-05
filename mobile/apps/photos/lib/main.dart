@@ -49,6 +49,7 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
+import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -68,6 +69,7 @@ void main() async {
   debugRepaintRainbowEnabled = false;
   await RustLib.init();
   WidgetsFlutterBinding.ensureInitialized();
+  await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
@@ -313,6 +315,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
+    wrappedService.scheduleInitialLoad();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;

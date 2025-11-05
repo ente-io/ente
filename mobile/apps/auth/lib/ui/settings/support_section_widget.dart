@@ -9,7 +9,7 @@ import 'package:ente_auth/utils/email_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupportSectionWidget extends StatefulWidget {
   const SupportSectionWidget({super.key});
@@ -62,11 +62,14 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            // ignore: unawaited_futures
-            launchUrlString(
-              githubFeatureRequestUrl,
+            final launched = await launchUrl(
+              githubFeatureRequestUri,
               mode: LaunchMode.externalApplication,
             );
+            if (!launched) {
+              Logger("SupportSection")
+                  .warning("Failed to open feature request discussions");
+            }
           },
         ),
         sectionOptionSpacing,
