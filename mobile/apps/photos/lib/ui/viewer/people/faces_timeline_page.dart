@@ -48,6 +48,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   bool _loggedPlaybackStart = false;
 
   int _currentIndex = 0;
+  bool _isScrubbing = false;
   double _sliderValue = 0;
   double _previousCaptionValue = 0;
   double _currentCaptionValue = 0;
@@ -451,6 +452,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                       isDarkMode: isDark,
                       colorScheme: colorScheme,
                       cardHeight: cardHeight,
+                      blurEnabled: !_isScrubbing,
                     ),
                   ]
                 : orderedSlices
@@ -462,6 +464,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                         isDarkMode: isDark,
                         colorScheme: colorScheme,
                         cardHeight: cardHeight,
+                        blurEnabled: !_isScrubbing,
                       ),
                     )
                     .toList();
@@ -524,6 +527,9 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                     _pausePlayback();
                     _isAnimatingCard = false;
                     _cardTransitionController.stop();
+                    setState(() {
+                      _isScrubbing = true;
+                    });
                   }
                 : null,
             onChanged: frameCount > 1
@@ -537,6 +543,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                       _previousCaptionValue = _currentCaptionValue;
                       _currentCaptionValue = frame.captionValue;
                       _currentCaptionType = frame.captionType;
+                      _isScrubbing = true;
                     });
                   }
                 : null,
@@ -548,6 +555,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                       _currentIndex = target;
                       _sliderValue = target.toDouble();
                       _stackProgress = _sliderValue;
+                      _isScrubbing = false;
                     });
                   }
                 : null,
@@ -658,6 +666,7 @@ class _FacesTimelineCard extends StatelessWidget {
   final bool isDarkMode;
   final EnteColorScheme colorScheme;
   final double cardHeight;
+  final bool blurEnabled;
 
   const _FacesTimelineCard({
     required this.frame,
@@ -665,6 +674,7 @@ class _FacesTimelineCard extends StatelessWidget {
     required this.isDarkMode,
     required this.colorScheme,
     required this.cardHeight,
+    required this.blurEnabled,
     super.key,
   });
 
@@ -673,7 +683,7 @@ class _FacesTimelineCard extends StatelessWidget {
     final scale = _calculateScale(distance);
     final yOffset = _calculateYOffset(distance);
     final opacity = _calculateOpacity(distance);
-    final blurSigma = _calculateBlur(distance);
+    final blurSigma = blurEnabled ? _calculateBlur(distance) : 0.0;
     final rotation = _calculateRotation(distance);
     final overlayOpacity =
         distance > 0 ? math.min(0.45, 0.12 + distance * 0.12) : 0.0;
