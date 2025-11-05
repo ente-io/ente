@@ -17,8 +17,6 @@ class ThemeSwitchWidget extends StatefulWidget {
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   AdaptiveThemeMode? currentThemeMode;
 
-  static const double _leadingSpace = 52;
-
   @override
   void initState() {
     super.initState();
@@ -80,7 +78,6 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         title: _name(context, themeMode),
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
-      leadingSpace: _leadingSpace,
       isExpandable: false,
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       trailingExtraMargin: 4,

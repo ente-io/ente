@@ -19,77 +19,47 @@ class TitleBarTitleWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorTheme = getEnteColorScheme(context);
     if (title != null) {
-      if (icon != null || trailingWidgets != null) {
-        return Row(
-          mainAxisSize: MainAxisSize.max,
+      Widget titleWidget;
+      if (icon != null) {
+        titleWidget = Row(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Expanded(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Flexible(
-                    child: Text(
-                      title!,
-                      style: textTheme.h3Bold,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                  if (icon != null) ...[
-                    const SizedBox(width: 8),
-                    Icon(icon, size: 20, color: colorTheme.strokeMuted),
-                  ],
-                ],
-              ),
+            Text(
+              title!,
+              style: textTheme.h3Bold,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-            if (trailingWidgets != null) ...[
-              ...trailingWidgets!,
-            ],
+            const SizedBox(width: 8),
+            Icon(icon, size: 20, color: colorTheme.strokeMuted),
           ],
         );
-      }
-      if (isTitleH2) {
-        final titleText = Text(
+      } else if (isTitleH2) {
+        titleWidget = Text(
           title!,
           style: textTheme.h2Bold,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         );
-        if (trailingWidgets != null) {
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: titleText,
-              ),
-              ...trailingWidgets!,
-            ],
-          );
-        }
-        return titleText;
       } else {
-        final titleText = Text(
+        titleWidget = Text(
           title!,
           style: textTheme.h3Bold,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         );
-        if (trailingWidgets != null) {
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: titleText,
-              ),
-              ...trailingWidgets!,
-            ],
-          );
-        }
-        return titleText;
       }
+
+      if (trailingWidgets != null && trailingWidgets!.isNotEmpty) {
+        return Row(
+          children: [
+            Expanded(child: titleWidget),
+            ...trailingWidgets!,
+          ],
+        );
+      }
+      return titleWidget;
     }
 
     return const SizedBox.shrink();

@@ -38,8 +38,6 @@ class AdvancedSharingBottomSheet extends StatefulWidget {
 
 class _AdvancedSharingBottomSheetState
     extends State<AdvancedSharingBottomSheet> {
-  static const double leadingSpace = 12;
-
   int get _shareeCount => widget.collection.getSharees().length;
 
   PublicURL? get _publicUrl => widget.collection.publicURLs.isNotEmpty
@@ -128,7 +126,6 @@ class _AdvancedSharingBottomSheetState
                           title: "Sharing enabled",
                         ),
                         menuItemColor: colorScheme.backgroundElevated2,
-                        leadingSpace: leadingSpace,
                         trailingWidget: ToggleSwitchWidget(
                           value: () => _shareeCount > 0 || _hasPublicLink,
                           onChanged: () async {},
@@ -141,7 +138,6 @@ class _AdvancedSharingBottomSheetState
                           title: "Allow downloads",
                         ),
                         menuItemColor: colorScheme.backgroundElevated2,
-                        leadingSpace: leadingSpace,
                         trailingWidget: ToggleSwitchWidget(
                           value: () => isDownloadEnabled,
                           onChanged: () async {
@@ -175,7 +171,6 @@ class _AdvancedSharingBottomSheetState
                           title: "Link enabled",
                         ),
                         menuItemColor: colorScheme.backgroundElevated2,
-                        leadingSpace: leadingSpace,
                         trailingWidget: ToggleSwitchWidget(
                           value: () => _hasPublicLink,
                           onChanged: () async {
@@ -195,7 +190,6 @@ class _AdvancedSharingBottomSheetState
                             title: "Allow uploads",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
-                          leadingSpace: leadingSpace,
                           trailingWidget: ToggleSwitchWidget(
                             value: () => isCollectEnabled,
                             onChanged: () async {
@@ -212,7 +206,6 @@ class _AdvancedSharingBottomSheetState
                             title: "Password lock",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
-                          leadingSpace: leadingSpace,
                           trailingWidget: ToggleSwitchWidget(
                             value: () => isPasswordEnabled,
                             onChanged: () async {
@@ -236,7 +229,6 @@ class _AdvancedSharingBottomSheetState
                                 : "${_publicUrl!.deviceLimit}",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
-                          leadingSpace: leadingSpace,
                           trailingWidget: Icon(
                             Icons.chevron_right,
                             color: colorScheme.textMuted,
@@ -262,7 +254,6 @@ class _AdvancedSharingBottomSheetState
                                 : "Never",
                           ),
                           menuItemColor: colorScheme.backgroundElevated2,
-                          leadingSpace: leadingSpace,
                           trailingWidget: Icon(
                             Icons.chevron_right,
                             color: colorScheme.textMuted,

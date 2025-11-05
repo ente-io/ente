@@ -37,8 +37,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   late bool _hasLoggedIn;
   final Logger _logger = Logger('SecuritySectionWidget');
 
-  static const double _leadingSpace = 52;
-
   @override
   void initState() {
     _hasLoggedIn = _config.hasConfiguredAccount();
@@ -72,7 +70,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               title: l10n.emailVerificationToggle,
               makeTextBold: true,
             ),
-            leadingSpace: _leadingSpace,
             trailingWidget: ToggleSwitchWidget(
               value: () => UserService.instance.hasEmailMFAEnabled(),
               onChanged: () async {
@@ -96,7 +93,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               title: context.l10n.passkey,
               makeTextBold: true,
             ),
-            leadingSpace: _leadingSpace,
             trailingIcon: Icons.chevron_right_outlined,
             onTap: () async {
               final hasAuthenticated = await LocalAuthenticationService.instance
@@ -122,7 +118,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           title: context.l10n.appLock,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         surfaceExecutionStates: false,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
