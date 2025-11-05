@@ -94,7 +94,7 @@ class _BadgeCardContent extends StatelessWidget {
                               child: Image.asset(
                                 _BadgeVisualAssets.cloud,
                                 fit: BoxFit.cover,
-                                color: Colors.white.withValues(alpha: 0.3),
+                                color: _kBadgeCloudTint,
                                 colorBlendMode: BlendMode.srcATop,
                               ),
                             ),
@@ -197,7 +197,7 @@ const double _kDesignPanelTop = 147.0;
 const double _kDesignPanelWidth = 329.0;
 const double _kDesignPanelHeight = 424.0;
 const double _kDesignPanelRadius = 27.0;
-const double _kDesignRaysTopOffset = 40.0;
+const double _kDesignRaysTopOffset = -24.0;
 const double _kDesignRaysHeight = 212.0;
 const double _kDesignCloudInset = 0.0;
 const double _kDesignCloudHeight = 120.0;
@@ -206,14 +206,14 @@ const double _kDesignDuckTop = 100.0;
 const double _kDesignDuckWidth = 280.0;
 const double _kDesignDuckHeight = 202.0;
 const double _kDesignTitleLeft = _kDesignPanelLeft;
-const double _kDesignTitleTop = 304.0;
-const double _kDesignSubtitleTop = 380.0;
-const double _kDesignShareLeft = 206.73;
-const double _kDesignShareTop = 486.0;
+const double _kDesignTitleTop = 324.0;
+const double _kDesignSubtitleTop = 368.0;
+const double _kDesignShareLeft = 192.73;
+const double _kDesignShareTop = 490.0;
 const double _kDesignShareWidth = 122.27;
 const double _kDesignShareHeight = 56.93;
-const double _kDesignLogoLeft = 38.0;
-const double _kDesignLogoTop = 496.0;
+const double _kDesignLogoLeft = 34.0;
+const double _kDesignLogoTop = 483.0;
 const double _kDesignLogoSize = 64.0;
 const double _kDesignTextWidth = _kDesignPanelWidth;
 
@@ -480,6 +480,7 @@ class _BadgeSharePill extends StatelessWidget {
 }
 
 const Color _kBadgeBaseGreen = Color(0xFF08C225);
+const Color _kBadgeCloudTint = Color(0x3308C225);
 const double _kBadgeLogoRotationRadians = -9.91 * math.pi / 180;
 
 Widget? buildBadgeDebugCardContent(
