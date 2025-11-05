@@ -2,17 +2,20 @@ import "dart:async";
 import "dart:math" as math;
 import "dart:ui" as ui;
 
+import "package:audio_session/audio_session.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:intl/intl.dart";
+import "package:just_audio/just_audio.dart";
 import "package:logging/logging.dart";
-import "package:photos/db/files_db.dart";
+import "package:mesh_gradient/mesh_gradient.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
+import "package:photos/services/wrapped/wrapped_media_preloader.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -31,6 +34,29 @@ part "cards/curation_card_content.dart";
 part "cards/narrative_card_content.dart";
 part "cards/badge_card_content.dart";
 part "cards/shared_widgets.dart";
+
+const double _kStoryCardOuterHorizontalInset = 18.0;
+const double _kStoryCardOuterVerticalInset = 12.0;
+const double _kStoryCardInnerHorizontalPadding = 24.0;
+const double _kStoryCardInnerTopPadding = 28.0;
+const double _kStoryCardInnerBottomPadding = 32.0;
+
+const EdgeInsets _kStoryCardOuterPadding = EdgeInsets.symmetric(
+  horizontal: _kStoryCardOuterHorizontalInset,
+  vertical: _kStoryCardOuterVerticalInset,
+);
+const EdgeInsets _kStoryCardInnerPadding = EdgeInsets.fromLTRB(
+  _kStoryCardInnerHorizontalPadding,
+  _kStoryCardInnerTopPadding,
+  _kStoryCardInnerHorizontalPadding,
+  _kStoryCardInnerBottomPadding,
+);
+
+const double _kStoryControlSize = 48.0;
+const double _kStoryControlIconSize = 24.0;
+const double _kStoryControlHorizontalMarginFromEdge =
+    _kStoryCardOuterHorizontalInset + _kStoryCardInnerHorizontalPadding;
+const double _kStoryControlBottomMarginFromEdge = _kStoryCardOuterVerticalInset;
 
 /// Basic viewer for the stats-only Ente Rewind experience.
 class WrappedViewerPage extends StatefulWidget {
@@ -63,6 +89,26 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   bool _wasPausedBeforeLongPress = false;
   double _verticalDragDistance = 0;
   bool _isClosing = false;
+  ui.Image? _shareBrandingLogo;
+  late final AudioPlayer _audioPlayer;
+  bool _isMusicReady = false;
+  bool _isMusicMuted = false;
+  bool _isMusicPlaying = false;
+  bool _musicLoadFailed = false;
+  bool _isFadingOutMusic = false;
+  bool _hideBadgeSharePill = false;
+  OverlayEntry? _sharePillOverlayEntry;
+  ui.Image? _sharePillOverlaySnapshot;
+  StreamSubscription<PlayerState>? _playerStateSubscription;
+  ModalRoute<dynamic>? _registeredRoute;
+  bool _didRegisterWillPop = false;
+  static bool _audioSessionConfigured = false;
+
+  static const double _kShareBrandingHeight = 42;
+  static const double _kShareBrandingLogoWidth = 58;
+  static const double _kShareBrandingLogoHeight = 11;
+  static const double _kShareBrandingLogoVerticalNudge = -8;
+  static const Duration _kMusicLoopTrim = Duration(milliseconds: 40);
 
   @override
   void initState() {
@@ -81,6 +127,23 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     _stateListener = () => _handleServiceUpdate(wrappedService.state);
     wrappedService.stateListenable.addListener(_stateListener!);
+    _audioPlayer = AudioPlayer();
+    _playerStateSubscription =
+        _audioPlayer.playerStateStream.listen(_handlePlayerState);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final ModalRoute<dynamic>? route = ModalRoute.of(context);
+      if (route == null) {
+        return;
+      }
+      // ignore: deprecated_member_use
+      route.addScopedWillPopCallback(_handleWillPop);
+      _registeredRoute = route;
+      _didRegisterWillPop = true;
+    });
+    unawaited(_initBackgroundMusic());
   }
 
   @override
@@ -88,9 +151,18 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     if (_stateListener != null) {
       wrappedService.stateListenable.removeListener(_stateListener!);
     }
+    _removeSharePillOverlay();
+    if (_didRegisterWillPop && _registeredRoute != null) {
+      // ignore: deprecated_member_use
+      _registeredRoute!.removeScopedWillPopCallback(_handleWillPop);
+      _didRegisterWillPop = false;
+      _registeredRoute = null;
+    }
     _progressController.removeStatusListener(_handleProgressStatus);
     _progressController.dispose();
     _pageController.dispose();
+    unawaited(_playerStateSubscription?.cancel());
+    unawaited(_audioPlayer.dispose());
     super.dispose();
   }
 
@@ -111,6 +183,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       _cards = _buildCards(next.result?.cards);
     });
     final int newCardCount = _cards.length;
+    _syncMusicPlayback();
     if (newCardCount == 0) {
       Navigator.of(context).maybePop();
       return;
@@ -133,7 +206,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       return <WrappedCard>[];
     }
     final List<WrappedCard> cards = List<WrappedCard>.from(source);
-    if (kReleaseMode) {
+    if (!kDebugMode) {
       return cards;
     }
 
@@ -159,6 +232,68 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         .toList(growable: false);
     if (candidates.isEmpty) {
       return cards;
+    }
+
+    final String? primaryBadgeKey = badgeCard.meta["badgeKey"] as String?;
+    final int badgeIndex = cards.indexOf(badgeCard);
+    final int insertionIndex = badgeIndex >= 0 ? badgeIndex + 1 : cards.length;
+    final List<WrappedCard> previewCards = <WrappedCard>[];
+
+    for (final Map<String, Object?> candidate in candidates) {
+      final String? candidateKey = candidate["key"] as String?;
+      if (candidateKey == null) {
+        continue;
+      }
+      if (candidateKey == primaryBadgeKey) {
+        continue;
+      }
+
+      final Map<String, Object?> meta = Map<String, Object?>.from(candidate)
+        ..["badgeKey"] = candidateKey;
+      final List<int> uploadedIDs =
+          (meta.remove("uploadedFileIDs") as List<dynamic>?)
+                  ?.map(
+                    (dynamic value) =>
+                        value is num ? value.toInt() : int.tryParse("$value"),
+                  )
+                  .whereType<int>()
+                  .where((int id) => id > 0)
+                  .toList(growable: false) ??
+              const <int>[];
+      final List<MediaRef> mediaRefs = uploadedIDs.isNotEmpty
+          ? uploadedIDs.map(MediaRef.new).toList(growable: false)
+          : badgeCard.media;
+
+      final String? candidateTitle = (meta.remove("title") as String?)?.trim();
+      final String title = (candidateTitle != null && candidateTitle.isNotEmpty)
+          ? candidateTitle
+          : badgeCard.title;
+      final String? candidateSubtitle =
+          (meta.remove("subtitle") as String?)?.trim();
+      final String? subtitleValue =
+          (candidateSubtitle != null && candidateSubtitle.isNotEmpty)
+              ? candidateSubtitle
+              : badgeCard.subtitle;
+
+      meta["uploadedFileIDs"] = uploadedIDs;
+      meta["detailChips"] ??= badgeCard.meta["detailChips"];
+      meta["gradient"] ??= badgeCard.meta["gradient"];
+      meta["emoji"] ??= badgeCard.meta["emoji"];
+      meta["debugPreview"] = true;
+
+      previewCards.add(
+        WrappedCard(
+          type: WrappedCardType.badge,
+          title: title,
+          subtitle: subtitleValue,
+          media: mediaRefs,
+          meta: meta,
+        ),
+      );
+    }
+
+    if (previewCards.isNotEmpty) {
+      cards.insertAll(insertionIndex, previewCards);
     }
 
     cards.add(
@@ -333,7 +468,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     _verticalDragDistance += delta;
     if (_verticalDragDistance >= 100) {
-      _closeViewer();
+      unawaited(_closeViewer());
     }
   }
 
@@ -343,7 +478,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
     final double velocity = details.primaryVelocity ?? 0;
     if (_verticalDragDistance >= 60 || velocity > 800) {
-      _closeViewer();
+      unawaited(_closeViewer());
     }
     _verticalDragDistance = 0;
   }
@@ -352,16 +487,26 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     _verticalDragDistance = 0;
   }
 
-  void _closeViewer() {
+  Future<void> _closeViewer() async {
     if (_isClosing || !mounted) {
       return;
     }
     _isClosing = true;
-    Navigator.of(context).maybePop().then((bool didPop) {
-      if (!didPop && mounted) {
-        _isClosing = false;
-      }
-    });
+    if (!_didRegisterWillPop) {
+      await _fadeOutAndStopMusic();
+    }
+    final bool didPop = await Navigator.of(context).maybePop();
+    if (!didPop && mounted) {
+      _isClosing = false;
+    }
+  }
+
+  Future<bool> _handleWillPop() async {
+    if (!_isClosing) {
+      _isClosing = true;
+    }
+    await _fadeOutAndStopMusic();
+    return true;
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
@@ -426,6 +571,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       return const SizedBox.shrink();
     }
 
+    final bool isCurrentCardBadge =
+        _cards[_currentIndex].type == WrappedCardType.badge ||
+            _cards[_currentIndex].type == WrappedCardType.badgeDebug;
+
     return Theme(
       data: darkThemeData,
       child: Builder(
@@ -434,11 +583,16 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
           final textTheme = getEnteTextTheme(context);
           final MediaQueryData mediaQuery = MediaQuery.of(context);
           final double bottomPadding = mediaQuery.padding.bottom;
+          final Color controlIconColor =
+              enteColorScheme.textMuted.withValues(alpha: 0.62);
+          final Color controlBackdropColor =
+              enteColorScheme.textMuted.withValues(alpha: 0.14);
 
           return PopScope(
             canPop: true,
             onPopInvokedWithResult: (bool didPop, Object? result) {
               if (!didPop) {
+                _isClosing = false;
                 return;
               }
               wrappedService.updateResumeIndex(_currentIndex);
@@ -447,7 +601,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
               backgroundColor: Colors.black,
               appBar: AppBar(
                 leading: BackButton(
-                  onPressed: _closeViewer,
+                  onPressed: () => unawaited(_closeViewer()),
                 ),
                 title: Text(
                   "Ente Rewind",
@@ -524,6 +678,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                                       colorScheme: enteColorScheme,
                                       textTheme: textTheme,
                                       isActive: index == _currentIndex,
+                                      gradientVariantIndex: index,
                                     );
                                   },
                                 ),
@@ -534,26 +689,57 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                       ),
                     ],
                   ),
-                  Positioned(
-                    right: 20,
-                    bottom: bottomPadding + 24,
-                    child: GestureDetector(
-                      key: _shareButtonKey,
-                      behavior: HitTestBehavior.translucent,
-                      onTap: _handleShare,
-                      child: Container(
-                        width: 56,
-                        height: 56,
-                        alignment: Alignment.center,
-                        child: Icon(
-                          Icons.share,
-                          size: 28,
-                          color:
-                              enteColorScheme.textMuted.withValues(alpha: 0.7),
+                  if (!isCurrentCardBadge) ...[
+                    Positioned(
+                      right: _kStoryControlHorizontalMarginFromEdge,
+                      bottom:
+                          bottomPadding + _kStoryControlBottomMarginFromEdge,
+                      child: GestureDetector(
+                        key: _shareButtonKey,
+                        behavior: HitTestBehavior.translucent,
+                        onTap: _handleShare,
+                        child: Container(
+                          width: _kStoryControlSize,
+                          height: _kStoryControlSize,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: controlBackdropColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.share,
+                            size: _kStoryControlIconSize,
+                            color: controlIconColor,
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    Positioned(
+                      left: _kStoryControlHorizontalMarginFromEdge,
+                      bottom:
+                          bottomPadding + _kStoryControlBottomMarginFromEdge,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () => unawaited(_handleMusicToggle()),
+                        child: Container(
+                          width: _kStoryControlSize,
+                          height: _kStoryControlSize,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: controlBackdropColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            (_isMusicMuted || !_isMusicPlaying)
+                                ? Icons.volume_off
+                                : Icons.volume_up,
+                            size: _kStoryControlIconSize,
+                            color: controlIconColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -563,15 +749,30 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     );
   }
 
+  GlobalKey get shareButtonKey => _shareButtonKey;
+  bool get hideBadgeSharePill => _hideBadgeSharePill;
+
+  Future<void> shareCurrentCard() async {
+    await _handleShare();
+  }
+
   Future<void> _handleShare() async {
     if (_cards.isEmpty) {
       showShortToast(context, "Nothing to share yet");
       return;
     }
+    final WrappedCard currentCard = _cards[_currentIndex];
+    final bool shouldShowBranding = _shouldShowBrandingForCard(currentCard);
     final bool wasPaused = _isPaused;
     _pauseAutoplay();
     try {
-      final Uint8List? bytes = await _captureCurrentCard();
+      final bool hideShareControls =
+          currentCard.type == WrappedCardType.badge ||
+              currentCard.type == WrappedCardType.badgeDebug;
+      final Uint8List? bytes = await _captureCurrentCard(
+        includeBranding: shouldShowBranding,
+        hideInteractiveControls: hideShareControls,
+      );
       if (bytes == null) {
         showShortToast(context, "Unable to prepare share");
         return;
@@ -600,22 +801,459 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
   }
 
-  Future<Uint8List?> _captureCurrentCard() async {
+  Future<Uint8List?> _captureCurrentCard({
+    required bool includeBranding,
+    bool hideInteractiveControls = false,
+  }) async {
+    Future<void> showShareControlsIfHidden() async {
+      bool awaitedFrame = false;
+      if (_hideBadgeSharePill && mounted) {
+        setState(() {
+          _hideBadgeSharePill = false;
+        });
+        awaitedFrame = true;
+      }
+      if (awaitedFrame) {
+        await WidgetsBinding.instance.endOfFrame;
+      }
+      _removeSharePillOverlay();
+    }
+
+    if (hideInteractiveControls && !_hideBadgeSharePill && mounted) {
+      await _showSharePillOverlay();
+      if (!_hideBadgeSharePill && mounted) {
+        setState(() {
+          _hideBadgeSharePill = true;
+        });
+        await WidgetsBinding.instance.endOfFrame;
+      }
+    }
     await Future<void>.delayed(Duration.zero);
     final RenderRepaintBoundary? boundary = _cardBoundaryKey.currentContext
         ?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary == null) {
+      await showShareControlsIfHidden();
       return null;
     }
-    final double width = boundary.size.width;
-    if (width <= 0) {
+    final double logicalWidth = boundary.size.width;
+    if (logicalWidth <= 0) {
+      await showShareControlsIfHidden();
       return null;
     }
-    final double pixelRatio = (1080 / width).clamp(1.0, 6.0);
+    final double pixelRatio = (1080 / logicalWidth).clamp(1.0, 6.0);
     final ui.Image image =
         await boundary.toImage(pixelRatio: pixelRatio.toDouble());
+    final double scale = image.width / logicalWidth;
+    final ui.Image finalImage =
+        includeBranding ? await _compositeBranding(image, scale) : image;
     final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+        await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    await showShareControlsIfHidden();
     return byteData?.buffer.asUint8List();
+  }
+
+  bool _shouldShowBrandingForCard(WrappedCard card) {
+    return card.type != WrappedCardType.badge &&
+        card.type != WrappedCardType.badgeDebug;
+  }
+
+  Future<void> _showSharePillOverlay() async {
+    if (!mounted || _sharePillOverlayEntry != null) {
+      return;
+    }
+    final overlayState = Overlay.of(context, rootOverlay: true);
+    // ignore: unnecessary_null_comparison
+    if (overlayState == null) {
+      return;
+    }
+    final RenderRepaintBoundary? shareBoundary = _shareButtonKey.currentContext
+        ?.findRenderObject() as RenderRepaintBoundary?;
+    if (shareBoundary == null) {
+      return;
+    }
+    final Size size = shareBoundary.size;
+    final Offset topLeft = shareBoundary.localToGlobal(Offset.zero);
+    try {
+      final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+      final double pixelRatio = math.max(1.0, math.min(devicePixelRatio, 4.0));
+      final ui.Image snapshot =
+          await shareBoundary.toImage(pixelRatio: pixelRatio);
+      _sharePillOverlaySnapshot?.dispose();
+      _sharePillOverlaySnapshot = snapshot;
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext overlayContext) {
+          return Positioned(
+            left: topLeft.dx,
+            top: topLeft.dy,
+            width: size.width,
+            height: size.height,
+            child: IgnorePointer(
+              child: RawImage(
+                image: snapshot,
+                fit: BoxFit.fill,
+              ),
+            ),
+          );
+        },
+      );
+      overlayState.insert(entry);
+      _sharePillOverlayEntry = entry;
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to create share pill overlay",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  void _removeSharePillOverlay() {
+    _sharePillOverlayEntry?.remove();
+    _sharePillOverlayEntry = null;
+    _sharePillOverlaySnapshot?.dispose();
+    _sharePillOverlaySnapshot = null;
+  }
+
+  Future<ui.Image> _compositeBranding(ui.Image baseImage, double scale) async {
+    final ui.Image? logo = await _loadBrandingLogoImage();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Size size = Size(
+      baseImage.width.toDouble(),
+      baseImage.height.toDouble(),
+    );
+
+    canvas.drawImage(baseImage, Offset.zero, Paint());
+
+    final double brandingHeight = _kShareBrandingHeight * scale;
+    final Rect brandingRect = Rect.fromLTWH(
+      0,
+      size.height - brandingHeight,
+      size.width,
+      brandingHeight,
+    );
+    canvas.drawRect(
+      brandingRect,
+      Paint()..color = const Color(0x80000000),
+    );
+
+    if (logo != null) {
+      final Rect srcRect = Rect.fromLTWH(
+        0,
+        0,
+        logo.width.toDouble(),
+        logo.height.toDouble(),
+      );
+      final double targetLogoWidth = _kShareBrandingLogoWidth * scale;
+      final double targetLogoHeight = _kShareBrandingLogoHeight * scale;
+      final Offset center = brandingRect.center.translate(
+        0,
+        _kShareBrandingLogoVerticalNudge * scale,
+      );
+      final Rect destRect = Rect.fromCenter(
+        center: center,
+        width: targetLogoWidth,
+        height: targetLogoHeight,
+      );
+      canvas.drawImageRect(logo, srcRect, destRect, Paint());
+    }
+
+    final ui.Image composedImage = await recorder.endRecording().toImage(
+          baseImage.width,
+          baseImage.height,
+        );
+    return composedImage;
+  }
+
+  Future<ui.Image?> _loadBrandingLogoImage() async {
+    if (_shareBrandingLogo != null) {
+      return _shareBrandingLogo;
+    }
+    try {
+      final ByteData data = await rootBundle.load("assets/ente_io_green.png");
+      final ui.Codec codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+      );
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      _shareBrandingLogo = frame.image;
+      return _shareBrandingLogo;
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to load branding logo for share export",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<void> _initBackgroundMusic() async {
+    _musicLoadFailed = false;
+    try {
+      await _ensureAudioSessionConfigured();
+      const String assetPath = "assets/ente_rewind_2025_music.mp3";
+      final Duration? trackDuration = await _audioPlayer.setAsset(
+        assetPath,
+        preload: true,
+      );
+      final AudioSource playlist = _buildLoopingMusicSource(
+        assetPath: assetPath,
+        trackDuration: trackDuration,
+      );
+      await _audioPlayer.setAudioSource(
+        playlist,
+        preload: true,
+      );
+      await _audioPlayer.setLoopMode(LoopMode.all);
+      await _audioPlayer.setShuffleModeEnabled(false);
+      await _audioPlayer.setVolume(1.0);
+      await _audioPlayer.seek(Duration.zero);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isMusicReady = true;
+      });
+      await _resumeMusic();
+    } catch (error, stackTrace) {
+      _musicLoadFailed = true;
+      _logger.warning(
+        "Failed to initialize Ente Rewind music",
+        error,
+        stackTrace,
+      );
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _handlePlayerState(PlayerState state) {
+    if (_musicLoadFailed || !_isMusicReady) {
+      return;
+    }
+    if (state.processingState == ProcessingState.completed) {
+      if (_isMusicMuted || _isClosing || _cards.isEmpty) {
+        _updateMusicPlaying(false);
+        return;
+      }
+      if (_audioPlayer.loopMode != LoopMode.off && state.playing) {
+        _updateMusicPlaying(true);
+        return;
+      }
+      unawaited(() async {
+        try {
+          await _audioPlayer.seek(Duration.zero);
+          await _audioPlayer.play();
+          _updateMusicPlaying(true);
+        } catch (error, stackTrace) {
+          _logger.warning(
+            "Failed to restart Ente Rewind music",
+            error,
+            stackTrace,
+          );
+          _updateMusicPlaying(false);
+        }
+      }());
+      return;
+    }
+    _updateMusicPlaying(state.playing);
+  }
+
+  Future<void> _pauseMusic() async {
+    if (!_isMusicReady) {
+      _updateMusicPlaying(false);
+      return;
+    }
+    try {
+      if (_audioPlayer.playing) {
+        await _audioPlayer.pause();
+      }
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to pause Ente Rewind music",
+        error,
+        stackTrace,
+      );
+    } finally {
+      _updateMusicPlaying(false);
+    }
+  }
+
+  Future<void> _resumeMusic() async {
+    if (!_isMusicReady || _isMusicMuted || _cards.isEmpty) {
+      _updateMusicPlaying(false);
+      return;
+    }
+    try {
+      final Future<void> playFuture = _audioPlayer.play();
+      unawaited(
+        playFuture.catchError(
+          (Object error, StackTrace stackTrace) {
+            _logger.warning(
+              "Failed to play Ente Rewind music",
+              error,
+              stackTrace,
+            );
+            _updateMusicPlaying(false);
+          },
+        ),
+      );
+      _updateMusicPlaying(true);
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to play Ente Rewind music",
+        error,
+        stackTrace,
+      );
+      _updateMusicPlaying(false);
+    }
+  }
+
+  void _syncMusicPlayback() {
+    if (!_isMusicReady || _isMusicMuted || _cards.isEmpty) {
+      unawaited(_pauseMusic());
+      return;
+    }
+    unawaited(_resumeMusic());
+  }
+
+  Future<void> _fadeOutAndStopMusic() async {
+    if (_musicLoadFailed || !_isMusicReady) {
+      await _pauseMusic();
+      return;
+    }
+    if (_isFadingOutMusic) {
+      return;
+    }
+    _isFadingOutMusic = true;
+    final double initialVolume =
+        math.min(1.0, math.max(0.0, _audioPlayer.volume));
+    try {
+      if (!_audioPlayer.playing) {
+        await _pauseMusic();
+        return;
+      }
+      const Duration totalDuration = Duration(milliseconds: 400);
+      const int steps = 8;
+      final int stepMillis = math.max(
+        10,
+        (totalDuration.inMilliseconds / steps).round(),
+      );
+      final Duration stepDuration = Duration(milliseconds: stepMillis);
+      for (int i = 0; i < steps; i++) {
+        final double factor = 1 - ((i + 1) / steps);
+        await _audioPlayer.setVolume(initialVolume * factor);
+        await Future<void>.delayed(stepDuration);
+      }
+      await _pauseMusic();
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to fade out Ente Rewind music",
+        error,
+        stackTrace,
+      );
+      await _pauseMusic();
+    } finally {
+      try {
+        await _audioPlayer.setVolume(initialVolume);
+      } catch (error, stackTrace) {
+        _logger.fine(
+          "Failed to restore Ente Rewind music volume",
+          error,
+          stackTrace,
+        );
+      }
+      _isFadingOutMusic = false;
+    }
+  }
+
+  Future<void> _handleMusicToggle() async {
+    if (_musicLoadFailed) {
+      showShortToast(context, "Music unavailable");
+      return;
+    }
+    if (!_isMusicReady) {
+      showShortToast(context, "Music loading…");
+      return;
+    }
+    if (_isMusicMuted) {
+      setState(() {
+        _isMusicMuted = false;
+      });
+      await _resumeMusic();
+    } else {
+      setState(() {
+        _isMusicMuted = true;
+      });
+      await _pauseMusic();
+    }
+  }
+
+  void _updateMusicPlaying(bool value) {
+    if (_isMusicPlaying == value) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        _isMusicPlaying = value;
+      });
+    } else {
+      _isMusicPlaying = value;
+    }
+  }
+
+  Future<void> _ensureAudioSessionConfigured() async {
+    if (_audioSessionConfigured) {
+      return;
+    }
+    try {
+      final AudioSession session = await AudioSession.instance;
+      await session.configure(const AudioSessionConfiguration.music());
+      _audioSessionConfigured = true;
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to configure audio session for Ente Rewind music",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  AudioSource _buildLoopingMusicSource({
+    required String assetPath,
+    required Duration? trackDuration,
+  }) {
+    final Duration? clipEnd = _calculateLoopEnd(trackDuration);
+    AudioSource buildChild() {
+      final UriAudioSource base = AudioSource.asset(assetPath);
+      if (clipEnd == null) {
+        return base;
+      }
+      return ClippingAudioSource(
+        start: Duration.zero,
+        end: clipEnd,
+        child: base,
+      );
+    }
+
+    return ConcatenatingAudioSource(
+      useLazyPreparation: false,
+      children: <AudioSource>[
+        buildChild(),
+        buildChild(),
+      ],
+    );
+  }
+
+  Duration? _calculateLoopEnd(Duration? trackDuration) {
+    if (trackDuration == null) {
+      return null;
+    }
+    final Duration clipEnd = trackDuration - _kMusicLoopTrim;
+    if (clipEnd <= Duration.zero) {
+      return null;
+    }
+    return clipEnd;
   }
 }
