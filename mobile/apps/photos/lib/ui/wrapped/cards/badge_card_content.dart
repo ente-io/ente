@@ -197,14 +197,14 @@ const double _kDesignPanelTop = 147.0;
 const double _kDesignPanelWidth = 329.0;
 const double _kDesignPanelHeight = 424.0;
 const double _kDesignPanelRadius = 27.0;
-const double _kDesignRaysTopOffset = -96.0;
+const double _kDesignRaysTopOffset = -72.0;
 const double _kDesignRaysHeight = 212.0;
 const double _kDesignRaysLeftInset = -18.0;
 const double _kDesignRaysRightInset = -18.0;
 const double _kDesignCloudInset = 0.0;
 const double _kDesignCloudHeight = 120.0;
 const double _kDesignCloudBottom = 0.0;
-const double _kDesignDuckTop = 100.0;
+const double _kDesignDuckTop = 106.0;
 const double _kDesignDuckWidth = 280.0;
 const double _kDesignDuckHeight = 202.0;
 const double _kDesignTitleLeft = _kDesignPanelLeft;
@@ -380,8 +380,8 @@ class _BadgeLayoutMetrics {
       panelRadius: _kDesignPanelRadius * scale,
       panelRaysLeft: _kDesignRaysLeftInset * scale,
       panelRaysTop: _kDesignRaysTopOffset * scale,
-      panelRaysWidth:
-          (panelWidth - (_kDesignRaysLeftInset + _kDesignRaysRightInset) * scale),
+      panelRaysWidth: (panelWidth -
+          (_kDesignRaysLeftInset + _kDesignRaysRightInset) * scale),
       panelRaysHeight: _kDesignRaysHeight * scale,
       panelCloudLeft: _kDesignCloudInset * scale,
       panelCloudRight: _kDesignCloudInset * scale,
