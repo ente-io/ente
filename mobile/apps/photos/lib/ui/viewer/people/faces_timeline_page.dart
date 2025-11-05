@@ -746,13 +746,18 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     final colorScheme = getEnteColorScheme(context);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final frameCount = _frames.length;
-    final maxValue = frameCount > 1 ? (frameCount - 1).toDouble() : 0.0;
-    final sliderValue =
-        frameCount > 1 ? _sliderValue.clamp(0.0, maxValue) : 0.0;
+    final bool hasMultipleFrames = frameCount > 1;
+    final double maxValue =
+        hasMultipleFrames ? (frameCount - 1).toDouble() : 0.0;
+    final double sliderValue =
+        hasMultipleFrames ? _sliderValue.clamp(0.0, maxValue) : 0.0;
     const Color activeTrackColor = Colors.white;
     final Color inactiveTrackColor =
         (isDark ? colorScheme.fillBaseGrey : colorScheme.strokeMuted)
             .withValues(alpha: isDark ? 0.55 : 0.48);
+    final bool sliderDiscrete = _allFramesLoaded && _expectedFrameCount > 1;
+    final int? divisions =
+        sliderDiscrete ? (_expectedFrameCount - 1) * 4 : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -770,7 +775,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
             value: sliderValue.toDouble(),
             min: 0.0,
             max: frameCount > 1 ? maxValue : 0.0,
-            divisions: frameCount > 1 ? (frameCount - 1) * 4 : null,
+            divisions: divisions,
             onChangeStart: frameCount > 1
                 ? (value) {
                     _pausePlayback();
