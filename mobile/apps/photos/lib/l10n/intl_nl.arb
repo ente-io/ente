@@ -1961,5 +1961,9 @@
   "streetFood": "Street food bites",
   "riverCruises": "Uitzichten vanaf de cruise",
   "playfulKids": "Spelende kinderen",
-  "coastalCliffs": "Kliffen bij de zee"
+  "coastalCliffs": "Kliffen bij de zee",
+  "cLTitle1": "Spring naar datum",
+  "cLDesc1": "Bekijk foto’s rondom een beeld door in het infopaneel van het bestand de optie Spring naar datum te kiezen.",
+  "cLTitle2": "Snellere video-editor",
+  "cLDesc2": "De video-editor is vernieuwd zodat grote video’s veel sneller bewerkt kunnen worden en de gebruikservaring is verbeterd."
 }
