@@ -308,17 +308,21 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       child: Builder(
         builder: (context) {
           final l10n = context.l10n;
-          final title = l10n.facesTimelineAppBarTitle(
-            name: widget.person.data.name,
-          );
+          final title = l10n.facesTimelineAppBarTitle;
           final colorScheme = getEnteColorScheme(context);
           final textTheme = getEnteTextTheme(context);
+          final titleStyle = textTheme.h2Bold.copyWith(
+            letterSpacing: -2,
+          );
           return Scaffold(
             backgroundColor: colorScheme.backgroundBase,
             appBar: AppBar(
               backgroundColor: colorScheme.backgroundBase,
               foregroundColor: colorScheme.textBase,
-              title: Text(title),
+              title: Text(
+                title,
+                style: titleStyle,
+              ),
             ),
             body: FutureBuilder<List<_TimelineFrame>>(
               future: _framesFuture,

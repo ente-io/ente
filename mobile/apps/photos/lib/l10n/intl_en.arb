@@ -2005,15 +2005,9 @@
       }
     }
   },
-  "facesTimelineAppBarTitle": "{name}'s faces timeline",
+  "facesTimelineAppBarTitle": "Memory lane",
   "@facesTimelineAppBarTitle": {
-    "description": "Faces timeline page title shown in the app bar",
-    "placeholders": {
-      "name": {
-        "type": "String",
-        "description": "The person's display name"
-      }
-    }
+    "description": "Faces timeline page title shown in the app bar"
   },
   "facesTimelineCaptionYearsOld": "{name} was {count, plural, one {{count} year old} other {{count} years old}}",
   "@facesTimelineCaptionYearsOld": {
