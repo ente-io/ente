@@ -996,11 +996,11 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         assetPath,
         preload: true,
       );
-      final AudioSource playlist = _buildLoopingMusicSource(
+      final playlist = _buildLoopingMusicSource(
         assetPath: assetPath,
         trackDuration: trackDuration,
       );
-      await _audioPlayer.setAudioSource(
+      await _audioPlayer.setAudioSources(
         playlist,
         preload: true,
       );
@@ -1220,7 +1220,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     }
   }
 
-  AudioSource _buildLoopingMusicSource({
+  List<AudioSource> _buildLoopingMusicSource({
     required String assetPath,
     required Duration? trackDuration,
   }) {
@@ -1237,13 +1237,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       );
     }
 
-    return ConcatenatingAudioSource(
-      useLazyPreparation: false,
-      children: <AudioSource>[
-        buildChild(),
-        buildChild(),
-      ],
-    );
+    return <AudioSource>[
+      buildChild(),
+      buildChild(),
+    ];
   }
 
   Duration? _calculateLoopEnd(Duration? trackDuration) {
