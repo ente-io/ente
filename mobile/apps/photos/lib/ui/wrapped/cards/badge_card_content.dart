@@ -140,9 +140,14 @@ class _BadgeCardContent extends StatelessWidget {
                   Positioned(
                     left: metrics.logoLeft,
                     top: metrics.logoTop,
-                    width: metrics.logoSize,
-                    height: metrics.logoSize,
-                    child: const _BadgeBrandLogo(),
+                    width: metrics.logoBoundingSize,
+                    height: metrics.logoBoundingSize,
+                    child: Center(
+                      child: SizedBox.square(
+                        dimension: metrics.logoSize,
+                        child: const _BadgeBrandLogo(),
+                      ),
+                    ),
                   ),
                   Positioned(
                     left: metrics.shareLeft,
@@ -213,14 +218,17 @@ const double _kDesignDuckHeight = 202.0;
 const double _kDesignTitleLeft = _kDesignPanelLeft;
 const double _kDesignTitleTop = 324.0;
 const double _kDesignSubtitleTop = 368.0;
-const double _kDesignShareLeft = 192.73;
-const double _kDesignShareTop = 490.0;
 const double _kDesignShareWidth = 122.27;
 const double _kDesignShareHeight = 56.93;
-const double _kDesignLogoLeft = 34.0;
-const double _kDesignLogoTop = 483.0;
 const double _kDesignLogoSize = 64.0;
+const double _kDesignLogoBoundingSize = 76.0;
 const double _kDesignTextWidth = _kDesignPanelWidth;
+const double _kDesignPanelContentPadding = 3.0;
+const double _kDesignShareShadowBlur = 6.0;
+const double _kDesignShareShadowOffsetY = 3.0;
+const double _kDesignLogoOffsetLeft = 21.0;
+const double _kDesignLogoOffsetBottom = 20.0;
+const double _kDesignLogoPaddingAdjust = 3.0;
 
 class _BadgeLayoutConstants {
   const _BadgeLayoutConstants({
@@ -295,6 +303,7 @@ class _BadgeLayoutMetrics {
     required this.logoLeft,
     required this.logoTop,
     required this.logoSize,
+    required this.logoBoundingSize,
   });
 
   final double scale;
@@ -336,6 +345,7 @@ class _BadgeLayoutMetrics {
   final double logoLeft;
   final double logoTop;
   final double logoSize;
+  final double logoBoundingSize;
 
   static _BadgeLayoutMetrics fromConstraints(BoxConstraints constraints) {
     final double availableWidth =
@@ -372,6 +382,16 @@ class _BadgeLayoutMetrics {
     final double titleLeft = _kDesignTitleLeft * scale;
     final double textWidth = math.max(_kDesignTextWidth, 160.0) * scale;
 
+    final double shareWidth = _kDesignShareWidth * scale;
+    final double shareHeight = _kDesignShareHeight * scale;
+    final double shareShadowBlur = _kDesignShareShadowBlur * scale;
+    final double shareShadowOffsetY = _kDesignShareShadowOffsetY * scale;
+
+    final double logoSize = _kDesignLogoSize * scale;
+    final double logoBoundingSize = _kDesignLogoBoundingSize * scale;
+    final double logoOffsetLeft = _kDesignLogoOffsetLeft * scale;
+    final double logoOffsetBottom = _kDesignLogoOffsetBottom * scale;
+
     return _BadgeLayoutMetrics._(
       scale: scale,
       cardWidth: cardWidth,
@@ -398,13 +418,30 @@ class _BadgeLayoutMetrics {
       titleTop: _kDesignTitleTop * scale,
       subtitleTop: _kDesignSubtitleTop * scale,
       textWidth: textWidth,
-      shareLeft: _kDesignShareLeft * scale,
-      shareTop: _kDesignShareTop * scale,
-      shareWidth: _kDesignShareWidth * scale,
-      shareHeight: _kDesignShareHeight * scale,
-      logoLeft: _kDesignLogoLeft * scale,
-      logoTop: _kDesignLogoTop * scale,
-      logoSize: _kDesignLogoSize * scale,
+      shareLeft: panelLeft +
+          panelWidth -
+          shareWidth -
+          _kDesignPanelContentPadding -
+          shareShadowBlur,
+      shareTop: panelTop +
+          panelHeight -
+          shareHeight -
+          _kDesignPanelContentPadding -
+          shareShadowOffsetY -
+          shareShadowBlur,
+      shareWidth: shareWidth,
+      shareHeight: shareHeight,
+      logoLeft: panelLeft +
+          _kDesignPanelContentPadding +
+          _kDesignLogoPaddingAdjust -
+          logoOffsetLeft,
+      logoTop: panelTop +
+          panelHeight -
+          (logoBoundingSize - logoOffsetBottom) -
+          _kDesignPanelContentPadding -
+          _kDesignLogoPaddingAdjust,
+      logoSize: logoSize,
+      logoBoundingSize: logoBoundingSize,
       outerRadius: outerRadius,
     );
   }
