@@ -89,3 +89,31 @@ export const CustomHeadPhotosOrAlbums: React.FC<CustomHeadProps> = ({
     ) : (
         <CustomHeadAlbums />
     );
+
+/**
+ * A static SSR-ed variant of {@link CustomHead} for use with the share app
+ * (Public Locker) deployed on production Ente instances for link previews.
+ *
+ * Similar to {@link CustomHeadAlbums}, this includes Open Graph meta tags with
+ * absolute URLs for social media preview images.
+ */
+export const CustomHeadShare: React.FC = () => (
+    <Head>
+        <title>Ente Locker</title>
+        <link rel="icon" href="/images/favicon.png" type="image/png" />
+        <meta
+            name="description"
+            content="Securely store and share your documents"
+        />
+        <meta
+            property="og:image"
+            content="https://share.ente.io/images/preview.png"
+        />
+        <meta
+            name="twitter:image"
+            content="https://share.ente.io/images/preview.png"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+    </Head>
+);
