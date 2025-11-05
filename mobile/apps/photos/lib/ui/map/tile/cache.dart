@@ -15,6 +15,10 @@ class TilesCacheManager extends CacheManager with ImageCacheManager {
 }
 
 class CachedNetworkTileProvider extends TileProvider {
+  final Map<String, String>? headers;
+
+  CachedNetworkTileProvider({this.headers});
+
   @override
   ImageProvider<Object> getImage(
     TileCoordinates coordinates,
@@ -23,6 +27,7 @@ class CachedNetworkTileProvider extends TileProvider {
     return CachedNetworkImageProvider(
       getTileUrl(coordinates, options),
       cacheManager: TilesCacheManager(),
+      headers: headers,
     );
   }
 }

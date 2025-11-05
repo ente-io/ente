@@ -31,7 +31,9 @@ class OSMTileLayer extends StatelessWidget {
       urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       userAgentPackageName: _userAgent,
-      tileProvider: CachedNetworkTileProvider(),
+      tileProvider: CachedNetworkTileProvider(
+        headers: {'User-Agent': _userAgent},
+      ),
     );
   }
 }
@@ -45,7 +47,9 @@ class OSMFranceTileLayer extends StatelessWidget {
       urlTemplate: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       fallbackUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
-      tileProvider: CachedNetworkTileProvider(),
+      tileProvider: CachedNetworkTileProvider(
+        headers: {'User-Agent': _userAgent},
+      ),
       userAgentPackageName: _userAgent,
       panBuffer: 1,
     );
@@ -134,7 +138,9 @@ class MapBoxTilesLayer extends StatelessWidget {
       fallbackUrl: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
       subdomains: const ['a', 'b', 'c'],
       userAgentPackageName: _userAgent,
-      tileProvider: CachedNetworkTileProvider(),
+      tileProvider: CachedNetworkTileProvider(
+        headers: {'User-Agent': _userAgent},
+      ),
       additionalOptions: const {
         "mb_token": String.fromEnvironment("mb_token"),
         "mb_style_id": String.fromEnvironment("mb_style_id"),
