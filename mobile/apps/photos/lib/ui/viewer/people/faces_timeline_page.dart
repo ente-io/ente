@@ -395,32 +395,6 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                                   Positioned.fill(
                                     child: _buildFrameView(context),
                                   ),
-                                  Positioned(
-                                    top: 24,
-                                    left: 0,
-                                    right: 0,
-                                    child: Center(
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 6,
-                                          horizontal: 12,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.fillFaint,
-                                          borderRadius:
-                                              BorderRadius.circular(24),
-                                        ),
-                                        child: Text(
-                                          _frames[displayIndex]
-                                              .entry
-                                              .year
-                                              .toString(),
-                                          style: getEnteTextTheme(context)
-                                              .bodyMuted,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -861,6 +835,12 @@ class _FacesTimelineCard extends StatelessWidget {
         distance > 0 ? math.min(0.45, 0.12 + distance * 0.12) : 0.0;
 
     final cardShadow = _shadowForCard(distance);
+    final String localeTag = Localizations.localeOf(context).toLanguageTag();
+    final String formattedDate = DateFormat(
+      "d MMM yyyy",
+      localeTag,
+    ).format(frame.creationDate.toLocal());
+    final textTheme = getEnteTextTheme(context);
 
     final cardContent = ClipRRect(
       borderRadius: BorderRadius.circular(_cardRadius),
@@ -881,6 +861,35 @@ class _FacesTimelineCard extends StatelessWidget {
                 color: colorScheme.strokeMuted,
               ),
             ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    colorScheme.backgroundBase.withValues(alpha: 0.45),
+                    colorScheme.backgroundBase.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(20, 36, 20, 20),
+              child: Text(
+                formattedDate,
+                textAlign: TextAlign.center,
+                style: textTheme.smallMuted.copyWith(
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.35),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
