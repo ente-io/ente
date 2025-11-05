@@ -371,7 +371,7 @@
   "useOffline": "Use without backups",
   "signInToBackup": "Sign in to backup your codes",
   "singIn": "Sign in",
-  "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
+  "sigInBackupReminder": "Ente will automatically backup codes after sign-in.\n\nWe still recommend exporting codes as an extra backup.",
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
   "compactMode": "Compact mode",
