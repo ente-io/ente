@@ -32,6 +32,7 @@ class _BadgeCardContent extends StatelessWidget {
     final _WrappedViewerPageState? viewerState =
         context.findAncestorStateOfType<_WrappedViewerPageState>();
     final GlobalKey? shareKey = viewerState?.shareButtonKey;
+    final bool hideSharePill = viewerState?.hideBadgeSharePill ?? false;
 
     final _BadgeLayoutConstants layout = _BadgeLayoutConstants(
       textTheme: textTheme,
@@ -154,13 +155,19 @@ class _BadgeCardContent extends StatelessWidget {
                     top: metrics.shareTop,
                     width: metrics.shareWidth,
                     height: metrics.shareHeight,
-                    child: _BadgeSharePill(
-                      labelStyle: shareStyle,
-                      onTap: viewerState == null
-                          ? null
-                          : () => unawaited(viewerState.shareCurrentCard()),
-                      shareButtonKey: shareKey,
-                      size: Size(metrics.shareWidth, metrics.shareHeight),
+                    child: IgnorePointer(
+                      ignoring: hideSharePill,
+                      child: Opacity(
+                        opacity: hideSharePill ? 0.0 : 1.0,
+                        child: _BadgeSharePill(
+                          labelStyle: shareStyle,
+                          onTap: viewerState == null
+                              ? null
+                              : () => unawaited(viewerState.shareCurrentCard()),
+                          shareButtonKey: shareKey,
+                          size: Size(metrics.shareWidth, metrics.shareHeight),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -497,25 +504,27 @@ class _BadgeSharePill extends StatelessWidget {
     final double shadowScale = size.height / _kDesignShareHeight;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: RepaintBoundary(
         key: shareButtonKey,
-        width: size.width,
-        height: size.height,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(size.height / 2),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 16 * shadowScale,
-              offset: Offset(0, 8 * shadowScale),
-            ),
-          ],
-        ),
-        child: Text(
-          "Share",
-          style: labelStyle,
+        child: Container(
+          width: size.width,
+          height: size.height,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(size.height / 2),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 16 * shadowScale,
+                offset: Offset(0, 8 * shadowScale),
+              ),
+            ],
+          ),
+          child: Text(
+            "Share",
+            style: labelStyle,
+          ),
         ),
       ),
     );

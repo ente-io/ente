@@ -73,6 +73,9 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   bool _isMusicPlaying = false;
   bool _musicLoadFailed = false;
   bool _isFadingOutMusic = false;
+  bool _hideBadgeSharePill = false;
+  OverlayEntry? _sharePillOverlayEntry;
+  ui.Image? _sharePillOverlaySnapshot;
   StreamSubscription<PlayerState>? _playerStateSubscription;
   ModalRoute<dynamic>? _registeredRoute;
   bool _didRegisterWillPop = false;
@@ -125,6 +128,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     if (_stateListener != null) {
       wrappedService.stateListenable.removeListener(_stateListener!);
     }
+    _removeSharePillOverlay();
     if (_didRegisterWillPop && _registeredRoute != null) {
       // ignore: deprecated_member_use
       _registeredRoute!.removeScopedWillPopCallback(_handleWillPop);
@@ -711,6 +715,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   GlobalKey get shareButtonKey => _shareButtonKey;
+  bool get hideBadgeSharePill => _hideBadgeSharePill;
 
   Future<void> shareCurrentCard() async {
     await _handleShare();
@@ -726,8 +731,13 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     final bool wasPaused = _isPaused;
     _pauseAutoplay();
     try {
-      final Uint8List? bytes =
-          await _captureCurrentCard(includeBranding: shouldShowBranding);
+      final bool hideShareControls =
+          currentCard.type == WrappedCardType.badge ||
+              currentCard.type == WrappedCardType.badgeDebug;
+      final Uint8List? bytes = await _captureCurrentCard(
+        includeBranding: shouldShowBranding,
+        hideInteractiveControls: hideShareControls,
+      );
       if (bytes == null) {
         showShortToast(context, "Unable to prepare share");
         return;
@@ -758,15 +768,41 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
 
   Future<Uint8List?> _captureCurrentCard({
     required bool includeBranding,
+    bool hideInteractiveControls = false,
   }) async {
+    Future<void> showShareControlsIfHidden() async {
+      bool awaitedFrame = false;
+      if (_hideBadgeSharePill && mounted) {
+        setState(() {
+          _hideBadgeSharePill = false;
+        });
+        awaitedFrame = true;
+      }
+      if (awaitedFrame) {
+        await WidgetsBinding.instance.endOfFrame;
+      }
+      _removeSharePillOverlay();
+    }
+
+    if (hideInteractiveControls && !_hideBadgeSharePill && mounted) {
+      await _showSharePillOverlay();
+      if (!_hideBadgeSharePill && mounted) {
+        setState(() {
+          _hideBadgeSharePill = true;
+        });
+        await WidgetsBinding.instance.endOfFrame;
+      }
+    }
     await Future<void>.delayed(Duration.zero);
     final RenderRepaintBoundary? boundary = _cardBoundaryKey.currentContext
         ?.findRenderObject() as RenderRepaintBoundary?;
     if (boundary == null) {
+      await showShareControlsIfHidden();
       return null;
     }
     final double logicalWidth = boundary.size.width;
     if (logicalWidth <= 0) {
+      await showShareControlsIfHidden();
       return null;
     }
     final double pixelRatio = (1080 / logicalWidth).clamp(1.0, 6.0);
@@ -777,12 +813,70 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         includeBranding ? await _compositeBranding(image, scale) : image;
     final ByteData? byteData =
         await finalImage.toByteData(format: ui.ImageByteFormat.png);
+    await showShareControlsIfHidden();
     return byteData?.buffer.asUint8List();
   }
 
   bool _shouldShowBrandingForCard(WrappedCard card) {
     return card.type != WrappedCardType.badge &&
         card.type != WrappedCardType.badgeDebug;
+  }
+
+  Future<void> _showSharePillOverlay() async {
+    if (!mounted || _sharePillOverlayEntry != null) {
+      return;
+    }
+    final OverlayState? overlayState = Overlay.of(context, rootOverlay: true);
+    if (overlayState == null) {
+      return;
+    }
+    final RenderRepaintBoundary? shareBoundary = _shareButtonKey.currentContext
+        ?.findRenderObject() as RenderRepaintBoundary?;
+    if (shareBoundary == null) {
+      return;
+    }
+    final Size size = shareBoundary.size;
+    final Offset topLeft = shareBoundary.localToGlobal(Offset.zero);
+    try {
+      final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+      final double pixelRatio =
+          math.max(1.0, math.min(devicePixelRatio, 4.0));
+      final ui.Image snapshot =
+          await shareBoundary.toImage(pixelRatio: pixelRatio);
+      _sharePillOverlaySnapshot?.dispose();
+      _sharePillOverlaySnapshot = snapshot;
+      final OverlayEntry entry = OverlayEntry(
+        builder: (BuildContext overlayContext) {
+          return Positioned(
+            left: topLeft.dx,
+            top: topLeft.dy,
+            width: size.width,
+            height: size.height,
+            child: IgnorePointer(
+              child: RawImage(
+                image: snapshot,
+                fit: BoxFit.fill,
+              ),
+            ),
+          );
+        },
+      );
+      overlayState.insert(entry);
+      _sharePillOverlayEntry = entry;
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Failed to create share pill overlay",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  void _removeSharePillOverlay() {
+    _sharePillOverlayEntry?.remove();
+    _sharePillOverlayEntry = null;
+    _sharePillOverlaySnapshot?.dispose();
+    _sharePillOverlaySnapshot = null;
   }
 
   Future<ui.Image> _compositeBranding(ui.Image baseImage, double scale) async {
