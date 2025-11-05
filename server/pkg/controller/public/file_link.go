@@ -1,6 +1,8 @@
 package public
 
 import (
+	"errors"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/repo"
@@ -32,27 +34,35 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 	if actorUserID != file.OwnerID {
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
-	accessToken := shortuuid.New()[0:AccessTokenLength]
-	_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
-	if err == nil || err == ente.ErrActiveLinkAlreadyExists {
-		row, rowErr := c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
-		if rowErr != nil {
-			return nil, stacktrace.Propagate(rowErr, "failed to get active file url token")
+	for attempt := 0; attempt < 5; attempt++ {
+		accessToken := shortuuid.New()[0:AccessTokenLength]
+		_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
+		if errors.Is(err, ente.ErrAccessTokenInUse) {
+			continue
 		}
-		if err == ente.ErrActiveLinkAlreadyExists {
-			updateErr := c.FileLinkRepo.UpdateLinkSecretIfEmpty(ctx, row.LinkID, req)
-			if updateErr != nil {
-				return nil, stacktrace.Propagate(updateErr, "failed to update link secret")
-			}
-			// Re-fetch to include any values that might have been updated.
-			row, rowErr = c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
+		if err == nil || errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
+			row, rowErr := c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
 			if rowErr != nil {
-				return nil, stacktrace.Propagate(rowErr, "failed to get active file url token after updating secret")
+				return nil, stacktrace.Propagate(rowErr, "failed to get active file url token")
 			}
+			if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
+				updateErr := c.FileLinkRepo.UpdateLinkSecretIfEmpty(ctx, row.LinkID, req)
+				if updateErr != nil {
+					return nil, stacktrace.Propagate(updateErr, "failed to update link secret")
+				}
+				// Re-fetch to include any values that might have been updated.
+				row, rowErr = c.FileLinkRepo.GetFileUrlRowByFileID(ctx, req.FileID)
+				if rowErr != nil {
+					return nil, stacktrace.Propagate(rowErr, "failed to get active file url token after updating secret")
+				}
+			}
+			return c.mapRowToFileUrl(ctx, row), nil
 		}
-		return c.mapRowToFileUrl(ctx, row), nil
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to create public file link")
+		}
 	}
-	return nil, stacktrace.Propagate(err, "failed to create public file link")
+	return nil, stacktrace.Propagate(ente.ErrAccessTokenInUse, "failed to generate unique access token for file link")
 }
 
 // Disable all public accessTokens generated for the given fileID till date.

@@ -100,6 +100,9 @@ var ErrLockUnavailable = errors.New("could not acquire lock")
 // ErrActiveLinkAlreadyExists is thrown when an active link already exists for entity
 var ErrActiveLinkAlreadyExists = errors.New("link already exists for this entity")
 
+// ErrAccessTokenInUse is thrown when an access token is already active
+var ErrAccessTokenInUse = errors.New("access token already in use")
+
 // ErrNotImplemented indicates that the action that we tried to perform is not
 // available at this museum instance. e.g. this could be something that is not
 // enabled on this particular instance of museum.
