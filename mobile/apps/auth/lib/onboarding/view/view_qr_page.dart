@@ -57,9 +57,14 @@ class ViewQrPage extends StatelessWidget {
                     const SizedBox(
                       width: 10,
                     ),
-                    Text(
-                      code?.account ?? '',
-                      style: enteTextTheme.largeBold,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          code?.account ?? '',
+                          style: enteTextTheme.largeBold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -76,9 +81,14 @@ class ViewQrPage extends StatelessWidget {
                     const SizedBox(
                       width: 10,
                     ),
-                    Text(
-                      code?.issuer ?? '',
-                      style: enteTextTheme.largeBold,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          code?.issuer ?? '',
+                          style: enteTextTheme.largeBold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

@@ -90,6 +90,7 @@ dependencies:
   google_nav_bar: ^5.0.5 #supported
   gradient_borders: ^1.0.0
   http: ^1.1.0
+  hugeicons: ^1.1.0
   image: ^4.5.4
   intl: ^0.20.2
   io: ^1.0.4
