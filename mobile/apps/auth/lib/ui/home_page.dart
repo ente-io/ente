@@ -35,14 +35,13 @@ import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
-import 'package:ente_qr/ente_qr.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -293,8 +292,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _importFromGalleryNative() async {
-    final l10n = AppLocalizations.of(context);
-
     if (_isImportingFromGallery) {
       return;
     }
@@ -302,67 +299,38 @@ class _HomePageState extends State<HomePage> {
     _isImportingFromGallery = true;
 
     try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-      );
-
-      if (result == null || result.files.single.path == null) {
+      final Code? newCode =
+          await pickCodeFromGallery(context, logger: _logger);
+      if (newCode == null) {
         return;
       }
-
-      final String imagePath = result.files.single.path!;
-      final enteQr = EnteQr();
-      final QrScanResult qrResult = await enteQr.scanQrFromImage(imagePath);
-
-      if (qrResult.success && qrResult.content != null) {
-        try {
-          final newCode = Code.fromOTPAuthUrl(qrResult.content!);
-          await CodeStore.instance.addCode(newCode, shouldSync: false);
-          // Focus the new code by searching
-          if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
-            _focusNewCode(newCode);
-          }
-          LocalBackupService.instance.triggerAutomaticBackup().ignore();
-        } catch (e) {
-          _logger.severe('Error adding code from QR scan', e);
-          await showErrorDialog(
-            context,
-            l10n.errorInvalidQRCode,
-            l10n.errorInvalidQRCodeBody,
-          );
-        }
-      } else {
-        _logger.warning('QR scan failed: ${qrResult.error}');
-        await showErrorDialog(
-          context,
-          l10n.errorNoQRCode,
-          qrResult.error ?? l10n.errorNoQRCode,
-        );
+      await CodeStore.instance.addCode(newCode, shouldSync: false);
+      // Focus the new code by searching
+      if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
+        _focusNewCode(newCode);
       }
-    } catch (e) {
-      await showErrorDialog(
-        context,
-        l10n.errorGenericTitle,
-        l10n.errorGenericBody,
-      );
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     } finally {
       _isImportingFromGallery = false;
     }
   }
 
   Future<void> _redirectToScannerPage() async {
-    final Code? code = await Navigator.of(context).push(
+    final ScannerPageResult? result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return const ScannerPage();
         },
       ),
     );
-    if (code != null) {
-      await CodeStore.instance.addCode(code);
+    if (result != null) {
+      await CodeStore.instance.addCode(
+        result.code,
+        shouldSync: result.fromGallery ? false : true,
+      );
       // Focus the new code by searching
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
-        _focusNewCode(code);
+        _focusNewCode(result.code);
       }
       LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
@@ -545,7 +513,6 @@ class _HomePageState extends State<HomePage> {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
-          onImportFromGalleryTap: _importFromGalleryNative,
         );
       } else {
         final anyCodeHasError =
