@@ -329,12 +329,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   valueListenable: inheritedData.indexNotifier,
                   child: GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+                    child: const Padding(
+                      padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
                       child: Icon(
                         Icons.close,
                         color: Colors.white,
-                        size: flagService.internalUser ? 20 : null,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -368,79 +368,63 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         Row(
                           children: [
                             child!,
-                            if (flagService.internalUser)
-                              GestureDetector(
-                                onTap: () async {
-                                  final fullScreenState =
-                                      context.findAncestorStateOfType<
-                                          _FullScreenMemoryState>();
-                                  fullScreenState?._toggleAnimation(
-                                    pause: true,
-                                  );
-                                  await routeToPage(
-                                    context,
-                                    JumpToDateGallery(
-                                      fileToJumpTo:
-                                          inheritedData.memories[value].file,
-                                    ),
-                                  );
-                                  fullScreenState?._toggleAnimation(
-                                    pause: false,
-                                  );
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4),
-                                    // color: fillFaintDark,
-                                    color: blurStrokeFaintDark,
-                                    border: Border.all(
-                                      color: strokeFaintDark,
-                                      width: 1,
-                                    ),
+                            GestureDetector(
+                              onTap: () async {
+                                final fullScreenState =
+                                    context.findAncestorStateOfType<
+                                        _FullScreenMemoryState>();
+                                fullScreenState?._toggleAnimation(
+                                  pause: true,
+                                );
+                                await routeToPage(
+                                  context,
+                                  JumpToDateGallery(
+                                    fileToJumpTo:
+                                        inheritedData.memories[value].file,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      const SizedBox(width: 2),
-                                      Padding(
-                                        padding: const EdgeInsets.all(2.0),
-                                        child: Text(
-                                          SmartMemoriesService.getDateFormatted(
-                                            creationTime: inheritedData
-                                                .memories[value]
-                                                .file
-                                                .creationTime!,
-                                            context: context,
-                                          ),
-                                          style: getEnteTextTheme(context)
-                                              .miniMuted
-                                              .copyWith(color: textBaseDark),
+                                );
+                                fullScreenState?._toggleAnimation(
+                                  pause: false,
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  // color: fillFaintDark,
+                                  color: blurStrokeFaintDark,
+                                  border: Border.all(
+                                    color: strokeFaintDark,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const SizedBox(width: 2),
+                                    Padding(
+                                      padding: const EdgeInsets.all(2.0),
+                                      child: Text(
+                                        SmartMemoriesService.getDateFormatted(
+                                          creationTime: inheritedData
+                                              .memories[value]
+                                              .file
+                                              .creationTime!,
+                                          context: context,
                                         ),
+                                        style: getEnteTextTheme(context)
+                                            .miniMuted
+                                            .copyWith(color: textBaseDark),
                                       ),
-                                      const SizedBox(width: 4),
-                                      const Icon(
-                                        Icons.keyboard_arrow_right_outlined,
-                                        size: 14,
-                                        color: blurStrokeBaseDark,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                            else
-                              Text(
-                                SmartMemoriesService.getDateFormatted(
-                                  creationTime: inheritedData
-                                      .memories[value].file.creationTime!,
-                                  context: context,
-                                ),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
-                                    .copyWith(
-                                      fontSize: 14,
-                                      color: Colors.white,
                                     ),
+                                    const SizedBox(width: 4),
+                                    const Icon(
+                                      Icons.keyboard_arrow_right_outlined,
+                                      size: 14,
+                                      color: blurStrokeBaseDark,
+                                    ),
+                                  ],
+                                ),
                               ),
+                            ),
                           ],
                         ),
                       ],

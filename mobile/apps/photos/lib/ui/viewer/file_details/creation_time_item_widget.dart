@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
@@ -25,37 +24,31 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       widget.file.creationTime!,
       isUtc: true,
     ).toLocal();
-    final infoWidget = InfoItemWidget(
-      key: const ValueKey("Creation time"),
-      leadingIcon: Icons.calendar_today_outlined,
-      title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
-          .format(dateTime),
-      subtitleSection: Future.value([
-        Text(
-          getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: getEnteTextTheme(context).miniMuted,
-        ),
-      ]),
-      editOnTap: ((widget.file.ownerID == null ||
-                  widget.file.ownerID == widget.currentUserID) &&
-              widget.file.uploadedFileID != null)
-          ? () {
-              _showDateTimePicker(widget.file);
-            }
-          : null,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
+      },
+      child: InfoItemWidget(
+        key: const ValueKey("Creation time"),
+        leadingIcon: Icons.calendar_today_outlined,
+        title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
+            .format(dateTime),
+        subtitleSection: Future.value([
+          Text(
+            getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+            style: getEnteTextTheme(context).miniMuted,
+          ),
+        ]),
+        editOnTap: ((widget.file.ownerID == null ||
+                    widget.file.ownerID == widget.currentUserID) &&
+                widget.file.uploadedFileID != null)
+            ? () {
+                _showDateTimePicker(widget.file);
+              }
+            : null,
+      ),
     );
-
-    if (flagService.internalUser) {
-      return GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
-        },
-        child: infoWidget,
-      );
-    }
-
-    return infoWidget;
   }
 
   void _showDateTimePicker(EnteFile file) async {
