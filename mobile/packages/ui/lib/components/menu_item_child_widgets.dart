@@ -150,28 +150,17 @@ class LeadingWidget extends StatelessWidget {
     if (leadingIcon == null && leadingIconWidget == null) {
       return const SizedBox.shrink();
     }
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: getEnteColorScheme(context).backgroundElevated,
-        ),
-        padding: const EdgeInsets.all(8.0),
-        child: leadingIcon == null
-            ? FittedBox(
-                fit: BoxFit.contain,
-                child: leadingIconWidget,
-              )
-            : FittedBox(
-                fit: BoxFit.contain,
-                child: Icon(
-                  leadingIcon,
-                  color:
-                      leadingIconColor ?? getEnteColorScheme(context).fillBase,
-                ),
-              ),
-      ),
+    return Container(
+      width: leadingIconSize,
+      height: leadingIconSize,
+      alignment: Alignment.center,
+      child: leadingIcon == null
+          ? leadingIconWidget!
+          : Icon(
+              leadingIcon,
+              color: leadingIconColor,
+              size: leadingIconSize,
+            ),
     );
   }
 }

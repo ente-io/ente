@@ -186,7 +186,10 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (leadingSection != null) leadingSection,
+          if (leadingSection != null) ...[
+            leadingSection,
+            const SizedBox(width: 12),
+          ],
           widget.captionedTextWidget,
           if (widget.expandableController != null)
             ExpansionTrailingIcon(

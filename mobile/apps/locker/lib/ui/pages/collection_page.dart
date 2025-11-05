@@ -18,7 +18,7 @@ import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
-import "package:locker/ui/components/menu_item_widget.dart";
+import "package:locker/ui/components/popup_menu_item_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
@@ -299,7 +299,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               value: 'edit',
               height: 0,
               padding: EdgeInsets.zero,
-              child: MenuItemWidget(
+              child: PopupMenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedPencilEdit02,
                   color: colorScheme.textBase,
@@ -318,7 +318,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               value: 'delete',
               padding: EdgeInsets.zero,
               height: 0,
-              child: MenuItemWidget(
+              child: PopupMenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedDelete02,
                   color: colorScheme.warning500,
@@ -339,7 +339,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               value: 'leave_collection',
               padding: EdgeInsets.zero,
               height: 0,
-              child: MenuItemWidget(
+              child: PopupMenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedDelete02,
                   color: colorScheme.textBase,
