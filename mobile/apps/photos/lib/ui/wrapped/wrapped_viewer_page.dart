@@ -11,11 +11,11 @@ import "package:intl/intl.dart";
 import "package:just_audio/just_audio.dart";
 import "package:logging/logging.dart";
 import "package:mesh_gradient/mesh_gradient.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
+import "package:photos/services/wrapped/wrapped_media_preloader.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -826,7 +826,8 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     if (!mounted || _sharePillOverlayEntry != null) {
       return;
     }
-    final OverlayState? overlayState = Overlay.of(context, rootOverlay: true);
+    final overlayState = Overlay.of(context, rootOverlay: true);
+    // ignore: unnecessary_null_comparison
     if (overlayState == null) {
       return;
     }
@@ -839,8 +840,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     final Offset topLeft = shareBoundary.localToGlobal(Offset.zero);
     try {
       final double devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-      final double pixelRatio =
-          math.max(1.0, math.min(devicePixelRatio, 4.0));
+      final double pixelRatio = math.max(1.0, math.min(devicePixelRatio, 4.0));
       final ui.Image snapshot =
           await shareBoundary.toImage(pixelRatio: pixelRatio);
       _sharePillOverlaySnapshot?.dispose();

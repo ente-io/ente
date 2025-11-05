@@ -6,6 +6,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_cache_service.dart";
 import "package:photos/services/wrapped/wrapped_engine.dart";
+import "package:photos/services/wrapped/wrapped_media_preloader.dart";
 import "package:synchronized/synchronized.dart";
 
 @immutable
@@ -105,6 +106,7 @@ class WrappedService {
       final WrappedResult? cached =
           await _cacheService.read(year: _kWrappedYear);
       if (cached != null) {
+        await WrappedMediaPreloader.instance.prime(cached);
         _logger.info(
           "Loaded Wrapped cache for $_kWrappedYear with "
           "${cached.cards.length} cards",
@@ -162,6 +164,7 @@ class WrappedService {
     try {
       final WrappedResult result =
           await WrappedEngine.compute(year: _kWrappedYear);
+      await WrappedMediaPreloader.instance.prime(result);
       await _cacheService.write(result: result);
       updateResult(result);
       _logger.info("Wrapped compute completed ($reason)");
@@ -172,6 +175,7 @@ class WrappedService {
 
   void updateResult(WrappedResult? result) {
     if (result == null || result.cards.isEmpty) {
+      WrappedMediaPreloader.instance.reset();
       unawaited(localSettings.setWrapped2025ResumeIndex(0));
       final bool isComplete = localSettings.wrapped2025Complete();
       _state.value = WrappedEntryState(

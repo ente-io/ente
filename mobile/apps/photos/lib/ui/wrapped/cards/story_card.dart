@@ -281,65 +281,78 @@ class _BlurredMediaBackgroundState extends State<_BlurredMediaBackground> {
   @override
   void initState() {
     super.initState();
-    _fileFuture = _loadFile();
+    _fileFuture = _ensureFile();
   }
 
   @override
   void didUpdateWidget(covariant _BlurredMediaBackground oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.mediaRef.uploadedFileID != widget.mediaRef.uploadedFileID) {
-      _fileFuture = _loadFile();
+      _fileFuture = _ensureFile();
     }
   }
 
-  Future<EnteFile?> _loadFile() {
-    return FilesDB.instance.getAnyUploadedFile(
+  Future<EnteFile?> _ensureFile() {
+    return WrappedMediaPreloader.instance.ensureFile(
       widget.mediaRef.uploadedFileID,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final EnteFile? cached = WrappedMediaPreloader.instance.getCachedFile(
+      widget.mediaRef.uploadedFileID,
+    );
+    if (cached != null) {
+      return _buildBackground(cached);
+    }
     return FutureBuilder<EnteFile?>(
       future: _fileFuture,
       builder: (BuildContext context, AsyncSnapshot<EnteFile?> snapshot) {
-        if (!snapshot.hasData) {
-          return Container(
-            color: widget.colorScheme.backgroundElevated,
-          );
-        }
         final EnteFile? file = snapshot.data;
-        if (file == null) {
-          return Container(
-            color: widget.colorScheme.backgroundElevated,
-          );
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            file == null) {
+          return _buildPlaceholder();
         }
-        return ClipRect(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ColorFiltered(
-                colorFilter: const ColorFilter.matrix(_kSaturationBoostMatrix),
-                child: ImageFiltered(
-                  imageFilter: ui.ImageFilter.blur(sigmaX: 36, sigmaY: 36),
-                  child: ThumbnailWidget(
-                    file,
-                    fit: BoxFit.cover,
-                    rawThumbnail: true,
-                    shouldShowSyncStatus: false,
-                    shouldShowArchiveStatus: false,
-                    shouldShowPinIcon: false,
-                    shouldShowOwnerAvatar: false,
-                    shouldShowFavoriteIcon: false,
-                    shouldShowVideoDuration: false,
-                    shouldShowVideoOverlayIcon: false,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
+        if (file == null) {
+          return _buildPlaceholder();
+        }
+        return _buildBackground(file);
       },
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      color: widget.colorScheme.backgroundElevated,
+    );
+  }
+
+  Widget _buildBackground(EnteFile file) {
+    return ClipRect(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ColorFiltered(
+            colorFilter: const ColorFilter.matrix(_kSaturationBoostMatrix),
+            child: ImageFiltered(
+              imageFilter: ui.ImageFilter.blur(sigmaX: 36, sigmaY: 36),
+              child: ThumbnailWidget(
+                file,
+                fit: BoxFit.cover,
+                rawThumbnail: true,
+                shouldShowSyncStatus: false,
+                shouldShowArchiveStatus: false,
+                shouldShowPinIcon: false,
+                shouldShowOwnerAvatar: false,
+                shouldShowFavoriteIcon: false,
+                shouldShowVideoDuration: false,
+                shouldShowVideoOverlayIcon: false,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
