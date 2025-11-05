@@ -1030,6 +1030,24 @@ abstract class AppLocalizations {
   /// **'Save information'**
   String get saveInformation;
 
+  /// No description provided for @saveToLocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Locker'**
+  String get saveToLocker;
+
+  /// No description provided for @saveDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get saveDocumentTitle;
+
+  /// No description provided for @saveDocumentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload documents securely to keep everything in one place.'**
+  String get saveDocumentDescription;
+
   /// No description provided for @informationDescription.
   ///
   /// In en, this message translates to:
@@ -2191,7 +2209,7 @@ abstract class AppLocalizations {
   /// No description provided for @incorrectPassword.
   ///
   /// In en, this message translates to:
-  /// **'Incorrect Password'**
+  /// **'Incorrect password'**
   String get incorrectPassword;
 
   /// No description provided for @pleaseTryAgain.
@@ -2203,7 +2221,7 @@ abstract class AppLocalizations {
   /// No description provided for @noInternetConnection.
   ///
   /// In en, this message translates to:
-  /// **'No Internet Connection'**
+  /// **'No internet connection'**
   String get noInternetConnection;
 
   /// No description provided for @checkInternetConnection.
@@ -2239,7 +2257,7 @@ abstract class AppLocalizations {
   /// No description provided for @invalidEmail.
   ///
   /// In en, this message translates to:
-  /// **'Invalid Email'**
+  /// **'Invalid email'**
   String get invalidEmail;
 
   /// No description provided for @enterValidEmailFirst.
@@ -2251,7 +2269,7 @@ abstract class AppLocalizations {
   /// No description provided for @lockerLoginIssueSubject.
   ///
   /// In en, this message translates to:
-  /// **'Locker Login Issue'**
+  /// **'Locker login issue'**
   String get lockerLoginIssueSubject;
 
   /// No description provided for @unnamed.

@@ -542,6 +542,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveInformation => 'Save information';
 
   @override
+  String get saveToLocker => 'Save to Locker';
+
+  @override
+  String get saveDocumentTitle => 'Document';
+
+  @override
+  String get saveDocumentDescription =>
+      'Upload documents securely to keep everything in one place.';
+
+  @override
   String get informationDescription =>
       'Save important information that can be shared and passed down to loved ones.';
 
@@ -1254,13 +1264,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUp => 'Sign up';
 
   @override
-  String get incorrectPassword => 'Incorrect Password';
+  String get incorrectPassword => 'Incorrect password';
 
   @override
   String get pleaseTryAgain => 'Please try again';
 
   @override
-  String get noInternetConnection => 'No Internet Connection';
+  String get noInternetConnection => 'No internet connection';
 
   @override
   String get checkInternetConnection =>
@@ -1281,13 +1291,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get useRecoveryKey => 'Use recovery key';
 
   @override
-  String get invalidEmail => 'Invalid Email';
+  String get invalidEmail => 'Invalid email';
 
   @override
   String get enterValidEmailFirst => 'Please enter a valid email address first';
 
   @override
-  String get lockerLoginIssueSubject => 'Locker Login Issue';
+  String get lockerLoginIssueSubject => 'Locker login issue';
 
   @override
   String get unnamed => 'Unnamed';
