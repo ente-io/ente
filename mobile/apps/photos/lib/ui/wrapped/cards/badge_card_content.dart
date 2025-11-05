@@ -33,130 +33,134 @@ class _BadgeCardContent extends StatelessWidget {
         context.findAncestorStateOfType<_WrappedViewerPageState>();
     final GlobalKey? shareKey = viewerState?.shareButtonKey;
 
+    final _BadgeLayoutConstants layout = _BadgeLayoutConstants(
+      textTheme: textTheme,
+    );
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double cardHeight = constraints.maxHeight.isFinite
-            ? math.max(constraints.maxHeight, 360)
-            : 520;
-        final double panelTopUpperBound = math.max(cardHeight - 190.0, 140.0);
-        final double panelTop = math.min(
-          math.max(cardHeight * 0.30, 110.0),
-          panelTopUpperBound,
-        );
-        final double width =
-            constraints.maxWidth.isFinite ? constraints.maxWidth : 360;
-        final double artWidth = math.max(math.min(width - 72, 280), 180);
-        final double artTopPadding = math.max(panelTop - 140, 4);
+        final _BadgeLayoutMetrics metrics =
+            _BadgeLayoutMetrics.fromConstraints(constraints);
+        final TextStyle titleStyle = layout.titleStyle(metrics.scale);
+        final TextStyle subtitleStyle = layout.subtitleStyle(metrics.scale);
+        final TextStyle shareStyle = layout.shareLabelStyle(metrics.scale);
 
-        return Container(
-          color: Colors.white,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned(
-                left: 16,
-                right: 16,
-                top: panelTop,
-                bottom: 16,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _kBadgeBaseGreen,
-                    borderRadius: BorderRadius.circular(40),
+        return Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: metrics.cardWidth,
+            height: metrics.cardHeight,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(metrics.outerRadius),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Positioned.fill(
+                    child: ColoredBox(color: Colors.white),
                   ),
-                ),
-              ),
-              Positioned(
-                left: 24,
-                right: 24,
-                top: panelTop - 80,
-                child: IgnorePointer(
-                  child: Opacity(
-                    opacity: 0.45,
+                  Positioned(
+                    left: metrics.panelLeft,
+                    top: metrics.panelTop,
+                    width: metrics.panelWidth,
+                    height: metrics.panelHeight,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(metrics.panelRadius),
+                      child: Stack(
+                        clipBehavior: Clip.hardEdge,
+                        children: [
+                          const Positioned.fill(
+                            child: ColoredBox(color: _kBadgeBaseGreen),
+                          ),
+                          Positioned(
+                            left: metrics.panelRaysLeft,
+                            top: metrics.panelRaysTop,
+                            width: metrics.panelRaysWidth,
+                            height: metrics.panelRaysHeight,
+                            child: IgnorePointer(
+                              child: Opacity(
+                                opacity: 0.82,
+                                child: Image.asset(
+                                  _BadgeVisualAssets.rays,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: metrics.panelCloudLeft,
+                            right: metrics.panelCloudRight,
+                            bottom: metrics.panelCloudBottom,
+                            height: metrics.panelCloudHeight,
+                            child: IgnorePointer(
+                              child: Image.asset(
+                                _BadgeVisualAssets.cloud,
+                                fit: BoxFit.cover,
+                                color: Colors.white.withValues(alpha: 0.3),
+                                colorBlendMode: BlendMode.srcATop,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: metrics.duckLeft,
+                    top: metrics.duckTop,
+                    width: metrics.duckWidth,
+                    height: metrics.duckHeight,
                     child: Image.asset(
-                      _BadgeVisualAssets.rays,
+                      visuals.illustrationAsset,
                       fit: BoxFit.contain,
-                      height: 180,
+                      filterQuality: FilterQuality.high,
                     ),
                   ),
-                ),
-              ),
-              Positioned(
-                left: 24,
-                right: 24,
-                top: panelTop - 48,
-                child: IgnorePointer(
-                  child: Image.asset(
-                    _BadgeVisualAssets.cloud,
-                    fit: BoxFit.contain,
-                    height: 150,
-                    color: Colors.white.withValues(alpha: 0.15),
-                    colorBlendMode: BlendMode.srcATop,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(top: artTopPadding),
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: artWidth,
-                            ),
-                            child: Image.asset(
-                              visuals.illustrationAsset,
-                              fit: BoxFit.contain,
-                              filterQuality: FilterQuality.high,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    buildWrappedCardTitle(
+                  Positioned(
+                    left: metrics.titleLeft,
+                    top: metrics.titleTop,
+                    width: metrics.textWidth,
+                    child: Text(
                       card.title,
-                      textTheme.h2Bold.copyWith(color: Colors.white),
+                      style: titleStyle,
+                      textAlign: TextAlign.center,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    if (card.subtitle != null && card.subtitle!.isNotEmpty)
-                      buildWrappedCardSubtitle(
+                  ),
+                  if (card.subtitle != null && card.subtitle!.isNotEmpty)
+                    Positioned(
+                      left: metrics.titleLeft,
+                      top: metrics.subtitleTop,
+                      width: metrics.textWidth,
+                      child: Text(
                         card.subtitle!,
-                        textTheme.bodyMuted.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        padding: const EdgeInsets.only(top: 12),
+                        style: subtitleStyle,
+                        textAlign: TextAlign.center,
                       ),
-                    const SizedBox(height: 22),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const _BadgeBrandLogo(),
-                        const Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 14, bottom: 12),
-                          child: _BadgeSharePill(
-                            labelStyle: textTheme.h3Bold.copyWith(
-                              color: _kBadgeBaseGreen,
-                              fontSize: 24,
-                              height: 1.0,
-                            ),
-                            onTap: viewerState == null
-                                ? null
-                                : () =>
-                                    unawaited(viewerState.shareCurrentCard()),
-                            shareButtonKey: shareKey,
-                          ),
-                        ),
-                      ],
                     ),
-                  ],
-                ),
+                  Positioned(
+                    left: metrics.logoLeft,
+                    top: metrics.logoTop,
+                    width: metrics.logoSize,
+                    height: metrics.logoSize,
+                    child: const _BadgeBrandLogo(),
+                  ),
+                  Positioned(
+                    left: metrics.shareLeft,
+                    top: metrics.shareTop,
+                    width: metrics.shareWidth,
+                    height: metrics.shareHeight,
+                    child: _BadgeSharePill(
+                      labelStyle: shareStyle,
+                      onTap: viewerState == null
+                          ? null
+                          : () => unawaited(viewerState.shareCurrentCard()),
+                      shareButtonKey: shareKey,
+                      size: Size(metrics.shareWidth, metrics.shareHeight),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -175,7 +179,7 @@ class _BadgeVisuals {
 class _BadgeVisualAssets {
   static const String cloud = "assets/rewind_badges/cloud-effect.png";
   static const String rays = "assets/rewind_badges/rays.png";
-  static const String logo = "assets/rewind_badges/simple_logo.png";
+  static const String logo = "assets/launcher_icon/icon-foreground.png";
   static const String peoplePerson = "assets/rewind_badges/people_person.png";
   static const String consistencyChamp =
       "assets/rewind_badges/consistency_champ.png";
@@ -184,6 +188,220 @@ class _BadgeVisualAssets {
   static const String minimalist =
       "assets/rewind_badges/minimalist_shooter.png";
   static const String portraitPro = "assets/rewind_badges/portrait_pro.png";
+}
+
+const double _kBadgeDesignWidth = 349.0;
+const double _kBadgeDesignHeight = 581.0;
+const double _kDesignPanelLeft = 10.0;
+const double _kDesignPanelTop = 147.0;
+const double _kDesignPanelWidth = 329.0;
+const double _kDesignPanelHeight = 424.0;
+const double _kDesignPanelRadius = 27.0;
+const double _kDesignRaysTopOffset = 40.0;
+const double _kDesignRaysHeight = 212.0;
+const double _kDesignCloudInset = 0.0;
+const double _kDesignCloudHeight = 120.0;
+const double _kDesignCloudBottom = 0.0;
+const double _kDesignDuckTop = 100.0;
+const double _kDesignDuckWidth = 280.0;
+const double _kDesignDuckHeight = 202.0;
+const double _kDesignTitleLeft = _kDesignPanelLeft;
+const double _kDesignTitleTop = 304.0;
+const double _kDesignSubtitleTop = 380.0;
+const double _kDesignShareLeft = 206.73;
+const double _kDesignShareTop = 486.0;
+const double _kDesignShareWidth = 122.27;
+const double _kDesignShareHeight = 56.93;
+const double _kDesignLogoLeft = 38.0;
+const double _kDesignLogoTop = 496.0;
+const double _kDesignLogoSize = 64.0;
+const double _kDesignTextWidth = _kDesignPanelWidth;
+
+class _BadgeLayoutConstants {
+  const _BadgeLayoutConstants({
+    required this.textTheme,
+  });
+
+  final EnteTextTheme textTheme;
+
+  TextStyle titleStyle(double scale) {
+    return textTheme.h2Bold.copyWith(
+      color: Colors.white,
+      fontSize: textTheme.h2Bold.fontSize != null
+          ? textTheme.h2Bold.fontSize! * scale
+          : 48.0 * scale,
+      height: 1.1,
+    );
+  }
+
+  TextStyle subtitleStyle(double scale) {
+    final double fontSize = 18.0 * scale;
+    return textTheme.bodyMuted.copyWith(
+      color: Colors.white,
+      fontSize: fontSize,
+      fontWeight: FontWeight.w500,
+      letterSpacing: -0.9 * scale,
+      height: 1.25,
+    );
+  }
+
+  TextStyle shareLabelStyle(double scale) {
+    final double fontSize = 24.0 * scale;
+    return textTheme.h3Bold.copyWith(
+      color: _kBadgeBaseGreen,
+      fontSize: fontSize,
+      letterSpacing: -1.1 * scale,
+      height: 1.1,
+    );
+  }
+}
+
+class _BadgeLayoutMetrics {
+  const _BadgeLayoutMetrics._({
+    required this.scale,
+    required this.cardWidth,
+    required this.cardHeight,
+    required this.outerRadius,
+    required this.panelLeft,
+    required this.panelTop,
+    required this.panelWidth,
+    required this.panelHeight,
+    required this.panelRadius,
+    required this.panelRaysLeft,
+    required this.panelRaysTop,
+    required this.panelRaysWidth,
+    required this.panelRaysHeight,
+    required this.panelCloudLeft,
+    required this.panelCloudRight,
+    required this.panelCloudBottom,
+    required this.panelCloudHeight,
+    required this.duckLeft,
+    required this.duckTop,
+    required this.duckWidth,
+    required this.duckHeight,
+    required this.titleLeft,
+    required this.titleTop,
+    required this.subtitleTop,
+    required this.textWidth,
+    required this.shareLeft,
+    required this.shareTop,
+    required this.shareWidth,
+    required this.shareHeight,
+    required this.logoLeft,
+    required this.logoTop,
+    required this.logoSize,
+  });
+
+  final double scale;
+  final double cardWidth;
+  final double cardHeight;
+  final double outerRadius;
+
+  final double panelLeft;
+  final double panelTop;
+  final double panelWidth;
+  final double panelHeight;
+  final double panelRadius;
+
+  final double panelRaysLeft;
+  final double panelRaysTop;
+  final double panelRaysWidth;
+  final double panelRaysHeight;
+
+  final double panelCloudLeft;
+  final double panelCloudRight;
+  final double panelCloudBottom;
+  final double panelCloudHeight;
+
+  final double duckLeft;
+  final double duckTop;
+  final double duckWidth;
+  final double duckHeight;
+
+  final double titleLeft;
+  final double titleTop;
+  final double subtitleTop;
+  final double textWidth;
+
+  final double shareLeft;
+  final double shareTop;
+  final double shareWidth;
+  final double shareHeight;
+
+  final double logoLeft;
+  final double logoTop;
+  final double logoSize;
+
+  static _BadgeLayoutMetrics fromConstraints(BoxConstraints constraints) {
+    final double availableWidth =
+        constraints.maxWidth.isFinite ? constraints.maxWidth : double.infinity;
+    final double availableHeight = constraints.maxHeight.isFinite
+        ? constraints.maxHeight
+        : double.infinity;
+    double scale = 1.0;
+    if (availableWidth.isFinite && availableHeight.isFinite) {
+      scale = math.min(
+        availableWidth / _kBadgeDesignWidth,
+        availableHeight / _kBadgeDesignHeight,
+      );
+    } else if (availableWidth.isFinite) {
+      scale = availableWidth / _kBadgeDesignWidth;
+    } else if (availableHeight.isFinite) {
+      scale = availableHeight / _kBadgeDesignHeight;
+    }
+    scale = math.max(0.7, math.min(scale, 1.6));
+
+    final double cardWidth = _kBadgeDesignWidth * scale;
+    final double cardHeight = _kBadgeDesignHeight * scale;
+    final double outerRadius = 33.0 * scale;
+    final double panelLeft = _kDesignPanelLeft * scale;
+    final double panelTop = _kDesignPanelTop * scale;
+    final double panelWidth = _kDesignPanelWidth * scale;
+    final double panelHeight = _kDesignPanelHeight * scale;
+
+    final double duckWidth = _kDesignDuckWidth * scale;
+    final double duckHeight = _kDesignDuckHeight * scale;
+    final double duckLeft = (cardWidth - duckWidth) / 2;
+    final double duckTop = _kDesignDuckTop * scale;
+
+    final double titleLeft = _kDesignTitleLeft * scale;
+    final double textWidth = math.max(_kDesignTextWidth, 160.0) * scale;
+
+    return _BadgeLayoutMetrics._(
+      scale: scale,
+      cardWidth: cardWidth,
+      cardHeight: cardHeight,
+      panelLeft: panelLeft,
+      panelTop: panelTop,
+      panelWidth: panelWidth,
+      panelHeight: panelHeight,
+      panelRadius: _kDesignPanelRadius * scale,
+      panelRaysLeft: 0,
+      panelRaysTop: _kDesignRaysTopOffset * scale,
+      panelRaysWidth: panelWidth,
+      panelRaysHeight: _kDesignRaysHeight * scale,
+      panelCloudLeft: _kDesignCloudInset * scale,
+      panelCloudRight: _kDesignCloudInset * scale,
+      panelCloudBottom: _kDesignCloudBottom * scale,
+      panelCloudHeight: _kDesignCloudHeight * scale,
+      duckLeft: duckLeft,
+      duckTop: duckTop,
+      duckWidth: duckWidth,
+      duckHeight: duckHeight,
+      titleLeft: titleLeft,
+      titleTop: _kDesignTitleTop * scale,
+      subtitleTop: _kDesignSubtitleTop * scale,
+      textWidth: textWidth,
+      shareLeft: _kDesignShareLeft * scale,
+      shareTop: _kDesignShareTop * scale,
+      shareWidth: _kDesignShareWidth * scale,
+      shareHeight: _kDesignShareHeight * scale,
+      logoLeft: _kDesignLogoLeft * scale,
+      logoTop: _kDesignLogoTop * scale,
+      logoSize: _kDesignLogoSize * scale,
+      outerRadius: outerRadius,
+    );
+  }
 }
 
 const Map<String, String> _kBadgeIllustrations = <String, String>{
@@ -212,7 +430,6 @@ class _BadgeBrandLogo extends StatelessWidget {
       angle: _kBadgeLogoRotationRadians,
       child: Image.asset(
         _BadgeVisualAssets.logo,
-        width: 40,
         fit: BoxFit.contain,
       ),
     );
@@ -222,6 +439,7 @@ class _BadgeBrandLogo extends StatelessWidget {
 class _BadgeSharePill extends StatelessWidget {
   const _BadgeSharePill({
     required this.labelStyle,
+    required this.size,
     this.onTap,
     this.shareButtonKey,
   });
@@ -229,24 +447,26 @@ class _BadgeSharePill extends StatelessWidget {
   final TextStyle labelStyle;
   final VoidCallback? onTap;
   final GlobalKey? shareButtonKey;
+  final Size size;
 
   @override
   Widget build(BuildContext context) {
+    final double shadowScale = size.height / _kDesignShareHeight;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         key: shareButtonKey,
-        width: 122,
-        height: 56,
+        width: size.width,
+        height: size.height,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(size.height / 2),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
+              blurRadius: 16 * shadowScale,
+              offset: Offset(0, 8 * shadowScale),
             ),
           ],
         ),
@@ -260,7 +480,7 @@ class _BadgeSharePill extends StatelessWidget {
 }
 
 const Color _kBadgeBaseGreen = Color(0xFF08C225);
-const double _kBadgeLogoRotationRadians = 9.91 * math.pi / 180;
+const double _kBadgeLogoRotationRadians = -9.91 * math.pi / 180;
 
 Widget? buildBadgeDebugCardContent(
   WrappedCard card,
