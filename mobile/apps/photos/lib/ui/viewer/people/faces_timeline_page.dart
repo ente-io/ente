@@ -1,10 +1,11 @@
 import "dart:async";
 import "dart:math" as math;
 import "dart:typed_data";
-import "dart:ui";
+import "dart:ui" as ui;
 
 import "package:collection/collection.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -53,6 +54,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   double _previousCaptionValue = 0;
   double _currentCaptionValue = 0;
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
+  int _maxCaptionDigits = 1;
 
   @override
   void initState() {
@@ -88,6 +90,11 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       frames.add(await _buildFrame(entry));
     }
     if (frames.isNotEmpty && mounted) {
+      int maxRounded = 0;
+      for (final frame in frames) {
+        maxRounded = math.max(maxRounded, frame.captionValue.round());
+      }
+      final int digitCount = math.max(1, maxRounded.toString().length);
       setState(() {
         _frames
           ..clear()
@@ -102,6 +109,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _currentCaptionValue = frames.first.captionValue;
         _previousCaptionValue = _currentCaptionValue;
         _currentCaptionType = frames.first.captionType;
+        _maxCaptionDigits = digitCount;
       });
       _startPlayback();
       _logPlaybackStart(frames.length);
@@ -347,17 +355,34 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 20,
-                      ),
-                      child: Column(
-                        children: [
-                          _buildCaption(context),
-                          const SizedBox(height: 20),
-                          _buildControls(context),
-                        ],
+                    SafeArea(
+                      top: false,
+                      child: Builder(
+                        builder: (context) {
+                          final viewPadding =
+                              MediaQuery.of(context).viewPadding;
+                          final double bottomInset = viewPadding.bottom;
+                          final double bottomPadding =
+                              math.max(12, bottomInset);
+                          const double topPadding = 12;
+                          return Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              24,
+                              topPadding,
+                              24,
+                              bottomPadding,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _buildCaption(context),
+                                const SizedBox(height: 16),
+                                _buildControls(context),
+                              ],
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -480,30 +505,115 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   }
 
   Widget _buildCaption(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = context.l10n;
     final captionType = _currentCaptionType;
-    return TweenAnimationBuilder<double>(
-      key: ValueKey<int>(_currentIndex),
-      tween: Tween<double>(
-        begin: _previousCaptionValue,
-        end: _currentCaptionValue,
+    final isPlaying = _isPlaying;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final localeName = l10n.localeName;
+    final numberFormat = NumberFormat.decimalPattern(localeName);
+    final int currentRounded =
+        _currentCaptionValue.round().clamp(0, 1000).toInt();
+    final int previousRounded =
+        _previousCaptionValue.round().clamp(0, 1000).toInt();
+    final TextStyle baseStyle = textTheme.bodyMuted.copyWith(
+      color: isDark
+          ? colorScheme.textMuted
+          : colorScheme.textBase.withValues(alpha: 0.72),
+    );
+    final TextStyle numberStyle = textTheme.body.copyWith(
+      color: colorScheme.fillBase,
+      fontWeight: FontWeight.w600,
+    );
+    final int digits = math.max(1, _maxCaptionDigits);
+    final int slotSampleValue = _maxValueForDigits(digits);
+    final String sampleString = numberFormat.format(slotSampleValue);
+    final TextPainter samplePainter = TextPainter(
+      text: TextSpan(text: sampleString, style: numberStyle),
+      textDirection: ui.TextDirection.ltr,
+    )..layout();
+    final double slotWidth = samplePainter.width;
+    final double slotHeight = samplePainter.height;
+    final String formattedCurrent = numberFormat.format(currentRounded);
+    final String fullText = captionType == _CaptionType.age
+        ? l10n.facesTimelineCaptionYearsOld(
+            name: widget.person.data.name,
+            count: currentRounded,
+          )
+        : l10n.facesTimelineCaptionYearsAgo(count: currentRounded);
+    final int insertionIndex = fullText.indexOf(formattedCurrent);
+    final InlineSpan captionSpan;
+    if (insertionIndex == -1) {
+      captionSpan = TextSpan(
+        text: fullText,
+        style: baseStyle,
+      );
+    } else {
+      final String prefix = fullText.substring(0, insertionIndex);
+      final String suffix = fullText.substring(
+        insertionIndex + formattedCurrent.length,
+      );
+      captionSpan = TextSpan(
+        children: [
+          TextSpan(text: prefix, style: baseStyle),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: SizedBox(
+              width: slotWidth,
+              height: slotHeight,
+              child: _RollingCounter(
+                value: currentRounded,
+                previousValue: previousRounded,
+                textStyle: numberStyle,
+                numberFormat: numberFormat,
+              ),
+            ),
+          ),
+          TextSpan(text: suffix, style: baseStyle),
+        ],
+      );
+    }
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Tooltip(
+            message: isPlaying
+                ? l10n.facesTimelinePlaybackPause
+                : l10n.facesTimelinePlaybackPlay,
+            child: IconButton(
+              onPressed: _frames.isEmpty ? null : _togglePlayback,
+              icon: Icon(
+                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.fillFaint,
+                foregroundColor: isDark
+                    ? colorScheme.textMuted
+                    : colorScheme.textBase.withValues(alpha: 0.72),
+                minimumSize: const Size(40, 40),
+                padding: const EdgeInsets.all(8),
+                shape: const CircleBorder(),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: captionSpan,
+            ),
+          ),
+        ],
       ),
-      duration: const Duration(milliseconds: 500),
-      builder: (context, value, child) {
-        final rounded = value.round().clamp(0, 1000);
-        final text = captionType == _CaptionType.age
-            ? context.l10n.facesTimelineCaptionYearsOld(
-                name: widget.person.data.name,
-                count: rounded,
-              )
-            : context.l10n.facesTimelineCaptionYearsAgo(count: rounded);
-        return Text(text, style: textTheme.body, textAlign: TextAlign.center);
-      },
     );
   }
 
   Widget _buildControls(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final frameCount = _frames.length;
     final maxValue = frameCount > 1 ? (frameCount - 1).toDouble() : 0.0;
     final sliderValue =
@@ -513,9 +623,12 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       children: [
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
+            trackHeight: 10,
             activeTrackColor: colorScheme.primary500,
-            thumbColor: colorScheme.primary500,
+            thumbColor: isDark ? colorScheme.fillBase : colorScheme.textBase,
             inactiveTrackColor: colorScheme.fillMuted,
+            overlayColor: Colors.transparent,
+            thumbShape: const _FacesTimelineSliderThumbShape(),
           ),
           child: Slider(
             value: sliderValue.toDouble(),
@@ -561,20 +674,19 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                 : null,
           ),
         ),
-        const SizedBox(height: 12),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Tooltip(
-            message: context.l10n.facesTimelinePlaybackPlay,
-            child: TextButton.icon(
-              onPressed: _frames.isEmpty || _isPlaying ? null : _resumeAutoPlay,
-              icon: const Icon(Icons.play_arrow),
-              label: Text(context.l10n.facesTimelinePlaybackPlay),
-            ),
-          ),
-        ),
       ],
     );
+  }
+
+  void _togglePlayback() {
+    if (_frames.isEmpty) {
+      return;
+    }
+    if (_isPlaying) {
+      _pausePlayback();
+    } else {
+      _resumeAutoPlay();
+    }
   }
 
   void _resumeAutoPlay() {
@@ -593,7 +705,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     }
     final eased =
         Curves.easeInOutCubic.transform(_cardTransitionController.value);
-    final progress = lerpDouble(
+    final progress = ui.lerpDouble(
       _animationStartProgress,
       _targetIndex.toDouble(),
       eased,
@@ -755,7 +867,7 @@ class _FacesTimelineCard extends StatelessWidget {
       return base;
     }
     return ImageFiltered(
-      imageFilter: ImageFilter.blur(
+      imageFilter: ui.ImageFilter.blur(
         sigmaX: blurSigma,
         sigmaY: blurSigma,
       ),
@@ -843,4 +955,122 @@ enum _CaptionType { age, yearsAgo }
 double _yearsBetween(DateTime start, DateTime end) {
   final days = end.difference(start).inDays;
   return days / 365.25;
+}
+
+class _FacesTimelineSliderThumbShape extends SliderComponentShape {
+  const _FacesTimelineSliderThumbShape();
+
+  static const double _thumbWidth = 32;
+  static const double _thumbHeight = 16;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      const Size(_thumbWidth, _thumbHeight);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required ui.TextDirection textDirection,
+    required double textScaleFactor,
+    required double value,
+    required Size sizeWithOverflow,
+  }) {
+    final Color color =
+        sliderTheme.thumbColor ?? sliderTheme.activeTrackColor ?? Colors.white;
+    final canvas = context.canvas;
+    final rect = Rect.fromCenter(
+      center: center,
+      width: _thumbWidth,
+      height: _thumbHeight,
+    );
+    final rrect = RRect.fromRectAndRadius(
+      rect,
+      const Radius.circular(_thumbHeight / 2),
+    );
+    final paint = Paint()..color = color;
+    canvas.drawRRect(rrect, paint);
+  }
+}
+
+class _RollingCounter extends StatelessWidget {
+  const _RollingCounter({
+    required this.value,
+    required this.previousValue,
+    required this.textStyle,
+    required this.numberFormat,
+  });
+
+  final int value;
+  final int previousValue;
+  final TextStyle textStyle;
+  final NumberFormat numberFormat;
+
+  @override
+  Widget build(BuildContext context) {
+    final ValueKey<int> currentKey = ValueKey<int>(value);
+    final double direction = value >= previousValue ? 1.0 : -1.0;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 320),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      layoutBuilder: (currentChild, previousChildren) => Stack(
+        alignment: Alignment.center,
+        children: [
+          ...previousChildren,
+          if (currentChild != null) currentChild,
+        ],
+      ),
+      transitionBuilder: (child, animation) {
+        final bool isCurrent = child.key == currentKey;
+        final Animation<double> curved = CurvedAnimation(
+          parent: animation,
+          curve: isCurrent ? Curves.easeOutCubic : Curves.easeInCubic,
+        );
+        return AnimatedBuilder(
+          animation: curved,
+          child: child,
+          builder: (context, child) {
+            if (child == null) {
+              return const SizedBox.shrink();
+            }
+            final double progress = isCurrent ? curved.value : 1 - curved.value;
+            final double offsetY =
+                isCurrent ? direction * (1 - progress) : -direction * progress;
+            return ClipRect(
+              child: FractionalTranslation(
+                translation: Offset(0, offsetY),
+                child: child,
+              ),
+            );
+          },
+        );
+      },
+      child: Align(
+        key: currentKey,
+        alignment: Alignment.center,
+        child: Text(
+          numberFormat.format(value),
+          style: textStyle,
+        ),
+      ),
+    );
+  }
+}
+
+int _maxValueForDigits(int digits) {
+  if (digits <= 0) {
+    return 0;
+  }
+  int value = 0;
+  for (int i = 0; i < digits; i++) {
+    value = (value * 10) + 9;
+  }
+  return value;
 }
