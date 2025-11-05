@@ -56,8 +56,7 @@ const double _kStoryControlSize = 48.0;
 const double _kStoryControlIconSize = 24.0;
 const double _kStoryControlHorizontalMarginFromEdge =
     _kStoryCardOuterHorizontalInset + _kStoryCardInnerHorizontalPadding;
-const double _kStoryControlBottomMarginFromEdge =
-    _kStoryCardOuterVerticalInset + _kStoryCardInnerBottomPadding;
+const double _kStoryControlBottomMarginFromEdge = _kStoryCardOuterVerticalInset;
 
 /// Basic viewer for the stats-only Ente Rewind experience.
 class WrappedViewerPage extends StatefulWidget {
