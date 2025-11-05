@@ -262,7 +262,7 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       } else {
         throw Exception("Log out action failed");
       }
@@ -271,7 +271,7 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
@@ -362,12 +362,20 @@ class UserService {
     try {
       final userPassword = _config.getVolatilePassword();
       await _saveConfiguration(response);
+      if (!context.mounted) {
+        await dialog.hide();
+        return;
+      }
+      final navigator = Navigator.of(context, rootNavigator: true);
       if (userPassword == null) {
         await dialog.hide();
+        if (!context.mounted) {
+          return;
+        }
         // ignore: unawaited_futures
-        Navigator.of(context).pushAndRemoveUntil(
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (BuildContext context) {
+            builder: (BuildContext _) {
               return PasswordReentryPage(
                 _config,
                 _homePage,
@@ -376,6 +384,7 @@ class UserService {
           ),
           (route) => route.isFirst,
         );
+        return;
       } else {
         Widget page;
         if (_config.getEncryptedToken() != null) {
@@ -389,16 +398,20 @@ class UserService {
           throw Exception("unexpected response during passkey verification");
         }
         await dialog.hide();
+        if (!context.mounted) {
+          return;
+        }
 
         // ignore: unawaited_futures
-        Navigator.of(context).pushAndRemoveUntil(
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (BuildContext context) {
+            builder: (BuildContext _) {
               return page;
             },
           ),
           (route) => route.isFirst,
         );
+        return;
       }
     } catch (e) {
       _logger.severe(e);

@@ -221,15 +221,13 @@ class SmartAlbumsService {
   Future<void> saveConfig(SmartAlbumConfig config) async {
     final userId = Configuration.instance.getUserID()!;
 
-    if (config.personIDs.isNotEmpty) {
-      await _addOrUpdateEntity(
-        EntityType.smartAlbum,
-        config.toJson(),
-        collectionId: config.collectionId,
-        addWithCustomID: config.id == null,
-        userId: userId,
-      );
-    }
+    await _addOrUpdateEntity(
+      EntityType.smartAlbum,
+      config.toJson(),
+      collectionId: config.collectionId,
+      addWithCustomID: config.id == null,
+      userId: userId,
+    );
   }
 
   Future<SmartAlbumConfig?> getConfig(int collectionId) async {

@@ -36,19 +36,20 @@ export const useFileShare = (): UseFileShareResult => {
     useEffect(() => {
         const loadFileInfo = async () => {
             try {
-                const { token } = router.query;
+                // Extract token from pathname (e.g., /4MzPEanZK8)
+                const token = window.location.pathname.slice(1);
 
-                if (!token || typeof token !== "string") {
+                if (!token) {
                     setError("Invalid file link. Missing access token.");
                     setLoading(false);
                     return;
                 }
 
                 const currentURL = new URL(window.location.href);
-                const key = await extractFileKeyFromURL(currentURL);
+                const keyMaterial = await extractFileKeyFromURL(currentURL);
 
-                if (!key) {
-                    setError("Invalid file link. Missing file key.");
+                if (!keyMaterial) {
+                    setError("Invalid file link. Missing secret.");
                     setLoading(false);
                     return;
                 }
@@ -56,7 +57,10 @@ export const useFileShare = (): UseFileShareResult => {
                 setAccessToken(token);
 
                 const encryptedInfo = await fetchFileInfo(token);
-                const decryptedInfo = await decryptFileInfo(encryptedInfo, key);
+                const decryptedInfo = await decryptFileInfo(
+                    encryptedInfo,
+                    keyMaterial,
+                );
 
                 // Check if decryption failed (invalid key)
                 if (
@@ -83,7 +87,7 @@ export const useFileShare = (): UseFileShareResult => {
         if (router.isReady) {
             void loadFileInfo();
         }
-    }, [router.isReady, router.query]);
+    }, [router.isReady]);
 
     const handleDownload = async () => {
         if (!accessToken || !fileInfo?.fileKey) return;
@@ -109,10 +113,6 @@ export const useFileShare = (): UseFileShareResult => {
     const handleCopyContent = async (content: string) => {
         try {
             await navigator.clipboard.writeText(content);
-            setNotificationAttributes({
-                color: "secondary",
-                title: "Copied to clipboard",
-            });
         } catch {
             setNotificationAttributes({
                 color: "critical",

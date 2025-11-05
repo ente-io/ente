@@ -1827,7 +1827,34 @@
   "noSimilarImagesFound": "Nessuna immagine simile trovata",
   "yourPhotosLookUnique": "Le tue foto sembrano uniche",
   "reviewAndRemoveSimilarImages": "Controlla e rimuovi immagini simili",
+  "deletePhotosWithSize": "Elimina {count} foto ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "clearSelection": "Annulla selezione",
+  "similarImagesCount": "{count} immagini simili",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Elimina ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "deleteFiles": "Elimina file",
   "areYouSureDeleteFiles": "Sei sicuro di voler eliminare questi file?",
   "greatJob": "Ottimo lavoro!",
@@ -1850,7 +1877,11 @@
   "all": "Tutti",
   "similar": "Simili",
   "identical": "Identici",
-  "related": "Correlati",
+  "related": "Correlate",
   "hoorayyyy": "Evviva!",
-  "nothingToTidyUpHere": "Niente da sistemare qui"
+  "nothingToTidyUpHere": "Niente da sistemare qui",
+  "closeBy": "Vicine",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

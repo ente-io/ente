@@ -1,27 +1,18 @@
-import { Stack, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 
+/**
+ * Index page that redirects to ente.io/locker
+ *
+ * Users visiting the root domain (/) are redirected to the Locker homepage.
+ * All share links use the format /token#key and are handled by 404.tsx.
+ */
 const Page: React.FC = () => {
-    return (
-        <Stack
-            sx={{
-                justifyContent: "center",
-                minHeight: "100vh",
-                gap: 2,
-                bgcolor: "white",
-                textAlign: "center",
-            }}
-        >
-            <img
-                src="/images/ente-locker.svg"
-                alt="Ente Locker"
-                style={{ height: "100px", alignSelf: "center" }}
-            />
-            <Typography variant="small" sx={{ color: "#a2a2a2", mt: 4 }}>
-                — Coming soon —
-            </Typography>
-        </Stack>
-    );
+    useEffect(() => {
+        // Redirect to ente.io/locker
+        window.location.href = "https://ente.io/locker";
+    }, []);
+
+    return null;
 };
 
 export default Page;

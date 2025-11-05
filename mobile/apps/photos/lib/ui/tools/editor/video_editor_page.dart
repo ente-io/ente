@@ -22,6 +22,7 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import "package:photos/ui/tools/editor/native_video_export_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
+import "package:photos/ui/tools/editor/video_crop_util.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
@@ -95,23 +96,26 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         ),
       );
 
-      _controller!.initialize().then((_) {
-        // Apply metadata rotation to the video player
-        if (_quarterTurnsForRotationCorrection != null &&
-            _quarterTurnsForRotationCorrection! != 0) {
-          final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
-          _controller!.video.value = _controller!.video.value.copyWith(
-            rotationCorrection: rotationDegrees,
+      _controller!
+          .initialize()
+          .then((_) {
+            // Apply metadata rotation to the video player
+            if (_quarterTurnsForRotationCorrection != null &&
+                _quarterTurnsForRotationCorrection! != 0) {
+              final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
+              _controller!.video.value = _controller!.video.value.copyWith(
+                rotationCorrection: rotationDegrees,
+              );
+            }
+            setState(() {});
+          })
+          .catchError(
+            (error) {
+              // handle minimum duration bigger than video duration error
+              Navigator.pop(context);
+            },
+            test: (e) => e is VideoMinDurationError,
           );
-        }
-        setState(() {});
-      }).catchError(
-        (error) {
-          // handle minumum duration bigger than video duration error
-          Navigator.pop(context);
-        },
-        test: (e) => e is VideoMinDurationError,
-      );
     });
   }
 
@@ -138,7 +142,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       child: ValueListenableBuilder<bool>(
         valueListenable: _isExporting,
         builder: (context, isExporting, _) {
-          final isReady = _controller != null &&
+          final isReady =
+              _controller != null &&
               _controller!.initialized &&
               _quarterTurnsForRotationCorrection != null;
 
@@ -205,8 +210,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 children: [
                                   Text(
                                     "Native (i)",
-                                    style: getEnteTextTheme(context)
-                                        .mini
+                                    style: getEnteTextTheme(context).mini
                                         .copyWith(color: colorScheme.textMuted),
                                   ),
                                   const SizedBox(width: 4),
@@ -235,9 +239,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 svgPath:
                                     "assets/video-editor/video-editor-trim-action.svg",
                                 onPressed: () => _openSubEditor(
-                                  VideoTrimPage(
-                                    controller: _controller!,
-                                  ),
+                                  VideoTrimPage(controller: _controller!),
                                 ),
                               ),
                               const SizedBox(width: 24),
@@ -246,9 +248,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 svgPath:
                                     "assets/video-editor/video-editor-crop-action.svg",
                                 onPressed: () => _openSubEditor(
-                                  VideoCropPage(
-                                    controller: _controller!,
-                                  ),
+                                  VideoCropPage(controller: _controller!),
                                 ),
                               ),
                               const SizedBox(width: 24),
@@ -257,9 +257,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 svgPath:
                                     "assets/video-editor/video-editor-rotate-action.svg",
                                 onPressed: () => _openSubEditor(
-                                  VideoRotatePage(
-                                    controller: _controller!,
-                                  ),
+                                  VideoRotatePage(controller: _controller!),
                                 ),
                               ),
                             ],
@@ -280,6 +278,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     final shouldUseNative = flagService.internalUser
         ? _useNativeExport
         : flagService.useNativeVideoEditor;
+
+    _logEditState(shouldUseNative: shouldUseNative);
 
     _isExporting.value = true;
 
@@ -322,14 +322,64 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
     if (shouldUseNative) {
-      final tempDir = Directory.systemTemp.createTempSync(
-        'ente_video_export',
-      );
+      final tempDir = Directory.systemTemp.createTempSync('ente_video_export');
+      try {
+        return await _runNativeExportWithRetry(
+          tempDir: tempDir,
+          dialogKey: dialogKey,
+        );
+      } catch (nativeError, stackTrace) {
+        if (nativeError is NativeVideoEditorException) {
+          _logger.warning(
+            "Native export failed, attempting FFmpeg fallback (code=${nativeError.code}, details=${nativeError.details})",
+            nativeError,
+          );
+        } else {
+          _logger.warning(
+            "Native export failed, attempting FFmpeg fallback",
+            nativeError,
+          );
+        }
+
+        if (flagService.internalUser && mounted) {
+          showShortToast(context, "(i) Switching to FFmpeg fallback");
+        }
+
+        if (dialogKey.currentState != null) {
+          dialogKey.currentState!.setProgress(0.0);
+        }
+
+        _logger.fine(
+          "Falling back to FFmpeg after native failure",
+          nativeError,
+          stackTrace,
+        );
+      }
+    }
+
+    return await _runFfmpegExportWithRetry(dialogKey: dialogKey);
+  }
+
+  Future<File> _runNativeExportWithRetry({
+    required Directory tempDir,
+    required GlobalKey<LinearProgressDialogState> dialogKey,
+  }) async {
+    const maxAttempts = 2;
+    const retryThreshold = Duration(seconds: 1);
+    Object? lastError;
+    StackTrace? lastStackTrace;
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
       final outputPath = path.join(
         tempDir.path,
-        'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
+        'native_export_${DateTime.now().microsecondsSinceEpoch}_$attempt.mp4',
       );
 
+      if (attempt > 0 && dialogKey.currentState != null) {
+        dialogKey.currentState!.setProgress(0.0);
+      }
+
+      final startTime = DateTime.now();
       try {
         return await NativeVideoExportService.exportVideo(
           controller: _controller!,
@@ -340,51 +390,121 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             }
           },
           onError: (e, s) {
-            _logger.severe("Error exporting video with native", e, s);
+            if (e is NativeVideoEditorException) {
+              _logger.severe(
+                "Error exporting video with native (code=${e.code}, details=${e.details})",
+                e,
+                s,
+              );
+            } else {
+              _logger.severe("Error exporting video with native", e, s);
+            }
           },
+          allowFfmpegFallback: false,
         );
-      } catch (nativeError, _) {
-        _logger.warning(
-          "Native export failed, attempting FFmpeg fallback",
-          nativeError,
-        );
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+        final elapsed = DateTime.now().difference(startTime);
 
-        if (flagService.internalUser && mounted) {
-          showShortToast(context, "(i) Switching to FFmpeg fallback");
+        if (attempt < maxAttempts - 1) {
+          if (elapsed > retryThreshold) {
+            _logger.info(
+              "Native export attempt ${attempt + 1} failed after ${elapsed.inMilliseconds}ms, skipping retry",
+              error,
+              stackTrace,
+            );
+            break;
+          }
+
+          _logger.info(
+            "Native export attempt ${attempt + 1} failed, retrying with fresh output path",
+            error,
+            stackTrace,
+          );
+          continue;
         }
 
-        if (dialogKey.currentState != null) {
-          dialogKey.currentState!.setProgress(0.0);
-        }
-
-        return await _runFfmpegExport(
-          dialogKey: dialogKey,
-        );
+        rethrow;
       }
     }
 
-    return await _runFfmpegExport(
-      dialogKey: dialogKey,
-    );
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
+    }
+    throw Exception("Unknown native export failure");
   }
 
-  Future<File> _runFfmpegExport({
+  Future<File> _runFfmpegExportWithRetry({
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
-    final config = VideoFFmpegVideoEditorConfig(
-      _controller!,
-      format: VideoExportFormat.mp4,
-      commandBuilder: (config, videoPath, outputPath) {
-        final List<String> filters = config.getExportFilters();
+    const maxAttempts = 2;
+    const retryThreshold = Duration(seconds: 1);
+    Object? lastError;
+    StackTrace? lastStackTrace;
 
-        final String startTrimCmd = "-ss ${_controller!.startTrim}";
-        final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
-        final command =
-            '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
-        return command;
-      },
-    );
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0 && dialogKey.currentState != null) {
+        dialogKey.currentState!.setProgress(0.0);
+      }
 
+      final config = VideoFFmpegVideoEditorConfig(
+        _controller!,
+        format: VideoExportFormat.mp4,
+        commandBuilder: (config, videoPath, outputPath) {
+          final List<String> filters = config.getExportFilters();
+
+          final String startTrimCmd = "-ss ${_controller!.startTrim}";
+          final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
+          final command =
+              '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+          return command;
+        },
+      );
+
+      final startTime = DateTime.now();
+      try {
+        return await _runFfmpegExportAttempt(
+          config: config,
+          dialogKey: dialogKey,
+        );
+      } catch (error, stackTrace) {
+        lastError = error;
+        lastStackTrace = stackTrace;
+        final elapsed = DateTime.now().difference(startTime);
+
+        if (attempt < maxAttempts - 1) {
+          if (elapsed > retryThreshold) {
+            _logger.info(
+              "FFmpeg export attempt ${attempt + 1} failed after ${elapsed.inMilliseconds}ms, skipping retry",
+              error,
+              stackTrace,
+            );
+            break;
+          }
+
+          _logger.info(
+            "FFmpeg export attempt ${attempt + 1} failed, retrying with fresh output path",
+            error,
+            stackTrace,
+          );
+          continue;
+        }
+
+        rethrow;
+      }
+    }
+
+    if (lastError != null) {
+      Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
+    }
+    throw Exception("Unknown FFmpeg export failure");
+  }
+
+  Future<File> _runFfmpegExportAttempt({
+    required VideoFFmpegVideoEditorConfig config,
+    required GlobalKey<LinearProgressDialogState> dialogKey,
+  }) async {
     final executeConfig = await config.getExecuteConfig();
     final completer = Completer<File>();
 
@@ -422,7 +542,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         return;
       }
 
-      final fileName = path.basenameWithoutExtension(widget.file.title!) +
+      final fileName =
+          path.basenameWithoutExtension(widget.file.title!) +
           "_edited_" +
           DateTime.now().microsecondsSinceEpoch.toString() +
           ".mp4";
@@ -502,6 +623,49 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     return Navigator.of(context).push(_VideoEditorSubPageRoute(child));
   }
 
+  void _logEditState({required bool shouldUseNative}) {
+    final controller = _controller;
+    if (controller == null) {
+      _logger.info(
+        "Export requested but controller not ready (native=$shouldUseNative)",
+      );
+      return;
+    }
+
+    final rotation = controller.rotation;
+    final startTrimMs = controller.startTrim.inMilliseconds;
+    final endTrimMs = controller.endTrim.inMilliseconds;
+    final trimmedDurationMs = controller.trimmedDuration.inMilliseconds;
+    final videoDurationMs = controller.videoDuration.inMilliseconds;
+    final minTrim = controller.minTrim;
+    final maxTrim = controller.maxTrim;
+
+    String fileSpaceCropSummary;
+    try {
+      final crop = VideoCropUtil.calculateFileSpaceCrop(controller: controller);
+      fileSpaceCropSummary =
+          "file(x=${crop.x}, y=${crop.y}, w=${crop.width}, h=${crop.height})";
+    } catch (e) {
+      fileSpaceCropSummary = "file=unavailable(${e.runtimeType})";
+    }
+
+    final cropInfo =
+        "normalized(min=${_formatOffset(controller.minCrop)}, max=${_formatOffset(controller.maxCrop)}), "
+        "$fileSpaceCropSummary"
+        "${controller.preferredCropAspectRatio != null ? ", aspectRatio=${controller.preferredCropAspectRatio!.toStringAsFixed(3)}" : ""}";
+
+    _logger.info(
+      "Export starting (native=$shouldUseNative) rotation=$rotation°, "
+      "trim={startMs:$startTrimMs, endMs:$endTrimMs, durationMs:$trimmedDurationMs, "
+      "min:${minTrim.toStringAsFixed(3)}, max:${maxTrim.toStringAsFixed(3)}, "
+      "videoDurationMs:$videoDurationMs} "
+      "crop={$cropInfo}",
+    );
+  }
+
+  String _formatOffset(Offset offset) =>
+      "(${offset.dx.toStringAsFixed(3)}, ${offset.dy.toStringAsFixed(3)})";
+
   Future<void> _doRotationCorrectionIfAndroid() async {
     if (Platform.isAndroid) {
       try {
@@ -531,22 +695,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
 class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
   _VideoEditorSubPageRoute(this.child)
-      : super(
-          fullscreenDialog: true,
-          transitionDuration: const Duration(milliseconds: 220),
-          reverseTransitionDuration: const Duration(milliseconds: 180),
-          pageBuilder: (_, __, ___) => child,
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-                reverseCurve: Curves.easeInCubic,
-              ),
-              child: child,
-            );
-          },
-        );
+    : super(
+        fullscreenDialog: true,
+        transitionDuration: const Duration(milliseconds: 220),
+        reverseTransitionDuration: const Duration(milliseconds: 180),
+        pageBuilder: (_, __, ___) => child,
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            ),
+            child: child,
+          );
+        },
+      );
 
   final Widget child;
 }

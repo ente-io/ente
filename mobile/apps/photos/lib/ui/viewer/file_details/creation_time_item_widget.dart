@@ -1,9 +1,12 @@
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
+import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
 
 class CreationTimeItem extends StatefulWidget {
@@ -22,7 +25,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       widget.file.creationTime!,
       isUtc: true,
     ).toLocal();
-    return InfoItemWidget(
+    final infoWidget = InfoItemWidget(
       key: const ValueKey("Creation time"),
       leadingIcon: Icons.calendar_today_outlined,
       title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
@@ -41,6 +44,18 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
             }
           : null,
     );
+
+    if (flagService.internalUser) {
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
+        },
+        child: infoWidget,
+      );
+    }
+
+    return infoWidget;
   }
 
   void _showDateTimePicker(EnteFile file) async {

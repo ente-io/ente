@@ -38,31 +38,22 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateFormat fullDateFormat = DateFormat("MMMM d");
 
-    final int stillPhotoCount =
-        math.max(snapshot.photoCount - snapshot.livePhotoCount, 0);
-    final List<String> detailChips = <String>[];
-    if (stillPhotoCount > 0) {
-      detailChips.add(
-        "${numberFormat.format(stillPhotoCount)} ${stillPhotoCount == 1 ? 'photo' : 'photos'}",
-      );
-    }
-    if (snapshot.livePhotoCount > 0) {
-      detailChips.add(
-        "${numberFormat.format(snapshot.livePhotoCount)} live ${snapshot.livePhotoCount == 1 ? 'photo' : 'photos'}",
-      );
-    }
-    if (snapshot.videoCount > 0) {
-      detailChips.add(
-        "${numberFormat.format(snapshot.videoCount)} ${snapshot.videoCount == 1 ? 'video' : 'videos'}",
-      );
-    }
-    if (snapshot.storageBytes > 0) {
-      detailChips.add("${formatBytes(snapshot.storageBytes, 1)} captured");
-    }
+    final String totalMemories = numberFormat.format(snapshot.totalCount);
+    final String? videosText = snapshot.videoCount > 0
+        ? numberFormat.format(snapshot.videoCount)
+        : null;
+
+    final List<String> detailChips = _cleanChips(<String>[
+      "Total: $totalMemories memories",
+      if (snapshot.storageBytes > 0)
+        "Storage: ${formatBytes(snapshot.storageBytes, 1)}",
+      if (snapshot.firstCaptureDay != null)
+        "First shot: ${fullDateFormat.format(snapshot.firstCaptureDay!)}",
+    ]);
 
     final String title =
         "You bottled ${numberFormat.format(snapshot.totalCount)} memories";
-    final String subtitle = snapshot.videoCount > 0
+    final String subtitle = videosText != null
         ? "That’s ${numberFormat.format(snapshot.photoCount)} photos and "
             "${numberFormat.format(snapshot.videoCount)} videos ready to relive."
         : "That’s ${numberFormat.format(snapshot.photoCount)} photos you kept close this year.";
@@ -76,17 +67,15 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       selectionTarget: 6,
     );
 
+    final List<int> heroCandidates = limitSelectorCandidates(heroIds);
+
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: heroIds,
-      maxCount: 6,
+      candidateUploadedFileIDs: heroCandidates,
+      maxCount: 3,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 45),
     );
-
-    final String? firstCaptureLine = snapshot.firstCaptureDay != null
-        ? "First frame: ${fullDateFormat.format(snapshot.firstCaptureDay!)}"
-        : null;
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": snapshot.year,
@@ -102,7 +91,6 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       "daysWithCaptures": snapshot.daysWithCaptures,
       "elapsedDays": snapshot.elapsedDays,
       "detailChips": detailChips,
-      if (firstCaptureLine != null) "firstCaptureLine": firstCaptureLine,
       "displayDurationMillis": 9000,
     };
 
@@ -135,51 +123,42 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateFormat monthFormat = DateFormat("MMMM");
 
-    final String title =
-        "${averageFormat.format(snapshot.averagePerDay)} memories per day";
-    final List<String> subtitleParts = <String>[];
+    final String baseSentence =
+        "You averaged ${averageFormat.format(snapshot.averagePerDay)} memories a day";
     String? busiestMonthName;
     if (snapshot.busiestMonth != null && snapshot.busiestMonthCount > 0) {
       busiestMonthName = monthFormat
           .format(DateTime(snapshot.year, snapshot.busiestMonth!, 1));
-      subtitleParts.add(
-        "$busiestMonthName peaked at ${numberFormat.format(snapshot.busiestMonthCount)}",
-      );
     }
-    subtitleParts.add(
-      "${numberFormat.format(snapshot.daysWithCaptures)} active days",
-    );
-    if (snapshot.daysWithCaptures > 0 &&
-        snapshot.averagePerActiveDay > snapshot.averagePerDay) {
-      subtitleParts.add(
-        "${averageFormat.format(snapshot.averagePerActiveDay)} on shooting days",
-      );
+    String? topFormatLabel;
+    int topFormatCount = 0;
+    snapshot.formatCounts.forEach((String format, int count) {
+      if (count > topFormatCount ||
+          (count == topFormatCount &&
+              topFormatLabel != null &&
+              format.compareTo(topFormatLabel!) < 0)) {
+        topFormatLabel = format;
+        topFormatCount = count;
+      }
+    });
+    if (topFormatLabel != null && topFormatCount <= 0) {
+      topFormatLabel = null;
     }
 
-    final List<String> chips = <String>[
-      "${numberFormat.format(snapshot.daysWithCaptures)} active days",
-      if (snapshot.longestStreakDays >= 3)
-        "Longest streak: ${numberFormat.format(snapshot.longestStreakDays)} days",
+    final List<String> chips = _cleanChips(<String>[
+      if (busiestMonthName != null && snapshot.busiestMonthCount > 0)
+        "$busiestMonthName: ${numberFormat.format(snapshot.busiestMonthCount)}",
       if (snapshot.longestGapDays >= 2)
         "Longest breather: ${numberFormat.format(snapshot.longestGapDays)} days",
-    ];
+      if (topFormatLabel != null)
+        "$topFormatLabel: ${numberFormat.format(topFormatCount)}",
+    ]);
 
-    final List<int> rhythmIds = _collectUniqueIds(
-      <List<int>>[
-        snapshot.streakStartUploadedIDs,
-        snapshot.busiestMonthHighlightUploadedIDs,
-        snapshot.breakReturnUploadedIDs,
-      ],
-      selectionTarget: 6,
-    );
+    const List<MediaRef> media = <MediaRef>[];
 
-    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
-      context: context,
-      candidateUploadedFileIDs: rhythmIds,
-      maxCount: 6,
-      preferNamedPeople: true,
-      minimumSpacing: const Duration(days: 21),
-    );
+    final String subtitle = topFormatLabel != null
+        ? "$baseSentence, and $topFormatLabel was your format of choice."
+        : "$baseSentence.";
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": snapshot.year,
@@ -195,6 +174,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
           entry.key.toString(): entry.value,
       },
       "dailyCounts": snapshot.dailyCounts,
+      "formatCounts": snapshot.formatCounts,
       "detailChips": chips,
       if (snapshot.longestStreakStart != null)
         "longestStreakStart": snapshot.longestStreakStart!.toIso8601String(),
@@ -210,8 +190,8 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.statsVelocity,
-      title: title,
-      subtitle: subtitleParts.join(" · "),
+      title: "Daily groove",
+      subtitle: subtitle,
       media: media,
       meta: meta
         ..addAll(
@@ -238,9 +218,12 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateTime day = snapshot.busiestDay!;
 
+    final List<int> candidateIds =
+        limitSelectorCandidates(snapshot.busiestDayMediaUploadedIDs);
+
     final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
       context: context,
-      candidateUploadedFileIDs: snapshot.busiestDayMediaUploadedIDs,
+      candidateUploadedFileIDs: candidateIds,
       maxCount: 6,
       preferNamedPeople: true,
     );
@@ -249,10 +232,10 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       "date": day.toIso8601String(),
       "weekday": weekdayFormat.format(day),
       "count": snapshot.busiestDayCount,
-      "detailChips": <String>[
-        "${numberFormat.format(snapshot.busiestDayCount)} memories in 24 hours",
-        weekdayFormat.format(day),
-      ],
+      "detailChips": _cleanChips(<String>[
+        "Captures: ${numberFormat.format(snapshot.busiestDayCount)}",
+        (weekdayFormat.format(day)),
+      ]),
       if (mediaRefs.isNotEmpty)
         "uploadedFileIDs": mediaRefs
             .map((MediaRef ref) => ref.uploadedFileID)
@@ -261,9 +244,8 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
 
     return WrappedCard(
       type: WrappedCardType.busiestDay,
-      title: "${longDateFormat.format(day)} went off",
-      subtitle:
-          "${numberFormat.format(snapshot.busiestDayCount)} memories captured in a single day.",
+      title: "Your peak day",
+      subtitle: "${longDateFormat.format(day)} was packed with memories!",
       media: mediaRefs,
       meta: meta,
     );
@@ -281,22 +263,66 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     }
 
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
+    final DateFormat weekStartFormat = DateFormat("MMM d");
+    DateTime? peakWeekStart;
+    int peakWeekCount = 0;
+    for (int index = 0;
+        index < snapshot.heatmapRows.length &&
+            index < snapshot.heatmapWeekStartDates.length;
+        index += 1) {
+      final List<int> week = snapshot.heatmapRows[index];
+      final int weekTotal =
+          week.fold<int>(0, (int sum, int value) => sum + math.max(0, value));
+      final DateTime weekStart = snapshot.heatmapWeekStartDates[index];
+      if (weekTotal > peakWeekCount ||
+          (weekTotal == peakWeekCount &&
+              (peakWeekStart == null || weekStart.isBefore(peakWeekStart)))) {
+        peakWeekCount = weekTotal;
+        peakWeekStart = weekStart;
+      }
+    }
+    DateTime? displayWeekStart;
+    if (peakWeekStart != null) {
+      final DateTime yearStart = DateTime(snapshot.year, 1, 1);
+      final DateTime yearEnd = DateTime(snapshot.year, 12, 31);
+      final DateTime weekBase = peakWeekStart;
+      displayWeekStart = weekBase;
+      if (displayWeekStart.isBefore(yearStart) ||
+          displayWeekStart.isAfter(yearEnd)) {
+        for (int offset = 0; offset < 7; offset += 1) {
+          final DateTime candidate =
+              _atLocalMidnight(weekBase.add(Duration(days: offset)));
+          if (!candidate.isBefore(yearStart) && !candidate.isAfter(yearEnd)) {
+            displayWeekStart = candidate;
+            break;
+          }
+        }
+      }
+    }
+    String formatDayCount(int value) {
+      final String formatted = numberFormat.format(value);
+      return value == 1 ? "$formatted day" : "$formatted days";
+    }
+
+    final List<String> detailChips = _cleanChips(<String>[
+      if (displayWeekStart != null)
+        "Peak week: ${weekStartFormat.format(displayWeekStart)} · ${numberFormat.format(peakWeekCount)}",
+      "Longest streak: ${formatDayCount(snapshot.longestStreakDays)}",
+      "Longest pause: ${formatDayCount(snapshot.longestGapDays)}",
+      "Active days: ${numberFormat.format(snapshot.daysWithCaptures)}",
+    ]);
     final Map<String, Object?> meta = <String, Object?>{
       "weekdayLabels": snapshot.heatmapWeekdayLabels,
       "quarters": quarterBlocks,
       "maxCount": snapshot.heatmapMaxCount,
-      "detailChips": <String>[
-        if (snapshot.busiestMonthName != null)
-          "Peak month: ${snapshot.busiestMonthName}",
-        "${numberFormat.format(snapshot.totalCount)} captures this year",
-      ],
+      "detailChips": detailChips,
     };
 
     return <WrappedCard>[
       WrappedCard(
         type: WrappedCardType.statsHeatmap,
-        title: "Seasons of snapshots",
-        subtitle: "Your year, one quarter at a time.",
+        title: "Season rhythm",
+        subtitle: "Week by week, here's how the year flowed.",
         meta: meta,
       ),
     ];
@@ -334,6 +360,7 @@ class _StatsSnapshot {
     required this.otherCount,
     required this.storageBytes,
     required this.monthCounts,
+    required this.formatCounts,
     required this.dailyCounts,
     required this.elapsedDays,
     required this.daysWithCaptures,
@@ -376,6 +403,7 @@ class _StatsSnapshot {
   final int otherCount;
   final int storageBytes;
   final Map<int, int> monthCounts;
+  final Map<String, int> formatCounts;
   final Map<String, int> dailyCounts;
   final int elapsedDays;
   final int daysWithCaptures;
@@ -418,6 +446,7 @@ class _StatsSnapshot {
       for (int month = 1; month <= 12; month += 1) month: 0,
     };
     final Map<int, _DayAggregate> dayAggregates = <int, _DayAggregate>{};
+    final Map<String, int> formatCounts = <String, int>{};
 
     int totalCount = 0;
     int photoCount = 0;
@@ -464,9 +493,16 @@ class _StatsSnapshot {
           dayAggregates.putIfAbsent(dayKey, () => _DayAggregate(day));
       aggregate.count += 1;
       final int? uploadedId = file.uploadedFileID;
-      if (uploadedId != null && aggregate.uploadedFileIDs.length < 9) {
+      if (uploadedId != null) {
         aggregate.uploadedFileIDs.add(uploadedId);
       }
+
+      final String formatLabel = _resolveFormatLabel(file);
+      formatCounts.update(
+        formatLabel,
+        (int current) => current + 1,
+        ifAbsent: () => 1,
+      );
     }
 
     final List<_DayAggregate> sortedAggregates = dayAggregates.values
@@ -642,6 +678,7 @@ class _StatsSnapshot {
       otherCount: otherCount,
       storageBytes: storageBytes,
       monthCounts: Map<int, int>.unmodifiable(monthCounts),
+      formatCounts: Map<String, int>.unmodifiable(formatCounts),
       dailyCounts: Map<String, int>.unmodifiable(dailyCounts),
       elapsedDays: elapsedDays,
       daysWithCaptures: daysWithCaptures,
@@ -675,6 +712,55 @@ class _StatsSnapshot {
       heatmapWeekStartDates: normalizedWeekStartDates,
       heatmapMaxCount: heatmapMaxCount,
     );
+  }
+
+  static String _resolveFormatLabel(EnteFile file) {
+    final String? candidateName = _firstNonEmpty(
+      <String?>[
+        file.title,
+        file.pubMagicMetadata?.editedName,
+      ],
+    );
+    final String rawExtension = candidateName != null
+        ? p.extension(candidateName).replaceFirst(".", "")
+        : "";
+    final String normalizedExtension = rawExtension.toLowerCase();
+    if (normalizedExtension.isEmpty) {
+      return _fallbackLabelForType(file.fileType);
+    }
+
+    const Map<String, String> overrides = <String, String>{
+      "jpg": "JPEG",
+      "jpeg": "JPEG",
+      "heif": "HEIC",
+    };
+
+    return overrides[normalizedExtension] ?? normalizedExtension.toUpperCase();
+  }
+
+  static String _fallbackLabelForType(FileType type) {
+    switch (type) {
+      case FileType.video:
+        return "VIDEO";
+      case FileType.livePhoto:
+        return "LIVE PHOTO";
+      case FileType.image:
+        return "IMAGE";
+      default:
+        return "OTHER";
+    }
+  }
+
+  static String? _firstNonEmpty(Iterable<String?> values) {
+    for (final String? value in values) {
+      if (value != null) {
+        final String trimmed = value.trim();
+        if (trimmed.isNotEmpty) {
+          return trimmed;
+        }
+      }
+    }
+    return null;
   }
 }
 

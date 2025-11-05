@@ -218,9 +218,17 @@ class Media3TransformerProcessor(private val context: Context) {
                         exportResult: ExportResult,
                         exportException: ExportException
                     ) {
-                        logError("Export failed", exportException)
-                        logError("Error code: ${exportException.errorCode}")
-                        logError("Export result: ${exportResult}")
+                        logError(
+                            "Export failed (code=${exportException.errorCode}, type=${exportException::class.java.simpleName})",
+                            exportException
+                        )
+                        exportException.cause?.let { cause ->
+                            logError(
+                                "Root cause: ${cause::class.java.simpleName} - ${cause.message}",
+                                cause
+                            )
+                        }
+                        logError("Export result: $exportResult")
                         processingError = exportException
                         latch.countDown()
                     }
@@ -304,7 +312,20 @@ class Media3TransformerProcessor(private val context: Context) {
             )
 
         } catch (e: Exception) {
-            logError("Failed to process video", e)
+            if (e is ExportException) {
+                logError(
+                    "Media3 transformer failed (code=${e.errorCode}, type=${e::class.java.simpleName})",
+                    e
+                )
+                e.cause?.let { cause ->
+                    logError(
+                        "Media3 transformer root cause: ${cause::class.java.simpleName} - ${cause.message}",
+                        cause
+                    )
+                }
+            } else {
+                logError("Failed to process video", e)
+            }
             throw VideoProcessingException("Video processing failed: ${e.message}", e)
         }
     }

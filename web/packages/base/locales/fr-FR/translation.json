@@ -158,6 +158,7 @@
     "logout": "Déconnexion",
     "logout_message": "Voulez-vous vraiment vous déconnecter?",
     "delete_account": "Supprimer le compte",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>Veuillez envoyer un e-mail à <a>{{emailID}}</a>depuis Votre adresse enregistrée.</p><p>Votre demande sera traitée dans les 72 heures.</p>",
     "change_email": "Modifier l'e-mail",
     "ok": "Ok",
