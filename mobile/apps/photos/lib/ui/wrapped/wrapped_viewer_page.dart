@@ -35,6 +35,30 @@ part "cards/narrative_card_content.dart";
 part "cards/badge_card_content.dart";
 part "cards/shared_widgets.dart";
 
+const double _kStoryCardOuterHorizontalInset = 18.0;
+const double _kStoryCardOuterVerticalInset = 12.0;
+const double _kStoryCardInnerHorizontalPadding = 24.0;
+const double _kStoryCardInnerTopPadding = 28.0;
+const double _kStoryCardInnerBottomPadding = 32.0;
+
+const EdgeInsets _kStoryCardOuterPadding = EdgeInsets.symmetric(
+  horizontal: _kStoryCardOuterHorizontalInset,
+  vertical: _kStoryCardOuterVerticalInset,
+);
+const EdgeInsets _kStoryCardInnerPadding = EdgeInsets.fromLTRB(
+  _kStoryCardInnerHorizontalPadding,
+  _kStoryCardInnerTopPadding,
+  _kStoryCardInnerHorizontalPadding,
+  _kStoryCardInnerBottomPadding,
+);
+
+const double _kStoryControlSize = 48.0;
+const double _kStoryControlIconSize = 24.0;
+const double _kStoryControlHorizontalMarginFromEdge =
+    _kStoryCardOuterHorizontalInset + _kStoryCardInnerHorizontalPadding;
+const double _kStoryControlBottomMarginFromEdge =
+    _kStoryCardOuterVerticalInset + _kStoryCardInnerBottomPadding;
+
 /// Basic viewer for the stats-only Ente Rewind experience.
 class WrappedViewerPage extends StatefulWidget {
   const WrappedViewerPage({
@@ -560,6 +584,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
           final textTheme = getEnteTextTheme(context);
           final MediaQueryData mediaQuery = MediaQuery.of(context);
           final double bottomPadding = mediaQuery.padding.bottom;
+          final Color controlIconColor =
+              enteColorScheme.textMuted.withValues(alpha: 0.62);
+          final Color controlBackdropColor =
+              enteColorScheme.textMuted.withValues(alpha: 0.14);
 
           return PopScope(
             canPop: true,
@@ -664,42 +692,50 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                   ),
                   if (!isCurrentCardBadge) ...[
                     Positioned(
-                      right: 20,
-                      bottom: bottomPadding + 24,
+                      right: _kStoryControlHorizontalMarginFromEdge,
+                      bottom:
+                          bottomPadding + _kStoryControlBottomMarginFromEdge,
                       child: GestureDetector(
                         key: _shareButtonKey,
                         behavior: HitTestBehavior.translucent,
                         onTap: _handleShare,
                         child: Container(
-                          width: 56,
-                          height: 56,
+                          width: _kStoryControlSize,
+                          height: _kStoryControlSize,
                           alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: controlBackdropColor,
+                            shape: BoxShape.circle,
+                          ),
                           child: Icon(
                             Icons.share,
-                            size: 28,
-                            color: enteColorScheme.textMuted
-                                .withValues(alpha: 0.7),
+                            size: _kStoryControlIconSize,
+                            color: controlIconColor,
                           ),
                         ),
                       ),
                     ),
                     Positioned(
-                      left: 20,
-                      bottom: bottomPadding + 24,
+                      left: _kStoryControlHorizontalMarginFromEdge,
+                      bottom:
+                          bottomPadding + _kStoryControlBottomMarginFromEdge,
                       child: GestureDetector(
                         behavior: HitTestBehavior.translucent,
                         onTap: () => unawaited(_handleMusicToggle()),
                         child: Container(
-                          width: 56,
-                          height: 56,
+                          width: _kStoryControlSize,
+                          height: _kStoryControlSize,
                           alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: controlBackdropColor,
+                            shape: BoxShape.circle,
+                          ),
                           child: Icon(
                             (_isMusicMuted || !_isMusicPlaying)
                                 ? Icons.volume_off
                                 : Icons.volume_up,
-                            size: 28,
-                            color: enteColorScheme.textMuted
-                                .withValues(alpha: 0.7),
+                            size: _kStoryControlIconSize,
+                            color: controlIconColor,
                           ),
                         ),
                       ),
