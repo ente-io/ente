@@ -131,7 +131,7 @@ func (c *FileLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdateFi
 	return c.mapRowToFileUrl(ctx, fileLinkRow), nil
 }
 
-func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, *ente.FileUrl, error) {
+func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, *ente.FileLinkSecret, error) {
 	accessContext := auth.MustGetFileLinkAccessContext(ctx)
 	file, err := c.FileRepo.GetFileAttributes(accessContext.FileID)
 	if err != nil {
@@ -141,7 +141,7 @@ func (c *FileLinkController) Info(ctx *gin.Context) (*ente.File, *ente.FileUrl, 
 	if err != nil {
 		return nil, nil, stacktrace.Propagate(err, "failed to get file link row")
 	}
-	return file, c.mapRowToFileUrl(ctx, row), nil
+	return file, c.mapRowToLinkSecret(row), nil
 }
 
 func (c *FileLinkController) PassInfo(ctx *gin.Context) (*ente.FileLinkRow, error) {
@@ -189,5 +189,18 @@ func (c *FileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLin
 		KdfMemLimit:           row.KdfMemLimit,
 		KdfOpsLimit:           row.KdfOpsLimit,
 		EncryptedShareKey:     row.EncryptedShareKey,
+	}
+}
+
+func (c *FileLinkController) mapRowToLinkSecret(row *ente.FileLinkRow) *ente.FileLinkSecret {
+	if row == nil {
+		return nil
+	}
+	return &ente.FileLinkSecret{
+		EncryptedFileKey:      row.EncryptedFileKey,
+		EncryptedFileKeyNonce: row.EncryptedFileKeyNonce,
+		KdfNonce:              row.KdfNonce,
+		KdfMemLimit:           row.KdfMemLimit,
+		KdfOpsLimit:           row.KdfOpsLimit,
 	}
 }

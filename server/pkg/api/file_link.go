@@ -27,7 +27,7 @@ func (h *FileHandler) ShareUrl(c *gin.Context) {
 }
 
 func (h *FileHandler) LinkInfo(c *gin.Context) {
-	fileResp, linkResp, err := h.FileUrlCtrl.Info(c)
+	fileResp, linkMeta, err := h.FileUrlCtrl.Info(c)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -35,8 +35,8 @@ func (h *FileHandler) LinkInfo(c *gin.Context) {
 	response := gin.H{
 		"file": fileResp,
 	}
-	if linkResp != nil {
-		response["link"] = linkResp
+	if linkMeta != nil {
+		response["link"] = linkMeta
 	}
 	c.JSON(http.StatusOK, response)
 }
