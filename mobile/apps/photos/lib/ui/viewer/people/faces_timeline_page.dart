@@ -30,7 +30,7 @@ class FacesTimelinePage extends StatefulWidget {
 
 class _FacesTimelinePageState extends State<FacesTimelinePage>
     with TickerProviderStateMixin {
-  static const _frameInterval = Duration(milliseconds: 1000);
+  static const _frameInterval = Duration(milliseconds: 800);
   static const _cardTransitionDuration = Duration(milliseconds: 520);
 
   final Logger _logger = Logger("FacesTimelinePage");
