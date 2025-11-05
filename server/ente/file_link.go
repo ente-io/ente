@@ -110,3 +110,11 @@ type FileLinkAccessContext struct {
 	FileID    int64
 	OwnerID   int64
 }
+
+type FileLinkSecret struct {
+	EncryptedFileKey      *string `json:"encryptedFileKey,omitempty"`
+	EncryptedFileKeyNonce *string `json:"encryptedFileKeyNonce,omitempty"`
+	KdfNonce              *string `json:"kdfNonce,omitempty"`
+	KdfMemLimit           *int64  `json:"kdfMemLimit,omitempty"`
+	KdfOpsLimit           *int64  `json:"kdfOpsLimit,omitempty"`
+}
