@@ -303,6 +303,7 @@
   "checking": "Checking...",
   "youAreOnTheLatestVersion": "You are on the latest version",
   "warning": "Warning",
+  "note": "Note",
   "exportWarningDesc": "The exported file contains sensitive information. Please store this safely.",
   "iUnderStand": "I understand",
   "@iUnderStand": {
