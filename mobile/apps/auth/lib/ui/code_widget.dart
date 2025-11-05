@@ -6,6 +6,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
@@ -23,6 +24,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +38,8 @@ class CodeWidget extends StatefulWidget {
   final bool isCompactMode;
   final CodeSortKey? sortKey;
   final bool isReordering;
+  final bool enableDesktopContextActions;
+  final List<Code> Function()? selectedCodesBuilder;
 
   const CodeWidget(
     this.code, {
@@ -43,6 +47,8 @@ class CodeWidget extends StatefulWidget {
     required this.isCompactMode,
     this.sortKey,
     this.isReordering = false,
+    this.enableDesktopContextActions = false,
+    this.selectedCodesBuilder,
   });
 
   @override
@@ -220,7 +226,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       return ValueListenableBuilder<Set<String>>(
         valueListenable: CodeDisplayStore.instance.selectedCodeIds,
         builder: (context, selectedIds, child) {
-          final isSelected = selectedIds.contains(widget.code.secret);
+          final isSelected = selectedIds.contains(widget.code.selectionKey);
 
           return Stack(
             children: [
@@ -247,7 +253,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                       onTap: () {
                         final store = CodeDisplayStore.instance;
                         if (store.isSelectionModeActive.value) {
-                          store.toggleSelection(widget.code.secret);
+                          store.toggleSelection(widget.code.selectionKey);
                         } else {
                           _copyCurrentOTPToClipboard();
                         }
@@ -263,7 +269,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                           ? null
                           : () {
                               CodeDisplayStore.instance.toggleSelection(
-                                widget.code.secret,
+                                widget.code.selectionKey,
                               );
                             },
                       child: getCardContents(l10n, isSelected: isSelected),
@@ -303,64 +309,23 @@ class _CodeWidgetState extends State<CodeWidget> {
       child: Builder(
         builder: (context) {
           if (PlatformUtil.isDesktop()) {
-            return ContextMenuRegion(
-              contextMenu: ContextMenu(
-                entries: <ContextMenuEntry>[
-                  if (!widget.code.isTrashed &&
-                      widget.code.type.isTOTPCompatible)
-                    MenuItem(
-                      label: context.l10n.share,
-                      icon: Icons.adaptive.share_outlined,
-                      onSelected: () => _onSharePressed(null),
-                    ),
-                  if (!widget.code.isTrashed)
-                    MenuItem(
-                      label: context.l10n.qr,
-                      icon: Icons.qr_code_2_outlined,
-                      onSelected: () => _onShowQrPressed(null),
-                    ),
-                  if (widget.code.note.isNotEmpty)
-                    MenuItem(
-                      label: context.l10n.notes,
-                      icon: Icons.notes_outlined,
-                      onSelected: () => _onShowNotesPressed(null),
-                    ),
-                  if (!widget.code.isTrashed && !ignorePin)
-                    MenuItem(
-                      label:
-                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                      icon: widget.code.isPinned
-                          ? Icons.push_pin
-                          : Icons.push_pin_outlined,
-                      onSelected: () => _onPinPressed(null),
-                    ),
-                  if (!widget.code.isTrashed)
-                    MenuItem(
-                      label: l10n.edit,
-                      icon: Icons.edit,
-                      onSelected: () => _onEditPressed(null),
-                    )
-                  else
-                    MenuItem(
-                      label: l10n.restore,
-                      icon: Icons.restore_outlined,
-                      onSelected: () => _onRestoreClicked(null),
-                    ),
-                  const MenuDivider(),
-                  MenuItem(
-                    label: widget.code.isTrashed ? l10n.delete : l10n.trash,
-                    value: l10n.delete,
-                    icon: widget.code.isTrashed
-                        ? Icons.delete_forever
-                        : Icons.delete,
-                    onSelected: () => widget.code.isTrashed
-                        ? _onDeletePressed(null)
-                        : _onTrashPressed(null),
+            return ValueListenableBuilder<Set<String>>(
+              valueListenable: CodeDisplayStore.instance.selectedCodeIds,
+              builder: (context, selectedIds, _) {
+                final menuEntries = _buildContextMenuEntries(
+                  context,
+                  l10n,
+                  selectedIds,
+                );
+
+                return ContextMenuRegion(
+                  contextMenu: ContextMenu(
+                    entries: menuEntries,
+                    padding: const EdgeInsets.all(8.0),
                   ),
-                ],
-                padding: const EdgeInsets.all(8.0),
-              ),
-              child: clippedCard(l10n),
+                  child: clippedCard(l10n),
+                );
+              },
             );
           }
 
@@ -394,10 +359,42 @@ class _CodeWidgetState extends State<CodeWidget> {
           ),
           const SizedBox(width: 8),
           widget.code.type.isTOTPCompatible
-              ? GestureDetector(
-                  onTap: () {
-                    _copyNextToClipboard();
-                  },
+              ? IgnorePointer(
+                  ignoring:
+                      CodeDisplayStore.instance.isSelectionModeActive.value,
+                  child: GestureDetector(
+                    onTap: () {
+                      _copyNextToClipboard();
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          l10n.nextTotpTitle,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        ValueListenableBuilder<String>(
+                          valueListenable: _nextCode,
+                          builder: (context, value, child) {
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: Text(
+                                _getFormattedCode(value),
+                                style: TextStyle(
+                                  fontSize: widget.isCompactMode ? 12 : 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : IgnorePointer(
+                  ignoring:
+                      CodeDisplayStore.instance.isSelectionModeActive.value,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -405,40 +402,16 @@ class _CodeWidgetState extends State<CodeWidget> {
                         l10n.nextTotpTitle,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: _nextCode,
-                        builder: (context, value, child) {
-                          return Material(
-                            type: MaterialType.transparency,
-                            child: Text(
-                              _getFormattedCode(value),
-                              style: TextStyle(
-                                fontSize: widget.isCompactMode ? 12 : 18,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          );
-                        },
+                      InkWell(
+                        onTap: _onNextHotpTapped,
+                        child: const Icon(
+                          Icons.forward_outlined,
+                          size: 32,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      l10n.nextTotpTitle,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    InkWell(
-                      onTap: _onNextHotpTapped,
-                      child: const Icon(
-                        Icons.forward_outlined,
-                        size: 32,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
                 ),
         ],
       ),
@@ -451,7 +424,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     final double indicatorSize = isCompactMode ? 16 : 20;
     const double indicatorPadding = 4;
     final double indicatorSlotWidth = indicatorSize + indicatorPadding;
-    const double accountTranslate = 0;
     final TextStyle? issuerStyle = isCompactMode
         ? Theme.of(context).textTheme.bodyMedium
         : Theme.of(context).textTheme.titleLarge;
@@ -494,8 +466,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                                   key: const ValueKey('selected-indicator'),
                                   alignment: Alignment.centerLeft,
                                   child: Padding(
-                                    padding: EdgeInsets.only(
-                                        right: indicatorPadding),
+                                    padding: const EdgeInsets.only(
+                                      right: indicatorPadding,
+                                    ),
                                     child: SizedBox(
                                       width: indicatorSize,
                                       height: indicatorSize,
@@ -566,6 +539,247 @@ class _CodeWidgetState extends State<CodeWidget> {
         ],
       ),
     );
+  }
+
+  List<ContextMenuEntry> _buildContextMenuEntries(
+    BuildContext context,
+    AppLocalizations l10n,
+    Set<String> selectedIds,
+  ) {
+    if (!widget.enableDesktopContextActions) {
+      return _buildSingleSelectionMenu(l10n);
+    }
+
+    final multiEntries = _buildMultiSelectionContextMenu(l10n, selectedIds);
+    if (multiEntries != null) {
+      return multiEntries;
+    }
+
+    return _buildSingleSelectionMenu(l10n);
+  }
+
+  List<ContextMenuEntry> _buildSingleSelectionMenu(AppLocalizations l10n) {
+    final entries = <ContextMenuEntry>[];
+
+    _addNonTrashedMenuItems(entries, l10n);
+    _addEditOrRestoreMenuItem(entries, l10n);
+    entries.add(const MenuDivider());
+    _addDeleteOrTrashMenuItem(entries, l10n);
+
+    return entries;
+  }
+
+  /// Adds menu items for non-trashed codes (share, QR, tag, notes, pin).
+  void _addNonTrashedMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    if (widget.code.isTrashed) return;
+
+    if (widget.code.type.isTOTPCompatible) {
+      entries.add(
+        MenuItem(
+          label: l10n.share,
+          icon: Icons.adaptive.share_outlined,
+          onSelected: () => _onSharePressed(null),
+        ),
+      );
+    }
+
+    entries.add(
+      MenuItem(
+        label: l10n.qr,
+        icon: Icons.qr_code_2_outlined,
+        onSelected: () => _onShowQrPressed(null),
+      ),
+    );
+
+    entries.add(
+      MenuItem(
+        label: l10n.addTag,
+        icon: Icons.local_offer_outlined,
+        onSelected: () {
+          CodeDisplayStore.instance.selectedCodeIds.value = {
+            widget.code.selectionKey,
+          };
+          _triggerMultiAction(MultiSelectAction.addTag);
+        },
+      ),
+    );
+
+    if (widget.code.note.isNotEmpty) {
+      entries.add(
+        MenuItem(
+          label: l10n.notes,
+          icon: Icons.notes_outlined,
+          onSelected: () => _onShowNotesPressed(null),
+        ),
+      );
+    }
+
+    if (!ignorePin) {
+      entries.add(
+        MenuItem(
+          label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+          icon: widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+          onSelected: () => _onPinPressed(null),
+        ),
+      );
+    }
+  }
+
+  /// Adds edit menu item for non-trashed codes or restore for trashed codes.
+  void _addEditOrRestoreMenuItem(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    if (!widget.code.isTrashed) {
+      entries.add(
+        MenuItem(
+          label: l10n.edit,
+          icon: Icons.edit,
+          onSelected: () => _onEditPressed(null),
+        ),
+      );
+    } else {
+      entries.add(
+        MenuItem(
+          label: l10n.restore,
+          icon: Icons.restore_outlined,
+          onSelected: () => _onRestoreClicked(null),
+        ),
+      );
+    }
+  }
+
+  /// Adds delete (forever) or trash menu item based on code state.
+  void _addDeleteOrTrashMenuItem(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: widget.code.isTrashed ? l10n.delete : l10n.trash,
+        value: l10n.delete,
+        icon: widget.code.isTrashed ? Icons.delete_forever : Icons.delete,
+        onSelected: () => widget.code.isTrashed
+            ? _onDeletePressed(null)
+            : _onTrashPressed(null),
+      ),
+    );
+  }
+
+  List<ContextMenuEntry>? _buildMultiSelectionContextMenu(
+    AppLocalizations l10n,
+    Set<String> selectedIds,
+  ) {
+    if (selectedIds.length <= 1 ||
+        !selectedIds.contains(widget.code.selectionKey)) {
+      return null;
+    }
+
+    final selectedCodes = widget.selectedCodesBuilder?.call() ?? const <Code>[];
+    if (selectedCodes.isEmpty) {
+      return null;
+    }
+
+    final entries = <ContextMenuEntry>[];
+    final bool allTrashed = selectedCodes.every((code) => code.isTrashed);
+
+    if (allTrashed) {
+      _addTrashedMultiSelectMenuItems(entries, l10n);
+      return entries.isEmpty ? null : entries;
+    }
+
+    _addPinMenuItems(entries, l10n, selectedCodes);
+    _addTagAndTrashMenuItems(entries, l10n);
+
+    return entries.isEmpty ? null : entries;
+  }
+
+  /// Adds menu items for multi-selected trashed codes (restore, delete).
+  void _addTrashedMultiSelectMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: l10n.restore,
+        icon: Icons.restore_outlined,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.restore),
+      ),
+    );
+    entries.add(
+      MenuItem(
+        label: l10n.delete,
+        icon: Icons.delete_forever,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.deleteForever),
+      ),
+    );
+  }
+
+  /// Adds pin/unpin menu items based on selection pin state.
+  void _addPinMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+    List<Code> selectedCodes,
+  ) {
+    final bool allPinned = selectedCodes.every((code) => code.isPinned);
+    final bool anyPinned = selectedCodes.any((code) => code.isPinned);
+    final bool isMixedPinned = anyPinned && !allPinned;
+
+    if (isMixedPinned) {
+      // Show both pin and unpin options for mixed state
+      entries.add(
+        MenuItem(
+          label: l10n.pinText,
+          icon: Icons.push_pin_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.pinToggle),
+        ),
+      );
+      entries.add(
+        MenuItem(
+          label: l10n.unpinText,
+          icon: Icons.push_pin,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.unpin),
+        ),
+      );
+    } else {
+      // Show single toggle option for uniform state
+      entries.add(
+        MenuItem(
+          label: allPinned ? l10n.unpinText : l10n.pinText,
+          icon: allPinned ? Icons.push_pin : Icons.push_pin_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.pinToggle),
+        ),
+      );
+    }
+  }
+
+  /// Adds tag and trash menu items for multi-selection.
+  void _addTagAndTrashMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: l10n.addTag,
+        icon: Icons.local_offer_outlined,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.addTag),
+      ),
+    );
+
+    entries.add(
+      MenuItem(
+        label: l10n.trash,
+        icon: Icons.delete_outline,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.trash),
+      ),
+    );
+  }
+
+  void _triggerMultiAction(MultiSelectAction action) {
+    Bus.instance.fire(MultiSelectActionRequestedEvent(action));
   }
 
   Widget _getIcon() {
