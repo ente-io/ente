@@ -33,6 +33,12 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     with TickerProviderStateMixin {
   static const _frameInterval = Duration(milliseconds: 800);
   static const _cardTransitionDuration = Duration(milliseconds: 520);
+  static const double _frameWidthFactor = 0.82;
+  static const double _frameHeightFactor = 0.78;
+  static const double _controlsDesiredGapToCard = 24;
+  static const double _cardGapUpdateTolerance = 0.5;
+  static const double _controlsHeightUpdateTolerance = 0.5;
+  static const double _controlsHeightFallback = 140;
 
   final Logger _logger = Logger("FacesTimelinePage");
   late final AnimationController _cardTransitionController;
@@ -49,6 +55,9 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   bool _loggedPlaybackStart = false;
 
   int _currentIndex = 0;
+  double _cardGap = 0;
+  double _controlsHeight = 0;
+  final GlobalKey _controlsKey = GlobalKey();
   bool _isScrubbing = false;
   double _sliderValue = 0;
   double _previousCaptionValue = 0;
@@ -175,6 +184,46 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       captionType: captionType,
       captionValue: captionValue,
     );
+  }
+
+  void _scheduleCardGapUpdate(double candidateGap) {
+    if ((_cardGap - candidateGap).abs() <= _cardGapUpdateTolerance) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if ((_cardGap - candidateGap).abs() <= _cardGapUpdateTolerance) {
+        return;
+      }
+      setState(() {
+        _cardGap = candidateGap;
+      });
+    });
+  }
+
+  void _scheduleControlsHeightUpdate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      final context = _controlsKey.currentContext;
+      if (context == null) {
+        return;
+      }
+      final Size? size = context.size;
+      if (size == null) {
+        return;
+      }
+      final double height = size.height;
+      if ((_controlsHeight - height).abs() <= _controlsHeightUpdateTolerance) {
+        return;
+      }
+      setState(() {
+        _controlsHeight = height;
+      });
+    });
   }
 
   void _logPlaybackStart(int frameCount) {
@@ -323,69 +372,84 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                 }
                 final displayIndex =
                     _stackProgress.round().clamp(0, frames.length - 1);
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Stack(
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final viewPadding = MediaQuery.of(context).viewPadding;
+                    final double bottomInset = viewPadding.bottom;
+                    final double bottomPadding = math.max(12, bottomInset);
+                    const double topPadding = 12;
+                    final double gapToTop = _cardGap + topPadding;
+                    const double desiredGap = _controlsDesiredGapToCard;
+                    final double overlap = math.max(0, gapToTop - desiredGap);
+                    final double controlsHeight = _controlsHeight > 0
+                        ? _controlsHeight
+                        : _controlsHeightFallback;
+                    final double reservedHeight =
+                        topPadding + bottomPadding + controlsHeight;
+                    final Widget controlsContent = KeyedSubtree(
+                      key: _controlsKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Positioned.fill(
-                            child: _buildFrameView(context),
-                          ),
-                          Positioned(
-                            top: 24,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.fillFaint,
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: Text(
-                                  _frames[displayIndex].entry.year.toString(),
-                                  style: getEnteTextTheme(context).bodyMuted,
-                                ),
-                              ),
-                            ),
-                          ),
+                          _buildCaption(context),
+                          const SizedBox(height: 16),
+                          _buildControls(context),
                         ],
                       ),
-                    ),
-                    SafeArea(
-                      top: false,
-                      child: Builder(
-                        builder: (context) {
-                          final viewPadding =
-                              MediaQuery.of(context).viewPadding;
-                          final double bottomInset = viewPadding.bottom;
-                          final double bottomPadding =
-                              math.max(12, bottomInset);
-                          const double topPadding = 12;
-                          return Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              24,
-                              topPadding,
-                              24,
-                              bottomPadding,
+                    );
+                    _scheduleControlsHeightUpdate();
+                    return Stack(
+                      children: [
+                        Column(
+                          children: [
+                            Expanded(
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: _buildFrameView(context),
+                                  ),
+                                  Positioned(
+                                    top: 24,
+                                    left: 0,
+                                    right: 0,
+                                    child: Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 6,
+                                          horizontal: 12,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.fillFaint,
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                        ),
+                                        child: Text(
+                                          _frames[displayIndex]
+                                              .entry
+                                              .year
+                                              .toString(),
+                                          style: getEnteTextTheme(context)
+                                              .bodyMuted,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _buildCaption(context),
-                                const SizedBox(height: 16),
-                                _buildControls(context),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                            SizedBox(height: reservedHeight),
+                          ],
+                        ),
+                        Positioned(
+                          left: 24,
+                          right: 24,
+                          bottom: bottomPadding + overlap,
+                          child: controlsContent,
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
             ),
@@ -401,8 +465,8 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       return Center(
         key: const ValueKey<String>("faces_timeline_empty"),
         child: FractionallySizedBox(
-          widthFactor: 0.82,
-          heightFactor: 0.78,
+          widthFactor: _frameWidthFactor,
+          heightFactor: _frameHeightFactor,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: colorScheme.backgroundElevated,
@@ -457,13 +521,18 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 
     return Center(
       child: FractionallySizedBox(
-        widthFactor: 0.82,
-        heightFactor: 0.78,
+        widthFactor: _frameWidthFactor,
+        heightFactor: _frameHeightFactor,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final cardHeight = constraints.hasBoundedHeight
                 ? constraints.maxHeight
                 : constraints.biggest.height;
+            if (cardHeight > 0) {
+              final double parentHeight = cardHeight / _frameHeightFactor;
+              final double gap = math.max(0, (parentHeight - cardHeight) / 2);
+              _scheduleCardGapUpdate(gap);
+            }
             final orderedSlices = <_CardSlice>[
               ...futureSlices,
               ...presentAndPastSlices,
