@@ -2095,7 +2095,7 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerPaidPlanTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unlock locker with a paid plan'**
+  /// **'Unlock Locker'**
   String get unlockLockerPaidPlanTitle;
 
   /// No description provided for @unlockLockerPaidPlanBody.

@@ -1203,7 +1203,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Unlock locker with a paid plan';
+  String get unlockLockerPaidPlanTitle => 'Unlock Locker';
 
   @override
   String get unlockLockerPaidPlanBody =>
