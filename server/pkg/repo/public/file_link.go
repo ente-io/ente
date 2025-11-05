@@ -47,38 +47,101 @@ func (pcr *FileLinkRepository) FileLink(app ente.App, token string) string {
 
 func (pcr *FileLinkRepository) Insert(
 	ctx context.Context,
-	fileID int64,
+	req ente.CreateFileUrl,
 	ownerID int64,
 	token string,
-	app ente.App,
 ) (*string, error) {
+	tx, err := pcr.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to begin transaction for file token insert")
+	}
+	defer tx.Rollback()
+
+	if err = ensureAccessTokenAvailable(ctx, tx, token); err != nil {
+		return nil, err
+	}
+
 	id, err := base.NewID("pft")
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to generate new ID for public file token")
 	}
-	_, err = pcr.DB.ExecContext(ctx, `INSERT INTO public_file_tokens 
-    (id, file_id, owner_id, access_token, app) VALUES ($1, $2, $3, $4, $5)`,
-		id, fileID, ownerID, token, string(app))
+
+	_, err = tx.ExecContext(ctx, `INSERT INTO public_file_tokens 
+    (id, file_id, owner_id, access_token, app, encrypted_file_key, encrypted_file_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, encrypted_share_key) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+		id,
+		req.FileID,
+		ownerID,
+		token,
+		string(req.App),
+		req.EncryptedFileKey,
+		req.EncryptedFileKeyNonce,
+		req.KdfNonce,
+		req.KdfMemLimit,
+		req.KdfOpsLimit,
+		req.EncryptedShareKey,
+	)
 	if err != nil {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"public_active_file_link_unique_idx\"" {
 			return nil, ente.ErrActiveLinkAlreadyExists
 		}
 		return nil, stacktrace.Propagate(err, "failed to insert")
 	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to commit file token insert")
+	}
+
 	return id, nil
+}
+
+// UpdateLinkSecretIfEmpty updates link key metadata if it hasn't been set already.
+func (pcr *FileLinkRepository) UpdateLinkSecretIfEmpty(
+	ctx context.Context,
+	linkID string,
+	data ente.CreateFileUrl,
+) error {
+	if data.EncryptedFileKey == nil &&
+		data.EncryptedFileKeyNonce == nil &&
+		data.KdfNonce == nil &&
+		data.KdfMemLimit == nil &&
+		data.KdfOpsLimit == nil &&
+		data.EncryptedShareKey == nil {
+		return nil
+	}
+	_, err := pcr.DB.ExecContext(ctx, `
+		UPDATE public_file_tokens
+		SET encrypted_file_key = COALESCE(encrypted_file_key, $1),
+		    encrypted_file_key_nonce = COALESCE(encrypted_file_key_nonce, $2),
+		    kdf_nonce = COALESCE(kdf_nonce, $3),
+		    kdf_mem_limit = COALESCE(kdf_mem_limit, $4),
+		    kdf_ops_limit = COALESCE(kdf_ops_limit, $5),
+		    encrypted_share_key = COALESCE(encrypted_share_key, $6)
+		WHERE id = $7`,
+		data.EncryptedFileKey,
+		data.EncryptedFileKeyNonce,
+		data.KdfNonce,
+		data.KdfMemLimit,
+		data.KdfOpsLimit,
+		data.EncryptedShareKey,
+		linkID,
+	)
+	return stacktrace.Propagate(err, "failed to update link secret metadata")
 }
 
 // GetActiveFileUrlToken will return ente.CollectionLinkRow for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *FileLinkRepository) GetActiveFileUrlToken(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, file_id, owner_id, access_token, valid_till, device_limit, 
-       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download FROM 
+       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download,
+       encrypted_file_key, encrypted_file_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, encrypted_share_key FROM 
                                                    public_file_tokens WHERE file_id = $1 and is_disabled = FALSE`,
 		fileID)
 
 	ret := ente.FileLinkRow{}
 	err := row.Scan(&ret.LinkID, &ret.FileID, &ret.OwnerID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
-		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload)
+		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload,
+		&ret.EncryptedFileKey, &ret.EncryptedFileKeyNonce, &ret.KdfNonce, &ret.KdfMemLimit, &ret.KdfOpsLimit, &ret.EncryptedShareKey)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -89,7 +152,8 @@ func (pcr *FileLinkRepository) GetFileUrls(ctx context.Context, userID int64, si
 		limit = 500
 	}
 	query := `SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit,
-	   created_at, updated_at FROM public_file_tokens
+	   created_at, updated_at, encrypted_file_key, encrypted_file_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, encrypted_share_key
+	   FROM public_file_tokens
 	   WHERE owner_id = $1 AND created_at > $2 AND app = $3 ORDER BY updated_at DESC LIMIT $4`
 	rows, err := pcr.DB.QueryContext(ctx, query, userID, sinceTime, string(app), limit)
 	if err != nil {
@@ -103,7 +167,8 @@ func (pcr *FileLinkRepository) GetFileUrls(ctx context.Context, userID int64, si
 		err = rows.Scan(&row.LinkID, &row.FileID, &row.OwnerID, &row.IsDisabled,
 			&row.ValidTill, &row.DeviceLimit, &row.EnableDownload,
 			&row.PassHash, &row.Nonce, &row.MemLimit,
-			&row.OpsLimit, &row.CreatedAt, &row.UpdatedAt)
+			&row.OpsLimit, &row.CreatedAt, &row.UpdatedAt,
+			&row.EncryptedFileKey, &row.EncryptedFileKeyNonce, &row.KdfNonce, &row.KdfMemLimit, &row.KdfOpsLimit, &row.EncryptedShareKey)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "failed to scan public file url row")
 		}
@@ -136,12 +201,12 @@ func (pcr *FileLinkRepository) DisableLinksForUser(ctx context.Context, userID i
 func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessToken string) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
 		`SELECT id, file_id, owner_id, is_disabled, valid_till, device_limit, enable_download, pw_hash, pw_nonce, mem_limit, ops_limit,
-       created_at, updated_at
+       created_at, updated_at, encrypted_file_key, encrypted_file_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, encrypted_share_key
 		from public_file_tokens
 		where access_token = $1
 `, accessToken)
 	var result = ente.FileLinkRow{}
-	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.ValidTill, &result.DeviceLimit, &result.EnableDownload, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
+	err := row.Scan(&result.LinkID, &result.FileID, &result.OwnerID, &result.IsDisabled, &result.ValidTill, &result.DeviceLimit, &result.EnableDownload, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt, &result.EncryptedFileKey, &result.EncryptedFileKeyNonce, &result.KdfNonce, &result.KdfMemLimit, &result.KdfOpsLimit, &result.EncryptedShareKey)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ente.ErrNotFound
@@ -154,11 +219,11 @@ func (pcr *FileLinkRepository) GetFileUrlRowByToken(ctx context.Context, accessT
 func (pcr *FileLinkRepository) GetFileUrlRowByFileID(ctx context.Context, fileID int64) (*ente.FileLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx,
 		`SELECT id, file_id, access_token, owner_id, is_disabled, enable_download, valid_till, device_limit, pw_hash, pw_nonce, mem_limit, ops_limit,
-	   created_at, updated_at
+	   created_at, updated_at, encrypted_file_key, encrypted_file_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, encrypted_share_key
 		from public_file_tokens 
 		where file_id = $1 and is_disabled = FALSE`, fileID)
 	var result = ente.FileLinkRow{}
-	err := row.Scan(&result.LinkID, &result.FileID, &result.Token, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt)
+	err := row.Scan(&result.LinkID, &result.FileID, &result.Token, &result.OwnerID, &result.IsDisabled, &result.EnableDownload, &result.ValidTill, &result.DeviceLimit, &result.PassHash, &result.Nonce, &result.MemLimit, &result.OpsLimit, &result.CreatedAt, &result.UpdatedAt, &result.EncryptedFileKey, &result.EncryptedFileKeyNonce, &result.KdfNonce, &result.KdfMemLimit, &result.KdfOpsLimit, &result.EncryptedShareKey)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ente.ErrNotFound
