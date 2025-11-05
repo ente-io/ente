@@ -50,13 +50,30 @@ func (pcr *CollectionLinkRepo) Insert(ctx context.Context,
 	if enableJoin != nil {
 		join = *enableJoin
 	}
-	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_collection_tokens 
+	tx, err := pcr.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to begin transaction for collection token insert")
+	}
+	defer tx.Rollback()
+
+	if err = ensureAccessTokenAvailable(ctx, tx, token); err != nil {
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, `INSERT INTO public_collection_tokens 
     (collection_id, access_token, valid_till, device_limit, enable_collect, enable_join) VALUES ($1, $2, $3, $4, $5, $6)`,
 		cID, token, validTill, deviceLimit, enableCollect, join)
 	if err != nil && err.Error() == "pq: duplicate key value violates unique constraint \"public_active_collection_unique_idx\"" {
 		return ente.ErrActiveLinkAlreadyExists
 	}
-	return stacktrace.Propagate(err, "failed to insert")
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to insert")
+	}
+
+	if err = tx.Commit(); err != nil {
+		return stacktrace.Propagate(err, "failed to commit collection token insert")
+	}
+	return nil
 }
 
 func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) error {
