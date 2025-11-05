@@ -30,7 +30,11 @@ var ErrCollectionDeleted = &ApiError{
 	HttpStatusCode: http.StatusNotFound,
 }
 
-var ErrFileLimitReached = errors.New("file limit reached")
+var ErrFileLimitReached = ApiError{
+	Code:           FileLimitReached,
+	Message:        "Maximum file limit reached",
+	HttpStatusCode: http.StatusForbidden,
+}
 
 // ErrBadRequest is returned when a bad request is encountered
 var ErrBadRequest = errors.New("bad request")
@@ -197,6 +201,12 @@ var ErrCastIPMismatch = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLockerRegistrationDisabled = &ApiError{
+	Code:           LockerRegistrationDisabled,
+	Message:        "Locker is restricted to paid users currently",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 type ErrorCode string
 
 const (
@@ -227,6 +237,12 @@ const (
 
 	// MaxPasskeysReached is thrown when user attempts to create more than max allowed passkeys
 	MaxPasskeysReached ErrorCode = "MAX_PASSKEYS_REACHED"
+
+	// LockerRegistrationDisabled indicates that locker registration is currently disabled
+	LockerRegistrationDisabled ErrorCode = "LOCKER_REGISTRATION_DISABLED"
+
+	// FileLimitReached indicates the user hit the maximum number of files allowed
+	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"
 
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
 )
