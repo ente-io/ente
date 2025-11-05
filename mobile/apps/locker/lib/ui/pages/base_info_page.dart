@@ -3,7 +3,6 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -443,10 +442,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                     child: SizedBox(
                       width: double.infinity,
                       child: GradientButton(
-                        hugeIcon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedFileUpload,
-                          color: colorScheme.textBase,
-                        ),
                         onTap: _isLoading ? null : _saveRecord,
                         text: _isLoading
                             ? context.l10n.pleaseWait

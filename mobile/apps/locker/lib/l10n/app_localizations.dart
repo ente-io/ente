@@ -1045,7 +1045,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveDocumentDescription.
   ///
   /// In en, this message translates to:
-  /// **'Upload documents securely to keep everything in one place.'**
+  /// **'Upload documents to keep everything in one place.'**
   String get saveDocumentDescription;
 
   /// No description provided for @informationDescription.
@@ -1057,37 +1057,37 @@ abstract class AppLocalizations {
   /// No description provided for @personalNote.
   ///
   /// In en, this message translates to:
-  /// **'Personal note'**
+  /// **'Note'**
   String get personalNote;
 
   /// No description provided for @personalNoteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Store essential notes or reflections securely.'**
+  /// **'Write essential notes or reflections.'**
   String get personalNoteDescription;
 
   /// No description provided for @physicalRecords.
   ///
   /// In en, this message translates to:
-  /// **'Physical Record'**
+  /// **'Location'**
   String get physicalRecords;
 
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Document real-world locations of key items.'**
+  /// **'Document real-world locations of important items.'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.
   ///
   /// In en, this message translates to:
-  /// **'Account credentials'**
+  /// **'Secret'**
   String get accountCredentials;
 
   /// No description provided for @accountCredentialsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Safely save login details for vital accounts.'**
+  /// **'Preserve account credentials.'**
   String get accountCredentialsDescription;
 
   /// No description provided for @emergencyContact.
