@@ -53,7 +53,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   static const double _controlsHeightUpdateTolerance = 0.5;
   static const double _controlsHeightFallback = 140;
   // Wait for this many frames (or the available total) before auto-starting playback.
-  static const int _initialFrameTarget = 64;
+  static const int _initialFrameTarget = 80;
 
   final Logger _logger = Logger("FacesTimelinePage");
   late final AnimationController _cardTransitionController;
