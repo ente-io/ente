@@ -16,7 +16,10 @@ class IconButtonWidget extends StatefulWidget {
   final Color? defaultColor;
   final Color? pressedColor;
   final Color? iconColor;
-const IconButtonWidget({
+  final EdgeInsetsGeometry padding;
+  final double size;
+
+  const IconButtonWidget({
     super.key,
     required this.icon,
     required this.iconButtonType,
@@ -25,6 +28,8 @@ const IconButtonWidget({
     this.defaultColor,
     this.pressedColor,
     this.iconColor,
+    this.padding = const EdgeInsets.all(8),
+    this.size = 24,
   });
 
   @override
@@ -66,9 +71,11 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
       padding: const EdgeInsets.all(4.0),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 20),
-        padding: const EdgeInsets.all(8),
+        padding: widget.padding,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(
+            widget.iconButtonType == IconButtonType.rounded ? widget.size : 20,
+          ),
           color: iconStateColor,
         ),
         child: Icon(
@@ -77,7 +84,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
               (widget.iconButtonType == IconButtonType.secondary
                   ? colorTheme.strokeMuted
                   : colorTheme.strokeBase),
-          size: 24,
+          size: widget.size,
         ),
       ),
     );

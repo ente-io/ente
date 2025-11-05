@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/ui/components/buttons/icon_button_widget.dart';
 import 'package:ente_auth/utils/gallery_import_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -49,6 +50,13 @@ class ScannerPageState extends State<ScannerPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final bool showGalleryImport = PlatformUtil.isMobile();
+    final theme = Theme.of(context);
+    final bool isLight = theme.brightness == Brightness.light;
+    final Color galleryBackgroundColor =
+        isLight ? Colors.black.withOpacity(0.035) : Colors.white.withOpacity(0.18);
+    final Color galleryPressedColor =
+        isLight ? Colors.black.withOpacity(0.07) : Colors.white.withOpacity(0.26);
+    final Color galleryIconColor = isLight ? Colors.black : Colors.white;
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.scan),
@@ -73,17 +81,36 @@ class ScannerPageState extends State<ScannerPage> {
                     ? Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              totp ?? l10n.scanACode,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
+                            child: totp != null
+                                ? Text(
+                                    totp!,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium,
+                                  )
+                                : const SizedBox.shrink(),
                           ),
-                          TextButton.icon(
-                            onPressed: _isImportingFromGallery
-                                ? null
-                                : _handleImportFromGallery,
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: Text(l10n.importFromGallery),
+                          Semantics(
+                            button: true,
+                            label: l10n.importFromGallery,
+                            child: Opacity(
+                              opacity: _isImportingFromGallery ? 0.5 : 1,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: IconButtonWidget(
+                                  icon: Icons.photo_library_outlined,
+                                  iconButtonType: IconButtonType.rounded,
+                                  onTap: _isImportingFromGallery
+                                      ? null
+                                      : _handleImportFromGallery,
+                                  defaultColor: galleryBackgroundColor,
+                                  iconColor: galleryIconColor,
+                                  pressedColor: galleryPressedColor,
+                                  size: 28,
+                                  padding: const EdgeInsets.all(14),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       )
