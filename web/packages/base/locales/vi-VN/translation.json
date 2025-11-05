@@ -158,6 +158,7 @@
     "logout": "Đăng xuất",
     "logout_message": "Bạn có chắc muốn đăng xuất không?",
     "delete_account": "Xóa tài khoản",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>Vui lòng gửi email đến <a>{{emailID}}</a> từ địa chỉ email đã đăng ký của bạn.</p><p>Yêu cầu của bạn sẽ được xử lý trong vòng 72 giờ.</p>",
     "change_email": "Đổi email",
     "ok": "OK",

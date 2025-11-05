@@ -158,6 +158,7 @@
     "logout": "Disconnettiti",
     "logout_message": "Sei sicuro di volerti disconnettere?",
     "delete_account": "Elimina account",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>Per favore invia una email a <a>{{emailID}}</a> dal tuo indirizzo email registrato.</p><p>La tua richiesta verrà elaborata entro 72 ore.</p>",
     "change_email": "Cambia email",
     "ok": "OK",
