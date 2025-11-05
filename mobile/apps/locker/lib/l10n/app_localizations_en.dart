@@ -549,32 +549,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveDocumentDescription =>
-      'Upload documents securely to keep everything in one place.';
+      'Upload documents to keep everything in one place.';
 
   @override
   String get informationDescription =>
       'Save important information that can be shared and passed down to loved ones.';
 
   @override
-  String get personalNote => 'Personal note';
+  String get personalNote => 'Note';
 
   @override
-  String get personalNoteDescription =>
-      'Store essential notes or reflections securely.';
+  String get personalNoteDescription => 'Write essential notes or reflections.';
 
   @override
-  String get physicalRecords => 'Physical Record';
+  String get physicalRecords => 'Location';
 
   @override
   String get physicalRecordsDescription =>
-      'Document real-world locations of key items.';
+      'Document real-world locations of important items.';
 
   @override
-  String get accountCredentials => 'Account credentials';
+  String get accountCredentials => 'Secret';
 
   @override
-  String get accountCredentialsDescription =>
-      'Safely save login details for vital accounts.';
+  String get accountCredentialsDescription => 'Preserve account credentials.';
 
   @override
   String get emergencyContact => 'Emergency contact';
