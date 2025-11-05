@@ -595,12 +595,15 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       color: colorScheme.fillBase,
       fontWeight: FontWeight.w600,
     );
-    final int digits = math.max(1, _maxCaptionDigits);
+    final int digits = math.max(3, _maxCaptionDigits);
     final int slotSampleValue = _maxValueForDigits(digits);
     final String sampleString = numberFormat.format(slotSampleValue);
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
     final TextPainter samplePainter = TextPainter(
       text: TextSpan(text: sampleString, style: numberStyle),
       textDirection: ui.TextDirection.ltr,
+      textScaler: textScaler,
+      maxLines: 1,
     )..layout();
     final double slotWidth = samplePainter.width;
     final double slotHeight = samplePainter.height;
@@ -632,11 +635,13 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
             child: SizedBox(
               width: slotWidth,
               height: slotHeight,
-              child: _RollingCounter(
-                value: currentRounded,
-                previousValue: previousRounded,
-                textStyle: numberStyle,
-                numberFormat: numberFormat,
+              child: Center(
+                child: _RollingCounter(
+                  value: currentRounded,
+                  previousValue: previousRounded,
+                  textStyle: numberStyle,
+                  numberFormat: numberFormat,
+                ),
               ),
             ),
           ),
