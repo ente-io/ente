@@ -559,12 +559,19 @@ class _HomePageState extends UploaderPageState<HomePage>
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return PopScope(
-      onPopInvokedWithResult: (_, result) async {
+      canPop: !isSearchActive && !_isSettingsOpen,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) {
+          return;
+        }
+
+        if (isSearchActive) {
+          _handleClearSearch();
+          return;
+        }
+
         if (_isSettingsOpen) {
           scaffoldKey.currentState!.closeDrawer();
-          return;
-        } else if (!Platform.isAndroid) {
-          Navigator.of(context).pop();
           return;
         }
       },
