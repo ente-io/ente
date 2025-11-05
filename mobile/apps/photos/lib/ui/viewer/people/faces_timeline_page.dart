@@ -835,6 +835,17 @@ class _FacesTimelineCard extends StatelessWidget {
         distance > 0 ? math.min(0.45, 0.12 + distance * 0.12) : 0.0;
 
     final cardShadow = _shadowForCard(distance);
+    // Emphasize the active card by delaying the date reveal until the card is
+    // nearly centered; keeps background cards calm while the primary one lifts.
+    final double emphasisDistance = distance.abs();
+    final double activation =
+        (1 - (emphasisDistance * 1.8)).clamp(0.0, 1.0); // hide until near front
+    final double emphasis = Curves.easeOutQuad.transform(activation);
+    final double dateOpacity = emphasis;
+    final double gradientAlpha = 0.6 * emphasis;
+    final double textShadowAlpha = 0.5 * emphasis;
+    final double dateYOffset = ui.lerpDouble(28, 0, emphasis) ?? 0;
+    final double dateScale = ui.lerpDouble(0.94, 1, emphasis) ?? 1;
     final String localeTag = Localizations.localeOf(context).toLanguageTag();
     final String formattedDate = DateFormat(
       "d MMM yyyy",
@@ -863,29 +874,40 @@ class _FacesTimelineCard extends StatelessWidget {
             ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [
-                    colorScheme.backgroundBase.withValues(alpha: 0.45),
-                    colorScheme.backgroundBase.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(20, 36, 20, 20),
-              child: Text(
-                formattedDate,
-                textAlign: TextAlign.center,
-                style: textTheme.smallMuted.copyWith(
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.35),
-                      blurRadius: 12,
+            child: Opacity(
+              opacity: dateOpacity,
+              child: Transform.translate(
+                offset: Offset(0, dateYOffset),
+                child: Transform.scale(
+                  scale: dateScale,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [
+                          colorScheme.backgroundBase.withValues(
+                            alpha: gradientAlpha,
+                          ),
+                          colorScheme.backgroundBase.withValues(alpha: 0.0),
+                        ],
+                      ),
                     ),
-                  ],
+                    padding: const EdgeInsets.fromLTRB(20, 36, 20, 20),
+                    child: Text(
+                      formattedDate,
+                      textAlign: TextAlign.center,
+                      style: textTheme.smallMuted.copyWith(
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(textShadowAlpha),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
