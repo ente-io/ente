@@ -301,13 +301,6 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     });
   }
 
-  void _onSharePressed(BuildContext context) {
-    _logger.info("share_attempt person=${widget.person.remoteID}");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.facesTimelineShareComingSoon)),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -326,13 +319,6 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
               backgroundColor: colorScheme.backgroundBase,
               foregroundColor: colorScheme.textBase,
               title: Text(title),
-              actions: [
-                IconButton(
-                  onPressed: () => _onSharePressed(context),
-                  icon: const Icon(Icons.ios_share),
-                  tooltip: l10n.facesTimelineShareComingSoon,
-                ),
-              ],
             ),
             body: FutureBuilder<List<_TimelineFrame>>(
               future: _framesFuture,
