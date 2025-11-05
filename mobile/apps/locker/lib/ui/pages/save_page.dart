@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/ui/pages/account_credentials_page.dart';
-import 'package:locker/ui/pages/emergency_contact_page.dart';
 import 'package:locker/ui/pages/personal_note_page.dart';
 import 'package:locker/ui/pages/physical_records_page.dart';
 
@@ -17,7 +16,6 @@ enum SaveOptionType {
   note,
   physicalRecord,
   credentials,
-  emergencyContact,
 }
 
 Future<void> showSaveBottomSheet(
@@ -95,6 +93,7 @@ class SaveBottomSheet extends StatelessWidget {
                           TitleBarTitleWidget(
                             title: context.l10n.saveToLocker,
                           ),
+                          const SizedBox(height: 12),
                           Text(
                             context.l10n.informationDescription,
                             style: textTheme.smallMuted,
@@ -187,21 +186,6 @@ class SaveBottomSheet extends StatelessWidget {
                         colorScheme: colorScheme,
                         textTheme: textTheme,
                       ),
-                      const SizedBox(height: 16),
-                      _buildSaveOption(
-                        context,
-                        rootContext: rootContext,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedContactBook,
-                          size: 24,
-                          color: colorScheme.primary700,
-                        ),
-                        title: context.l10n.emergencyContact,
-                        description: context.l10n.emergencyContactDescription,
-                        type: SaveOptionType.emergencyContact,
-                        colorScheme: colorScheme,
-                        textTheme: textTheme,
-                      ),
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -288,11 +272,6 @@ class SaveBottomSheet extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => const AccountCredentialsPage(),
           ),
-        );
-        break;
-      case SaveOptionType.emergencyContact:
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const EmergencyContactPage()),
         );
         break;
     }
