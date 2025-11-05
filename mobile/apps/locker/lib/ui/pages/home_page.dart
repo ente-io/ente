@@ -21,12 +21,11 @@ import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/collection_flex_grid_view.dart";
 import "package:locker/ui/collections/section_title.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
-import "package:locker/ui/components/popup_menu_item_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
-import 'package:locker/ui/pages/information_page.dart';
+import 'package:locker/ui/pages/save_page.dart';
 import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
@@ -278,27 +277,10 @@ class _HomePageState extends UploaderPageState<HomePage>
     return _filterOutUncategorized(collections);
   }
 
-  final ValueNotifier<bool> _isFabOpen = ValueNotifier<bool>(false);
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-
   @override
   void initState() {
     super.initState();
     _selectedCollections = SelectedCollections();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
 
     _loadCollections();
 
@@ -346,8 +328,6 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _isFabOpen.dispose();
     _searchFocusNode.dispose();
     disposeSharing();
     super.dispose();
@@ -591,8 +571,17 @@ class _HomePageState extends UploaderPageState<HomePage>
             onSearchChanged: _handleSearchChange,
           ),
           body: _buildBody(),
-          floatingActionButton:
-              isSearchActive ? const SizedBox.shrink() : _buildMultiOptionFab(),
+          floatingActionButton: isSearchActive
+              ? null
+              : FloatingActionButton(
+                  onPressed: _openSavePage,
+                  shape: const CircleBorder(),
+                  backgroundColor: colorScheme.primary700,
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
+                    color: Colors.white,
+                  ),
+                ),
         ),
       ),
     );
@@ -716,122 +705,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     );
   }
 
-  Widget _buildMultiOptionFab() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: _isFabOpen,
-      builder: (context, isFabOpen, child) {
-        final colorScheme = getEnteColorScheme(context);
-
-        return Stack(
-          children: [
-            if (isFabOpen)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: _toggleFab,
-                  child: Container(
-                    color: Colors.transparent,
-                  ),
-                ),
-              ),
-            Positioned(
-              right: 64,
-              bottom: 64,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 1),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: _animationController,
-                    curve: Curves.easeOutCubic,
-                  ),
-                ),
-                child: FadeTransition(
-                  opacity: _animation,
-                  child: Container(
-                    width: 200,
-                    decoration: BoxDecoration(
-                      color: colorScheme.backdropBase,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: colorScheme.strokeFaint),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 15,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PopupMenuItemWidget(
-                          label: context.l10n.saveInformation,
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedFile01,
-                            color: colorScheme.primary700,
-                            size: 20,
-                          ),
-                          isFirst: true,
-                          isLast: false,
-                          onTap: () {
-                            _toggleFab();
-                            _showInformationDialog();
-                          },
-                        ),
-                        PopupMenuItemWidget(
-                          label: context.l10n.saveDocument,
-                          icon: HugeIcon(
-                            icon: HugeIcons.strokeRoundedFileUpload,
-                            color: colorScheme.primary700,
-                            size: 20,
-                          ),
-                          isFirst: false,
-                          isLast: true,
-                          onTap: () {
-                            _toggleFab();
-                            addFile();
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: FloatingActionButton(
-                onPressed: _toggleFab,
-                shape: const CircleBorder(),
-                backgroundColor: colorScheme.primary700,
-                child: AnimatedRotation(
-                  turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
-                  duration: const Duration(milliseconds: 300),
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlusSign,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _toggleFab() {
-    _isFabOpen.value = !_isFabOpen.value;
-
-    if (_isFabOpen.value) {
-      _animationController.forward();
-    } else {
-      _animationController.reverse();
-    }
-  }
-
   List<Widget> _buildCollectionSection({
     required String title,
     required List<Collection> collections,
@@ -866,11 +739,10 @@ class _HomePageState extends UploaderPageState<HomePage>
     ];
   }
 
-  void _showInformationDialog() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const InformationPage(),
-      ),
+  void _openSavePage() {
+    showSaveBottomSheet(
+      context,
+      onUploadDocument: addFile,
     );
   }
 }

@@ -127,8 +127,8 @@ class _LoginPageState extends State<LoginPage> {
         _logger.severe('Server reject, failed verify SRP login', e, s);
         await showErrorDialog(
           context,
-          'Incorrect Password',
-          'Please try again',
+          context.l10n.incorrectPassword,
+          context.l10n.pleaseTryAgain,
         );
       } else {
         _logger.severe('API failure during SRP login ${e.type}', e, s);
@@ -137,14 +137,14 @@ class _LoginPageState extends State<LoginPage> {
             e.type == DioExceptionType.sendTimeout) {
           await showErrorDialog(
             context,
-            'No Internet Connection',
-            'Please check your internet connection and try again',
+            context.l10n.noInternetConnection,
+            context.l10n.checkInternetConnection,
           );
         } else {
           await showErrorDialog(
             context,
-            'Something went wrong',
-            'Verification failed, please try again',
+            context.l10n.somethingWentWrong,
+            context.l10n.verificationFailedTryAgain,
           );
         }
       }
@@ -162,10 +162,9 @@ class _LoginPageState extends State<LoginPage> {
       } else if (e is KeyDerivationError) {
         final dialogChoice = await showChoiceDialog(
           context,
-          title: 'Recreate password',
-          body:
-              'Your device does not have enough memory to verify your password',
-          firstButtonLabel: 'Use recovery key',
+          title: context.l10n.recreatePassword,
+          body: context.l10n.deviceCannotVerifyPassword,
+          firstButtonLabel: context.l10n.useRecoveryKey,
         );
         if (dialogChoice!.action == ButtonAction.first) {
           await UserService.instance.sendOtt(
@@ -179,8 +178,8 @@ class _LoginPageState extends State<LoginPage> {
         _logger.severe('unexpected error while verifying password', e, s);
         await _showContactSupportDialog(
           context,
-          'Oops',
-          'Verification failed, please try again',
+          context.l10n.oops,
+          context.l10n.verificationFailedTryAgain,
         );
       }
     }
@@ -195,14 +194,15 @@ class _LoginPageState extends State<LoginPage> {
       context,
       title: title,
       body: message,
-      firstButtonLabel: 'Contact support',
-      secondButtonLabel: 'OK',
+      firstButtonLabel: context.l10n.contactSupport,
+      secondButtonLabel: context.l10n.ok,
     );
     if (dialogChoice!.action == ButtonAction.first) {
       final Uri emailUri = Uri(
         scheme: 'mailto',
         path: 'support@ente.io',
-        query: 'subject=Locker Login Issue',
+        query:
+            'subject=${Uri.encodeComponent(context.l10n.lockerLoginIssueSubject)}',
       );
       if (await canLaunchUrl(emailUri)) {
         await launchUrl(emailUri);
@@ -214,8 +214,8 @@ class _LoginPageState extends State<LoginPage> {
     if (_email == null || !_emailIsValid) {
       await showErrorDialog(
         context,
-        'Invalid Email',
-        'Please enter a valid email address first',
+        context.l10n.invalidEmail,
+        context.l10n.enterValidEmailFirst,
       );
       return;
     }
@@ -230,10 +230,9 @@ class _LoginPageState extends State<LoginPage> {
   void _handleSignUp() {
     showCreateNewAccountDialog(
       context,
-      title: "Unlock locker with a paid plan",
-      body:
-          "Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker",
-      buttonLabel: "Checkout Ente Photos",
+      title: context.l10n.unlockLockerPaidPlanTitle,
+      body: context.l10n.unlockLockerPaidPlanBody,
+      buttonLabel: context.l10n.okay,
       assetPath: "assets/file_lock.png",
       icon: const SizedBox.shrink(),
     );
@@ -248,12 +247,13 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
         title: Text(
-          "Locker",
+          l10n.locker,
           style: textTheme.h3Bold.copyWith(
             color: colorScheme.primary700,
           ),
@@ -282,7 +282,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: [
                         const SizedBox(height: 24),
                         Text(
-                          "Email id",
+                          l10n.emailIdLabel,
                           style: textTheme.bodyBold.copyWith(
                             color: colorScheme.textBase,
                           ),
@@ -292,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                           key: const ValueKey("emailInputField"),
                           autofillHints: const [AutofillHints.email],
                           decoration: InputDecoration(
-                            hintText: "Enter your email id",
+                            hintText: l10n.emailIdHint,
                             hintStyle: textTheme.body.copyWith(
                               color: colorScheme.textMuted,
                             ),
@@ -339,7 +339,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 24),
                         Text(
-                          "Password",
+                          l10n.loginPasswordLabel,
                           style: textTheme.bodyBold.copyWith(
                             color: colorScheme.textBase,
                           ),
@@ -349,7 +349,7 @@ class _LoginPageState extends State<LoginPage> {
                           key: const ValueKey("passwordInputField"),
                           autofillHints: const [AutofillHints.password],
                           decoration: InputDecoration(
-                            hintText: "Enter your password",
+                            hintText: l10n.loginPasswordHint,
                             hintStyle: textTheme.body.copyWith(
                               color: colorScheme.textMuted,
                             ),
@@ -396,7 +396,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: TextButton(
                             onPressed: _handleForgotPassword,
                             child: Text(
-                              "Forgot Password?",
+                              l10n.forgotPassword,
                               style: textTheme.bodyBold.copyWith(
                                 color: colorScheme.primary700,
                                 decoration: TextDecoration.underline,
@@ -420,7 +420,7 @@ class _LoginPageState extends State<LoginPage> {
                           await _handleLogin();
                         }
                       : null,
-                  text: "Log in",
+                  text: l10n.logInAction,
                 ),
               ),
               const SizedBox(height: 16),
@@ -433,9 +433,9 @@ class _LoginPageState extends State<LoginPage> {
                         color: colorScheme.textBase,
                       ),
                       children: [
-                        const TextSpan(text: "Don't have an account? "),
+                        TextSpan(text: '${l10n.dontHaveAccount} '),
                         TextSpan(
-                          text: "Sign up",
+                          text: l10n.signUp,
                           style: textTheme.bodyBold.copyWith(
                             color: colorScheme.primary700,
                             decoration: TextDecoration.underline,
