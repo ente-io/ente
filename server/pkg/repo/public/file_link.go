@@ -51,11 +51,22 @@ func (pcr *FileLinkRepository) Insert(
 	ownerID int64,
 	token string,
 ) (*string, error) {
+	tx, err := pcr.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "failed to begin transaction for file token insert")
+	}
+	defer tx.Rollback()
+
+	if err = ensureAccessTokenAvailable(ctx, tx, token); err != nil {
+		return nil, err
+	}
+
 	id, err := base.NewID("pft")
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to generate new ID for public file token")
 	}
-	_, err = pcr.DB.ExecContext(ctx, `INSERT INTO public_file_tokens 
+
+	_, err = tx.ExecContext(ctx, `INSERT INTO public_file_tokens 
     (id, file_id, owner_id, access_token, app, encrypted_file_key, encrypted_file_key_nonce, kdf_nonce, kdf_mem_limit, kdf_ops_limit, encrypted_share_key) 
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
 		id,
@@ -76,6 +87,11 @@ func (pcr *FileLinkRepository) Insert(
 		}
 		return nil, stacktrace.Propagate(err, "failed to insert")
 	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, stacktrace.Propagate(err, "failed to commit file token insert")
+	}
+
 	return id, nil
 }
 
