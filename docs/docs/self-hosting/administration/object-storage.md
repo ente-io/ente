@@ -115,6 +115,16 @@ Use the content provided below for creating a `cors.json` file:
 You may have to change the `AllowedOrigins` to allow only certain origins (your
 Ente web apps and Museum) for security.
 
+::: note
+
+Newer Ente builds include a `Content-MD5` header on upload requests (and `UPLOAD-URL`
+when routing through the upload worker). If your provider requires an explicit
+allow list instead of `["*"]`, make sure these headers are present in
+`AllowedHeaders`, otherwise preflight checks will fail, and uploads will be
+blocked.
+
+:::
+
 Assuming you have AWS CLI on your system and that you have configured it with
 your access key and secret, you can execute the below command to set bucket
 CORS. Make sure to enter the right path for the `cors.json` file.
