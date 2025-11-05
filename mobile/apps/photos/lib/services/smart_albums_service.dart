@@ -229,6 +229,12 @@ class SmartAlbumsService {
         addWithCustomID: config.id == null,
         userId: userId,
       );
+    } else {
+      // Delete the config when no people are selected
+      await _deleteEntry(
+        userId: userId,
+        collectionId: config.collectionId,
+      );
     }
   }
 
