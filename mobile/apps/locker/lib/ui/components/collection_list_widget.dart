@@ -32,6 +32,7 @@ class CollectionListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final bool isFavourite = collection.type == CollectionType.favorites;
 
     final collectionRowWidget = Flexible(
       flex: 6,
@@ -128,32 +129,34 @@ class CollectionListWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 collectionRowWidget,
-                Flexible(
-                  flex: 1,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: isSelected
-                        ? IconButtonWidget(
-                            key: const ValueKey("selected"),
-                            icon: Icons.check_circle_rounded,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.primary700,
-                          )
-                        : CollectionPopupMenuWidget(
-                            collection: collection,
-                            overflowActions: overflowActions,
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedMoreVertical,
-                                color: colorScheme.textBase,
-                              ),
-                            ),
-                          ),
-                  ),
-                ),
+                isFavourite
+                    ? const SizedBox.shrink()
+                    : Flexible(
+                        flex: 1,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          switchInCurve: Curves.easeOut,
+                          switchOutCurve: Curves.easeIn,
+                          child: isSelected
+                              ? IconButtonWidget(
+                                  key: const ValueKey("selected"),
+                                  icon: Icons.check_circle_rounded,
+                                  iconButtonType: IconButtonType.secondary,
+                                  iconColor: colorScheme.primary700,
+                                )
+                              : CollectionPopupMenuWidget(
+                                  collection: collection,
+                                  overflowActions: overflowActions,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: HugeIcon(
+                                      icon: HugeIcons.strokeRoundedMoreVertical,
+                                      color: colorScheme.textBase,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ),
               ],
             ),
           );
