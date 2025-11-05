@@ -52,6 +52,8 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   static const double _cardGapUpdateTolerance = 0.5;
   static const double _controlsHeightUpdateTolerance = 0.5;
   static const double _controlsHeightFallback = 140;
+  // Wait for this many frames (or the available total) before auto-starting playback.
+  static const int _initialFrameTarget = 64;
 
   final Logger _logger = Logger("FacesTimelinePage");
   late final AnimationController _cardTransitionController;
@@ -60,12 +62,15 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   int _targetIndex = 0;
   bool _isAnimatingCard = false;
 
-  late Future<List<_TimelineFrame>> _framesFuture;
   final List<_TimelineFrame> _frames = [];
 
   Timer? _playTimer;
   bool _isPlaying = false;
   bool _loggedPlaybackStart = false;
+  bool _hasStartedPlayback = false;
+  bool _allFramesLoaded = false;
+  bool _timelineUnavailable = false;
+  int _expectedFrameCount = 0;
 
   int _currentIndex = 0;
   double _cardGap = 0;
@@ -87,7 +92,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     )
       ..addListener(_onCardAnimationTick)
       ..addStatusListener(_onCardAnimationStatusChanged);
-    _framesFuture = _loadFrames();
+    unawaited(_loadFrames());
   }
 
   @override
@@ -100,27 +105,114 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     super.dispose();
   }
 
-  Future<List<_TimelineFrame>> _loadFrames() async {
-    final timeline = await FacesTimelineService.instance.getTimeline(
-      widget.person.remoteID,
-    );
-    if (timeline == null || !timeline.isReady || timeline.entries.isEmpty) {
-      return <_TimelineFrame>[];
-    }
-    final frames = <_TimelineFrame>[];
-    for (final entry in timeline.entries) {
-      frames.add(await _buildFrame(entry));
-    }
-    if (frames.isNotEmpty && mounted) {
-      int maxRounded = 0;
-      for (final frame in frames) {
-        maxRounded = math.max(maxRounded, frame.captionValue.round());
-      }
-      final int digitCount = math.max(1, maxRounded.toString().length);
+  Future<void> _loadFrames() async {
+    _playTimer?.cancel();
+    if (mounted) {
       setState(() {
-        _frames
-          ..clear()
-          ..addAll(frames);
+        _isPlaying = false;
+      });
+    }
+    try {
+      final timeline = await FacesTimelineService.instance.getTimeline(
+        widget.person.remoteID,
+      );
+      if (!mounted) {
+        return;
+      }
+      if (timeline == null || !timeline.isReady || timeline.entries.isEmpty) {
+        setState(() {
+          _timelineUnavailable = true;
+          _allFramesLoaded = true;
+          _frames.clear();
+          _hasStartedPlayback = false;
+          _loggedPlaybackStart = false;
+        });
+        return;
+      }
+
+      final entries = timeline.entries;
+      _expectedFrameCount = entries.length;
+      if (_expectedFrameCount == 0) {
+        setState(() {
+          _timelineUnavailable = true;
+          _allFramesLoaded = true;
+          _frames.clear();
+          _hasStartedPlayback = false;
+          _loggedPlaybackStart = false;
+        });
+        return;
+      }
+
+      setState(() {
+        _timelineUnavailable = false;
+        _allFramesLoaded = false;
+        _frames.clear();
+        _hasStartedPlayback = false;
+        _loggedPlaybackStart = false;
+        _stackProgress = 0;
+        _animationStartProgress = 0;
+        _targetIndex = 0;
+        _isAnimatingCard = false;
+        _currentIndex = 0;
+        _sliderValue = 0;
+        _previousCaptionValue = 0;
+        _currentCaptionValue = 0;
+        _currentCaptionType = _CaptionType.yearsAgo;
+        _maxCaptionDigits = 1;
+      });
+      _cardTransitionController
+        ..stop()
+        ..value = 0;
+
+      int loadedCount = 0;
+      for (final entry in entries) {
+        final frame = await _buildFrame(entry);
+        if (!mounted) {
+          return;
+        }
+        loadedCount += 1;
+        _handleFrameLoaded(frame, loadedCount);
+      }
+
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _allFramesLoaded = true;
+      });
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "Faces timeline failed to load",
+        error,
+        stackTrace,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _timelineUnavailable = true;
+        _allFramesLoaded = true;
+        _frames.clear();
+        _hasStartedPlayback = false;
+        _loggedPlaybackStart = false;
+      });
+    }
+  }
+
+  int get _initialFrameThreshold {
+    if (_expectedFrameCount <= 0) {
+      return 1;
+    }
+    return math.max(1, math.min(_initialFrameTarget, _expectedFrameCount));
+  }
+
+  void _handleFrameLoaded(_TimelineFrame frame, int loadedCount) {
+    final bool isFirstFrame = _frames.isEmpty;
+    final int digitCount = _captionDigitCount(frame.captionValue);
+    setState(() {
+      _frames.add(frame);
+      _maxCaptionDigits = math.max(_maxCaptionDigits, digitCount);
+      if (isFirstFrame) {
         _currentIndex = 0;
         _sliderValue = 0;
         _stackProgress = 0;
@@ -128,15 +220,21 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _targetIndex = 0;
         _isAnimatingCard = false;
         _cardTransitionController.value = 0;
-        _currentCaptionValue = frames.first.captionValue;
-        _previousCaptionValue = _currentCaptionValue;
-        _currentCaptionType = frames.first.captionType;
-        _maxCaptionDigits = digitCount;
-      });
+        _currentCaptionValue = frame.captionValue;
+        _previousCaptionValue = frame.captionValue;
+        _currentCaptionType = frame.captionType;
+      }
+    });
+    if (!_hasStartedPlayback && loadedCount >= _initialFrameThreshold) {
+      _hasStartedPlayback = true;
       _startPlayback();
-      _logPlaybackStart(frames.length);
+      _logPlaybackStart(_expectedFrameCount);
     }
-    return frames;
+  }
+
+  int _captionDigitCount(double value) {
+    final int rounded = value.round().abs();
+    return math.max(1, rounded.toString().length);
   }
 
   Future<_TimelineFrame> _buildFrame(FacesTimelineEntry entry) async {
@@ -344,96 +442,72 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                   style: titleStyle,
                 ),
               ),
-              body: FutureBuilder<List<_TimelineFrame>>(
-                future: _framesFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          colorScheme.primary500,
-                        ),
-                      ),
-                    );
-                  }
-                  if (snapshot.hasError) {
-                    _logger.severe(
-                      "Faces timeline failed to load",
-                      snapshot.error,
-                      snapshot.stackTrace,
-                    );
-                    return Center(
+              body: Stack(
+                children: [
+                  if (_timelineUnavailable && _allFramesLoaded)
+                    Center(
                       child: Text(
                         l10n.facesTimelineUnavailable,
                         style: textTheme.body,
                         textAlign: TextAlign.center,
                       ),
-                    );
-                  }
-                  final frames = snapshot.data ?? [];
-                  if (frames.isEmpty) {
-                    return Center(
-                      child: Text(
-                        l10n.facesTimelineUnavailable,
-                        style: textTheme.body,
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      final viewPadding = MediaQuery.of(context).viewPadding;
-                      final double bottomInset = viewPadding.bottom;
-                      final double bottomPadding = math.max(12, bottomInset);
-                      const double topPadding = 12;
-                      final double gapToTop = _cardGap + topPadding;
-                      const double desiredGap = _controlsDesiredGapToCard;
-                      final double overlap = math.max(0, gapToTop - desiredGap);
-                      final double controlsHeight = _controlsHeight > 0
-                          ? _controlsHeight
-                          : _controlsHeightFallback;
-                      final double reservedHeight =
-                          topPadding + bottomPadding + controlsHeight;
-                      final Widget controlsContent = KeyedSubtree(
-                        key: _controlsKey,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildCaption(context),
-                            const SizedBox(height: 16),
-                            _buildControls(context),
-                          ],
-                        ),
-                      );
-                      _scheduleControlsHeightUpdate();
-                      return Stack(
-                        children: [
-                          Column(
+                    )
+                  else
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final viewPadding = MediaQuery.of(context).viewPadding;
+                        final double bottomInset = viewPadding.bottom;
+                        final double bottomPadding = math.max(12, bottomInset);
+                        const double topPadding = 12;
+                        final double gapToTop = _cardGap + topPadding;
+                        const double desiredGap = _controlsDesiredGapToCard;
+                        final double overlap =
+                            math.max(0, gapToTop - desiredGap);
+                        final double controlsHeight = _controlsHeight > 0
+                            ? _controlsHeight
+                            : _controlsHeightFallback;
+                        final double reservedHeight =
+                            topPadding + bottomPadding + controlsHeight;
+                        final Widget controlsContent = KeyedSubtree(
+                          key: _controlsKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Expanded(
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: _buildFrameView(context),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: reservedHeight),
+                              _buildCaption(context),
+                              const SizedBox(height: 16),
+                              _buildControls(context),
                             ],
                           ),
-                          Positioned(
-                            left: 24,
-                            right: 24,
-                            bottom: bottomPadding + overlap,
-                            child: controlsContent,
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
+                        );
+                        _scheduleControlsHeightUpdate();
+                        return Stack(
+                          children: [
+                            Column(
+                              children: [
+                                Expanded(
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: _buildFrameView(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: reservedHeight),
+                              ],
+                            ),
+                            Positioned(
+                              left: 24,
+                              right: 24,
+                              bottom: bottomPadding + overlap,
+                              child: controlsContent,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                ],
               ),
             ),
           );
@@ -675,10 +749,10 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     final maxValue = frameCount > 1 ? (frameCount - 1).toDouble() : 0.0;
     final sliderValue =
         frameCount > 1 ? _sliderValue.clamp(0.0, maxValue) : 0.0;
-    final Color activeTrackColor = Colors.white;
+    const Color activeTrackColor = Colors.white;
     final Color inactiveTrackColor =
         (isDark ? colorScheme.fillBaseGrey : colorScheme.strokeMuted)
-            .withOpacity(isDark ? 0.55 : 0.48);
+            .withValues(alpha: isDark ? 0.55 : 0.48);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -929,7 +1003,8 @@ class _FacesTimelineCard extends StatelessWidget {
                       style: textTheme.smallMuted.copyWith(
                         shadows: [
                           Shadow(
-                            color: Colors.black.withOpacity(textShadowAlpha),
+                            color:
+                                Colors.black.withValues(alpha: textShadowAlpha),
                             blurRadius: 12,
                           ),
                         ],
@@ -1104,7 +1179,7 @@ class _FacesTimelineSliderThumbShape extends SliderComponentShape {
         sliderTheme.thumbColor ?? sliderTheme.activeTrackColor ?? Colors.white;
     final canvas = context.canvas;
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.25)
+      ..color = Colors.black.withValues(alpha: 0.25)
       ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 3);
     canvas.drawCircle(center.translate(0, 1), _thumbRadius, shadowPaint);
     final paint = Paint()..color = color;
