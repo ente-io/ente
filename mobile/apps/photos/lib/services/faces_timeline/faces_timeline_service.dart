@@ -600,5 +600,6 @@ int _compareFaceQuality(_TimelineFaceData a, _TimelineFaceData b) {
 }
 
 int _dayKeyForMicros(int micros) {
-  return micros ~/ Duration.microsecondsPerDay;
+  final localDate = DateTime.fromMicrosecondsSinceEpoch(micros);
+  return localDate.year * 10000 + localDate.month * 100 + localDate.day;
 }
