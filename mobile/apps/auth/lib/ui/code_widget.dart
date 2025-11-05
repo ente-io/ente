@@ -862,17 +862,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  void _onNextHotpTapped() {
-    if (widget.code.type == Type.hotp) {
-      CodeStore.instance
-          .addCode(
-            widget.code.copyWith(counter: widget.code.counter + 1),
-            shouldSync: true,
-          )
-          .ignore();
-    }
-  }
-
   Future<void> _onShowNotesPressed([bool? pop]) async {
     if (mounted && pop == true) {
       Navigator.of(context).pop();
