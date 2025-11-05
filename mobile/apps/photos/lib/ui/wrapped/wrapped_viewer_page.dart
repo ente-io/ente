@@ -1037,7 +1037,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         _updateMusicPlaying(false);
         return;
       }
-      if (_audioPlayer.loopMode != LoopMode.off) {
+      if (_audioPlayer.loopMode != LoopMode.off && state.playing) {
         _updateMusicPlaying(true);
         return;
       }
