@@ -133,7 +133,8 @@ export const CustomHeadShareStatic: React.FC = () => (
  */
 export const CustomHeadShare: React.FC<CustomHeadProps> = ({ title }) =>
     isCustomShareAppOrigin ||
-    (haveWindow() && new URL(window.location.href).origin != shareAppOrigin()) ? (
+    (haveWindow() &&
+        new URL(window.location.href).origin != shareAppOrigin()) ? (
         <CustomHead {...{ title }} />
     ) : (
         <CustomHeadShareStatic />
