@@ -8,7 +8,7 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
-import "package:locker/ui/components/menu_item_widget.dart";
+import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/utils/collection_actions.dart";
 
 class CollectionPopupMenuWidget extends StatelessWidget {
@@ -62,7 +62,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
             value: action.id,
             padding: EdgeInsets.zero,
             height: 0,
-            child: MenuItemWidget(
+            child: PopupMenuItemWidget(
               icon: action.icon,
               label: action.label,
               isFirst: i == 0,
@@ -90,7 +90,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
           value: 'edit',
           padding: EdgeInsets.zero,
           height: 0,
-          child: MenuItemWidget(
+          child: PopupMenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedEdit02,
               color: colorScheme.textBase,
@@ -108,7 +108,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
           value: 'delete',
           padding: EdgeInsets.zero,
           height: 0,
-          child: MenuItemWidget(
+          child: PopupMenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedDelete01,
               color: colorScheme.warning500,
@@ -129,7 +129,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
           value: 'leave_collection',
           padding: EdgeInsets.zero,
           height: 0,
-          child: MenuItemWidget(
+          child: PopupMenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedLogout02,
               color: colorScheme.warning500,

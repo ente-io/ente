@@ -21,7 +21,7 @@ import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/collections/collection_flex_grid_view.dart";
 import "package:locker/ui/collections/section_title.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
-import "package:locker/ui/components/menu_item_widget.dart";
+import "package:locker/ui/components/popup_menu_item_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
@@ -765,7 +765,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        MenuItemWidget(
+                        PopupMenuItemWidget(
                           label: context.l10n.saveInformation,
                           icon: HugeIcon(
                             icon: HugeIcons.strokeRoundedFile01,
@@ -779,7 +779,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                             _showInformationDialog();
                           },
                         ),
-                        MenuItemWidget(
+                        PopupMenuItemWidget(
                           label: context.l10n.saveDocument,
                           icon: HugeIcon(
                             icon: HugeIcons.strokeRoundedFileUpload,

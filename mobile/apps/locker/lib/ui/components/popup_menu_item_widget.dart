@@ -1,7 +1,7 @@
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
-class MenuItemWidget extends StatelessWidget {
+class PopupMenuItemWidget extends StatelessWidget {
   final Widget icon;
   final String label;
   final bool isFirst;
@@ -9,7 +9,7 @@ class MenuItemWidget extends StatelessWidget {
   final bool isWarning;
   final VoidCallback? onTap;
 
-  const MenuItemWidget({
+  const PopupMenuItemWidget({
     super.key,
     required this.icon,
     required this.label,

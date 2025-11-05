@@ -12,7 +12,7 @@ import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
-import "package:locker/ui/components/menu_item_widget.dart";
+import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
@@ -68,7 +68,7 @@ class FilePopupMenuWidget extends StatelessWidget {
             value: action.id,
             padding: EdgeInsets.zero,
             height: 0,
-            child: MenuItemWidget(
+            child: PopupMenuItemWidget(
               icon: action.icon,
               label: action.label,
               isFirst: i == 0,
@@ -86,7 +86,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         value: 'edit',
         padding: EdgeInsets.zero,
         height: 0,
-        child: MenuItemWidget(
+        child: PopupMenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedPencilEdit02,
             color: colorScheme.textBase,
@@ -101,7 +101,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         value: 'share_link',
         padding: EdgeInsets.zero,
         height: 0,
-        child: MenuItemWidget(
+        child: PopupMenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedShare08,
             color: colorScheme.textBase,
@@ -116,7 +116,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         value: 'delete',
         padding: EdgeInsets.zero,
         height: 0,
-        child: MenuItemWidget(
+        child: PopupMenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedDelete02,
             color: colorScheme.warning500,
