@@ -656,16 +656,21 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     final maxValue = frameCount > 1 ? (frameCount - 1).toDouble() : 0.0;
     final sliderValue =
         frameCount > 1 ? _sliderValue.clamp(0.0, maxValue) : 0.0;
+    final Color activeTrackColor = Colors.white;
+    final Color inactiveTrackColor =
+        (isDark ? colorScheme.fillBaseGrey : colorScheme.strokeMuted)
+            .withOpacity(isDark ? 0.55 : 0.48);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
-            trackHeight: 10,
-            activeTrackColor: colorScheme.primary500,
-            thumbColor: isDark ? colorScheme.fillBase : colorScheme.textBase,
-            inactiveTrackColor: colorScheme.fillMuted,
+            trackHeight: 4,
+            activeTrackColor: activeTrackColor,
+            inactiveTrackColor: inactiveTrackColor,
+            thumbColor: Colors.white,
             overlayColor: Colors.transparent,
+            trackShape: const RoundedRectSliderTrackShape(),
             thumbShape: const _FacesTimelineSliderThumbShape(),
           ),
           child: Slider(
@@ -1055,12 +1060,11 @@ double _yearsBetween(DateTime start, DateTime end) {
 class _FacesTimelineSliderThumbShape extends SliderComponentShape {
   const _FacesTimelineSliderThumbShape();
 
-  static const double _thumbWidth = 32;
-  static const double _thumbHeight = 16;
+  static const double _thumbRadius = 12;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
-      const Size(_thumbWidth, _thumbHeight);
+      const Size.fromRadius(_thumbRadius);
 
   @override
   void paint(
@@ -1080,17 +1084,12 @@ class _FacesTimelineSliderThumbShape extends SliderComponentShape {
     final Color color =
         sliderTheme.thumbColor ?? sliderTheme.activeTrackColor ?? Colors.white;
     final canvas = context.canvas;
-    final rect = Rect.fromCenter(
-      center: center,
-      width: _thumbWidth,
-      height: _thumbHeight,
-    );
-    final rrect = RRect.fromRectAndRadius(
-      rect,
-      const Radius.circular(_thumbHeight / 2),
-    );
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.25)
+      ..maskFilter = const ui.MaskFilter.blur(ui.BlurStyle.normal, 3);
+    canvas.drawCircle(center.translate(0, 1), _thumbRadius, shadowPaint);
     final paint = Paint()..color = color;
-    canvas.drawRRect(rrect, paint);
+    canvas.drawCircle(center, _thumbRadius, paint);
   }
 }
 
