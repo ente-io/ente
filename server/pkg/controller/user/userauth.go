@@ -362,11 +362,7 @@ func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) erro
 		return nil
 	}
 	const restrictionMsg = "locker is restricted to paid users currently"
-	if c.BillingController == nil {
-		log.Error("locker access: billing controller is not configured")
-		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, restrictionMsg)
-	}
-	if err := c.BillingController.IsActivePayingSubscriber(userID); err != nil {
+	if err := c.BillingController.HasActiveSelfOrFamilySubscription(userID, true); err != nil {
 		if !errors.Is(err, ente.ErrNoActiveSubscription) && !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
 			log.WithError(err).Error("locker access: failed to verify active subscription status")
 		}
