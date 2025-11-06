@@ -242,6 +242,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upload your first document to get started';
 
   @override
+  String get collectionEmptyStateTitle => 'Nothing to see here';
+
+  @override
+  String get collectionEmptyStateSubtitle =>
+      'Add items to this collection to see them here';
+
+  @override
+  String get homeLockerEmptyTitle => 'Your Locker is empty';
+
+  @override
+  String get homeLockerEmptySubtitle => 'Click the + button to get started';
+
+  @override
   String get uploadDocument => 'Upload document';
 
   @override
