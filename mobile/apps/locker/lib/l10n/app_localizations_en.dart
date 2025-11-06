@@ -1092,14 +1092,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please authenticate to manage your trusted contacts';
 
   @override
-  String legacyInvite(Object email) {
-    return '$email has invited you to be a trusted contact';
-  }
-
-  @override
-  String get acceptTrustInvite => 'Accept invite';
-
-  @override
   String get uploadError => 'Upload error';
 
   @override

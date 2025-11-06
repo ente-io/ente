@@ -38,6 +38,68 @@ class AccountSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
+          title: context.l10n.legacy,
+          makeTextBold: true,
+        ),
+        trailingIcon: Icons.chevron_right_outlined,
+        showOnlyLoadingState: true,
+        onTap: () async {
+          final hasAuthenticated = kDebugMode ||
+              await LocalAuthenticationService.instance
+                  .requestLocalAuthentication(
+                context,
+                "Authenticate to manage legacy contacts",
+              );
+          if (hasAuthenticated) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return EmergencyPage(
+                    config: Configuration.instance,
+                  );
+                },
+              ),
+            ).ignore();
+          }
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.recoveryKey,
+          makeTextBold: true,
+        ),
+        trailingIcon: Icons.chevron_right_outlined,
+        onTap: () async {
+          final hasAuthenticated = await LocalAuthenticationService.instance
+              .requestLocalAuthentication(
+            context,
+            l10n.authToViewYourRecoveryKey,
+          );
+          if (hasAuthenticated) {
+            String recoveryKey;
+            try {
+              recoveryKey =
+                  CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
+            } catch (e) {
+              // ignore: unawaited_futures
+              showGenericErrorDialog(
+                context: context,
+                error: e,
+              );
+              return;
+            }
+            await showRecoveryKeyDialogLocker(
+              context,
+              recoveryKey: recoveryKey,
+              onDone: () {},
+            );
+          }
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
           title: l10n.changeEmail,
           makeTextBold: true,
         ),
@@ -87,68 +149,6 @@ class AccountSectionWidget extends StatelessWidget {
                 },
               ),
             );
-          }
-        },
-      ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.recoveryKey,
-          makeTextBold: true,
-        ),
-        trailingIcon: Icons.chevron_right_outlined,
-        onTap: () async {
-          final hasAuthenticated = await LocalAuthenticationService.instance
-              .requestLocalAuthentication(
-            context,
-            l10n.authToViewYourRecoveryKey,
-          );
-          if (hasAuthenticated) {
-            String recoveryKey;
-            try {
-              recoveryKey =
-                  CryptoUtil.bin2hex(Configuration.instance.getRecoveryKey());
-            } catch (e) {
-              // ignore: unawaited_futures
-              showGenericErrorDialog(
-                context: context,
-                error: e,
-              );
-              return;
-            }
-            await showRecoveryKeyDialogLocker(
-              context,
-              recoveryKey: recoveryKey,
-              onDone: () {},
-            );
-          }
-        },
-      ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: context.l10n.legacy,
-          makeTextBold: true,
-        ),
-        trailingIcon: Icons.chevron_right_outlined,
-        showOnlyLoadingState: true,
-        onTap: () async {
-          final hasAuthenticated = kDebugMode ||
-              await LocalAuthenticationService.instance
-                  .requestLocalAuthentication(
-                context,
-                "Authenticate to manage legacy contacts",
-              );
-          if (hasAuthenticated) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return EmergencyPage(
-                    config: Configuration.instance,
-                  );
-                },
-              ),
-            ).ignore();
           }
         },
       ),

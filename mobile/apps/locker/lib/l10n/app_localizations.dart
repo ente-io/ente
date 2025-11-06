@@ -1942,18 +1942,6 @@ abstract class AppLocalizations {
   /// **'Please authenticate to manage your trusted contacts'**
   String get authToManageLegacy;
 
-  /// No description provided for @legacyInvite.
-  ///
-  /// In en, this message translates to:
-  /// **'{email} has invited you to be a trusted contact'**
-  String legacyInvite(Object email);
-
-  /// No description provided for @acceptTrustInvite.
-  ///
-  /// In en, this message translates to:
-  /// **'Accept invite'**
-  String get acceptTrustInvite;
-
   /// No description provided for @uploadError.
   ///
   /// In en, this message translates to:
