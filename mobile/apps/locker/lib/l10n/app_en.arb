@@ -362,19 +362,35 @@
   "physicalRecordsDescription": "Document real-world locations of important items.",
   "accountCredentials": "Secret",
   "accountCredentialsDescription": "Preserve account credentials.",
+  "editSecret": "Edit secret",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
+  "editLocation": "Edit location",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
+  "editNote": "Edit note",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Emergency contact",
   "emergencyContactDescription": "Keep contact info for key people in crises.",
   "noteName": "Title",
   "noteNameHint": "Hint text",
   "noteContent": "Content",
   "noteContentHint": "Write down important thoughts, instructions, or memories you want to preserve",
+  "unsavedNoteChangesTitle": "Discard changes?",
+  "unsavedNoteChangesDescription": "You have unsaved changes in this note. If you go back now, they will be lost.",
+  "keepEditing": "Keep editing",
+  "discardChanges": "Discard",
   "recordName": "Record name",
   "recordNameHint": "Name of the real-world item",
   "recordLocation": "Location",
   "recordLocationHint": "Where can this item be found?",
   "recordNotes": "Notes",
-  "recordNotesHint": "Any additional information about the item?",
-  "credentialName": "Account name",
+  "recordNotesHint": "Any additional information about the item",
+  "credentialName": "Item name",
   "credentialNameHint": "Name of the service or account",
   "username": "Username",
   "usernameHint": "Login username or email address",

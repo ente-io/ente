@@ -133,7 +133,7 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
                 decoration: InputDecoration(
                   hintText: widget.hintText,
                   hintStyle:
-                      textTheme.body.copyWith(color: colorScheme.textMuted),
+                      textTheme.body.copyWith(color: colorScheme.textFaint),
                   filled: true,
                   fillColor: colorScheme.fillFaint,
                   contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),

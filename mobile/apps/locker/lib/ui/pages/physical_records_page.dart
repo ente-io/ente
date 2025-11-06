@@ -24,6 +24,8 @@ class _PhysicalRecordsPageState
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _locationController.addListener(_onFieldChanged);
     _loadExistingData();
   }
 
@@ -44,6 +46,8 @@ class _PhysicalRecordsPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _locationController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _locationController.dispose();
     _notesController.dispose();
@@ -51,7 +55,26 @@ class _PhysicalRecordsPageState
   }
 
   @override
-  String get pageTitle => context.l10n.physicalRecords;
+  String get pageTitle {
+    if (isInEditMode) {
+      if (widget.existingFile != null || currentData != null) {
+        return context.l10n.editLocation;
+      }
+      return context.l10n.physicalRecords;
+    }
+
+    final controllerName = _nameController.text.trim();
+    if (controllerName.isNotEmpty) {
+      return controllerName;
+    }
+
+    final dataName = (currentData?.name ?? '').trim();
+    if (dataName.isNotEmpty) {
+      return dataName;
+    }
+
+    return context.l10n.physicalRecords;
+  }
 
   @override
   String get submitButtonText => context.l10n.saveRecord;
@@ -64,6 +87,12 @@ class _PhysicalRecordsPageState
     return _nameController.text.trim().isNotEmpty &&
         _locationController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled =>
+      super.isSaveEnabled &&
+      _nameController.text.trim().isNotEmpty &&
+      _locationController.text.trim().isNotEmpty;
 
   @override
   PhysicalRecordData createInfoData() {
@@ -80,10 +109,11 @@ class _PhysicalRecordsPageState
   List<Widget> buildFormFields() {
     return [
       FormTextInputWidget(
-        labelText: context.l10n.recordName,
+        labelText: context.l10n.name,
         hintText: context.l10n.recordNameHint,
         controller: _nameController,
         shouldUseTextInputWidget: false,
+        autofocus: true,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterRecordName;
@@ -112,30 +142,35 @@ class _PhysicalRecordsPageState
         shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
-      const SizedBox(height: 24),
     ];
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   List<Widget> buildViewFields() {
-    return [
-      buildViewField(
-        label: context.l10n.recordName,
-        value: _nameController.text,
-      ),
-      const SizedBox(height: 24),
+    final viewFields = <Widget>[
       buildViewField(
         label: context.l10n.recordLocation,
         value: _locationController.text,
       ),
-      if (_notesController.text.isNotEmpty) ...[
+    ];
+
+    if (_notesController.text.isNotEmpty) {
+      viewFields.addAll([
         const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.recordNotes,
           value: _notesController.text,
           maxLines: 3,
         ),
-      ],
-    ];
+      ]);
+    }
+
+    return viewFields;
   }
 }

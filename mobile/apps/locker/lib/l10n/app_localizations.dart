@@ -1090,6 +1090,24 @@ abstract class AppLocalizations {
   /// **'Preserve account credentials.'**
   String get accountCredentialsDescription;
 
+  /// Title shown when editing an existing secret
+  ///
+  /// In en, this message translates to:
+  /// **'Edit secret'**
+  String get editSecret;
+
+  /// Title shown when editing an existing location record
+  ///
+  /// In en, this message translates to:
+  /// **'Edit location'**
+  String get editLocation;
+
+  /// Title shown when editing an existing note
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note'**
+  String get editNote;
+
   /// No description provided for @emergencyContact.
   ///
   /// In en, this message translates to:
@@ -1126,6 +1144,30 @@ abstract class AppLocalizations {
   /// **'Write down important thoughts, instructions, or memories you want to preserve'**
   String get noteContentHint;
 
+  /// No description provided for @unsavedNoteChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get unsavedNoteChangesTitle;
+
+  /// No description provided for @unsavedNoteChangesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes in this note. If you go back now, they will be lost.'**
+  String get unsavedNoteChangesDescription;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardChanges;
+
   /// No description provided for @recordName.
   ///
   /// In en, this message translates to:
@@ -1159,13 +1201,13 @@ abstract class AppLocalizations {
   /// No description provided for @recordNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Any additional information about the item?'**
+  /// **'Any additional information about the item'**
   String get recordNotesHint;
 
   /// No description provided for @credentialName.
   ///
   /// In en, this message translates to:
-  /// **'Account name'**
+  /// **'Item name'**
   String get credentialName;
 
   /// No description provided for @credentialNameHint.

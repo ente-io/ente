@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -32,6 +33,15 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   bool _isLoading = false;
   late InfoPageMode _currentMode;
   late InfoPageMode _initialMode;
+
+  @protected
+  InfoPageMode get currentMode => _currentMode;
+
+  @protected
+  bool get isInViewMode => _currentMode == InfoPageMode.view;
+
+  @protected
+  bool get isInEditMode => _currentMode == InfoPageMode.edit;
 
   // Current data state (can be updated after saving)
   T? _currentData;
@@ -70,6 +80,88 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   List<Widget> buildFormFields();
   List<Widget> buildViewFields();
   bool validateForm();
+
+  bool get showCollectionSelectionTitle => true;
+  double get collectionSpacing => 24;
+
+  @protected
+  bool get isSaveEnabled => !_isLoading;
+
+  @protected
+  Future<bool> onEditModeBackPressed() async {
+    return true;
+  }
+
+  @protected
+  Future<bool> onPopRequested() async {
+    return true;
+  }
+
+  @protected
+  Widget buildAppBarTitle(BuildContext context) {
+    return TitleBarTitleWidget(
+      title: pageTitle,
+    );
+  }
+
+  @protected
+  List<Collection> get availableCollections => _availableCollections;
+
+  @protected
+  Set<int> get selectedCollectionIds => _selectedCollectionIds;
+
+  @protected
+  void toggleCollectionSelection(int collectionId) {
+    _onToggleCollection(collectionId);
+  }
+
+  @protected
+  void updateAvailableCollections(List<Collection> collections) {
+    _onCollectionsUpdated(collections);
+  }
+
+  @protected
+  Widget buildEditModeContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...buildFormFields(),
+            SizedBox(height: collectionSpacing),
+            CollectionSelectionWidget(
+              collections: _availableCollections,
+              selectedCollectionIds: _selectedCollectionIds,
+              onToggleCollection: _onToggleCollection,
+              onCollectionsUpdated: _onCollectionsUpdated,
+              titleWidget:
+                  showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @protected
+  Widget buildViewModeContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: buildViewFields(),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -364,6 +456,27 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     );
   }
 
+  Future<void> _handleBackNavigation() async {
+    if (isInEditMode) {
+      final canLeaveEdit = await onEditModeBackPressed();
+      if (!canLeaveEdit) {
+        return;
+      }
+
+      if (currentData != null) {
+        _toggleMode();
+        return;
+      }
+    }
+
+    final shouldPop = await onPopRequested();
+    if (!shouldPop || !mounted) {
+      return;
+    }
+
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isViewMode = _currentMode == InfoPageMode.view;
@@ -376,11 +489,10 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final shouldInterceptBack = isEditMode && _initialMode == InfoPageMode.view;
 
     return PopScope(
-      canPop: !shouldInterceptBack,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && shouldInterceptBack) {
-          // Switch back to view mode instead of leaving the page
-          _toggleMode();
+        if (!didPop) {
+          _handleBackNavigation();
         }
       },
       child: Scaffold(
@@ -389,19 +501,24 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           surfaceTintColor: Colors.transparent,
           toolbarHeight: 48,
           leadingWidth: 48,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_outlined),
-            onPressed: () {
-              if (shouldInterceptBack) {
-                _toggleMode();
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-            tooltip: shouldInterceptBack
-                ? context.l10n.backToView
-                : context.l10n.back,
-          ),
+          centerTitle: false,
+          titleSpacing: 0,
+          title: buildAppBarTitle(context),
+          leading: isEditMode && currentData != null
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
+                  ),
+                  onPressed: _handleBackNavigation,
+                  tooltip: context.l10n.backToView,
+                )
+              : IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
+                  ),
+                  onPressed: _handleBackNavigation,
+                  tooltip: context.l10n.back,
+                ),
           automaticallyImplyLeading: false,
           actions: [
             if (isViewMode && currentData != null)
@@ -420,38 +537,14 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: TitleBarTitleWidget(
-                    title: pageTitle,
-                  ),
-                ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Fields based on current mode
-                          if (isViewMode)
-                            ...buildViewFields()
-                          else
-                            ...buildFormFields(),
-
-                          // Collection selection only in edit mode
-                          if (isEditMode) ...[
-                            const SizedBox(height: 24),
-                            CollectionSelectionWidget(
-                              collections: _availableCollections,
-                              selectedCollectionIds: _selectedCollectionIds,
-                              onToggleCollection: _onToggleCollection,
-                              onCollectionsUpdated: _onCollectionsUpdated,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (isViewMode) {
+                        return buildViewModeContent(context, constraints);
+                      }
+                      return buildEditModeContent(context, constraints);
+                    },
                   ),
                 ),
 
@@ -462,7 +555,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                     child: SizedBox(
                       width: double.infinity,
                       child: GradientButton(
-                        onTap: _isLoading ? null : _saveRecord,
+                        onTap: isSaveEnabled ? _saveRecord : null,
                         text: _isLoading
                             ? context.l10n.pleaseWait
                             : submitButtonText,

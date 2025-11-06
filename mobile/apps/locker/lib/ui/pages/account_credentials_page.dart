@@ -27,6 +27,9 @@ class _AccountCredentialsPageState
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _usernameController.addListener(_onFieldChanged);
+    _passwordController.addListener(_onFieldChanged);
     _passwordFocusNode.addListener(() {
       setState(() {
         // Password focus state handling if needed
@@ -53,6 +56,9 @@ class _AccountCredentialsPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _usernameController.removeListener(_onFieldChanged);
+    _passwordController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
@@ -62,7 +68,26 @@ class _AccountCredentialsPageState
   }
 
   @override
-  String get pageTitle => context.l10n.accountCredentials;
+  String get pageTitle {
+    if (isInEditMode) {
+      if (widget.existingFile != null || currentData != null) {
+        return context.l10n.editSecret;
+      }
+      return context.l10n.accountCredentials;
+    }
+
+    final controllerName = _nameController.text.trim();
+    if (controllerName.isNotEmpty) {
+      return controllerName;
+    }
+
+    final dataName = (currentData?.name ?? '').trim();
+    if (dataName.isNotEmpty) {
+      return dataName;
+    }
+
+    return context.l10n.accountCredentials;
+  }
 
   @override
   String get submitButtonText => context.l10n.saveRecord;
@@ -76,6 +101,9 @@ class _AccountCredentialsPageState
         _usernameController.text.trim().isNotEmpty &&
         _passwordController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled => super.isSaveEnabled && validateForm();
 
   @override
   AccountCredentialData createInfoData() {
@@ -97,6 +125,7 @@ class _AccountCredentialsPageState
         hintText: context.l10n.credentialNameHint,
         controller: _nameController,
         shouldUseTextInputWidget: false,
+        autofocus: true,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterAccountName;
@@ -124,8 +153,15 @@ class _AccountCredentialsPageState
         controller: _passwordController,
         obscureText: !_passwordVisible,
         shouldUseTextInputWidget: false,
-        suffixIcon: GestureDetector(
-          onTap: () {
+        suffixIcon: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+          iconSize: 20,
+          visualDensity: VisualDensity.compact,
+          icon: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
+          onPressed: () {
             setState(() {
               _passwordVisible = !_passwordVisible;
             });
@@ -149,18 +185,12 @@ class _AccountCredentialsPageState
         shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
-      const SizedBox(height: 24),
     ];
   }
 
   @override
   List<Widget> buildViewFields() {
-    return [
-      buildViewField(
-        label: context.l10n.credentialName,
-        value: _nameController.text,
-      ),
-      const SizedBox(height: 24),
+    final viewFields = <Widget>[
       buildViewField(
         label: context.l10n.username,
         value: _usernameController.text,
@@ -171,14 +201,25 @@ class _AccountCredentialsPageState
         value: _passwordController.text,
         isSecret: true,
       ),
-      if (_notesController.text.isNotEmpty) ...[
+    ];
+
+    if (_notesController.text.isNotEmpty) {
+      viewFields.addAll([
         const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.credentialNotes,
           value: _notesController.text,
           maxLines: 3,
         ),
-      ],
-    ];
+      ]);
+    }
+
+    return viewFields;
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 }

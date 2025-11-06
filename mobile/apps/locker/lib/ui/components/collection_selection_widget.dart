@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dotted_border/dotted_border.dart';
-import 'package:ente_ui/components/title_bar_title_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -102,45 +101,120 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     final textTheme = getEnteTextTheme(context);
     final containsUncategorized = _uncategorizedCollection != null;
 
+    Widget? headerWidget = widget.titleWidget;
+    if (headerWidget == null) {
+      headerWidget = Text(
+        context.l10n.collections,
+        style: textTheme.body,
+      );
+    }
+
+    bool _isHiddenHeader(Widget widget) {
+      if (widget is SizedBox) {
+        final isZeroWidth = widget.width != null && widget.width == 0;
+        final isZeroHeight = widget.height != null && widget.height == 0;
+        final noChild = widget.child == null;
+        if ((isZeroWidth || isZeroHeight) && noChild) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    final bool hasVisibleHeader = !_isHiddenHeader(headerWidget);
+
+    final chipItems = <_ChipItem>[];
+    if (containsUncategorized) {
+      chipItems.add(
+        _ChipItem(
+          widget: _buildUncategorizedChip(
+            name: context.l10n.uncategorized,
+            isSelected: widget.selectedCollectionIds
+                .contains(_uncategorizedCollection?.id ?? -1),
+            onTap: () {
+              if (_uncategorizedCollection != null) {
+                _onCollectionTap(_uncategorizedCollection!.id);
+              }
+            },
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+          weight: context.l10n.uncategorized.length,
+        ),
+      );
+    }
+
+    for (final collection in _availableCollections) {
+      final collectionName = collection.name ?? context.l10n.unnamedCollection;
+      chipItems.add(
+        _ChipItem(
+          widget: _buildCollectionChip(
+            collection: collection,
+            isSelected: widget.selectedCollectionIds.contains(collection.id),
+            onTap: () => _onCollectionTap(collection.id),
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+          ),
+          weight: collectionName.length,
+        ),
+      );
+    }
+
+    final newCollectionChip = _ChipItem(
+      widget: _buildNewCollectionChip(
+        colorScheme: colorScheme,
+        textTheme: textTheme,
+      ),
+      weight: context.l10n.collectionLabel.length,
+    );
+
+    final topRowChips = <Widget>[];
+    final bottomRowChips = <Widget>[];
+    var topWeight = 0;
+    var bottomWeight = newCollectionChip.weight;
+
+    for (final item in chipItems) {
+      if (topWeight <= bottomWeight) {
+        topRowChips.add(item.widget);
+        topWeight += item.weight;
+      } else {
+        bottomRowChips.add(item.widget);
+        bottomWeight += item.weight;
+      }
+    }
+
+    bottomRowChips.add(newCollectionChip.widget);
+
+    List<Widget> _buildChipRow(List<Widget> rowChips) {
+      final children = <Widget>[];
+      for (var i = 0; i < rowChips.length; i++) {
+        if (i != 0) {
+          children.add(const SizedBox(width: 8));
+        }
+        children.add(rowChips[i]);
+      }
+      return children;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widget.titleWidget ??
-            TitleBarTitleWidget(
-              title: context.l10n.addToCollection,
-            ),
-        const SizedBox(height: 24),
-        Wrap(
-          spacing: 8,
-          runSpacing: 12,
-          children: [
-            if (containsUncategorized)
-              _buildUncategorizedChip(
-                name: context.l10n.uncategorized,
-                isSelected: widget.selectedCollectionIds
-                    .contains(_uncategorizedCollection?.id ?? -1),
-                onTap: () {
-                  if (_uncategorizedCollection != null) {
-                    _onCollectionTap(_uncategorizedCollection!.id);
-                  }
-                },
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-              ),
-            for (final collection in _availableCollections)
-              _buildCollectionChip(
-                collection: collection,
-                isSelected:
-                    widget.selectedCollectionIds.contains(collection.id),
-                onTap: () => _onCollectionTap(collection.id),
-                colorScheme: colorScheme,
-                textTheme: textTheme,
-              ),
-            _buildNewCollectionChip(
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-            ),
-          ],
+        if (hasVisibleHeader) ...[
+          headerWidget,
+          const SizedBox(height: 12),
+        ],
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: _buildChipRow(topRowChips)),
+              if (bottomRowChips.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(children: _buildChipRow(bottomRowChips)),
+              ],
+            ],
+          ),
         ),
       ],
     );
@@ -238,7 +312,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
             ),
             const SizedBox(width: 6),
             Text(
-              context.l10n.newCollection,
+              context.l10n.collectionLabel,
               style: textTheme.body.copyWith(
                 color: colorScheme.textMuted,
                 fontWeight: FontWeight.w500,
@@ -251,4 +325,11 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
   }
 
   List<Collection> get availableCollections => _availableCollections;
+}
+
+class _ChipItem {
+  final Widget widget;
+  final int weight;
+
+  const _ChipItem({required this.widget, required this.weight});
 }

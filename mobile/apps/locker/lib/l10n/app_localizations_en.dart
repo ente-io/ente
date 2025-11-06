@@ -575,6 +575,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCredentialsDescription => 'Preserve account credentials.';
 
   @override
+  String get editSecret => 'Edit secret';
+
+  @override
+  String get editLocation => 'Edit location';
+
+  @override
+  String get editNote => 'Edit note';
+
+  @override
   String get emergencyContact => 'Emergency contact';
 
   @override
@@ -595,6 +604,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write down important thoughts, instructions, or memories you want to preserve';
 
   @override
+  String get unsavedNoteChangesTitle => 'Discard changes?';
+
+  @override
+  String get unsavedNoteChangesDescription =>
+      'You have unsaved changes in this note. If you go back now, they will be lost.';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get discardChanges => 'Discard';
+
+  @override
   String get recordName => 'Record name';
 
   @override
@@ -610,10 +632,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordNotes => 'Notes';
 
   @override
-  String get recordNotesHint => 'Any additional information about the item?';
+  String get recordNotesHint => 'Any additional information about the item';
 
   @override
-  String get credentialName => 'Account name';
+  String get credentialName => 'Item name';
 
   @override
   String get credentialNameHint => 'Name of the service or account';
