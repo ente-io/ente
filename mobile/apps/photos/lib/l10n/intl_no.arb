@@ -1734,5 +1734,9 @@
   "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
-  "pastYearsMemories": "Tidligere års minner"
+  "pastYearsMemories": "Tidligere års minner",
+  "cLTitle1": "Hopp til dato",
+  "cLDesc1": "Se bildene rundt et motiv ved å velge \"Hopp til dato\" i info-panelet for filen.",
+  "cLTitle2": "Raskere videoredigerer",
+  "cLDesc2": "Videoredigereren er fornyet for å gjøre redigering av store videoer mye raskere og samtidig gi en bedre brukeropplevelse."
 }

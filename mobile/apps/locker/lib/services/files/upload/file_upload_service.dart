@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
@@ -49,7 +48,6 @@ class FileUploader {
       LinkedHashMap<String, BackupItem>();
   final kSafeBufferForLockExpiry = const Duration(hours: 4).inMicroseconds;
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
-  final _uploadURLs = Queue<UploadURL>();
 
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
 
@@ -177,10 +175,6 @@ class FileUploader {
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     _totalCountInUploadSession = 0;
-  }
-
-  void clearCachedUploadURLs() {
-    _uploadURLs.clear();
   }
 
   void removeFromQueueWhere(
@@ -334,10 +328,18 @@ class FileUploader {
         // otherwise just delete the file for singlepart upload
         await File(encryptedFilePath).delete();
       }
+
+      // Validate source file before encryption
+      final sourceFileSize = await file.length();
+      if (sourceFileSize == 0) {
+        throw Exception('Source file is empty (0 bytes): ${file.path}');
+      }
+      _logger.info('Source file size: $sourceFileSize bytes');
+
       await _checkIfWithinStorageLimit(file);
       final encryptedFile = File(encryptedFilePath);
 
-      final fileAttributes = await CryptoUtil.encryptFile(
+      final fileAttributes = await CryptoUtil.encryptFileWithMD5(
         file.path,
         encryptedFilePath,
         key: key,
@@ -347,7 +349,7 @@ class FileUploader {
       final thumbnailData = base64Decode(blackThumbnailBase64);
       final encryptedThumbnailData = await CryptoUtil.encryptData(
         thumbnailData,
-        fileAttributes.key!,
+        fileAttributes.key,
       );
       if (File(encryptedThumbnailPath).existsSync()) {
         await File(encryptedThumbnailPath).delete();
@@ -357,16 +359,52 @@ class FileUploader {
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
       final encThumbSize = await encryptedThumbnailFile.length();
 
-      final thumbnailUploadURL = await _getUploadURL();
+      // Validate file sizes before upload
+      if (encFileSize == 0) {
+        throw Exception(
+          'Encrypted file size is 0',
+        );
+      }
+      if (encThumbSize == 0) {
+        throw Exception(
+          'Encrypted thumbnail size is 0',
+        );
+      }
+
+      // Calculate MD5 hashes for checksum verification
+      final thumbnailMd5 = await computeMd5(encryptedThumbnailPath);
+      final fileMd5 = fileAttributes.fileMd5;
+
+      // Validate that MD5 was calculated during encryption
+      if (fileMd5 == null || fileMd5.isEmpty) {
+        throw Exception('File MD5 hash is null or empty');
+      }
+
+      _logger.info(
+        'Uploading file: encFileSize=$encFileSize, encThumbSize=$encThumbSize',
+      );
+
+      final thumbnailUploadURL = await _getUploadURL(
+        contentLength: encThumbSize,
+        md5: thumbnailMd5,
+      );
       final thumbnailObjectKey = await _putFile(
         thumbnailUploadURL,
         encryptedThumbnailFile,
         encThumbSize,
+        thumbnailMd5,
       );
 
-      final fileUploadURL = await _getUploadURL();
-      final fileObjectKey =
-          await _putFile(fileUploadURL, encryptedFile, encFileSize);
+      final fileUploadURL = await _getUploadURL(
+        contentLength: encFileSize,
+        md5: fileMd5,
+      );
+      final fileObjectKey = await _putFile(
+        fileUploadURL,
+        encryptedFile,
+        encFileSize,
+        fileMd5,
+      );
 
       final enteFile = EnteFile.fromFile(file);
 
@@ -616,59 +654,38 @@ class FileUploader {
     }
   }
 
-  Future<UploadURL> _getUploadURL() async {
-    if (_uploadURLs.isEmpty) {
-      // the queue is empty, fetch at least for one file to handle force uploads
-      // that are not in the queue. This is to also avoid
-      await fetchUploadURLs(math.max(_queue.length, 1));
-    }
+  // Fetch a fresh upload URL for each file with content length and MD5
+  Future<UploadURL> _getUploadURL({
+    required int contentLength,
+    required String md5,
+  }) async {
     try {
-      return _uploadURLs.removeFirst();
-    } catch (e) {
-      if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
-        _logger.warning("Oops, uploadUrls has no element now, fetching again");
-        return _getUploadURL();
-      } else {
-        rethrow;
-      }
-    }
-  }
-
-  Future<void>? _uploadURLFetchInProgress;
-
-  Future<void> fetchUploadURLs(int fileCount) async {
-    _uploadURLFetchInProgress ??= Future<void>(() async {
-      try {
-        final response = await _enteDio.get(
-          "/files/upload-urls",
-          queryParameters: {
-            "count": math.min(42, fileCount * 2), // m4gic number
-          },
-        );
-        final urls = (response.data["urls"] as List)
-            .map((e) => UploadURL.fromMap(e))
-            .toList();
-        _uploadURLs.addAll(urls);
-      } on DioException catch (e, s) {
-        if (e.response != null) {
-          if (e.response!.statusCode == 402) {
-            final error = NoActiveSubscriptionError();
-            clearQueue(error);
-            throw error;
-          } else if (e.response!.statusCode == 426) {
-            final error = StorageLimitExceededError();
-            clearQueue(error);
-            throw error;
-          } else {
-            _logger.warning("Could not fetch upload URLs", e, s);
-          }
+      final response = await _enteDio.post(
+        "/files/upload-url",
+        data: {
+          "contentLength": contentLength,
+          "contentMD5": md5,
+        },
+      );
+      return UploadURL.fromMap(
+        (response.data as Map).cast<String, dynamic>(),
+      );
+    } on DioException catch (e, s) {
+      if (e.response != null) {
+        if (e.response!.statusCode == 402) {
+          final error = NoActiveSubscriptionError();
+          clearQueue(error);
+          throw error;
+        } else if (e.response!.statusCode == 426) {
+          final error = StorageLimitExceededError();
+          clearQueue(error);
+          throw error;
+        } else {
+          _logger.warning("Could not fetch upload URL", e, s);
         }
-        rethrow;
-      } finally {
-        _uploadURLFetchInProgress = null;
       }
-    });
-    return _uploadURLFetchInProgress;
+      rethrow;
+    }
   }
 
   void _onStorageLimitExceeded() {
@@ -679,7 +696,8 @@ class FileUploader {
   Future<String> _putFile(
     UploadURL uploadURL,
     File file,
-    int fileSize, {
+    int fileSize,
+    String md5, {
     int attempt = 1,
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
@@ -691,6 +709,7 @@ class FileUploader {
         options: Options(
           headers: {
             Headers.contentLengthHeader: fileSize,
+            'Content-MD5': md5,
           },
         ),
       );
@@ -704,11 +723,15 @@ class FileUploader {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload failed for $fileName, retrying");
-        final newUploadURL = await _getUploadURL();
+        final newUploadURL = await _getUploadURL(
+          contentLength: fileSize,
+          md5: md5,
+        );
         return _putFile(
           newUploadURL,
           file,
           fileSize,
+          md5,
           attempt: attempt + 1,
         );
       } else {

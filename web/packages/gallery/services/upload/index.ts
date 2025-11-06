@@ -18,6 +18,10 @@ class UploadState {
      * `true` if the workers should be disabled for uploads.
      */
     shouldDisableCFUploadProxy = false;
+    /**
+     * `true` if uploads should include checksum metadata.
+     */
+    checksumProtectedUploadsEnabled = false;
 }
 
 /** State shared by the functions in this module. See {@link UploadState}. */
@@ -483,6 +487,19 @@ export const updateShouldDisableCFUploadProxy = async (
 ) => {
     _state.shouldDisableCFUploadProxy =
         savedPreference || (await computeShouldDisableCFUploadProxy());
+};
+
+/**
+ * Return `true` if uploads should include checksum metadata.
+ */
+export const areChecksumProtectedUploadsEnabled = () =>
+    _state.checksumProtectedUploadsEnabled;
+
+/**
+ * Update the in-memory value controlling checksum protected uploads.
+ */
+export const updateChecksumProtectedUploadsEnabled = (enabled: boolean) => {
+    _state.checksumProtectedUploadsEnabled = enabled;
 };
 
 const computeShouldDisableCFUploadProxy = async () => {

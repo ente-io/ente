@@ -24,6 +24,7 @@ const MaxSendCount = 10
 var AllowedProviders = map[string]bool{
 	"Kagi": true,
 	"Tuta": true,
+	"Notesnook": true,
 	"Test": true,
 }
 
@@ -148,6 +149,9 @@ func (c *Controller) sendCouponEmail(ctx context.Context, user ente.User, coupon
 	case "Tuta":
 		subject = "Ente Friends - Tuta discount code"
 		templateName = "discount_coupon_tuta.html"
+	case "Notesnook":
+		subject = "Ente Friends - Notesnook discount code"
+		templateName = "discount_coupon_notesnook.html"
 	case "Test":
 		subject = "Ente Friends - Test trial code"
 		templateName = "discount_coupon_test.html"
