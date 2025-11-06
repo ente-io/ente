@@ -348,7 +348,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     width: 400,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 0),
                       ),
                       onPressed: () async {
                         final digits =
