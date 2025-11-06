@@ -843,17 +843,7 @@ class CollectionsService {
       CollectionsService.instance.getCollectionKey(c.id),
     );
 
-    // Build the final URL
-    String finalUrl = publicUrl.toString();
-
-    // Handle IDN domains - if the host was percent-encoded by Uri.replace,
-    // decode it for user-friendly display
-    if (customDomain.isNotEmpty && publicUrl.host.contains('%')) {
-      final decodedHost = Uri.decodeComponent(publicUrl.host);
-      finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
-    }
-
-    return "$finalUrl#$collectionKey";
+    return "${publicUrl.toString()}#$collectionKey";
   }
 
   String getEmbedHtml(Collection c) {
@@ -878,17 +868,7 @@ class CollectionsService {
       CollectionsService.instance.getCollectionKey(c.id),
     );
 
-    // Build the final URL
-    String finalUrl = publicUrl.toString();
-
-    // Handle IDN domains - if the host was percent-encoded by Uri.replace,
-    // decode it for user-friendly display
-    if (embedUrl.isNotEmpty && publicUrl.host.contains('%')) {
-      final decodedHost = Uri.decodeComponent(publicUrl.host);
-      finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
-    }
-
-    final String embedHtmlUrl = "$finalUrl#$collectionKey";
+    final String embedHtmlUrl = "${publicUrl.toString()}#$collectionKey";
     return '<iframe src="$embedHtmlUrl" width="800" height="600" frameborder="0" allowfullscreen></iframe>';
   }
 
