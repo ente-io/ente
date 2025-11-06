@@ -181,10 +181,11 @@ class CollectionActions {
     Collection collection, {
     VoidCallback? onSuccess,
   }) async {
+    final l10n = context.l10n;
     if (!collection.type.canDelete) {
       SnackBarUtils.showWarningSnackBar(
         context,
-        context.l10n.collectionCannotBeDeleted,
+        l10n.collectionCannotBeDeleted,
       );
       return;
     }
@@ -193,9 +194,9 @@ class CollectionActions {
 
     final result = await showDeleteConfirmationDialog(
       context,
-      title: context.l10n.areYouSure,
-      body: context.l10n.deleteCollectionDialogBody(collectionName),
-      deleteButtonLabel: context.l10n.yesDeleteCollections(1),
+      title: l10n.areYouSure,
+      body: l10n.deleteCollectionDialogBody(collectionName),
+      deleteButtonLabel: l10n.yesDeleteCollections(1),
       assetPath: "assets/collection_delete_icon.png",
     );
 
@@ -203,8 +204,7 @@ class CollectionActions {
       return;
     }
 
-    final progressDialog =
-        createProgressDialog(context, context.l10n.pleaseWait);
+    final progressDialog = createProgressDialog(context, l10n.pleaseWait);
     await progressDialog.show();
 
     try {
@@ -213,7 +213,7 @@ class CollectionActions {
 
       SnackBarUtils.showInfoSnackBar(
         context,
-        context.l10n.collectionDeletedSuccessfully,
+        l10n.collectionDeletedSuccessfully,
       );
 
       // Call success callback if provided
@@ -223,7 +223,7 @@ class CollectionActions {
 
       SnackBarUtils.showWarningSnackBar(
         context,
-        context.l10n.failedToDeleteCollection(error.toString()),
+        l10n.failedToDeleteCollection(error.toString()),
       );
     }
   }

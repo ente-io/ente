@@ -91,6 +91,11 @@ class TrashService {
           "sinceTime": sinceTime,
         },
       );
+      final List<Collection> allCollections =
+          await CollectionService.instance.getCollections();
+      final Map<int, Collection> collectionMap = {
+        for (final collection in allCollections) collection.id: collection,
+      };
       int latestUpdatedAtTime = 0;
       final trashedFiles = <TrashFile>[];
       final deletedUploadIDs = <int>[];
@@ -121,12 +126,7 @@ class TrashService {
             item["file"]["thumbnail"]["decryptionHeader"];
         trash.metadataDecryptionHeader =
             item["file"]["metadata"]["decryptionHeader"];
-        // TODO: Refactor
-        final collections = await CollectionService.instance.getCollections();
-        final Collection? collection =
-            collections.where((c) => c.id == trash.collectionID).isNotEmpty
-                ? collections.firstWhere((c) => c.id == trash.collectionID)
-                : null;
+        final Collection? collection = collectionMap[trash.collectionID];
         if (collection == null) {
           continue;
         }

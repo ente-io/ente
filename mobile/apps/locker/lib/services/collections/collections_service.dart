@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import "dart:math";
 import 'dart:typed_data';
 
 import "package:ente_accounts/services/user_service.dart";
@@ -78,8 +78,6 @@ class CollectionService {
     final List<Future> fileFutures = [];
     for (final collection in updatedCollections) {
       if (collection.isDeleted) {
-        await _db.deleteCollection(collection);
-        _collectionIDToCollections.remove(collection.id);
         continue;
       }
       final syncTime = _db.getCollectionSyncTime(collection.id);
@@ -365,10 +363,39 @@ class CollectionService {
 
   Future<void> trashCollection(Collection collection) async {
     try {
-      await _apiClient.trashCollection(collection);
+      final files = await _db.getFilesInCollection(collection);
+      var keepFiles = false;
+
+      if (files.isNotEmpty) {
+        keepFiles = true;
+        final requests = files
+            .where((file) => file.uploadedFileID != null)
+            .map(
+              (file) => TrashRequest(
+                file.uploadedFileID!,
+                collection.id,
+              ),
+            )
+            .toList();
+
+        if (requests.isNotEmpty) {
+          await _apiClient.trash(requests);
+        }
+
+        await _db.deleteFilesFromCollection(collection, files);
+        Bus.instance.fire(CollectionsUpdatedEvent('collection_files_trashed'));
+        await TrashService.instance.syncTrash();
+      }
+
+      await _apiClient.trashCollection(
+        collection,
+        keepFiles: keepFiles,
+      );
+
       _logger.info("Trashed collection: ${collection.name}");
       // Let sync update the local state
       await sync();
+      await TrashService.instance.syncTrash();
     } catch (e) {
       _logger.severe("Failed to trash collection: $e");
       rethrow;

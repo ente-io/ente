@@ -211,10 +211,15 @@ class CollectionApiClient {
     );
   }
 
-  Future<void> trashCollection(Collection collection) async {
+  Future<void> trashCollection(
+    Collection collection, {
+    bool keepFiles = false,
+  }) async {
     try {
       await _enteDio.delete(
-        "/collections/v3/${collection.id}?keepFiles=False&collectionID=${collection.id}",
+        "/collections/v3/${collection.id}"
+        "?keepFiles=${keepFiles ? "True" : "False"}"
+        "&collectionID=${collection.id}",
       );
     } catch (e) {
       _logger.severe('failed to trash collection', e);
