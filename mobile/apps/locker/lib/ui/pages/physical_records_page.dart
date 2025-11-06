@@ -70,7 +70,8 @@ class _PhysicalRecordsPageState
   }
 
   @override
-  bool get isSaveEnabled => super.isSaveEnabled &&
+  bool get isSaveEnabled =>
+      super.isSaveEnabled &&
       _nameController.text.trim().isNotEmpty &&
       _locationController.text.trim().isNotEmpty;
 
