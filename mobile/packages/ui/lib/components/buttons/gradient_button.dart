@@ -25,7 +25,14 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget textWidget = Text(text, style: _textStyle);
+    final colorScheme = getEnteColorScheme(context);
+    final bool isEnabled = onTap != null;
+    final Color backgroundColor =
+        isEnabled ? colorScheme.primary700 : colorScheme.fillFaint;
+    final TextStyle effectiveTextStyle =
+        _textStyle.copyWith(color: isEnabled ? Colors.white : colorScheme.textMuted);
+
+    final Widget textWidget = Text(text, style: effectiveTextStyle);
 
     final Widget content = (hugeIcon != null)
         ? Row(
@@ -43,9 +50,11 @@ class GradientButton extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Material(
-        color: getEnteColorScheme(context).primary700,
+        color: backgroundColor,
         child: InkWell(
           onTap: onTap,
+          splashColor: isEnabled ? null : Colors.transparent,
+          highlightColor: isEnabled ? null : Colors.transparent,
           child: SizedBox(
             height: 56,
             child: Center(child: content),

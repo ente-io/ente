@@ -23,6 +23,7 @@ class _PersonalNotePageState
   @override
   void initState() {
     super.initState();
+    _contentController.addListener(_onContentChanged);
     _loadExistingData();
   }
 
@@ -42,6 +43,7 @@ class _PersonalNotePageState
 
   @override
   void dispose() {
+    _contentController.removeListener(_onContentChanged);
     _nameController.dispose();
     _contentController.dispose();
     super.dispose();
@@ -58,9 +60,11 @@ class _PersonalNotePageState
 
   @override
   bool validateForm() {
-    return _nameController.text.trim().isNotEmpty &&
-        _contentController.text.trim().isNotEmpty;
+    return _contentController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled => super.isSaveEnabled && validateForm();
 
   @override
   PersonalNoteData createInfoData() {
@@ -78,12 +82,7 @@ class _PersonalNotePageState
         hintText: context.l10n.noteNameHint,
         controller: _nameController,
         shouldUseTextInputWidget: false,
-        validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return context.l10n.pleaseEnterNoteName;
-          }
-          return null;
-        },
+        validator: (_) => null,
       ),
       const SizedBox(height: 24),
       FormTextInputWidget(
@@ -116,5 +115,11 @@ class _PersonalNotePageState
         maxLines: 5,
       ),
     ];
+  }
+
+  void _onContentChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 }

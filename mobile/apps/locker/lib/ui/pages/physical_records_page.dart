@@ -24,6 +24,8 @@ class _PhysicalRecordsPageState
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _locationController.addListener(_onFieldChanged);
     _loadExistingData();
   }
 
@@ -44,6 +46,8 @@ class _PhysicalRecordsPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _locationController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _locationController.dispose();
     _notesController.dispose();
@@ -64,6 +68,11 @@ class _PhysicalRecordsPageState
     return _nameController.text.trim().isNotEmpty &&
         _locationController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled => super.isSaveEnabled &&
+      _nameController.text.trim().isNotEmpty &&
+      _locationController.text.trim().isNotEmpty;
 
   @override
   PhysicalRecordData createInfoData() {
@@ -113,6 +122,12 @@ class _PhysicalRecordsPageState
         maxLines: 3,
       ),
     ];
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override

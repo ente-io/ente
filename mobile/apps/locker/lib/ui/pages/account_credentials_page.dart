@@ -27,6 +27,9 @@ class _AccountCredentialsPageState
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onFieldChanged);
+    _usernameController.addListener(_onFieldChanged);
+    _passwordController.addListener(_onFieldChanged);
     _passwordFocusNode.addListener(() {
       setState(() {
         // Password focus state handling if needed
@@ -53,6 +56,9 @@ class _AccountCredentialsPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _usernameController.removeListener(_onFieldChanged);
+    _passwordController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
@@ -76,6 +82,9 @@ class _AccountCredentialsPageState
         _usernameController.text.trim().isNotEmpty &&
         _passwordController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled => super.isSaveEnabled && validateForm();
 
   @override
   AccountCredentialData createInfoData() {
@@ -183,5 +192,11 @@ class _AccountCredentialsPageState
         ),
       ],
     ];
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 }

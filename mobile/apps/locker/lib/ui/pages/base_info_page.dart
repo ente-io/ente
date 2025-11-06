@@ -1,6 +1,7 @@
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -70,6 +71,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   bool validateForm();
 
   bool get showCollectionSelectionTitle => true;
+
+  @protected
+  bool get isSaveEnabled => !_isLoading;
 
   @override
   void initState() {
@@ -446,7 +450,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                     child: SizedBox(
                       width: double.infinity,
                       child: GradientButton(
-                        onTap: _isLoading ? null : _saveRecord,
+                        onTap: isSaveEnabled ? _saveRecord : null,
                         text: _isLoading
                             ? context.l10n.pleaseWait
                             : submitButtonText,
