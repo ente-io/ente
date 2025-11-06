@@ -125,7 +125,7 @@ class CollectionService {
   }) async {
     try {
       final collection = await _apiClient.create(name, type);
-      _logger.info("Created collection: ${collection.name}");
+      _logger.info("Created collection: ${collection.id}");
 
       // Cache in memory
       _collectionIDToCollections[collection.id] = collection;
@@ -196,7 +196,7 @@ class CollectionService {
       return files;
     } catch (e) {
       _logger.severe(
-        "Failed to fetch files for collection ${collection.name}: $e",
+        "Failed to fetch files for collection ${collection.id}: $e",
       );
       rethrow;
     }
@@ -239,7 +239,7 @@ class CollectionService {
   }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
-      _logger.info("Added file ${file.title} to collection ${collection.name}");
+      _logger.info("Added file ${file.title} to collection ${collection.id}");
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -284,7 +284,7 @@ class CollectionService {
         collection,
         newName,
       );
-      _logger.info("Renamed collection ${collection.name} to $newName");
+      _logger.info("Renamed collection ${collection.id} to $newName");
       // Let sync update the local state
       await sync();
     } catch (e, s) {
@@ -366,7 +366,7 @@ class CollectionService {
   Future<void> trashCollection(Collection collection) async {
     try {
       await _apiClient.trashCollection(collection);
-      _logger.info("Trashed collection: ${collection.name}");
+      _logger.info("Trashed collection: ${collection.id}");
       // Let sync update the local state
       await sync();
     } catch (e) {
