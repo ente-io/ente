@@ -123,6 +123,9 @@ class _LoginPageState extends State<LoginPage> {
       );
     } on DioException catch (e, s) {
       await dialog.hide();
+      final enteErrCode = e.response?.data is Map<String, dynamic>
+          ? e.response?.data["code"]
+          : null;
       if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('Server reject, failed verify SRP login', e, s);
         await showErrorDialog(
@@ -139,6 +142,13 @@ class _LoginPageState extends State<LoginPage> {
             context,
             context.l10n.noInternetConnection,
             context.l10n.checkInternetConnection,
+          );
+        } else if (enteErrCode != null &&
+            enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+          await showErrorDialog(
+            context,
+            context.l10n.oops,
+            'Sorry, Locker access is available only to paid customers of Ente Photos right now.',
           );
         } else {
           await showErrorDialog(

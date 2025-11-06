@@ -1817,6 +1817,10 @@
       }
     }
   },
+  "cLTitle1": "Pular para a data",
+  "cLDesc1": "Veja as fotos ao redor de qualquer imagem selecionando a opção Pular para a data no painel de informações do arquivo.",
+  "cLTitle2": "Editor de vídeo mais rápido",
+  "cLDesc2": "Reformulamos o editor de vídeo para acelerar bastante a edição de vídeos maiores e melhorar a experiência de uso.",
   "closeBy": "Parecida",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

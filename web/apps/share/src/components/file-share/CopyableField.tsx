@@ -4,7 +4,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import React, { useState } from "react";
 
 interface CopyableFieldProps {
-    label: string;
+    label?: string;
     value: string;
     onCopy: (value: string) => void;
     multiline?: boolean;
@@ -30,18 +30,20 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
 
     return (
         <Box>
-            <Typography
-                variant="h6"
-                sx={{
-                    fontWeight: 500,
-                    fontSize: "16px",
-                    color: "#000000",
-                    mb: 1,
-                    mt: 3,
-                }}
-            >
-                {label}
-            </Typography>
+            {label && (
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 500,
+                        fontSize: "16px",
+                        color: "#000000",
+                        mb: 1,
+                        mt: 3,
+                    }}
+                >
+                    {label}
+                </Typography>
+            )}
             <Box sx={{ position: "relative" }}>
                 <Box
                     sx={{

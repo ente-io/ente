@@ -12,13 +12,17 @@ class LinksClient {
 
   Future<void> init() async {}
 
-  Future<ShareableLink> getOrCreateLink(int fileID) async {
+  Future<ShareableLink> getOrCreateLink(
+    int fileID, {
+    Map<String, dynamic>? metadata,
+  }) async {
     try {
       final response = await _enteDio.post(
         '/files/share-url',
         data: {
           'fileID': fileID,
           'app': 'locker',
+          if (metadata != null) ...metadata,
         },
       );
       return ShareableLink.fromJson(response.data as Map<String, dynamic>);

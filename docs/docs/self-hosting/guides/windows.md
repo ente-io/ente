@@ -177,6 +177,7 @@ services:
       - 3000:3000  # Photos
       - 3002:3002  # Albums
       - 3004:3004  # Cast
+      - 3005:3005  # Share
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
       # ENTE_API_ORIGIN: http://192.168.1.42:8080

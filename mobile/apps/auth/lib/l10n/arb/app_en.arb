@@ -10,7 +10,8 @@
   "onBoardingGetStarted": "Get Started",
   "setupFirstAccount": "Setup your first account",
   "importScanQrCode": "Scan a QR Code",
-  "qrCode": "QR Code",
+  "qrCode": "QR code",
+  "qr": "QR",
   "importEnterSetupKey": "Enter a setup key",
   "importAccountPageTitle": "Enter account details",
   "secretCanNotBeEmpty": "Secret can not be empty",
@@ -139,6 +140,7 @@
   "existingUser": "Existing User",
   "newUser": "New to Ente",
   "delete": "Delete",
+  "addTag": "Add tag",
   "enterYourPasswordHint": "Enter your password",
   "forgotPassword": "Forgot password",
   "oops": "Oops",
@@ -301,6 +303,7 @@
   "checking": "Checking...",
   "youAreOnTheLatestVersion": "You are on the latest version",
   "warning": "Warning",
+  "note": "Note",
   "exportWarningDesc": "The exported file contains sensitive information. Please store this safely.",
   "iUnderStand": "I understand",
   "@iUnderStand": {
@@ -369,7 +372,7 @@
   "useOffline": "Use without backups",
   "signInToBackup": "Sign in to backup your codes",
   "singIn": "Sign in",
-  "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
+  "sigInBackupReminder": "Ente will automatically backup codes after sign-in.\n\nWe still recommend exporting codes as an extra backup.",
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
   "compactMode": "Compact mode",
@@ -547,5 +550,42 @@
   "saveAction":"Save",
   "saveBackup":"Save backup",
   "changeLocation": "Change location",
-  "changeCurrentLocation": "Change current location"
+  "changeCurrentLocation": "Change current location",
+  "done": "Done",
+  "addNew": "Add new",
+  "selected": "selected",
+  "moveMultipleToTrashMessage": "Are you sure you want to move {count} item(s) to the trash?",
+  "nSelected": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1{Pinned 1 item} other{Pinned {count} items}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{Unpinned 1 item} other{Unpinned {count} items}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

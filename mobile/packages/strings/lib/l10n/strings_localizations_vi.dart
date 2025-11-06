@@ -192,6 +192,10 @@ class StringsLocalizationsVi extends StringsLocalizations {
   String get noDeleteAccountAction => 'Không, xóa tài khoản';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'Vui lòng xác thực để bắt đầu xóa tài khoản';
 
