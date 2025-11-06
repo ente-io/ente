@@ -69,6 +69,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   List<Widget> buildViewFields();
   bool validateForm();
 
+  bool get showCollectionSelectionTitle => true;
+
   @override
   void initState() {
     super.initState();
@@ -367,6 +369,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           surfaceTintColor: Colors.transparent,
           toolbarHeight: 48,
           leadingWidth: 48,
+          centerTitle: false,
+          titleSpacing: 0,
+          title: TitleBarTitleWidget(
+            title: pageTitle,
+          ),
           leading: isEditMode && currentData != null
               ? IconButton(
                   icon: const Icon(
@@ -400,12 +407,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: TitleBarTitleWidget(
-                    title: pageTitle,
-                  ),
-                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
@@ -427,6 +428,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                               selectedCollectionIds: _selectedCollectionIds,
                               onToggleCollection: _onToggleCollection,
                               onCollectionsUpdated: _onCollectionsUpdated,
+                              titleWidget: showCollectionSelectionTitle
+                                  ? null
+                                  : const SizedBox.shrink(),
                             ),
                           ],
                         ],

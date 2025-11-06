@@ -613,7 +613,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordNotesHint => 'Any additional information about the item?';
 
   @override
-  String get credentialName => 'Account name';
+  String get credentialName => 'Item name';
 
   @override
   String get credentialNameHint => 'Name of the service or account';

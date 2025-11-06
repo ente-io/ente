@@ -374,7 +374,7 @@
   "recordLocationHint": "Where can this item be found?",
   "recordNotes": "Notes",
   "recordNotesHint": "Any additional information about the item?",
-  "credentialName": "Account name",
+  "credentialName": "Item name",
   "credentialNameHint": "Name of the service or account",
   "username": "Username",
   "usernameHint": "Login username or email address",

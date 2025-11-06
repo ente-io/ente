@@ -1165,7 +1165,7 @@ abstract class AppLocalizations {
   /// No description provided for @credentialName.
   ///
   /// In en, this message translates to:
-  /// **'Account name'**
+  /// **'Item name'**
   String get credentialName;
 
   /// No description provided for @credentialNameHint.

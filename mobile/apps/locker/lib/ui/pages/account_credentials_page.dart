@@ -125,6 +125,10 @@ class _AccountCredentialsPageState
         obscureText: !_passwordVisible,
         shouldUseTextInputWidget: false,
         suffixIcon: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minHeight: 0, minWidth: 0),
+          iconSize: 20,
+          visualDensity: VisualDensity.compact,
           icon: Icon(
             _passwordVisible ? Icons.visibility : Icons.visibility_off,
           ),
@@ -149,7 +153,6 @@ class _AccountCredentialsPageState
         shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
-      const SizedBox(height: 24),
     ];
   }
 
