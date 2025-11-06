@@ -206,6 +206,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               child: AlbumRowItemWidget(
                                 collections.incoming[index],
                                 sideOfThumbnail,
+                                key: ValueKey(
+                                  'incoming_${collections.incoming[index].id}',
+                                ),
                                 tag: "incoming",
                                 showFileCount: true,
                               ),
@@ -262,6 +265,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               child: AlbumRowItemWidget(
                                 collections.outgoing[index],
                                 sideOfThumbnail,
+                                key: ValueKey(
+                                  'outgoing_${collections.outgoing[index].id}',
+                                ),
                                 tag: "outgoing",
                                 showFileCount: true,
                               ),
