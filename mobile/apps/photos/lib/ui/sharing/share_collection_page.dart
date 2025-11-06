@@ -6,7 +6,9 @@ import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -64,6 +66,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees;
     final bool hasUrl = widget.collection.hasLink;
+    final bool adminRoleEnabled = flagService.enableAdminRole;
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
@@ -80,23 +83,56 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       ),
     );
 
+    if (adminRoleEnabled) {
+      children.add(
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: 'Add admin',
+            makeTextBold: true,
+          ),
+          leadingIcon: Icons.add,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          isTopBorderRadiusRemoved: _sharees.isNotEmpty,
+          onTap: () async {
+            routeToPage(
+              context,
+              AddParticipantPage(
+                [widget.collection],
+                const [ActionTypesToShow.addAdmin],
+              ),
+            ).then(
+              (value) => {
+                if (mounted) {setState(() => {})},
+              },
+            );
+          },
+        ),
+      );
+      children.add(
+        DividerWidget(
+          dividerType: DividerType.menu,
+          bgColor: getEnteColorScheme(context).fillFaint,
+        ),
+      );
+    }
     children.add(
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).addViewer,
+          title: AppLocalizations.of(context).addCollaborator,
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
-        isTopBorderRadiusRemoved: _sharees.isNotEmpty,
-        isBottomBorderRadiusRemoved: true,
+        isTopBorderRadiusRemoved:
+            adminRoleEnabled ? true : _sharees.isNotEmpty,
+        isBottomBorderRadiusRemoved: false,
         onTap: () async {
           // ignore: unawaited_futures
           routeToPage(
             context,
             AddParticipantPage(
               [widget.collection],
-              const [ActionTypesToShow.addViewer],
+              const [ActionTypesToShow.addCollaborator],
             ),
           ).then(
             (value) => {
@@ -115,19 +151,19 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     children.add(
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).addCollaborator,
+          title: AppLocalizations.of(context).addViewer,
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
         isTopBorderRadiusRemoved: true,
+        isBottomBorderRadiusRemoved: true,
         onTap: () async {
-          // ignore: unawaited_futures
           routeToPage(
             context,
             AddParticipantPage(
               [widget.collection],
-              const [ActionTypesToShow.addCollaborator],
+              const [ActionTypesToShow.addViewer],
             ),
           ).then(
             (value) => {

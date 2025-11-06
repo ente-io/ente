@@ -386,6 +386,7 @@ class CollectionsService {
     }
     if (includedShared || includeCollab) {
       allowedRoles.add(CollectionParticipantRole.collaborator);
+      allowedRoles.add(CollectionParticipantRole.admin);
     }
     final int userID = _config.getUserID()!;
     return _collectionIDToCollections.values
