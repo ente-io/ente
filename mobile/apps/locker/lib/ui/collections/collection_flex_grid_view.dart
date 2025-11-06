@@ -7,7 +7,6 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
 
@@ -64,7 +63,7 @@ class _CollectionFlexGridViewWidgetState
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.45,
+          childAspectRatio: 2.4,
         ),
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {
@@ -79,19 +78,14 @@ class _CollectionFlexGridViewWidgetState
                 borderRadius: BorderRadius.circular(20),
                 color: colorScheme.backdropBase,
               ),
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: colorScheme.backgroundElevated,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.all(8.0),
+                    height: 32,
+                    width: 32,
+                    padding: const EdgeInsets.all(6),
                     child: collection.type == CollectionType.favorites
                         ? HugeIcon(
                             icon: HugeIcons.strokeRoundedStar,
@@ -102,27 +96,14 @@ class _CollectionFlexGridViewWidgetState
                             color: colorScheme.textBase,
                           ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    collectionName,
-                    style: textTheme.bodyBold,
-                    textAlign: TextAlign.left,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                  const SizedBox(height: 4),
-                  FutureBuilder<int>(
-                    future: CollectionService.instance.getFileCount(collection),
-                    builder: (context, snapshot) {
-                      final fileCount = snapshot.data ?? 0;
-                      return Text(
-                        context.l10n.items(fileCount),
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
-                        textAlign: TextAlign.left,
-                      );
-                    },
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      collectionName,
+                      style: textTheme.bodyBold,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
