@@ -646,10 +646,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(onTap: addFile),
+          padding: EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(),
         ),
       );
     }
@@ -702,9 +702,7 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   Widget _buildRecentsSection() {
     if (_recentFiles.isEmpty) {
-      return HomeEmptyStateWidget(
-        onTap: addFile,
-      );
+      return const HomeEmptyStateWidget();
     }
     return RecentsSectionWidget(
       collections: _filterOutUncategorized(_collections),

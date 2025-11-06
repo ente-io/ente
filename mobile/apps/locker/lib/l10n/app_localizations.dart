@@ -484,6 +484,30 @@ abstract class AppLocalizations {
   /// **'Upload your first document to get started'**
   String get uploadYourFirstDocument;
 
+  /// No description provided for @collectionEmptyStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to see here'**
+  String get collectionEmptyStateTitle;
+
+  /// No description provided for @collectionEmptyStateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items to this collection to see them here'**
+  String get collectionEmptyStateSubtitle;
+
+  /// No description provided for @homeLockerEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Locker is empty'**
+  String get homeLockerEmptyTitle;
+
+  /// No description provided for @homeLockerEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the + button to get started'**
+  String get homeLockerEmptySubtitle;
+
   /// No description provided for @uploadDocument.
   ///
   /// In en, this message translates to:

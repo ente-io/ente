@@ -415,12 +415,11 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
             child: _displayedFiles.isEmpty
-                ? const Center(
+                ? Center(
                     child: EmptyStateWidget(
                       assetPath: 'assets/empty_state.png',
-                      title: "Nothing to see here",
-                      subtitle:
-                          "Upload files to this collection to see them here",
+                      title: context.l10n.collectionEmptyStateTitle,
+                      subtitle: context.l10n.collectionEmptyStateSubtitle,
                       showBorder: false,
                     ),
                   )

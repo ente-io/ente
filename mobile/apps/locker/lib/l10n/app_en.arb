@@ -212,6 +212,10 @@
   "createCollection": "Create collection",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
+  "collectionEmptyStateTitle": "Nothing to see here",
+  "collectionEmptyStateSubtitle": "Add items to this collection to see them here",
+  "homeLockerEmptyTitle": "Your Locker is empty",
+  "homeLockerEmptySubtitle": "Click the + button to get started",
   "uploadDocument": "Upload document",
   "items": "{count} items",
   "@items": {
