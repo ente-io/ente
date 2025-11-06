@@ -53,7 +53,7 @@ incorrect time when certain privacy settings are enabled.
 
 ### Why may TOTP verification fail with Google Workspace? {#google-workspace-totp-verification}
 
-Google Workspace doesn't explicitly block Ente Auth, but its implementation of TOTP is more restrictive and can sometimes be incompatible with third-party authenticators. While Ente Auth follows the open TOTP standard, Google's system occasionally expects additional metadata or a specific app ID, which can cause verification to fail. 
+Google Workspace doesn't explicitly block Ente Auth, but its implementation of TOTP is more restrictive and can sometimes be incompatible with third-party authenticators. While Ente Auth follows the open TOTP standard, Google's system occasionally expects additional metadata or a specific app ID, which can cause verification to fail.
 
 That said, many users are able to use Ente Auth with Google Workspace without issues, so this behavior can vary.
 
@@ -67,6 +67,15 @@ You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
 
 No, Ente Auth does not require an account. You can choose to use the app without
 backups if you prefer.
+
+### Will I lose my offline codes if I create an account later?
+
+No. When you sign in after using Ente Auth offline, the desktop app migrates any
+remaining offline codes into the newly created account so you keep them.
+
+> [!NOTE]
+>
+> The app will still recommend you to export your codes first before starting the sign in, so you have your own copy in case something unexpected happens during the sign-in.
 
 ### Can I use Ente Auth on multiple devices and sync them?
 

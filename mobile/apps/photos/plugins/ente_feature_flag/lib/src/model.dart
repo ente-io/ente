@@ -12,6 +12,7 @@ class RemoteFlags {
   final bool internalUser;
   final bool betaUser;
   final bool enableMobMultiPart;
+  final int serverApiFlag;
   final String castUrl;
   final String embedUrl;
   final String customDomain;
@@ -26,6 +27,7 @@ class RemoteFlags {
     required this.internalUser,
     required this.betaUser,
     required this.enableMobMultiPart,
+    required this.serverApiFlag,
     required this.castUrl,
     required this.embedUrl,
     required this.customDomain,
@@ -42,6 +44,7 @@ class RemoteFlags {
     bool? internalUser,
     bool? betaUser,
     bool? enableMobMultiPart,
+    int? serverApiFlag,
     String? castUrl,
     String? customDomain,
     String? customDomainCNAME,
@@ -56,6 +59,7 @@ class RemoteFlags {
       internalUser: internalUser ?? this.internalUser,
       betaUser: betaUser ?? this.betaUser,
       enableMobMultiPart: enableMobMultiPart ?? this.enableMobMultiPart,
+      serverApiFlag: serverApiFlag ?? this.serverApiFlag,
       castUrl: castUrl ?? this.castUrl,
       customDomain: customDomain ?? this.customDomain,
       customDomainCNAME: customDomainCNAME ?? this.customDomainCNAME,
@@ -72,6 +76,7 @@ class RemoteFlags {
     internalUser: kDebugMode,
     betaUser: kDebugMode,
     enableMobMultiPart: false,
+    serverApiFlag: 0,
     castUrl: "https://cast.ente.io",
     customDomain: "",
     embedUrl: "https://embed.ente.io",
@@ -89,6 +94,7 @@ class RemoteFlags {
       'internalUser': internalUser,
       'betaUser': betaUser,
       'enableMobMultiPart': enableMobMultiPart,
+      'serverApiFlag': serverApiFlag,
       'castUrl': castUrl,
       'customDomain': customDomain,
       'customDomainCNAME': customDomainCNAME,
@@ -109,6 +115,7 @@ class RemoteFlags {
       betaUser: map['betaUser'] ?? defaultValue.betaUser,
       enableMobMultiPart:
           map['enableMobMultiPart'] ?? defaultValue.enableMobMultiPart,
+      serverApiFlag: _parseServerApiFlag(map) ?? defaultValue.serverApiFlag,
       castUrl: map['castUrl'] ?? defaultValue.castUrl,
       customDomain: map['customDomain'] ?? defaultValue.customDomain,
       customDomainCNAME:
@@ -116,4 +123,12 @@ class RemoteFlags {
       embedUrl: map['embedUrl'] ?? defaultValue.embedUrl,
     );
   }
+}
+
+int? _parseServerApiFlag(Map<String, dynamic> map) {
+  final dynamic raw = map['serverApiFlag'];
+  if (raw is num) {
+    return raw.toInt();
+  }
+  return null;
 }

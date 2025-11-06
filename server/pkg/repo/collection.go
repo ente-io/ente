@@ -387,7 +387,7 @@ func (repo *CollectionRepository) Share(
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if role != ente.VIEWER && role != ente.COLLABORATOR {
+	if role != ente.VIEWER && role != ente.COLLABORATOR && role != ente.ADMIN {
 		err = fmt.Errorf("invalid role %s", string(role))
 		return stacktrace.Propagate(err, "")
 	}

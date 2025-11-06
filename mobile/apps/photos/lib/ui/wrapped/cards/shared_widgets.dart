@@ -5,9 +5,13 @@ Widget buildWrappedCardTitle(
   TextStyle style, {
   EdgeInsetsGeometry? padding,
 }) {
+  final TextStyle titleStyle = style.copyWith(
+    fontWeight: FontWeight.w700,
+    letterSpacing: -2,
+  );
   return _buildCenteredCardText(
     text: text,
-    style: style,
+    style: titleStyle,
     padding: padding,
   );
 }
@@ -545,51 +549,63 @@ class _MediaThumbState extends State<_MediaThumb> {
   @override
   void initState() {
     super.initState();
-    _fileFuture = FilesDB.instance.getAnyUploadedFile(
-      widget.ref.uploadedFileID,
-    );
+    _fileFuture = _ensureFile();
   }
 
   @override
   void didUpdateWidget(covariant _MediaThumb oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.ref.uploadedFileID != widget.ref.uploadedFileID) {
-      _fileFuture = FilesDB.instance.getAnyUploadedFile(
-        widget.ref.uploadedFileID,
-      );
+      _fileFuture = _ensureFile();
     }
+  }
+
+  Future<EnteFile?> _ensureFile() {
+    return WrappedMediaPreloader.instance.ensureFile(
+      widget.ref.uploadedFileID,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final EnteFile? cached = WrappedMediaPreloader.instance.getCachedFile(
+      widget.ref.uploadedFileID,
+    );
+    if (cached != null) {
+      return _buildThumbnail(cached);
+    }
     return FutureBuilder<EnteFile?>(
       future: _fileFuture,
       builder: (BuildContext context, AsyncSnapshot<EnteFile?> snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+        final EnteFile? file = snapshot.data;
+        if (snapshot.connectionState != ConnectionState.done && file == null) {
           return Container(
             color: colorScheme.fillFaint,
           );
         }
-        final EnteFile? file = snapshot.data;
         if (file == null) {
           return Container(
             color: colorScheme.fillFaint,
           );
         }
-        return ThumbnailWidget(
-          file,
-          fit: BoxFit.cover,
-          rawThumbnail: true,
-          shouldShowSyncStatus: false,
-          shouldShowArchiveStatus: false,
-          shouldShowPinIcon: false,
-          shouldShowOwnerAvatar: false,
-          shouldShowFavoriteIcon: false,
-          shouldShowVideoDuration: false,
-          shouldShowVideoOverlayIcon: false,
-        );
+        return _buildThumbnail(file);
       },
+    );
+  }
+
+  Widget _buildThumbnail(EnteFile file) {
+    return ThumbnailWidget(
+      file,
+      fit: BoxFit.cover,
+      rawThumbnail: true,
+      shouldShowSyncStatus: false,
+      shouldShowArchiveStatus: false,
+      shouldShowPinIcon: false,
+      shouldShowOwnerAvatar: false,
+      shouldShowFavoriteIcon: false,
+      shouldShowVideoDuration: false,
+      shouldShowVideoOverlayIcon: false,
     );
   }
 }
