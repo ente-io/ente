@@ -124,15 +124,15 @@ class _AccountCredentialsPageState
         controller: _passwordController,
         obscureText: !_passwordVisible,
         shouldUseTextInputWidget: false,
-        suffixIcon: IconButton(
-          icon: Icon(
-            _passwordVisible ? Icons.visibility : Icons.visibility_off,
-          ),
-          onPressed: () {
+        suffixIcon: GestureDetector(
+          onTap: () {
             setState(() {
               _passwordVisible = !_passwordVisible;
             });
           },
+          child: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
