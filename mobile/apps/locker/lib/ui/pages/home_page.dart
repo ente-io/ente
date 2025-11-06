@@ -646,10 +646,10 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
     if (_displayedCollections.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: HomeEmptyStateWidget(onTap: addFile),
+          padding: EdgeInsets.all(16.0),
+          child: HomeEmptyStateWidget(),
         ),
       );
     }
@@ -702,9 +702,7 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   Widget _buildRecentsSection() {
     if (_recentFiles.isEmpty) {
-      return HomeEmptyStateWidget(
-        onTap: addFile,
-      );
+      return const HomeEmptyStateWidget();
     }
     return RecentsSectionWidget(
       collections: _filterOutUncategorized(_collections),
@@ -720,6 +718,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     final colorScheme = getEnteColorScheme(context);
     return [
       SectionOptions(
+        SectionTitle(title: title),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -730,15 +729,13 @@ class _HomePageState extends UploaderPageState<HomePage>
             ),
           );
         },
-        body: context.l10n.items(collections.length),
-        SectionTitle(title: title),
         trailingWidget: IconButtonWidget(
           icon: Icons.chevron_right,
           iconButtonType: IconButtonType.secondary,
           iconColor: colorScheme.textBase,
         ),
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 12),
       CollectionFlexGridViewWidget(
         collections: collections,
       ),

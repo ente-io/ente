@@ -678,6 +678,14 @@ class StringsLocalizationsEl extends StringsLocalizations {
   String get trustedContacts => 'Trusted contacts';
 
   @override
+  String legacyInvite(String email) {
+    return '$email has invited you to be a trusted contact';
+  }
+
+  @override
+  String get acceptTrustInvite => 'Accept invite';
+
+  @override
   String get addTrustedContact => 'Add Trusted Contact';
 
   @override

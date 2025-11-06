@@ -56,7 +56,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noFilesFound => 'No files here';
 
   @override
-  String get addFiles => 'Add Files';
+  String get addFiles => 'Add files';
 
   @override
   String get name => 'Name';
@@ -76,10 +76,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get downloadFailed => 'Download Failed';
+  String get downloadFailed => 'Download failed';
 
   @override
-  String get failedToDownloadOrDecrypt => 'Failed to download or decrypt file';
+  String get failedToDownloadOrDecrypt => 'Failed to download file';
 
   @override
   String get errorOpeningFile => 'Error opening file';
@@ -217,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
-  String get deleteFile => 'Delete File';
+  String get deleteFile => 'Delete file';
 
   @override
   String deleteFileConfirmation(String fileName) {
@@ -242,7 +242,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upload your first document to get started';
 
   @override
-  String get uploadDocument => 'Upload Document';
+  String get collectionEmptyStateTitle => 'Nothing to see here';
+
+  @override
+  String get collectionEmptyStateSubtitle =>
+      'Add items to this collection to see them here';
+
+  @override
+  String get homeLockerEmptyTitle => 'Your Locker is empty';
+
+  @override
+  String get homeLockerEmptySubtitle => 'Click the + button to get started';
+
+  @override
+  String get uploadDocument => 'Upload document';
 
   @override
   String items(int count) {
@@ -1092,7 +1105,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please authenticate to manage your trusted contacts';
 
   @override
-  String get uploadError => 'Upload Error';
+  String get uploadError => 'Upload error';
 
   @override
   String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';
@@ -1103,10 +1116,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get deselectAll => 'Deselect All';
+  String get deselectAll => 'Deselect all';
 
   @override
-  String get selectAll => 'Select All';
+  String get selectAll => 'Select all';
 
   @override
   String get unnamedCollection => 'Unnamed Collection';
@@ -1135,13 +1148,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionButtonLabel => 'Collection';
 
   @override
-  String get hideWindow => 'Hide Window';
+  String get hideWindow => 'Hide window';
 
   @override
-  String get showWindow => 'Show Window';
+  String get showWindow => 'Show window';
 
   @override
-  String get exitApp => 'Exit App';
+  String get exitApp => 'Exit app';
 
   @override
   String get lockerLogs => 'Locker logs';
@@ -1153,7 +1166,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clear => 'Clear';
 
   @override
-  String get uploadAFile => 'Upload a File';
+  String get uploadAFile => 'Upload a file';
 
   @override
   String get clickHereToUpload => 'Click here to upload';
@@ -1162,7 +1175,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveDocument => 'Save document';
 
   @override
-  String get uploadFiles => 'Upload Files';
+  String get uploadFiles => 'Upload files';
 
   @override
   String filesSelected(int count) {
@@ -1237,7 +1250,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unlockLockerPaidPlanBody =>
-      'Locker is available only to paid customers of Ente Photos right now.';
+      'Locker is currently available only to paid customers of Ente Photos.';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';
