@@ -72,11 +72,9 @@ if using an external bucket.
 
 If a bucket has SSL support enabled, set `s3.are_local_buckets` to `false`. Enable path-style URL by setting `s3.use_path_style_urls` to `true`.
 
-::: note
-
-You can configure this for individual buckets over defining top-level configuration if you are using the latest server image (August 2025)
-
-:::
+> [!NOTE]
+>
+> You can configure this for individual buckets over defining top-level configuration if you are using the latest server image (August 2025).
 
 A sample configuration for `b2-eu-cen` is provided, which can be used for other 2 buckets as well:
 
@@ -115,15 +113,13 @@ Use the content provided below for creating a `cors.json` file:
 You may have to change the `AllowedOrigins` to allow only certain origins (your
 Ente web apps and Museum) for security.
 
-::: note
-
-Newer Ente builds include a `Content-MD5` header on upload requests (and `UPLOAD-URL`
-when routing through the upload worker). If your provider requires an explicit
-allow list instead of `["*"]`, make sure these headers are present in
-`AllowedHeaders`, otherwise preflight checks will fail, and uploads will be
-blocked.
-
-:::
+> [!NOTE]
+>
+> Newer Ente builds include a `Content-MD5` header on upload requests (and `UPLOAD-URL`
+> when routing through the upload worker). If your provider requires an explicit
+> allow list instead of `["*"]`, make sure these headers are present in
+> `AllowedHeaders`, otherwise preflight checks will fail, and uploads will be
+> blocked.
 
 Assuming you have AWS CLI on your system and that you have configured it with
 your access key and secret, you can execute the below command to set bucket
