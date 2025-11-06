@@ -187,6 +187,10 @@ class StringsLocalizationsKo extends StringsLocalizations {
   String get noDeleteAccountAction => '아니오, 계정을 지웁니다';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle => '계정 삭제 절차를 시작하려면 인증 절차를 거쳐주세요';
 
   @override

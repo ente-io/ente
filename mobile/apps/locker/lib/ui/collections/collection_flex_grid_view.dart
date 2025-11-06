@@ -64,7 +64,7 @@ class _CollectionFlexGridViewWidgetState
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.5,
+          childAspectRatio: 1.45,
         ),
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {

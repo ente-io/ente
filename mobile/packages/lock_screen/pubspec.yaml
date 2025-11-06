@@ -30,7 +30,13 @@ dependencies:
     git:
       url: https://github.com/eaceto/flutter_local_authentication
       ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
-  flutter_secure_storage: ^9.0.0
+  # Do not upgrade this package unless this issue is resolved:
+  # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870
+  # On v9.2.4, keys related to lockscreen persist even after reintsall. For context see:
+  # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870#issuecomment-2777447937
+  # Let's wait till the issue is resolved by the package maintainer.
+  # If not resolved and we need to upgrade, write a migration script.
+  flutter_secure_storage: 9.0.0
   local_auth: ^2.3.0
   logging: ^1.1.1
   pinput: ^5.0.0

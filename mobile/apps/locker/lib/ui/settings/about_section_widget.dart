@@ -10,8 +10,6 @@ import "package:url_launcher/url_launcher.dart";
 class AboutSectionWidget extends StatelessWidget {
   const AboutSectionWidget({super.key});
 
-  static const double _leadingSpace = 52;
-
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -30,7 +28,6 @@ class AboutSectionWidget extends StatelessWidget {
             title: context.l10n.weAreOpenSource,
             makeTextBold: true,
           ),
-          leadingSpace: _leadingSpace,
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
             // ignore: unawaited_futures
@@ -41,13 +38,11 @@ class AboutSectionWidget extends StatelessWidget {
         AboutMenuItemWidget(
           title: context.l10n.privacy,
           url: "https://ente.io/privacy",
-          leadingSpace: _leadingSpace,
         ),
         sectionOptionSpacing,
         AboutMenuItemWidget(
           title: context.l10n.termsOfServicesTitle,
           url: "https://ente.io/terms",
-          leadingSpace: _leadingSpace,
         ),
         sectionOptionSpacing,
       ],
@@ -59,12 +54,10 @@ class AboutMenuItemWidget extends StatelessWidget {
   final String title;
   final String url;
   final String? webPageTitle;
-  final double leadingSpace;
   const AboutMenuItemWidget({
     required this.title,
     required this.url,
     this.webPageTitle,
-    required this.leadingSpace,
     super.key,
   });
 
@@ -75,7 +68,6 @@ class AboutMenuItemWidget extends StatelessWidget {
         title: title,
         makeTextBold: true,
       ),
-      leadingSpace: leadingSpace,
       trailingIcon: Icons.chevron_right_outlined,
       onTap: () async {
         await PlatformUtil.openWebView(

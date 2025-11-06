@@ -185,6 +185,10 @@ class StringsLocalizationsZh extends StringsLocalizations {
   String get noDeleteAccountAction => '否，删除账户';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle => '请进行身份验证以启动账户删除';
 
   @override

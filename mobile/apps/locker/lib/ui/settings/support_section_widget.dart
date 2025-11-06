@@ -14,8 +14,6 @@ import "package:url_launcher/url_launcher_string.dart";
 class SupportSectionWidget extends StatelessWidget {
   const SupportSectionWidget({super.key});
 
-  static const double _leadingSpace = 52;
-
   get supportEmail => null;
 
   @override
@@ -38,7 +36,6 @@ class SupportSectionWidget extends StatelessWidget {
             title: context.l10n.contactSupport,
             makeTextBold: true,
           ),
-          leadingSpace: _leadingSpace,
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
             await sendEmail(context, to: supportEmail);
@@ -48,7 +45,6 @@ class SupportSectionWidget extends StatelessWidget {
         AboutMenuItemWidget(
           title: context.l10n.help,
           url: "https://help.ente.io",
-          leadingSpace: _leadingSpace,
         ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -56,7 +52,6 @@ class SupportSectionWidget extends StatelessWidget {
             title: context.l10n.suggestFeatures,
             makeTextBold: true,
           ),
-          leadingSpace: _leadingSpace,
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
             // ignore: unawaited_futures
@@ -72,7 +67,6 @@ class SupportSectionWidget extends StatelessWidget {
             title: context.l10n.reportABug,
             makeTextBold: true,
           ),
-          leadingSpace: _leadingSpace,
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
             await sendLogs(context, context.l10n.reportBug);

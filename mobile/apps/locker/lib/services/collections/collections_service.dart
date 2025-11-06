@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import "dart:math";
 import 'dart:typed_data';
 
 import "package:ente_accounts/services/user_service.dart";
@@ -78,8 +78,6 @@ class CollectionService {
     final List<Future> fileFutures = [];
     for (final collection in updatedCollections) {
       if (collection.isDeleted) {
-        await _db.deleteCollection(collection);
-        _collectionIDToCollections.remove(collection.id);
         continue;
       }
       final syncTime = _db.getCollectionSyncTime(collection.id);
@@ -125,7 +123,7 @@ class CollectionService {
   }) async {
     try {
       final collection = await _apiClient.create(name, type);
-      _logger.info("Created collection: ${collection.name}");
+      _logger.info("Created collection: ${collection.id}");
 
       // Cache in memory
       _collectionIDToCollections[collection.id] = collection;
@@ -146,8 +144,14 @@ class CollectionService {
     }
   }
 
-  Future<List<Collection>> getCollections() async {
-    return _db.getCollections();
+  Future<List<Collection>> getCollections({
+    bool includeDeleted = false,
+  }) async {
+    final collections = await _db.getCollections();
+    if (includeDeleted) {
+      return collections;
+    }
+    return collections.where((collection) => !collection.isDeleted).toList();
   }
 
   Future<Collection?> getCollectionByID(int collectionID) async {
@@ -196,7 +200,7 @@ class CollectionService {
       return files;
     } catch (e) {
       _logger.severe(
-        "Failed to fetch files for collection ${collection.name}: $e",
+        "Failed to fetch files for collection ${collection.id}: $e",
       );
       rethrow;
     }
@@ -239,7 +243,7 @@ class CollectionService {
   }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
-      _logger.info("Added file ${file.title} to collection ${collection.name}");
+      _logger.info("Added file ${file.title} to collection ${collection.id}");
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -284,7 +288,7 @@ class CollectionService {
         collection,
         newName,
       );
-      _logger.info("Renamed collection ${collection.name} to $newName");
+      _logger.info("Renamed collection ${collection.id} to $newName");
       // Let sync update the local state
       await sync();
     } catch (e, s) {
@@ -365,10 +369,39 @@ class CollectionService {
 
   Future<void> trashCollection(Collection collection) async {
     try {
-      await _apiClient.trashCollection(collection);
+      final files = await _db.getFilesInCollection(collection);
+      var keepFiles = false;
+
+      if (files.isNotEmpty) {
+        keepFiles = true;
+        final requests = files
+            .where((file) => file.uploadedFileID != null)
+            .map(
+              (file) => TrashRequest(
+                file.uploadedFileID!,
+                collection.id,
+              ),
+            )
+            .toList();
+
+        if (requests.isNotEmpty) {
+          await _apiClient.trash(requests);
+        }
+
+        await _db.deleteFilesFromCollection(collection, files);
+        Bus.instance.fire(CollectionsUpdatedEvent('collection_files_trashed'));
+        await TrashService.instance.syncTrash();
+      }
+
+      await _apiClient.trashCollection(
+        collection,
+        keepFiles: keepFiles,
+      );
+
       _logger.info("Trashed collection: ${collection.name}");
       // Let sync update the local state
       await sync();
+      await TrashService.instance.syncTrash();
     } catch (e) {
       _logger.severe("Failed to trash collection: $e");
       rethrow;

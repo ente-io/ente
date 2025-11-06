@@ -1774,5 +1774,9 @@
   "same": "Aynı",
   "different": "Farklı",
   "sameperson": "Aynı kişi mi?",
-  "indexingPausedStatusDescription": "Dizin oluşturma duraklatıldı. Cihaz hazır olduğunda otomatik olarak devam edecektir. Cihaz, pil seviyesi, pil sağlığı ve termal durumu sağlıklı bir aralıkta olduğunda hazır kabul edilir."
+  "indexingPausedStatusDescription": "Dizin oluşturma duraklatıldı. Cihaz hazır olduğunda otomatik olarak devam edecektir. Cihaz, pil seviyesi, pil sağlığı ve termal durumu sağlıklı bir aralıkta olduğunda hazır kabul edilir.",
+  "cLTitle1": "Tarihe atla",
+  "cLDesc1": "Dosyanın bilgi panelinde Tarihe atla seçeneğini kullanarak fotoğrafın çevresindeki kareleri görün.",
+  "cLTitle2": "Daha hızlı video düzenleyici",
+  "cLDesc2": "Video düzenleyiciyi, büyük videoları düzenlerken hızını ciddi şekilde artırmak ve kullanıcı deneyimini iyileştirmek için baştan tasarladık."
 }

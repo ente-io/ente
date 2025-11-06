@@ -49,5 +49,6 @@ in `ports` in compose file.
 | Ente Albums                                             | Web      | 3002      | 3002           |
 | [Ente Auth](https://ente.io/auth/)                      | Web      | 3003      | 3003           |
 | [Ente Cast](https://ente.io/help/photos/features/cast/) | Web      | 3004      | 3004           |
+| Ente Public Locker                                      | Web      | 3005      | 3005           |
 | MinIO                                                   | S3       | 3200      | 3200           |
 | PostgreSQL                                              | Database |           | 5432           |

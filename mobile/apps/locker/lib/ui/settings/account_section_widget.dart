@@ -8,7 +8,6 @@ import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
-import "package:ente_utils/platform_util.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
@@ -21,8 +20,6 @@ import "package:locker/ui/settings/common_settings.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
-
-  static const double _leadingSpace = 52;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +41,6 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changeEmail,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -52,7 +48,6 @@ class AccountSectionWidget extends StatelessWidget {
             context,
             l10n.authToChangeYourEmail,
           );
-          await PlatformUtil.refocusWindows();
           if (hasAuthenticated) {
             // ignore: unawaited_futures
             showDialog(
@@ -72,7 +67,6 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.changePassword,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -102,7 +96,6 @@ class AccountSectionWidget extends StatelessWidget {
           title: l10n.recoveryKey,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
@@ -137,7 +130,6 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.legacy,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         showOnlyLoadingState: true,
         onTap: () async {
@@ -166,7 +158,6 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.logout,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           _onLogoutTapped(context);
@@ -178,7 +169,6 @@ class AccountSectionWidget extends StatelessWidget {
           title: context.l10n.deleteAccount,
           makeTextBold: true,
         ),
-        leadingSpace: _leadingSpace,
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
           final config = Configuration.instance;

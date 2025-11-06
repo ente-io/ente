@@ -32,6 +32,7 @@ class CollectionRowWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final collectionName = collection.name ?? context.l10n.unnamedCollection;
+    final bool isFavourite = collection.type == CollectionType.favorites;
 
     return GestureDetector(
       onTap: () {
@@ -122,17 +123,19 @@ class CollectionRowWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: isSelected
-                          ? const SizedBox.shrink()
-                          : CollectionPopupMenuWidget(
-                              collection: collection,
-                              overflowActions: overflowActions,
-                            ),
-                    ),
+                    isFavourite
+                        ? const SizedBox.shrink()
+                        : AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            child: isSelected
+                                ? const SizedBox.shrink()
+                                : CollectionPopupMenuWidget(
+                                    collection: collection,
+                                    overflowActions: overflowActions,
+                                  ),
+                          ),
                   ],
                 ),
                 const SizedBox(height: 4),

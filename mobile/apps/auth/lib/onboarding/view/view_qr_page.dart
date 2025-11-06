@@ -29,7 +29,10 @@ class ViewQrPage extends StatelessWidget {
               children: [
                 QrImageView(
                   data: code!.rawData
-                      .replaceAll('algorithm=Algorithm.', 'algorithm='),
+                      .replaceAll('algorithm=Algorithm.', 'algorithm=')
+                      .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+                      .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+                      .replaceAll('algorithm=sha512', 'algorithm=SHA512'),
                   eyeStyle: QrEyeStyle(
                     eyeShape: QrEyeShape.square,
                     color: Theme.of(context).colorScheme.onSurface,
@@ -54,9 +57,14 @@ class ViewQrPage extends StatelessWidget {
                     const SizedBox(
                       width: 10,
                     ),
-                    Text(
-                      code?.account ?? '',
-                      style: enteTextTheme.largeBold,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          code?.account ?? '',
+                          style: enteTextTheme.largeBold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -73,9 +81,14 @@ class ViewQrPage extends StatelessWidget {
                     const SizedBox(
                       width: 10,
                     ),
-                    Text(
-                      code?.issuer ?? '',
-                      style: enteTextTheme.largeBold,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Text(
+                          code?.issuer ?? '',
+                          style: enteTextTheme.largeBold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

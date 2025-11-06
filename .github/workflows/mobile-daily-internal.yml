@@ -3,7 +3,7 @@ name: "Internal release (photos)"
 on:
     schedule:
         # Runs daily at 12:30 UTC (6:00 PM IST)
-        - cron: "30 12 * * *"
+        - cron: "30 12 * * 1-3"
     workflow_dispatch: # Allow manual trigger
 
 env:
@@ -168,7 +168,7 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🏆 Daily release Photos v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
+                  title: "🏆 Nightly build Photos v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
                   description: |
                       **Version:** ${{ env.NEW_VERSION }}
                       **Flutter:** ${{ env.FLUTTER_VERSION }}

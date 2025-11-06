@@ -166,6 +166,9 @@ class _AccountCredentialsPageState
               _passwordVisible = !_passwordVisible;
             });
           },
+          child: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {

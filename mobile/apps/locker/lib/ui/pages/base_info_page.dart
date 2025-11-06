@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -31,6 +32,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
+  late InfoPageMode _initialMode;
 
   @protected
   InfoPageMode get currentMode => _currentMode;
@@ -165,6 +167,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   void initState() {
     super.initState();
     _currentMode = widget.mode;
+    _initialMode = widget.mode;
     _loadCollections();
     loadExistingData();
   }
@@ -259,9 +262,22 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       }
     } catch (e) {
       if (mounted) {
+        final errorDetails = () {
+          if (e is DioException) {
+            final responseData = e.response?.data;
+            if (responseData != null) {
+              return responseData.toString();
+            }
+            return e.message ?? e.toString();
+          }
+          return e.toString();
+        }();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${context.l10n.failedToSaveRecord}: $e'),
+            content: Text(
+              '${context.l10n.failedToSaveRecord}: $errorDetails',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -466,6 +482,12 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
     final colorScheme = getEnteColorScheme(context);
+
+    // Only intercept back gesture if:
+    // - Currently in edit mode AND
+    // - Was initially opened in view mode (editing existing note)
+    final shouldInterceptBack = isEditMode && _initialMode == InfoPageMode.view;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {

@@ -158,6 +158,7 @@
     "logout": "退出登录",
     "logout_message": "你确定要退出登录吗？",
     "delete_account": "删除账户",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>请从您注册的电子邮件地址发送一封电子邮件到 <a>{{emailID}}</a></p><p>。您的请求将在72小时内处理。</p>",
     "change_email": "更换邮箱",
     "ok": "确定",

@@ -158,6 +158,7 @@
     "logout": "Logout",
     "logout_message": "Are you sure you want to logout?",
     "delete_account": "Delete account",
+    "delete_account_multi_app_warning": "This will delete your Ente Auth, Ente Photos and Ente Locker account.",
     "delete_account_manually_message": "<p>Please send an email to <a>{{emailID}}</a> from your registered email address.</p><p>Your request will be processed within 72 hours.</p>",
     "change_email": "Change email",
     "ok": "OK",
