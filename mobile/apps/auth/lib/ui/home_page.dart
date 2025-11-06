@@ -1055,6 +1055,7 @@ class _HomePageState extends State<HomePage> {
       // is the account name.
       final List<Code> issuerMatch = [];
       final List<Code> accountMatch = [];
+      final List<Code> noteMatch = [];
 
       for (final Code codeState in _allCodes!) {
         if (codeState.hasError ||
@@ -1068,10 +1069,13 @@ class _HomePageState extends State<HomePage> {
           issuerMatch.add(codeState);
         } else if (codeState.account.toLowerCase().contains(val)) {
           accountMatch.add(codeState);
+        } else if (codeState.note.toLowerCase().contains(val)) {
+          noteMatch.add(codeState);
         }
       }
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
+      _filteredCodes.addAll(noteMatch);
     } else if (_isTrashOpen) {
       _filteredCodes = _allCodes
               ?.where(
