@@ -30,6 +30,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
+  late InfoPageMode _initialMode;
 
   // Current data state (can be updated after saving)
   T? _currentData;
@@ -73,6 +74,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   void initState() {
     super.initState();
     _currentMode = widget.mode;
+    _initialMode = widget.mode;
     _loadCollections();
     loadExistingData();
   }
@@ -353,11 +355,17 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
     final colorScheme = getEnteColorScheme(context);
+
+    // Only intercept back gesture if:
+    // - Currently in edit mode AND
+    // - Was initially opened in view mode (editing existing note)
+    final shouldInterceptBack = isEditMode && _initialMode == InfoPageMode.view;
+
     return PopScope(
-      canPop: isViewMode,
+      canPop: !shouldInterceptBack,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && isEditMode) {
-          // If in edit mode and trying to go back, switch to view mode instead
+        if (!didPop && shouldInterceptBack) {
+          // Switch back to view mode instead of leaving the page
           _toggleMode();
         }
       },
@@ -367,21 +375,19 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           surfaceTintColor: Colors.transparent,
           toolbarHeight: 48,
           leadingWidth: 48,
-          leading: isEditMode && currentData != null
-              ? IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_outlined,
-                  ),
-                  onPressed: _toggleMode,
-                  tooltip: context.l10n.backToView,
-                )
-              : IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back_outlined,
-                  ),
-                  onPressed: () => Navigator.of(context).pop(),
-                  tooltip: context.l10n.back,
-                ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_outlined),
+            onPressed: () {
+              if (shouldInterceptBack) {
+                _toggleMode();
+              } else {
+                Navigator.of(context).pop();
+              }
+            },
+            tooltip: shouldInterceptBack
+                ? context.l10n.backToView
+                : context.l10n.back,
+          ),
           automaticallyImplyLeading: false,
           actions: [
             if (isViewMode && currentData != null)
