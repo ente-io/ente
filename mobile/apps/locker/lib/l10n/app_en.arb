@@ -30,7 +30,7 @@
     }
   },
   "downloadFailed": "Download failed",
-  "failedToDownloadOrDecrypt": "Failed to download or decrypt file",
+  "failedToDownloadOrDecrypt": "Failed to download file",
   "errorOpeningFile": "Error opening file",
   "errorOpeningFileMessage": "Error opening file: {error}",
   "@errorOpeningFileMessage": {
@@ -697,7 +697,7 @@
   "locker": "Locker",
   "loginToEnteAccount": "Log in to your Ente account",
   "unlockLockerPaidPlanTitle": "Coming soon!",
-  "unlockLockerPaidPlanBody": "Locker is available only to paid customers of Ente Photos right now.",
+  "unlockLockerPaidPlanBody": "Locker is currently available only to paid customers of Ente Photos.",
   "checkoutEntePhotos": "Checkout Ente Photos",
   "okay": "Okay",
   "noAccountCta": "I don't have an account",
