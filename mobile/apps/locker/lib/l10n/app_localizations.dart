@@ -1945,7 +1945,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadError.
   ///
   /// In en, this message translates to:
-  /// **'Upload Error'**
+  /// **'Upload error'**
   String get uploadError;
 
   /// No description provided for @tryAdjustingYourSearchQuery.

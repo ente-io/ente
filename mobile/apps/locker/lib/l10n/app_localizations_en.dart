@@ -1092,7 +1092,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please authenticate to manage your trusted contacts';
 
   @override
-  String get uploadError => 'Upload Error';
+  String get uploadError => 'Upload error';
 
   @override
   String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';

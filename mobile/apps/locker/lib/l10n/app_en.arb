@@ -573,7 +573,7 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "legacy": "Legacy",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
-  "uploadError": "Upload Error",
+  "uploadError": "Upload error",
   "tryAdjustingYourSearchQuery": "Try adjusting your search query",
   "noFilesFoundForQuery": "No files found for \"{query}\"",
   "@noFilesFoundForQuery": {
