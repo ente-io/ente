@@ -49,6 +49,7 @@ class SectionOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (trailingWidget != null) {
+      final hasBody = body != null && body!.isNotEmpty;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -62,10 +63,11 @@ class SectionOptions extends StatelessWidget {
                 trailingWidget!,
               ],
             ),
-            Text(
-              body ?? "",
-              style: getEnteTextTheme(context).bodyMuted,
-            ),
+            if (hasBody)
+              Text(
+                body!,
+                style: getEnteTextTheme(context).bodyMuted,
+              ),
           ],
         ),
       );

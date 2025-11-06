@@ -720,6 +720,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     final colorScheme = getEnteColorScheme(context);
     return [
       SectionOptions(
+        SectionTitle(title: title),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -730,15 +731,13 @@ class _HomePageState extends UploaderPageState<HomePage>
             ),
           );
         },
-        body: context.l10n.items(collections.length),
-        SectionTitle(title: title),
         trailingWidget: IconButtonWidget(
           icon: Icons.chevron_right,
           iconButtonType: IconButtonType.secondary,
           iconColor: colorScheme.textBase,
         ),
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 12),
       CollectionFlexGridViewWidget(
         collections: collections,
       ),
