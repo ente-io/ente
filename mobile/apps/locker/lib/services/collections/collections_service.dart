@@ -144,8 +144,14 @@ class CollectionService {
     }
   }
 
-  Future<List<Collection>> getCollections() async {
-    return _db.getCollections();
+  Future<List<Collection>> getCollections({
+    bool includeDeleted = false,
+  }) async {
+    final collections = await _db.getCollections();
+    if (includeDeleted) {
+      return collections;
+    }
+    return collections.where((collection) => !collection.isDeleted).toList();
   }
 
   Future<Collection?> getCollectionByID(int collectionID) async {

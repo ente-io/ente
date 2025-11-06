@@ -92,7 +92,9 @@ class TrashService {
         },
       );
       final List<Collection> allCollections =
-          await CollectionService.instance.getCollections();
+          await CollectionService.instance.getCollections(
+        includeDeleted: true,
+      );
       final Map<int, Collection> collectionMap = {
         for (final collection in allCollections) collection.id: collection,
       };
