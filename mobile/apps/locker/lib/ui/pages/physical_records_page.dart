@@ -80,7 +80,7 @@ class _PhysicalRecordsPageState
   List<Widget> buildFormFields() {
     return [
       FormTextInputWidget(
-        labelText: context.l10n.recordName,
+        labelText: context.l10n.name,
         hintText: context.l10n.recordNameHint,
         controller: _nameController,
         shouldUseTextInputWidget: false,
@@ -112,7 +112,6 @@ class _PhysicalRecordsPageState
         shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
-      const SizedBox(height: 24),
     ];
   }
 
@@ -120,7 +119,7 @@ class _PhysicalRecordsPageState
   List<Widget> buildViewFields() {
     return [
       buildViewField(
-        label: context.l10n.recordName,
+        label: context.l10n.name,
         value: _nameController.text,
       ),
       const SizedBox(height: 24),

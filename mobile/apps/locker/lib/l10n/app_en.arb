@@ -373,7 +373,7 @@
   "recordLocation": "Location",
   "recordLocationHint": "Where can this item be found?",
   "recordNotes": "Notes",
-  "recordNotesHint": "Any additional information about the item?",
+  "recordNotesHint": "Any additional information about the item",
   "credentialName": "Item name",
   "credentialNameHint": "Name of the service or account",
   "username": "Username",

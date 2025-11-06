@@ -1159,7 +1159,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Any additional information about the item?'**
+  /// **'Any additional information about the item'**
   String get recordNotesHint;
 
   /// No description provided for @credentialName.

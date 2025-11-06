@@ -610,7 +610,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordNotes => 'Notes';
 
   @override
-  String get recordNotesHint => 'Any additional information about the item?';
+  String get recordNotesHint => 'Any additional information about the item';
 
   @override
   String get credentialName => 'Item name';
