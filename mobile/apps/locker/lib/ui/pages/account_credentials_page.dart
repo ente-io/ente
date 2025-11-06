@@ -68,7 +68,23 @@ class _AccountCredentialsPageState
   }
 
   @override
-  String get pageTitle => context.l10n.accountCredentials;
+  String get pageTitle {
+    if (isInEditMode) {
+      return context.l10n.editSecret;
+    }
+
+    final controllerName = _nameController.text.trim();
+    if (controllerName.isNotEmpty) {
+      return controllerName;
+    }
+
+    final dataName = (currentData?.name ?? '').trim();
+    if (dataName.isNotEmpty) {
+      return dataName;
+    }
+
+    return context.l10n.accountCredentials;
+  }
 
   @override
   String get submitButtonText => context.l10n.saveRecord;
@@ -167,12 +183,7 @@ class _AccountCredentialsPageState
 
   @override
   List<Widget> buildViewFields() {
-    return [
-      buildViewField(
-        label: context.l10n.credentialName,
-        value: _nameController.text,
-      ),
-      const SizedBox(height: 24),
+    final viewFields = <Widget>[
       buildViewField(
         label: context.l10n.username,
         value: _usernameController.text,
@@ -183,15 +194,20 @@ class _AccountCredentialsPageState
         value: _passwordController.text,
         isSecret: true,
       ),
-      if (_notesController.text.isNotEmpty) ...[
+    ];
+
+    if (_notesController.text.isNotEmpty) {
+      viewFields.addAll([
         const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.credentialNotes,
           value: _notesController.text,
           maxLines: 3,
         ),
-      ],
-    ];
+      ]);
+    }
+
+    return viewFields;
   }
 
   void _onFieldChanged() {

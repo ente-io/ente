@@ -1090,6 +1090,24 @@ abstract class AppLocalizations {
   /// **'Preserve account credentials.'**
   String get accountCredentialsDescription;
 
+  /// Title shown when editing an existing secret
+  ///
+  /// In en, this message translates to:
+  /// **'Edit secret'**
+  String get editSecret;
+
+  /// Title shown when editing an existing location record
+  ///
+  /// In en, this message translates to:
+  /// **'Edit location'**
+  String get editLocation;
+
+  /// Title shown when editing an existing note
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note'**
+  String get editNote;
+
   /// No description provided for @emergencyContact.
   ///
   /// In en, this message translates to:

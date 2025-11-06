@@ -575,6 +575,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accountCredentialsDescription => 'Preserve account credentials.';
 
   @override
+  String get editSecret => 'Edit secret';
+
+  @override
+  String get editLocation => 'Edit location';
+
+  @override
+  String get editNote => 'Edit note';
+
+  @override
   String get emergencyContact => 'Emergency contact';
 
   @override

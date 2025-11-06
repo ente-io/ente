@@ -362,6 +362,18 @@
   "physicalRecordsDescription": "Document real-world locations of important items.",
   "accountCredentials": "Secret",
   "accountCredentialsDescription": "Preserve account credentials.",
+  "editSecret": "Edit secret",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
+  "editLocation": "Edit location",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
+  "editNote": "Edit note",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Emergency contact",
   "emergencyContactDescription": "Keep contact info for key people in crises.",
   "noteName": "Title",

@@ -55,7 +55,23 @@ class _PhysicalRecordsPageState
   }
 
   @override
-  String get pageTitle => context.l10n.physicalRecords;
+  String get pageTitle {
+    if (isInEditMode) {
+      return context.l10n.editLocation;
+    }
+
+    final controllerName = _nameController.text.trim();
+    if (controllerName.isNotEmpty) {
+      return controllerName;
+    }
+
+    final dataName = (currentData?.name ?? '').trim();
+    if (dataName.isNotEmpty) {
+      return dataName;
+    }
+
+    return context.l10n.physicalRecords;
+  }
 
   @override
   String get submitButtonText => context.l10n.saveRecord;
@@ -133,24 +149,24 @@ class _PhysicalRecordsPageState
 
   @override
   List<Widget> buildViewFields() {
-    return [
-      buildViewField(
-        label: context.l10n.name,
-        value: _nameController.text,
-      ),
-      const SizedBox(height: 24),
+    final viewFields = <Widget>[
       buildViewField(
         label: context.l10n.recordLocation,
         value: _locationController.text,
       ),
-      if (_notesController.text.isNotEmpty) ...[
+    ];
+
+    if (_notesController.text.isNotEmpty) {
+      viewFields.addAll([
         const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.recordNotes,
           value: _notesController.text,
           maxLines: 3,
         ),
-      ],
-    ];
+      ]);
+    }
+
+    return viewFields;
   }
 }

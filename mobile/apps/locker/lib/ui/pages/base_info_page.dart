@@ -32,6 +32,15 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   bool _isLoading = false;
   late InfoPageMode _currentMode;
 
+  @protected
+  InfoPageMode get currentMode => _currentMode;
+
+  @protected
+  bool get isInViewMode => _currentMode == InfoPageMode.view;
+
+  @protected
+  bool get isInEditMode => _currentMode == InfoPageMode.edit;
+
   // Current data state (can be updated after saving)
   T? _currentData;
 

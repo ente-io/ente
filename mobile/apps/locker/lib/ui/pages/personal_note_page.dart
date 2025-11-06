@@ -23,7 +23,8 @@ class _PersonalNotePageState
   @override
   void initState() {
     super.initState();
-    _contentController.addListener(_onContentChanged);
+    _nameController.addListener(_onFieldChanged);
+    _contentController.addListener(_onFieldChanged);
     _loadExistingData();
   }
 
@@ -43,14 +44,31 @@ class _PersonalNotePageState
 
   @override
   void dispose() {
-    _contentController.removeListener(_onContentChanged);
+    _nameController.removeListener(_onFieldChanged);
+    _contentController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _contentController.dispose();
     super.dispose();
   }
 
   @override
-  String get pageTitle => context.l10n.personalNote;
+  String get pageTitle {
+    if (isInEditMode) {
+      return context.l10n.editNote;
+    }
+
+    final controllerTitle = _nameController.text.trim();
+    if (controllerTitle.isNotEmpty) {
+      return controllerTitle;
+    }
+
+    final dataTitle = (currentData?.title ?? '').trim();
+    if (dataTitle.isNotEmpty) {
+      return dataTitle;
+    }
+
+    return context.l10n.personalNote;
+  }
 
   @override
   String get submitButtonText => context.l10n.saveRecord;
@@ -105,11 +123,6 @@ class _PersonalNotePageState
   List<Widget> buildViewFields() {
     return [
       buildViewField(
-        label: context.l10n.noteName,
-        value: _nameController.text,
-      ),
-      const SizedBox(height: 24),
-      buildViewField(
         label: context.l10n.noteContent,
         value: _contentController.text,
         maxLines: 5,
@@ -117,7 +130,7 @@ class _PersonalNotePageState
     ];
   }
 
-  void _onContentChanged() {
+  void _onFieldChanged() {
     if (mounted) {
       setState(() {});
     }
