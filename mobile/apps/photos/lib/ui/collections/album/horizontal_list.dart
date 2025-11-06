@@ -102,6 +102,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                           child: AlbumRowItemWidget(
                             item,
                             sideOfThumbnail,
+                            key: ValueKey('horizontal_list_${item.id}'),
                             showFileCount: true,
                             hasVerifiedLock: widget.hasVerifiedLock,
                           ),
