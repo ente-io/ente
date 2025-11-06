@@ -59,9 +59,7 @@ class SortCodeMenuWidget extends StatelessWidget {
                   sortOptionText(CodeSortKey.values[index]),
                   if (CodeSortKey.values[index] == currentKey)
                     Icon(
-                      CodeSortKey.values[index] == CodeSortKey.manual
-                          ? Icons.mode_edit
-                          : Icons.check,
+                      Icons.mode_edit,
                       color: Theme.of(context).iconTheme.color,
                     ),
                 ],
