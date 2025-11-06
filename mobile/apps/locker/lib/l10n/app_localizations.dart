@@ -187,7 +187,7 @@ abstract class AppLocalizations {
   /// No description provided for @addFiles.
   ///
   /// In en, this message translates to:
-  /// **'Add Files'**
+  /// **'Add files'**
   String get addFiles;
 
   /// No description provided for @name.
@@ -223,13 +223,13 @@ abstract class AppLocalizations {
   /// No description provided for @downloadFailed.
   ///
   /// In en, this message translates to:
-  /// **'Download Failed'**
+  /// **'Download failed'**
   String get downloadFailed;
 
   /// No description provided for @failedToDownloadOrDecrypt.
   ///
   /// In en, this message translates to:
-  /// **'Failed to download or decrypt file'**
+  /// **'Failed to download file'**
   String get failedToDownloadOrDecrypt;
 
   /// No description provided for @errorOpeningFile.
@@ -445,7 +445,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteFile.
   ///
   /// In en, this message translates to:
-  /// **'Delete File'**
+  /// **'Delete file'**
   String get deleteFile;
 
   /// Confirmation message for file deletion
@@ -487,7 +487,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadDocument.
   ///
   /// In en, this message translates to:
-  /// **'Upload Document'**
+  /// **'Upload document'**
   String get uploadDocument;
 
   /// Number of items in a collection
@@ -1963,13 +1963,13 @@ abstract class AppLocalizations {
   /// No description provided for @deselectAll.
   ///
   /// In en, this message translates to:
-  /// **'Deselect All'**
+  /// **'Deselect all'**
   String get deselectAll;
 
   /// No description provided for @selectAll.
   ///
   /// In en, this message translates to:
-  /// **'Select All'**
+  /// **'Select all'**
   String get selectAll;
 
   /// No description provided for @unnamedCollection.
@@ -2017,19 +2017,19 @@ abstract class AppLocalizations {
   /// No description provided for @hideWindow.
   ///
   /// In en, this message translates to:
-  /// **'Hide Window'**
+  /// **'Hide window'**
   String get hideWindow;
 
   /// No description provided for @showWindow.
   ///
   /// In en, this message translates to:
-  /// **'Show Window'**
+  /// **'Show window'**
   String get showWindow;
 
   /// No description provided for @exitApp.
   ///
   /// In en, this message translates to:
-  /// **'Exit App'**
+  /// **'Exit app'**
   String get exitApp;
 
   /// No description provided for @lockerLogs.
@@ -2053,7 +2053,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadAFile.
   ///
   /// In en, this message translates to:
-  /// **'Upload a File'**
+  /// **'Upload a file'**
   String get uploadAFile;
 
   /// No description provided for @clickHereToUpload.
@@ -2071,7 +2071,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadFiles.
   ///
   /// In en, this message translates to:
-  /// **'Upload Files'**
+  /// **'Upload files'**
   String get uploadFiles;
 
   /// Number of files selected for upload
@@ -2161,7 +2161,7 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerPaidPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is available only to paid customers of Ente Photos right now.'**
+  /// **'Locker is currently available only to paid customers of Ente Photos.'**
   String get unlockLockerPaidPlanBody;
 
   /// No description provided for @checkoutEntePhotos.
