@@ -78,3 +78,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Provide error-prone annotations so R8 keeps Tink classes at shrink time
+    implementation "com.google.errorprone:error_prone_annotations:2.24.1"
+}
