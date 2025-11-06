@@ -30,7 +30,8 @@ class GradientButton extends StatelessWidget {
     final Color backgroundColor =
         isEnabled ? colorScheme.primary700 : colorScheme.fillFaint;
     final TextStyle effectiveTextStyle = _textStyle.copyWith(
-        color: isEnabled ? Colors.white : colorScheme.textMuted);
+      color: isEnabled ? Colors.white : colorScheme.textMuted,
+    );
 
     final Widget textWidget = Text(text, style: effectiveTextStyle);
 

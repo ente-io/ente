@@ -1144,6 +1144,30 @@ abstract class AppLocalizations {
   /// **'Write down important thoughts, instructions, or memories you want to preserve'**
   String get noteContentHint;
 
+  /// No description provided for @unsavedNoteChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get unsavedNoteChangesTitle;
+
+  /// No description provided for @unsavedNoteChangesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes in this note. If you go back now, they will be lost.'**
+  String get unsavedNoteChangesDescription;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardChanges;
+
   /// No description provided for @recordName.
   ///
   /// In en, this message translates to:

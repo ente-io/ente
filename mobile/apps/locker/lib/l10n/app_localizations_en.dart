@@ -604,6 +604,19 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write down important thoughts, instructions, or memories you want to preserve';
 
   @override
+  String get unsavedNoteChangesTitle => 'Discard changes?';
+
+  @override
+  String get unsavedNoteChangesDescription =>
+      'You have unsaved changes in this note. If you go back now, they will be lost.';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get discardChanges => 'Discard';
+
+  @override
   String get recordName => 'Record name';
 
   @override

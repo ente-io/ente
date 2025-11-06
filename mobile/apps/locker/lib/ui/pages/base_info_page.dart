@@ -80,9 +80,86 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   bool validateForm();
 
   bool get showCollectionSelectionTitle => true;
+  double get collectionSpacing => 24;
 
   @protected
   bool get isSaveEnabled => !_isLoading;
+
+  @protected
+  Future<bool> onEditModeBackPressed() async {
+    return true;
+  }
+
+  @protected
+  Future<bool> onPopRequested() async {
+    return true;
+  }
+
+  @protected
+  Widget buildAppBarTitle(BuildContext context) {
+    return TitleBarTitleWidget(
+      title: pageTitle,
+    );
+  }
+
+  @protected
+  List<Collection> get availableCollections => _availableCollections;
+
+  @protected
+  Set<int> get selectedCollectionIds => _selectedCollectionIds;
+
+  @protected
+  void toggleCollectionSelection(int collectionId) {
+    _onToggleCollection(collectionId);
+  }
+
+  @protected
+  void updateAvailableCollections(List<Collection> collections) {
+    _onCollectionsUpdated(collections);
+  }
+
+  @protected
+  Widget buildEditModeContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...buildFormFields(),
+            SizedBox(height: collectionSpacing),
+            CollectionSelectionWidget(
+              collections: _availableCollections,
+              selectedCollectionIds: _selectedCollectionIds,
+              onToggleCollection: _onToggleCollection,
+              onCollectionsUpdated: _onCollectionsUpdated,
+              titleWidget:
+                  showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @protected
+  Widget buildViewModeContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: buildViewFields(),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -363,17 +440,37 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     );
   }
 
+  Future<void> _handleBackNavigation() async {
+    if (isInEditMode) {
+      final canLeaveEdit = await onEditModeBackPressed();
+      if (!canLeaveEdit) {
+        return;
+      }
+
+      if (currentData != null) {
+        _toggleMode();
+        return;
+      }
+    }
+
+    final shouldPop = await onPopRequested();
+    if (!shouldPop || !mounted) {
+      return;
+    }
+
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
     final colorScheme = getEnteColorScheme(context);
     return PopScope(
-      canPop: isViewMode,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && isEditMode) {
-          // If in edit mode and trying to go back, switch to view mode instead
-          _toggleMode();
+        if (!didPop) {
+          _handleBackNavigation();
         }
       },
       child: Scaffold(
@@ -384,22 +481,20 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           leadingWidth: 48,
           centerTitle: false,
           titleSpacing: 0,
-          title: TitleBarTitleWidget(
-            title: pageTitle,
-          ),
+          title: buildAppBarTitle(context),
           leading: isEditMode && currentData != null
               ? IconButton(
                   icon: const Icon(
                     Icons.arrow_back_outlined,
                   ),
-                  onPressed: _toggleMode,
+                  onPressed: _handleBackNavigation,
                   tooltip: context.l10n.backToView,
                 )
               : IconButton(
                   icon: const Icon(
                     Icons.arrow_back_outlined,
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _handleBackNavigation,
                   tooltip: context.l10n.back,
                 ),
           automaticallyImplyLeading: false,
@@ -421,34 +516,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Fields based on current mode
-                          if (isViewMode)
-                            ...buildViewFields()
-                          else
-                            ...buildFormFields(),
-
-                          // Collection selection only in edit mode
-                          if (isEditMode) ...[
-                            const SizedBox(height: 24),
-                            CollectionSelectionWidget(
-                              collections: _availableCollections,
-                              selectedCollectionIds: _selectedCollectionIds,
-                              onToggleCollection: _onToggleCollection,
-                              onCollectionsUpdated: _onCollectionsUpdated,
-                              titleWidget: showCollectionSelectionTitle
-                                  ? null
-                                  : const SizedBox.shrink(),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (isViewMode) {
+                        return buildViewModeContent(context, constraints);
+                      }
+                      return buildEditModeContent(context, constraints);
+                    },
                   ),
                 ),
 
