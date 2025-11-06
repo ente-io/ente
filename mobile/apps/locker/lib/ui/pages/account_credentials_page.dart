@@ -70,7 +70,10 @@ class _AccountCredentialsPageState
   @override
   String get pageTitle {
     if (isInEditMode) {
-      return context.l10n.editSecret;
+      if (widget.existingFile != null || currentData != null) {
+        return context.l10n.editSecret;
+      }
+      return context.l10n.accountCredentials;
     }
 
     final controllerName = _nameController.text.trim();
@@ -122,6 +125,7 @@ class _AccountCredentialsPageState
         hintText: context.l10n.credentialNameHint,
         controller: _nameController,
         shouldUseTextInputWidget: false,
+        autofocus: true,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterAccountName;

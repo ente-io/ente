@@ -57,7 +57,10 @@ class _PhysicalRecordsPageState
   @override
   String get pageTitle {
     if (isInEditMode) {
-      return context.l10n.editLocation;
+      if (widget.existingFile != null || currentData != null) {
+        return context.l10n.editLocation;
+      }
+      return context.l10n.physicalRecords;
     }
 
     final controllerName = _nameController.text.trim();
@@ -110,6 +113,7 @@ class _PhysicalRecordsPageState
         hintText: context.l10n.recordNameHint,
         controller: _nameController,
         shouldUseTextInputWidget: false,
+        autofocus: true,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterRecordName;

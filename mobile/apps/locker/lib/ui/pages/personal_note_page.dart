@@ -154,6 +154,7 @@ class _PersonalNotePageState
                         },
                         keyboardType: TextInputType.multiline,
                         textCapitalization: TextCapitalization.sentences,
+                        autofocus: true,
                         maxLines: null,
                         minLines: null,
                         expands: true,
