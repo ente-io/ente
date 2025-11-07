@@ -735,7 +735,7 @@
   "areYouSure": "Are you sure?",
   "yesDeleteCollection": "Yes, delete collection",
   "yesDeleteFile": "Yes, delete file",
-  "deleteCollectionDialogBody": "This action is immediate and cannot be undone.\nThe {collectionName} will be deleted permanently.",
+  "deleteCollectionDialogBody": "{collectionName} will be deleted permanently.",
   "@deleteCollectionDialogBody": {
     "description": "Confirmation message body for deleting a single collection",
     "placeholders": {
@@ -745,7 +745,7 @@
       }
     }
   },
-  "deleteMultipleCollectionsDialogBody": "This action is immediate and cannot be undone.\n{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.",
+  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.",
   "@deleteMultipleCollectionsDialogBody": {
     "description": "Confirmation message body for deleting multiple collections",
     "placeholders": {
@@ -755,7 +755,7 @@
       }
     }
   },
-  "deleteMultipleFilesDialogBody": "This action is immediate and cannot be undone.\n{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.",
+  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.",
   "@deleteMultipleFilesDialogBody": {
     "description": "Confirmation message body for deleting multiple files",
     "placeholders": {
