@@ -229,25 +229,25 @@ abstract class AppLocalizations {
   /// No description provided for @failedToDownloadOrDecrypt.
   ///
   /// In en, this message translates to:
-  /// **'Failed to download file'**
+  /// **'Failed to download item'**
   String get failedToDownloadOrDecrypt;
 
   /// No description provided for @errorOpeningFile.
   ///
   /// In en, this message translates to:
-  /// **'Error opening file'**
+  /// **'Error opening item'**
   String get errorOpeningFile;
 
-  /// Error message when opening a file fails
+  /// Error message when opening an item fails
   ///
   /// In en, this message translates to:
-  /// **'Error opening file: {error}'**
+  /// **'Error opening item: {error}'**
   String errorOpeningFileMessage(String error);
 
-  /// Error message when file cannot be opened
+  /// Error message when item cannot be opened
   ///
   /// In en, this message translates to:
-  /// **'Could not open file: {error}'**
+  /// **'Could not open item: {error}'**
   String couldNotOpenFile(String error);
 
   /// Time format for minutes ago
@@ -406,13 +406,13 @@ abstract class AppLocalizations {
   /// **'Trash'**
   String get trash;
 
-  /// Message when file is permanently deleted from trash
+  /// Message when item is permanently deleted from trash
   ///
   /// In en, this message translates to:
   /// **'Deleted \"{fileName}\" permanently'**
   String deletedPermanently(String fileName);
 
-  /// Error message when file restoration fails
+  /// Error message when item restoration fails
   ///
   /// In en, this message translates to:
   /// **'Failed to restore \"{fileName}\": {error}'**
@@ -445,10 +445,10 @@ abstract class AppLocalizations {
   /// No description provided for @deleteFile.
   ///
   /// In en, this message translates to:
-  /// **'Delete file'**
+  /// **'Delete item'**
   String get deleteFile;
 
-  /// Confirmation message for file deletion
+  /// Confirmation message for item deletion
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to delete \"{fileName}\"?'**
@@ -526,10 +526,10 @@ abstract class AppLocalizations {
   /// **'{count} items'**
   String items(int count);
 
-  /// Number of files in a collection
+  /// Number of items in a collection
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{no files} =1{1 file} other{{count} files}}'**
+  /// **'{count, plural, =0{no items} =1{1 item} other{{count} items}}'**
   String files(int count);
 
   /// No description provided for @createCollectionTooltip.
@@ -550,7 +550,7 @@ abstract class AppLocalizations {
   /// **'Restore'**
   String get restore;
 
-  /// Dialog title for restoring a file from trash
+  /// Dialog title for restoring an item from trash
   ///
   /// In en, this message translates to:
   /// **'Restore {fileName}'**
@@ -583,7 +583,7 @@ abstract class AppLocalizations {
   /// No description provided for @fileTitle.
   ///
   /// In en, this message translates to:
-  /// **'File title'**
+  /// **'Item title'**
   String get fileTitle;
 
   /// No description provided for @note.
@@ -640,7 +640,7 @@ abstract class AppLocalizations {
   /// **'Restoring...'**
   String get restoring;
 
-  /// Success message when file is restored to a collection
+  /// Success message when an item is restored to a collection
   ///
   /// In en, this message translates to:
   /// **'Restored \"{fileName}\" to \"{collectionName}\"'**
@@ -679,7 +679,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareThisLink.
   ///
   /// In en, this message translates to:
-  /// **'Anyone with this link can access your file.'**
+  /// **'Anyone with this link can access your item.'**
   String get shareThisLink;
 
   /// No description provided for @copyLink.
@@ -721,7 +721,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteShareLinkConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'People with this link will no longer be able to access the file.'**
+  /// **'People with this link will no longer be able to access the item.'**
   String get deleteShareLinkConfirmation;
 
   /// No description provided for @deletingShareLink.
@@ -751,7 +751,7 @@ abstract class AppLocalizations {
   /// No description provided for @deletingFile.
   ///
   /// In en, this message translates to:
-  /// **'Deleting file...'**
+  /// **'Deleting item...'**
   String get deletingFile;
 
   /// No description provided for @changeEmail.
@@ -1483,7 +1483,7 @@ abstract class AppLocalizations {
   /// No description provided for @allowAddingFiles.
   ///
   /// In en, this message translates to:
-  /// **'Allow adding files'**
+  /// **'Allow adding items'**
   String get allowAddingFiles;
 
   /// No description provided for @disableDownloadWarningTitle.
@@ -1495,13 +1495,13 @@ abstract class AppLocalizations {
   /// No description provided for @disableDownloadWarningBody.
   ///
   /// In en, this message translates to:
-  /// **'Viewers can still take screenshots or save a copy of your files using external tools.'**
+  /// **'Viewers can still take screenshots or save a copy of your items using external tools.'**
   String get disableDownloadWarningBody;
 
   /// No description provided for @allowAddFilesDescription.
   ///
   /// In en, this message translates to:
-  /// **'Allow people with the link to also add files to the shared collection.'**
+  /// **'Allow people with the link to also add items to the shared collection.'**
   String get allowAddFilesDescription;
 
   /// No description provided for @after1Hour.
@@ -1675,7 +1675,7 @@ abstract class AppLocalizations {
   /// No description provided for @collaboratorsCanAddFilesToTheSharedCollection.
   ///
   /// In en, this message translates to:
-  /// **'Collaborators can add files to the shared collection.'**
+  /// **'Collaborators can add items to the shared collection.'**
   String get collaboratorsCanAddFilesToTheSharedCollection;
 
   /// No description provided for @enterEmail.
@@ -1771,7 +1771,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTextRecommendUsingEnte.
   ///
   /// In en, this message translates to:
-  /// **'Download Ente so we can easily share original quality files\n\nhttps://ente.io'**
+  /// **'Download Ente so we can easily share original quality items\n\nhttps://ente.io'**
   String get shareTextRecommendUsingEnte;
 
   /// No description provided for @thisIsYourVerificationId.
@@ -1813,7 +1813,7 @@ abstract class AppLocalizations {
   /// No description provided for @emailNoEnteAccount.
   ///
   /// In en, this message translates to:
-  /// **'{email} does not have an Ente account.\n\nSend them an invite to share files.'**
+  /// **'{email} does not have an Ente account.\n\nSend them an invite to share items.'**
   String emailNoEnteAccount(Object email);
 
   /// No description provided for @shareMyVerificationID.
@@ -1867,7 +1867,7 @@ abstract class AppLocalizations {
   /// Warning message when changing a collaborator to viewer
   ///
   /// In en, this message translates to:
-  /// **'{name} will no longer be able to add files to the collection after becoming a viewer.'**
+  /// **'{name} will no longer be able to add items to the collection after becoming a viewer.'**
   String cannotAddMoreFilesAfterBecomingViewer(String name);
 
   /// No description provided for @removeWithQuestionMark.
@@ -1879,7 +1879,7 @@ abstract class AppLocalizations {
   /// No description provided for @removeParticipantBody.
   ///
   /// In en, this message translates to:
-  /// **'{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection'**
+  /// **'{userEmail} will be removed from this shared collection\n\nAny items added by them will also be removed from the collection'**
   String removeParticipantBody(Object userEmail);
 
   /// No description provided for @yesRemove.
@@ -1909,7 +1909,7 @@ abstract class AppLocalizations {
   /// No description provided for @collaboratorsCanAddFilesToTheSharedAlbum.
   ///
   /// In en, this message translates to:
-  /// **'Collaborators can add files to the shared collection.'**
+  /// **'Collaborators can add items to the shared collection.'**
   String get collaboratorsCanAddFilesToTheSharedAlbum;
 
   /// The count of participants in an album
@@ -1951,7 +1951,7 @@ abstract class AppLocalizations {
   /// No description provided for @filesAddedByYouWillBeRemovedFromTheCollection.
   ///
   /// In en, this message translates to:
-  /// **'Files added by you will be removed from the collection'**
+  /// **'Items added by you will be removed from the collection'**
   String get filesAddedByYouWillBeRemovedFromTheCollection;
 
   /// No description provided for @leaveSharedCollection.
@@ -1996,10 +1996,10 @@ abstract class AppLocalizations {
   /// **'Try adjusting your search query'**
   String get tryAdjustingYourSearchQuery;
 
-  /// Message when no files match the search query
+  /// Message when no items match the search query
   ///
   /// In en, this message translates to:
-  /// **'No files found for \"{query}\"'**
+  /// **'No items found for \"{query}\"'**
   String noFilesFoundForQuery(String query);
 
   /// No description provided for @deselectAll.
@@ -2026,16 +2026,16 @@ abstract class AppLocalizations {
   /// **'ente Locker'**
   String get enteLocker;
 
-  /// Progress message showing uploaded files
+  /// Progress message showing uploaded items
   ///
   /// In en, this message translates to:
-  /// **'Uploaded {completed}/{total} files...'**
+  /// **'Uploaded {completed}/{total} items...'**
   String uploadedFilesProgress(int completed, int total);
 
-  /// Progress message showing uploaded files with error
+  /// Progress message showing uploaded items with error
   ///
   /// In en, this message translates to:
-  /// **'Uploaded {completed}/{total} files... ({error})'**
+  /// **'Uploaded {completed}/{total} items... ({error})'**
   String uploadedFilesProgressWithError(int completed, int total, String error);
 
   /// No description provided for @noCollectionsAvailableForSelection.
@@ -2095,7 +2095,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadAFile.
   ///
   /// In en, this message translates to:
-  /// **'Upload a file'**
+  /// **'Upload an item'**
   String get uploadAFile;
 
   /// No description provided for @clickHereToUpload.
@@ -2113,13 +2113,13 @@ abstract class AppLocalizations {
   /// No description provided for @uploadFiles.
   ///
   /// In en, this message translates to:
-  /// **'Upload files'**
+  /// **'Upload items'**
   String get uploadFiles;
 
-  /// Number of files selected for upload
+  /// Number of items selected for upload
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{No files selected} =1{1 file selected} other{{count} files selected}}'**
+  /// **'{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}'**
   String filesSelected(int count);
 
   /// No description provided for @addToCollection.
@@ -2395,7 +2395,7 @@ abstract class AppLocalizations {
   /// No description provided for @yesDeleteFile.
   ///
   /// In en, this message translates to:
-  /// **'Yes, delete file'**
+  /// **'Yes, delete item'**
   String get yesDeleteFile;
 
   /// Confirmation message body for deleting a single collection
@@ -2410,10 +2410,10 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
   String deleteMultipleCollectionsDialogBody(int count);
 
-  /// Confirmation message body for deleting multiple files
+  /// Confirmation message body for deleting multiple items
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.'**
+  /// **'{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.'**
   String deleteMultipleFilesDialogBody(int count);
 
   /// Button label for confirming deletion of one or more collections
@@ -2422,10 +2422,10 @@ abstract class AppLocalizations {
   /// **'Yes, delete {count, plural, =1{collection} other{collections}}'**
   String yesDeleteCollections(int count);
 
-  /// Button label for confirming deletion of one or more files
+  /// Button label for confirming deletion of one or more items
   ///
   /// In en, this message translates to:
-  /// **'Yes, delete {count, plural, =1{file} other{files}}'**
+  /// **'Yes, delete {count, plural, =1{item} other{items}}'**
   String yesDeleteFiles(int count);
 
   /// No description provided for @usage.
@@ -2434,7 +2434,7 @@ abstract class AppLocalizations {
   /// **'Usage'**
   String get usage;
 
-  /// Display file count usage in the format 'used / max'
+  /// Display item count usage in the format 'used / max'
   ///
   /// In en, this message translates to:
   /// **'{used} / {max}'**

@@ -30,21 +30,21 @@
     }
   },
   "downloadFailed": "Download failed",
-  "failedToDownloadOrDecrypt": "Failed to download file",
-  "errorOpeningFile": "Error opening file",
-  "errorOpeningFileMessage": "Error opening file: {error}",
+  "failedToDownloadOrDecrypt": "Failed to download item",
+  "errorOpeningFile": "Error opening item",
+  "errorOpeningFileMessage": "Error opening item: {error}",
   "@errorOpeningFileMessage": {
-    "description": "Error message when opening a file fails",
+    "description": "Error message when opening an item fails",
     "placeholders": {
       "error": {
         "type": "String",
-        "example": "File not found"
+        "example": "Item not found"
       }
     }
   },
-  "couldNotOpenFile": "Could not open file: {error}",
+  "couldNotOpenFile": "Could not open item: {error}",
   "@couldNotOpenFile": {
-    "description": "Error message when file cannot be opened",
+    "description": "Error message when item cannot be opened",
     "placeholders": {
       "error": {
         "type": "String",
@@ -170,7 +170,7 @@
   "trash": "Trash",
   "deletedPermanently": "Deleted \"{fileName}\" permanently",
   "@deletedPermanently": {
-    "description": "Message when file is permanently deleted from trash",
+    "description": "Message when item is permanently deleted from trash",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -180,7 +180,7 @@
   },
   "failedToRestoreFile": "Failed to restore \"{fileName}\": {error}",
   "@failedToRestoreFile": {
-    "description": "Error message when file restoration fails",
+    "description": "Error message when item restoration fails",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -196,10 +196,10 @@
   "create": "Create",
   "renameCollection": "Rename collection",
   "save": "Save",
-  "deleteFile": "Delete file",
+  "deleteFile": "Delete item",
   "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
   "@deleteFileConfirmation": {
-    "description": "Confirmation message for file deletion",
+    "description": "Confirmation message for item deletion",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -228,9 +228,9 @@
       }
     }
   },
-  "files": "{count, plural, =0{no files} =1{1 file} other{{count} files}}",
+  "files": "{count, plural, =0{no items} =1{1 item} other{{count} items}}",
   "@files": {
-    "description": "Number of files in a collection",
+    "description": "Number of items in a collection",
     "placeholders": {
       "count": {
         "type": "int",
@@ -243,7 +243,7 @@
   "restore": "Restore",
   "restoreFile": "Restore {fileName}",
   "@restoreFile": {
-    "description": "Dialog title for restoring a file from trash",
+    "description": "Dialog title for restoring an item from trash",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -255,7 +255,7 @@
   "emptyTrash": "Empty trash",
   "emptyTrashTooltip": "Empty trash",
   "emptyTrashConfirmation": "Are you sure you want to permanently delete all items in trash? This action cannot be undone.",
-  "fileTitle": "File title",
+  "fileTitle": "Item title",
   "note": "Note",
   "optionalNote": "Optional note",
   "upload": "Upload",
@@ -276,7 +276,7 @@
   "restoring": "Restoring...",
   "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",
   "@restoredFileToCollection": {
-    "description": "Success message when file is restored to a collection",
+    "description": "Success message when an item is restored to a collection",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -293,19 +293,19 @@
   "share": "Share",
   "shareLink": "Share link",
   "creatingShareLink": "Creating link...",
-  "shareThisLink": "Anyone with this link can access your file.",
+  "shareThisLink": "Anyone with this link can access your item.",
   "copyLink": "Copy link",
   "deleteLink": "Delete link",
   "close": "Close",
   "linkCopiedToClipboard": "Link copied to clipboard",
   "deleteShareLink": "Delete link",
   "deleteShareLinkDialogTitle": "Delete link?",
-  "deleteShareLinkConfirmation": "People with this link will no longer be able to access the file.",
+  "deleteShareLinkConfirmation": "People with this link will no longer be able to access the item.",
   "deletingShareLink": "Deleting link...",
   "shareLinkDeletedSuccessfully": "Link deleted successfully",
   "failedToCreateShareLink": "Failed to create link",
   "failedToDeleteShareLink": "Failed to delete link",
-  "deletingFile": "Deleting file...",
+  "deletingFile": "Deleting item...",
   "changeEmail": "Change email",
   "authToChangeYourEmail": "Please authenticate to change your email",
   "changePasswordTitle": "Change password",
@@ -436,10 +436,10 @@
   "sendLink": "Send link",
   "setPasswordTitle": "Set password",
   "resetPasswordTitle": "Reset password",
-  "allowAddingFiles": "Allow adding files",
+  "allowAddingFiles": "Allow adding items",
   "disableDownloadWarningTitle": "Please note",
-  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your files using external tools.",
-  "allowAddFilesDescription": "Allow people with the link to also add files to the shared collection.",
+  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your items using external tools.",
+  "allowAddFilesDescription": "Allow people with the link to also add items to the shared collection.",
   "after1Hour": "After 1 hour",
   "after1Day": "After 1 day",
   "after1Week": "After 1 week",
@@ -476,7 +476,7 @@
   "createPublicLink": "Create public link",
   "addParticipants": "Add participants",
   "add": "Add",
-  "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add files to the shared collection.",
+  "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add items to the shared collection.",
   "enterEmail": "Enter email",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}",
   "@viewersSuccessfullyAdded": {
@@ -510,7 +510,7 @@
   "youCannotShareWithYourself": "You cannot share with yourself",
   "inviteToEnte": "Invite to Ente",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente\n\nhttps://ente.io",
   "thisIsYourVerificationId": "This is your Verification ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
   "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
@@ -525,7 +525,7 @@
   },
   "verificationId": "Verification ID",
   "verifyEmailID": "Verify {email}",
-  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share items.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
   "passwordLock": "Password lock",
@@ -534,7 +534,7 @@
   "removeParticipant": "Remove participant",
   "yesConvertToViewer": "Yes, convert to viewer",
   "changePermissions": "Change permissions",
-  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add files to the collection after becoming a viewer.",
+  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add items to the collection after becoming a viewer.",
   "@cannotAddMoreFilesAfterBecomingViewer": {
     "description": "Warning message when changing a collaborator to viewer",
     "placeholders": {
@@ -545,12 +545,12 @@
     }
   },
   "removeWithQuestionMark": "Remove?",
-  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection",
+  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny items added by them will also be removed from the collection",
   "yesRemove": "Yes, remove",
   "remove": "Remove",
   "viewer": "Viewer",
   "collaborator": "Collaborator",
-  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add files to the shared collection.",
+  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add items to the shared collection.",
   "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
   "@albumParticipantsCount": {
     "description": "The count of participants in an album",
@@ -574,7 +574,7 @@
     }
   },
   "leaveCollection": "Leave collection",
-  "filesAddedByYouWillBeRemovedFromTheCollection": "Files added by you will be removed from the collection",
+  "filesAddedByYouWillBeRemovedFromTheCollection": "Items added by you will be removed from the collection",
   "leaveSharedCollection": "Leave shared collection?",
   "noSystemLockFound": "No system lock found",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
@@ -582,9 +582,9 @@
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "uploadError": "Upload error",
   "tryAdjustingYourSearchQuery": "Try adjusting your search query",
-  "noFilesFoundForQuery": "No files found for \"{query}\"",
+  "noFilesFoundForQuery": "No items found for \"{query}\"",
   "@noFilesFoundForQuery": {
-    "description": "Message when no files match the search query",
+    "description": "Message when no items match the search query",
     "placeholders": {
       "query": {
         "type": "String",
@@ -596,9 +596,9 @@
   "selectAll": "Select all",
   "unnamedCollection": "Unnamed Collection",
   "enteLocker": "ente Locker",
-  "uploadedFilesProgress": "Uploaded {completed}/{total} files...",
+  "uploadedFilesProgress": "Uploaded {completed}/{total} items...",
   "@uploadedFilesProgress": {
-    "description": "Progress message showing uploaded files",
+    "description": "Progress message showing uploaded items",
     "placeholders": {
       "completed": {
         "type": "int",
@@ -610,9 +610,9 @@
       }
     }
   },
-  "uploadedFilesProgressWithError": "Uploaded {completed}/{total} files... ({error})",
+  "uploadedFilesProgressWithError": "Uploaded {completed}/{total} items... ({error})",
   "@uploadedFilesProgressWithError": {
-    "description": "Progress message showing uploaded files with error",
+    "description": "Progress message showing uploaded items with error",
     "placeholders": {
       "completed": {
         "type": "int",
@@ -637,13 +637,13 @@
   "lockerLogs": "Locker logs",
   "recents": "Recents",
   "clear": "Clear",
-  "uploadAFile": "Upload a file",
+  "uploadAFile": "Upload an item",
   "clickHereToUpload": "Click here to upload",
   "saveDocument": "Save document",
-  "uploadFiles": "Upload files",
-  "filesSelected": "{count, plural, =0{No files selected} =1{1 file selected} other{{count} files selected}}",
+  "uploadFiles": "Upload items",
+  "filesSelected": "{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}",
   "@filesSelected": {
-    "description": "Number of files selected for upload",
+    "description": "Number of items selected for upload",
     "placeholders": {
       "count": {
         "type": "int",
@@ -736,7 +736,7 @@
   "collectionLabel": "Collection",
   "areYouSure": "Are you sure?",
   "yesDeleteCollection": "Yes, delete collection",
-  "yesDeleteFile": "Yes, delete file",
+  "yesDeleteFile": "Yes, delete item",
   "deleteCollectionDialogBody": "{collectionName} will be deleted permanently.",
   "@deleteCollectionDialogBody": {
     "description": "Confirmation message body for deleting a single collection",
@@ -757,9 +757,9 @@
       }
     }
   },
-  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.",
+  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.",
   "@deleteMultipleFilesDialogBody": {
-    "description": "Confirmation message body for deleting multiple files",
+    "description": "Confirmation message body for deleting multiple items",
     "placeholders": {
       "count": {
         "type": "int",
@@ -777,9 +777,9 @@
       }
     }
   },
-  "yesDeleteFiles": "Yes, delete {count, plural, =1{file} other{files}}",
+  "yesDeleteFiles": "Yes, delete {count, plural, =1{item} other{items}}",
   "@yesDeleteFiles": {
-    "description": "Button label for confirming deletion of one or more files",
+    "description": "Button label for confirming deletion of one or more items",
     "placeholders": {
       "count": {
         "type": "int",
@@ -790,7 +790,7 @@
   "usage": "Usage",
   "fileCount": "{used} / {max}",
   "@fileCount": {
-    "description": "Display file count usage in the format 'used / max'",
+    "description": "Display item count usage in the format 'used / max'",
     "placeholders": {
       "used": {
         "type": "String",

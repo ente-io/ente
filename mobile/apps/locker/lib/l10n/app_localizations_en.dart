@@ -79,19 +79,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadFailed => 'Download failed';
 
   @override
-  String get failedToDownloadOrDecrypt => 'Failed to download file';
+  String get failedToDownloadOrDecrypt => 'Failed to download item';
 
   @override
-  String get errorOpeningFile => 'Error opening file';
+  String get errorOpeningFile => 'Error opening item';
 
   @override
   String errorOpeningFileMessage(String error) {
-    return 'Error opening file: $error';
+    return 'Error opening item: $error';
   }
 
   @override
   String couldNotOpenFile(String error) {
-    return 'Could not open file: $error';
+    return 'Could not open item: $error';
   }
 
   @override
@@ -217,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
-  String get deleteFile => 'Delete file';
+  String get deleteFile => 'Delete item';
 
   @override
   String deleteFileConfirmation(String fileName) {
@@ -270,9 +270,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count files',
-      one: '1 file',
-      zero: 'no files',
+      other: '$count items',
+      one: '1 item',
+      zero: 'no items',
     );
     return '$_temp0';
   }
@@ -305,7 +305,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to permanently delete all items in trash? This action cannot be undone.';
 
   @override
-  String get fileTitle => 'File title';
+  String get fileTitle => 'Item title';
 
   @override
   String get note => 'Note';
@@ -357,7 +357,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingShareLink => 'Creating link...';
 
   @override
-  String get shareThisLink => 'Anyone with this link can access your file.';
+  String get shareThisLink => 'Anyone with this link can access your item.';
 
   @override
   String get copyLink => 'Copy link';
@@ -379,7 +379,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteShareLinkConfirmation =>
-      'People with this link will no longer be able to access the file.';
+      'People with this link will no longer be able to access the item.';
 
   @override
   String get deletingShareLink => 'Deleting link...';
@@ -394,7 +394,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToDeleteShareLink => 'Failed to delete link';
 
   @override
-  String get deletingFile => 'Deleting file...';
+  String get deletingFile => 'Deleting item...';
 
   @override
   String get changeEmail => 'Change email';
@@ -777,18 +777,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get allowAddingFiles => 'Allow adding files';
+  String get allowAddingFiles => 'Allow adding items';
 
   @override
   String get disableDownloadWarningTitle => 'Please note';
 
   @override
   String get disableDownloadWarningBody =>
-      'Viewers can still take screenshots or save a copy of your files using external tools.';
+      'Viewers can still take screenshots or save a copy of your items using external tools.';
 
   @override
   String get allowAddFilesDescription =>
-      'Allow people with the link to also add files to the shared collection.';
+      'Allow people with the link to also add items to the shared collection.';
 
   @override
   String get after1Hour => 'After 1 hour';
@@ -889,7 +889,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collaboratorsCanAddFilesToTheSharedCollection =>
-      'Collaborators can add files to the shared collection.';
+      'Collaborators can add items to the shared collection.';
 
   @override
   String get enterEmail => 'Enter email';
@@ -976,7 +976,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareTextRecommendUsingEnte =>
-      'Download Ente so we can easily share original quality files\n\nhttps://ente.io';
+      'Download Ente so we can easily share original quality items\n\nhttps://ente.io';
 
   @override
   String get thisIsYourVerificationId => 'This is your Verification ID';
@@ -1004,7 +1004,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String emailNoEnteAccount(Object email) {
-    return '$email does not have an Ente account.\n\nSend them an invite to share files.';
+    return '$email does not have an Ente account.\n\nSend them an invite to share items.';
   }
 
   @override
@@ -1037,7 +1037,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cannotAddMoreFilesAfterBecomingViewer(String name) {
-    return '$name will no longer be able to add files to the collection after becoming a viewer.';
+    return '$name will no longer be able to add items to the collection after becoming a viewer.';
   }
 
   @override
@@ -1045,7 +1045,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String removeParticipantBody(Object userEmail) {
-    return '$userEmail will be removed from this shared collection\n\nAny files added by them will also be removed from the collection';
+    return '$userEmail will be removed from this shared collection\n\nAny items added by them will also be removed from the collection';
   }
 
   @override
@@ -1062,7 +1062,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collaboratorsCanAddFilesToTheSharedAlbum =>
-      'Collaborators can add files to the shared collection.';
+      'Collaborators can add items to the shared collection.';
 
   @override
   String albumParticipantsCount(int count) {
@@ -1095,7 +1095,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filesAddedByYouWillBeRemovedFromTheCollection =>
-      'Files added by you will be removed from the collection';
+      'Items added by you will be removed from the collection';
 
   @override
   String get leaveSharedCollection => 'Leave shared collection?';
@@ -1122,7 +1122,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String noFilesFoundForQuery(String query) {
-    return 'No files found for \"$query\"';
+    return 'No items found for \"$query\"';
   }
 
   @override
@@ -1139,13 +1139,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String uploadedFilesProgress(int completed, int total) {
-    return 'Uploaded $completed/$total files...';
+    return 'Uploaded $completed/$total items...';
   }
 
   @override
   String uploadedFilesProgressWithError(
       int completed, int total, String error) {
-    return 'Uploaded $completed/$total files... ($error)';
+    return 'Uploaded $completed/$total items... ($error)';
   }
 
   @override
@@ -1176,7 +1176,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get clear => 'Clear';
 
   @override
-  String get uploadAFile => 'Upload a file';
+  String get uploadAFile => 'Upload an item';
 
   @override
   String get clickHereToUpload => 'Click here to upload';
@@ -1185,16 +1185,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveDocument => 'Save document';
 
   @override
-  String get uploadFiles => 'Upload files';
+  String get uploadFiles => 'Upload items';
 
   @override
   String filesSelected(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count files selected',
-      one: '1 file selected',
-      zero: 'No files selected',
+      other: '$count items selected',
+      one: '1 item selected',
+      zero: 'No items selected',
     );
     return '$_temp0';
   }
@@ -1361,7 +1361,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yesDeleteCollection => 'Yes, delete collection';
 
   @override
-  String get yesDeleteFile => 'Yes, delete file';
+  String get yesDeleteFile => 'Yes, delete item';
 
   @override
   String deleteCollectionDialogBody(String collectionName) {
@@ -1384,8 +1384,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count files',
-      one: '1 file',
+      other: '$count items',
+      one: '1 item',
     );
     return '$_temp0 will be deleted permanently.';
   }
@@ -1406,8 +1406,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'files',
-      one: 'file',
+      other: 'items',
+      one: 'item',
     );
     return 'Yes, delete $_temp0';
   }
