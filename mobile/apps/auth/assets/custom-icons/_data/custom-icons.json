@@ -2044,6 +2044,24 @@
         "ESET Small Business Security",
         "ESET Home Security"
       ]
+    },
+    {
+      "title": "Binghamton University",
+      "slug": "binghamton_university",
+      "altNames": [
+        "Binghamton",
+        "Binghamton Univ",
+        "Binghamton University SSO",
+        "BingOTP"
+      ]
+    },
+    {
+      "title": "IBM",
+      "slug": "ibm",
+      "altNames": [
+        "International Business Machines",
+        "IBMid"
+      ]
     }
   ]
 }
