@@ -173,6 +173,9 @@ class _CollectionsFlexiGridViewWidgetState
             return AlbumRowItemWidget(
               widget.collections![collectionIndex],
               sideOfThumbnail,
+              key: ValueKey(
+                '${widget.tag}_${widget.collections![collectionIndex].id}',
+              ),
               tag: widget.tag,
               selectedAlbums: widget.selectedAlbums,
               onTapCallback: (c) {
