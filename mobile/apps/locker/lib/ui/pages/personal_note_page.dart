@@ -14,6 +14,7 @@ class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
     super.key,
     super.mode = InfoPageMode.edit,
     super.existingFile,
+    super.onCancelWithoutSaving,
   });
 
   @override

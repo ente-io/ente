@@ -564,11 +564,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveDocumentTitle => 'Document';
 
   @override
-  String get saveDocumentDescription => 'Upload items to to be preserved';
+  String get saveDocumentDescription => 'Upload important docs';
 
   @override
   String get informationDescription =>
-      'Save information to be shared or passed down to loved ones.';
+      'Save and share information with loved ones.';
 
   @override
   String get personalNote => 'Note';
@@ -580,7 +580,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get physicalRecords => 'Place';
 
   @override
-  String get physicalRecordsDescription => 'Share locations to important items';
+  String get physicalRecordsDescription => 'Save locations of physical items';
 
   @override
   String get accountCredentials => 'Secret';

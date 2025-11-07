@@ -9,6 +9,7 @@ class EmergencyContactPage extends BaseInfoPage<EmergencyContactData> {
     super.key,
     super.mode = InfoPageMode.edit,
     super.existingFile,
+    super.onCancelWithoutSaving,
   });
 
   @override

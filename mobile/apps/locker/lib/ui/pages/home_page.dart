@@ -101,6 +101,7 @@ class CustomLockerAppBar extends StatelessWidget
                       context.l10n.locker,
                       style: textTheme.h3Bold.copyWith(
                         color: Colors.white,
+                        fontFamily: 'Montserrat',
                       ),
                     ),
                   ),

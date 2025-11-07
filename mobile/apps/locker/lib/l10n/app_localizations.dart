@@ -1075,13 +1075,13 @@ abstract class AppLocalizations {
   /// No description provided for @saveDocumentDescription.
   ///
   /// In en, this message translates to:
-  /// **'Upload items to to be preserved'**
+  /// **'Upload important docs'**
   String get saveDocumentDescription;
 
   /// No description provided for @informationDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save information to be shared or passed down to loved ones.'**
+  /// **'Save and share information with loved ones.'**
   String get informationDescription;
 
   /// No description provided for @personalNote.
@@ -1105,7 +1105,7 @@ abstract class AppLocalizations {
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Share locations to important items'**
+  /// **'Save locations of physical items'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.

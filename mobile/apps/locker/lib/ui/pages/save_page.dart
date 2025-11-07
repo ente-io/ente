@@ -7,9 +7,11 @@ import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/info/info_item.dart';
 import 'package:locker/ui/pages/account_credentials_page.dart';
 import 'package:locker/ui/pages/personal_note_page.dart';
 import 'package:locker/ui/pages/physical_records_page.dart';
+import 'package:locker/utils/info_item_utils.dart';
 
 enum SaveOptionType {
   document,
@@ -20,7 +22,7 @@ enum SaveOptionType {
 
 Future<void> showSaveBottomSheet(
   BuildContext context, {
-  required Future<void> Function() onUploadDocument,
+  required Future<bool> Function() onUploadDocument,
 }) {
   final colorScheme = getEnteColorScheme(context);
   return showModalBottomSheet<void>(
@@ -50,7 +52,7 @@ class SaveBottomSheet extends StatelessWidget {
   });
 
   final BuildContext rootContext;
-  final Future<void> Function() onUploadDocument;
+  final Future<bool> Function() onUploadDocument;
 
   @override
   Widget build(BuildContext context) {
@@ -145,10 +147,10 @@ class SaveBottomSheet extends StatelessWidget {
                       _buildSaveOption(
                         context,
                         rootContext: rootContext,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedPencilEdit02,
+                        icon: InfoItemUtils.getInfoIcon(
+                          InfoType.note,
+                          showBackground: false,
                           size: 24,
-                          color: colorScheme.primary700,
                         ),
                         title: context.l10n.personalNote,
                         description: context.l10n.personalNoteDescription,
@@ -160,10 +162,10 @@ class SaveBottomSheet extends StatelessWidget {
                       _buildSaveOption(
                         context,
                         rootContext: rootContext,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedFolder02,
+                        icon: InfoItemUtils.getInfoIcon(
+                          InfoType.physicalRecord,
+                          showBackground: false,
                           size: 24,
-                          color: colorScheme.primary700,
                         ),
                         title: context.l10n.physicalRecords,
                         description: context.l10n.physicalRecordsDescription,
@@ -175,10 +177,10 @@ class SaveBottomSheet extends StatelessWidget {
                       _buildSaveOption(
                         context,
                         rootContext: rootContext,
-                        icon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedUserEdit01,
+                        icon: InfoItemUtils.getInfoIcon(
+                          InfoType.accountCredential,
+                          showBackground: false,
                           size: 24,
-                          color: colorScheme.primary700,
                         ),
                         title: context.l10n.accountCredentials,
                         description: context.l10n.accountCredentialsDescription,
@@ -201,7 +203,7 @@ class SaveBottomSheet extends StatelessWidget {
   Widget _buildSaveOption(
     BuildContext sheetContext, {
     required BuildContext rootContext,
-    required HugeIcon icon,
+    required Widget icon,
     required String title,
     required String description,
     required SaveOptionType type,
@@ -253,24 +255,53 @@ class SaveBottomSheet extends StatelessWidget {
   }
 
   void _handleSaveOption(BuildContext context, SaveOptionType type) {
+    final navigator = Navigator.of(context);
+    void reopenSheet() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!navigator.mounted) {
+          return;
+        }
+        showSaveBottomSheet(
+          navigator.context,
+          onUploadDocument: onUploadDocument,
+        );
+      });
+    }
+
     switch (type) {
       case SaveOptionType.document:
-        unawaited(onUploadDocument());
+        unawaited(
+          onUploadDocument().then((didUpload) {
+            if (!didUpload) {
+              reopenSheet();
+            }
+          }),
+        );
         return;
       case SaveOptionType.note:
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const PersonalNotePage()),
+          MaterialPageRoute(
+            builder: (context) => PersonalNotePage(
+              onCancelWithoutSaving: reopenSheet,
+            ),
+          ),
         );
         break;
       case SaveOptionType.physicalRecord:
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const PhysicalRecordsPage()),
+          MaterialPageRoute(
+            builder: (context) => PhysicalRecordsPage(
+              onCancelWithoutSaving: reopenSheet,
+            ),
+          ),
         );
         break;
       case SaveOptionType.credentials:
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const AccountCredentialsPage(),
+            builder: (context) => AccountCredentialsPage(
+              onCancelWithoutSaving: reopenSheet,
+            ),
           ),
         );
         break;

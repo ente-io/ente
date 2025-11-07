@@ -31,7 +31,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
   void onFileUploadComplete();
 
   /// Opens a file picker dialog and uploads the selected file
-  Future<void> addFile() async {
+  Future<bool> addFile() async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
       allowMultiple: true,
@@ -44,12 +44,15 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           .toList();
 
       if (selectedFiles.isNotEmpty) {
-        await uploadFiles(selectedFiles);
+        return await uploadFiles(selectedFiles);
       }
     }
+
+    return false;
   }
 
-  Future<void> uploadFiles(List<File> files) async {
+  Future<bool> uploadFiles(List<File> files) async {
+    var didUpload = false;
     final progressDialog = createProgressDialog(
       context,
       context.l10n.uploadedFilesProgress(0, files.length),
@@ -82,6 +85,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           uploadResult != null && uploadResult.selectedCollections.isNotEmpty;
 
       if (isUncategorizedUpload || isRegularUpload) {
+        didUpload = true;
         if (isUncategorizedUpload) {
           // Get the uncategorized collection for upload
           final uncategorizedCollection = await CollectionService.instance
@@ -159,5 +163,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         await progressDialog.hide();
       }
     }
+
+    return didUpload;
   }
 }

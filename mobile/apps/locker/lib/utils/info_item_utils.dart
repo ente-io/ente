@@ -23,12 +23,12 @@ class InfoItemUtils {
       backgroundColor: Color.fromRGBO(255, 152, 0, 0.06),
     ),
     InfoType.physicalRecord: InfoIconConfig(
-      icon: HugeIcons.strokeRoundedFolder01,
+      icon: HugeIcons.strokeRoundedBriefcase01,
       color: Color.fromRGBO(156, 39, 176, 1),
       backgroundColor: Color.fromRGBO(156, 39, 176, 0.06),
     ),
     InfoType.accountCredential: InfoIconConfig(
-      icon: HugeIcons.strokeRoundedKey01,
+      icon: HugeIcons.strokeRoundedLockPassword,
       color: Color.fromRGBO(16, 113, 255, 1),
       backgroundColor: Color.fromRGBO(16, 113, 255, 0.06),
     ),

@@ -46,8 +46,8 @@ class _UsageCardWidgetState extends State<UsageCardWidget> {
 
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 14,
+        horizontal: 16,
+        vertical: 20,
       ),
       decoration: BoxDecoration(
         color: colorScheme.primary700,
@@ -65,6 +65,7 @@ class _UsageCardWidgetState extends State<UsageCardWidget> {
             padding: const EdgeInsets.all(8.0),
             child: const HugeIcon(
               icon: HugeIcons.strokeRoundedCloudUpload,
+              color: Colors.white,
             ),
           ),
           const SizedBox(width: 12),
@@ -88,7 +89,9 @@ class _UsageCardWidgetState extends State<UsageCardWidget> {
                               NumberFormat().format(usedCount),
                               NumberFormat().format(maxFileCount),
                             ),
-                            style: textTheme.smallMuted,
+                            style: textTheme.smallMuted.copyWith(
+                              color: Colors.white,
+                            ),
                           )
                         : SizedBox(
                             width: 60,

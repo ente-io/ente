@@ -19,11 +19,13 @@ enum InfoPageMode { view, edit }
 abstract class BaseInfoPage<T extends InfoData> extends StatefulWidget {
   final InfoPageMode mode;
   final EnteFile? existingFile; // The file to edit, or null for new files
+  final VoidCallback? onCancelWithoutSaving;
 
   const BaseInfoPage({
     super.key,
     this.mode = InfoPageMode.edit,
     this.existingFile,
+    this.onCancelWithoutSaving,
   });
 }
 
@@ -474,7 +476,18 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       return;
     }
 
+    _popAndMaybeNotifyCancel();
+  }
+
+  void _popAndMaybeNotifyCancel() {
+    final shouldNotify =
+        widget.existingFile == null && widget.onCancelWithoutSaving != null;
     Navigator.of(context).pop();
+    if (shouldNotify) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onCancelWithoutSaving?.call();
+      });
+    }
   }
 
   @override
