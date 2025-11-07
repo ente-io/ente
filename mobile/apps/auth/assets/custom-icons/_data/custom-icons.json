@@ -1046,6 +1046,13 @@
       "title": "Mintos"
     },
     {
+      "title": "Mint Mobile",
+      "slug": "mintmobile",
+      "altNames": [
+        "MintMobile"
+      ]
+    },
+    {
       "title": "Mistral",
       "altNames": [
         "Le Chat",
