@@ -228,13 +228,7 @@ git clone https://github.com/ente-io/ente
     :3005 {
         root * /var/www/ente/apps/out/share
         file_server
-        @root {
-            path /
-        }
-        handle @root {
-            try_files /index.html
-        }
-        try_files {path} {path}.html /404.html
+        try_files {path} {path}.html /index.html
     }
     ```
 

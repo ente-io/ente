@@ -51,8 +51,7 @@ server {
 }
 server {
     listen 3005; root /out/share;
-    location = / { try_files /index.html =404; }
-    location / { try_files \$uri \$uri.html /404.html; }
+    location / { try_files \$uri \$uri.html /index.html; }
 }
 EOF
 
