@@ -2036,14 +2036,16 @@
       "altNames": [
         "Binghamton",
         "Binghamton Univ",
-        "Binghamton University SSO"
+        "Binghamton University SSO",
+        "BingOTP"
       ]
     },
     {
       "title": "IBM",
       "slug": "ibm",
       "altNames": [
-        "International Business Machines"
+        "International Business Machines",
+        "IBMid"
       ]
     }
   ]
