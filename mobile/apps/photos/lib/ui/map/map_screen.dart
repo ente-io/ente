@@ -46,6 +46,7 @@ class _MapScreenState extends State<MapScreen> {
       StreamController<List<EnteFile>>.broadcast();
   MapController mapController = MapController();
   bool isLoading = true;
+  bool hasLocationData = true;
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
@@ -100,6 +101,7 @@ class _MapScreenState extends State<MapScreen> {
         return;
       }
       setState(() {
+        hasLocationData = false;
         imageMarkers = tempMarkers;
         isLoading = false;
       });
@@ -119,6 +121,7 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     setState(() {
+      hasLocationData = true;
       imageMarkers = tempMarkers;
     });
 
@@ -276,6 +279,7 @@ class _MapScreenState extends State<MapScreen> {
             visibleImages,
             bottomSheetDraggableAreaHeight,
             bottomUnsafeArea,
+            hasLocationData: hasLocationData,
           ),
         ),
       ),
