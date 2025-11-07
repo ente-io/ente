@@ -14,31 +14,26 @@ import { FileShareView } from "../components/file-share/FileShareView";
  * - nginx try_files for Docker deployment
  */
 const Page: React.FC = () => {
-    const [isShareLink, setIsShareLink] = useState<boolean | null>(null);
+    const [hideContent, setHideContent] = useState(false);
 
     useEffect(() => {
-        // Check if we're at the root path
+        // Check if we're at the root path (client-side only)
         const pathname = window.location.pathname;
 
         if (pathname === "/" || pathname === "") {
+            // Hide content before redirect to avoid error flash
+            setHideContent(true);
             // Redirect to ente.io/locker for root path
             window.location.href = "https://ente.io/locker";
-        } else {
-            // It's a share link, render the FileShareView
-            setIsShareLink(true);
         }
     }, []);
 
-    // Show nothing while determining the route
-    if (isShareLink === null) {
-        return null;
-    }
-
-    // Render the share view for share links
+    // Always render CustomHeadShare for SSR (ensures meta tags are in static HTML)
     return (
         <>
             <CustomHeadShare title="Ente Locker" />
-            <FileShareView />
+            {/* Hide FileShareView only when we detect root path on client */}
+            {!hideContent && <FileShareView />}
         </>
     );
 };
