@@ -1359,7 +1359,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deleteCollectionDialogBody(String collectionName) {
-    return 'This action is immediate and cannot be undone.\nThe $collectionName will be deleted permanently.';
+    return '$collectionName will be deleted permanently.';
   }
 
   @override
@@ -1370,7 +1370,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count collections',
       one: '1 collection',
     );
-    return 'This action is immediate and cannot be undone.\n$_temp0 will be deleted permanently.';
+    return '$_temp0 will be deleted permanently.';
   }
 
   @override
@@ -1381,7 +1381,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: '$count files',
       one: '1 file',
     );
-    return 'This action is immediate and cannot be undone.\n$_temp0 will be deleted permanently.';
+    return '$_temp0 will be deleted permanently.';
   }
 
   @override

@@ -2389,19 +2389,19 @@ abstract class AppLocalizations {
   /// Confirmation message body for deleting a single collection
   ///
   /// In en, this message translates to:
-  /// **'This action is immediate and cannot be undone.\nThe {collectionName} will be deleted permanently.'**
+  /// **'{collectionName} will be deleted permanently.'**
   String deleteCollectionDialogBody(String collectionName);
 
   /// Confirmation message body for deleting multiple collections
   ///
   /// In en, this message translates to:
-  /// **'This action is immediate and cannot be undone.\n{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
+  /// **'{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
   String deleteMultipleCollectionsDialogBody(int count);
 
   /// Confirmation message body for deleting multiple files
   ///
   /// In en, this message translates to:
-  /// **'This action is immediate and cannot be undone.\n{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.'**
+  /// **'{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.'**
   String deleteMultipleFilesDialogBody(int count);
 
   /// Button label for confirming deletion of one or more collections
