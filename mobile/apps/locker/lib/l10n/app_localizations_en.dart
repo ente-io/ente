@@ -975,8 +975,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendInvite => 'Send invite';
 
   @override
-  String get shareTextRecommendUsingEnte =>
-      'Download Ente so we can easily share original quality items\n\nhttps://ente.io';
+  String get shareTextRecommendUsingEnte => 'Download Ente\n\nhttps://ente.io';
 
   @override
   String get thisIsYourVerificationId => 'This is your Verification ID';

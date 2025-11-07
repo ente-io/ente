@@ -40,7 +40,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     super.initState();
     _files = List.from(widget.files);
 
-    if (widget.selectedCollection != null) {
+    if (widget.selectedCollection != null &&
+        widget.selectedCollection!.type != CollectionType.uncategorized) {
       _selectedCollections.add(widget.selectedCollection!);
     }
   }
@@ -147,21 +148,19 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                       const SizedBox(height: 24),
                     ],
                     TitleBarTitleWidget(
-                      title: context.l10n.addToCollection,
+                      title: context.l10n.collections,
                     ),
                     const SizedBox(height: 24),
                     Wrap(
                       spacing: 8,
                       runSpacing: 12,
                       children: [
-                        _buildCollectionChip(
-                          context.l10n.uncategorized,
-                          _selectedCollections.isEmpty,
-                          _onUncategorizedSelected,
-                          colorScheme,
-                          textTheme,
-                        ),
-                        ...widget.collections.map((collection) {
+                        ...widget.collections
+                            .where(
+                          (collection) =>
+                              collection.type != CollectionType.uncategorized,
+                        )
+                            .map((collection) {
                           final isSelected =
                               _selectedCollections.contains(collection);
                           return _buildCollectionChip(
@@ -184,17 +183,16 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: GradientButton(
-                  hugeIcon: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedFileUpload,
-                    color: Colors.white,
-                  ),
-                  onTap: () async {
-                    final result = FileUploadDialogResult(
-                      note: '',
-                      selectedCollections: _selectedCollections.toList(),
-                    );
-                    Navigator.of(context).pop(result);
-                  },
+                  onTap: _selectedCollections.isEmpty
+                      ? null
+                      : () async {
+                          final result = FileUploadDialogResult(
+                            note: '',
+                            selectedCollections:
+                                _selectedCollections.toList(),
+                          );
+                          Navigator.of(context).pop(result);
+                        },
                   text: context.l10n.save,
                 ),
               ),
@@ -281,12 +279,6 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     return FileIconUtils.getFileIcon(fileName, showBackground: true);
   }
 
-  void _onUncategorizedSelected() {
-    setState(() {
-      _selectedCollections.clear();
-    });
-  }
-
   void _onCollectionSelected(Collection collection) {
     setState(() {
       if (_selectedCollections.contains(collection)) {
@@ -361,7 +353,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             ),
             const SizedBox(width: 6),
             Text(
-              context.l10n.newCollection,
+              context.l10n.collectionButtonLabel,
               style: textTheme.body.copyWith(
                 color: colorScheme.textMuted,
                 fontWeight: FontWeight.w500,

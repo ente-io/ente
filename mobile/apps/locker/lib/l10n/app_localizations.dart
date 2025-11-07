@@ -1771,7 +1771,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTextRecommendUsingEnte.
   ///
   /// In en, this message translates to:
-  /// **'Download Ente so we can easily share original quality items\n\nhttps://ente.io'**
+  /// **'Download Ente\n\nhttps://ente.io'**
   String get shareTextRecommendUsingEnte;
 
   /// No description provided for @thisIsYourVerificationId.
