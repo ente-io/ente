@@ -13,8 +13,8 @@
   "untitled": "Untitled",
   "edit": "Edit",
   "delete": "Delete",
-  "noFilesFound": "No files here",
-  "addFiles": "Add files",
+  "noFilesFound": "No items here",
+  "addFiles": "Add items",
   "name": "Name",
   "date": "Date",
   "pleaseWait": "Please wait...",
@@ -132,10 +132,10 @@
   },
   "pleaseSelectAtLeastOneCollection": "Please select at least one collection",
   "unknownItemType": "Unknown item type",
-  "fileDeletedSuccessfully": "File deleted successfully",
-  "failedToDeleteFile": "Failed to delete file: {error}",
+  "fileDeletedSuccessfully": "Item deleted successfully",
+  "failedToDeleteFile": "Failed to delete item: {error}",
   "@failedToDeleteFile": {
-    "description": "Error message when file deletion fails",
+    "description": "Error message when item deletion fails",
     "placeholders": {
       "error": {
         "type": "String",
@@ -143,10 +143,10 @@
       }
     }
   },
-  "fileUpdatedSuccessfully": "File updated successfully!",
-  "failedToUpdateFile": "Failed to update file: {error}",
+  "fileUpdatedSuccessfully": "Item updated successfully!",
+  "failedToUpdateFile": "Failed to update item: {error}",
   "@failedToUpdateFile": {
-    "description": "Error message when file update fails",
+    "description": "Error message when item update fails",
     "placeholders": {
       "error": {
         "type": "String",
@@ -654,6 +654,8 @@
   "addToCollection": "Add to collection",
   "newCollection": "New collection",
   "title": "Title",
+  "editItem": "Edit item",
+  "enterNewTitle": "Enter a new title",
   "backToView": "Back to view",
   "back": "Back",
   "failedToLoadCollections": "Failed to load collections: {error}",

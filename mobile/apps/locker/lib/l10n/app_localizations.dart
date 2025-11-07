@@ -181,13 +181,13 @@ abstract class AppLocalizations {
   /// No description provided for @noFilesFound.
   ///
   /// In en, this message translates to:
-  /// **'No files here'**
+  /// **'No items here'**
   String get noFilesFound;
 
   /// No description provided for @addFiles.
   ///
   /// In en, this message translates to:
-  /// **'Add files'**
+  /// **'Add items'**
   String get addFiles;
 
   /// No description provided for @name.
@@ -355,25 +355,25 @@ abstract class AppLocalizations {
   /// No description provided for @fileDeletedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'File deleted successfully'**
+  /// **'Item deleted successfully'**
   String get fileDeletedSuccessfully;
 
-  /// Error message when file deletion fails
+  /// Error message when item deletion fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to delete file: {error}'**
+  /// **'Failed to delete item: {error}'**
   String failedToDeleteFile(String error);
 
   /// No description provided for @fileUpdatedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'File updated successfully!'**
+  /// **'Item updated successfully!'**
   String get fileUpdatedSuccessfully;
 
-  /// Error message when file update fails
+  /// Error message when item update fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to update file: {error}'**
+  /// **'Failed to update item: {error}'**
   String failedToUpdateFile(String error);
 
   /// No description provided for @noChangesWereMade.
@@ -2139,6 +2139,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Title'**
   String get title;
+
+  /// No description provided for @editItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get editItem;
+
+  /// No description provided for @enterNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new title'**
+  String get enterNewTitle;
 
   /// No description provided for @backToView.
   ///

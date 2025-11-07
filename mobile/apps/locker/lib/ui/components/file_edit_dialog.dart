@@ -2,9 +2,11 @@ import "package:ente_ui/components/buttons/gradient_button.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
+import 'package:locker/ui/components/form_text_input_widget.dart';
 import 'package:locker/utils/collection_list_util.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
 
@@ -46,11 +48,39 @@ class _FileEditDialogState extends State<FileEditDialog> {
   void initState() {
     super.initState();
 
-    _availableCollections = uniqueCollectionsById(widget.collections);
+    _availableCollections = _filterCollections(widget.collections);
 
     _titleController.text = widget.file.displayName;
 
     _captionController.text = widget.file.caption ?? '';
+
+    _initializeSelections();
+  }
+
+  Future<void> _initializeSelections() async {
+    try {
+      final existingCollections =
+          await CollectionService.instance.getCollectionsForFile(widget.file);
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _selectedCollectionIds
+          ..clear()
+          ..addAll(
+            existingCollections
+                .where(
+                  (collection) =>
+                      collection.type != CollectionType.uncategorized,
+                )
+                .map((collection) => collection.id),
+          );
+      });
+    } catch (_) {
+      // Ignore failures; selections will remain empty.
+    }
   }
 
   @override
@@ -71,8 +101,18 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
   void _onCollectionsUpdated(List<Collection> updatedCollections) {
     setState(() {
-      _availableCollections = uniqueCollectionsById(updatedCollections);
+      _availableCollections = _filterCollections(updatedCollections);
+      _selectedCollectionIds
+          .removeWhere((id) => !_availableCollections.any((c) => c.id == id));
     });
+  }
+
+  List<Collection> _filterCollections(List<Collection> source) {
+    final filtered = uniqueCollectionsById(source)
+      ..removeWhere(
+        (collection) => collection.type == CollectionType.uncategorized,
+      );
+    return filtered;
   }
 
   Future<void> _onCancel() async {
@@ -99,10 +139,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
     );
 
     Navigator.of(context).pop(result);
-  }
-
-  String get _fileName {
-    return widget.file.displayName;
   }
 
   @override
@@ -137,17 +173,8 @@ class _FileEditDialogState extends State<FileEditDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Rename your document",
+                        context.l10n.editItem,
                         style: textTheme.largeBold,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _fileName,
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -169,36 +196,13 @@ class _FileEditDialogState extends State<FileEditDialog> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            TextField(
+            const SizedBox(height: 24),
+            FormTextInputWidget(
               controller: _titleController,
-              decoration: InputDecoration(
-                hintText: "Enter a new name for your document",
-                hintStyle: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
-                ),
-                filled: true,
-                fillColor: colorScheme.fillFaint,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(
-                    color: colorScheme.strokeFaint,
-                  ),
-                ),
-                counterText: "",
-              ),
+              labelText: context.l10n.title,
+              hintText: context.l10n.enterNewTitle,
               maxLength: 200,
-              style: textTheme.body.copyWith(
-                color: colorScheme.textBase,
-              ),
+              shouldUseTextInputWidget: false,
             ),
             const SizedBox(height: 24),
             CollectionSelectionWidget(
@@ -207,8 +211,10 @@ class _FileEditDialogState extends State<FileEditDialog> {
               onToggleCollection: _toggleCollection,
               onCollectionsUpdated: _onCollectionsUpdated,
               titleWidget: Text(
-                "Add to collection",
-                style: textTheme.largeBold,
+                context.l10n.collections,
+                style: textTheme.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             const SizedBox(height: 28),

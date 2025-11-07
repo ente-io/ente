@@ -53,10 +53,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get noFilesFound => 'No files here';
+  String get noFilesFound => 'No items here';
 
   @override
-  String get addFiles => 'Add files';
+  String get addFiles => 'Add items';
 
   @override
   String get name => 'Name';
@@ -161,19 +161,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownItemType => 'Unknown item type';
 
   @override
-  String get fileDeletedSuccessfully => 'File deleted successfully';
+  String get fileDeletedSuccessfully => 'Item deleted successfully';
 
   @override
   String failedToDeleteFile(String error) {
-    return 'Failed to delete file: $error';
+    return 'Failed to delete item: $error';
   }
 
   @override
-  String get fileUpdatedSuccessfully => 'File updated successfully!';
+  String get fileUpdatedSuccessfully => 'Item updated successfully!';
 
   @override
   String failedToUpdateFile(String error) {
-    return 'Failed to update file: $error';
+    return 'Failed to update item: $error';
   }
 
   @override
@@ -1207,6 +1207,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get title => 'Title';
+
+  @override
+  String get editItem => 'Edit item';
+
+  @override
+  String get enterNewTitle => 'Enter a new title';
 
   @override
   String get backToView => 'Back to view';
