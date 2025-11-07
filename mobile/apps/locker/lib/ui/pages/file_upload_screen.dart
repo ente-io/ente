@@ -188,8 +188,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                       : () async {
                           final result = FileUploadDialogResult(
                             note: '',
-                            selectedCollections:
-                                _selectedCollections.toList(),
+                            selectedCollections: _selectedCollections.toList(),
                           );
                           Navigator.of(context).pop(result);
                         },
