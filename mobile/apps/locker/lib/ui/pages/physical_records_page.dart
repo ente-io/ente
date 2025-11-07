@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
-import 'package:locker/ui/components/form_text_input_widget.dart';
+import 'package:locker/ui/components/capsule_form_field.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class PhysicalRecordsPage extends BaseInfoPage<PhysicalRecordData> {
@@ -108,12 +109,13 @@ class _PhysicalRecordsPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      FormTextInputWidget(
+      CapsuleFormField(
         labelText: context.l10n.name,
         hintText: context.l10n.recordNameHint,
         controller: _nameController,
-        shouldUseTextInputWidget: false,
         autofocus: true,
+        textCapitalization: TextCapitalization.sentences,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterRecordName;
@@ -122,11 +124,12 @@ class _PhysicalRecordsPageState
         },
       ),
       const SizedBox(height: 24),
-      FormTextInputWidget(
+      CapsuleFormField(
         labelText: context.l10n.recordLocation,
         hintText: context.l10n.recordLocationHint,
         controller: _locationController,
-        shouldUseTextInputWidget: false,
+        textCapitalization: TextCapitalization.sentences,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterLocation;
@@ -135,12 +138,16 @@ class _PhysicalRecordsPageState
         },
       ),
       const SizedBox(height: 24),
-      FormTextInputWidget(
+      CapsuleFormField(
         labelText: context.l10n.recordNotes,
         hintText: context.l10n.recordNotesHint,
         controller: _notesController,
-        shouldUseTextInputWidget: false,
         maxLines: 3,
+        minLines: 3,
+        textCapitalization: TextCapitalization.sentences,
+        keyboardType: TextInputType.multiline,
+        textInputAction: TextInputAction.newline,
+        lineHeight: 1.5,
       ),
     ];
   }
@@ -151,26 +158,52 @@ class _PhysicalRecordsPageState
     }
   }
 
+  void _copyValue(String value, String label) {
+    if (value.trim().isEmpty) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.copiedToClipboard(label)),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
   @override
   List<Widget> buildViewFields() {
-    final viewFields = <Widget>[
-      buildViewField(
-        label: context.l10n.recordLocation,
+    final fields = <Widget>[
+      CapsuleDisplayField(
+        labelText: context.l10n.recordLocation,
         value: _locationController.text,
+        onCopy: _locationController.text.trim().isEmpty
+            ? null
+            : () => _copyValue(
+                  _locationController.text,
+                  context.l10n.recordLocation,
+                ),
       ),
     ];
 
-    if (_notesController.text.isNotEmpty) {
-      viewFields.addAll([
+    if (_notesController.text.trim().isNotEmpty) {
+      fields.addAll([
         const SizedBox(height: 24),
-        buildViewField(
-          label: context.l10n.recordNotes,
+        CapsuleDisplayField(
+          labelText: context.l10n.recordNotes,
           value: _notesController.text,
-          maxLines: 3,
+          maxLines: 6,
+          lineHeight: 1.5,
+          onCopy: () => _copyValue(
+            _notesController.text,
+            context.l10n.recordNotes,
+          ),
         ),
       ]);
     }
 
-    return viewFields;
+    return fields;
   }
 }

@@ -1081,7 +1081,7 @@ abstract class AppLocalizations {
   /// No description provided for @informationDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save important information that can be shared and passed down to loved ones.'**
+  /// **'Save information to be shared or passed down to loved ones.'**
   String get informationDescription;
 
   /// No description provided for @personalNote.
@@ -1237,13 +1237,13 @@ abstract class AppLocalizations {
   /// No description provided for @credentialName.
   ///
   /// In en, this message translates to:
-  /// **'Item name'**
+  /// **'Account'**
   String get credentialName;
 
   /// No description provided for @credentialNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Name of the service or account'**
+  /// **'Name of the service'**
   String get credentialNameHint;
 
   /// No description provided for @username.
@@ -1255,7 +1255,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHint.
   ///
   /// In en, this message translates to:
-  /// **'Login username or email address'**
+  /// **'Login ID or email'**
   String get usernameHint;
 
   /// No description provided for @password.
@@ -1267,7 +1267,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'Account password'**
+  /// **'Password'**
   String get passwordHint;
 
   /// No description provided for @credentialNotes.
@@ -1279,7 +1279,7 @@ abstract class AppLocalizations {
   /// No description provided for @credentialNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Recovery methods, security questions, or other important details'**
+  /// **'Recovery methods, security questions, ...'**
   String get credentialNotesHint;
 
   /// No description provided for @contactName.

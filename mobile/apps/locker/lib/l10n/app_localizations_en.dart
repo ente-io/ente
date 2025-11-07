@@ -568,7 +568,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get informationDescription =>
-      'Save important information that can be shared and passed down to loved ones.';
+      'Save information to be shared or passed down to loved ones.';
 
   @override
   String get personalNote => 'Note';
@@ -648,29 +648,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordNotesHint => 'Any additional information about the item';
 
   @override
-  String get credentialName => 'Item name';
+  String get credentialName => 'Account';
 
   @override
-  String get credentialNameHint => 'Name of the service or account';
+  String get credentialNameHint => 'Name of the service';
 
   @override
   String get username => 'Username';
 
   @override
-  String get usernameHint => 'Login username or email address';
+  String get usernameHint => 'Login ID or email';
 
   @override
   String get password => 'Password';
 
   @override
-  String get passwordHint => 'Account password';
+  String get passwordHint => 'Password';
 
   @override
   String get credentialNotes => 'Additional notes';
 
   @override
-  String get credentialNotesHint =>
-      'Recovery methods, security questions, or other important details';
+  String get credentialNotesHint => 'Recovery methods, security questions, ...';
 
   @override
   String get contactName => 'Contact name';
