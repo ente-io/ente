@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,9 +23,19 @@ class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
 class _PersonalNotePageState
     extends BaseInfoPageState<PersonalNoteData, PersonalNotePage> {
   static const String _defaultTitle = 'Note title';
+  static const double _editorMinWidth = 320.0;
+  static const double _editorMaxWidth = 720.0;
+  static const double _editorWidthFactor = 0.92;
+  static const double _editorMinHeight = 260.0;
+  static const double _editorMaxHeight = 560.0;
+  static const double _editorBorderRadius = 24.0;
+  static const EdgeInsets _editorContentPadding =
+      EdgeInsets.symmetric(horizontal: 28, vertical: 24);
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   final FocusNode _titleFocusNode = FocusNode();
+  final FocusNode _contentFocusNode = FocusNode();
+  final ScrollController _contentScrollController = ScrollController();
   bool _isControllerSyncInProgress = false;
   String _initialContent = '';
 
@@ -33,6 +45,7 @@ class _PersonalNotePageState
     _nameController.addListener(_onTitleChanged);
     _contentController.addListener(_onContentChanged);
     _titleFocusNode.addListener(_onTitleFocusChanged);
+    _contentFocusNode.addListener(_onContentFocusChanged);
   }
 
   @override
@@ -59,9 +72,12 @@ class _PersonalNotePageState
     _nameController.removeListener(_onTitleChanged);
     _contentController.removeListener(_onContentChanged);
     _titleFocusNode.removeListener(_onTitleFocusChanged);
+    _contentFocusNode.removeListener(_onContentFocusChanged);
     _nameController.dispose();
     _contentController.dispose();
     _titleFocusNode.dispose();
+    _contentFocusNode.dispose();
+    _contentScrollController.dispose();
     super.dispose();
   }
 
@@ -122,87 +138,16 @@ class _PersonalNotePageState
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.note,
-                  style: textTheme.body,
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: TextFormField(
-                        controller: _contentController,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return context.l10n.pleaseEnterNoteContent;
-                          }
-                          return null;
-                        },
-                        keyboardType: TextInputType.multiline,
-                        textCapitalization: TextCapitalization.sentences,
-                        autofocus: true,
-                        maxLines: null,
-                        minLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        style: textTheme.body,
-                        decoration: InputDecoration(
-                          hintText: context.l10n.noteContentHint,
-                          hintStyle: textTheme.body.copyWith(
-                            color: colorScheme.textFaint,
-                          ),
-                          filled: true,
-                          fillColor: colorScheme.fillFaint,
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                          border: const UnderlineInputBorder(
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.warning500,
-                              width: 1,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: colorScheme.warning500,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            child: _buildEditorSurface(
+              context,
+              constraints,
+              isEditing: true,
             ),
           ),
         ),
@@ -224,56 +169,122 @@ class _PersonalNotePageState
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final contentText = _contentController.text;
-
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 100),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            child: _buildEditorSurface(
+              context,
+              constraints,
+              isEditing: false,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEditorSurface(
+    BuildContext context,
+    BoxConstraints constraints, {
+    required bool isEditing,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final dimensions = _calculateEditorDimensions(context, constraints);
+    final accentBlue = Color.lerp(
+      colorScheme.primary500,
+      const Color(0xFF3B82F6),
+      0.7,
+    )!;
+
+    _contentFocusNode.canRequestFocus = isEditing;
+    if (!isEditing && _contentFocusNode.hasFocus) {
+      _contentFocusNode.unfocus();
+    }
+    final isEditorFocused = isEditing && _contentFocusNode.hasFocus;
+    final editorFillColor =
+        isEditorFocused ? accentBlue.withOpacity(0.14) : colorScheme.fillFaint;
+
+    final contentPadding = isEditing
+        ? _editorContentPadding
+        : _editorContentPadding + const EdgeInsets.only(bottom: 36);
+
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: dimensions.width,
+          maxWidth: dimensions.width,
+        ),
+        child: SizedBox(
+          height: dimensions.height,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              color: editorFillColor,
+              borderRadius: BorderRadius.circular(_editorBorderRadius),
+            ),
             child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              borderRadius: BorderRadius.circular(_editorBorderRadius),
               child: Material(
                 color: Colors.transparent,
                 child: Stack(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.fillFaint,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 48, right: 4),
-                      child: Scrollbar(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-                          child: contentText.isEmpty
-                              ? Text(
-                                  context.l10n.noteContentHint,
-                                  style: textTheme.body.copyWith(
-                                    color: colorScheme.textFaint,
-                                  ),
-                                )
-                              : SelectableText(
-                                  contentText,
-                                  style: textTheme.body,
-                                ),
+                    Scrollbar(
+                      controller: _contentScrollController,
+                      child: Padding(
+                        padding: contentPadding,
+                        child: TextFormField(
+                          controller: _contentController,
+                          focusNode: _contentFocusNode,
+                          scrollController: _contentScrollController,
+                          readOnly: !isEditing,
+                          showCursor: isEditing,
+                          enableInteractiveSelection: true,
+                          validator: isEditing
+                              ? (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return context.l10n.pleaseEnterNoteContent;
+                                  }
+                                  return null;
+                                }
+                              : null,
+                          keyboardType: TextInputType.multiline,
+                          textCapitalization: TextCapitalization.sentences,
+                          autofocus: isEditing,
+                          maxLines: null,
+                          minLines: null,
+                          expands: true,
+                          textAlignVertical: TextAlignVertical.top,
+                          style: textTheme.body.copyWith(height: 1.69),
+                          decoration: InputDecoration.collapsed(
+                            hintText: context.l10n.noteContentHint,
+                            hintStyle: textTheme.body.copyWith(
+                              color: colorScheme.textFaint,
+                              height: 1.69,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    if (contentText.trim().isNotEmpty)
+                    if (!isEditing &&
+                        _contentController.text.trim().isNotEmpty)
                       Positioned(
-                        bottom: 12,
-                        right: 12,
+                        bottom: 24,
+                        right: 24,
                         child: InkWell(
                           onTap: _copyContentToClipboard,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(8),
                           child: Container(
-                            padding: const EdgeInsets.all(4),
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colorScheme.fillBase.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             child: Icon(
                               Icons.copy,
                               size: 16,
@@ -287,29 +298,36 @@ class _PersonalNotePageState
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
   @override
   Widget buildAppBarTitle(BuildContext context) {
-    if (isInEditMode) {
-      final textTheme = getEnteTextTheme(context);
-      return TextField(
-        controller: _nameController,
-        focusNode: _titleFocusNode,
-        style: textTheme.h3Bold,
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding: EdgeInsets.zero,
-        ),
-        textCapitalization: TextCapitalization.sentences,
-        maxLines: 1,
-      );
+    final textTheme = getEnteTextTheme(context);
+    final isEditing = isInEditMode;
+
+    if (!isEditing && _titleFocusNode.hasFocus) {
+      _titleFocusNode.unfocus();
     }
-    return super.buildAppBarTitle(context);
+    _titleFocusNode.canRequestFocus = isEditing;
+
+    return TextField(
+      controller: _nameController,
+      focusNode: _titleFocusNode,
+      readOnly: !isEditing,
+      showCursor: isEditing,
+      enableInteractiveSelection: true,
+      style: textTheme.h3Bold,
+      decoration: const InputDecoration(
+        border: InputBorder.none,
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+      ),
+      textCapitalization: TextCapitalization.sentences,
+      maxLines: 1,
+    );
   }
 
   void _syncControllers({
@@ -339,6 +357,27 @@ class _PersonalNotePageState
     if (triggerSetState && mounted) {
       setState(() {});
     }
+  }
+
+  _EditorDimensions _calculateEditorDimensions(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    final screenSize = MediaQuery.of(context).size;
+    final availableWidth =
+        constraints.hasBoundedWidth ? constraints.maxWidth : screenSize.width;
+    final availableHeight = constraints.hasBoundedHeight
+        ? constraints.maxHeight
+        : screenSize.height;
+    final width = availableWidth >= _editorMinWidth
+        ? math.min(availableWidth * _editorWidthFactor, _editorMaxWidth)
+        : availableWidth;
+    final constrainedHeight = math.max(
+      _editorMinHeight,
+      math.min(_editorMaxHeight, availableHeight * 0.65),
+    );
+    final height = math.min(availableHeight, constrainedHeight);
+    return _EditorDimensions(width, height);
   }
 
   void _onTitleChanged() {
@@ -407,6 +446,12 @@ class _PersonalNotePageState
     }
   }
 
+  void _onContentFocusChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void _copyContentToClipboard() {
     final contentText = _contentController.text;
     if (contentText.trim().isEmpty) {
@@ -464,4 +509,11 @@ class _PersonalNotePageState
 
     return result ?? false;
   }
+}
+
+class _EditorDimensions {
+  final double width;
+  final double height;
+
+  const _EditorDimensions(this.width, this.height);
 }

@@ -1075,7 +1075,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveDocumentDescription.
   ///
   /// In en, this message translates to:
-  /// **'Upload documents to keep everything in one place.'**
+  /// **'Upload items to to be preserved'**
   String get saveDocumentDescription;
 
   /// No description provided for @informationDescription.
@@ -1093,19 +1093,19 @@ abstract class AppLocalizations {
   /// No description provided for @personalNoteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Write essential notes or reflections.'**
+  /// **'Write down thoughts and instructions'**
   String get personalNoteDescription;
 
   /// No description provided for @physicalRecords.
   ///
   /// In en, this message translates to:
-  /// **'Location'**
+  /// **'Place'**
   String get physicalRecords;
 
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Document real-world locations of important items.'**
+  /// **'Share locations to important items'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.
@@ -1171,7 +1171,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteContentHint.
   ///
   /// In en, this message translates to:
-  /// **'Write down important thoughts, instructions, or memories you want to preserve'**
+  /// **'Write down important thoughts or instructions'**
   String get noteContentHint;
 
   /// No description provided for @unsavedNoteChangesTitle.

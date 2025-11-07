@@ -564,8 +564,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveDocumentTitle => 'Document';
 
   @override
-  String get saveDocumentDescription =>
-      'Upload documents to keep everything in one place.';
+  String get saveDocumentDescription => 'Upload items to to be preserved';
 
   @override
   String get informationDescription =>
@@ -575,14 +574,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalNote => 'Note';
 
   @override
-  String get personalNoteDescription => 'Write essential notes or reflections.';
+  String get personalNoteDescription => 'Write down thoughts and instructions';
 
   @override
-  String get physicalRecords => 'Location';
+  String get physicalRecords => 'Place';
 
   @override
-  String get physicalRecordsDescription =>
-      'Document real-world locations of important items.';
+  String get physicalRecordsDescription => 'Share locations to important items';
 
   @override
   String get accountCredentials => 'Secret';
@@ -616,8 +614,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteContent => 'Content';
 
   @override
-  String get noteContentHint =>
-      'Write down important thoughts, instructions, or memories you want to preserve';
+  String get noteContentHint => 'Write down important thoughts or instructions';
 
   @override
   String get unsavedNoteChangesTitle => 'Discard changes?';
