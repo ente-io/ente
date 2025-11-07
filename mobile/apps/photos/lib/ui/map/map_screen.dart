@@ -88,22 +88,33 @@ class _MapScreenState extends State<MapScreen> {
     final EnteFile? mostRecentFile = result.$1;
     final List<ImageMarker> tempMarkers = result.$2;
 
-    if (tempMarkers.isNotEmpty) {
-      center = widget.center ??
-          LatLng(
-            mostRecentFile!.location!.latitude!,
-            mostRecentFile.location!.longitude!,
-          );
-
-      if (kDebugMode) {
-        debugPrint(
-          "Info for map: center $center, initialZoom ${widget.initialZoom}",
-        );
-      }
-    } else {
+    if (tempMarkers.isEmpty) {
       showShortToast(
         context,
         AppLocalizations.of(context).noImagesWithLocation,
+      );
+      if (!visibleImages.isClosed) {
+        visibleImages.sink.add([]);
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        imageMarkers = tempMarkers;
+        isLoading = false;
+      });
+      return;
+    }
+
+    center = widget.center ??
+        LatLng(
+          mostRecentFile!.location!.latitude!,
+          mostRecentFile.location!.longitude!,
+        );
+
+    if (kDebugMode) {
+      debugPrint(
+        "Info for map: center $center, initialZoom ${widget.initialZoom}",
       );
     }
 
@@ -117,6 +128,9 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     Timer(Duration(milliseconds: debounceDuration), () {
+      if (!mounted) {
+        return;
+      }
       calculateVisibleMarkers(mapController.camera.visibleBounds);
       setState(() {
         isLoading = false;
