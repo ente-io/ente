@@ -780,13 +780,6 @@
       ]
     },
     {
-      "title": "IBM",
-      "slug": "ibm",
-      "altNames": [
-        "International Business Machines"
-      ]
-    },
-    {
       "title": "IceDrive",
       "slug": "ice_drive"
     },
@@ -2035,6 +2028,22 @@
         "ESET Protect",
         "ESET Small Business Security",
         "ESET Home Security"
+      ]
+    },
+    {
+      "title": "Binghamton University",
+      "slug": "binghamton_university",
+      "altNames": [
+        "Binghamton",
+        "Binghamton Univ",
+        "Binghamton University SSO"
+      ]
+    },
+    {
+      "title": "IBM",
+      "slug": "ibm",
+      "altNames": [
+        "International Business Machines"
       ]
     }
   ]
