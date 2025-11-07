@@ -157,7 +157,8 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                AppLocalizations.of(context).zoomOutToSeePhotos,
+                                AppLocalizations.of(context)
+                                    .noImagesWithLocation,
                                 style: textTheme.smallFaint,
                               ),
                             ],
