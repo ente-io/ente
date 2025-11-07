@@ -2,16 +2,12 @@ const baseConfig = require("ente-base/next.config.base.js");
 
 module.exports = {
     ...baseConfig,
-    // Disable file tracing for the share app to avoid build errors
-    outputFileTracingRoot: undefined,
-    experimental: {
-        ...baseConfig.experimental,
-        outputFileTracingIncludes: undefined,
-    },
-    // Only add rewrites for development (not for static export)
-    async rewrites() {
-        // Only apply rewrites in development mode
-        if (process.env.NODE_ENV !== "production") {
+    // Override output for development to support rewrites
+    // In production, we use static export (inherited from baseConfig)
+    ...(process.env.NODE_ENV === "development" && {
+        output: undefined, // Remove 'export' mode in development to allow rewrites
+        // Add rewrites only in development for SPA routing
+        async rewrites() {
             return {
                 fallback: [
                     {
@@ -21,9 +17,6 @@ module.exports = {
                     },
                 ],
             };
-        }
-        return {
-            fallback: [],
-        };
-    },
+        },
+    }),
 };
