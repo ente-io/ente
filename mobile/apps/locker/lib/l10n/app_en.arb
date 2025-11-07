@@ -781,5 +781,20 @@
         "example": "3"
       }
     }
+  },
+  "usage": "Usage",
+  "fileCount": "{used} / {max}",
+  "@fileCount": {
+    "description": "Display file count usage in the format 'used / max'",
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "8"
+      },
+      "max": {
+        "type": "String",
+        "example": "1,000"
+      }
+    }
   }
 }
