@@ -150,7 +150,6 @@ class AlbumRowItemWidget extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.topLeft,
                               child: AlbumSharesIcons(
-                                key: ValueKey('${c.id}_sharees'),
                                 padding: const EdgeInsets.only(left: 4, top: 4),
                                 sharees: c.getSharees(),
                                 type: AvatarType.mini,
@@ -197,7 +196,6 @@ class AlbumRowItemWidget extends StatelessWidget {
                                     const EdgeInsets.only(right: 4, bottom: 4),
                                 child: UserAvatarWidget(
                                   c.owner,
-                                  key: ValueKey('${c.id}_owner_${c.owner.id}'),
                                   thumbnailView: true,
                                 ),
                               ),
