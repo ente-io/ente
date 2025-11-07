@@ -224,11 +224,15 @@ class _TrashPageState extends State<TrashPage> {
           ),
         ),
       ),
-      body: _buildBody(colorScheme, textTheme),
+      body: _buildBody(context, colorScheme, textTheme),
     );
   }
 
-  Widget _buildBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
+  Widget _buildBody(
+    BuildContext context,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -258,9 +262,9 @@ class _TrashPageState extends State<TrashPage> {
           ),
           const SizedBox(height: 24),
           _sortedTrashFiles.isEmpty
-              ? const EmptyStateWidget(
+              ? EmptyStateWidget(
                   assetPath: 'assets/empty_state.png',
-                  title: "Nothing to see here",
+                  title: context.l10n.yourTrashIsEmpty,
                   showBorder: false,
                 )
               : Expanded(

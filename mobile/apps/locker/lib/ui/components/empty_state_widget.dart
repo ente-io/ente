@@ -6,18 +6,18 @@ class EmptyStateWidget extends StatelessWidget {
   const EmptyStateWidget({
     super.key,
     required this.assetPath,
-    required this.title,
+    this.title,
     this.subtitle,
     this.onTap,
     this.showBorder = true,
     this.illustrationHeight,
     this.horizontalPadding = 24,
     this.verticalPadding = 42,
-    this.spacing = 12,
+    this.spacing = 20,
   });
 
   final String assetPath;
-  final String title;
+  final String? title;
   final String? subtitle;
   final VoidCallback? onTap;
   final bool showBorder;
@@ -53,14 +53,15 @@ class EmptyStateWidget extends StatelessWidget {
                 height: illustrationHeight,
               ),
             if (assetPath.isNotEmpty) SizedBox(height: spacing),
-            Text(
-              title,
-              style: textTheme.h3Bold.copyWith(
-                color: colorScheme.textBase,
+            if (title != null && title!.isNotEmpty)
+              Text(
+                title!,
+                style: textTheme.largeBold.copyWith(
+                  color: colorScheme.textBase,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
+            if (title != null && title!.isNotEmpty) const SizedBox(height: 12),
             if (subtitle != null && subtitle!.isNotEmpty)
               Text(
                 subtitle!,

@@ -152,7 +152,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       ),
       body: Stack(
         children: [
-          _buildBody(),
+          _buildBody(context),
           CollectionSelectionOverlayBar(
             collection: _sortedCollections,
             selectedCollections: widget.selectedCollections!,
@@ -163,7 +163,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
 
     if (_isLoading) {
@@ -206,9 +206,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const EmptyStateWidget(
+              EmptyStateWidget(
                 assetPath: 'assets/empty_state.png',
-                title: "No collection found",
+                title: context.l10n.noCollections,
                 subtitle: "",
                 showBorder: false,
               ),

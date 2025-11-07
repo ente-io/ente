@@ -91,7 +91,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
           filterChipsRow,
           const SizedBox(height: 16),
         ],
-        _buildRecentsTable(),
+        _buildRecentsTable(context),
       ],
     );
   }
@@ -164,12 +164,11 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     );
   }
 
-  Widget _buildRecentsTable() {
+  Widget _buildRecentsTable(BuildContext context) {
     if (_displayedFiles.isEmpty) {
-      return const EmptyStateWidget(
+      return EmptyStateWidget(
         assetPath: "assets/empty_state.png",
-        title: "Oops",
-        subtitle: "No items match the selected filters",
+        subtitle: context.l10n.noItemsMatchSelectedFilters,
       );
     }
 
