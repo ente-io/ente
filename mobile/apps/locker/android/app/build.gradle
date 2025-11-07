@@ -78,3 +78,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Needed at runtime for Tink since R8 strips these annotations otherwise.
+    implementation 'com.google.errorprone:error_prone_annotations:2.24.0'
+}
