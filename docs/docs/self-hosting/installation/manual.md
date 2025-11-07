@@ -228,15 +228,15 @@ git clone https://github.com/ente-io/ente
     :3005 {
         root * /var/www/ente/apps/out/share
         file_server
-        @root {
-            path /
-        }
-        handle @root {
-            try_files /index.html
-        }
-        try_files {path} {path}.html /404.html
+        try_files {path} {path}.html /index.html
     }
     ```
+
+    ::: tip Important for Share App
+
+    The share web app (Public Locker) specifically requires all routes to be served through `/index.html` as it uses client-side routing with a single entry point. The `try_files` directive with `/index.html` as the fallback is essential for proper functionality. Without this configuration, direct links to shared albums and routes will result in 404 errors.
+
+    :::
 
     The web application for Ente Photos should be accessible at
     http://localhost:3000, check out the
