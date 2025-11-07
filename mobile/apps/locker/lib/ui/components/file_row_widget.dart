@@ -1,5 +1,6 @@
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
@@ -69,31 +70,34 @@ class FileRowWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: _buildFileIcon(),
-                ),
-                const Spacer(),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        file.displayName,
-                        style: textTheme.body,
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                      ),
+                    SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: _buildFileIcon(),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 12),
+                    const Spacer(),
                     FilePopupMenuWidget(
                       file: file,
                       overflowActions: overflowActions,
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedMoreVertical,
+                        color: colorScheme.textBase,
+                      ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                const Spacer(),
+                Text(
+                  file.displayName,
+                  style: textTheme.body,
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
                 const SizedBox(height: 4),
               ],
