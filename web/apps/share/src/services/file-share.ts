@@ -3,6 +3,7 @@ import {
     decryptBoxBytes,
     decryptMetadataJSON,
     decryptStreamBytes,
+    deriveKey,
     fromHex,
     toB64,
 } from "ente-base/crypto";
@@ -11,6 +12,7 @@ import type {
     DecryptedFileInfo,
     FileLinkInfo,
     FileMetadata,
+    LinkKeyMaterial,
     LockerInfo,
 } from "../types/file-share";
 
@@ -19,22 +21,25 @@ import type {
  */
 export const extractFileKeyFromURL = async (
     url: URL,
-): Promise<string | null> => {
+): Promise<LinkKeyMaterial | null> => {
     const hashValue = url.hash.slice(1); // Remove '#' prefix
     if (!hashValue) return null;
 
     try {
-        let decodedKey: string;
-        // Support both base58 and hex encoding
+        const base62SecretPattern = /^[0-9A-Za-z]{12}$/;
+
+        if (hashValue.length === 12 && base62SecretPattern.test(hashValue)) {
+            return { type: "secret", passphrase: hashValue };
+        }
+
+        // Support both base58 and hex encoding for legacy links
         if (hashValue.length < 50) {
             // Base58 encoded - convert to base64
             const decoded = bs58.decode(hashValue);
-            decodedKey = await toB64(decoded);
-        } else {
-            // Hex encoded - convert to base64
-            decodedKey = await fromHex(hashValue);
+            return { type: "direct", fileKey: await toB64(decoded) };
         }
-        return decodedKey;
+        // Hex encoded - convert to base64
+        return { type: "direct", fileKey: await fromHex(hashValue) };
     } catch {
         return null;
     }
@@ -169,12 +174,58 @@ const extractFileInfo = (
     return { fileName, fileSize, uploadedTime };
 };
 
+const resolveFileKey = async (
+    fileLinkInfo: FileLinkInfo,
+    keyMaterial: LinkKeyMaterial,
+): Promise<string> => {
+    const file = fileLinkInfo.file;
+
+    if (keyMaterial.type === "secret") {
+        const linkMeta = fileLinkInfo.link;
+        if (
+            !linkMeta?.encryptedFileKey ||
+            !linkMeta.encryptedFileKeyNonce ||
+            !linkMeta.kdfNonce ||
+            linkMeta.kdfMemLimit == null ||
+            linkMeta.kdfOpsLimit == null
+        ) {
+            throw new Error("Missing link metadata for deriving file key");
+        }
+
+        const derivedKey = await deriveKey(
+            keyMaterial.passphrase,
+            linkMeta.kdfNonce,
+            linkMeta.kdfOpsLimit,
+            linkMeta.kdfMemLimit,
+        );
+
+        const decryptedKeyBytes = await decryptBoxBytes(
+            {
+                encryptedData: linkMeta.encryptedFileKey,
+                nonce: linkMeta.encryptedFileKeyNonce,
+            },
+            derivedKey,
+        );
+        return await toB64(decryptedKeyBytes);
+    }
+
+    if (file?.encryptedKey && file.keyDecryptionNonce) {
+        return await decryptFileKey(
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+            keyMaterial.fileKey,
+        );
+    }
+
+    return keyMaterial.fileKey;
+};
+
 /**
  * Decrypt file info
  */
 export const decryptFileInfo = async (
     fileLinkInfo: FileLinkInfo,
-    linkKey: string,
+    keyMaterial: LinkKeyMaterial,
 ): Promise<DecryptedFileInfo> => {
     try {
         const file = fileLinkInfo.file;
@@ -184,15 +235,7 @@ export const decryptFileInfo = async (
             throw new Error("No file object in response");
         }
 
-        // Decrypt the file key if it exists
-        let fileKey = linkKey; // Default to link key
-        if (file.encryptedKey && file.keyDecryptionNonce) {
-            fileKey = await decryptFileKey(
-                file.encryptedKey,
-                file.keyDecryptionNonce,
-                linkKey,
-            );
-        }
+        const fileKey = await resolveFileKey(fileLinkInfo, keyMaterial);
 
         const fileId = file.id || 0;
         const fileDecryptionHeader = file.file?.decryptionHeader;
@@ -258,6 +301,10 @@ export const decryptFileInfo = async (
             lockerInfoData: infoObject?.data,
         };
     } catch {
+        const fallbackKey =
+            keyMaterial.type === "secret"
+                ? keyMaterial.passphrase
+                : keyMaterial.fileKey;
         // Return partial info if decryption fails
         if (!fileLinkInfo.file) {
             return {
@@ -268,7 +315,7 @@ export const decryptFileInfo = async (
                 ownerName: fileLinkInfo.ownerName,
                 fileDecryptionHeader: undefined,
                 fileNonce: undefined,
-                fileKey: linkKey,
+                fileKey: fallbackKey,
             };
         }
 
@@ -281,7 +328,7 @@ export const decryptFileInfo = async (
             ownerName: fileLinkInfo.ownerName,
             fileDecryptionHeader: file.file?.decryptionHeader,
             fileNonce: undefined,
-            fileKey: linkKey,
+            fileKey: fallbackKey,
         };
     }
 };

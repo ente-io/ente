@@ -247,6 +247,7 @@ class _AlbumsSection extends StatelessWidget {
                   return AlbumRowItemWidget(
                     item,
                     120,
+                    key: ValueKey('contact_result_${item.id}'),
                     showFileCount: false,
                   );
                 },

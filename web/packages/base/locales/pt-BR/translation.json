@@ -158,6 +158,7 @@
     "logout": "Encerrar sessão",
     "logout_message": "Deseja mesmo encerrar sessão?",
     "delete_account": "Excluir conta",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>Por favor, envie um e-mail para <a>{{emailID}}</a>através do seu e-mail registrado.</p><p>Seu pedido será processado em 72 horas.</p>",
     "change_email": "Alterar e-mail",
     "ok": "OK",

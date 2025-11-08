@@ -158,6 +158,7 @@
     "logout": "ログアウト",
     "logout_message": "本当にログアウトしてよろしいですか？",
     "delete_account": "アカウント削除",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>ご登録のメールアドレスから <a>{{emailID}}</a> にメールを送信してください。</p><p>あなたのリクエストは72時間以内に処理されます。</p>",
     "change_email": "メールアドレスを変更",
     "ok": "OK",

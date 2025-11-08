@@ -3,7 +3,7 @@ name: "Beta release (auth)"
 on:
     schedule:
         # Runs daily at 12:00 UTC (5:30 PM IST)
-        - cron: "0 12 * * *"
+        - cron: "0 12 * * 1-3"
     workflow_dispatch: # Allow manual trigger
 
 env:

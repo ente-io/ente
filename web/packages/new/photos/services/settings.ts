@@ -5,7 +5,10 @@
 import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
-import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import {
+    updateChecksumProtectedUploadsEnabled,
+    updateShouldDisableCFUploadProxy,
+} from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import {
@@ -149,6 +152,7 @@ export const initSettings = () => {
 
 export const logoutSettings = () => {
     _state = new SettingsState();
+    updateChecksumProtectedUploadsEnabled(false);
 };
 
 /**
@@ -200,6 +204,9 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     if (flags?.customDomain) settings.customDomain = flags.customDomain;
     if (flags?.customDomainCNAME)
         settings.customDomainCNAME = flags.customDomainCNAME;
+    updateChecksumProtectedUploadsEnabled(
+        isDevBuild || settings.isInternalUser,
+    );
     setSettingsSnapshot(settings);
 };
 

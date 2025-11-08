@@ -158,6 +158,7 @@
     "logout": "Ausloggen",
     "logout_message": "Sind sie sicher, dass sie sich ausloggen möchten?",
     "delete_account": "Konto löschen",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>Bitte sende eine E-Mail an <a>{{emailID}}</a> mit deiner registrierten E-Mail-Adresse.</p><p>Deine Anfrage wird innerhalb von 72 Stunden bearbeitet.</p>",
     "change_email": "E-Mail-Adresse ändern",
     "ok": "OK",

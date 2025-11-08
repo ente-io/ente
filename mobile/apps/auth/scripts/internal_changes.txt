@@ -1,3 +1,4 @@
+- Prateek & a5xwin: Add Multi-select
 - Ashil: Update auth icons
 - a5xwin: Import 2FA codes from gallery using QR image scanning
 - Tristan: Minimize to tray on Windows, macOS, and Linux

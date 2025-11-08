@@ -96,7 +96,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () async {
             ButtonResult? result = await showChoiceActionSheet(
               context,
-              title: context.l10n.warning,
+              title: context.l10n.note,
               body: context.l10n.sigInBackupReminder,
               secondButtonLabel: context.l10n.singIn,
               secondButtonAction: ButtonAction.second,

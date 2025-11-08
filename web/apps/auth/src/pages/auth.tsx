@@ -67,7 +67,8 @@ const Page: React.FC = () => {
     const filteredCodes = codes.filter(
         (code) =>
             code.issuer.toLowerCase().includes(lcSearch) ||
-            code.account?.toLowerCase().includes(lcSearch),
+            code.account?.toLowerCase().includes(lcSearch) ||
+            code.codeDisplay?.note?.toLowerCase().includes(lcSearch),
     );
 
     if (!hasFetched) {

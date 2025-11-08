@@ -158,6 +158,7 @@
     "logout": "Útskrá",
     "logout_message": "Ertu viss um að þú viljir skrá þig út?",
     "delete_account": "Eyða aðgangi",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "",
     "change_email": "Breyta netfangi",
     "ok": "Í lagi",

@@ -42,8 +42,8 @@ export const calculateDistance = (
 export const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
     if (photos.length === 0) return [];
 
-    // 25km clustering distance (roughly 0.25 degrees)
-    const distanceThreshold = 0.25; // About 25km in degrees
+    // 5km clustering distance (roughly 0.05 degrees)
+    const distanceThreshold = 0.05; // About 5km in degrees
 
     // First, group photos by day
     const photosByDay = new Map<string, JourneyPoint[]>();
@@ -110,18 +110,22 @@ export const createIcon = (
         return null;
     }
 
-    // Create cache key based on all parameters
-    const cacheKey = `icon_${imageSrc}_${size}_${borderColor}_${isReached}`;
+    const pinSize = size + 16; // Make it square and bigger
+    const triangleHeight = size <= 30 ? 7 : 10; // Smaller triangle for mobile
+    const pinHeight = pinSize + triangleHeight + 2; // Add space for triangle
+    const hasImage = imageSrc && imageSrc.trim() !== "";
+
+    // Adjust border radius for smaller mobile markers
+    const outerBorderRadius = size <= 30 ? 14 : 16;
+    const innerBorderRadius = size <= 30 ? 10 : 12;
+
+    // Create cache key based on all parameters including border radius and triangle size
+    const cacheKey = `icon_${imageSrc}_${size}_${borderColor}_${isReached}_${outerBorderRadius}_${innerBorderRadius}_${triangleHeight}`;
 
     const cachedIcon = iconCache.get(cacheKey);
     if (cachedIcon) {
         return cachedIcon;
     }
-
-    const pinSize = size + 16; // Make it square and bigger
-    const pinHeight = pinSize + 12; // Add space for triangle
-    const triangleHeight = 10;
-    const hasImage = imageSrc && imageSrc.trim() !== "";
 
     const icon = leaflet.divIcon({
         html: `
@@ -136,7 +140,7 @@ export const createIcon = (
           <div style="
             width: ${pinSize}px;
             height: ${pinSize}px;
-            border-radius: 16px;
+            border-radius: ${outerBorderRadius}px;
             background: ${isReached ? "#22c55e" : "white"};
             border: 2px solid ${isReached ? "#22c55e" : borderColor};
             padding: 4px;
@@ -151,13 +155,13 @@ export const createIcon = (
                 hasImage
                     ? `
               <!-- Image inside the rounded rectangle -->
-              <img 
-                src="${imageSrc}" 
+              <img
+                src="${imageSrc}"
                 style="
                   width: 100%;
                   height: 100%;
                   object-fit: cover;
-                  border-radius: 12px;
+                  border-radius: ${innerBorderRadius}px;
                 "
                 alt="Location"
               />
@@ -167,7 +171,7 @@ export const createIcon = (
               <div style="
                 width: 100%;
                 height: 100%;
-                border-radius: 12px;
+                border-radius: ${innerBorderRadius}px;
                 animation: skeleton-pulse 1.5s ease-in-out infinite;
               "></div>
               <style>
