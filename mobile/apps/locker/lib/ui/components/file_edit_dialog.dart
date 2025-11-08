@@ -1,4 +1,5 @@
 import "package:ente_ui/components/buttons/gradient_button.dart";
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -147,11 +148,14 @@ class _FileEditDialogState extends State<FileEditDialog> {
     final textTheme = getEnteTextTheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundElevated2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.backdropBase,
-          borderRadius: BorderRadius.circular(28),
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -160,7 +164,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,9 +176,8 @@ class _FileEditDialogState extends State<FileEditDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        context.l10n.editItem,
-                        style: textTheme.largeBold,
+                      TitleBarTitleWidget(
+                        title: context.l10n.editItem,
                       ),
                     ],
                   ),

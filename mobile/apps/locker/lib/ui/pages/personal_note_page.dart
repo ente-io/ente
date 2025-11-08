@@ -272,8 +272,7 @@ class _PersonalNotePageState
                         ),
                       ),
                     ),
-                    if (!isEditing &&
-                        _contentController.text.trim().isNotEmpty)
+                    if (!isEditing && _contentController.text.trim().isNotEmpty)
                       Positioned(
                         bottom: 24,
                         right: 24,

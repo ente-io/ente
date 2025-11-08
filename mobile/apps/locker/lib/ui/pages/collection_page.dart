@@ -382,25 +382,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 trailingWidgets: widget.isUncategorized
                     ? const []
                     : [
-                        GestureDetector(
-                          onTap: () async {
-                            await _shareCollection();
-                          },
-                          child: Container(
-                            height: 48,
-                            width: 48,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: colorScheme.backdropBase,
-                            ),
-                            padding: const EdgeInsets.all(12),
-                            child: HugeIcon(
-                              icon: HugeIcons.strokeRoundedShare08,
-                              color: colorScheme.textBase,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
                         _buildMenuButton(colorScheme),
                       ],
               ),

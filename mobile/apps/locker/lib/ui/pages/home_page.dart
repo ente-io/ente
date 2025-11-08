@@ -61,7 +61,6 @@ class CustomLockerAppBar extends StatelessWidget
     final textTheme = getEnteTextTheme(context);
     final hasQuery = searchController.text.isNotEmpty;
     final showClearIcon = isSearchActive || hasQuery;
-    final clearIconColor = colorScheme.primary700;
 
     return Container(
       decoration: BoxDecoration(
@@ -109,7 +108,6 @@ class CustomLockerAppBar extends StatelessWidget
                 ],
               ),
             ),
-            // Search bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Container(
@@ -123,12 +121,13 @@ class CustomLockerAppBar extends StatelessWidget
                   controller: searchController,
                   focusNode: searchFocusNode,
                   onTap: onSearchFocused,
+                  cursorColor: colorScheme.backdropBase,
                   onChanged: onSearchChanged,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
                     hintStyle: TextStyle(
-                      color: colorScheme.primary700,
+                      color: colorScheme.textBase,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -158,7 +157,7 @@ class CustomLockerAppBar extends StatelessWidget
                             padding: const EdgeInsets.only(right: 16, left: 8),
                             icon: HugeIcon(
                               icon: HugeIcons.strokeRoundedCancel01,
-                              color: clearIconColor,
+                              color: colorScheme.iconColor,
                               size: 20,
                             ),
                           )
@@ -169,9 +168,7 @@ class CustomLockerAppBar extends StatelessWidget
                     ),
                   ),
                   style: TextStyle(
-                    color: colorScheme.primary700,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    color: colorScheme.iconColor,
                   ),
                 ),
               ),

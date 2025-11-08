@@ -1,4 +1,5 @@
 import "package:ente_ui/components/buttons/gradient_button.dart";
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -83,16 +84,18 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundElevated2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.backdropBase,
-            borderRadius: BorderRadius.circular(28),
+            color: colorScheme.backgroundElevated2,
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.08),
@@ -101,61 +104,36 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Restore",
-                          style: textTheme.largeBold,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.file.displayName,
-                          style: textTheme.small.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _onCancel,
-                    child: Container(
-                      height: 36,
-                      width: 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.backgroundElevated,
-                      ),
-                      child: const Icon(
-                        Icons.close_rounded,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
               CollectionSelectionWidget(
                 collections: _availableCollections,
                 selectedCollectionIds: _selectedCollectionIds,
                 onToggleCollection: _toggleCollection,
                 onCollectionsUpdated: _onCollectionsUpdated,
                 singleSelectionMode: true,
-                titleWidget: Text(
-                  "Move to collection",
-                  style: textTheme.largeBold,
+                titleWidget: TitleBarTitleWidget(
+                  title: "Restore",
+                  trailingWidgets: [
+                    GestureDetector(
+                      onTap: _onCancel,
+                      child: Container(
+                        height: 36,
+                        width: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colorScheme.backgroundElevated,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 28),

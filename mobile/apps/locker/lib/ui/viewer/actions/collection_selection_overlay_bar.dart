@@ -2,6 +2,7 @@ import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
@@ -188,7 +189,7 @@ class _CollectionSelectionOverlayBarState
                               ),
                             ],
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                           _buildActionButtons(),
                         ],
                       ),
@@ -253,6 +254,7 @@ class _CollectionSelectionOverlayBarState
   List<Widget> _getActionsForSelection(
     Set<Collection> selectedCollections,
   ) {
+    final colorScheme = getEnteColorScheme(context);
     final isSingleSelection = selectedCollections.length == 1;
     final collection = isSingleSelection ? selectedCollections.first : null;
     final actions = <Widget>[];
@@ -263,19 +265,26 @@ class _CollectionSelectionOverlayBarState
       if (isSingleSelection) {
         actions.addAll([
           SelectionActionButton(
-            icon: Icons.share_outlined,
+            hugeIcon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedNavigation06,
+            ),
             label: context.l10n.share,
             onTap: () => _shareCollection(collection!),
           ),
           SelectionActionButton(
-            icon: Icons.edit_outlined,
+            hugeIcon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedPencilEdit02,
+            ),
             label: context.l10n.edit,
             onTap: () {
               _editCollection(collection!);
             },
           ),
           SelectionActionButton(
-            icon: Icons.delete_outline,
+            hugeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: colorScheme.warning500,
+            ),
             label: context.l10n.delete,
             onTap: () {
               _deleteCollection(collection!);
@@ -286,7 +295,10 @@ class _CollectionSelectionOverlayBarState
       } else {
         actions.addAll([
           SelectionActionButton(
-            icon: Icons.delete_outline,
+            hugeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: colorScheme.warning500,
+            ),
             label: context.l10n.delete,
             onTap: () {
               _deleteMultipleCollections(
@@ -300,7 +312,9 @@ class _CollectionSelectionOverlayBarState
     } else {
       actions.add(
         SelectionActionButton(
-          icon: Icons.share_outlined,
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedNavigation06,
+          ),
           label: context.l10n.share,
           onTap: _leaveCollection,
         ),

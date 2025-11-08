@@ -31,7 +31,6 @@ class FileRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
 
     return GestureDetector(
       onTap: () {
@@ -94,12 +93,10 @@ class FileRowWidget extends StatelessWidget {
                 const Spacer(),
                 Text(
                   file.displayName,
-                  style: textTheme.body,
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,
                 ),
-                const SizedBox(height: 4),
               ],
             ),
           );

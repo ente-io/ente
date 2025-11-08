@@ -5,6 +5,7 @@ import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,7 @@ class _RecoveryKeyDialogLockerState extends State<RecoveryKeyDialogLocker> {
     }
 
     return Dialog(
-      backgroundColor: colorScheme.backdropBase,
+      backgroundColor: colorScheme.backgroundElevated2,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
@@ -79,9 +80,8 @@ class _RecoveryKeyDialogLockerState extends State<RecoveryKeyDialogLocker> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.strings.recoveryKey,
-                  style: textTheme.largeBold,
+                TitleBarTitleWidget(
+                  title: context.strings.recoveryKey,
                 ),
                 GestureDetector(
                   onTap: () => _handleClose(),
@@ -109,49 +109,43 @@ class _RecoveryKeyDialogLockerState extends State<RecoveryKeyDialogLocker> {
             ),
             const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.all(1.5),
               decoration: BoxDecoration(
+                color: colorScheme.primary700,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.primary700,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 22,
-                        vertical: 24,
-                      ),
-                      child: SelectableText(
-                        recoveryKeyMnemonic,
-                        style: textTheme.body.copyWith(
-                          color: colorScheme.backgroundBase,
-                          fontFamily: 'monospace',
-                          letterSpacing: 0.5,
-                          height: 1.5,
-                        ),
-                        textAlign: TextAlign.justify,
-                      ),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 22,
+                      vertical: 24,
                     ),
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: IconButton(
-                        onPressed: () => _copyToClipboard(recoveryKeyMnemonic),
-                        visualDensity: VisualDensity.compact,
-                        icon: Icon(
-                          Icons.copy_rounded,
-                          size: 18,
-                          color: colorScheme.primary500,
-                        ),
-                        tooltip: 'Copy to clipboard',
+                    child: SelectableText(
+                      recoveryKeyMnemonic,
+                      style: textTheme.body.copyWith(
+                        color: colorScheme.backgroundBase,
+                        fontFamily: 'monospace',
+                        letterSpacing: 0.5,
+                        height: 1.5,
                       ),
+                      textAlign: TextAlign.justify,
                     ),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      onPressed: () => _copyToClipboard(recoveryKeyMnemonic),
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(
+                        Icons.copy_rounded,
+                        size: 20,
+                        color: colorScheme.primary500,
+                      ),
+                      tooltip: 'Copy to clipboard',
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),

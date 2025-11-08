@@ -691,10 +691,14 @@ class _ShareCollectionBottomSheetState
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => Dialog(
+          backgroundColor: colorScheme.backgroundElevated2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Container(
             width: 400,
             decoration: BoxDecoration(
-              color: colorScheme.backdropBase,
+              color: colorScheme.backgroundElevated2,
               borderRadius: BorderRadius.circular(24),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24),

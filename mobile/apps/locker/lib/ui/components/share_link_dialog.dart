@@ -1,4 +1,5 @@
 import "package:ente_ui/components/buttons/gradient_button.dart";
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/share_utils.dart";
@@ -54,8 +55,8 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
     final l10n = context.l10n;
 
     return Dialog(
-      backgroundColor: colorScheme.backdropBase,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      backgroundColor: colorScheme.backgroundElevated2,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
       ),
@@ -69,9 +70,8 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  l10n.share,
-                  style: textTheme.largeBold,
+                TitleBarTitleWidget(
+                  title: l10n.share,
                 ),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
@@ -107,8 +107,8 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 22,
-                      vertical: 24,
+                      horizontal: 12,
+                      vertical: 16,
                     ),
                     child: Row(
                       children: [

@@ -633,7 +633,7 @@ const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
 const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.75);
 const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.30);
 
-const Color backdropBaseDark = Color.fromRGBO(33, 33, 33, 0.9);
+const Color backdropBaseDark = Color.fromRGBO(33, 33, 33, 1);
 const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.65);
 const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.20);
 

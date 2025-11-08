@@ -133,12 +133,10 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
     final hasFocus = _focusNode.hasFocus && isEnabled;
     final bool isMultiline =
         (widget.maxLines ?? 1) > 1 || (widget.minLines ?? 1) > 1;
-    final int? effectiveMaxLines =
-        widget.obscureText ? 1 : widget.maxLines;
+    final int? effectiveMaxLines = widget.obscureText ? 1 : widget.maxLines;
     final int? effectiveMinLines = widget.obscureText
         ? 1
-        : (widget.minLines ??
-            (isMultiline ? (widget.maxLines ?? 3) : 1));
+        : (widget.minLines ?? (isMultiline ? (widget.maxLines ?? 3) : 1));
     final textInputType = widget.keyboardType ??
         (isMultiline ? TextInputType.multiline : TextInputType.text);
 
@@ -148,8 +146,7 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
             ? accentBlue.withOpacity(0.14)
             : colorScheme.fillFaint;
 
-    final textLineHeight =
-        widget.lineHeight ?? (isMultiline ? 1.5 : 1.25);
+    final textLineHeight = widget.lineHeight ?? (isMultiline ? 1.5 : 1.25);
     final textColor =
         widget.enabled ? colorScheme.textBase : colorScheme.textFaint;
 
@@ -213,8 +210,9 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
                           height: textLineHeight,
                           color: textColor,
                         ),
-                        textAlignVertical:
-                            isMultiline ? TextAlignVertical.top : TextAlignVertical.center,
+                        textAlignVertical: isMultiline
+                            ? TextAlignVertical.top
+                            : TextAlignVertical.center,
                         decoration: InputDecoration.collapsed(
                           hintText: widget.hintText,
                           hintStyle: textTheme.body.copyWith(
@@ -274,8 +272,7 @@ class CapsuleDisplayField extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final displayValue = isSecret ? '••••••••' : value;
-    final textLineHeight =
-        lineHeight ?? ((maxLines ?? 1) > 1 ? 1.5 : 1.3);
+    final textLineHeight = lineHeight ?? ((maxLines ?? 1) > 1 ? 1.5 : 1.3);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,7 +300,8 @@ class CapsuleDisplayField extends StatelessWidget {
                   child: isSecret
                       ? Text(
                           displayValue,
-                          style: textTheme.body.copyWith(height: textLineHeight),
+                          style:
+                              textTheme.body.copyWith(height: textLineHeight),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         )

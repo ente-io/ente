@@ -55,7 +55,7 @@ class _ChangeEmailDialogLockerState extends State<ChangeEmailDialogLocker> {
     final textTheme = getEnteTextTheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backdropBase,
+      backgroundColor: colorScheme.backgroundElevated2,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),

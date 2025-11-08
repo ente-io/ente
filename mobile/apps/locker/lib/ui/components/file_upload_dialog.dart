@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/text_input_widget.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -109,9 +110,9 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
     final textTheme = getEnteTextTheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backgroundElevated,
+      backgroundColor: colorScheme.backgroundElevated2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Container(
         width: 400,
@@ -130,11 +131,8 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    _fileName,
-                    style: textTheme.largeBold,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: TitleBarTitleWidget(
+                    title: _fileName,
                   ),
                 ),
               ],

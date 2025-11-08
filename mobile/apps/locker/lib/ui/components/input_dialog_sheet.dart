@@ -1,5 +1,6 @@
 import "package:ente_base/typedefs.dart";
 import "package:ente_ui/components/buttons/gradient_button.dart";
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
@@ -91,9 +92,8 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.title,
-                  style: textTheme.largeBold,
+                TitleBarTitleWidget(
+                  title: widget.title,
                 ),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
@@ -176,7 +176,7 @@ Future<dynamic> showInputDialogSheet(
     builder: (dialogContext) {
       final colorScheme = getEnteColorScheme(dialogContext);
       return Dialog(
-        backgroundColor: colorScheme.backdropBase,
+        backgroundColor: colorScheme.backgroundElevated2,
         clipBehavior: Clip.antiAlias,
         insetPadding: const EdgeInsets.symmetric(
           horizontal: 24,

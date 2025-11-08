@@ -85,13 +85,16 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
     final colorScheme = getEnteColorScheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundElevated2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.backdropBase,
-            borderRadius: BorderRadius.circular(28),
+            color: colorScheme.backgroundElevated2,
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.08),
@@ -100,7 +103,7 @@ class _AddToCollectionDialogState extends State<AddToCollectionDialog> {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

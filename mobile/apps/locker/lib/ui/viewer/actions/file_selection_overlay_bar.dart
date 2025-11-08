@@ -2,6 +2,7 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -218,7 +219,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
                             _buildActionButtons(),
                           ],
                         ),
@@ -233,160 +234,169 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _buildActionButtons() {
-    final selectedFiles = widget.selectedFiles.files;
-    if (selectedFiles.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    return ListenableBuilder(
+      listenable: widget.selectedFiles,
+      builder: (context, child) {
+        final selectedFiles = widget.selectedFiles.files;
+        if (selectedFiles.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPrimaryActionRow(selectedFiles),
+            const SizedBox(height: 12),
+            _buildSecondaryActionRow(selectedFiles),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildPrimaryActionRow(Set<EnteFile> selectedFiles) {
     final isSingleSelection = selectedFiles.length == 1;
-    final file = isSingleSelection ? selectedFiles.first : null;
+    final files = selectedFiles.toList();
+    final file = isSingleSelection ? files.first : null;
+    final colorScheme = getEnteColorScheme(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Row(
       children: [
-        _buildPrimaryActionRow(selectedFiles.toList()),
-        const SizedBox(height: 12),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          switchInCurve: Curves.easeInOut,
-          switchOutCurve: Curves.easeInOut,
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SizeTransition(
-                sizeFactor: animation,
-                child: child,
-              ),
-            );
-          },
-          child: isSingleSelection
-              ? _buildSingleSelectionSecondaryRow(file!)
-              : _buildMultiSelectionSecondaryRow(selectedFiles.toList()),
+        Expanded(
+          child: SelectionActionButton(
+            hugeIcon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedDownload01,
+            ),
+            label: "Download",
+            onTap: () => isSingleSelection
+                ? _downloadFile(context, file!)
+                : _downloadMultipleFiles(context, files),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: SelectionActionButton(
+            hugeIcon: const HugeIcon(
+              icon: HugeIcons.strokeRoundedNavigation06,
+            ),
+            label: context.l10n.share,
+            onTap: () => isSingleSelection
+                ? _shareLink(context, file!)
+                : _shareMultipleFiles(context),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: SelectionActionButton(
+            hugeIcon: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete02,
+              color: colorScheme.warning500,
+            ),
+            label: context.l10n.delete,
+            onTap: () => isSingleSelection
+                ? _deleteFile(context, file!)
+                : _deleteMultipleFile(context, files),
+            isDestructive: true,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildPrimaryActionRow(List<EnteFile> files) {
-    final isSingle = files.length == 1;
+  Widget _buildSecondaryActionRow(Set<EnteFile> selectedFiles) {
+    final actions = _getSecondaryActionsForSelection(selectedFiles);
     final colorScheme = getEnteColorScheme(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: BorderRadius.circular(24.0),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.download_outlined,
-                label: "Download",
-                onTap: () => isSingle
-                    ? _downloadFile(context, files.first)
-                    : _downloadMultipleFiles(context, files),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.share_outlined,
-                label: context.l10n.share,
-                onTap: () => isSingle
-                    ? _shareLink(context, files.first)
-                    : _shareMultipleFiles(context),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.delete_outline,
-                label: context.l10n.delete,
-                onTap: () => isSingle
-                    ? _deleteFile(context, files.first)
-                    : _deleteMultipleFile(context, files),
-                isDestructive: true,
-              ),
-            ),
-          ],
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeInOut,
+      switchOutCurve: Curves.easeInOut,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SizeTransition(
+            sizeFactor: animation,
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(24),
         ),
+        child: actions.length > 1
+            ? Row(
+                key: const ValueKey('multi_action'),
+                children: _buildActionRow(actions),
+              )
+            : Row(
+                key: const ValueKey('single_action'),
+                children: [Expanded(child: actions.first)],
+              ),
       ),
     );
   }
 
-  Widget _buildSingleSelectionSecondaryRow(EnteFile file) {
-    final colorScheme = getEnteColorScheme(context);
-
-    return Container(
-      key: const ValueKey('single_selection_secondary'),
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: BorderRadius.circular(24.0),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.edit_outlined,
-                label: context.l10n.edit,
-                onTap: () => _showEditDialog(context, file),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SelectionActionButton(
-                icon: _isImportant ? Icons.star : Icons.star_outline,
-                label: _isImportant ? "Unmark" : "Important",
-                onTap: () => _toggleImportant(context, file),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.start_rounded,
-                label: "Add to",
-                onTap: () => _showAddToDialog(context, [file]),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  List<Widget> _buildActionRow(List<Widget> actions) {
+    final children = <Widget>[];
+    for (var i = 0; i < actions.length; i++) {
+      children.add(Expanded(child: actions[i]));
+      if (i != actions.length - 1) {
+        children.add(const SizedBox(width: 12));
+      }
+    }
+    return children;
   }
 
-  Widget _buildMultiSelectionSecondaryRow(List<EnteFile> files) {
-    final colorScheme = getEnteColorScheme(context);
+  List<Widget> _getSecondaryActionsForSelection(Set<EnteFile> selectedFiles) {
+    final isSingleSelection = selectedFiles.length == 1;
+    final file = isSingleSelection ? selectedFiles.first : null;
+    final files = selectedFiles.toList();
+    final actions = <Widget>[];
 
-    return Container(
-      key: const ValueKey('multi_selection_secondary'),
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: BorderRadius.circular(24.0),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.star_outline,
-                label: "Important",
-                onTap: () => _markMultipleAsImportant(context, files),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: SelectionActionButton(
-                icon: Icons.start_rounded,
-                label: "Add to",
-                onTap: () => _showAddToDialog(context, files),
-              ),
-            ),
-          ],
+    if (isSingleSelection) {
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedPencilEdit02,
+          ),
+          label: context.l10n.edit,
+          onTap: () => _showEditDialog(context, file!),
         ),
+      );
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedStar,
+          ),
+          label: _isImportant ? "Unmark" : "Important",
+          onTap: () => _toggleImportant(context, file!),
+        ),
+      );
+    } else {
+      actions.add(
+        SelectionActionButton(
+          hugeIcon: const HugeIcon(
+            icon: HugeIcons.strokeRoundedStar,
+          ),
+          label: "Important",
+          onTap: () => _markMultipleAsImportant(context, files),
+        ),
+      );
+    }
+
+    actions.add(
+      SelectionActionButton(
+        hugeIcon: const HugeIcon(
+          icon: HugeIcons.strokeRoundedArrowRight03,
+        ),
+        label: "Add to",
+        onTap: () => _showAddToDialog(context, files),
       ),
     );
+
+    return actions;
   }
 
   Future<void> _downloadMultipleFiles(
