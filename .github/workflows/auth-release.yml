@@ -110,35 +110,35 @@ jobs:
                   echo "Release entry added:"
                   echo "$NEW_RELEASE"
 
-            # - name: Setup keys
-            #   uses: timheuer/base64-to-file@v1
-            #   with:
-            #       fileName: "keystore/ente_auth_key.jks"
-            #       encodedString: ${{ secrets.SIGNING_KEY }}
+            - name: Setup keys
+              uses: timheuer/base64-to-file@v1
+              with:
+                  fileName: "keystore/ente_auth_key.jks"
+                  encodedString: ${{ secrets.SIGNING_KEY }}
 
             - name: Create artifacts directory
               run: mkdir artifacts
 
-            # - name: Build independent APK
-            #   run: |
-            #       flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
-            #       mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.ref_name }}.apk
-            #   env:
-            #       SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-            #       SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-            #       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-            #       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+            - name: Build independent APK
+              run: |
+                  flutter build apk --dart-define=cronetHttpNoPlay=true --release --flavor independent
+                  mv build/app/outputs/flutter-apk/app-independent-release.apk artifacts/ente-${{ github.ref_name }}.apk
+              env:
+                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
-            # - name: Build PlayStore AAB
-            #   # disable this step if release tag contains nightly or beta
-            #   if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
-            #   run: |
-            #       flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
-            #   env:
-            #       SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-            #       SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-            #       SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-            #       SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+            - name: Build PlayStore AAB
+              # disable this step if release tag contains nightly or beta
+              if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
+              run: |
+                  flutter build appbundle --release --flavor playstore --dart-define=app.flavor=playstore --dart-define=cronetHttpNoPlay=true
+              env:
+                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
             - name: Install dependencies for desktop build
               run: |
