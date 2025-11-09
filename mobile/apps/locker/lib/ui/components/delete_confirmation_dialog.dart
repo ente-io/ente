@@ -4,15 +4,26 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 
-Future<ButtonResult?> showDeleteConfirmationDialog(
+class DeleteConfirmationResult {
+  final ButtonResult buttonResult;
+  final bool deleteFromAllCollections;
+
+  DeleteConfirmationResult({
+    required this.buttonResult,
+    required this.deleteFromAllCollections,
+  });
+}
+
+Future<DeleteConfirmationResult?> showDeleteConfirmationDialog(
   BuildContext context, {
   required String title,
   required String body,
   required String deleteButtonLabel,
   required String assetPath,
   Widget? icon,
+  bool showDeleteFromAllCollectionsOption = false,
 }) {
-  return showModalBottomSheet<ButtonResult>(
+  return showModalBottomSheet<DeleteConfirmationResult>(
     context: context,
     isScrollControlled: true,
     isDismissible: true,
@@ -23,17 +34,19 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
         deleteButtonLabel: deleteButtonLabel,
         assetPath: assetPath,
         icon: icon,
+        showDeleteFromAllCollectionsOption: showDeleteFromAllCollectionsOption,
       );
     },
   );
 }
 
-class _DeleteConfirmationBottomSheet extends StatelessWidget {
+class _DeleteConfirmationBottomSheet extends StatefulWidget {
   final String title;
   final String body;
   final String deleteButtonLabel;
   final String assetPath;
   final Widget? icon;
+  final bool showDeleteFromAllCollectionsOption;
 
   const _DeleteConfirmationBottomSheet({
     required this.title,
@@ -41,7 +54,17 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
     required this.deleteButtonLabel,
     required this.assetPath,
     this.icon,
+    required this.showDeleteFromAllCollectionsOption,
   });
+
+  @override
+  State<_DeleteConfirmationBottomSheet> createState() =>
+      _DeleteConfirmationBottomSheetState();
+}
+
+class _DeleteConfirmationBottomSheetState
+    extends State<_DeleteConfirmationBottomSheet> {
+  bool _deleteFromAllCollections = false;
 
   @override
   Widget build(BuildContext context) {
@@ -62,52 +85,107 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: colorScheme.backgroundElevated,
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.close,
-                        size: 24,
-                        color: colorScheme.textBase,
+              SizedBox(
+                width: double.infinity,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50),
+                          color: colorScheme.backgroundElevated,
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.close,
+                          size: 24,
+                          color: colorScheme.textBase,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 8),
-              Image.asset(assetPath),
+              Center(child: Image.asset(widget.assetPath)),
               const SizedBox(height: 24),
               Text(
-                title,
+                widget.title,
                 style: textTheme.h3Bold,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                body,
+                widget.body,
                 style: textTheme.body.copyWith(
                   color: colorScheme.textMuted,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 12),
+              if (widget.showDeleteFromAllCollectionsOption) ...[
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _deleteFromAllCollections = !_deleteFromAllCollections;
+                    });
+                  },
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: _deleteFromAllCollections
+                                  ? colorScheme.primary700
+                                  : colorScheme.strokeMuted,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                            color: _deleteFromAllCollections
+                                ? colorScheme.primary700
+                                : Colors.transparent,
+                          ),
+                          alignment: Alignment.center,
+                          child: _deleteFromAllCollections
+                              ? const Icon(
+                                  Icons.check,
+                                  size: 12,
+                                  color: Colors.white,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            "Also delete items from all other collections",
+                            style: textTheme.small,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).pop(
-                      ButtonResult(ButtonAction.first),
+                      DeleteConfirmationResult(
+                        buttonResult: ButtonResult(ButtonAction.first),
+                        deleteFromAllCollections: _deleteFromAllCollections,
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -117,7 +195,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  icon: icon ??
+                  icon: widget.icon ??
                       const HugeIcon(
                         icon: HugeIcons.strokeRoundedFileUpload,
                         color: Colors.white,
@@ -125,7 +203,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                         strokeWidth: 1.9,
                       ),
                   label: Text(
-                    deleteButtonLabel,
+                    widget.deleteButtonLabel,
                     style: textTheme.bodyBold.copyWith(
                       color: Colors.white,
                     ),

@@ -672,7 +672,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       assetPath: "assets/file_delete_icon.png",
     );
 
-    if (confirmation?.action != ButtonAction.first) {
+    if (confirmation?.buttonResult.action != ButtonAction.first) {
       return;
     }
 
@@ -730,7 +730,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       assetPath: "assets/file_delete_icon.png",
     );
 
-    if (confirmation?.action != ButtonAction.first) {
+    if (confirmation?.buttonResult.action != ButtonAction.first) {
       return;
     }
 

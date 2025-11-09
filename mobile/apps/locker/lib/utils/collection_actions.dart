@@ -130,9 +130,10 @@ class CollectionActions {
           context.l10n.deleteMultipleCollectionsDialogBody(collections.length),
       deleteButtonLabel: context.l10n.yesDeleteCollections(collections.length),
       assetPath: "assets/collection_delete_icon.png",
+      showDeleteFromAllCollectionsOption: true,
     );
 
-    if (dialogChoice?.action != ButtonAction.first) return;
+    if (dialogChoice?.buttonResult.action != ButtonAction.first) return;
 
     final progressDialog =
         createProgressDialog(context, context.l10n.pleaseWait);
@@ -147,7 +148,10 @@ class CollectionActions {
           continue;
         }
         if (collection.type.canDelete) {
-          await CollectionService.instance.trashCollection(collection);
+          await CollectionService.instance.trashCollection(
+            collection,
+            keepFiles: !(dialogChoice?.deleteFromAllCollections ?? false),
+          );
         }
       }
       await progressDialog.hide();
@@ -198,9 +202,10 @@ class CollectionActions {
       body: l10n.deleteCollectionDialogBody(collectionName),
       deleteButtonLabel: l10n.yesDeleteCollections(1),
       assetPath: "assets/collection_delete_icon.png",
+      showDeleteFromAllCollectionsOption: true,
     );
 
-    if (result?.action != ButtonAction.first && context.mounted) {
+    if (result?.buttonResult.action != ButtonAction.first && context.mounted) {
       return;
     }
 
@@ -208,7 +213,13 @@ class CollectionActions {
     await progressDialog.show();
 
     try {
-      await CollectionService.instance.trashCollection(collection);
+      // If deleteFromAllCollections is true → keepFiles should be false (move files to trash)
+      // If deleteFromAllCollections is false → keepFiles should be true (keep files in other collections)
+      await CollectionService.instance.trashCollection(
+        collection,
+        keepFiles: !(result?.deleteFromAllCollections ?? false),
+      );
+
       await progressDialog.hide();
 
       SnackBarUtils.showInfoSnackBar(

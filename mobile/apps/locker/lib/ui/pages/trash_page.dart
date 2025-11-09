@@ -170,7 +170,7 @@ class _TrashPageState extends State<TrashPage> {
       assetPath: "assets/collection_delete_icon.png",
     );
 
-    if (result?.action == ButtonAction.first && context.mounted) {
+    if (result?.buttonResult.action == ButtonAction.first && context.mounted) {
       await _performEmptyTrash();
     }
   }

@@ -267,17 +267,51 @@ class CollectionService {
       requests.add(TrashRequest(file.uploadedFileID!, collection.id));
       await _apiClient.trash(requests);
 
-      // Update local database immediately
       await _db.deleteFilesFromCollection(collection, [file]);
 
-      // Fire event to update UI
       Bus.instance.fire(CollectionsUpdatedEvent('trash_file'));
 
-      // Also sync to ensure we have the latest state
       await sync();
       await TrashService.instance.syncTrash();
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> trashFileFromAllCollections(
+    EnteFile file, {
+    bool runSync = true,
+  }) async {
+    try {
+      final collections = await getCollectionsForFile(file);
+
+      if (collections.isEmpty) {
+        return;
+      }
+
+      final List<TrashRequest> requests = [];
+      for (final collection in collections) {
+        requests.add(TrashRequest(file.uploadedFileID!, collection.id));
+      }
+
+      if (requests.isNotEmpty) {
+        await _apiClient.trash(requests);
+      }
+
+      for (final collection in collections) {
+        await _db.deleteFilesFromCollection(collection, [file]);
+      }
+
+      Bus.instance
+          .fire(CollectionsUpdatedEvent('file_trashed_from_all_collections'));
+
+      if (runSync) {
+        await sync();
+        await TrashService.instance.syncTrash();
+      }
+    } catch (e) {
+      _logger.severe("Failed to trash file from all collections: $e");
       rethrow;
     }
   }
@@ -367,45 +401,241 @@ class CollectionService {
     }
   }
 
-  Future<void> trashCollection(Collection collection) async {
+  Future<void> trashCollection(
+    Collection collection, {
+    bool keepFiles = true,
+  }) async {
+    if (keepFiles) {
+      await trashCollectionKeepingFiles(collection);
+    } else {
+      await trashCollectionWithFiles(collection);
+    }
+  }
+
+  Future<void> trashCollectionKeepingFiles(Collection collection) async {
     try {
       final files = await _db.getFilesInCollection(collection);
-      var keepFiles = false;
 
       if (files.isNotEmpty) {
-        keepFiles = true;
-        final requests = files
-            .where((file) => file.uploadedFileID != null)
-            .map(
-              (file) => TrashRequest(
-                file.uploadedFileID!,
-                collection.id,
-              ),
-            )
-            .toList();
-
-        if (requests.isNotEmpty) {
-          await _apiClient.trash(requests);
-        }
-
-        await _db.deleteFilesFromCollection(collection, files);
-        Bus.instance.fire(CollectionsUpdatedEvent('collection_files_trashed'));
-        await TrashService.instance.syncTrash();
+        await moveFilesFromCurrentCollection(collection, files);
       }
 
       await _apiClient.trashCollection(
         collection,
-        keepFiles: keepFiles,
+        keepFiles: true,
       );
 
-      _logger.info("Trashed collection: ${collection.name}");
-      // Let sync update the local state
+      Bus.instance
+          .fire(CollectionsUpdatedEvent('collection_trashed_keeping_files'));
+    } catch (e) {
+      _logger.severe("Failed to trash collection keeping files: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> trashCollectionWithFiles(Collection collection) async {
+    try {
+      final files = await _db.getFilesInCollection(collection);
+
+      if (files.isNotEmpty) {
+        for (final file in files) {
+          await trashFileFromAllCollections(
+            file,
+            runSync: false,
+          );
+        }
+      }
+
+      await _apiClient.trashCollection(
+        collection,
+        keepFiles: false,
+      );
+
+      Bus.instance
+          .fire(CollectionsUpdatedEvent('collection_trashed_with_files'));
+
       await sync();
       await TrashService.instance.syncTrash();
     } catch (e) {
-      _logger.severe("Failed to trash collection: $e");
+      _logger.severe("Failed to trash collection with files: $e");
       rethrow;
     }
+  }
+
+  Future<void> moveFilesFromCurrentCollection(
+    Collection collection,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) {
+      return;
+    }
+
+    final int currentUserID = Configuration.instance.getUserID()!;
+
+    final List<EnteFile> ownedByCurrentUser = [];
+    final List<EnteFile> ownedByOtherUsers = [];
+    for (final file in files) {
+      if (file.uploadedFileID == null) {
+        _logger.warning(
+          "Skipping file ${file.title} while moving from collection "
+          "${collection.id} because uploadedFileID is null",
+        );
+        continue;
+      }
+      if (file.ownerID == null || file.ownerID == currentUserID) {
+        ownedByCurrentUser.add(file);
+      } else {
+        ownedByOtherUsers.add(file);
+      }
+    }
+
+    final bool isCollectionOwner = collection.owner.id == currentUserID;
+    bool removalsPerformed = false;
+    bool movesPerformed = false;
+
+    if (isCollectionOwner && ownedByOtherUsers.isNotEmpty) {
+      await _apiClient.removeFromCollection(collection.id, ownedByOtherUsers);
+      removalsPerformed = true;
+    } else if (!isCollectionOwner && ownedByCurrentUser.isNotEmpty) {
+      await _apiClient.removeFromCollection(collection.id, ownedByCurrentUser);
+      removalsPerformed = true;
+      if (removalsPerformed) {
+        Bus.instance.fire(
+          CollectionsUpdatedEvent('files_moved_from_collection'),
+        );
+        await sync();
+      }
+      return;
+    }
+
+    if (!isCollectionOwner && ownedByOtherUsers.isNotEmpty) {
+      _logger.warning(
+        "Cannot remove files owned by others from collection ${collection.id}",
+      );
+      if (removalsPerformed) {
+        Bus.instance.fire(
+          CollectionsUpdatedEvent('files_moved_from_collection'),
+        );
+        await sync();
+      }
+      return;
+    }
+
+    if (ownedByCurrentUser.isEmpty) {
+      if (removalsPerformed) {
+        Bus.instance.fire(
+          CollectionsUpdatedEvent('files_moved_from_collection'),
+        );
+        await sync();
+      }
+      return;
+    }
+
+    final Map<int, List<EnteFile>> destinationMap = {};
+    final Map<int, Collection> resolvedDestinationCollections = {};
+    final List<EnteFile> fallbackFiles = [];
+    for (final file in ownedByCurrentUser) {
+      final Collection? targetCollection = await _findAutoMoveDestination(
+        file,
+        collection,
+        currentUserID,
+      );
+      if (targetCollection != null) {
+        resolvedDestinationCollections[targetCollection.id] = targetCollection;
+        destinationMap
+            .putIfAbsent(targetCollection.id, () => <EnteFile>[])
+            .add(file);
+      } else {
+        fallbackFiles.add(file);
+      }
+    }
+
+    if (fallbackFiles.isNotEmpty) {
+      final Collection fallbackCollection =
+          await getOrCreateUncategorizedCollection();
+      resolvedDestinationCollections[fallbackCollection.id] =
+          fallbackCollection;
+      destinationMap
+          .putIfAbsent(fallbackCollection.id, () => <EnteFile>[])
+          .addAll(fallbackFiles);
+    }
+
+    for (final entry in destinationMap.entries) {
+      final Collection? targetCollection =
+          resolvedDestinationCollections[entry.key] ??
+              await getCollectionByID(entry.key);
+      if (targetCollection == null) {
+        _logger.warning(
+          "Skipping move to unknown collection ${entry.key}",
+        );
+        continue;
+      }
+      if (collection.type == CollectionType.uncategorized &&
+          targetCollection.id == collection.id) {
+        _logger.info(
+          "Skipping move back into uncategorized collection ${collection.id}",
+        );
+        continue;
+      }
+      for (final file in entry.value) {
+        await move(
+          file,
+          collection,
+          targetCollection,
+        );
+        movesPerformed = true;
+      }
+    }
+
+    if (removalsPerformed) {
+      Bus.instance.fire(
+        CollectionsUpdatedEvent('files_moved_from_collection'),
+      );
+    }
+
+    if (movesPerformed || removalsPerformed) {
+      await sync();
+    }
+  }
+
+  Future<Collection?> _findAutoMoveDestination(
+    EnteFile file,
+    Collection fromCollection,
+    int currentUserID,
+  ) async {
+    final collections = await getCollectionsForFile(file);
+    for (final candidate in collections) {
+      if (!_isAutoMoveCandidate(
+        fromCollection: fromCollection,
+        targetCollection: candidate,
+        currentUserID: currentUserID,
+      )) {
+        continue;
+      }
+      return candidate;
+    }
+    return null;
+  }
+
+  bool _isAutoMoveCandidate({
+    required Collection fromCollection,
+    required Collection? targetCollection,
+    required int currentUserID,
+  }) {
+    if (targetCollection == null) {
+      return false;
+    }
+    if (fromCollection.id == targetCollection.id) {
+      return false;
+    }
+    if (targetCollection.owner.id != currentUserID) {
+      return false;
+    }
+    if (targetCollection.type == CollectionType.uncategorized ||
+        targetCollection.type == CollectionType.favorites) {
+      return false;
+    }
+    return true;
   }
 
   // Track if default collections have been set up

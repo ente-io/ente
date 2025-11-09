@@ -150,6 +150,48 @@ class CollectionApiClient {
     }
   }
 
+  Future<void> removeFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) return;
+
+    final params = <String, dynamic>{};
+    params["collectionID"] = collectionID;
+
+    const batchSize = 100;
+    final batchedFiles = <List<EnteFile>>[];
+    for (int i = 0; i < files.length; i += batchSize) {
+      batchedFiles.add(
+        files.sublist(i, min(i + batchSize, files.length)),
+      );
+    }
+
+    for (final batch in batchedFiles) {
+      params["fileIDs"] = <int>[];
+      for (final file in batch) {
+        if (file.uploadedFileID != null) {
+          params["fileIDs"].add(file.uploadedFileID);
+        }
+      }
+
+      if (params["fileIDs"].isNotEmpty) {
+        final response = await _enteDio.post(
+          "/collections/v3/remove-files",
+          data: params,
+        );
+        if (response.statusCode != 200) {
+          throw Exception("Failed to remove files from collection");
+        }
+
+        await _db.deleteFilesFromCollection(
+          await _db.getCollection(collectionID),
+          batch,
+        );
+      }
+    }
+  }
+
   Future<void> rename(Collection collection, String newName) async {
     final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
     final encryptedName = CryptoUtil.encryptSync(
@@ -221,6 +263,7 @@ class CollectionApiClient {
         "?keepFiles=${keepFiles ? "True" : "False"}"
         "&collectionID=${collection.id}",
       );
+      await _handleCollectionDeletion(collection);
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;
