@@ -90,11 +90,11 @@ fpm -s dir -t rpm \
   -v "$VERSION" \
   --vendor "Ente.io" \
   --maintainer "Ente.io Developers <auth@ente.io>" \
-  --license "GPLv3" \
+  --license "AGPLv3" \
   --url "https://github.com/ente-io/ente" \
   --description "2FA app with free end-to-end encrypted backup and sync" \
   --category "Application/Utility" \
-  --depends libsqlite3x \
+  --depends sqlite-libs \
   --depends libsecret \
   --depends libappindicator \
   -C "$STAGING_DIR" \
