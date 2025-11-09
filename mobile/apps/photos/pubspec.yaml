@@ -196,6 +196,7 @@ dependencies:
     path: rust_builder
   screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
+  secure_application: ^4.1.0
   sentry: ^8.14.1
   sentry_flutter: ^8.14.1
   share_plus: ^11.0.0

@@ -51,6 +51,7 @@ import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:secure_application/secure_application.dart';
 
 final _logger = Logger("main");
 
@@ -90,15 +91,17 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
-      AppLock(
-        builder: (args) => EnteApp(locale, savedThemeMode),
-        lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen() ||
-            localSettings.isOnGuestView(),
-        locale: locale,
-        lightTheme: lightThemeData,
-        darkTheme: darkThemeData,
-        savedThemeMode: _themeMode(savedThemeMode),
+      SecureApplication(
+        child: AppLock(
+          builder: (args) => EnteApp(locale, savedThemeMode),
+          lockScreen: const LockScreen(),
+          enabled: await Configuration.instance.shouldShowLockScreen() ||
+              localSettings.isOnGuestView(),
+          locale: locale,
+          lightTheme: lightThemeData,
+          darkTheme: darkThemeData,
+          savedThemeMode: _themeMode(savedThemeMode),
+        ),
       ),
     );
     unawaited(_scheduleFGSync('appStart in FG'));
