@@ -1,0 +1,24 @@
+---
+title: Ente Auth - Changelog
+description: Release notes of recent updates to Ente Auth
+---
+
+# Changelog - Ente Auth
+
+<!-- A short summary list of changes to the Ente Auth mobile and desktop apps. For a more user-oriented list with screenshots and blog post links, see the [global changelog](https://ente.io/changelog). -->
+
+## v4.4.4 - Aug 2025
+
+- Lots of new custom icons!
+- Add monochrome icon style for macOS tray
+- Auto hide dock icon macOS
+
+## v4.4.3 - Jul 2025
+
+- Fix unknown hard error on closing the app on Windows
+- Fall back to Passcode if FaceId not detected on iOS
+
+## v4.4.0 - Jun 2025
+
+- Handle incorrect system time during code generation (online mode only)
+- Sign windows build using Azure trust signing

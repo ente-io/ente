@@ -13,13 +13,11 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/standalone/date_time.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import "package:screenshot/screenshot.dart";
 import 'package:share_plus/share_plus.dart';
 import "package:uuid/uuid.dart";
 
@@ -273,7 +271,6 @@ Future<void> shareAlbumLinkWithPlaceholder(
   String url,
   GlobalKey key,
 ) async {
-  final ScreenshotController screenshotController = ScreenshotController();
   final List<EnteFile> filesInCollection =
       (await FilesDB.instance.getFilesInCollection(
     collection.id,
@@ -294,15 +291,9 @@ Future<void> shareAlbumLinkWithPlaceholder(
     await shareText(url);
     return;
   } else {
-    final placeholderBytes = await _createAlbumPlaceholder(
-      filesInCollection,
-      screenshotController,
-      context,
-    );
     await dialog.hide();
 
-    await shareImageAndUrl(
-      placeholderBytes,
+    await shareText(
       url,
       context: context,
       key: key,
@@ -322,22 +313,4 @@ Rect _sharePosOrigin(BuildContext? context, GlobalKey? key) {
     rect = const Offset(20.0, 20.0) & const Size(10, 10);
   }
   return rect;
-}
-
-Future<Uint8List> _createAlbumPlaceholder(
-  List<EnteFile> files,
-  ScreenshotController screenshotController,
-  BuildContext context,
-) async {
-  final Widget imageWidget = LinkPlaceholder(
-    files: files,
-  );
-  final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-  final bytesOfImageToWidget = await screenshotController.captureFromWidget(
-    imageWidget,
-    pixelRatio: pixelRatio,
-    targetSize: MediaQuery.sizeOf(context),
-    delay: const Duration(milliseconds: 300),
-  );
-  return bytesOfImageToWidget;
 }
