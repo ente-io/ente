@@ -197,7 +197,7 @@ class FilePopupMenuWidget extends StatelessWidget {
       assetPath: "assets/file_delete_icon.png",
     );
 
-    if (result?.action == ButtonAction.first && context.mounted) {
+    if (result?.buttonResult.action == ButtonAction.first && context.mounted) {
       await _deleteFile(context);
     }
   }
