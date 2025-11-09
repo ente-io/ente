@@ -2900,12 +2900,11 @@ packages:
   video_player:
     dependency: "direct overridden"
     description:
-      path: "packages/video_player/video_player"
-      ref: android_video_roation_fix
-      resolved-ref: "0acef25ca43206e02a0758b51d5fd176e3d8c6b8"
-      url: "https://github.com/ente-io/packages.git"
-    source: git
-    version: "2.7.0"
+      name: video_player
+      sha256: "0d55b1f1a31e5ad4c4967bfaa8ade0240b07d20ee4af1dfef5f531056512961a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
   video_player_android:
     dependency: transitive
     description:

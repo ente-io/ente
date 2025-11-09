@@ -40,8 +40,4 @@ dependency_overrides:
     path: ../../packages/log_viewer
   native_video_editor:
     path: ../../packages/native_video_editor
-  video_player:
-    git:
-      url: https://github.com/ente-io/packages.git
-      ref: android_video_roation_fix
-      path: packages/video_player/video_player/
+  video_player: ^2.10.0

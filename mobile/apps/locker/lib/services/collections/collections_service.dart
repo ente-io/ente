@@ -279,43 +279,6 @@ class CollectionService {
     }
   }
 
-  Future<void> trashFileFromAllCollections(
-    EnteFile file, {
-    bool runSync = true,
-  }) async {
-    try {
-      final collections = await getCollectionsForFile(file);
-
-      if (collections.isEmpty) {
-        return;
-      }
-
-      final List<TrashRequest> requests = [];
-      for (final collection in collections) {
-        requests.add(TrashRequest(file.uploadedFileID!, collection.id));
-      }
-
-      if (requests.isNotEmpty) {
-        await _apiClient.trash(requests);
-      }
-
-      for (final collection in collections) {
-        await _db.deleteFilesFromCollection(collection, [file]);
-      }
-
-      Bus.instance
-          .fire(CollectionsUpdatedEvent('file_trashed_from_all_collections'));
-
-      if (runSync) {
-        await sync();
-        await TrashService.instance.syncTrash();
-      }
-    } catch (e) {
-      _logger.severe("Failed to trash file from all collections: $e");
-      rethrow;
-    }
-  }
-
   Future<void> rename(Collection collection, String newName) async {
     try {
       await _apiClient.rename(
@@ -439,17 +402,17 @@ class CollectionService {
 
       if (files.isNotEmpty) {
         for (final file in files) {
-          await trashFileFromAllCollections(
-            file,
-            runSync: false,
-          );
+          // Get all collections this file belongs to
+          final fileCollections = await getCollectionsForFile(file);
+
+          // Trash the file from ALL collections it belongs to
+          for (final fileCollection in fileCollections) {
+            await trashFile(file, fileCollection);
+          }
         }
       }
 
-      await _apiClient.trashCollection(
-        collection,
-        keepFiles: false,
-      );
+      await _apiClient.trashCollection(collection);
 
       Bus.instance
           .fire(CollectionsUpdatedEvent('collection_trashed_with_files'));

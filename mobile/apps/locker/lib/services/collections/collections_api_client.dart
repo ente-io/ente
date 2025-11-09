@@ -223,6 +223,7 @@ class CollectionApiClient {
     await _db.deleteCollection(collection);
     final deletedCollection = collection.copyWith(isDeleted: true);
     await _updateCollectionInDB(deletedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("delete_collection"));
     await CollectionService.instance.sync();
   }
 
