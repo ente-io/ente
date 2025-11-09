@@ -242,13 +242,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           return const SizedBox.shrink();
         }
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildPrimaryActionRow(selectedFiles),
-            const SizedBox(height: 12),
-            _buildSecondaryActionRow(selectedFiles),
-          ],
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOutCubic,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildPrimaryActionRow(selectedFiles),
+              const SizedBox(height: 12),
+              _buildSecondaryActionRow(selectedFiles),
+            ],
+          ),
         );
       },
     );
@@ -307,33 +311,34 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     final actions = _getSecondaryActionsForSelection(selectedFiles);
     final colorScheme = getEnteColorScheme(context);
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      switchInCurve: Curves.easeInOut,
-      switchOutCurve: Curves.easeInOut,
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: SizeTransition(
-            sizeFactor: animation,
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+          return Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              ...previousChildren,
+              if (currentChild != null) currentChild,
+            ],
+          );
+        },
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+            opacity: animation,
             child: child,
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.backgroundElevated2,
-          borderRadius: BorderRadius.circular(24),
+          );
+        },
+        child: Row(
+          key: ValueKey('secondary_${selectedFiles.length}'),
+          children: _buildActionRow(actions),
         ),
-        child: actions.length > 1
-            ? Row(
-                key: const ValueKey('multi_action'),
-                children: _buildActionRow(actions),
-              )
-            : Row(
-                key: const ValueKey('single_action'),
-                children: [Expanded(child: actions.first)],
-              ),
       ),
     );
   }
