@@ -91,9 +91,13 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
+      // 1. WRAP WITH THE PROVIDER
       SecureApplication(
         child: AppLock(
-          builder: (args) => EnteApp(locale, savedThemeMode),
+          // 2. WRAP YOUR APP'S CONTENT WITH THE GATE
+          builder: (args) => SecureGate(
+            child: EnteApp(locale, savedThemeMode),
+          ),
           lockScreen: const LockScreen(),
           enabled: await Configuration.instance.shouldShowLockScreen() ||
               localSettings.isOnGuestView(),
