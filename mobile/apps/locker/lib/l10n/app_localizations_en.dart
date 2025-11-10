@@ -564,7 +564,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveDocumentTitle => 'Document';
 
   @override
-  String get saveDocumentDescription => 'Upload important docs';
+  String get saveDocumentDescription => 'Upload important docs.';
 
   @override
   String get informationDescription =>
@@ -574,13 +574,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalNote => 'Note';
 
   @override
-  String get personalNoteDescription => 'Write down thoughts and instructions';
+  String get personalNoteDescription => 'Write down thoughts and instructions.';
 
   @override
-  String get physicalRecords => 'Place';
+  String get physicalRecords => 'Thing';
 
   @override
-  String get physicalRecordsDescription => 'Save locations of physical items';
+  String get physicalRecordsDescription =>
+      'Save locations of real-world items.';
 
   @override
   String get accountCredentials => 'Secret';
@@ -639,13 +640,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordLocation => 'Location';
 
   @override
-  String get recordLocationHint => 'Where can this item be found?';
+  String get recordLocationHint => 'Where is this item kept?';
 
   @override
   String get recordNotes => 'Notes';
 
   @override
-  String get recordNotesHint => 'Any additional information about the item';
+  String get recordNotesHint => 'Additional information about the item';
 
   @override
   String get credentialName => 'Account';

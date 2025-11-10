@@ -1075,7 +1075,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveDocumentDescription.
   ///
   /// In en, this message translates to:
-  /// **'Upload important docs'**
+  /// **'Upload important docs.'**
   String get saveDocumentDescription;
 
   /// No description provided for @informationDescription.
@@ -1093,19 +1093,19 @@ abstract class AppLocalizations {
   /// No description provided for @personalNoteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Write down thoughts and instructions'**
+  /// **'Write down thoughts and instructions.'**
   String get personalNoteDescription;
 
   /// No description provided for @physicalRecords.
   ///
   /// In en, this message translates to:
-  /// **'Place'**
+  /// **'Thing'**
   String get physicalRecords;
 
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save locations of physical items'**
+  /// **'Save locations of real-world items.'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.
@@ -1219,7 +1219,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordLocationHint.
   ///
   /// In en, this message translates to:
-  /// **'Where can this item be found?'**
+  /// **'Where is this item kept?'**
   String get recordLocationHint;
 
   /// No description provided for @recordNotes.
@@ -1231,7 +1231,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Any additional information about the item'**
+  /// **'Additional information about the item'**
   String get recordNotesHint;
 
   /// No description provided for @credentialName.
