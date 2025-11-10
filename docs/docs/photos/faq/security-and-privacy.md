@@ -173,10 +173,14 @@ receiver just needs a free Ente account.
 
 ## Has the Ente Photos app been audited by a credible source?
 
-Yes, Ente Photos has undergone a thorough security audit conducted by Cure53, in
-collaboration with Symbolic Software. Cure53 is a prominent German cybersecurity
-firm, while Symbolic Software specializes in applied cryptography. Please find
-the full report here: https://ente.io/blog/cryptography-audit/
+Yes, Ente Photos has undergone multiple thorough security audits.
+
+Our first assessment was carried out by Cure53 in collaboration with Symbolic Software. Cure53 is a
+prominent German cybersecurity firm, while Symbolic Software specializes in
+applied cryptography. Please find the full report here:
+https://ente.io/blog/cryptography-audit/
+
+A second more recent audit was completed on behalf of CERN. Details of that are available here: https://ente.io/blog/cern-audit/
 
 ## Machine Learning and Privacy {#ml-privacy}
 
@@ -251,3 +255,11 @@ If you'd like to support this project, please consider [subscribing](https://ent
 For any security or privacy questions not covered here, please contact our team
 at security@ente.io. We're committed to addressing your concerns and
 continuously improving our security measures.
+
+## Security
+
+If you believe you have found a security vulnerability, please responsibly
+disclose it by emailing security@ente.io or [using this
+link](https://github.com/ente-io/ente/security/advisories/new) instead of
+opening a public issue. We will investigate all legitimate reports. To know
+more, please see our [security policy](https://github.com/ente-io/ente/blob/main/SECURITY.md).
