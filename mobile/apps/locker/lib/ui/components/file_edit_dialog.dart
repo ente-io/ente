@@ -1,4 +1,3 @@
-import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
+import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/utils/collection_list_util.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
 

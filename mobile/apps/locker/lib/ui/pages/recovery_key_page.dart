@@ -1,7 +1,7 @@
-import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/components/text_input_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import "package:locker/ui/components/gradient_button.dart";
 
 class RecoveryKeyPage extends StatefulWidget {
   const RecoveryKeyPage({super.key});

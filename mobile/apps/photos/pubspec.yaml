@@ -220,6 +220,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/video_editor_fork.git
       ref: master
+  video_player: ^2.10.0
   video_thumbnail: ^0.5.6
   visibility_detector: ^0.4.0+2
   wakelock_plus: ^1.1.1
@@ -255,7 +256,6 @@ dependency_overrides:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
   protobuf: ^3.1.0
-  video_player: ^2.10.0
   watcher: ^1.1.0
   win32: "5.10.1"
 

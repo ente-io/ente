@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:ente_accounts/ente_accounts.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
+import "package:locker/ui/components/gradient_button.dart";
 
 class ChangeEmailDialogLocker extends StatefulWidget {
   const ChangeEmailDialogLocker({super.key});

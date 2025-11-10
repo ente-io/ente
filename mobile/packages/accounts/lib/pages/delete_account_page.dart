@@ -10,7 +10,6 @@ import 'package:ente_ui/components/dialogs.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
-import "package:hugeicons/hugeicons.dart";
 
 class DeleteAccountPage extends StatelessWidget {
   final BaseConfiguration config;
@@ -77,7 +76,7 @@ class DeleteAccountPage extends StatelessWidget {
               ),
               GradientButton(
                 text: context.strings.yesSendFeedbackAction,
-                hugeIcon: const HugeIcon(icon: HugeIcons.strokeRoundedTick02),
+                iconData: Icons.check,
                 onTap: () async {
                   await sendEmail(
                     context,

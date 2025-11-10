@@ -1,8 +1,8 @@
 import "package:ente_base/typedefs.dart";
-import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:locker/ui/components/gradient_button.dart";
 
 class InputDialogSheet extends StatefulWidget {
   final String title;

@@ -1,6 +1,5 @@
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
-import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -17,6 +16,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/sharing/advanced_sharing_bottom_sheet.dart";
 import "package:locker/ui/sharing/album_share_info_widget.dart";
 import "package:locker/utils/collection_actions.dart";

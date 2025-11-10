@@ -4,13 +4,13 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_configuration/constants.dart';
 import 'package:ente_strings/ente_strings.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/ui/components/gradient_button.dart";
 
 class RecoveryKeyDialogLocker extends StatefulWidget {
   final String recoveryKey;

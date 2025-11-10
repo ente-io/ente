@@ -1,4 +1,3 @@
-import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
@@ -8,6 +7,7 @@ import "package:flutter/services.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/delete_share_link_dialog.dart";
+import "package:locker/ui/components/gradient_button.dart";
 
 Future<void> showShareLinkDialog(
   BuildContext context,
