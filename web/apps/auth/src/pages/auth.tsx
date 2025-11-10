@@ -1,4 +1,5 @@
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import {
     Box,
     Button,
@@ -51,6 +52,8 @@ const Page: React.FC = () => {
             try {
                 const { codes, timeOffset } =
                     await getAuthCodesAndTimeOffset(masterKey);
+
+                console.log(codes);
                 setCodes(codes);
                 setTimeOffset(timeOffset ?? 0);
             } catch (e) {
@@ -261,9 +264,37 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({
                 backgroundColor: theme.vars.palette.background.elevatedPaper,
                 borderRadius: "4px",
                 overflow: "hidden",
+                position: "relative",
             })}
         >
             <CodeValidityBar {...{ code, timeOffset }} />
+            {code.codeDisplay?.pinned && (
+                <>
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: "-5px",
+                            right: "-41px",
+                            width: "107px",
+                            height: "26px",
+                            backgroundColor: "#390C4F",
+                            transform: "rotate(43deg)",
+                            zIndex: 0,
+                        }}
+                    />
+                    <PushPinIcon
+                        sx={{
+                            position: "absolute",
+                            top: "6px",
+                            right: "5px",
+                            fontSize: "14px",
+                            color: "#8e2de2",
+                            zIndex: 1,
+                            transform: "rotate(45deg)",
+                        }}
+                    />
+                </>
+            )}
             <Stack
                 direction="row"
                 sx={{
