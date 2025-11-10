@@ -10,7 +10,6 @@
   "onBoardingGetStarted": "प्रारंभ करें",
   "setupFirstAccount": "अपना पहला अकाउंट सेटअप करें",
   "importScanQrCode": "एक QR कोड स्कैन करें",
-  "qrCode": "QR कोड",
   "importEnterSetupKey": "",
   "importAccountPageTitle": "अकाउंट विवरण डालें",
   "secretCanNotBeEmpty": "सीक्रेट खाली नहीं हो सकता है",

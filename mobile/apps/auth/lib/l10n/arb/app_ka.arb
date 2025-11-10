@@ -10,7 +10,6 @@
   "onBoardingGetStarted": "დაწყება",
   "setupFirstAccount": "დააყენეთ თქვენი პირველი ანგარიში",
   "importScanQrCode": "QR კოდის დასკანერება",
-  "qrCode": "QR კოდი",
   "importEnterSetupKey": "შეიყვანეთ დაყენების კოდი",
   "importAccountPageTitle": "შეიყვანეთ ანგარიშის მონაცემები",
   "secretCanNotBeEmpty": "გასაღების ველი არ შეიძლება ცარიელი იყოს",
