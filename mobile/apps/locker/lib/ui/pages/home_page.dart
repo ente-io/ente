@@ -205,9 +205,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  List<Collection> outgoingCollections = [];
-  List<Collection> incomingCollections = [];
-  List<Collection> quickLinks = [];
   List<Collection> homeCollections = [];
 
   String? _error;
@@ -249,16 +246,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   List<Collection> get _displayedCollections {
-    final List<Collection> collections;
-    if (isSearchActive) {
-      collections = _filteredCollections;
-    } else {
-      final excludeIds = {
-        ...quickLinks.map((c) => c.id),
-      };
-      collections =
-          _collections.where((c) => !excludeIds.contains(c.id)).toList();
-    }
+    final collections = isSearchActive ? _filteredCollections : _collections;
     return _filterOutUncategorized(collections);
   }
 
@@ -267,11 +255,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   List<Collection> getOnEnteCollections(List<Collection> collections) {
-    final excludeIds = {
-      ...incomingCollections.map((c) => c.id),
-      ...quickLinks.map((c) => c.id),
-    };
-    collections = collections.where((c) => !excludeIds.contains(c.id)).toList();
     return _filterOutUncategorized(collections);
   }
 
@@ -447,18 +430,12 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
-      final sharedCollections =
-          await CollectionService.instance.getSharedCollections();
-
       if (mounted) {
         setState(() {
           homeCollections = getOnEnteCollections(sortedCollections);
           _collections = sortedCollections;
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
-          incomingCollections = sharedCollections.incoming;
-          outgoingCollections = sharedCollections.outgoing;
-          quickLinks = sharedCollections.quickLinks;
           _isLoading = false;
         });
       }
@@ -677,18 +654,6 @@ class _HomePageState extends UploaderPageState<HomePage>
                   collections: homeCollections,
                   viewType: UISectionType.homeCollections,
                 ),
-                if (outgoingCollections.isNotEmpty)
-                  ..._buildCollectionSection(
-                    title: context.l10n.sharedByYou,
-                    collections: outgoingCollections,
-                    viewType: UISectionType.outgoingCollections,
-                  ),
-                if (incomingCollections.isNotEmpty)
-                  ..._buildCollectionSection(
-                    title: context.l10n.sharedWithYou,
-                    collections: incomingCollections,
-                    viewType: UISectionType.incomingCollections,
-                  ),
                 _buildRecentsSection(),
               ],
             ),
