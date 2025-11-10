@@ -267,7 +267,9 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({
                 position: "relative",
             })}
         >
-            <CodeValidityBar {...{ code, timeOffset }} />
+            <Box sx={{ position: "relative", zIndex: 2 }}>
+                <CodeValidityBar {...{ code, timeOffset }} />
+            </Box>
             {code.codeDisplay?.pinned && (
                 <>
                     <Box
