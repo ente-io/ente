@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
-import 'package:locker/models/file_type.dart';
-import 'package:locker/models/info/info_item.dart';
 import 'package:locker/models/item_view_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -33,16 +31,12 @@ class RecentsSectionWidget extends StatefulWidget {
 class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   final Set<Collection> _selectedCollections = {};
   final List<Collection> _selectionOrder = [];
-  final Set<InfoType> _selectedInfoTypes = {};
-  final List<InfoType> _infoTypeSelectionOrder = [];
   List<EnteFile> _filteredFiles = [];
   List<Collection> _availableCollections = [];
-  List<InfoType> _availableInfoTypes = InfoType.values.toList();
   late List<Collection> _originalCollectionOrder;
   int _filtersComputationId = 0;
   final Map<int, List<Collection>> _fileCollectionsCache = {};
   final Map<int, Future<List<Collection>>> _fileCollectionsRequests = {};
-  final Map<int, InfoType?> _fileInfoTypeCache = {};
   ItemViewType? _viewType;
 
   @override
@@ -50,7 +44,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     super.initState();
     _originalCollectionOrder = List.from(widget.collections);
     _availableCollections = List.from(widget.collections);
-    _availableInfoTypes = _computeAvailableInfoTypes(widget.recentFiles);
     _viewType = localSettings.itemViewType();
   }
 
@@ -72,8 +65,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     }
   }
 
-  bool get _hasActiveFilters =>
-      _selectedCollections.isNotEmpty || _selectedInfoTypes.isNotEmpty;
+  bool get _hasActiveFilters => _selectedCollections.isNotEmpty;
 
   List<EnteFile> get _displayedFiles =>
       _hasActiveFilters ? _filteredFiles : widget.recentFiles;
@@ -134,7 +126,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   Widget? _buildFilterChipsRow() {
-    final orderedFilters = _getOrderedFilters();
+    final orderedFilters = _getOrderedCollections();
 
     if (orderedFilters.isEmpty) {
       return null;
@@ -142,17 +134,11 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
     final chipModels = orderedFilters
         .map(
-          (filter) => _FilterChipViewModel(
-            key: filter.key,
-            label: filter.isCollection
-                ? _collectionLabel(filter.collection!)
-                : _infoTypeLabel(context, filter.infoType!),
-            isSelected: filter.isCollection
-                ? _selectedCollections.contains(filter.collection)
-                : _selectedInfoTypes.contains(filter.infoType!),
-            onTap: filter.isCollection
-                ? () => _onCollectionSelected(filter.collection!)
-                : () => _onInfoTypeSelected(filter.infoType!),
+          (collection) => _FilterChipViewModel(
+            key: 'c_${collection.id}',
+            label: _collectionLabel(collection),
+            isSelected: _selectedCollections.contains(collection),
+            onTap: () => _onCollectionSelected(collection),
           ),
         )
         .toList();
@@ -178,20 +164,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     );
   }
 
-  List<_FilterChipEntry> _getOrderedFilters() {
-    final filters = <_FilterChipEntry>[];
-
-    for (final infoType in _getOrderedInfoTypes()) {
-      filters.add(_FilterChipEntry.infoType(infoType));
-    }
-
-    for (final collection in _getOrderedCollections()) {
-      filters.add(_FilterChipEntry.collection(collection));
-    }
-
-    return filters;
-  }
-
   void _onCollectionSelected(Collection collection) {
     HapticFeedback.lightImpact();
 
@@ -208,30 +180,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     _updateFilteredFiles();
   }
 
-  void _onInfoTypeSelected(InfoType infoType) {
-    HapticFeedback.lightImpact();
-
-    setState(() {
-      if (_selectedInfoTypes.contains(infoType)) {
-        _selectedInfoTypes.remove(infoType);
-        _infoTypeSelectionOrder.remove(infoType);
-      } else {
-        _selectedInfoTypes.add(infoType);
-        _infoTypeSelectionOrder.add(infoType);
-      }
-    });
-
-    _updateFilteredFiles();
-  }
-
   void _clearAllFilters() {
     HapticFeedback.lightImpact();
 
     setState(() {
       _selectedCollections.clear();
       _selectionOrder.clear();
-      _selectedInfoTypes.clear();
-      _infoTypeSelectionOrder.clear();
     });
 
     _updateFilteredFiles();
@@ -258,12 +212,9 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   Future<void> _updateFilteredFiles() async {
     final int computationId = ++_filtersComputationId;
     final hasCollectionFilters = _selectedCollections.isNotEmpty;
-    final hasInfoFilters = _selectedInfoTypes.isNotEmpty;
-    final hasAnyFilters = hasCollectionFilters || hasInfoFilters;
+    final hasAnyFilters = hasCollectionFilters;
 
     if (!hasAnyFilters) {
-      final availableInfoTypes = _computeAvailableInfoTypes(widget.recentFiles);
-
       if (!mounted || computationId != _filtersComputationId) {
         return;
       }
@@ -271,7 +222,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
       setState(() {
         _filteredFiles = [];
         _availableCollections = List.from(widget.collections);
-        _availableInfoTypes = availableInfoTypes;
       });
       return;
     }
@@ -305,20 +255,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
         }
       }
 
-      if (hasInfoFilters) {
-        final infoType = _getInfoTypeForFile(file);
-        if (infoType == null || !_selectedInfoTypes.contains(infoType)) {
-          continue;
-        }
-      }
-
       filteredFiles.add(file);
       if (fileId != null) {
         filteredFileCollections[fileId] = collectionsForFile;
       }
     }
 
-    final availableInfoTypes = _computeAvailableInfoTypes(filteredFiles);
     final availableCollections = _computeAvailableCollections(
       hasActiveFilters: hasAnyFilters,
       filteredFiles: filteredFiles,
@@ -332,7 +274,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     setState(() {
       _filteredFiles = filteredFiles;
       _availableCollections = availableCollections;
-      _availableInfoTypes = availableInfoTypes;
     });
   }
 
@@ -465,88 +406,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     return orderedCollections;
   }
 
-  List<InfoType> _getOrderedInfoTypes() {
-    final orderedInfoTypes = <InfoType>[];
-
-    for (final infoType in _infoTypeSelectionOrder) {
-      if (_availableInfoTypes.contains(infoType)) {
-        orderedInfoTypes.add(infoType);
-      }
-    }
-
-    for (final infoType in InfoType.values) {
-      if (_availableInfoTypes.contains(infoType) &&
-          !_selectedInfoTypes.contains(infoType)) {
-        orderedInfoTypes.add(infoType);
-      }
-    }
-
-    return orderedInfoTypes;
-  }
-
-  InfoType? _getInfoTypeForFile(EnteFile file) {
-    if (file.fileType != FileType.info) {
-      return null;
-    }
-
-    final fileId = file.uploadedFileID;
-    if (fileId != null && _fileInfoTypeCache.containsKey(fileId)) {
-      return _fileInfoTypeCache[fileId];
-    }
-
-    final infoData = file.pubMagicMetadata.info;
-    if (infoData == null) {
-      if (fileId != null) {
-        _fileInfoTypeCache[fileId] = null;
-      }
-      return null;
-    }
-
-    final typeValue = infoData['type'];
-    if (typeValue is! String) {
-      if (fileId != null) {
-        _fileInfoTypeCache[fileId] = null;
-      }
-      return null;
-    }
-
-    for (final infoType in InfoType.values) {
-      if (infoType.name == typeValue) {
-        if (fileId != null) {
-          _fileInfoTypeCache[fileId] = infoType;
-        }
-        return infoType;
-      }
-    }
-
-    try {
-      final resolved = InfoTypeExtension.fromString(typeValue);
-      if (fileId != null) {
-        _fileInfoTypeCache[fileId] = resolved;
-      }
-      return resolved;
-    } catch (_) {
-      if (fileId != null) {
-        _fileInfoTypeCache[fileId] = null;
-      }
-      return null;
-    }
-  }
-
-  String _infoTypeLabel(BuildContext context, InfoType infoType) {
-    final l10n = context.l10n;
-    switch (infoType) {
-      case InfoType.note:
-        return l10n.personalNote;
-      case InfoType.physicalRecord:
-        return l10n.physicalRecords;
-      case InfoType.accountCredential:
-        return l10n.accountCredentials;
-      case InfoType.emergencyContact:
-        return l10n.emergencyContact;
-    }
-  }
-
   String _collectionLabel(Collection collection) {
     final name = collection.name?.trim();
     if (name == null || name.isEmpty) {
@@ -555,47 +414,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     return name;
   }
 
-  List<InfoType> _computeAvailableInfoTypes(List<EnteFile> baseFiles) {
-    final typesInBase = <InfoType>{};
-
-    for (final file in baseFiles) {
-      final infoType = _getInfoTypeForFile(file);
-      if (infoType != null) {
-        typesInBase.add(infoType);
-      }
-    }
-
-    final updatedInfoTypes = <InfoType>[];
-
-    for (final infoType in _selectedInfoTypes) {
-      if (!updatedInfoTypes.contains(infoType)) {
-        updatedInfoTypes.add(infoType);
-      }
-    }
-
-    for (final infoType in InfoType.values) {
-      if (typesInBase.contains(infoType) &&
-          !updatedInfoTypes.contains(infoType)) {
-        updatedInfoTypes.add(infoType);
-      }
-    }
-
-    return updatedInfoTypes;
-  }
-}
-
-class _FilterChipEntry {
-  const _FilterChipEntry.collection(this.collection) : infoType = null;
-
-  const _FilterChipEntry.infoType(this.infoType) : collection = null;
-
-  final Collection? collection;
-  final InfoType? infoType;
-
-  bool get isCollection => collection != null;
-
-  String get key =>
-      isCollection ? 'c_${collection!.id}' : 'i_${infoType!.name}';
 }
 
 class _FilterChipViewModel {
