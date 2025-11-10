@@ -15,7 +15,6 @@ import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/trash_page.dart';
-import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -153,11 +152,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
       body: Stack(
         children: [
           _buildBody(context),
-          CollectionSelectionOverlayBar(
-            collection: _sortedCollections,
-            selectedCollections: widget.selectedCollections!,
-            viewType: widget.viewType,
-          ),
+          // TODO(aman): Uncomment when multi-select actions are restored.
+          // CollectionSelectionOverlayBar(
+          //   collection: _sortedCollections,
+          //   selectedCollections: widget.selectedCollections!,
+          //   viewType: widget.viewType,
+          // ),
         ],
       ),
     );
@@ -238,7 +238,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           Expanded(
             child: ItemListView(
               collections: _sortedCollections,
-              selectedCollections: widget.selectedCollections,
+              // TODO(aman): pass selectedCollections when multi-select returns.
+              selectedCollections: null,
               physics: const BouncingScrollPhysics(),
             ),
           ),

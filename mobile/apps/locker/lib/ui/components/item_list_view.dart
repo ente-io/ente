@@ -99,6 +99,8 @@ class _ItemListViewState extends State<ItemListView> {
   }
 
   void _toggleCollectionSelection(Collection collection) {
+    // TODO(aman): Re-enable collection multi-select when bulk actions return.
+    return;
     HapticFeedback.lightImpact();
     widget.selectedCollections!.toggleSelection(collection);
   }

@@ -24,7 +24,6 @@ import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/sharing/share_collection_bottom_sheet.dart";
-import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_actions.dart';
 import "package:logging/logging.dart";
 
@@ -229,10 +228,11 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           alignment: Alignment.bottomCenter,
           children: [
             _buildBody(colorScheme, textTheme),
-            FileSelectionOverlayBar(
-              files: _displayedFiles,
-              selectedFiles: _selectedFiles,
-            ),
+            // TODO(aman): Re-enable file multi-select overlay when bulk actions return.
+            // FileSelectionOverlayBar(
+            //   files: _displayedFiles,
+            //   selectedFiles: _selectedFiles,
+            // ),
           ],
         ),
       ),
@@ -407,7 +407,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 : ItemListView(
                     key: ValueKey(_displayedFiles.length),
                     files: _displayedFiles,
-                    selectedFiles: _selectedFiles,
+                    // TODO(aman): pass selectedFiles when multi-select returns.
+                    selectedFiles: null,
                     physics: const BouncingScrollPhysics(),
                   ),
           ),
