@@ -108,7 +108,14 @@ class _LoginPasswordVerificationPageState
       );
     } on DioException catch (e, s) {
       await dialog.hide();
-      if (e.response != null && e.response!.statusCode == 401) {
+      final String? enteErrCode = e.response?.data["code"];
+      if (enteErrCode != null && enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+        await _showContactSupportDialog(
+          context,
+          context.strings.oops,
+          'Sorry, this account doesn’t have Locker access yet.',
+        );
+      } else if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
         await _showContactSupportDialog(
           context,

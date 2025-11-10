@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
@@ -165,9 +166,22 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       }
     } catch (e) {
       if (mounted) {
+        final errorDetails = () {
+          if (e is DioException) {
+            final responseData = e.response?.data;
+            if (responseData != null) {
+              return responseData.toString();
+            }
+            return e.message ?? e.toString();
+          }
+          return e.toString();
+        }();
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${context.l10n.failedToSaveRecord}: $e'),
+            content: Text(
+              '${context.l10n.failedToSaveRecord}: $errorDetails',
+            ),
             backgroundColor: Colors.red,
           ),
         );

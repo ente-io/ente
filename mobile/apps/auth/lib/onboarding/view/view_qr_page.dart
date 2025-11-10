@@ -104,7 +104,7 @@ class ViewQrPage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
-                        vertical: 4,
+                        vertical: 0,
                       ),
                       child: Text(l10n.back),
                     ),

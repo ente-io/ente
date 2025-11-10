@@ -1935,6 +1935,10 @@
   "hoorayyyy": "耶～～！",
   "nothingToTidyUpHere": "这里没什么可清理的",
   "deletingDash": "正在删除 - ",
+  "cLTitle1": "跳转到日期",
+  "cLDesc1": "在文件信息面板中选择“跳转到日期”即可查看该照片前后的相关照片。",
+  "cLTitle2": "更快的视频编辑器",
+  "cLDesc2": "我们重新设计了视频编辑器，大幅提升大型视频的编辑速度，并带来更好的使用体验。",
   "closeBy": "关闭",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

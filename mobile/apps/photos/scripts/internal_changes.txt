@@ -1,4 +1,5 @@
-- Ashil: (i) Jump to date
+- Laurens: Ente Rewind final version. Please manually recompute from ML debug options to see it.
+- Ashil: Jump to date
 - Prateek: Add native video editor to boost performance
 - Neeraj: Report stacktraces to Sentry & skip noisy TaskQueue exception
 - Neeraj: Prevent concurrent modification when trashing multiple albums

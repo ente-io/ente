@@ -36,10 +36,12 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 
 **What happens next:**
 
-- Videos captured in the last 30 days will start processing
-- Both local and remote videos will be processed
-- This may consume bandwidth for downloading remote files and uploading generated streams
-- Processing continues in the background
+- Videos captured in the last 60 days and under 1 minute will start processing automatically
+- Local videos will be processed
+
+**For older or longer videos:**
+
+Open the specific video, tap the overflow menu (⋮) in the top-right corner, and select **Create stream**
 
 ### On desktop
 
@@ -52,6 +54,7 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 - All existing previously uploaded videos will be processed
 - Stream generation is CPU intensive and happens in the background
 - Click the search bar to see "Processing videos..." status
+- Processed videos sync to mobile automatically
 
 ## Viewing video streams
 

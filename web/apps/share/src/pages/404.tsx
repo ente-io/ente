@@ -1,3 +1,4 @@
+import { CustomHeadShare } from "ente-base/components/Head";
 import React from "react";
 import { FileShareView } from "../components/file-share/FileShareView";
 
@@ -14,7 +15,12 @@ import { FileShareView } from "../components/file-share/FileShareView";
  * while preserving the URL in the browser.
  */
 const NotFoundPage: React.FC = () => {
-    return <FileShareView />;
+    return (
+        <>
+            <CustomHeadShare title="Ente Locker" />
+            <FileShareView />
+        </>
+    );
 };
 
 export default NotFoundPage;

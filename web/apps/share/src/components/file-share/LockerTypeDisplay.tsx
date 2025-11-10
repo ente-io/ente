@@ -28,7 +28,6 @@ export const LockerTypeDisplay: React.FC<LockerTypeDisplayProps> = ({
                 <>
                     {data.content && (
                         <CopyableField
-                            label="Content"
                             value={data.content}
                             onCopy={onCopy}
                             multiline

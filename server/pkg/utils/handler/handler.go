@@ -53,7 +53,7 @@ func Error(c *gin.Context, err error) {
 	if isEnteApiErr {
 		c.AbortWithStatusJSON(enteApiErr.HttpStatusCode, enteApiErr)
 	} else if httpStatus := httpStatusCode(err); httpStatus != 0 {
-		c.AbortWithStatus(httpStatus)
+		c.AbortWithStatusJSON(httpStatus, gin.H{})
 	} else {
 		if _, ok := stacktrace.RootCause(err).(validator.ValidationErrors); ok {
 			c.AbortWithStatus(http.StatusBadRequest)

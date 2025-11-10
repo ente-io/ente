@@ -111,7 +111,7 @@ func (repo *CollectionRepository) GetCollectionsOwnedByUserV2(userID int64, upda
 		SELECT 
 c.collection_id, c.owner_id, c.encrypted_key,c.key_decryption_nonce, c.name, c.encrypted_name, c.name_decryption_nonce, c.type, c.app, c.attributes, c.updation_time, c.is_deleted, c.magic_metadata, c.pub_magic_metadata,
 users.user_id, users.encrypted_email, users.email_decryption_nonce, cs.role_type,
-pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join 
+pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_at, pct.pw_hash, pct.pw_nonce, pct.mem_limit, pct.ops_limit, pct.enable_download, pct.enable_collect, pct.enable_join, pct.min_role 
     FROM collections c
     LEFT JOIN collection_shares cs
     ON (cs.collection_id = c.collection_id AND cs.is_deleted = false)
@@ -141,11 +141,11 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 		var pctEnableDownload, pctEnableCollect, pctEnableJoin sql.NullBool
 		var shareUserID, pctValidTill, pctCreatedAt, pctUpdatedAt, pctMemLimit, pctOpsLimit sql.NullInt64
 		var encryptedEmail, nonce []byte
-		var shareeRoleType, pctToken, pctPwHash, pctPwNonce sql.NullString
+		var shareeRoleType, pctToken, pctPwHash, pctPwNonce, pctMinRole sql.NullString
 
 		if err := rows.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata,
 			&shareUserID, &encryptedEmail, &nonce, &shareeRoleType,
-			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin); err != nil {
+			&pctToken, &pctValidTill, &pctDeviceLimit, &pctCreatedAt, &pctUpdatedAt, &pctPwHash, &pctPwNonce, &pctMemLimit, &pctOpsLimit, &pctEnableDownload, &pctEnableCollect, &pctEnableJoin, &pctMinRole); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 
@@ -192,6 +192,11 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 					url.MemLimit = &pctMemLimit.Int64
 					url.OpsLimit = &pctOpsLimit.Int64
 				}
+				if pctMinRole.Valid {
+					role := ente.ConvertStringToCollectionParticipantRole(pctMinRole.String)
+					rolePtr := role
+					url.MinRole = &rolePtr
+				}
 				currentCollection.PublicURLs = append(currentCollection.PublicURLs, url)
 			}
 		}
@@ -206,7 +211,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 // with a user
 func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, updationTime int64, app ente.App, limit *int64) ([]ente.Collection, error) {
 	query := `
-		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted
+		SELECT collections.collection_id, collections.owner_id, users.encrypted_email, users.email_decryption_nonce, collection_shares.encrypted_key, collections.name, collections.encrypted_name, collections.name_decryption_nonce, collections.type, collections.app, collections.pub_magic_metadata, collection_shares.magic_metadata, collections.updation_time, collection_shares.is_deleted, collection_shares.role_type
 		FROM collections
 		INNER JOIN users
 			ON collections.owner_id = users.user_id
@@ -225,11 +230,13 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 	defer rows.Close()
 
 	collections := make([]ente.Collection, 0)
+	shareeRoleByCollection := make(map[int64]ente.CollectionParticipantRole)
 	for rows.Next() {
 		var c ente.Collection
 		var collectionName, encryptedName, nameDecryptionNonce sql.NullString
 		var encryptedEmail, emailDecryptionNonce []byte
-		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted); err != nil {
+		var roleType sql.NullString
+		if err := rows.Scan(&c.ID, &c.Owner.ID, &encryptedEmail, &emailDecryptionNonce, &c.EncryptedKey, &collectionName, &encryptedName, &nameDecryptionNonce, &c.Type, &c.App, &c.PublicMagicMetadata, &c.SharedMagicMetadata, &c.UpdationTime, &c.IsDeleted, &roleType); err != nil {
 			return collections, stacktrace.Propagate(err, "")
 		}
 		if collectionName.Valid && len(collectionName.String) > 0 {
@@ -260,7 +267,38 @@ func (repo *CollectionRepository) GetCollectionsSharedWithUser(userID int64, upd
 			}
 			c.Sharees = sharees
 		}
+		role := ente.ConvertStringToCollectionParticipantRole(roleType.String)
+		if role == ente.UNKNOWN {
+			role = ente.VIEWER
+		}
+		shareeRoleByCollection[c.ID] = role
 		collections = append(collections, c)
+	}
+
+	collectionIDs := make([]int64, 0, len(collections))
+	for _, collection := range collections {
+		if collection.IsDeleted {
+			continue
+		}
+		collectionIDs = append(collectionIDs, collection.ID)
+	}
+	if len(collectionIDs) > 0 {
+		urlMap, err := repo.CollectionLinkRepo.GetCollectionToActivePublicURLMap(context.Background(), collectionIDs, app)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "failed to get public URLs")
+		}
+		for idx := range collections {
+			if collections[idx].IsDeleted {
+				collections[idx].PublicURLs = []ente.PublicURL{}
+				continue
+			}
+			role := shareeRoleByCollection[collections[idx].ID]
+			collections[idx].PublicURLs = ente.FilterPublicURLsForRole(urlMap[collections[idx].ID], role)
+		}
+	} else {
+		for idx := range collections {
+			collections[idx].PublicURLs = []ente.PublicURL{}
+		}
 	}
 	return collections, nil
 }
