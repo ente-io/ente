@@ -1348,7 +1348,7 @@ class _HomePageState extends State<HomePage> {
             currentKey: PreferenceService.instance.codeSortKey(),
             onSelected: (newOrder) async {
               await PreferenceService.instance.setCodeSortKey(newOrder);
-              if (newOrder == CodeSortKey.manual && newOrder == _codeSortKey) {
+              if (newOrder == CodeSortKey.manual) {
                 await navigateToReorderPage(_allCodes!);
               }
               setState(() {
