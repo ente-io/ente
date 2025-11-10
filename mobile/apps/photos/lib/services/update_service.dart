@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/constants.dart';
@@ -15,7 +14,6 @@ class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
   static const currentChangeLogVersion = 39;
-
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
   final PackageInfo _packageInfo;
