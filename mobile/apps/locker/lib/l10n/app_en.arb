@@ -261,6 +261,19 @@
   "upload": "Upload",
   "documentsHint": "Documents",
   "searchHint": "Search...",
+  "searchEmptyTitle": "No matches found",
+  "searchEmptyDescription": "Try searching for something else.",
+  "searchEverywhereTitle": "Search everywhere for \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
+  "searchEverywhereSubtitle": "Search across all collections and files.",
   "noCollectionsFoundForQuery": "No collections found for \"{query}\"",
   "@noCollectionsFoundForQuery": {
     "description": "Message when no collections match the search query",

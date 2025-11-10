@@ -616,6 +616,30 @@ abstract class AppLocalizations {
   /// **'Search...'**
   String get searchHint;
 
+  /// No description provided for @searchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found'**
+  String get searchEmptyTitle;
+
+  /// No description provided for @searchEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Try searching for something else.'**
+  String get searchEmptyDescription;
+
+  /// CTA title prompting the user to search globally
+  ///
+  /// In en, this message translates to:
+  /// **'Search everywhere for \"{query}\"'**
+  String searchEverywhereTitle(String query);
+
+  /// No description provided for @searchEverywhereSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search across all collections and files.'**
+  String get searchEverywhereSubtitle;
+
   /// Message when no collections match the search query
   ///
   /// In en, this message translates to:

@@ -12,6 +12,7 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import "package:locker/ui/components/collection_list_widget.dart";
 import "package:locker/ui/components/collection_row_widget.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
 import "package:locker/ui/components/file_list_widget.dart";
 import "package:locker/ui/components/file_row_widget.dart";
 import 'package:locker/ui/pages/collection_page.dart';
@@ -365,36 +366,22 @@ class FileListViewHelpers {
     String? message,
   }) {
     return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          color: getEnteColorScheme(context).backdropBase,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Oops!",
-              style: getEnteTextTheme(context).largeBold,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Your search query do not match any results. Try searching something else',
-              style: getEnteTextTheme(context).bodyMuted,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+      child: EmptyStateWidget(
+        assetPath: 'assets/empty_state.png',
+        title: context.l10n.searchEmptyTitle,
+        subtitle: context.l10n.searchEmptyDescription,
+        showBorder: false,
       ),
     );
   }
 
   static Widget createSearchEverywhereFooter({
+    required BuildContext context,
     required String searchQuery,
     required VoidCallback onTap,
-    BuildContext? context,
   }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Container(
       margin: const EdgeInsets.all(16.0),
       child: Card(
@@ -408,9 +395,7 @@ class FileListViewHelpers {
               children: [
                 Icon(
                   Icons.search,
-                  color: context != null
-                      ? Theme.of(context).primaryColor
-                      : Colors.blue,
+                  color: colorScheme.primary700,
                   size: 24,
                 ),
                 const SizedBox(width: 16),
@@ -419,36 +404,25 @@ class FileListViewHelpers {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Search everywhere for "$searchQuery"',
-                        style: context != null
-                            ? getEnteTextTheme(context).large.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).primaryColor,
-                                )
-                            : const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.blue,
-                              ),
+                        context.l10n.searchEverywhereTitle(searchQuery),
+                        style: textTheme.large.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.primary700,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Search across all collections and files',
-                        style: context != null
-                            ? getEnteTextTheme(context).body.copyWith(
-                                  color: Colors.grey[600],
-                                )
-                            : TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
+                        context.l10n.searchEverywhereSubtitle,
+                        style: textTheme.body.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.grey[400],
+                  color: colorScheme.textMuted,
                   size: 16,
                 ),
               ],

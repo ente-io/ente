@@ -323,6 +323,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchHint => 'Search...';
 
   @override
+  String get searchEmptyTitle => 'No matches found';
+
+  @override
+  String get searchEmptyDescription => 'Try searching for something else.';
+
+  @override
+  String searchEverywhereTitle(String query) {
+    return 'Search everywhere for \"$query\"';
+  }
+
+  @override
+  String get searchEverywhereSubtitle =>
+      'Search across all collections and files.';
+
+  @override
   String noCollectionsFoundForQuery(String query) {
     return 'No collections found for \"$query\"';
   }

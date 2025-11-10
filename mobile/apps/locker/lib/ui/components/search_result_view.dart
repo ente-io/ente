@@ -47,9 +47,9 @@ class SearchResultView extends StatelessWidget {
               onSearchEverywhere != null &&
               searchQuery.isNotEmpty)
             FileListViewHelpers.createSearchEverywhereFooter(
+              context: context,
               searchQuery: searchQuery,
               onTap: onSearchEverywhere!,
-              context: context,
             ),
         ],
       ),
