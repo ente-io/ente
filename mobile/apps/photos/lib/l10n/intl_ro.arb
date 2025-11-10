@@ -1519,9 +1519,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "cLTitle1": "Sari la dată",
-  "cLDesc1": "Vezi fotografiile din jurul oricărei imagini alegând opțiunea Sari la dată din panoul de informații al fișierului.",
-  "cLTitle2": "Editor video mai rapid",
-  "cLDesc2": "Editorul video a fost refăcut pentru a crește considerabil viteza la editarea clipurilor mari și pentru a îmbunătăți experiența de utilizare."
+  "join": "Alăturare"
 }

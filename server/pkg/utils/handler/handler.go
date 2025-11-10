@@ -56,11 +56,11 @@ func Error(c *gin.Context, err error) {
 		c.AbortWithStatusJSON(httpStatus, gin.H{})
 	} else {
 		if _, ok := stacktrace.RootCause(err).(validator.ValidationErrors); ok {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		} else if isClientError {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{})
 		} else {
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{})
 		}
 	}
 }

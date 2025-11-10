@@ -69,11 +69,19 @@ export interface CodeDisplay {
      * Pinned codes show at the top of the list of codes.
      */
     pinned?: boolean;
+    /**
+     * User-provided note or description for this code.
+     *
+     * This is optional metadata that users can add to help remember details
+     * about the code (e.g., which account, recovery codes location, etc.).
+     */
+    note?: string;
 }
 
 const CodeDisplay = z.object({
     trashed: z.boolean().nullish().transform(nullToUndefined),
     pinned: z.boolean().nullish().transform(nullToUndefined),
+    note: z.string().nullish().transform(nullToUndefined),
 });
 
 /**

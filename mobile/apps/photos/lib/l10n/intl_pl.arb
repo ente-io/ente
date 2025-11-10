@@ -1862,9 +1862,5 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Przejdź do daty",
-  "cLDesc1": "Zobacz sąsiednie zdjęcia, wybierając opcję Przejdź do daty w panelu informacji o pliku.",
-  "cLTitle2": "Szybszy edytor wideo",
-  "cLDesc2": "Przeprojektowaliśmy edytor wideo, aby znacznie przyspieszyć pracę z dużymi nagraniami i poprawić wygodę użytkowania."
+  "deletingDash": "Usuwanie - "
 }

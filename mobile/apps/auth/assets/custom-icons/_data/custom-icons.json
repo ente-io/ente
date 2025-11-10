@@ -1046,6 +1046,13 @@
       "title": "Mintos"
     },
     {
+      "title": "Mint Mobile",
+      "slug": "mintmobile",
+      "altNames": [
+        "MintMobile"
+      ]
+    },
+    {
       "title": "Mistral",
       "altNames": [
         "Le Chat",
@@ -1821,6 +1828,14 @@
       ]
     },
     {
+      "title": "uscis",
+      "altNames": [
+        "USCIS",
+        "myuscis",
+        "uscis.gov"
+      ]
+    },
+    {
   "title": "VHV",
   "slug": "vhv", 
   "altNames": ["VHV", "VHV Versicherung"]
@@ -2028,6 +2043,24 @@
         "ESET Protect",
         "ESET Small Business Security",
         "ESET Home Security"
+      ]
+    },
+    {
+      "title": "Binghamton University",
+      "slug": "binghamton_university",
+      "altNames": [
+        "Binghamton",
+        "Binghamton Univ",
+        "Binghamton University SSO",
+        "BingOTP"
+      ]
+    },
+    {
+      "title": "IBM",
+      "slug": "ibm",
+      "altNames": [
+        "International Business Machines",
+        "IBMid"
       ]
     }
   ]

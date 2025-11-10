@@ -11,6 +11,7 @@
   "setupFirstAccount": "设置您的第一个账户",
   "importScanQrCode": "扫描二维码",
   "qrCode": "二维码",
+  "qr": "二维码",
   "importEnterSetupKey": "输入设置密钥",
   "importAccountPageTitle": "输入账户详细信息",
   "secretCanNotBeEmpty": "密码不能为空",
@@ -139,6 +140,7 @@
   "existingUser": "已注册用户",
   "newUser": "初来 Ente",
   "delete": "删除",
+  "addTag": "添加标签",
   "enterYourPasswordHint": "输入您的密码",
   "forgotPassword": "忘记密码",
   "oops": "哎呀",
@@ -301,6 +303,7 @@
   "checking": "正在检查...",
   "youAreOnTheLatestVersion": "当前为最新版本",
   "warning": "警告",
+  "note": "注意",
   "exportWarningDesc": "导出的文件包含敏感信息。请安全存储。",
   "iUnderStand": "了解",
   "@iUnderStand": {
@@ -369,7 +372,7 @@
   "useOffline": "无需备份即可使用",
   "signInToBackup": "登录以备份您的代码",
   "singIn": "登录",
-  "sigInBackupReminder": "请导出您的代码以确保您有可以恢复的备份。",
+  "sigInBackupReminder": "登录后 Ente 会自动备份代码。\n\n我们仍然建议您导出代码作为额外备份。",
   "offlineModeWarning": "您已选择在不进行备份的情况下继续操作。请手动备份以确保您的代码安全。",
   "showLargeIcons": "显示大图标",
   "compactMode": "紧凑模式",
@@ -546,5 +549,42 @@
   "couldNotDetermineLocation": "无法确定位置…",
   "saveBackup": "保存备份",
   "changeLocation": "更改位置",
-  "changeCurrentLocation": "更改当前位置"
+  "changeCurrentLocation": "更改当前位置",
+  "done": "完成",
+  "addNew": "新增",
+  "selected": "已选",
+  "moveMultipleToTrashMessage": "您确定要将 {count} 个项目移至回收站吗？",
+  "nSelected": "{count, plural, =1{已选择 1 个} other{已选择 {count} 个}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1{已置顶 1 个项目} other{已置顶 {count} 个项目}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{已取消置顶 1 个项目} other{已取消置顶 {count} 个项目}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }
