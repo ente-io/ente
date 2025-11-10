@@ -23,6 +23,7 @@ class MapPullUpGallery extends StatefulWidget {
   final StreamController<List<EnteFile>> visibleImages;
   final double bottomUnsafeArea;
   final double bottomSheetDraggableAreaHeight;
+  final bool hasLocationData;
   static const gridCrossAxisSpacing = 4.0;
   static const gridMainAxisSpacing = 4.0;
   static const gridPadding = 2.0;
@@ -31,6 +32,7 @@ class MapPullUpGallery extends StatefulWidget {
     this.visibleImages,
     this.bottomSheetDraggableAreaHeight,
     this.bottomUnsafeArea, {
+    this.hasLocationData = true,
     super.key,
   });
 
@@ -157,7 +159,11 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                AppLocalizations.of(context).zoomOutToSeePhotos,
+                                widget.hasLocationData
+                                    ? AppLocalizations.of(context)
+                                        .zoomOutToSeePhotos
+                                    : AppLocalizations.of(context)
+                                        .noImagesWithLocation,
                                 style: textTheme.smallFaint,
                               ),
                             ],

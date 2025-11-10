@@ -6,7 +6,6 @@
   "onBoardingGetStarted": "Începe",
   "setupFirstAccount": "Configurează primul cont",
   "importScanQrCode": "Scanează un cod QR",
-  "qrCode": "Cod QR",
   "importEnterSetupKey": "Introdu o cheie de configurare",
   "importAccountPageTitle": "Introdu detaliile contului",
   "secretCanNotBeEmpty": "Secretul nu poate fi gol",

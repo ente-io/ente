@@ -8,10 +8,11 @@
   },
   "onBoardingBody": "2FA kodlarınızı güvenli bir şekilde yedekleyin",
   "onBoardingGetStarted": "Başlayın",
-  "setupFirstAccount": "İlk hesabınızı ekleyin",
+  "setupFirstAccount": "İlk hesabınızı kurun",
   "importScanQrCode": "QR kod tara",
-  "qrCode": "QR Kodu",
-  "importEnterSetupKey": "Kurulum anahtarını giriniz",
+  "qrCode": "QR kod",
+  "qr": "QR",
+  "importEnterSetupKey": "Kurulum anahtarını girin",
   "importAccountPageTitle": "Hesap bilgilerinizi girin",
   "secretCanNotBeEmpty": "Gizli anahtar boş olamaz",
   "bothIssuerAndAccountCanNotBeEmpty": "Sağlayıcı adı ve hesap değerleri boş olamaz",
@@ -63,7 +64,7 @@
       }
     }
   },
-  "copyEmailAction": "E-postayı Kopyala",
+  "copyEmailAction": "E-postayı kopyala",
   "exportLogsAction": "Kayıtları dışa aktar",
   "reportABug": "Hata bildirin",
   "crashAndErrorReporting": "Çökme ve hata bildirimi",
@@ -111,12 +112,13 @@
   "importAegisGuide": "Aegis'in Ayarlarında \"Kasayı dışa aktar\" seçeneğini kullanın.\n\nKasanız şifrelenmişse, kasanın şifresini çözmek için kasa parolasını girmeniz gerekecektir.",
   "import2FasGuide": "2FAS içindeki \"Ayarlar -> Yedekle-Dışa Aktar\" seçeneğini seçin.\n\nEğer yedeğiniz şifreli ise, şifrenin çözülmesi için şifreleme parolasını girmeniz gerekmekte",
   "importLastpassGuide": "Lastpass Kimlik Doğrulayıcı Ayarları içerisindeki \"Hesapları aktar\" seçeneği kullanın ve \"Hesapları dosyaya dışarı aktar\"a basın. İndirilen JSON'u içeri aktarın.",
+  "importProtonAuthGuide": "Kodlarınızı dışa aktarmak için Proton Doğrulama Ayarlarındaki \"Dışa Aktar\" seçeneğini kullanın.",
   "exportCodes": "Kodu dışa aktar",
   "importLabel": "İçe aktar",
   "importInstruction": "Lütfen aşağıdaki şekilde kodlarınızın listesini içeren dosyayı seçiniz",
   "importCodeDelimiterInfo": "Kodlar, virgülle ya da yeni bir satırla ayrılabilir",
   "selectFile": "Dosya seç",
-  "emailVerificationToggle": "E-posta doğrulama",
+  "emailVerificationToggle": "E-posta doğrulaması",
   "emailVerificationEnableWarning": "E-postanız için 2FA'yı bizde saklıyorsanız, e-posta doğrulamasını açmak bir kilitlenmeye neden olabilir. Bir hizmetin dışında kalırsanız, diğerine giriş yapamayabilirsiniz.",
   "authToChangeEmailVerificationSetting": "E-posta doğrulamasını değiştirmek için lütfen kimlik doğrulaması yapın",
   "authenticateGeneric": "Lütfen doğrulama yapın",
@@ -138,6 +140,7 @@
   "existingUser": "Mevcut kullanıcı",
   "newUser": "Ente'de Yeni",
   "delete": "Sil",
+  "addTag": "Etiket ekle",
   "enterYourPasswordHint": "Parolanızı girin",
   "forgotPassword": "Şifremi unuttum",
   "oops": "Hay aksi",
@@ -214,7 +217,7 @@
   "copiedNextToClipboard": "Sonraki kod panoya kopyalandı",
   "error": "Hata",
   "recoveryKeyCopiedToClipboard": "Kurtarma anahtarı panoya kopyalandı",
-  "recoveryKeyOnForgotPassword": "Eğer şifrenizi unutursanız, verilerinizi kurtarabileceğiniz tek yol bu anahtardır.",
+  "recoveryKeyOnForgotPassword": "Eğer şifrenizi unutursanız, verilerinizi kurtarabilmenizin tek yol bu anahtardır.",
   "recoveryKeySaveDescription": "Biz bu anahtarı saklamıyoruz, lütfen. bu 24 kelimelik anahtarı güvenli bir yerde saklayın.",
   "doThisLater": "Bunu daha sonra yap",
   "saveKey": "Anahtarı kaydet",
@@ -300,6 +303,7 @@
   "checking": "Denetleniyor...",
   "youAreOnTheLatestVersion": "En son sürümdesiniz",
   "warning": "Uyarı",
+  "note": "Not",
   "exportWarningDesc": "Dışa aktarılan dosya hassas bilgiler içeriyor. Lütfen bunu güvenli bir şekilde saklayın.",
   "iUnderStand": "Anlıyorum",
   "@iUnderStand": {
@@ -368,13 +372,14 @@
   "useOffline": "Yedekleme olmadan kullan",
   "signInToBackup": "Kodlarınızı yedeklemek için giriş yapın",
   "singIn": "Giriş yap",
-  "sigInBackupReminder": "Geri yükleyebileceğiniz bir yedeğiniz olduğundan emin olmak için lütfen kodlarınızı dışa aktarın.",
+  "sigInBackupReminder": "Ente, oturum açtıktan sonra kodları otomatik olarak yedekleyecek.\n\nYine de kodları ekstra bir yedek olarak dışa aktarmanızı öneririz.",
   "offlineModeWarning": "Yedekleme yapmadan devam etmeyi seçtiniz. Kodlarınızın güvende olduğundan emin olmak için lütfen manuel yedekleme yapın.",
   "showLargeIcons": "Büyük simgeler göster",
   "compactMode": "Sıkıştırılmış mod",
   "shouldHideCode": "Kodları gizle",
   "doubleTapToViewHiddenCode": "Kodu görüntülemek için bir girdiye çift dokunabilirsiniz",
   "focusOnSearchBar": "Uygulama başladığında arama bölümüne odaklan",
+  "minimizeToTrayOnClose": "Kapatıldığında tepsiye küçült",
   "confirmUpdatingkey": "Gizli anahtarı güncellemek istediğinizden emin misiniz?",
   "minimizeAppOnCopy": "Kopyalarken uygulamayı küçült",
   "editCodeAuthMessage": "Kodu düzenlemek için doğrulama yapın",
@@ -519,5 +524,67 @@
   "algorithm": "Algoritma",
   "type": "Tür",
   "period": "Zaman Aralığı",
-  "digits": "Uzunluk"
+  "digits": "Uzunluk",
+  "importFromGallery": "Galeriden aktar",
+  "errorCouldNotReadImage": "Seçilen resim dosyası okunamadı.",
+  "errorInvalidQRCode": "Geçersiz QR Kodu",
+  "errorInvalidQRCodeBody": "Taranan QR kodu geçerli bir 2FA hesabı değil.",
+  "errorNoQRCode": "QR kod bulunamadı",
+  "errorGenericTitle": "Bir Hata Oluştu",
+  "errorGenericBody": "İçe aktarırken beklenmedik bir hata oluştu.",
+  "localBackupSettingsTitle": "Yerel yedekleme",
+  "localBackupSidebarTitle": "Yerel yedekleme",
+  "enableAutomaticBackups": "Otomatik yedeklemeyi aç",
+  "backupDescription": "Bu, verilerinizi otomatik olarak cihaz üzerindeki bir konuma yedekleyecektir. Yedeklemeler eklendiğinde, düzenlendiğinde veya silindiğinde yedeklemeler güncellenir",
+  "currentLocation": "Mevcut yedekleme konumu:",
+  "securityNotice": "Güvenlik uyarısı",
+  "backupSecurityNotice": "Bu şifrelenmiş yedekleme, 2FA anahtarlarınızı içerir. Kaybederseniz, hesaplarınızı kurtaramayabilirsiniz. Güvende tutun!",
+  "locationUpdatedAndBackupCreated": "Konum güncellendi ve ilk yedekleme oluşturuldu!",
+  "initialBackupCreated": "İlk yedekleme oluşturuldu!",
+  "passwordTooShort": "Şifre en az 8 karakter uzunluğunda olmalıdır.",
+  "noDefaultBackupFolder": "Varsayılan yedekleme klasörü oluşturulamadı.",
+  "backupLocationChoiceDescription": "Yedeklemelerinizi nereye kaydetmek istiyorsunuz?",
+  "chooseBackupLocation": "Yedekleme konumu seçin",
+  "loadDefaultLocation": "Varsayılan konum yükleniyor...",
+  "couldNotDetermineLocation": "Konum belirlenemedi...",
+  "saveBackup": "Yedeklemeyi kaydet",
+  "changeLocation": "Konumu değiştir",
+  "changeCurrentLocation": "Mevcut konumu değiştir",
+  "done": "Tamamlandı",
+  "addNew": "Yeni ekle",
+  "selected": "seçildi",
+  "moveMultipleToTrashMessage": "{count} öğeyi çöp kutusuna taşımak istediğinizden emin misiniz?",
+  "nSelected": "{count, plural, =1 {1 seçildi} other{{count} seçildi}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1 {1 öğe sabitlendi} other{{count} öğe sabitlendi}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1 {1 öğenin sabitlemesi kaldırıldı} other{{count} öğenin sabitlemesi kaldırıldı}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

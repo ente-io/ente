@@ -96,6 +96,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                       itemBuilder: (context, index) {
                         final item = collections[index];
                         return Padding(
+                          key: ValueKey('horizontal_list_${item.id}'),
                           padding: const EdgeInsets.only(
                             right: horizontalPadding / 2,
                           ),
