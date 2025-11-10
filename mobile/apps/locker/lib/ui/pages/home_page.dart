@@ -121,13 +121,13 @@ class CustomLockerAppBar extends StatelessWidget
                   controller: searchController,
                   focusNode: searchFocusNode,
                   onTap: onSearchFocused,
-                  cursorColor: colorScheme.backdropBase,
+                  cursorColor: colorScheme.primary700,
                   onChanged: onSearchChanged,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
                     hintStyle: TextStyle(
-                      color: colorScheme.textBase,
+                      color: colorScheme.textMuted,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
