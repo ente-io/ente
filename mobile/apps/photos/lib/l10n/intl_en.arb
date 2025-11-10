@@ -118,6 +118,10 @@
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",
   "contactSupport": "Contact support",
+  "locationPickerTip": "You can also add a location centered on a photo from the photo's info screen",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Incorrect password",
   "pleaseTryAgain": "Please try again",
   "recreatePasswordTitle": "Recreate password",
@@ -1849,6 +1853,18 @@
   "addedToStreamRecreationQueue": "Added to stream recreation queue",
   "videoPreviewAlreadyExists": "Video preview already exists",
   "videoAlreadyInQueue": "Video file already present in the queue",
+  "videoExportFailed": "Video creation failed. Please try again.",
+  "videoExportSuccess": "Video successfully created at {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Added to queue",
   "creatingStream": "Creating stream",
   "similarImages": "Similar images",
