@@ -37,7 +37,6 @@ can achieve this the following steps:
 
 3.  Edit `internal.admins` or `internal.admin` (if you wish to whitelist only
     single user) in `museum.yaml` to add the user ID you wish to whitelist.
-
     - For multiple admins:
 
     ```yaml

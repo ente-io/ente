@@ -338,10 +338,24 @@ const authenticatorAttestationResponse = (credential: Credential) => {
  * Ente. So only do this check if we're running on our production servers (or
  * localhost).
  */
-export const isWhitelistedRedirect = (redirectURL: URL) =>
-    shouldRestrictToWhitelistedRedirect()
-        ? _isWhitelistedRedirect(redirectURL)
-        : true;
+const isAllowedRedirectScheme = (url: URL) =>
+    url.protocol === "http:" ||
+    url.protocol === "https:" ||
+    url.protocol === "ente:" ||
+    url.protocol === "enteauth:" ||
+    url.protocol === "ente-cli:";
+
+export const isWhitelistedRedirect = (redirectURL: URL) => {
+    if (!isAllowedRedirectScheme(redirectURL)) return false;
+    if (!shouldRestrictToWhitelistedRedirect()) return true;
+    // In production/local, enforce host allowlist only for http(s)
+    return (
+        redirectURL.protocol === "ente:" ||
+        redirectURL.protocol === "enteauth:" ||
+        redirectURL.protocol === "ente-cli:" ||
+        _isWhitelistedRedirect(redirectURL)
+    );
+};
 
 export const shouldRestrictToWhitelistedRedirect = () => {
     // host includes port, hostname is sans port
@@ -356,10 +370,19 @@ export const shouldRestrictToWhitelistedRedirect = () => {
 const _isWhitelistedRedirect = (redirectURL: URL) =>
     (isDevBuild && redirectURL.hostname.endsWith("localhost")) ||
     redirectURL.host.endsWith(".ente.io") ||
-    redirectURL.host.endsWith(".ente.sh") ||
-    redirectURL.protocol == "ente:" ||
-    redirectURL.protocol == "enteauth:" ||
-    redirectURL.protocol == "ente-cli:";
+    redirectURL.host.endsWith(".ente.sh");
+
+export const parseRedirectURLParam = (
+    value: string | undefined,
+): URL | undefined => {
+    if (!value) return undefined;
+    try {
+        const url = new URL(value);
+        return isWhitelistedRedirect(url) ? url : undefined;
+    } catch {
+        return undefined;
+    }
+};
 
 export interface BeginPasskeyAuthenticationResponse {
     /**

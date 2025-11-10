@@ -1587,7 +1587,6 @@
   },
   "legacyInvite": "{email} convidou-lhe a ser um contacto de confiança",
   "authToManageLegacy": "Autentica-se para gerir os seus contactos de confiança",
-  "useDifferentPlayerInfo": "A ter problemas reproduzindo este vídeo? Prima aqui para tentar outro reprodutor.",
   "hideSharedItemsFromHomeGallery": "Esconder Itens Partilhados da Galeria Inicial",
   "gallery": "Galeria",
   "joinAlbum": "Aderir ao Álbum",
@@ -1817,5 +1816,9 @@
         "type": "int"
       }
     }
-  }
+  },
+  "cLTitle1": "Saltar para a data",
+  "cLDesc1": "Veja as fotos em redor de qualquer imagem selecionando a opção Saltar para a data no painel de informações do ficheiro.",
+  "cLTitle2": "Editor de vídeo mais rápido",
+  "cLDesc2": "O editor de vídeo foi renovado para acelerar de forma drástica a edição de vídeos maiores e melhorar a experiência de utilização."
 }

@@ -192,6 +192,10 @@ class StringsLocalizationsHu extends StringsLocalizations {
   String get noDeleteAccountAction => 'Fiók végleges törlése';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'Kérjük, hitelesítse magát a fiók törlésének kezdeményezéséhez';
 

@@ -23,21 +23,6 @@ export interface UseScrollHandlingParams {
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
     setTargetZoom: (zoom: number | null) => void;
-    previousSuperClusterStateRef: React.RefObject<{
-        isInSuperCluster: boolean;
-        superClusterIndex: number | null;
-    }>;
-    superClusterInfo: {
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    };
-    scrollProgress: number;
     isMobileOrTablet: boolean;
 }
 
@@ -54,9 +39,6 @@ export const useScrollHandling = ({
     setHasUserScrolled,
     setScrollProgress,
     setTargetZoom,
-    previousSuperClusterStateRef,
-    superClusterInfo,
-    scrollProgress,
     isMobileOrTablet,
 }: UseScrollHandlingParams) => {
     // Update location positions callback
@@ -80,8 +62,6 @@ export const useScrollHandling = ({
             previousActiveLocationRef,
             isMobileOrTablet,
             setTargetZoom,
-            previousSuperClusterStateRef,
-            superClusterInfo,
         });
     }, [
         timelineRef,
@@ -94,8 +74,6 @@ export const useScrollHandling = ({
         previousActiveLocationRef,
         isMobileOrTablet,
         setTargetZoom,
-        previousSuperClusterStateRef,
-        superClusterInfo,
     ]);
 
     // Throttled scroll handler
@@ -133,10 +111,7 @@ export const useScrollHandling = ({
                 setHasUserScrolled,
                 scrollTimelineToLocation: scrollToLocation,
                 isMobileOrTablet,
-                superClusterInfo,
-                scrollProgress,
                 setTargetZoom,
-                previousSuperClusterStateRef,
                 previousActiveLocationRef,
             });
         },
@@ -149,10 +124,7 @@ export const useScrollHandling = ({
             setHasUserScrolled,
             scrollToLocation,
             isMobileOrTablet,
-            superClusterInfo,
-            scrollProgress,
             setTargetZoom,
-            previousSuperClusterStateRef,
             previousActiveLocationRef,
         ],
     );

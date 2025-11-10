@@ -16,7 +16,9 @@ export const setupAutoUpdater = (mainWindow: BrowserWindow) => {
     // warning when updating on Windows.
     // See: https://github.com/electron-userland/electron-builder/pull/6575
     autoUpdater.disableWebInstaller = true;
-
+    // Disable differential downloads to fix Windows NSIS update issues
+    // See: https://github.com/electron-userland/electron-builder/issues/9181
+    autoUpdater.disableDifferentialDownload = true;
     /**
      * [Note: Testing auto updates]
      *

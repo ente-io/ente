@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:fluttertoast/fluttertoast.dart";
 import "package:logging/logging.dart";
@@ -64,6 +65,10 @@ class _VideoWidgetState extends State<VideoWidget> {
       setState(() {
         useNativeVideoPlayer = false;
       });
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _maybeShowTransformToast();
     });
     if (widget.file.isUploaded) {
       isPreviewLoadable =
@@ -200,6 +205,41 @@ class _VideoWidgetState extends State<VideoWidget> {
         });
       },
       onFinalFileLoad: widget.onFinalFileLoad,
+    );
+  }
+
+  void _maybeShowTransformToast() {
+    if (!kDebugMode) return;
+    final name = widget.file.title ?? widget.file.displayName;
+    final editedIndex = name.indexOf('_edited');
+    if (editedIndex == -1) return;
+    final prefix = name.substring(0, editedIndex);
+
+    final hasTrim = prefix.contains('_t');
+    final cropMatch = RegExp(r'_c_([0-9]+(?:[:_-][0-9]+)?)').firstMatch(prefix);
+    final rotateMatch = RegExp(r'_r_([^_]+)').firstMatch(prefix);
+
+    if (!hasTrim && cropMatch == null && rotateMatch == null) return;
+
+    final parts = <String>[];
+    if (hasTrim) {
+      parts.add('Trim applied');
+    }
+    if (cropMatch != null) {
+      final raw = cropMatch.group(1) ?? '';
+      final formatted = raw.replaceAll(RegExp('[:_-]'), ':');
+      parts.add('Crop: $formatted');
+    }
+    if (rotateMatch != null) {
+      parts.add('Rotate: ${rotateMatch.group(1)}°');
+    }
+
+    if (parts.isEmpty) return;
+    showToast(
+      context,
+      parts.join(' • '),
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
     );
   }
 }

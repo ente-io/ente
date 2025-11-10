@@ -103,19 +103,12 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       ChangeLogEntry(
         context.l10n.cLTitle1,
         context.l10n.cLDesc1,
+        isFeature: true,
       ),
       ChangeLogEntry(
         context.l10n.cLTitle2,
         context.l10n.cLDesc2,
-      ),
-      ChangeLogEntry(
-        context.l10n.cLTitle3,
-        context.l10n.cLDesc3,
-      ),
-      ChangeLogEntry(
-        context.l10n.cLTitle4,
-        context.l10n.cLDesc4,
-        isFeature: false,
+        isFeature: true,
       ),
     ]);
     return Container(

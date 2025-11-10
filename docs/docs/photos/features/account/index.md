@@ -168,8 +168,8 @@ Ente accepts multiple payment methods:
 
 **App Store payments**:
 
-- iOS App Store and Google Play Store
-- Managed through respective app stores
+- iOS App Store
+- Managed by Apple
 
 Ente does not store your payment information. All payments are processed securely through Stripe or the respective payment provider.
 

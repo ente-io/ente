@@ -103,3 +103,20 @@ export const albumsAppOrigin = () =>
  */
 export const shouldOnlyServeAlbumsApp =
     !!process.env.NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP;
+
+/**
+ * A static build time constant that is `true` if {@link shareAppOrigin} has
+ * been customized.
+ */
+export const isCustomShareAppOrigin =
+    !!process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT;
+
+/**
+ * Return the origin that serves public locker (share app).
+ *
+ * Defaults to our production instance, "https://share.ente.io", but can be
+ * overridden by setting the `NEXT_PUBLIC_ENTE_SHARE_ENDPOINT` environment
+ * variable.
+ */
+export const shareAppOrigin = (): string =>
+    process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT ?? "https://share.ente.io";
