@@ -1,0 +1,121 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:photos/generated/l10n.dart';
+import 'package:photos/models/collection/collection.dart';
+import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/divider_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
+import 'package:photos/utils/share_util.dart';
+
+class PublicLinkEnabledActionsWidget extends StatelessWidget {
+  final Collection collection;
+  final GlobalKey? sendLinkButtonKey;
+
+  const PublicLinkEnabledActionsWidget({
+    super.key,
+    required this.collection,
+    this.sendLinkButtonKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!collection.hasLink) {
+      return const SizedBox.shrink();
+    }
+
+    final enteColorScheme = getEnteColorScheme(context);
+    final bool hasExpired =
+        collection.publicURLs.firstOrNull?.isExpired ?? false;
+
+    if (hasExpired) {
+      return MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: AppLocalizations.of(context).linkHasExpired,
+          textColor: enteColorScheme.warning500,
+        ),
+        leadingIcon: Icons.error_outline,
+        leadingIconColor: enteColorScheme.warning500,
+        menuItemColor: enteColorScheme.fillFaint,
+        isBottomBorderRadiusRemoved: true,
+      );
+    }
+
+    final String url = CollectionsService.instance.getPublicUrl(collection);
+    final GlobalKey effectiveKey = sendLinkButtonKey ?? GlobalKey();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).copyLink,
+            makeTextBold: true,
+          ),
+          leadingIcon: Icons.copy,
+          menuItemColor: enteColorScheme.fillFaint,
+          showOnlyLoadingState: true,
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: url));
+            showShortToast(
+              context,
+              AppLocalizations.of(context).linkCopiedToClipboard,
+            );
+          },
+          isBottomBorderRadiusRemoved: true,
+        ),
+        DividerWidget(
+          dividerType: DividerType.menu,
+          bgColor: enteColorScheme.fillFaint,
+        ),
+        MenuItemWidget(
+          key: effectiveKey,
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).sendLink,
+            makeTextBold: true,
+          ),
+          leadingIcon: Icons.adaptive.share,
+          menuItemColor: enteColorScheme.fillFaint,
+          onTap: () async {
+            await shareAlbumLinkWithPlaceholder(
+              context,
+              collection,
+              url,
+              effectiveKey,
+            );
+          },
+          isTopBorderRadiusRemoved: true,
+          isBottomBorderRadiusRemoved: true,
+        ),
+        DividerWidget(
+          dividerType: DividerType.menu,
+          bgColor: enteColorScheme.fillFaint,
+        ),
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).sendQrCode,
+            makeTextBold: true,
+          ),
+          leadingIcon: Icons.qr_code_outlined,
+          menuItemColor: enteColorScheme.fillFaint,
+          onTap: () async {
+            await showDialog<void>(
+              context: context,
+              builder: (BuildContext dialogContext) {
+                return QrCodeDialogWidget(
+                  collection: collection,
+                );
+              },
+            );
+          },
+          isTopBorderRadiusRemoved: true,
+          isBottomBorderRadiusRemoved: true,
+        ),
+      ],
+    );
+  }
+}

@@ -243,42 +243,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<Widget> _actionButtons() {
     final widgets = <Widget>[];
-    if (widget.actionTypesToShow.contains(ActionTypesToShow.addAdmin)) {
-      widgets.add(
-        ButtonWidget(
-          buttonType: widget.actionTypesToShow.length == 1
-              ? ButtonType.primary
-              : ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          labelText: _adminActionLabel(_selectedEmails.length),
-          isDisabled: _selectedEmails.isEmpty,
-          onTap: () async {
-            final results = <bool>[];
-            final collections = widget.collections;
-
-            for (final email in _selectedEmails) {
-              bool result = false;
-              for (final collection in collections) {
-                result = await collectionActions.addEmailToCollection(
-                  context,
-                  collection,
-                  email,
-                  CollectionParticipantRole.admin,
-                );
-              }
-              results.add(result);
-            }
-
-            final successful = results.where((e) => e).length;
-            showToast(context, _adminSuccessMessage(successful));
-
-            if (!results.any((e) => e == false) && mounted) {
-              Navigator.of(context).pop(true);
-            }
-          },
-        ),
-      );
-    }
     if (widget.actionTypesToShow.contains(
       ActionTypesToShow.addCollaborator,
     )) {

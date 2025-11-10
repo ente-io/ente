@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/extensions/user_extension.dart";
@@ -14,6 +15,7 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/sharing/add_participant_page.dart";
 import 'package:photos/ui/sharing/manage_album_participant.dart';
+import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -28,6 +30,7 @@ class AlbumParticipantsPage extends StatefulWidget {
 
 class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   late int currentUserID;
+  final GlobalKey _sendLinkButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -66,6 +69,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final bool isOwner = role == CollectionParticipantRole.owner;
     final bool isAdmin = role == CollectionParticipantRole.admin;
     final bool canManageParticipants = isOwner || (adminRoleEnabled && isAdmin);
+    final bool hasActivePublicLink = widget.collection.hasLink &&
+        !(widget.collection.publicURLs.firstOrNull?.isExpired ?? true);
+    final bool shouldShowPublicLink = !isOwner && hasActivePublicLink;
     final colorScheme = getEnteColorScheme(context);
     final int participants = 1 + widget.collection.getSharees().length;
     final User owner = widget.collection.owner;
@@ -123,6 +129,26 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               context,
             ).albumParticipantsCount(count: participants),
           ),
+          if (shouldShowPublicLink)
+            SliverPadding(
+              padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MenuSectionTitle(
+                      title: AppLocalizations.of(context).publicLinkEnabled,
+                      iconData: Icons.public,
+                    ),
+                    PublicLinkEnabledActionsWidget(
+                      collection: widget.collection,
+                      sendLinkButtonKey: _sendLinkButtonKey,
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
