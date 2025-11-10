@@ -53,7 +53,6 @@ const Page: React.FC = () => {
                 const { codes, timeOffset } =
                     await getAuthCodesAndTimeOffset(masterKey);
 
-                console.log(codes);
                 setCodes(codes);
                 setTimeOffset(timeOffset ?? 0);
             } catch (e) {
