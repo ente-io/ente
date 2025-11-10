@@ -7,6 +7,13 @@ description: Release notes of recent updates to Ente Auth
 
 <!-- A short summary list of changes to the Ente Auth mobile and desktop apps. For a more user-oriented list with screenshots and blog post links, see the [global changelog](https://ente.io/changelog). -->
 
+## v4.4.10 - Nov 2025
+
+- New icon!
+- Multi-select! Select multiple codes to perform actions in one go
+- Import 2FA codes from gallery
+- Support Google Authenticator when exporting QR
+
 ## v4.4.4 - Aug 2025
 
 - Lots of new custom icons!
