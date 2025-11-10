@@ -79,7 +79,7 @@ class FlagService {
 
   bool get useNativeVideoEditor => true;
 
-  bool get useWidgetV2 => kDebugMode;
+  bool get useWidgetV2 => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
