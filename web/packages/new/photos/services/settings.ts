@@ -197,7 +197,7 @@ type FeatureFlags = z.infer<typeof FeatureFlags>;
 const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
-    settings.isInternalUser = flags?.internalUser || isDevBuild;
+    settings.isInternalUser = flags?.internalUser || false;
     settings.isAdminRoleEnabled =
         (flags?.internalUser ?? false) || isDevBuild;
     settings.mapEnabled = flags?.mapEnabled || false;

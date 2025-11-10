@@ -155,6 +155,9 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     const canManageParticipants = isOwner || (isAdminRoleEnabled && isAdmin);
     const isSharedIncoming = collectionSummary.type == "sharedIncoming";
     const showEmailSection = !isSharedIncoming || canManageParticipants;
+    const hasPublicLink = collection.publicURLs.length > 0;
+    const showPublicShare =
+        isOwner || (isSharedIncoming && hasPublicLink && isAdminRoleEnabled);
 
     return (
         <SidebarDrawer anchor="right" {...{ open, onClose }}>
@@ -183,7 +186,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                             }}
                         />
                     ) : null}
-                    {isOwner ? (
+                    {showPublicShare ? (
                         <PublicShare
                             onRootClose={onClose}
                             {...{
@@ -191,6 +194,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
                                 setBlockingLoad,
                                 onRemotePull,
                             }}
+                            canManage={isOwner}
                         />
                     ) : null}
                     {isSharedIncoming ? (
@@ -1385,7 +1389,7 @@ const ManageParticipant: React.FC<ManageParticipantProps> = ({
     );
 };
 
-type PublicShareProps = { onRootClose: () => void } & Pick<
+type PublicShareProps = { onRootClose: () => void; canManage: boolean } & Pick<
     CollectionShareProps,
     "collection" | "setBlockingLoad" | "onRemotePull"
 >;
@@ -1395,6 +1399,7 @@ const PublicShare: React.FC<PublicShareProps> = ({
     onRootClose,
     setBlockingLoad,
     onRemotePull,
+    canManage,
 }) => {
     const { customDomain } = useSettingsSnapshot();
 
@@ -1421,13 +1426,16 @@ const PublicShare: React.FC<PublicShareProps> = ({
                 collection.key,
             ).then((url) =>
                 setResolvedURL(
-                    substituteCustomDomainIfNeeded(url, customDomain),
+                    substituteCustomDomainIfNeeded(
+                        url,
+                        canManage ? customDomain : undefined,
+                    ),
                 ),
             );
         } else {
             setResolvedURL(undefined);
         }
-    }, [collection.key, publicURL, customDomain]);
+    }, [collection.key, publicURL, customDomain, canManage]);
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
@@ -1436,22 +1444,28 @@ const PublicShare: React.FC<PublicShareProps> = ({
     return (
         <>
             {publicURL && resolvedURL ? (
-                <ManagePublicShare
-                    {...{
-                        onRootClose,
-                        collection,
-                        publicURL,
-                        setPublicURL,
-                        resolvedURL,
-                        setBlockingLoad,
-                        onRemotePull,
-                    }}
-                />
+                canManage ? (
+                    <ManagePublicShare
+                        {...{
+                            onRootClose,
+                            collection,
+                            publicURL,
+                            setPublicURL,
+                            resolvedURL,
+                            setBlockingLoad,
+                            onRemotePull,
+                        }}
+                    />
+                ) : (
+                    <ReadOnlyPublicShare resolvedURL={resolvedURL} />
+                )
             ) : (
-                <EnablePublicShareOptions
-                    {...{ collection, onRemotePull, setPublicURL }}
-                    onLinkCreated={showPublicLinkCreated}
-                />
+                canManage ? (
+                    <EnablePublicShareOptions
+                        {...{ collection, onRemotePull, setPublicURL }}
+                        onLinkCreated={showPublicLinkCreated}
+                    />
+                ) : null
             )}
             <PublicLinkCreated
                 {...publicLinkCreatedVisibilityProps}
@@ -1632,6 +1646,32 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
 
 const isLinkExpired = (validTill: number) =>
     validTill > 0 && validTill < Date.now() * 1000;
+
+const ReadOnlyPublicShare: React.FC<{ resolvedURL: string }> = ({
+    resolvedURL,
+}) => {
+    const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
+    return (
+        <Stack>
+            <RowButtonGroupTitle icon={<PublicIcon />}>
+                {t("public_link_enabled")}
+            </RowButtonGroupTitle>
+            <RowButtonGroup>
+                <RowButton
+                    startIcon={
+                        copied ? (
+                            <DoneIcon sx={{ color: "accent.main" }} />
+                        ) : (
+                            <ContentCopyIcon />
+                        )
+                    }
+                    onClick={handleCopyLink}
+                    label={t("copy_link")}
+                />
+            </RowButtonGroup>
+        </Stack>
+    );
+};
 
 type ManagePublicShareOptionsProps = ModalVisibilityProps & {
     onRootClose: () => void;
