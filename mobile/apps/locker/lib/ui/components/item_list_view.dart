@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
+import 'package:locker/models/item_view_type.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
+import "package:locker/ui/components/collection_list_widget.dart";
 import "package:locker/ui/components/collection_row_widget.dart";
+import "package:locker/ui/components/empty_state_widget.dart";
+import "package:locker/ui/components/file_list_widget.dart";
 import "package:locker/ui/components/file_row_widget.dart";
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
@@ -17,7 +21,8 @@ import 'package:locker/utils/collection_sort_util.dart';
 class OverflowMenuAction {
   final String id;
   final String label;
-  final IconData icon;
+  final Widget icon;
+  final bool isWarning;
   final void Function(
     BuildContext context,
     EnteFile? file,
@@ -29,6 +34,7 @@ class OverflowMenuAction {
     required this.label,
     required this.icon,
     required this.onTap,
+    this.isWarning = false,
   });
 }
 
@@ -40,6 +46,8 @@ class ItemListView extends StatefulWidget {
   final List<OverflowMenuAction>? collectionOverflowActions;
   final SelectedCollections? selectedCollections;
   final SelectedFiles? selectedFiles;
+  final ItemViewType viewType;
+  final ScrollPhysics? physics;
 
   const ItemListView({
     super.key,
@@ -50,6 +58,8 @@ class ItemListView extends StatefulWidget {
     this.collectionOverflowActions,
     this.selectedCollections,
     this.selectedFiles,
+    this.viewType = ItemViewType.listView,
+    this.physics = const NeverScrollableScrollPhysics(),
   });
 
   @override
@@ -89,6 +99,8 @@ class _ItemListViewState extends State<ItemListView> {
   }
 
   void _toggleCollectionSelection(Collection collection) {
+    // TODO(aman): Re-enable collection multi-select when bulk actions return.
+    return;
     HapticFeedback.lightImpact();
     widget.selectedCollections!.toggleSelection(collection);
   }
@@ -108,93 +120,151 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ListView.separated(
-          separatorBuilder: (context, index) {
-            return const SizedBox(height: 8);
-          },
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _sortedItems.length,
-          itemBuilder: (context, index) {
-            final item = _sortedItems[index];
-            final isLastItem = index == _sortedItems.length - 1;
+    return widget.viewType == ItemViewType.gridView
+        ? _buildGridView()
+        : _buildListView();
+  }
 
-            final hasCollectionSelection = widget.selectedCollections != null;
-            final hasFileSelection = widget.selectedFiles != null;
-
-            if (hasCollectionSelection && item.isCollection) {
-              return ListenableBuilder(
-                listenable: widget.selectedCollections!,
-                builder: (context, child) {
-                  final isAnyCollectionSelected =
-                      widget.selectedCollections?.hasSelections ?? false;
-
-                  return ListItemWidget(
-                    item: item,
-                    collections: widget.collections,
-                    fileOverflowActions: widget.fileOverflowActions,
-                    collectionOverflowActions: widget.collectionOverflowActions,
-                    isLastItem: isLastItem,
-                    selectedCollections: widget.selectedCollections,
-                    selectedFiles: widget.selectedFiles,
-                    onCollectionTap: (c) {
-                      isAnyCollectionSelected
-                          ? _toggleCollectionSelection(c)
-                          : _navigateToCollectionPage(c);
-                    },
-                    onCollectionLongPress: (c) {
-                      isAnyCollectionSelected
-                          ? _navigateToCollectionPage(c)
-                          : _toggleCollectionSelection(c);
-                    },
-                  );
-                },
-              );
-            } else if (hasFileSelection && !item.isCollection) {
-              return ListenableBuilder(
-                listenable: widget.selectedFiles!,
-                builder: (context, child) {
-                  final isAnyFileSelected =
-                      widget.selectedFiles?.hasSelections ?? false;
-                  return ListItemWidget(
-                    item: item,
-                    collections: widget.collections,
-                    fileOverflowActions: widget.fileOverflowActions,
-                    collectionOverflowActions: widget.collectionOverflowActions,
-                    isLastItem: isLastItem,
-                    selectedCollections: widget.selectedCollections,
-                    selectedFiles: widget.selectedFiles,
-                    onFileTap: isAnyFileSelected
-                        ? (file) {
-                            _toggleFileSelection(file);
-                          }
-                        : null,
-                    onFileLongPress: isAnyFileSelected
-                        ? null
-                        : (file) {
-                            _toggleFileSelection(file);
-                          },
-                  );
-                },
-              );
-            } else {
-              return ListItemWidget(
-                item: item,
-                collections: widget.collections,
-                fileOverflowActions: widget.fileOverflowActions,
-                collectionOverflowActions: widget.collectionOverflowActions,
-                isLastItem: isLastItem,
-                selectedCollections: widget.selectedCollections,
-                selectedFiles: widget.selectedFiles,
-              );
-            }
-          },
-        ),
-      ],
+  Widget _buildListView() {
+    return ListView.separated(
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      shrinkWrap: true,
+      physics: widget.physics,
+      itemCount: _sortedItems.length,
+      itemBuilder: (context, index) => _buildItem(index),
     );
+  }
+
+  Widget _buildGridView() {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: widget.physics,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.45,
+      ),
+      itemCount: _sortedItems.length,
+      itemBuilder: (context, index) => _buildItem(index),
+    );
+  }
+
+  Widget _buildItem(int index) {
+    final item = _sortedItems[index];
+    final isLastItem = index == _sortedItems.length - 1;
+
+    if (item.isCollection) {
+      return _buildCollectionItem(item.collection!, isLastItem);
+    } else {
+      return _buildFileItem(item.file!, isLastItem);
+    }
+  }
+
+  Widget _buildCollectionItem(Collection collection, bool isLastItem) {
+    final hasSelection = widget.selectedCollections != null;
+
+    if (hasSelection) {
+      return ListenableBuilder(
+        listenable: widget.selectedCollections!,
+        builder: (context, child) {
+          final isAnySelected = widget.selectedCollections!.hasSelections;
+          return _createCollectionWidget(
+            collection: collection,
+            isLastItem: isLastItem,
+            onTap: (c) => isAnySelected
+                ? _toggleCollectionSelection(c)
+                : _navigateToCollectionPage(c),
+            onLongPress: (c) => isAnySelected
+                ? _navigateToCollectionPage(c)
+                : _toggleCollectionSelection(c),
+          );
+        },
+      );
+    }
+
+    return _createCollectionWidget(
+      collection: collection,
+      isLastItem: isLastItem,
+    );
+  }
+
+  Widget _buildFileItem(EnteFile file, bool isLastItem) {
+    final hasSelection = widget.selectedFiles != null;
+
+    if (hasSelection) {
+      return ListenableBuilder(
+        listenable: widget.selectedFiles!,
+        builder: (context, child) {
+          final isAnySelected = widget.selectedFiles!.hasSelections;
+          return _createFileWidget(
+            file: file,
+            isLastItem: isLastItem,
+            onTap: isAnySelected ? (f) => _toggleFileSelection(f) : null,
+            onLongPress: isAnySelected ? null : (f) => _toggleFileSelection(f),
+          );
+        },
+      );
+    }
+
+    return _createFileWidget(
+      file: file,
+      isLastItem: isLastItem,
+    );
+  }
+
+  Widget _createCollectionWidget({
+    required Collection collection,
+    required bool isLastItem,
+    Function(Collection)? onTap,
+    Function(Collection)? onLongPress,
+  }) {
+    if (widget.viewType == ItemViewType.gridView) {
+      return CollectionRowWidget(
+        collection: collection,
+        overflowActions: widget.collectionOverflowActions,
+        isLastItem: isLastItem,
+        selectedCollections: widget.selectedCollections,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    } else {
+      return CollectionListWidget(
+        collection: collection,
+        overflowActions: widget.collectionOverflowActions,
+        isLastItem: isLastItem,
+        selectedCollections: widget.selectedCollections,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    }
+  }
+
+  Widget _createFileWidget({
+    required EnteFile file,
+    required bool isLastItem,
+    Function(EnteFile)? onTap,
+    Function(EnteFile)? onLongPress,
+  }) {
+    if (widget.viewType == ItemViewType.gridView) {
+      return FileRowWidget(
+        file: file,
+        overflowActions: widget.fileOverflowActions,
+        isLastItem: isLastItem,
+        selectedFiles: widget.selectedFiles,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    } else {
+      return FileListWidget(
+        file: file,
+        overflowActions: widget.fileOverflowActions,
+        isLastItem: isLastItem,
+        selectedFiles: widget.selectedFiles,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    }
   }
 
   Widget _buildDefaultEmptyState(BuildContext context) {
@@ -230,7 +300,6 @@ abstract class _ListItem {
   bool get isCollection;
 
   Collection? get collection => null;
-
   EnteFile? get file => null;
 }
 
@@ -292,112 +361,29 @@ class _FileListItem extends _ListItem {
   EnteFile get file => _file;
 }
 
-class ListItemWidget extends StatelessWidget {
-  // ignore: library_private_types_in_public_api
-  final _ListItem item;
-  final List<Collection> collections;
-  final List<OverflowMenuAction>? fileOverflowActions;
-  final List<OverflowMenuAction>? collectionOverflowActions;
-  final bool isLastItem;
-  final SelectedCollections? selectedCollections;
-  final SelectedFiles? selectedFiles;
-  final Function(Collection)? onCollectionTap;
-  final Function(Collection)? onCollectionLongPress;
-  final Function(EnteFile)? onFileTap;
-  final Function(EnteFile)? onFileLongPress;
-
-  const ListItemWidget({
-    super.key,
-    // ignore: library_private_types_in_public_api
-    required this.item,
-    required this.collections,
-    this.fileOverflowActions,
-    this.collectionOverflowActions,
-    this.isLastItem = false,
-    this.selectedCollections,
-    this.selectedFiles,
-    this.onCollectionTap,
-    this.onCollectionLongPress,
-    this.onFileTap,
-    this.onFileLongPress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (item.isCollection && item.collection != null) {
-      final collection = item.collection!;
-      return CollectionRowWidget(
-        collection: collection,
-        overflowActions: collectionOverflowActions,
-        isLastItem: isLastItem,
-        selectedCollections: selectedCollections,
-        onTapCallback: onCollectionTap,
-        onLongPressCallback: onCollectionLongPress,
-      );
-    } else if (!item.isCollection && item.file != null) {
-      return FileRowWidget(
-        file: item.file!,
-        collections: collections,
-        overflowActions: fileOverflowActions,
-        isLastItem: isLastItem,
-        selectedFiles: selectedFiles,
-        onTapCallback: onFileTap,
-        onLongPressCallback: onFileLongPress,
-      );
-    } else {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        child: Text(context.l10n.unknownItemType),
-      );
-    }
-  }
-}
-
 class FileListViewHelpers {
   static Widget createSearchEmptyState({
+    required BuildContext context,
     required String searchQuery,
     String? message,
   }) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.search_off,
-              size: 64,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message ?? 'No results found for "$searchQuery"',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Try adjusting your search query',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+      child: EmptyStateWidget(
+        assetPath: 'assets/empty_state.png',
+        title: context.l10n.searchEmptyTitle,
+        subtitle: context.l10n.searchEmptyDescription,
+        showBorder: false,
       ),
     );
   }
 
   static Widget createSearchEverywhereFooter({
+    required BuildContext context,
     required String searchQuery,
     required VoidCallback onTap,
-    BuildContext? context,
   }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Container(
       margin: const EdgeInsets.all(16.0),
       child: Card(
@@ -411,9 +397,7 @@ class FileListViewHelpers {
               children: [
                 Icon(
                   Icons.search,
-                  color: context != null
-                      ? Theme.of(context).primaryColor
-                      : Colors.blue,
+                  color: colorScheme.primary700,
                   size: 24,
                 ),
                 const SizedBox(width: 16),
@@ -422,36 +406,25 @@ class FileListViewHelpers {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Search everywhere for "$searchQuery"',
-                        style: context != null
-                            ? getEnteTextTheme(context).large.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).primaryColor,
-                                )
-                            : const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.blue,
-                              ),
+                        context.l10n.searchEverywhereTitle(searchQuery),
+                        style: textTheme.large.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.primary700,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Search across all collections and files',
-                        style: context != null
-                            ? getEnteTextTheme(context).body.copyWith(
-                                  color: Colors.grey[600],
-                                )
-                            : TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
+                        context.l10n.searchEverywhereSubtitle,
+                        style: textTheme.body.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: Colors.grey[400],
+                  color: colorScheme.textMuted,
                   size: 16,
                 ),
               ],

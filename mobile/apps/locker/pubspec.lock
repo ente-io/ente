@@ -201,6 +201,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  dots_indicator:
+    dependency: "direct main"
+    description:
+      name: dots_indicator
+      sha256: "2a53e0321a3f0d87e38ef30f6e9ff1deb5d6c0e2c5708e057d26cdaa94a95f10"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   dotted_border:
     dependency: "direct main"
     description:
@@ -243,7 +251,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "7fc9a9709ab818e4cfff23866c60285ba305f0dd"
+      resolved-ref: "8492b3cbb018f682183184582ee92e6f247cf802"
       url: "https://github.com/ente-io/ente_crypto_dart.git"
     source: git
     version: "1.0.0"
@@ -367,7 +375,7 @@ packages:
     source: hosted
     version: "10.2.0"
   file_saver:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: file_saver
       sha256: "9d93db09bd4da9e43238f9dd485360fc51a5c138eea5ef5f407ec56e58079ac0"
@@ -651,6 +659,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
+  hugeicons:
+    dependency: "direct main"
+    description:
+      name: hugeicons
+      sha256: "036d917bd12e2dee331de7910a11417ebf6c80be1962c0d63ee945e3184f0937"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   image:
     dependency: transitive
     description:
@@ -1019,6 +1035,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  photo_manager:
+    dependency: "direct main"
+    description:
+      name: photo_manager
+      sha256: a0d9a7a9bc35eda02d33766412bde6d883a8b0acb86bbe37dac5f691a0894e8a
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.7.1"
   pinput:
     dependency: transitive
     description:

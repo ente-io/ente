@@ -1,9 +1,12 @@
 import "dart:math";
 
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
 
@@ -27,10 +30,28 @@ class _CollectionFlexGridViewWidgetState
   void initState() {
     super.initState();
     _displayedCollections = widget.collections;
+    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(CollectionFlexGridViewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.collections, widget.collections)) {
+      setState(() {
+        _displayedCollections = widget.collections;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
@@ -42,7 +63,7 @@ class _CollectionFlexGridViewWidgetState
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
+          childAspectRatio: 2.4,
         ),
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {
@@ -54,52 +75,36 @@ class _CollectionFlexGridViewWidgetState
             onTap: () => _navigateToCollection(collection),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
+                borderRadius: BorderRadius.circular(20),
+                color: colorScheme.backdropBase,
               ),
-              padding: const EdgeInsets.all(12),
-              child: Stack(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      FutureBuilder<int>(
-                        future:
-                            CollectionService.instance.getFileCount(collection),
-                        builder: (context, snapshot) {
-                          final fileCount = snapshot.data ?? 0;
-                          return Text(
-                            context.l10n.items(fileCount),
-                            style: getEnteTextTheme(context).small.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                            textAlign: TextAlign.left,
-                          );
-                        },
-                      ),
-                    ],
+                  Container(
+                    height: 32,
+                    width: 32,
+                    padding: const EdgeInsets.all(6),
+                    child: collection.type == CollectionType.favorites
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedStar,
+                            color: colorScheme.primary700,
+                          )
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedWallet05,
+                            color: colorScheme.textBase,
+                          ),
                   ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      collectionName,
+                      style: textTheme.bodyBold,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
                 ],
               ),
             ),

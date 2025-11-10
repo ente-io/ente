@@ -6,14 +6,15 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/usage_card_widget.dart";
 import "package:locker/ui/settings/about_section_widget.dart";
 import 'package:locker/ui/settings/account_section_widget.dart';
 import "package:locker/ui/settings/app_version_widget.dart";
 import "package:locker/ui/settings/security_section_widget.dart";
+import "package:locker/ui/settings/settings_title_bar_widget.dart";
 import "package:locker/ui/settings/social_section_widget.dart";
 import "package:locker/ui/settings/support_section_widget.dart";
 import "package:locker/ui/settings/theme_switch_widget.dart";
-import "package:locker/ui/settings/title_bar_widget.dart";
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
@@ -33,8 +34,9 @@ class SettingsPage extends StatelessWidget {
     }
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
+      backgroundColor: enteColorScheme.backgroundBase,
       body: Container(
-        color: enteColorScheme.backdropBase,
+        color: enteColorScheme.backgroundBase,
         child: _getBody(context, enteColorScheme),
       ),
     );
@@ -69,6 +71,8 @@ class SettingsPage extends StatelessWidget {
         ),
       );
       contents.addAll([
+        const SizedBox(height: 12),
+        const UsageCardWidget(),
         const SizedBox(height: 12),
         const AccountSectionWidget(),
         sectionSpacing,

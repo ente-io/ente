@@ -16,6 +16,7 @@ import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:ente_utils/platform_util.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:locker/app.dart';
 import 'package:locker/core/locale.dart';
@@ -24,6 +25,7 @@ import 'package:locker/services/collections/collections_api_client.dart';
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/configuration.dart';
+import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/download/service_locator.dart';
 import "package:locker/services/files/links/links_client.dart";
 import "package:locker/services/files/links/links_service.dart";
@@ -58,6 +60,13 @@ void main() async {
   await _runInForeground();
   if (Platform.isAndroid) {
     FlutterDisplayMode.setHighRefreshRate().ignore();
+    // Make the navigation bar transparent so the app theme can take over
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0x00000000),
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
   }
 }
 
@@ -143,35 +152,40 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _init(bool bool, {String? via}) async {
-  final SharedPreferences preferences = await SharedPreferences.getInstance();
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  try {
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
-  await CryptoUtil.init();
+    await CryptoUtil.init();
 
-  await CollectionDB.instance.init();
-  await TrashDB.instance.init();
+    await CollectionDB.instance.init();
+    await TrashDB.instance.init();
 
-  await Configuration.instance.init([
-    CollectionDB.instance,
-    TrashDB.instance,
-  ]);
+    await Configuration.instance.init([
+      CollectionDB.instance,
+      TrashDB.instance,
+    ]);
 
-  await Network.instance.init(Configuration.instance);
-  await UserService.instance.init(Configuration.instance, const HomePage());
-  await LockScreenSettings.instance.init(Configuration.instance);
-  await CollectionApiClient.instance.init();
-  await CollectionService.instance.init();
-  await LinksClient.instance.init();
-  await LinksService.instance.init();
-  await ServiceLocator.instance.init(
-    preferences,
-    Network.instance.enteDio,
-    Network.instance.getDio(),
-    packageInfo,
-  );
-  await TrashService.instance.init(preferences);
-  await EmergencyContactService.instance.init(
-    UserService.instance,
-    Configuration.instance,
-  );
+    await Network.instance.init(Configuration.instance);
+    await UserService.instance.init(Configuration.instance, const HomePage());
+    await LockScreenSettings.instance.init(Configuration.instance);
+    await CollectionApiClient.instance.init();
+    await CollectionService.instance.init();
+    await FavoritesService.instance.init();
+    await LinksClient.instance.init();
+    await LinksService.instance.init();
+    await ServiceLocator.instance.init(
+      preferences,
+      Network.instance.enteDio,
+      Network.instance.getDio(),
+      packageInfo,
+    );
+    await TrashService.instance.init(preferences);
+    await EmergencyContactService.instance.init(
+      UserService.instance,
+      Configuration.instance,
+    );
+  } catch (e) {
+    _logger.severe("Error during initialization", e);
+  }
 }

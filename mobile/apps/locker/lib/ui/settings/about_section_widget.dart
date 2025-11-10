@@ -1,6 +1,5 @@
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
@@ -27,10 +26,9 @@ class AboutSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.weAreOpenSource,
+            makeTextBold: true,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
           onTap: () async {
             // ignore: unawaited_futures
             launchUrl(Uri.parse("https://github.com/ente-io/ente"));
@@ -68,10 +66,9 @@ class AboutMenuItemWidget extends StatelessWidget {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: title,
+        makeTextBold: true,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
       onTap: () async {
         await PlatformUtil.openWebView(
           context,
