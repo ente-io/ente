@@ -42,10 +42,10 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
           ],
         ),
       EnteApp.locker => (
-          primary700: const Color.fromARGB(255, 0, 122, 255),
+          primary700: const Color.fromRGBO(16, 113, 255, 1),
           primary400: const Color.fromARGB(255, 52, 152, 255),
           primary500: const Color.fromARGB(255, 102, 178, 255),
-          primary300: const Color.fromARGB(255, 153, 204, 255),
+          primary300: const Color.fromARGB(255, 236, 242, 250),
           gradientButtonBgColor: const Color.fromRGBO(0, 122, 255, 1),
           gradientButtonBgColors: const [
             Color.fromRGBO(0, 122, 255, 1),
@@ -620,20 +620,20 @@ const EnteColorScheme darkScheme = EnteColorScheme(
 );
 
 // Background Colors
-const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
-const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
-const Color backgroundElevated2Light = Color.fromRGBO(251, 251, 251, 1);
+const Color backgroundBaseLight = Color.fromRGBO(250, 250, 250, 1);
+const Color backgroundElevatedLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color backgroundElevated2Light = Color.fromRGBO(250, 250, 250, 1);
 
 const Color backgroundBaseDark = Color.fromRGBO(0, 0, 0, 1);
-const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
-const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
+const Color backgroundElevatedDark = Color.fromRGBO(255, 255, 255, 0.04);
+const Color backgroundElevated2Dark = Color.fromRGBO(26, 26, 26, 1);
 
 // Backdrop Colors
 const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
 const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.75);
 const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.30);
 
-const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
+const Color backdropBaseDark = Color.fromRGBO(33, 33, 33, 1);
 const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.65);
 const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.20);
 
@@ -782,9 +782,9 @@ const Color _defaultSearchResultsBackgroundColor =
 // Default Code Card Background Color
 const Color _defaultCodeCardBackgroundColor = Color.fromRGBO(246, 246, 246, 1);
 
-
 const Color _golden700 = Color(0xFFFDB816);
 const Color _golden500 = Color(0xFFFFC336);
+
 /// Utility class to help apps create custom color schemes with their brand colors.
 ///
 /// This class provides convenient methods to generate complete color schemes

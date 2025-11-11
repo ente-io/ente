@@ -2898,7 +2898,7 @@ packages:
     source: git
     version: "3.0.0"
   video_player:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       name: video_player
       sha256: "0d55b1f1a31e5ad4c4967bfaa8ade0240b07d20ee4af1dfef5f531056512961a"

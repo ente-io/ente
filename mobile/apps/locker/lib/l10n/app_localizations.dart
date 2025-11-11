@@ -181,13 +181,13 @@ abstract class AppLocalizations {
   /// No description provided for @noFilesFound.
   ///
   /// In en, this message translates to:
-  /// **'No files here'**
+  /// **'No items here'**
   String get noFilesFound;
 
   /// No description provided for @addFiles.
   ///
   /// In en, this message translates to:
-  /// **'Add Files'**
+  /// **'Add items'**
   String get addFiles;
 
   /// No description provided for @name.
@@ -223,31 +223,31 @@ abstract class AppLocalizations {
   /// No description provided for @downloadFailed.
   ///
   /// In en, this message translates to:
-  /// **'Download Failed'**
+  /// **'Download failed'**
   String get downloadFailed;
 
   /// No description provided for @failedToDownloadOrDecrypt.
   ///
   /// In en, this message translates to:
-  /// **'Failed to download or decrypt file'**
+  /// **'Failed to download item'**
   String get failedToDownloadOrDecrypt;
 
   /// No description provided for @errorOpeningFile.
   ///
   /// In en, this message translates to:
-  /// **'Error opening file'**
+  /// **'Error opening item'**
   String get errorOpeningFile;
 
-  /// Error message when opening a file fails
+  /// Error message when opening an item fails
   ///
   /// In en, this message translates to:
-  /// **'Error opening file: {error}'**
+  /// **'Error opening item: {error}'**
   String errorOpeningFileMessage(String error);
 
-  /// Error message when file cannot be opened
+  /// Error message when item cannot be opened
   ///
   /// In en, this message translates to:
-  /// **'Could not open file: {error}'**
+  /// **'Could not open item: {error}'**
   String couldNotOpenFile(String error);
 
   /// Time format for minutes ago
@@ -355,25 +355,25 @@ abstract class AppLocalizations {
   /// No description provided for @fileDeletedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'File deleted successfully'**
+  /// **'Item deleted successfully'**
   String get fileDeletedSuccessfully;
 
-  /// Error message when file deletion fails
+  /// Error message when item deletion fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to delete file: {error}'**
+  /// **'Failed to delete item: {error}'**
   String failedToDeleteFile(String error);
 
   /// No description provided for @fileUpdatedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'File updated successfully!'**
+  /// **'Item updated successfully!'**
   String get fileUpdatedSuccessfully;
 
-  /// Error message when file update fails
+  /// Error message when item update fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to update file: {error}'**
+  /// **'Failed to update item: {error}'**
   String failedToUpdateFile(String error);
 
   /// No description provided for @noChangesWereMade.
@@ -406,13 +406,13 @@ abstract class AppLocalizations {
   /// **'Trash'**
   String get trash;
 
-  /// Message when file is permanently deleted from trash
+  /// Message when item is permanently deleted from trash
   ///
   /// In en, this message translates to:
   /// **'Deleted \"{fileName}\" permanently'**
   String deletedPermanently(String fileName);
 
-  /// Error message when file restoration fails
+  /// Error message when item restoration fails
   ///
   /// In en, this message translates to:
   /// **'Failed to restore \"{fileName}\": {error}'**
@@ -445,10 +445,10 @@ abstract class AppLocalizations {
   /// No description provided for @deleteFile.
   ///
   /// In en, this message translates to:
-  /// **'Delete File'**
+  /// **'Delete item'**
   String get deleteFile;
 
-  /// Confirmation message for file deletion
+  /// Confirmation message for item deletion
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to delete \"{fileName}\"?'**
@@ -469,7 +469,7 @@ abstract class AppLocalizations {
   /// No description provided for @createCollection.
   ///
   /// In en, this message translates to:
-  /// **'Create Collection'**
+  /// **'Create collection'**
   String get createCollection;
 
   /// No description provided for @nothingYet.
@@ -484,10 +484,40 @@ abstract class AppLocalizations {
   /// **'Upload your first document to get started'**
   String get uploadYourFirstDocument;
 
+  /// No description provided for @collectionEmptyStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to see here'**
+  String get collectionEmptyStateTitle;
+
+  /// No description provided for @collectionEmptyStateSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no items in this collection'**
+  String get collectionEmptyStateSubtitle;
+
+  /// No description provided for @yourTrashIsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trash is empty'**
+  String get yourTrashIsEmpty;
+
+  /// No description provided for @homeLockerEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Locker is empty'**
+  String get homeLockerEmptyTitle;
+
+  /// No description provided for @homeLockerEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Click the + button to get started'**
+  String get homeLockerEmptySubtitle;
+
   /// No description provided for @uploadDocument.
   ///
   /// In en, this message translates to:
-  /// **'Upload Document'**
+  /// **'Upload document'**
   String get uploadDocument;
 
   /// Number of items in a collection
@@ -496,10 +526,10 @@ abstract class AppLocalizations {
   /// **'{count} items'**
   String items(int count);
 
-  /// Number of files in a collection
+  /// Number of items in a collection
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{no files} =1{1 file} other{{count} files}}'**
+  /// **'{count, plural, =0{no items} =1{1 item} other{{count} items}}'**
   String files(int count);
 
   /// No description provided for @createCollectionTooltip.
@@ -520,7 +550,7 @@ abstract class AppLocalizations {
   /// **'Restore'**
   String get restore;
 
-  /// Dialog title for restoring a file from trash
+  /// Dialog title for restoring an item from trash
   ///
   /// In en, this message translates to:
   /// **'Restore {fileName}'**
@@ -553,7 +583,7 @@ abstract class AppLocalizations {
   /// No description provided for @fileTitle.
   ///
   /// In en, this message translates to:
-  /// **'File title'**
+  /// **'Item title'**
   String get fileTitle;
 
   /// No description provided for @note.
@@ -586,6 +616,30 @@ abstract class AppLocalizations {
   /// **'Search...'**
   String get searchHint;
 
+  /// No description provided for @searchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches found'**
+  String get searchEmptyTitle;
+
+  /// No description provided for @searchEmptyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Try searching for something else.'**
+  String get searchEmptyDescription;
+
+  /// CTA title prompting the user to search globally
+  ///
+  /// In en, this message translates to:
+  /// **'Search everywhere for \"{query}\"'**
+  String searchEverywhereTitle(String query);
+
+  /// No description provided for @searchEverywhereSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search across all collections and files.'**
+  String get searchEverywhereSubtitle;
+
   /// Message when no collections match the search query
   ///
   /// In en, this message translates to:
@@ -610,7 +664,7 @@ abstract class AppLocalizations {
   /// **'Restoring...'**
   String get restoring;
 
-  /// Success message when file is restored to a collection
+  /// Success message when an item is restored to a collection
   ///
   /// In en, this message translates to:
   /// **'Restored \"{fileName}\" to \"{collectionName}\"'**
@@ -649,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareThisLink.
   ///
   /// In en, this message translates to:
-  /// **'Anyone with this link can access your file.'**
+  /// **'Anyone with this link can access your item.'**
   String get shareThisLink;
 
   /// No description provided for @copyLink.
@@ -691,7 +745,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteShareLinkConfirmation.
   ///
   /// In en, this message translates to:
-  /// **'People with this link will no longer be able to access the file.'**
+  /// **'People with this link will no longer be able to access the item.'**
   String get deleteShareLinkConfirmation;
 
   /// No description provided for @deletingShareLink.
@@ -721,7 +775,7 @@ abstract class AppLocalizations {
   /// No description provided for @deletingFile.
   ///
   /// In en, this message translates to:
-  /// **'Deleting file...'**
+  /// **'Deleting item...'**
   String get deletingFile;
 
   /// No description provided for @changeEmail.
@@ -1030,47 +1084,83 @@ abstract class AppLocalizations {
   /// **'Save information'**
   String get saveInformation;
 
+  /// No description provided for @saveToLocker.
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Locker'**
+  String get saveToLocker;
+
+  /// No description provided for @saveDocumentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get saveDocumentTitle;
+
+  /// No description provided for @saveDocumentDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload important docs.'**
+  String get saveDocumentDescription;
+
   /// No description provided for @informationDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save important information that can be shared and passed down to loved ones.'**
+  /// **'Save and share information with loved ones.'**
   String get informationDescription;
 
   /// No description provided for @personalNote.
   ///
   /// In en, this message translates to:
-  /// **'Personal note'**
+  /// **'Note'**
   String get personalNote;
 
   /// No description provided for @personalNoteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save important notes or thoughts'**
+  /// **'Write down thoughts and instructions.'**
   String get personalNoteDescription;
 
   /// No description provided for @physicalRecords.
   ///
   /// In en, this message translates to:
-  /// **'Physical records'**
+  /// **'Thing'**
   String get physicalRecords;
 
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save the real-world locations of important items'**
+  /// **'Save locations of real-world items.'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.
   ///
   /// In en, this message translates to:
-  /// **'Account credentials'**
+  /// **'Secret'**
   String get accountCredentials;
 
   /// No description provided for @accountCredentialsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Securely store login details for important accounts'**
+  /// **'Preserve account credentials.'**
   String get accountCredentialsDescription;
+
+  /// Title shown when editing an existing secret
+  ///
+  /// In en, this message translates to:
+  /// **'Edit secret'**
+  String get editSecret;
+
+  /// Title shown when editing an existing location record
+  ///
+  /// In en, this message translates to:
+  /// **'Edit location'**
+  String get editLocation;
+
+  /// Title shown when editing an existing note
+  ///
+  /// In en, this message translates to:
+  /// **'Edit note'**
+  String get editNote;
 
   /// No description provided for @emergencyContact.
   ///
@@ -1081,7 +1171,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencyContactDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save details of people to contact in emergencies'**
+  /// **'Keep contact info for key people in crises.'**
   String get emergencyContactDescription;
 
   /// No description provided for @noteName.
@@ -1093,7 +1183,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Give your note a meaningful title'**
+  /// **'Hint text'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -1105,8 +1195,32 @@ abstract class AppLocalizations {
   /// No description provided for @noteContentHint.
   ///
   /// In en, this message translates to:
-  /// **'Write down important thoughts, instructions, or memories you want to preserve'**
+  /// **'Write down important thoughts or instructions'**
   String get noteContentHint;
+
+  /// No description provided for @unsavedNoteChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get unsavedNoteChangesTitle;
+
+  /// No description provided for @unsavedNoteChangesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes in this note. If you go back now, they will be lost.'**
+  String get unsavedNoteChangesDescription;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardChanges;
 
   /// No description provided for @recordName.
   ///
@@ -1129,7 +1243,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordLocationHint.
   ///
   /// In en, this message translates to:
-  /// **'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')'**
+  /// **'Where is this item kept?'**
   String get recordLocationHint;
 
   /// No description provided for @recordNotes.
@@ -1141,19 +1255,19 @@ abstract class AppLocalizations {
   /// No description provided for @recordNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Any additional details about accessing or understanding this record'**
+  /// **'Additional information about the item'**
   String get recordNotesHint;
 
   /// No description provided for @credentialName.
   ///
   /// In en, this message translates to:
-  /// **'Account name'**
+  /// **'Account'**
   String get credentialName;
 
   /// No description provided for @credentialNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Name of the service or account'**
+  /// **'Name of the service'**
   String get credentialNameHint;
 
   /// No description provided for @username.
@@ -1165,7 +1279,7 @@ abstract class AppLocalizations {
   /// No description provided for @usernameHint.
   ///
   /// In en, this message translates to:
-  /// **'Login username or email address'**
+  /// **'Login ID or email'**
   String get usernameHint;
 
   /// No description provided for @password.
@@ -1177,7 +1291,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'Account password'**
+  /// **'Password'**
   String get passwordHint;
 
   /// No description provided for @credentialNotes.
@@ -1189,7 +1303,7 @@ abstract class AppLocalizations {
   /// No description provided for @credentialNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Recovery methods, security questions, or other important details'**
+  /// **'Recovery methods, security questions, ...'**
   String get credentialNotesHint;
 
   /// No description provided for @contactName.
@@ -1393,7 +1507,7 @@ abstract class AppLocalizations {
   /// No description provided for @allowAddingFiles.
   ///
   /// In en, this message translates to:
-  /// **'Allow adding files'**
+  /// **'Allow adding items'**
   String get allowAddingFiles;
 
   /// No description provided for @disableDownloadWarningTitle.
@@ -1405,13 +1519,13 @@ abstract class AppLocalizations {
   /// No description provided for @disableDownloadWarningBody.
   ///
   /// In en, this message translates to:
-  /// **'Viewers can still take screenshots or save a copy of your files using external tools.'**
+  /// **'Viewers can still take screenshots or save a copy of your items using external tools.'**
   String get disableDownloadWarningBody;
 
   /// No description provided for @allowAddFilesDescription.
   ///
   /// In en, this message translates to:
-  /// **'Allow people with the link to also add files to the shared collection.'**
+  /// **'Allow people with the link to also add items to the shared collection.'**
   String get allowAddFilesDescription;
 
   /// No description provided for @after1Hour.
@@ -1585,7 +1699,7 @@ abstract class AppLocalizations {
   /// No description provided for @collaboratorsCanAddFilesToTheSharedCollection.
   ///
   /// In en, this message translates to:
-  /// **'Collaborators can add files to the shared collection.'**
+  /// **'Collaborators can add items to the shared collection.'**
   String get collaboratorsCanAddFilesToTheSharedCollection;
 
   /// No description provided for @enterEmail.
@@ -1648,6 +1762,18 @@ abstract class AppLocalizations {
   /// **'Oops'**
   String get oops;
 
+  /// No description provided for @noItemsMatchSelectedFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'No items match the selected filters'**
+  String get noItemsMatchSelectedFilters;
+
+  /// No description provided for @noCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections'**
+  String get noCollections;
+
   /// No description provided for @youCannotShareWithYourself.
   ///
   /// In en, this message translates to:
@@ -1669,7 +1795,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareTextRecommendUsingEnte.
   ///
   /// In en, this message translates to:
-  /// **'Download Ente so we can easily share original quality files\n\nhttps://ente.io'**
+  /// **'Download Ente\n\nhttps://ente.io'**
   String get shareTextRecommendUsingEnte;
 
   /// No description provided for @thisIsYourVerificationId.
@@ -1711,7 +1837,7 @@ abstract class AppLocalizations {
   /// No description provided for @emailNoEnteAccount.
   ///
   /// In en, this message translates to:
-  /// **'{email} does not have an Ente account.\n\nSend them an invite to share files.'**
+  /// **'{email} does not have an Ente account.\n\nSend them an invite to share items.'**
   String emailNoEnteAccount(Object email);
 
   /// No description provided for @shareMyVerificationID.
@@ -1765,7 +1891,7 @@ abstract class AppLocalizations {
   /// Warning message when changing a collaborator to viewer
   ///
   /// In en, this message translates to:
-  /// **'{name} will no longer be able to add files to the collection after becoming a viewer.'**
+  /// **'{name} will no longer be able to add items to the collection after becoming a viewer.'**
   String cannotAddMoreFilesAfterBecomingViewer(String name);
 
   /// No description provided for @removeWithQuestionMark.
@@ -1777,7 +1903,7 @@ abstract class AppLocalizations {
   /// No description provided for @removeParticipantBody.
   ///
   /// In en, this message translates to:
-  /// **'{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection'**
+  /// **'{userEmail} will be removed from this shared collection\n\nAny items added by them will also be removed from the collection'**
   String removeParticipantBody(Object userEmail);
 
   /// No description provided for @yesRemove.
@@ -1807,7 +1933,7 @@ abstract class AppLocalizations {
   /// No description provided for @collaboratorsCanAddFilesToTheSharedAlbum.
   ///
   /// In en, this message translates to:
-  /// **'Collaborators can add files to the shared collection.'**
+  /// **'Collaborators can add items to the shared collection.'**
   String get collaboratorsCanAddFilesToTheSharedAlbum;
 
   /// The count of participants in an album
@@ -1849,7 +1975,7 @@ abstract class AppLocalizations {
   /// No description provided for @filesAddedByYouWillBeRemovedFromTheCollection.
   ///
   /// In en, this message translates to:
-  /// **'Files added by you will be removed from the collection'**
+  /// **'Items added by you will be removed from the collection'**
   String get filesAddedByYouWillBeRemovedFromTheCollection;
 
   /// No description provided for @leaveSharedCollection.
@@ -1885,7 +2011,7 @@ abstract class AppLocalizations {
   /// No description provided for @uploadError.
   ///
   /// In en, this message translates to:
-  /// **'Upload Error'**
+  /// **'Upload error'**
   String get uploadError;
 
   /// No description provided for @tryAdjustingYourSearchQuery.
@@ -1894,22 +2020,22 @@ abstract class AppLocalizations {
   /// **'Try adjusting your search query'**
   String get tryAdjustingYourSearchQuery;
 
-  /// Message when no files match the search query
+  /// Message when no items match the search query
   ///
   /// In en, this message translates to:
-  /// **'No files found for \"{query}\"'**
+  /// **'No items found for \"{query}\"'**
   String noFilesFoundForQuery(String query);
 
   /// No description provided for @deselectAll.
   ///
   /// In en, this message translates to:
-  /// **'Deselect All'**
+  /// **'Deselect all'**
   String get deselectAll;
 
   /// No description provided for @selectAll.
   ///
   /// In en, this message translates to:
-  /// **'Select All'**
+  /// **'Select all'**
   String get selectAll;
 
   /// No description provided for @unnamedCollection.
@@ -1924,16 +2050,16 @@ abstract class AppLocalizations {
   /// **'ente Locker'**
   String get enteLocker;
 
-  /// Progress message showing uploaded files
+  /// Progress message showing uploaded items
   ///
   /// In en, this message translates to:
-  /// **'Uploaded {completed}/{total} files...'**
+  /// **'Uploaded {completed}/{total} items...'**
   String uploadedFilesProgress(int completed, int total);
 
-  /// Progress message showing uploaded files with error
+  /// Progress message showing uploaded items with error
   ///
   /// In en, this message translates to:
-  /// **'Uploaded {completed}/{total} files... ({error})'**
+  /// **'Uploaded {completed}/{total} items... ({error})'**
   String uploadedFilesProgressWithError(int completed, int total, String error);
 
   /// No description provided for @noCollectionsAvailableForSelection.
@@ -1957,19 +2083,19 @@ abstract class AppLocalizations {
   /// No description provided for @hideWindow.
   ///
   /// In en, this message translates to:
-  /// **'Hide Window'**
+  /// **'Hide window'**
   String get hideWindow;
 
   /// No description provided for @showWindow.
   ///
   /// In en, this message translates to:
-  /// **'Show Window'**
+  /// **'Show window'**
   String get showWindow;
 
   /// No description provided for @exitApp.
   ///
   /// In en, this message translates to:
-  /// **'Exit App'**
+  /// **'Exit app'**
   String get exitApp;
 
   /// No description provided for @lockerLogs.
@@ -1977,6 +2103,366 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Locker logs'**
   String get lockerLogs;
+
+  /// No description provided for @recents.
+  ///
+  /// In en, this message translates to:
+  /// **'Recents'**
+  String get recents;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @uploadAFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload an item'**
+  String get uploadAFile;
+
+  /// No description provided for @clickHereToUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Click here to upload'**
+  String get clickHereToUpload;
+
+  /// No description provided for @saveDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Save document'**
+  String get saveDocument;
+
+  /// No description provided for @uploadFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload items'**
+  String get uploadFiles;
+
+  /// Number of items selected for upload
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}'**
+  String filesSelected(int count);
+
+  /// No description provided for @addToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to collection'**
+  String get addToCollection;
+
+  /// No description provided for @newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get newCollection;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @editItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get editItem;
+
+  /// No description provided for @enterNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new title'**
+  String get enterNewTitle;
+
+  /// No description provided for @backToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to view'**
+  String get backToView;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// Error message when loading collections fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load collections: {error}'**
+  String failedToLoadCollections(String error);
+
+  /// No description provided for @informationCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get informationCollectionName;
+
+  /// Success message when record is saved to multiple collections
+  ///
+  /// In en, this message translates to:
+  /// **'Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully'**
+  String recordSavedToMultipleCollections(int count);
+
+  /// Message when a field is copied to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} copied to clipboard'**
+  String copiedToClipboard(String fieldName);
+
+  /// Search results count message
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}} for \"{query}\"'**
+  String searchResultsCount(int count, String query);
+
+  /// No description provided for @locker.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker'**
+  String get locker;
+
+  /// No description provided for @loginToEnteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to your Ente account'**
+  String get loginToEnteAccount;
+
+  /// No description provided for @unlockLockerPaidPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon!'**
+  String get unlockLockerPaidPlanTitle;
+
+  /// No description provided for @unlockLockerPaidPlanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker is currently available only to paid customers of Ente Photos.'**
+  String get unlockLockerPaidPlanBody;
+
+  /// No description provided for @checkoutEntePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkout Ente Photos'**
+  String get checkoutEntePhotos;
+
+  /// No description provided for @okay.
+  ///
+  /// In en, this message translates to:
+  /// **'Okay'**
+  String get okay;
+
+  /// No description provided for @noAccountCta.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t have an account'**
+  String get noAccountCta;
+
+  /// No description provided for @featureSaveImportant.
+  ///
+  /// In en, this message translates to:
+  /// **'Save your important documents and credentials'**
+  String get featureSaveImportant;
+
+  /// No description provided for @featurePassAutomatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass them on automatically in emergencies'**
+  String get featurePassAutomatically;
+
+  /// No description provided for @featureShareAnytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Share them anytime'**
+  String get featureShareAnytime;
+
+  /// No description provided for @emailIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailIdLabel;
+
+  /// No description provided for @emailIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address'**
+  String get emailIdHint;
+
+  /// No description provided for @loginPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get loginPasswordLabel;
+
+  /// No description provided for @loginPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get loginPasswordHint;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @logInAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in'**
+  String get logInAction;
+
+  /// No description provided for @dontHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get dontHaveAccount;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get signUp;
+
+  /// No description provided for @incorrectPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password'**
+  String get incorrectPassword;
+
+  /// No description provided for @pleaseTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please try again'**
+  String get pleaseTryAgain;
+
+  /// No description provided for @noInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get noInternetConnection;
+
+  /// No description provided for @checkInternetConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your internet connection and try again'**
+  String get checkInternetConnection;
+
+  /// No description provided for @verificationFailedTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed, please try again'**
+  String get verificationFailedTryAgain;
+
+  /// No description provided for @recreatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Recreate password'**
+  String get recreatePassword;
+
+  /// No description provided for @deviceCannotVerifyPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device does not have enough memory to verify your password'**
+  String get deviceCannotVerifyPassword;
+
+  /// No description provided for @useRecoveryKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Use recovery key'**
+  String get useRecoveryKey;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get invalidEmail;
+
+  /// No description provided for @enterValidEmailFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address first'**
+  String get enterValidEmailFirst;
+
+  /// No description provided for @lockerLoginIssueSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker login issue'**
+  String get lockerLoginIssueSubject;
+
+  /// No description provided for @unnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed'**
+  String get unnamed;
+
+  /// No description provided for @collectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get collectionLabel;
+
+  /// No description provided for @areYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get areYouSure;
+
+  /// No description provided for @yesDeleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete collection'**
+  String get yesDeleteCollection;
+
+  /// No description provided for @yesDeleteFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete item'**
+  String get yesDeleteFile;
+
+  /// Confirmation message body for deleting a single collection
+  ///
+  /// In en, this message translates to:
+  /// **'{collectionName} will be deleted permanently.'**
+  String deleteCollectionDialogBody(String collectionName);
+
+  /// Confirmation message body for deleting multiple collections
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
+  String deleteMultipleCollectionsDialogBody(int count);
+
+  /// Confirmation message body for deleting multiple items
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.'**
+  String deleteMultipleFilesDialogBody(int count);
+
+  /// Button label for confirming deletion of one or more collections
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete {count, plural, =1{collection} other{collections}}'**
+  String yesDeleteCollections(int count);
+
+  /// Button label for confirming deletion of one or more items
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete {count, plural, =1{item} other{items}}'**
+  String yesDeleteFiles(int count);
+
+  /// No description provided for @usage.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get usage;
+
+  /// Display item count usage in the format 'used / max'
+  ///
+  /// In en, this message translates to:
+  /// **'{used} / {max}'**
+  String fileCount(String used, String max);
 }
 
 class _AppLocalizationsDelegate

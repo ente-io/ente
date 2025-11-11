@@ -377,7 +377,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         bodyHighlight: "They are yet to accept your invite",
         buttons: [
           ButtonWidget(
-            labelText: "context.strings.removeInvite",
+            labelText: context.strings.removeInvite,
             buttonType: ButtonType.critical,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.first,
@@ -413,7 +413,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         bodyHighlight: "They have accepted your invite",
         buttons: [
           ButtonWidget(
-            labelText: "context.strings.remove",
+            labelText: context.strings.remove,
             buttonType: ButtonType.critical,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.second,
@@ -452,7 +452,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: "context.strings.acceptTrustInvite",
+          labelText: context.strings.acceptTrustInvite,
           buttonType: ButtonType.primary,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -495,7 +495,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: "context.strings.legacyInvite(email: contact.user.email)",
+      body: context.strings.legacyInvite(contact.user.email),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;

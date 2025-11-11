@@ -59,7 +59,8 @@ class LinksService {
       final userPublicKey = keyAttributes?.publicKey;
       if (userPublicKey == null) {
         throw StateError(
-            "Public key unavailable while generating share secret");
+          "Public key unavailable while generating share secret",
+        );
       }
       final encryptedShareKeyBytes = CryptoUtil.sealSync(
         Uint8List.fromList(utf8.encode(secretBase64)),

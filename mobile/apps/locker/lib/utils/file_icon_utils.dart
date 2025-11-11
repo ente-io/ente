@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class FileIconConfig {
-  final IconData icon;
+  final dynamic icon;
   final Color color;
+  final Color backgroundColor;
   final Set<String> extensions;
 
   const FileIconConfig({
     required this.icon,
     required this.color,
+    required this.backgroundColor,
     required this.extensions,
   });
 }
@@ -17,30 +20,35 @@ class FileIconUtils {
   static const Map<String, FileIconConfig> _fileTypeConfigs = {
     'pdf': FileIconConfig(
       extensions: {'.pdf'},
-      icon: Icons.picture_as_pdf,
-      color: Colors.red,
+      icon: HugeIcons.strokeRoundedFile01,
+      color: Color.fromRGBO(246, 58, 58, 1),
+      backgroundColor: Color.fromRGBO(255, 58, 58, 0.06),
     ),
     'image': FileIconConfig(
       extensions: {'.jpg', '.png', '.heic'},
-      icon: Icons.image,
-      color: Colors.blue,
+      icon: HugeIcons.strokeRoundedImage01,
+      color: Color.fromRGBO(8, 194, 37, 1),
+      backgroundColor: Color.fromRGBO(8, 194, 37, 0.06),
     ),
     'presentation': FileIconConfig(
       extensions: {'.pptx'},
-      icon: Icons.slideshow,
-      color: Colors.orange,
+      icon: HugeIcons.strokeRoundedPresentation01,
+      color: Color.fromRGBO(16, 113, 255, 1),
+      backgroundColor: Color.fromRGBO(16, 113, 255, 0.06),
     ),
     'spreadsheet': FileIconConfig(
       extensions: {'.xlsx'},
-      icon: Icons.table_chart,
-      color: Colors.green,
+      icon: HugeIcons.strokeRoundedTable01,
+      color: Color(0xFF388E3C),
+      backgroundColor: Color(0xFFE8F5E9),
     ),
   };
 
   static const FileIconConfig _defaultConfig = FileIconConfig(
     extensions: {},
-    icon: Icons.insert_drive_file,
-    color: Colors.grey,
+    icon: HugeIcons.strokeRoundedFile02,
+    color: Color(0xFF757575),
+    backgroundColor: Color(0xFFFAFAFA),
   );
 
   static FileIconConfig _getFileConfig(String fileName) {
@@ -62,11 +70,40 @@ class FileIconUtils {
     return _defaultConfig;
   }
 
-  static IconData getFileIcon(String fileName) {
-    return _getFileConfig(fileName).icon;
+  static Widget getFileIcon(
+    String fileName, {
+    bool showBackground = true,
+    double size = 20,
+  }) {
+    final config = _getFileConfig(fileName);
+
+    final icon = HugeIcon(
+      icon: config.icon,
+      color: config.color,
+      size: size,
+    );
+
+    if (!showBackground) {
+      return icon;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: config.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: icon,
+      ),
+    );
   }
 
-  static Color getFileIconColor(String fileName) {
+  Color getFileIconColor(String fileName) {
     return _getFileConfig(fileName).color;
+  }
+
+  Color getFileIconBackgroundColor(String fileName) {
+    return _getFileConfig(fileName).backgroundColor;
   }
 }

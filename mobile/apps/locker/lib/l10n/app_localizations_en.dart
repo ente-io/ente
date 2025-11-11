@@ -53,10 +53,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get noFilesFound => 'No files here';
+  String get noFilesFound => 'No items here';
 
   @override
-  String get addFiles => 'Add Files';
+  String get addFiles => 'Add items';
 
   @override
   String get name => 'Name';
@@ -76,22 +76,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get downloadFailed => 'Download Failed';
+  String get downloadFailed => 'Download failed';
 
   @override
-  String get failedToDownloadOrDecrypt => 'Failed to download or decrypt file';
+  String get failedToDownloadOrDecrypt => 'Failed to download item';
 
   @override
-  String get errorOpeningFile => 'Error opening file';
+  String get errorOpeningFile => 'Error opening item';
 
   @override
   String errorOpeningFileMessage(String error) {
-    return 'Error opening file: $error';
+    return 'Error opening item: $error';
   }
 
   @override
   String couldNotOpenFile(String error) {
-    return 'Could not open file: $error';
+    return 'Could not open item: $error';
   }
 
   @override
@@ -161,19 +161,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownItemType => 'Unknown item type';
 
   @override
-  String get fileDeletedSuccessfully => 'File deleted successfully';
+  String get fileDeletedSuccessfully => 'Item deleted successfully';
 
   @override
   String failedToDeleteFile(String error) {
-    return 'Failed to delete file: $error';
+    return 'Failed to delete item: $error';
   }
 
   @override
-  String get fileUpdatedSuccessfully => 'File updated successfully!';
+  String get fileUpdatedSuccessfully => 'Item updated successfully!';
 
   @override
   String failedToUpdateFile(String error) {
-    return 'Failed to update file: $error';
+    return 'Failed to update item: $error';
   }
 
   @override
@@ -217,7 +217,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
-  String get deleteFile => 'Delete File';
+  String get deleteFile => 'Delete item';
 
   @override
   String deleteFileConfirmation(String fileName) {
@@ -232,7 +232,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your first collection to get started';
 
   @override
-  String get createCollection => 'Create Collection';
+  String get createCollection => 'Create collection';
 
   @override
   String get nothingYet => 'Nothing yet';
@@ -242,7 +242,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Upload your first document to get started';
 
   @override
-  String get uploadDocument => 'Upload Document';
+  String get collectionEmptyStateTitle => 'Nothing to see here';
+
+  @override
+  String get collectionEmptyStateSubtitle =>
+      'There are no items in this collection';
+
+  @override
+  String get yourTrashIsEmpty => 'Your trash is empty';
+
+  @override
+  String get homeLockerEmptyTitle => 'Your Locker is empty';
+
+  @override
+  String get homeLockerEmptySubtitle => 'Click the + button to get started';
+
+  @override
+  String get uploadDocument => 'Upload document';
 
   @override
   String items(int count) {
@@ -254,9 +270,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count files',
-      one: '1 file',
-      zero: 'no files',
+      other: '$count items',
+      one: '1 item',
+      zero: 'no items',
     );
     return '$_temp0';
   }
@@ -289,7 +305,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to permanently delete all items in trash? This action cannot be undone.';
 
   @override
-  String get fileTitle => 'File title';
+  String get fileTitle => 'Item title';
 
   @override
   String get note => 'Note';
@@ -305,6 +321,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchHint => 'Search...';
+
+  @override
+  String get searchEmptyTitle => 'No matches found';
+
+  @override
+  String get searchEmptyDescription => 'Try searching for something else.';
+
+  @override
+  String searchEverywhereTitle(String query) {
+    return 'Search everywhere for \"$query\"';
+  }
+
+  @override
+  String get searchEverywhereSubtitle =>
+      'Search across all collections and files.';
 
   @override
   String noCollectionsFoundForQuery(String query) {
@@ -341,7 +372,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingShareLink => 'Creating link...';
 
   @override
-  String get shareThisLink => 'Anyone with this link can access your file.';
+  String get shareThisLink => 'Anyone with this link can access your item.';
 
   @override
   String get copyLink => 'Copy link';
@@ -363,7 +394,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteShareLinkConfirmation =>
-      'People with this link will no longer be able to access the file.';
+      'People with this link will no longer be able to access the item.';
 
   @override
   String get deletingShareLink => 'Deleting link...';
@@ -378,7 +409,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToDeleteShareLink => 'Failed to delete link';
 
   @override
-  String get deletingFile => 'Deleting file...';
+  String get deletingFile => 'Deleting item...';
 
   @override
   String get changeEmail => 'Change email';
@@ -542,48 +573,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveInformation => 'Save information';
 
   @override
+  String get saveToLocker => 'Save to Locker';
+
+  @override
+  String get saveDocumentTitle => 'Document';
+
+  @override
+  String get saveDocumentDescription => 'Upload important docs.';
+
+  @override
   String get informationDescription =>
-      'Save important information that can be shared and passed down to loved ones.';
+      'Save and share information with loved ones.';
 
   @override
-  String get personalNote => 'Personal note';
+  String get personalNote => 'Note';
 
   @override
-  String get personalNoteDescription => 'Save important notes or thoughts';
+  String get personalNoteDescription => 'Write down thoughts and instructions.';
 
   @override
-  String get physicalRecords => 'Physical records';
+  String get physicalRecords => 'Thing';
 
   @override
   String get physicalRecordsDescription =>
-      'Save the real-world locations of important items';
+      'Save locations of real-world items.';
 
   @override
-  String get accountCredentials => 'Account credentials';
+  String get accountCredentials => 'Secret';
 
   @override
-  String get accountCredentialsDescription =>
-      'Securely store login details for important accounts';
+  String get accountCredentialsDescription => 'Preserve account credentials.';
+
+  @override
+  String get editSecret => 'Edit secret';
+
+  @override
+  String get editLocation => 'Edit location';
+
+  @override
+  String get editNote => 'Edit note';
 
   @override
   String get emergencyContact => 'Emergency contact';
 
   @override
   String get emergencyContactDescription =>
-      'Save details of people to contact in emergencies';
+      'Keep contact info for key people in crises.';
 
   @override
   String get noteName => 'Title';
 
   @override
-  String get noteNameHint => 'Give your note a meaningful title';
+  String get noteNameHint => 'Hint text';
 
   @override
   String get noteContent => 'Content';
 
   @override
-  String get noteContentHint =>
-      'Write down important thoughts, instructions, or memories you want to preserve';
+  String get noteContentHint => 'Write down important thoughts or instructions';
+
+  @override
+  String get unsavedNoteChangesTitle => 'Discard changes?';
+
+  @override
+  String get unsavedNoteChangesDescription =>
+      'You have unsaved changes in this note. If you go back now, they will be lost.';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get discardChanges => 'Discard';
 
   @override
   String get recordName => 'Record name';
@@ -595,40 +655,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordLocation => 'Location';
 
   @override
-  String get recordLocationHint =>
-      'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')';
+  String get recordLocationHint => 'Where is this item kept?';
 
   @override
   String get recordNotes => 'Notes';
 
   @override
-  String get recordNotesHint =>
-      'Any additional details about accessing or understanding this record';
+  String get recordNotesHint => 'Additional information about the item';
 
   @override
-  String get credentialName => 'Account name';
+  String get credentialName => 'Account';
 
   @override
-  String get credentialNameHint => 'Name of the service or account';
+  String get credentialNameHint => 'Name of the service';
 
   @override
   String get username => 'Username';
 
   @override
-  String get usernameHint => 'Login username or email address';
+  String get usernameHint => 'Login ID or email';
 
   @override
   String get password => 'Password';
 
   @override
-  String get passwordHint => 'Account password';
+  String get passwordHint => 'Password';
 
   @override
   String get credentialNotes => 'Additional notes';
 
   @override
-  String get credentialNotesHint =>
-      'Recovery methods, security questions, or other important details';
+  String get credentialNotesHint => 'Recovery methods, security questions, ...';
 
   @override
   String get contactName => 'Contact name';
@@ -732,18 +789,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetPasswordTitle => 'Reset password';
 
   @override
-  String get allowAddingFiles => 'Allow adding files';
+  String get allowAddingFiles => 'Allow adding items';
 
   @override
   String get disableDownloadWarningTitle => 'Please note';
 
   @override
   String get disableDownloadWarningBody =>
-      'Viewers can still take screenshots or save a copy of your files using external tools.';
+      'Viewers can still take screenshots or save a copy of your items using external tools.';
 
   @override
   String get allowAddFilesDescription =>
-      'Allow people with the link to also add files to the shared collection.';
+      'Allow people with the link to also add items to the shared collection.';
 
   @override
   String get after1Hour => 'After 1 hour';
@@ -844,7 +901,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collaboratorsCanAddFilesToTheSharedCollection =>
-      'Collaborators can add files to the shared collection.';
+      'Collaborators can add items to the shared collection.';
 
   @override
   String get enterEmail => 'Enter email';
@@ -914,6 +971,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get oops => 'Oops';
 
   @override
+  String get noItemsMatchSelectedFilters =>
+      'No items match the selected filters';
+
+  @override
+  String get noCollections => 'No collections';
+
+  @override
   String get youCannotShareWithYourself => 'You cannot share with yourself';
 
   @override
@@ -923,8 +987,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendInvite => 'Send invite';
 
   @override
-  String get shareTextRecommendUsingEnte =>
-      'Download Ente so we can easily share original quality files\n\nhttps://ente.io';
+  String get shareTextRecommendUsingEnte => 'Download Ente\n\nhttps://ente.io';
 
   @override
   String get thisIsYourVerificationId => 'This is your Verification ID';
@@ -952,7 +1015,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String emailNoEnteAccount(Object email) {
-    return '$email does not have an Ente account.\n\nSend them an invite to share files.';
+    return '$email does not have an Ente account.\n\nSend them an invite to share items.';
   }
 
   @override
@@ -985,7 +1048,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String cannotAddMoreFilesAfterBecomingViewer(String name) {
-    return '$name will no longer be able to add files to the collection after becoming a viewer.';
+    return '$name will no longer be able to add items to the collection after becoming a viewer.';
   }
 
   @override
@@ -993,7 +1056,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String removeParticipantBody(Object userEmail) {
-    return '$userEmail will be removed from this shared collection\n\nAny files added by them will also be removed from the collection';
+    return '$userEmail will be removed from this shared collection\n\nAny items added by them will also be removed from the collection';
   }
 
   @override
@@ -1010,7 +1073,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collaboratorsCanAddFilesToTheSharedAlbum =>
-      'Collaborators can add files to the shared collection.';
+      'Collaborators can add items to the shared collection.';
 
   @override
   String albumParticipantsCount(int count) {
@@ -1043,7 +1106,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filesAddedByYouWillBeRemovedFromTheCollection =>
-      'Files added by you will be removed from the collection';
+      'Items added by you will be removed from the collection';
 
   @override
   String get leaveSharedCollection => 'Leave shared collection?';
@@ -1063,21 +1126,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Please authenticate to manage your trusted contacts';
 
   @override
-  String get uploadError => 'Upload Error';
+  String get uploadError => 'Upload error';
 
   @override
   String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';
 
   @override
   String noFilesFoundForQuery(String query) {
-    return 'No files found for \"$query\"';
+    return 'No items found for \"$query\"';
   }
 
   @override
-  String get deselectAll => 'Deselect All';
+  String get deselectAll => 'Deselect all';
 
   @override
-  String get selectAll => 'Select All';
+  String get selectAll => 'Select all';
 
   @override
   String get unnamedCollection => 'Unnamed Collection';
@@ -1087,13 +1150,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String uploadedFilesProgress(int completed, int total) {
-    return 'Uploaded $completed/$total files...';
+    return 'Uploaded $completed/$total items...';
   }
 
   @override
   String uploadedFilesProgressWithError(
       int completed, int total, String error) {
-    return 'Uploaded $completed/$total files... ($error)';
+    return 'Uploaded $completed/$total items... ($error)';
   }
 
   @override
@@ -1106,14 +1169,265 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionButtonLabel => 'Collection';
 
   @override
-  String get hideWindow => 'Hide Window';
+  String get hideWindow => 'Hide window';
 
   @override
-  String get showWindow => 'Show Window';
+  String get showWindow => 'Show window';
 
   @override
-  String get exitApp => 'Exit App';
+  String get exitApp => 'Exit app';
 
   @override
   String get lockerLogs => 'Locker logs';
+
+  @override
+  String get recents => 'Recents';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get uploadAFile => 'Upload an item';
+
+  @override
+  String get clickHereToUpload => 'Click here to upload';
+
+  @override
+  String get saveDocument => 'Save document';
+
+  @override
+  String get uploadFiles => 'Upload items';
+
+  @override
+  String filesSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items selected',
+      one: '1 item selected',
+      zero: 'No items selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addToCollection => 'Add to collection';
+
+  @override
+  String get newCollection => 'New collection';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get editItem => 'Edit item';
+
+  @override
+  String get enterNewTitle => 'Enter a new title';
+
+  @override
+  String get backToView => 'Back to view';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String failedToLoadCollections(String error) {
+    return 'Failed to load collections: $error';
+  }
+
+  @override
+  String get informationCollectionName => 'Information';
+
+  @override
+  String recordSavedToMultipleCollections(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections',
+      one: '1 collection',
+    );
+    return 'Record saved to $_temp0 successfully';
+  }
+
+  @override
+  String copiedToClipboard(String fieldName) {
+    return '$fieldName copied to clipboard';
+  }
+
+  @override
+  String searchResultsCount(int count, String query) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0 for \"$query\"';
+  }
+
+  @override
+  String get locker => 'Locker';
+
+  @override
+  String get loginToEnteAccount => 'Log in to your Ente account';
+
+  @override
+  String get unlockLockerPaidPlanTitle => 'Coming soon!';
+
+  @override
+  String get unlockLockerPaidPlanBody =>
+      'Locker is currently available only to paid customers of Ente Photos.';
+
+  @override
+  String get checkoutEntePhotos => 'Checkout Ente Photos';
+
+  @override
+  String get okay => 'Okay';
+
+  @override
+  String get noAccountCta => 'I don\'t have an account';
+
+  @override
+  String get featureSaveImportant =>
+      'Save your important documents and credentials';
+
+  @override
+  String get featurePassAutomatically =>
+      'Pass them on automatically in emergencies';
+
+  @override
+  String get featureShareAnytime => 'Share them anytime';
+
+  @override
+  String get emailIdLabel => 'Email';
+
+  @override
+  String get emailIdHint => 'Enter your email address';
+
+  @override
+  String get loginPasswordLabel => 'Password';
+
+  @override
+  String get loginPasswordHint => 'Enter your password';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get logInAction => 'Log in';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account?';
+
+  @override
+  String get signUp => 'Sign up';
+
+  @override
+  String get incorrectPassword => 'Incorrect password';
+
+  @override
+  String get pleaseTryAgain => 'Please try again';
+
+  @override
+  String get noInternetConnection => 'No internet connection';
+
+  @override
+  String get checkInternetConnection =>
+      'Please check your internet connection and try again';
+
+  @override
+  String get verificationFailedTryAgain =>
+      'Verification failed, please try again';
+
+  @override
+  String get recreatePassword => 'Recreate password';
+
+  @override
+  String get deviceCannotVerifyPassword =>
+      'Your device does not have enough memory to verify your password';
+
+  @override
+  String get useRecoveryKey => 'Use recovery key';
+
+  @override
+  String get invalidEmail => 'Invalid email';
+
+  @override
+  String get enterValidEmailFirst => 'Please enter a valid email address first';
+
+  @override
+  String get lockerLoginIssueSubject => 'Locker login issue';
+
+  @override
+  String get unnamed => 'Unnamed';
+
+  @override
+  String get collectionLabel => 'Collection';
+
+  @override
+  String get areYouSure => 'Are you sure?';
+
+  @override
+  String get yesDeleteCollection => 'Yes, delete collection';
+
+  @override
+  String get yesDeleteFile => 'Yes, delete item';
+
+  @override
+  String deleteCollectionDialogBody(String collectionName) {
+    return '$collectionName will be deleted permanently.';
+  }
+
+  @override
+  String deleteMultipleCollectionsDialogBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections',
+      one: '1 collection',
+    );
+    return '$_temp0 will be deleted permanently.';
+  }
+
+  @override
+  String deleteMultipleFilesDialogBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0 will be deleted permanently.';
+  }
+
+  @override
+  String yesDeleteCollections(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'collections',
+      one: 'collection',
+    );
+    return 'Yes, delete $_temp0';
+  }
+
+  @override
+  String yesDeleteFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'Yes, delete $_temp0';
+  }
+
+  @override
+  String get usage => 'Usage';
+
+  @override
+  String fileCount(String used, String max) {
+    return '$used / $max';
+  }
 }

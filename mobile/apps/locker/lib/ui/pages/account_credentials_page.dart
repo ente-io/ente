@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
-import 'package:locker/ui/components/form_text_input_widget.dart';
+import 'package:locker/ui/components/capsule_form_field.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class AccountCredentialsPage extends BaseInfoPage<AccountCredentialData> {
@@ -9,6 +10,7 @@ class AccountCredentialsPage extends BaseInfoPage<AccountCredentialData> {
     super.key,
     super.mode = InfoPageMode.edit,
     super.existingFile,
+    super.onCancelWithoutSaving,
   });
 
   @override
@@ -22,16 +24,13 @@ class _AccountCredentialsPageState
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   bool _passwordVisible = false;
-  final _passwordFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _passwordFocusNode.addListener(() {
-      setState(() {
-        // Password focus state handling if needed
-      });
-    });
+    _nameController.addListener(_onFieldChanged);
+    _usernameController.addListener(_onFieldChanged);
+    _passwordController.addListener(_onFieldChanged);
     _loadExistingData();
   }
 
@@ -53,16 +52,37 @@ class _AccountCredentialsPageState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onFieldChanged);
+    _usernameController.removeListener(_onFieldChanged);
+    _passwordController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _notesController.dispose();
-    _passwordFocusNode.dispose();
     super.dispose();
   }
 
   @override
-  String get pageTitle => context.l10n.accountCredentials;
+  String get pageTitle {
+    if (isInEditMode) {
+      if (widget.existingFile != null || currentData != null) {
+        return context.l10n.editSecret;
+      }
+      return context.l10n.accountCredentials;
+    }
+
+    final controllerName = _nameController.text.trim();
+    if (controllerName.isNotEmpty) {
+      return controllerName;
+    }
+
+    final dataName = (currentData?.name ?? '').trim();
+    if (dataName.isNotEmpty) {
+      return dataName;
+    }
+
+    return context.l10n.accountCredentials;
+  }
 
   @override
   String get submitButtonText => context.l10n.saveRecord;
@@ -76,6 +96,9 @@ class _AccountCredentialsPageState
         _usernameController.text.trim().isNotEmpty &&
         _passwordController.text.trim().isNotEmpty;
   }
+
+  @override
+  bool get isSaveEnabled => super.isSaveEnabled && validateForm();
 
   @override
   AccountCredentialData createInfoData() {
@@ -92,10 +115,13 @@ class _AccountCredentialsPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      FormTextInputWidget(
+      CapsuleFormField(
         labelText: context.l10n.credentialName,
         hintText: context.l10n.credentialNameHint,
         controller: _nameController,
+        textCapitalization: TextCapitalization.sentences,
+        autofocus: true,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterAccountName;
@@ -103,11 +129,12 @@ class _AccountCredentialsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
-      FormTextInputWidget(
+      const SizedBox(height: 24),
+      CapsuleFormField(
         labelText: context.l10n.username,
         hintText: context.l10n.usernameHint,
         controller: _usernameController,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterUsername;
@@ -115,13 +142,18 @@ class _AccountCredentialsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
-      FormTextInputWidget(
+      const SizedBox(height: 24),
+      CapsuleFormField(
         labelText: context.l10n.password,
         hintText: context.l10n.passwordHint,
         controller: _passwordController,
         obscureText: !_passwordVisible,
-        suffixIcon: IconButton(
+        textInputAction: TextInputAction.next,
+        trailing: IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
+          iconSize: 20,
+          visualDensity: VisualDensity.compact,
           icon: Icon(
             _passwordVisible ? Icons.visibility : Icons.visibility_off,
           ),
@@ -138,43 +170,83 @@ class _AccountCredentialsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
-      FormTextInputWidget(
+      const SizedBox(height: 24),
+      CapsuleFormField(
         labelText: context.l10n.credentialNotes,
         hintText: context.l10n.credentialNotesHint,
         controller: _notesController,
         maxLines: 3,
+        minLines: 3,
+        textCapitalization: TextCapitalization.sentences,
+        keyboardType: TextInputType.multiline,
+        textInputAction: TextInputAction.newline,
+        lineHeight: 1.5,
       ),
-      const SizedBox(height: 24),
     ];
   }
 
   @override
   List<Widget> buildViewFields() {
-    return [
-      buildViewField(
-        label: context.l10n.credentialName,
-        value: _nameController.text,
+    final usernameText = _usernameController.text;
+    final passwordText = _passwordController.text;
+    final notesText = _notesController.text;
+
+    final fields = <Widget>[
+      CapsuleDisplayField(
+        labelText: context.l10n.username,
+        value: usernameText,
+        onCopy: usernameText.trim().isEmpty
+            ? null
+            : () => _copyValue(usernameText, context.l10n.username),
       ),
-      const SizedBox(height: 16),
-      buildViewField(
-        label: context.l10n.username,
-        value: _usernameController.text,
-      ),
-      const SizedBox(height: 16),
-      buildViewField(
-        label: context.l10n.password,
-        value: _passwordController.text,
+      const SizedBox(height: 24),
+      CapsuleDisplayField(
+        labelText: context.l10n.password,
+        value: passwordText,
         isSecret: true,
+        onCopy: passwordText.trim().isEmpty
+            ? null
+            : () => _copyValue(passwordText, context.l10n.password),
       ),
-      if (_notesController.text.isNotEmpty) ...[
-        const SizedBox(height: 16),
-        buildViewField(
-          label: context.l10n.credentialNotes,
-          value: _notesController.text,
-          maxLines: 3,
-        ),
-      ],
     ];
+
+    if (notesText.trim().isNotEmpty) {
+      fields.addAll([
+        const SizedBox(height: 24),
+        CapsuleDisplayField(
+          labelText: context.l10n.credentialNotes,
+          value: notesText,
+          maxLines: 6,
+          lineHeight: 1.5,
+          onCopy: () => _copyValue(
+            notesText,
+            context.l10n.credentialNotes,
+          ),
+        ),
+      ]);
+    }
+
+    return fields;
+  }
+
+  void _onFieldChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  void _copyValue(String value, String label) {
+    if (value.trim().isEmpty) {
+      return;
+    }
+    Clipboard.setData(ClipboardData(text: value));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.copiedToClipboard(label)),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 }
