@@ -23,14 +23,12 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     return Material(
-          color: enteColorScheme.backgroundElevated,
+      color: enteColorScheme.backgroundElevated,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
-            height: 36,
-          ),
+          const SizedBox(height: 36),
           Container(
             alignment: Alignment.centerLeft,
             child: Padding(
@@ -70,9 +68,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       }
                     },
                   ),
-                  const SizedBox(
-                    height: 8,
-                  ),
+                  const SizedBox(height: 8),
                   ButtonWidget(
                     buttonType: ButtonType.trailingIconSecondary,
                     buttonSize: ButtonSize.large,
@@ -83,8 +79,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       await updateService.launchReviewUrl();
                     },
                   ),
-                  const SizedBox(height: 8),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
