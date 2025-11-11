@@ -207,8 +207,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
-    settings.isAdminRoleEnabled =
-        (flags?.internalUser ?? false) || isDevBuild;
+    settings.isAdminRoleEnabled = (flags?.internalUser ?? false) || isDevBuild;
     settings.isSurfacePublicLinkEnabled =
         (flags?.internalUser ?? false) || isDevBuild;
     settings.mapEnabled = flags?.mapEnabled || false;
