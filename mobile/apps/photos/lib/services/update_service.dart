@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/constants.dart';
@@ -22,13 +23,14 @@ class UpdateService {
   UpdateService(SharedPreferences prefs, PackageInfo packageInfo)
       : _prefs = prefs,
         _packageInfo = packageInfo {
-    debugPrint("UpdateService constructor");
+    if (kDebugMode) {
+      debugPrint("UpdateService constructor");
+    }
   }
 
   Future<bool> showChangeLog() async {
-    // fetch the change log version which was last shown to user.
-    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
-    return lastShownAtVersion < currentChangeLogVersion;
+    // Always surface the changelog dialog, even if the user has already seen it.
+    return true;
   }
 
   Future<bool> hideChangeLog() async {
