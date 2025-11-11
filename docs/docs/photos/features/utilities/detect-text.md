@@ -39,7 +39,7 @@ After copying, the text stays on your clipboard so you can paste it into message
 
 Detect Text runs on demand and does not build a searchable index across your library, so searches still rely on metadata, machine learning tags, and descriptions. Magic search may occasionally surface photos with prominent text (thanks to CLIP embeddings), but it is not a dedicated "search by detected text" feature.
 
-Not all languages are currently supported. It works well on Chinese, Japanese, and most languages with the Latin scripture.  
+Not all languages are currently supported. It works well on Chinese, Japanese, English, and most languages with the Latin scripture.  
 
 ## Privacy
 
