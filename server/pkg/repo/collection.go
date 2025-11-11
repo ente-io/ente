@@ -89,8 +89,9 @@ func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, erro
 	return c, nil
 }
 
-// GetWithSharingDetails returns the collection along with sharees, active public URLs, and decrypted owner email.
-func (repo *CollectionRepository) GetWithSharingDetails(collectionID int64) (ente.Collection, error) {
+// GetWithSharingDetailsForUser returns the collection along with sharees, active public URLs,
+// and decrypted owner email. If the actor is a sharee, the encrypted key sealed for that actor is returned.
+func (repo *CollectionRepository) GetWithSharingDetailsForUser(collectionID int64, actorUserID int64) (ente.Collection, error) {
 	c, err := repo.Get(collectionID)
 	if err != nil {
 		return c, stacktrace.Propagate(err, "")
@@ -116,6 +117,18 @@ func (repo *CollectionRepository) GetWithSharingDetails(collectionID int64) (ent
 			return ente.Collection{}, stacktrace.Propagate(err, "failed to decrypt owner email")
 		}
 		c.Owner.Email = email
+	}
+	if actorUserID != c.Owner.ID {
+		var encryptedKey sql.NullString
+		err := repo.DB.QueryRow(`SELECT encrypted_key FROM collection_shares WHERE collection_id = $1 AND to_user_id = $2 AND is_deleted = $3`,
+			collectionID, actorUserID, false).Scan(&encryptedKey)
+		if err != nil {
+			return ente.Collection{}, stacktrace.Propagate(err, "failed to fetch sharee encrypted key")
+		}
+		if !encryptedKey.Valid {
+			return ente.Collection{}, stacktrace.Propagate(fmt.Errorf("share key missing for user %d collection %d", actorUserID, collectionID), "")
+		}
+		c.EncryptedKey = encryptedKey.String
 	}
 	return c, nil
 }
