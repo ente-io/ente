@@ -329,6 +329,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.11"
+  dbus_secrets:
+    dependency: transitive
+    description:
+      name: dbus_secrets
+      sha256: "2a48a4f564f01752fe2cd89a5ae80fbdb4adb05ce0744f0b91c7b8e9fa2982e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   device_info_plus:
     dependency: "direct main"
     description:

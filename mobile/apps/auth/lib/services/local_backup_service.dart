@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_configuration/secure_storage.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:intl/intl.dart';  //for time based file naming
+import 'package:intl/intl.dart'; //for time based file naming
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //we gonn change
@@ -14,6 +14,7 @@ class LocalBackupService {
   static final LocalBackupService instance =
       LocalBackupService._privateConstructor();
   LocalBackupService._privateConstructor();
+  final SecureStorage _secureStorage = createSecureStorage();
 
   static const int _maxBackups = 2;
 
@@ -31,16 +32,14 @@ class LocalBackupService {
       if (backupPath == null) {
         return;
       }
-      
-      const storage = FlutterSecureStorage();
-      final password = await storage.read(key: 'autoBackupPassword');
+
+      final password = await _secureStorage.read(key: 'autoBackupPassword');
       if (password == null || password.isEmpty) {
         _logger.warning("Automatic backup skipped: password not set.");
         return;
       }
 
       _logger.info("Change detected, triggering automatic encrypted backup...");
-
 
       String rawContent = await CodeStore.instance.getCodesForExport();
 
@@ -49,13 +48,11 @@ class LocalBackupService {
 
       for (String line in lines) {
         if (line.trim().isEmpty) continue;
-  
+
         String cleanUrl;
         if (line.startsWith('"') && line.endsWith('"')) {
-          cleanUrl = jsonDecode(line); 
-        }
-
-        else {
+          cleanUrl = jsonDecode(line);
+        } else {
           cleanUrl = line;
         }
 
@@ -73,7 +70,7 @@ class LocalBackupService {
         utf8.encode(password),
         kekSalt,
       );
-      
+
       final encResult = await CryptoUtil.encryptData(
         utf8.encode(plainTextContent),
         derivedKeyResult.key,
@@ -92,7 +89,7 @@ class LocalBackupService {
           salt: CryptoUtil.bin2base64(kekSalt),
         ),
       );
-      
+
       final encryptedJson = jsonEncode(data.toJson());
 
       final now = DateTime.now();
@@ -102,11 +99,12 @@ class LocalBackupService {
 
       final filePath = '$backupPath/$fileName';
       final backupFile = File(filePath);
-      
+
       await backupFile.writeAsString(encryptedJson);
       await _manageOldBackups(backupPath);
 
-      _logger.info('Automatic encrypted backup successful! Saved to: $filePath');
+      _logger
+          .info('Automatic encrypted backup successful! Saved to: $filePath');
     } catch (e, s) {
       _logger.severe('Silent error during automatic backup', e, s);
     }
@@ -118,10 +116,16 @@ class LocalBackupService {
       final directory = Directory(backupPath);
 
       // fetch all filenames in the folder, filter out ente backup files
-      final files = directory.listSync()
-          .where((entity) =>
-              entity is File &&
-              entity.path.split('/').last.startsWith('ente-auth-auto-backup-'),)
+      final files = directory
+          .listSync()
+          .where(
+            (entity) =>
+                entity is File &&
+                entity.path
+                    .split('/')
+                    .last
+                    .startsWith('ente-auth-auto-backup-'),
+          )
           .map((entity) => entity as File)
           .toList();
 
@@ -130,13 +134,13 @@ class LocalBackupService {
 
       // if we have more files than our limit, delete the oldest ones (current limit=_maxBackups)
       while (files.length > _maxBackups) {
-  // remove the oldest file (at index 0) from the list
-  final fileToDelete = files.removeAt(0); 
-  // and delete it from the device's storage..
-  await fileToDelete.delete(); 
-  _logger.info('Deleted old backup: ${fileToDelete.path}');
-}
-_logger.info('Backup count is now ${files.length}. Cleanup complete.');
+        // remove the oldest file (at index 0) from the list
+        final fileToDelete = files.removeAt(0);
+        // and delete it from the device's storage..
+        await fileToDelete.delete();
+        _logger.info('Deleted old backup: ${fileToDelete.path}');
+      }
+      _logger.info('Backup count is now ${files.length}. Cleanup complete.');
     } catch (e, s) {
       _logger.severe('Error during old backup cleanup', e, s);
     }
@@ -152,10 +156,16 @@ _logger.info('Backup count is now ${files.length}. Cleanup complete.');
         return;
       }
 
-      final files = directory.listSync()
-          .where((entity) =>
-              entity is File &&
-              entity.path.split('/').last.startsWith('ente-auth-auto-backup-'),)
+      final files = directory
+          .listSync()
+          .where(
+            (entity) =>
+                entity is File &&
+                entity.path
+                    .split('/')
+                    .last
+                    .startsWith('ente-auth-auto-backup-'),
+          )
           .map((entity) => entity as File)
           .toList();
 
@@ -163,13 +173,12 @@ _logger.info('Backup count is now ${files.length}. Cleanup complete.');
         _logger.info("No old backup files found to delete.");
         return;
       }
-      
+
       for (final file in files) {
         await file.delete();
         _logger.info('Deleted: ${file.path}');
       }
       _logger.info("Successfully cleaned up old backup location.");
-
     } catch (e, s) {
       _logger.severe('Error during full backup cleanup of old directory', e, s);
     }
