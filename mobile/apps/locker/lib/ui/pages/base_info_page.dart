@@ -181,9 +181,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     try {
       final collections = await CollectionService.instance.getCollections();
       setState(() {
-        // Filter out uncategorized collection (it will be shown separately)
+        // Filter out uncategorized and favorites collections
         _availableCollections = collections
-            .where((c) => c.type != CollectionType.uncategorized)
+            .where(
+              (c) =>
+                  c.type != CollectionType.uncategorized &&
+                  c.type != CollectionType.favorites,
+            )
             .toList();
         // Pre-select a default collection if available
         if (_availableCollections.isNotEmpty) {
