@@ -1049,14 +1049,16 @@ const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
         pointer-events: none;
     }
 
-    &:hover {
-        input[type="checkbox"] {
-            visibility: visible;
-            opacity: 0.5;
-        }
+    @media (pointer: fine) {
+        &:hover {
+            input[type="checkbox"] {
+                visibility: visible;
+                opacity: 0.5;
+            }
 
-        .preview-card-hover-overlay {
-            opacity: 1;
+            .preview-card-hover-overlay {
+                opacity: 1;
+            }
         }
     }
 
