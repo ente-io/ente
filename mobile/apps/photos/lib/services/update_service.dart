@@ -15,6 +15,7 @@ class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
   static const currentChangeLogVersion = 39;
+
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
   final PackageInfo _packageInfo;
@@ -23,14 +24,13 @@ class UpdateService {
   UpdateService(SharedPreferences prefs, PackageInfo packageInfo)
       : _prefs = prefs,
         _packageInfo = packageInfo {
-    if (kDebugMode) {
-      debugPrint("UpdateService constructor");
-    }
+    debugPrint("UpdateService constructor");
   }
 
   Future<bool> showChangeLog() async {
-    // Always surface the changelog dialog, even if the user has already seen it.
-    return true;
+    // fetch the change log version which was last shown to user.
+    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
+    return lastShownAtVersion < currentChangeLogVersion;
   }
 
   Future<bool> hideChangeLog() async {
