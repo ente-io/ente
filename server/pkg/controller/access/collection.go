@@ -41,12 +41,7 @@ func (c controllerImpl) GetCollection(ctx *gin.Context, req *GetCollectionParams
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
-		// Hide public URL info for non-collection owners
-		if shareeRole == nil {
-			return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
-		}
 		roleValue := *shareeRole
-		collection.PublicURLs = ente.FilterPublicURLsForRole(collection.PublicURLs, roleValue)
 		role = roleValue
 	} else {
 		role = ente.OWNER

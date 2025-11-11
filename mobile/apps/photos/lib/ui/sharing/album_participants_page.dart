@@ -30,12 +30,27 @@ class AlbumParticipantsPage extends StatefulWidget {
 
 class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   late int currentUserID;
+  late Collection _collection;
   final GlobalKey _sendLinkButtonKey = GlobalKey();
 
   @override
   void initState() {
-    currentUserID = Configuration.instance.getUserID()!;
     super.initState();
+    currentUserID = Configuration.instance.getUserID()!;
+    _collection = widget.collection;
+    _refreshCollection();
+  }
+
+  Future<void> _refreshCollection() async {
+    try {
+      final latest =
+          await collectionsService.fetchCollectionByID(widget.collection.id);
+      if (mounted) {
+        setState(() {
+          _collection = latest;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _navigateToManageUser(User user) async {
@@ -44,41 +59,37 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     }
     await routeToPage(
       context,
-      ManageIndividualParticipant(collection: widget.collection, user: user),
+      ManageIndividualParticipant(collection: _collection, user: user),
     );
-    if (mounted) {
-      setState(() => {});
-    }
+    await _refreshCollection();
   }
 
   Future<void> _navigateToAddUser(List<ActionTypesToShow> actions) async {
     await routeToPage(
       context,
-      AddParticipantPage([widget.collection], actions),
+      AddParticipantPage([_collection], actions),
     );
-    if (mounted) {
-      setState(() => {});
-    }
+    await _refreshCollection();
   }
 
   @override
   Widget build(BuildContext context) {
     final currentUserID = Configuration.instance.getUserID()!;
-    final role = widget.collection.getRole(currentUserID);
+    final role = _collection.getRole(currentUserID);
     final bool adminRoleEnabled = flagService.enableAdminRole;
     final bool isOwner = role == CollectionParticipantRole.owner;
     final bool isAdmin = role == CollectionParticipantRole.admin;
     final bool canManageParticipants = isOwner || (adminRoleEnabled && isAdmin);
-    final bool hasActivePublicLink = widget.collection.hasLink &&
-        !(widget.collection.publicURLs.firstOrNull?.isExpired ?? true);
+    final bool hasActivePublicLink = _collection.hasLink &&
+        !(_collection.publicURLs.firstOrNull?.isExpired ?? true);
     final bool shouldShowPublicLink = !isOwner && hasActivePublicLink;
     final colorScheme = getEnteColorScheme(context);
-    final int participants = 1 + widget.collection.getSharees().length;
-    final User owner = widget.collection.owner;
+    final int participants = 1 + _collection.getSharees().length;
+    final User owner = _collection.owner;
     if (owner.id == currentUserID && owner.email == "") {
       owner.email = Configuration.instance.getEmail()!;
     }
-    final List<User> allSharees = widget.collection.getSharees();
+    final List<User> allSharees = _collection.getSharees();
     final List<User> admins = [];
     final List<User> collaborators = [];
     final List<User> viewers = [];
@@ -123,7 +134,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: widget.collection.displayName,
+              title: _collection.displayName,
             ),
             flexibleSpaceCaption: AppLocalizations.of(
               context,
@@ -141,7 +152,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       iconData: Icons.public,
                     ),
                     PublicLinkEnabledActionsWidget(
-                      collection: widget.collection,
+                      collection: _collection,
                       sendLinkButtonKey: _sendLinkButtonKey,
                     ),
                     const SizedBox(height: 24),
@@ -167,7 +178,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                               title: isOwner
                                   ? AppLocalizations.of(context).you
                                   : _nameIfAvailableElseEmail(
-                                      widget.collection.owner,
+                                      _collection.owner,
                                     ),
                               makeTextBold: isOwner,
                             ),

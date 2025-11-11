@@ -81,7 +81,15 @@ func (c *CollectionController) GetCollection(ctx *gin.Context, userID int64, cID
 	if err != nil {
 		return ente.Collection{}, stacktrace.Propagate(err, "")
 	}
-	return resp.Collection, nil
+	collection, err := c.CollectionRepo.GetWithSharingDetails(cID)
+	if err != nil {
+		role := ente.UNKNOWN
+		if resp.Role != nil {
+			role = *resp.Role
+		}
+		collection.PublicURLs = ente.FilterPublicURLsForRole(collection.PublicURLs, role)
+	}
+	return collection, err
 }
 
 func (c *CollectionController) GetFile(ctx *gin.Context, collectionID int64, fileID int64) (*ente.File, error) {

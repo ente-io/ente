@@ -88,6 +88,37 @@ func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, erro
 	}
 	return c, nil
 }
+
+// GetWithSharingDetails returns the collection along with sharees, active public URLs, and decrypted owner email.
+func (repo *CollectionRepository) GetWithSharingDetails(collectionID int64) (ente.Collection, error) {
+	c, err := repo.Get(collectionID)
+	if err != nil {
+		return c, stacktrace.Propagate(err, "")
+	}
+	sharees, err := repo.GetSharees(collectionID)
+	if err != nil {
+		return ente.Collection{}, stacktrace.Propagate(err, "failed to get sharees info")
+	}
+	c.Sharees = sharees
+
+	var encryptedEmail, nonce []byte
+	err = repo.DB.QueryRow(`SELECT encrypted_email, email_decryption_nonce FROM users WHERE user_id = $1`, c.Owner.ID).
+		Scan(&encryptedEmail, &nonce)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c, nil
+		}
+		return ente.Collection{}, stacktrace.Propagate(err, "failed to fetch owner email")
+	}
+	if len(encryptedEmail) > 0 && len(nonce) > 0 {
+		email, err := crypto.Decrypt(encryptedEmail, repo.SecretEncryptionKey, nonce)
+		if err != nil {
+			return ente.Collection{}, stacktrace.Propagate(err, "failed to decrypt owner email")
+		}
+		c.Owner.Email = email
+	}
+	return c, nil
+}
 func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string) (ente.Collection, error) {
 	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata
 		FROM collections
