@@ -184,6 +184,8 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   _pinnedBgColorDark,
 );
 
+const accentColor = Color(0xFFA75CFF);
+
 // Background Colors
 const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);

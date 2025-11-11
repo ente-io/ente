@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_accounts/pages/email_entry_page.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
-import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
-import 'package:ente_auth/theme/text_style.dart';
+import 'package:ente_auth/theme/colors.dart';
+import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
-import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -24,8 +24,8 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_events/event_bus.dart';
-import 'package:flutter/foundation.dart';
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:local_auth/local_auth.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -41,6 +41,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   late StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
 
   int _developerModeTapCount = 0;
+  double _featureIndex = 0;
 
   @override
   void initState() {
@@ -61,154 +62,156 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     debugPrint("Building OnboardingPage");
     final l10n = context.l10n;
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () async {
-            _developerModeTapCount++;
-            if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
-              _developerModeTapCount = 0;
-              final result = await showChoiceDialog(
-                context,
-                title: l10n.developerSettings,
-                firstButtonLabel: l10n.yes,
-                body: l10n.developerSettingsWarning,
-                isDismissible: false,
-              );
-              if (result?.action == ButtonAction.first) {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return const DeveloperSettingsPage();
-                    },
+      backgroundColor: accentColor,
+      appBar: AppBar(
+        leading: const SizedBox(),
+        title: SvgPicture.asset("assets/svg/auth-logo.svg"),
+        backgroundColor: accentColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        actions: 1 != 1
+            ? [
+                GestureDetector(
+                  onTap: () async {
+                    final locale = (await getLocale())!;
+                    // ignore: unawaited_futures
+                    routeToPage(
+                      context,
+                      LanguageSelectorPage(
+                        appSupportedLocales,
+                        (locale) async {
+                          await setLocale(locale);
+                          App.setLocale(
+                            context,
+                            locale,
+                          );
+                        },
+                        locale,
+                      ),
+                    ).then((value) {
+                      setState(() {});
+                    });
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      "Lang(i)",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                );
-                setState(() {});
-              }
-            }
-          },
+                ),
+                const SizedBox(width: 16),
+              ]
+            : null,
+      ),
+      body: GestureDetector(
+        onTap: () async => _handleDeveloperTap(context),
+        child: Center(
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height,
-                  maxWidth: 450,
+                constraints: const BoxConstraints(
+                  maxWidth: 420,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 40.0,
-                    horizontal: 40,
+                    vertical: 32,
                   ),
                   child: Column(
                     children: [
-                      Column(
-                        children: [
-                          kDebugMode
-                              ? GestureDetector(
-                                  child: const Align(
-                                    alignment: Alignment.topRight,
-                                    child: Text("Lang"),
-                                  ),
-                                  onTap: () async {
-                                    final locale = (await getLocale())!;
-                                    // ignore: unawaited_futures
-                                    routeToPage(
-                                      context,
-                                      LanguageSelectorPage(
-                                        appSupportedLocales,
-                                        (locale) async {
-                                          await setLocale(locale);
-                                          App.setLocale(context, locale);
-                                        },
-                                        locale,
-                                      ),
-                                    ).then((value) {
-                                      setState(() {});
-                                    });
-                                  },
-                                )
-                              : const SizedBox(),
-                          Image.asset(
-                            "assets/sheild-front-gradient.png",
-                            width: 200,
-                            height: 200,
+                      const SizedBox(height: 28),
+                      _buildFeatureSlider(context),
+                      const SizedBox(height: 2),
+                      DotsIndicator(
+                        dotsCount: 3,
+                        position: _featureIndex.toInt(),
+                        decorator: DotsDecorator(
+                          activeColor: Colors.white,
+                          color: Colors.white.withValues(alpha: 0.32),
+                          activeShape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            "ente",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Montserrat',
-                              fontSize: 42,
-                            ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Authenticator",
-                            style: Theme.of(context).textTheme.headlineMedium,
-                          ),
-                          const SizedBox(height: 32),
-                          Text(
-                            l10n.onBoardingBody,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(
-                                  color: Colors.white38,
-                                ),
-                          ),
-                        ],
+                          size: const Size(10, 10),
+                          activeSize: const Size(20, 10),
+                          spacing: const EdgeInsets.all(6),
+                        ),
                       ),
-                      const SizedBox(height: 100),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: GradientButton(
-                          onTap: _navigateToSignUpPage,
-                          text: l10n.newUser,
+                      const SizedBox(height: 48),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFb97dff),
+                                  foregroundColor: accentColor,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                onPressed: _navigateToSignUpPage,
+                                child: Text(
+                                  l10n.signUp,
+                                  style: textTheme.bodyBold.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: accentColor,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 18,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                onPressed: _navigateToSignInPage,
+                                child: Text(
+                                  l10n.logInLabel,
+                                  style: textTheme.bodyBold.copyWith(
+                                    color: accentColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: _optForOfflineMode,
+                        child: Text(
+                          l10n.useOffline,
+                          style: textTheme.bodyBold.copyWith(
+                            color: Colors.white.withValues(alpha: 0.85),
+                            decoration: TextDecoration.underline,
+                            decorationColor: Colors.white,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Container(
-                        height: 56,
-                        width: double.infinity,
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                        child: Hero(
-                          tag: "log_in",
-                          child: ElevatedButton(
-                            style: Theme.of(context)
-                                .colorScheme
-                                .optionalActionButtonStyle,
-                            onPressed: _navigateToSignInPage,
-                            child: Text(
-                              l10n.existingUser,
-                              style: const TextStyle(
-                                color: Colors.black, // same for both themes
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.only(top: 20, bottom: 20),
-                        child: GestureDetector(
-                          onTap: _optForOfflineMode,
-                          child: Center(
-                            child: Text(
-                              l10n.useOffline,
-                              textAlign: TextAlign.center,
-                              style: body.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .mutedTextColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
                       const DeveloperSettingsWidget(),
                     ],
                   ),
@@ -219,6 +222,32 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleDeveloperTap(BuildContext context) async {
+    _developerModeTapCount++;
+    if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
+      _developerModeTapCount = 0;
+      final result = await showChoiceDialog(
+        context,
+        title: context.l10n.developerSettings,
+        firstButtonLabel: context.l10n.yes,
+        body: context.l10n.developerSettingsWarning,
+        isDismissible: false,
+      );
+      if (result?.action == ButtonAction.first) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const DeveloperSettingsPage();
+            },
+          ),
+        );
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    }
   }
 
   Future<void> _optForOfflineMode() async {
@@ -255,6 +284,33 @@ class _OnboardingPageState extends State<OnboardingPage> {
         ),
       );
     }
+  }
+
+  Widget _buildFeatureSlider(BuildContext context) {
+    final l10n = context.l10n;
+    final features = [
+      ("assets/onboarding_lock.png", l10n.featureBackupCodes),
+      ("assets/onboarding_file.png", l10n.featureSearchEtc),
+      ("assets/onboarding_share.png", l10n.featureOpenSource),
+    ];
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 320),
+      child: PageView(
+        children: features
+            .map(
+              (feature) => _FeatureItemWidget(
+                assetPath: feature.$1,
+                title: feature.$2,
+              ),
+            )
+            .toList(),
+        onPageChanged: (index) {
+          setState(() {
+            _featureIndex = index.toDouble();
+          });
+        },
+      ),
+    );
   }
 
   void _navigateToSignUpPage() {
@@ -321,6 +377,41 @@ class _OnboardingPageState extends State<OnboardingPage> {
           return page;
         },
       ),
+    );
+  }
+}
+
+class _FeatureItemWidget extends StatelessWidget {
+  const _FeatureItemWidget({
+    required this.assetPath,
+    required this.title,
+  });
+
+  final String assetPath;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Image.asset(
+          assetPath,
+          height: 132,
+        ),
+        const SizedBox(height: 12),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Text(
+            title,
+            style: getEnteTextTheme(context).largeBold.copyWith(
+                  color: Colors.white,
+                ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
     );
   }
 }
