@@ -903,6 +903,9 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
     const longPressCompletedRef = useRef(false);
+    const touchStateRef = useRef<{ x: number; y: number; moved: boolean } | null>(
+        null,
+    );
 
     const longPressHandlers = useMemo(
         () => ({
@@ -912,7 +915,15 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             },
             onMouseUp: () => setIsLongPressing(false),
             onMouseLeave: () => setIsLongPressing(false),
-            onTouchStart: () => {
+            onTouchStart: (e: React.TouchEvent) => {
+                const touch = e.touches[0];
+                if (touch) {
+                    touchStateRef.current = {
+                        x: touch.clientX,
+                        y: touch.clientY,
+                        moved: false,
+                    };
+                }
                 setIsLongPressing(true);
                 longPressCompletedRef.current = false;
             },
@@ -974,17 +985,32 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         }
     };
 
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        if (enableSelect) {
-            // Let longPressHandlers handle the touch event for long press
-            longPressHandlers.onTouchEnd();
-            // For quick taps (not long press), prevent default to stop Safari
-            // from synthesizing click events that might hit the checkbox
-            if (!longPressCompletedRef.current) {
-                e.preventDefault();
-                handleClick();
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const state = touchStateRef.current;
+        if (state && !state.moved) {
+            const touch = e.touches[0];
+            if (touch) {
+                const dx = Math.abs(touch.clientX - state.x);
+                const dy = Math.abs(touch.clientY - state.y);
+                if (dx > 10 || dy > 10) state.moved = true;
             }
         }
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (enableSelect) longPressHandlers.onTouchEnd();
+
+        const shouldClick =
+            !longPressCompletedRef.current &&
+            touchStateRef.current &&
+            !touchStateRef.current.moved;
+
+        if (shouldClick) {
+            e.preventDefault();
+            handleClick();
+        }
+
+        touchStateRef.current = null;
     };
 
     // See: [Note: Files in trash pseudo collection have deleteBy]
@@ -997,13 +1023,27 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
+            onTouchStart={(e) => {
+                const touch = e.touches[0];
+                if (touch) {
+                    touchStateRef.current = {
+                        x: touch.clientX,
+                        y: touch.clientY,
+                        moved: false,
+                    };
+                }
+                if (enableSelect) {
+                    setIsLongPressing(true);
+                    longPressCompletedRef.current = false;
+                }
+            }}
+            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             disabled={!imageURL}
             {...(enableSelect && {
                 onMouseDown: longPressHandlers.onMouseDown,
                 onMouseUp: longPressHandlers.onMouseUp,
                 onMouseLeave: longPressHandlers.onMouseLeave,
-                onTouchStart: longPressHandlers.onTouchStart,
             })}
         >
             {enableSelect && (
