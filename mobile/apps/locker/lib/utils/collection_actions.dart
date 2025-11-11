@@ -140,6 +140,7 @@ class CollectionActions {
     await progressDialog.show();
 
     bool isFavoriteCollection = false;
+    final bool keepFiles = !(dialogChoice?.deleteFromAllCollections ?? false);
 
     try {
       for (final collection in collections) {
@@ -150,10 +151,11 @@ class CollectionActions {
         if (collection.type.canDelete) {
           await CollectionService.instance.trashCollection(
             collection,
-            keepFiles: !(dialogChoice?.deleteFromAllCollections ?? false),
+            keepFiles: keepFiles,
           );
         }
       }
+
       await progressDialog.hide();
 
       SnackBarUtils.showInfoSnackBar(
