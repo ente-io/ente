@@ -88,24 +88,26 @@ The preview shows exactly how your edited video will look, including all applied
 Ente uses two export methods to ensure compatibility across devices:
 
 1. **Native export** (default)
-   - Uses platform-specific video encoding (AVFoundation on iOS, Media3 on Android)
-   - Faster performance and better quality
+   - **iOS**: Uses AVFoundation with HighestQuality preset or Passthrough (no re-encoding for simple trims)
+   - **Android**: Uses Media3 Transformer with H.264 encoding
+   - Faster performance and better quality preservation
    - Hardware-accelerated on supported devices
+   - **Output**: MP4 with H.264 video, maintains original quality when possible
 
 2. **FFmpeg fallback**
    - Automatically used if native export fails
-   - Cross-platform compatibility
-   - Software-based encoding
+   - Cross-platform software-based encoding
+   - **Output**: MP4 with H.264 video (libx264), AAC audio
 
 The app automatically switches between methods to ensure your edits can be saved successfully.
 
 ### Output format
 
-Edited videos are exported as:
+All edited videos are exported as MP4 files:
 
-- **Format**: MP4 (H.264 video, AAC audio)
 - **File naming**: `[original-name]_edited_[timestamp].mp4`
-- **Quality**: Preserves original resolution when possible
+- **Resolution**: Preserves original resolution when possible
+- **Quality**: Native export maintains highest quality; FFmpeg uses standard H.264/AAC encoding
 
 ### Processing time
 
@@ -124,9 +126,3 @@ A progress dialog shows the export status while your video is being processed.
 - **Mobile only**: Currently available on iOS and Android apps only
 - **Single video editing**: Edit one video at a time
 - **Destructive workflow**: Cannot save edit settings - each export creates a final video
-
-## Related features
-
-- [Video Streaming](/photos/features/utilities/video-streaming) - Watch videos without downloading
-- [Storage Optimization](/photos/features/albums-and-organization/storage-optimization) - Manage storage with video conversion options
-- [Export](/photos/features/backup-and-sync/export) - Download and export your videos
