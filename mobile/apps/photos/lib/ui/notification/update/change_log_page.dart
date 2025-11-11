@@ -95,7 +95,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   }
 
   Widget _getChangeLog(BuildContext ctx) {
-    final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [
       ChangeLogEntry(
         context.l10n.cLTitle1,
@@ -109,14 +108,12 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       ),
     ];
     final double maxListHeight = MediaQuery.of(ctx).size.height * 0.5;
-    final bool shouldScroll = items.length > 3;
+    final scrollController = ScrollController();
     final listView = ListView.builder(
       controller: scrollController,
       shrinkWrap: true,
       padding: const EdgeInsets.only(right: 16),
-      physics: shouldScroll
-          ? const BouncingScrollPhysics()
-          : const NeverScrollableScrollPhysics(),
+      physics: const BouncingScrollPhysics(),
       itemBuilder: (context, index) {
         return ChangeLogEntryWidget(entry: items[index]);
       },
@@ -128,7 +125,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       ),
       child: Scrollbar(
         controller: scrollController,
-        thumbVisibility: shouldScroll,
         thickness: 2.0,
         child: listView,
       ),
