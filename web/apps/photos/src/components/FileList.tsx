@@ -902,13 +902,20 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 }) => {
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
+    const longPressCompletedRef = useRef(false);
 
     const longPressHandlers = useMemo(
         () => ({
-            onMouseDown: () => setIsLongPressing(true),
+            onMouseDown: () => {
+                setIsLongPressing(true);
+                longPressCompletedRef.current = false;
+            },
             onMouseUp: () => setIsLongPressing(false),
             onMouseLeave: () => setIsLongPressing(false),
-            onTouchStart: () => setIsLongPressing(true),
+            onTouchStart: () => {
+                setIsLongPressing(true);
+                longPressCompletedRef.current = false;
+            },
             onTouchEnd: () => setIsLongPressing(false),
         }),
         [],
@@ -916,7 +923,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
     useEffect(() => {
         const timerID = isLongPressing
-            ? setTimeout(() => onSelect(!selected), 500)
+            ? setTimeout(() => {
+                  longPressCompletedRef.current = true;
+                  onSelect(!selected);
+              }, 500)
             : undefined;
         return () => {
             if (timerID) clearTimeout(timerID);
@@ -964,6 +974,19 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         }
     };
 
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (enableSelect) {
+            // Let longPressHandlers handle the touch event for long press
+            longPressHandlers.onTouchEnd();
+            // For quick taps (not long press), prevent default to stop Safari
+            // from synthesizing click events that might hit the checkbox
+            if (!longPressCompletedRef.current) {
+                e.preventDefault();
+                handleClick();
+            }
+        }
+    };
+
     // See: [Note: Files in trash pseudo collection have deleteBy]
     const deleteBy =
         activeCollectionID == PseudoCollectionID.trash &&
@@ -974,8 +997,14 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
+            onTouchEnd={handleTouchEnd}
             disabled={!imageURL}
-            {...(enableSelect && longPressHandlers)}
+            {...(enableSelect && {
+                onMouseDown: longPressHandlers.onMouseDown,
+                onMouseUp: longPressHandlers.onMouseUp,
+                onMouseLeave: longPressHandlers.onMouseLeave,
+                onTouchStart: longPressHandlers.onTouchStart,
+            })}
         >
             {enableSelect && (
                 <Check
@@ -1072,9 +1101,6 @@ const Check = styled("input")<{ $active: boolean }>(
     left: 0;
     outline: none;
     cursor: pointer;
-    @media (pointer: coarse) {
-        pointer-events: none;
-    }
 
     &::before {
         content: "";
