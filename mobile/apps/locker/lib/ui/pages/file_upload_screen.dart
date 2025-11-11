@@ -40,7 +40,9 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     super.initState();
     _files = List.from(widget.files);
 
-    if (widget.selectedCollection != null) {
+    if (widget.selectedCollection != null &&
+        widget.selectedCollection!.type != CollectionType.uncategorized &&
+        widget.selectedCollection!.type != CollectionType.favorites) {
       _selectedCollections.add(widget.selectedCollection!);
     }
   }
