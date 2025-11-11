@@ -27,7 +27,7 @@ import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -164,6 +164,20 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
+
+    // Handle ctrl+F keyboard shortcut to focus search
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for ctrl+F (cmd+F on macOS)
+            if ((event.metaKey || event.ctrlKey) && event.key === "f") {
+                event.preventDefault();
+                selectRef.current?.focus();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
 
     const handleChange = (value: SearchOption | null) => {
         const type = value?.suggestion.type;
