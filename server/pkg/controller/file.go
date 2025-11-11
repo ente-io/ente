@@ -210,10 +210,26 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		}
 		return file, stacktrace.Propagate(err, "")
 	}
-	if usage == fileSize+thumbnailSize {
-		go c.EmailNotificationCtrl.OnFirstFileUpload(file.OwnerID, userAgent)
+	if usage == fileSize+thumbnailSize && app == ente.Photos {
+		go c.maybeSendFirstUploadEmail(file.OwnerID, userAgent)
 	}
 	return file, nil
+}
+
+func (c *FileController) maybeSendFirstUploadEmail(userID int64, userAgent string) {
+	ctx := context.Background()
+	hasTrashItems, err := c.TrashRepository.HasItems(ctx, userID)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"user_id": userID,
+		}).WithError(err).Error("Failed to determine trash state before sending first upload email")
+		return
+	}
+	if !hasTrashItems {
+		c.EmailNotificationCtrl.OnFirstFileUpload(userID, userAgent)
+		return
+	}
+	log.WithField("user_id", userID).Debug("Skipping first upload email because trash is not empty")
 }
 
 // Update verifies permissions and updates the specified file

@@ -344,6 +344,21 @@ func (t *TrashRepository) GetTimeStampForLatestNonDeletedEntry(userID int64) (*i
 	return updatedAt, stacktrace.Propagate(err, "")
 }
 
+// HasItems returns true if the user has any entries in trash.
+func (t *TrashRepository) HasItems(ctx context.Context, userID int64) (bool, error) {
+	row := t.DB.QueryRowContext(ctx, `
+		SELECT exists(
+			SELECT 1 FROM trash
+			WHERE user_id = $1
+		)`, userID)
+	var hasItems bool
+	err := row.Scan(&hasItems)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return hasItems, stacktrace.Propagate(err, "")
+}
+
 // GetUserIDToFileIDsMapForDeletion returns map of userID to fileIds, where the file ids which should be deleted by now
 func (t *TrashRepository) GetUserIDToFileIDsMapForDeletion() (map[int64][]int64, error) {
 	rows, err := t.DB.Query(`SELECT user_id, file_id FROM trash 
