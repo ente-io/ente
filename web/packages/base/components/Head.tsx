@@ -1,7 +1,12 @@
 import Head from "next/head";
 import React from "react";
 import { haveWindow } from "../env";
-import { albumsAppOrigin, isCustomAlbumsAppOrigin } from "../origins";
+import {
+    albumsAppOrigin,
+    isCustomAlbumsAppOrigin,
+    isCustomShareAppOrigin,
+    shareAppOrigin,
+} from "../origins";
 
 interface CustomHeadProps {
     title: string;
@@ -88,4 +93,49 @@ export const CustomHeadPhotosOrAlbums: React.FC<CustomHeadProps> = ({
         <CustomHead {...{ title }} />
     ) : (
         <CustomHeadAlbums />
+    );
+
+/**
+ * A static SSR-ed variant of {@link CustomHead} for use with the share app
+ * (Public Locker) deployed on production Ente instances for link previews.
+ *
+ * Similar to {@link CustomHeadAlbums}, this includes Open Graph meta tags with
+ * absolute URLs for social media preview images.
+ */
+export const CustomHeadShareStatic: React.FC = () => (
+    <Head>
+        <title>Ente Locker</title>
+        <link rel="icon" href="/images/favicon.png" type="image/png" />
+        <meta
+            name="description"
+            content="Securely store and share your documents"
+        />
+        <meta
+            property="og:image"
+            content="https://share.ente.io/images/preview.png"
+        />
+        <meta
+            name="twitter:image"
+            content="https://share.ente.io/images/preview.png"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+    </Head>
+);
+
+/**
+ * A convenience fan out to conditionally show one of {@link CustomHead} or
+ * {@link CustomHeadShareStatic}.
+ *
+ * This component defaults to {@link CustomHeadShareStatic} during SSR unless a
+ * custom endpoint is defined, and then does a client side update when it
+ * detects that the origin it is being served on is not the share origin.
+ */
+export const CustomHeadShare: React.FC<CustomHeadProps> = ({ title }) =>
+    isCustomShareAppOrigin ||
+    (haveWindow() &&
+        new URL(window.location.href).origin != shareAppOrigin()) ? (
+        <CustomHead {...{ title }} />
+    ) : (
+        <CustomHeadShareStatic />
     );

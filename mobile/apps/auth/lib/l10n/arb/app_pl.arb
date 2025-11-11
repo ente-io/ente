@@ -11,6 +11,7 @@
   "setupFirstAccount": "Skonfiguruj pierwsze konto",
   "importScanQrCode": "Zeskanuj kod QR",
   "qrCode": "Kod QR",
+  "qr": "QR",
   "importEnterSetupKey": "Wprowadź klucz",
   "importAccountPageTitle": "Wprowadź dane konta",
   "secretCanNotBeEmpty": "Sekret nie może być pusty",
@@ -139,6 +140,7 @@
   "existingUser": "Istniejący użytkownik",
   "newUser": "Nowy/a do Ente",
   "delete": "Usuń",
+  "addTag": "Dodaj etykietę",
   "enterYourPasswordHint": "Wprowadź swoje hasło",
   "forgotPassword": "Nie pamiętam hasła",
   "oops": "Ups",
@@ -301,6 +303,7 @@
   "checking": "Sprawdzanie...",
   "youAreOnTheLatestVersion": "Używasz najnowszej wersji",
   "warning": "Ostrzeżenie",
+  "note": "Notatka",
   "exportWarningDesc": "Wyeksportowany plik zawiera poufne informacje. Przechowuj go bezpiecznie.",
   "iUnderStand": "Rozumiem",
   "@iUnderStand": {
@@ -369,7 +372,7 @@
   "useOffline": "Używaj bez kopii zapasowych",
   "signInToBackup": "Zaloguj się, aby wykonać kopię zapasową swoich kodów",
   "singIn": "Zaloguj się",
-  "sigInBackupReminder": "Prosimy wyeksportować swoje kody, aby upewnić się, że masz kopię zapasową, z której możesz przywrócić swoje kody.",
+  "sigInBackupReminder": "Ente automatycznie wykona kopię zapasową kodów po zalogowaniu.\n\nNadal zalecamy eksport kodów jako dodatkową kopię zapasową.",
   "offlineModeWarning": "Zdecydowano się kontynuować bez kopii zapasowych. Prosimy wykonywać ręczne kopie zapasowe, aby upewnić się, że Twoje kody są bezpieczne.",
   "showLargeIcons": "Pokaż duże ikony",
   "compactMode": "Tryb kompaktowy",
@@ -546,5 +549,42 @@
   "couldNotDetermineLocation": "Nie można określić lokalizacji...",
   "saveBackup": "Zapisz kopię zapasową",
   "changeLocation": "Zmień lokalizację",
-  "changeCurrentLocation": "Zmień obecną lokalizację"
+  "changeCurrentLocation": "Zmień obecną lokalizację",
+  "done": "Gotowe",
+  "addNew": "Dodaj nowy",
+  "selected": "zaznaczone",
+  "moveMultipleToTrashMessage": "Czy na pewno chcesz przenieść do kosza elementy: {count}?",
+  "nSelected": "{count, plural, one {} few {{count} zaznaczone} many {{count} zaznaczonych}=1{1 zaznaczony} other{{count} zaznaczone}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, one {} few {Przypięto {count} elementy} many {Przypięto {count} elementów}=1{Przypięto 1 element} other{Przypięto {count} elementów}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, one {} few {Odpięto {count} elementy} many {Odpięto {count} elementów}=1{Odpięto 1 element} other{Odpięto {count} elementów}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

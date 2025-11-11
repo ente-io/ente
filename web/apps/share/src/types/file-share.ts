@@ -1,3 +1,11 @@
+export interface FileLinkMeta {
+    encryptedFileKey?: string;
+    encryptedFileKeyNonce?: string;
+    kdfNonce?: string;
+    kdfMemLimit?: number;
+    kdfOpsLimit?: number;
+}
+
 export interface FileLinkInfo {
     file?: {
         id?: number;
@@ -28,6 +36,7 @@ export interface FileLinkInfo {
         uploadedTime?: number;
     };
     ownerName?: string;
+    link?: FileLinkMeta;
 }
 
 export interface LockerInfoData {
@@ -68,3 +77,7 @@ export interface DecryptedFileInfo {
     lockerType?: string;
     lockerInfoData?: LockerInfoData;
 }
+
+export type LinkKeyMaterial =
+    | { type: "direct"; fileKey: string }
+    | { type: "secret"; passphrase: string };

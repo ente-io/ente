@@ -239,7 +239,7 @@ class FileUploader {
           await _tryToUpload(file, collection, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
-          final message = "Upload timed out for file $file";
+          final message = "Upload timed out for file ${basename(file.path)}";
           _logger.warning(message);
           throw TimeoutException(message);
         },
@@ -318,7 +318,7 @@ class FileUploader {
     try {
       _logger.info(
         'starting ${forcedUpload ? 'forced' : ''} '
-        'upload of ${file.toString()}',
+        'upload of ${basename(file.path)}',
       );
 
       Uint8List? key;
@@ -464,10 +464,10 @@ class FileUploader {
           e is SilentlyCancelUploadsError ||
           e is InvalidFileError ||
           e is FileTooLargeForPlanError)) {
-        _logger.severe("File upload failed for $file", e, s);
+        _logger.severe("File upload failed for ${basename(file.path)}", e, s);
       }
       if (e is InvalidFileError) {
-        _logger.severe("File upload ignored for $file", e);
+        _logger.severe("File upload ignored for ${basename(file.path)}", e);
       }
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||

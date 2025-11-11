@@ -153,13 +153,13 @@ class InfoFileService {
     switch (infoItem.type) {
       case InfoType.note:
         final noteData = infoItem.data as PersonalNoteData;
-        return noteData.title.isNotEmpty ? noteData.title : 'Personal Note';
+        return noteData.title.isNotEmpty ? noteData.title : 'Note';
       case InfoType.physicalRecord:
         final recordData = infoItem.data as PhysicalRecordData;
-        return recordData.name.isNotEmpty ? recordData.name : 'Physical Record';
+        return recordData.name.isNotEmpty ? recordData.name : 'Location';
       case InfoType.accountCredential:
         final credData = infoItem.data as AccountCredentialData;
-        return credData.name.isNotEmpty ? credData.name : 'Account Credential';
+        return credData.name.isNotEmpty ? credData.name : 'Secret';
       case InfoType.emergencyContact:
         final contactData = infoItem.data as EmergencyContactData;
         return contactData.name.isNotEmpty

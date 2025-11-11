@@ -158,6 +158,7 @@
     "logout": "Αποσυνδέση",
     "logout_message": "Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;",
     "delete_account": "Διαγραφή λογαριασμού",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "",
     "change_email": "Αλλαγή διεύθυνσης ηλ. ταχυδρομείου",
     "ok": "ΟΚ",

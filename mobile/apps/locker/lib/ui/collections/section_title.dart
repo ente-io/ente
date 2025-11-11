@@ -36,25 +36,38 @@ class SectionOptions extends StatelessWidget {
   final Widget title;
   final Widget? trailingWidget;
   final VoidCallback? onTap;
+  final String? body;
 
   const SectionOptions(
     this.title, {
     this.trailingWidget,
     super.key,
+    this.body,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     if (trailingWidget != null) {
+      final hasBody = body != null && body!.isNotEmpty;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            title,
-            trailingWidget!,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                title,
+                trailingWidget!,
+              ],
+            ),
+            if (hasBody)
+              Text(
+                body!,
+                style: getEnteTextTheme(context).bodyMuted,
+              ),
           ],
         ),
       );

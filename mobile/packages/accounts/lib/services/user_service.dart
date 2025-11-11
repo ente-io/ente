@@ -131,6 +131,14 @@ class UserService {
             context.strings.emailNotRegistered,
           ),
         );
+      }  else if (enteErrCode != null && enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.strings.oops,
+            "Registration is temporarily paused",
+          ),
+        );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showErrorDialog(

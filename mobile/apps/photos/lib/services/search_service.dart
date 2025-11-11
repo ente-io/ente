@@ -64,6 +64,7 @@ class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
   Future<List<EnteFile>>? _cachedFilesForSearch;
   Future<List<EnteFile>>? _cachedFilesForHierarchicalSearch;
+  Future<List<EnteFile>>? _cachedFilesForGenericGallery;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
@@ -80,6 +81,7 @@ class SearchService {
       _cachedFilesFuture = null;
       _cachedFilesForSearch = null;
       _cachedFilesForHierarchicalSearch = null;
+      _cachedFilesForGenericGallery = null;
       _cachedHiddenFilesFuture = null;
     });
   }
@@ -140,6 +142,32 @@ class SearchService {
     return _cachedFilesForHierarchicalSearch!;
   }
 
+  Future<List<EnteFile>> getAllFilesForGenericGallery() async {
+    if (_cachedFilesFuture != null && _cachedFilesForGenericGallery != null) {
+      return _cachedFilesForGenericGallery!;
+    }
+
+    if (_cachedFilesFuture == null) {
+      _logger.info("Reading all files from db");
+      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+        ignoreCollections(),
+        dedupeByUploadId: false,
+      );
+    }
+
+    _cachedFilesForGenericGallery = _cachedFilesFuture!.then((files) {
+      return applyDBFilters(
+        files,
+        DBFilterOptions(
+          dedupeUploadID: true,
+          onlyUploadedFiles: true,
+        ),
+      );
+    });
+
+    return _cachedFilesForGenericGallery!;
+  }
+
   Future<List<EnteFile>> getHiddenFiles() async {
     if (_cachedHiddenFilesFuture != null) {
       return _cachedHiddenFilesFuture!;
@@ -156,6 +184,7 @@ class SearchService {
     _cachedFilesFuture = null;
     _cachedFilesForSearch = null;
     _cachedFilesForHierarchicalSearch = null;
+    _cachedFilesForGenericGallery = null;
     _cachedHiddenFilesFuture = null;
     unawaited(memoriesCacheService.clearMemoriesCache());
   }

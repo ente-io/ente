@@ -1,10 +1,7 @@
 import "package:flutter/material.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/wrapped/models.dart";
-import "package:photos/services/wrapped/wrapped_service.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/notification/toast.dart";
-import "package:photos/ui/wrapped/wrapped_viewer_page.dart";
+import "package:photos/services/wrapped/wrapped_service.dart"
+    show WrappedEntryState;
+import "package:photos/ui/wrapped/wrapped_rewind_banner_button.dart";
 
 class WrappedDiscoverySection extends StatelessWidget {
   const WrappedDiscoverySection({
@@ -16,97 +13,44 @@ class WrappedDiscoverySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
     final bool hasProgress = state.resumeIndex > 0 &&
         state.resumeIndex < (state.result?.cards.length ?? 0);
-    final String subtitle = state.isComplete
-        ? "Replay the full story."
-        : hasProgress
-            ? "Resume from where you left off."
-            : "Highlights from your 2025.";
+    final String semanticsLabel = hasProgress && !state.isComplete
+        ? "Resume Ente Rewind 2025"
+        : "Open Ente Rewind 2025";
+
+    const double bleed = 12;
+    const double bannerHeight = 164;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Ente Rewind",
-            style: textTheme.largeBold,
-          ),
-          const SizedBox(height: 12),
-          Material(
-            color: colorScheme.backgroundElevated,
-            borderRadius: BorderRadius.circular(18),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
-              onTap: () => _handleTap(context),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.play_circle_fill_rounded,
-                      color: colorScheme.primary500,
-                      size: 36,
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            state.isComplete
-                                ? "Watch again"
-                                : hasProgress
-                                    ? "Continue watching"
-                                    : "View your recap",
-                            style: textTheme.largeBold,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            subtitle,
-                            style: textTheme.smallMuted,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorScheme.textMuted,
-                    ),
-                  ],
+      padding: const EdgeInsets.only(top: 16, bottom: 4),
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double baseWidth =
+              constraints.hasBoundedWidth && constraints.maxWidth.isFinite
+                  ? constraints.maxWidth
+                  : MediaQuery.sizeOf(context).width;
+          final double targetWidth = baseWidth + bleed * 2;
+
+          return SizedBox(
+            height: bannerHeight,
+            child: OverflowBox(
+              alignment: Alignment.center,
+              minWidth: targetWidth,
+              maxWidth: targetWidth,
+              minHeight: bannerHeight,
+              maxHeight: bannerHeight,
+              child: SizedBox(
+                width: targetWidth,
+                height: bannerHeight,
+                child: WrappedRewindBannerButton(
+                  height: bannerHeight,
+                  semanticsLabel: semanticsLabel,
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _handleTap(BuildContext context) {
-    WrappedEntryState currentState = wrappedService.state;
-    final WrappedResult? result = currentState.result;
-    if (result == null || result.cards.isEmpty) {
-      showShortToast(context, "Ente Rewind isn't ready yet");
-      return;
-    }
-    final int cardCount = result.cards.length;
-    if (cardCount > 1 &&
-        currentState.resumeIndex >= cardCount - 1 &&
-        currentState.resumeIndex != 0) {
-      wrappedService.updateResumeIndex(0);
-      currentState = wrappedService.state;
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) =>
-            WrappedViewerPage(initialState: currentState),
+          );
+        },
       ),
     );
   }

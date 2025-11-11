@@ -10,7 +10,8 @@
   "onBoardingGetStarted": "Premiers pas",
   "setupFirstAccount": "Configurez votre premier compte",
   "importScanQrCode": "Scannez un QR Code",
-  "qrCode": "QR Code",
+  "qrCode": "QR code",
+  "qr": "QR",
   "importEnterSetupKey": "Saisir une clé de configuration",
   "importAccountPageTitle": "Saisir les détails du compte",
   "secretCanNotBeEmpty": "La clé secrète ne peut pas être vide",
@@ -139,6 +140,7 @@
   "existingUser": "Utilisateur existant",
   "newUser": "Nouveau dans Ente",
   "delete": "Supprimer",
+  "addTag": "Ajouter une étiquette",
   "enterYourPasswordHint": "Entrez votre mot de passe",
   "forgotPassword": "Mot de passe oublié",
   "oops": "Oups",
@@ -301,6 +303,7 @@
   "checking": "Vérification...",
   "youAreOnTheLatestVersion": "Vous êtes sur la dernière version",
   "warning": "Attention",
+  "note": "Note",
   "exportWarningDesc": "Le fichier exporté contient des informations sensibles. Veuillez le stocker en toute sécurité.",
   "iUnderStand": "J’ai compris",
   "@iUnderStand": {
@@ -369,7 +372,7 @@
   "useOffline": "Utiliser sans sauvegardes",
   "signInToBackup": "Connectez-vous pour sauvegarder vos codes",
   "singIn": "Se connecter",
-  "sigInBackupReminder": "Veuillez exporter vos codes pour vous assurer que vous avez une sauvegarde à partir de laquelle vous pouvez restaurer.",
+  "sigInBackupReminder": "Ente sauvegardera automatiquement les codes après la connexion.\n\nNous recommandons toujours d'exporter les codes comme une sauvegarde supplémentaire.",
   "offlineModeWarning": "Vous avez choisi de procéder sans sauvegarde. Veuillez prendre des sauvegardes manuelles pour vous assurer que vos codes sont sûrs.",
   "showLargeIcons": "Afficher les grandes icônes",
   "compactMode": "Mode compact",
@@ -546,5 +549,42 @@
   "couldNotDetermineLocation": "Impossible de déterminer l'emplacement...",
   "saveBackup": "Enregistrer la sauvegarde",
   "changeLocation": "Changer l'emplacement",
-  "changeCurrentLocation": "Changer l'emplacement actuel"
+  "changeCurrentLocation": "Changer l'emplacement actuel",
+  "done": "Terminé",
+  "addNew": "Ajouter un nouveau",
+  "selected": "Sélectionné",
+  "moveMultipleToTrashMessage": "Êtes-vous sûr de vouloir déplacer {count} éléments vers la corbeille ?",
+  "nSelected": "{count, plural, one {}=1{1 sélectionné} other{{count} sélectionné}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, one {}=1{Épinglé 1 élément} other{Épinglé {count} objets}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, one {}=1{Désépinglé 1 élément} other{Désépinglé {count} objets}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

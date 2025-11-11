@@ -1,6 +1,4 @@
-import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/models/button_type.dart';
-import 'package:ente_ui/components/text_input_widget.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -8,7 +6,9 @@ import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
-import 'package:locker/utils/file_icon_utils.dart';
+import 'package:locker/ui/components/form_text_input_widget.dart';
+import "package:locker/ui/components/gradient_button.dart";
+import 'package:locker/utils/collection_list_util.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
 
 class FileEditDialogResult {
@@ -26,11 +26,13 @@ class FileEditDialogResult {
 class FileEditDialog extends StatefulWidget {
   final EnteFile file;
   final List<Collection> collections;
+  final BuildContext snackBarContext;
 
   const FileEditDialog({
     super.key,
     required this.file,
     required this.collections,
+    required this.snackBarContext,
   });
 
   @override
@@ -47,26 +49,44 @@ class _FileEditDialogState extends State<FileEditDialog> {
   void initState() {
     super.initState();
 
-    _availableCollections = List.from(widget.collections);
+    _availableCollections = _filterCollections(widget.collections);
 
     _titleController.text = widget.file.displayName;
 
     _captionController.text = widget.file.caption ?? '';
 
-    CollectionService.instance
-        .getCollectionsForFile(widget.file)
-        .then((fileCollections) {
-      for (final collection in fileCollections) {
-        _selectedCollectionIds.add(collection.id);
+    _initializeSelections();
+  }
+
+  Future<void> _initializeSelections() async {
+    try {
+      final existingCollections =
+          await CollectionService.instance.getCollectionsForFile(widget.file);
+
+      if (!mounted) {
+        return;
       }
-      setState(() {});
-    });
+
+      setState(() {
+        _selectedCollectionIds
+          ..clear()
+          ..addAll(
+            existingCollections
+                .where(
+                  (collection) =>
+                      collection.type != CollectionType.uncategorized,
+                )
+                .map((collection) => collection.id),
+          );
+      });
+    } catch (_) {
+      // Ignore failures; selections will remain empty.
+    }
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _captionController.dispose();
     super.dispose();
   }
 
@@ -82,8 +102,18 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
   void _onCollectionsUpdated(List<Collection> updatedCollections) {
     setState(() {
-      _availableCollections = updatedCollections;
+      _availableCollections = _filterCollections(updatedCollections);
+      _selectedCollectionIds
+          .removeWhere((id) => !_availableCollections.any((c) => c.id == id));
     });
+  }
+
+  List<Collection> _filterCollections(List<Collection> source) {
+    final filtered = uniqueCollectionsById(source)
+      ..removeWhere(
+        (collection) => collection.type == CollectionType.uncategorized,
+      );
+    return filtered;
   }
 
   Future<void> _onCancel() async {
@@ -97,8 +127,8 @@ class _FileEditDialogState extends State<FileEditDialog> {
 
     if (selectedCollections.isEmpty) {
       SnackBarUtils.showWarningSnackBar(
-        context,
-        context.l10n.pleaseSelectAtLeastOneCollection,
+        widget.snackBarContext,
+        widget.snackBarContext.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -112,104 +142,93 @@ class _FileEditDialogState extends State<FileEditDialog> {
     Navigator.of(context).pop(result);
   }
 
-  String get _fileName {
-    return widget.file.displayName;
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
     return Dialog(
-      backgroundColor: colorScheme.backgroundElevated,
+      backgroundColor: colorScheme.backgroundElevated2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Container(
-        width: 400,
-        constraints: const BoxConstraints(maxHeight: 600),
-        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  FileIconUtils.getFileIcon(_fileName),
-                  color: FileIconUtils.getFileIconColor(_fileName),
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    _fileName,
-                    style: textTheme.largeBold,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TitleBarTitleWidget(
+                        title: context.l10n.editItem,
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: _onCancel,
+                  child: Container(
+                    height: 36,
+                    width: 36,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.backgroundElevated,
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Title',
-              style: textTheme.small.copyWith(
-                color: colorScheme.textBase,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextInputWidget(
-              hintText: context.l10n.fileTitle,
-              initialValue: _titleController.text,
-              onChange: (value) => _titleController.text = value,
+            const SizedBox(height: 24),
+            FormTextInputWidget(
+              controller: _titleController,
+              labelText: context.l10n.title,
+              hintText: context.l10n.enterNewTitle,
               maxLength: 200,
-              textCapitalization: TextCapitalization.words,
+              shouldUseTextInputWidget: false,
             ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.note,
-              style: textTheme.small.copyWith(
-                color: colorScheme.textBase,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextInputWidget(
-              hintText: context.l10n.optionalNote,
-              initialValue: _captionController.text,
-              onChange: (value) => _captionController.text = value,
-              maxLength: 500,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             CollectionSelectionWidget(
               collections: _availableCollections,
               selectedCollectionIds: _selectedCollectionIds,
               onToggleCollection: _toggleCollection,
               onCollectionsUpdated: _onCollectionsUpdated,
+              titleWidget: Text(
+                context.l10n.collections,
+                style: textTheme.body.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Flexible(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.secondary,
-                    labelText: context.l10n.cancel,
-                    onTap: _onCancel,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Flexible(
-                  child: ButtonWidget(
-                    buttonType: ButtonType.primary,
-                    labelText: context.l10n.save,
-                    onTap: _onSave,
-                    isDisabled: _selectedCollectionIds.isEmpty,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: GradientButton(
+                onTap: () async {
+                  await _onSave();
+                },
+                text: context.l10n.save,
+              ),
             ),
           ],
         ),
@@ -222,13 +241,14 @@ Future<FileEditDialogResult?> showFileEditDialog(
   BuildContext context, {
   required EnteFile file,
   required List<Collection> collections,
+  BuildContext? snackBarContext,
 }) async {
   return showDialog<FileEditDialogResult>(
     context: context,
-    barrierColor: getEnteColorScheme(context).backdropBase,
-    builder: (context) => FileEditDialog(
+    builder: (dialogContext) => FileEditDialog(
       file: file,
       collections: collections,
+      snackBarContext: snackBarContext ?? context,
     ),
   );
 }

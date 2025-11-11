@@ -142,8 +142,14 @@ class IconUtils {
           providerTitle.toUpperCase()[0],
           // fixed color
           style: showLargeIcon
-              ? getEnteTextTheme(context).h3Bold.copyWith(color: Colors.white)
-              : getEnteTextTheme(context).body.copyWith(color: Colors.white),
+              ? getEnteTextTheme(context).h3Bold.copyWith(
+                    color: Colors.white,
+                    fontSize: width * 0.6,
+                  )
+              : getEnteTextTheme(context).body.copyWith(
+                    color: Colors.white,
+                    fontSize: width * 0.6,
+                  ),
         ),
       );
     } else {

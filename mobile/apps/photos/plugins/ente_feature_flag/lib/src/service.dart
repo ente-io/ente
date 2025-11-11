@@ -52,7 +52,7 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
-  bool get enteWrapped => internalUser;
+  bool get enteWrapped => false; // TODO: lau: set to true before December release
 
   bool get isBetaUser => internalUser || flags.betaUser;
 
@@ -79,7 +79,7 @@ class FlagService {
 
   bool get useNativeVideoEditor => true;
 
-  bool get useWidgetV2 => kDebugMode;
+  bool get useWidgetV2 => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

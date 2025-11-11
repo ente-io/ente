@@ -1,20 +1,22 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
+import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
-import 'package:ente_auth/ui/components/bottom_action_bar_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
@@ -22,6 +24,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +38,8 @@ class CodeWidget extends StatefulWidget {
   final bool isCompactMode;
   final CodeSortKey? sortKey;
   final bool isReordering;
+  final bool enableDesktopContextActions;
+  final List<Code> Function()? selectedCodesBuilder;
 
   const CodeWidget(
     this.code, {
@@ -42,6 +47,8 @@ class CodeWidget extends StatefulWidget {
     required this.isCompactMode,
     this.sortKey,
     this.isReordering = false,
+    this.enableDesktopContextActions = false,
+    this.selectedCodesBuilder,
   });
 
   @override
@@ -68,8 +75,9 @@ class _CodeWidgetState extends State<CodeWidget> {
     isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
 
     _hideCode = isMaskingEnabled;
-    _everySecondTimer =
-        Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
+    _everySecondTimer = Timer.periodic(const Duration(milliseconds: 500), (
+      Timer t,
+    ) {
       int newStep = 0;
       int epochSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (widget.code.type != Type.hotp) {
@@ -104,7 +112,6 @@ class _CodeWidgetState extends State<CodeWidget> {
   @override
   Widget build(BuildContext context) {
     ignorePin = widget.sortKey != null && widget.sortKey == CodeSortKey.manual;
-    final colorScheme = getEnteColorScheme(context);
     if (isMaskingEnabled != PreferenceService.instance.shouldHideCodes()) {
       isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
       _hideCode = isMaskingEnabled;
@@ -119,16 +126,18 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     final l10n = context.l10n;
 
-    Widget getCardContents(AppLocalizations l10n) {
+    Widget getCardContents(AppLocalizations l10n, {required bool isSelected}) {
+      final colorScheme = getEnteColorScheme(context);
+      final isSelectionActive =
+          CodeDisplayStore.instance.isSelectionModeActive.value;
+
       return Stack(
         children: [
           if (!ignorePin && widget.code.isPinned)
             Align(
               alignment: Alignment.topRight,
               child: CustomPaint(
-                painter: PinBgPainter(
-                  color: colorScheme.pinnedBgColor,
-                ),
+                painter: PinBgPainter(color: colorScheme.pinnedBgColor),
                 size: widget.isCompactMode
                     ? const Size(24, 24)
                     : const Size(39, 39),
@@ -138,9 +147,7 @@ class _CodeWidgetState extends State<CodeWidget> {
             Align(
               alignment: Alignment.topLeft,
               child: CustomPaint(
-                painter: PinBgPainter(
-                  color: colorScheme.warning700,
-                ),
+                painter: PinBgPainter(color: colorScheme.warning700),
                 size: const Size(39, 39),
               ),
             ),
@@ -149,12 +156,26 @@ class _CodeWidgetState extends State<CodeWidget> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (widget.code.type.isTOTPCompatible)
-                CodeTimerProgress(
-                  key: ValueKey('period_${widget.code.period}'),
-                  period: widget.code.period,
-                  isCompactMode: widget.isCompactMode,
-                  timeOffsetInMilliseconds:
-                      PreferenceService.instance.timeOffsetInMilliSeconds(),
+                SizedBox(
+                  height: widget.isCompactMode ? 1 : 3,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    switchInCurve: Curves.easeIn,
+                    switchOutCurve: Curves.easeOut,
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                    child: isSelectionActive
+                        ? const SizedBox.shrink()
+                        : CodeTimerProgress(
+                            key: ValueKey('period_${widget.code.period}'),
+                            period: widget.code.period,
+                            isCompactMode: widget.isCompactMode,
+                            timeOffsetInMilliseconds: PreferenceService.instance
+                                .timeOffsetInMilliSeconds(),
+                          ),
+                  ),
                 ),
               widget.isCompactMode
                   ? const SizedBox(height: 4)
@@ -165,7 +186,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   Expanded(
                     child: Column(
                       children: [
-                        _getTopRow(),
+                        _getTopRow(isSelected: isSelected),
                         widget.isCompactMode
                             ? const SizedBox.shrink()
                             : const SizedBox(height: 4),
@@ -200,58 +221,84 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
 
     Widget clippedCard(AppLocalizations l10n) {
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-          boxShadow:
-              widget.code.isPinned ? colorScheme.pinnedCardBoxShadow : [],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              customBorder: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+      final colorScheme = getEnteColorScheme(context);
+
+      return ValueListenableBuilder<Set<String>>(
+        valueListenable: CodeDisplayStore.instance.selectedCodeIds,
+        builder: (context, selectedIds, child) {
+          final isSelected = selectedIds.contains(widget.code.selectionKey);
+
+          return Stack(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: isSelected
+                      ? colorScheme.primary400.withValues(alpha: 0.10)
+                      : Theme.of(context).colorScheme.codeCardBackgroundColor,
+                  boxShadow: (widget.code.isPinned && !isSelected)
+                      ? colorScheme.pinnedCardBoxShadow
+                      : [],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onTap: () {
+                        final store = CodeDisplayStore.instance;
+                        if (store.isSelectionModeActive.value) {
+                          store.toggleSelection(widget.code.selectionKey);
+                        } else {
+                          _copyCurrentOTPToClipboard();
+                        }
+                      },
+                      onDoubleTap: isMaskingEnabled
+                          ? () {
+                              setState(() {
+                                _hideCode = !_hideCode;
+                              });
+                            }
+                          : null,
+                      onLongPress: widget.isReordering
+                          ? null
+                          : () {
+                              CodeDisplayStore.instance.toggleSelection(
+                                widget.code.selectionKey,
+                              );
+                            },
+                      child: getCardContents(l10n, isSelected: isSelected),
+                    ),
+                  ),
+                ),
               ),
-              onTap: () {
-                _copyCurrentOTPToClipboard();
-              },
-              onDoubleTap: isMaskingEnabled
-                  ? () {
-                      setState(
-                        () {
-                          _hideCode = !_hideCode;
-                        },
-                      );
-                    }
-                  : null,
-              onLongPress: widget.isReordering
-                  ? null
-                  : () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (_) {
-                          return BottomActionBarWidget(
-                            code: widget.code,
-                            showPin: !ignorePin,
-                            onEdit: () => _onEditPressed(true),
-                            onShare: () => _onSharePressed(true),
-                            onPin: () => _onPinPressed(true),
-                            onTrashed: () => _onTrashPressed(true),
-                            onDelete: () => _onDeletePressed(true),
-                            onRestore: () => _onRestoreClicked(true),
-                            onShowQR: () => _onShowQrPressed(true),
-                            onCancel: () => Navigator.of(context).pop(),
-                          );
-                        },
-                      );
-                    },
-              child: getCardContents(l10n),
-            ),
-          ),
-        ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeInOut,
+                    opacity: isSelected ? 1 : 0,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: colorScheme.primary400,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       );
     }
 
@@ -262,64 +309,23 @@ class _CodeWidgetState extends State<CodeWidget> {
       child: Builder(
         builder: (context) {
           if (PlatformUtil.isDesktop()) {
-            return ContextMenuRegion(
-              contextMenu: ContextMenu(
-                entries: <ContextMenuEntry>[
-                  if (!widget.code.isTrashed &&
-                      widget.code.type.isTOTPCompatible)
-                    MenuItem(
-                      label: context.l10n.share,
-                      icon: Icons.adaptive.share_outlined,
-                      onSelected: () => _onSharePressed(null),
-                    ),
-                  if (!widget.code.isTrashed)
-                    MenuItem(
-                      label: 'QR',
-                      icon: Icons.qr_code_2_outlined,
-                      onSelected: () => _onShowQrPressed(null),
-                    ),
-                  if (widget.code.note.isNotEmpty)
-                    MenuItem(
-                      label: context.l10n.notes,
-                      icon: Icons.notes_outlined,
-                      onSelected: () => _onShowNotesPressed(null),
-                    ),
-                  if (!widget.code.isTrashed && !ignorePin)
-                    MenuItem(
-                      label:
-                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                      icon: widget.code.isPinned
-                          ? Icons.push_pin
-                          : Icons.push_pin_outlined,
-                      onSelected: () => _onPinPressed(null),
-                    ),
-                  if (!widget.code.isTrashed)
-                    MenuItem(
-                      label: l10n.edit,
-                      icon: Icons.edit,
-                      onSelected: () => _onEditPressed(null),
-                    )
-                  else
-                    MenuItem(
-                      label: l10n.restore,
-                      icon: Icons.restore_outlined,
-                      onSelected: () => _onRestoreClicked(null),
-                    ),
-                  const MenuDivider(),
-                  MenuItem(
-                    label: widget.code.isTrashed ? l10n.delete : l10n.trash,
-                    value: "Delete",
-                    icon: widget.code.isTrashed
-                        ? Icons.delete_forever
-                        : Icons.delete,
-                    onSelected: () => widget.code.isTrashed
-                        ? _onDeletePressed(null)
-                        : _onTrashPressed(null),
+            return ValueListenableBuilder<Set<String>>(
+              valueListenable: CodeDisplayStore.instance.selectedCodeIds,
+              builder: (context, selectedIds, _) {
+                final menuEntries = _buildContextMenuEntries(
+                  context,
+                  l10n,
+                  selectedIds,
+                );
+
+                return ContextMenuRegion(
+                  contextMenu: ContextMenu(
+                    entries: menuEntries,
+                    padding: const EdgeInsets.all(8.0),
                   ),
-                ],
-                padding: const EdgeInsets.all(8.0),
-              ),
-              child: clippedCard(l10n),
+                  child: clippedCard(l10n),
+                );
+              },
             );
           }
 
@@ -354,10 +360,42 @@ class _CodeWidgetState extends State<CodeWidget> {
           ),
           const SizedBox(width: 8),
           widget.code.type.isTOTPCompatible
-              ? GestureDetector(
-                  onTap: () {
-                    _copyNextToClipboard();
-                  },
+              ? IgnorePointer(
+                  ignoring:
+                      CodeDisplayStore.instance.isSelectionModeActive.value,
+                  child: GestureDetector(
+                    onTap: () {
+                      _copyNextToClipboard();
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          l10n.nextTotpTitle,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        ValueListenableBuilder<String>(
+                          valueListenable: _nextCode,
+                          builder: (context, value, child) {
+                            return Material(
+                              type: MaterialType.transparency,
+                              child: Text(
+                                _getFormattedCode(value),
+                                style: TextStyle(
+                                  fontSize: widget.isCompactMode ? 12 : 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : IgnorePointer(
+                  ignoring:
+                      CodeDisplayStore.instance.isSelectionModeActive.value,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -383,31 +421,25 @@ class _CodeWidgetState extends State<CodeWidget> {
                       ),
                     ],
                   ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      l10n.nextTotpTitle,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    InkWell(
-                      onTap: _onNextHotpTapped,
-                      child: const Icon(
-                        Icons.forward_outlined,
-                        size: 32,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
                 ),
         ],
       ),
     );
   }
 
-  Widget _getTopRow() {
-    bool isCompactMode = widget.isCompactMode;
+  Widget _getTopRow({required bool isSelected}) {
+    final colorScheme = getEnteColorScheme(context);
+    final bool isCompactMode = widget.isCompactMode;
+    final double indicatorSize = isCompactMode ? 16 : 20;
+    const double indicatorPadding = 4;
+    final double indicatorSlotWidth = indicatorSize + indicatorPadding;
+    final TextStyle? issuerStyle = isCompactMode
+        ? Theme.of(context).textTheme.bodyMedium
+        : Theme.of(context).textTheme.titleLarge;
+    final double issuerLineHeight =
+        (issuerStyle?.fontSize ?? 16) * (issuerStyle?.height ?? 1.0);
+    final double rowHeight = math.max(issuerLineHeight, indicatorSize);
+
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
@@ -417,11 +449,72 @@ class _CodeWidgetState extends State<CodeWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  safeDecode(widget.code.issuer).trim(),
-                  style: isCompactMode
-                      ? Theme.of(context).textTheme.bodyMedium
-                      : Theme.of(context).textTheme.titleLarge,
+                SizedBox(
+                  height: rowHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        curve: Curves.easeInOut,
+                        width: isSelected ? indicatorSlotWidth : 0,
+                        height: rowHeight,
+                        alignment: Alignment.centerLeft,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          switchInCurve: Curves.easeIn,
+                          switchOutCurve: Curves.easeOut,
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(
+                            opacity: animation,
+                            child:
+                                ScaleTransition(scale: animation, child: child),
+                          ),
+                          child: isSelected
+                              ? Align(
+                                  key: const ValueKey('selected-indicator'),
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      right: indicatorPadding,
+                                    ),
+                                    child: SizedBox(
+                                      width: indicatorSize,
+                                      height: indicatorSize,
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.circle,
+                                            color: colorScheme.primary400,
+                                            size: indicatorSize,
+                                          ),
+                                          Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                            size: isCompactMode ? 8 : 12,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            safeDecode(widget.code.issuer).trim(),
+                            style: issuerStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 if (!isCompactMode) const SizedBox(height: 2),
                 Text(
@@ -430,6 +523,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                         fontSize: isCompactMode ? 12 : 12,
                         color: Colors.grey,
                       ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -453,6 +548,247 @@ class _CodeWidgetState extends State<CodeWidget> {
         ],
       ),
     );
+  }
+
+  List<ContextMenuEntry> _buildContextMenuEntries(
+    BuildContext context,
+    AppLocalizations l10n,
+    Set<String> selectedIds,
+  ) {
+    if (!widget.enableDesktopContextActions) {
+      return _buildSingleSelectionMenu(l10n);
+    }
+
+    final multiEntries = _buildMultiSelectionContextMenu(l10n, selectedIds);
+    if (multiEntries != null) {
+      return multiEntries;
+    }
+
+    return _buildSingleSelectionMenu(l10n);
+  }
+
+  List<ContextMenuEntry> _buildSingleSelectionMenu(AppLocalizations l10n) {
+    final entries = <ContextMenuEntry>[];
+
+    _addNonTrashedMenuItems(entries, l10n);
+    _addEditOrRestoreMenuItem(entries, l10n);
+    entries.add(const MenuDivider());
+    _addDeleteOrTrashMenuItem(entries, l10n);
+
+    return entries;
+  }
+
+  /// Adds menu items for non-trashed codes (share, QR, tag, notes, pin).
+  void _addNonTrashedMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    if (widget.code.isTrashed) return;
+
+    if (widget.code.type.isTOTPCompatible) {
+      entries.add(
+        MenuItem(
+          label: l10n.share,
+          icon: Icons.adaptive.share_outlined,
+          onSelected: () => _onSharePressed(null),
+        ),
+      );
+    }
+
+    entries.add(
+      MenuItem(
+        label: l10n.qr,
+        icon: Icons.qr_code_2_outlined,
+        onSelected: () => _onShowQrPressed(null),
+      ),
+    );
+
+    entries.add(
+      MenuItem(
+        label: l10n.addTag,
+        icon: Icons.local_offer_outlined,
+        onSelected: () {
+          CodeDisplayStore.instance.selectedCodeIds.value = {
+            widget.code.selectionKey,
+          };
+          _triggerMultiAction(MultiSelectAction.addTag);
+        },
+      ),
+    );
+
+    if (widget.code.note.isNotEmpty) {
+      entries.add(
+        MenuItem(
+          label: l10n.notes,
+          icon: Icons.notes_outlined,
+          onSelected: () => _onShowNotesPressed(null),
+        ),
+      );
+    }
+
+    if (!ignorePin) {
+      entries.add(
+        MenuItem(
+          label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+          icon: widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+          onSelected: () => _onPinPressed(null),
+        ),
+      );
+    }
+  }
+
+  /// Adds edit menu item for non-trashed codes or restore for trashed codes.
+  void _addEditOrRestoreMenuItem(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    if (!widget.code.isTrashed) {
+      entries.add(
+        MenuItem(
+          label: l10n.edit,
+          icon: Icons.edit,
+          onSelected: () => _onEditPressed(null),
+        ),
+      );
+    } else {
+      entries.add(
+        MenuItem(
+          label: l10n.restore,
+          icon: Icons.restore_outlined,
+          onSelected: () => _onRestoreClicked(null),
+        ),
+      );
+    }
+  }
+
+  /// Adds delete (forever) or trash menu item based on code state.
+  void _addDeleteOrTrashMenuItem(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: widget.code.isTrashed ? l10n.delete : l10n.trash,
+        value: l10n.delete,
+        icon: widget.code.isTrashed ? Icons.delete_forever : Icons.delete,
+        onSelected: () => widget.code.isTrashed
+            ? _onDeletePressed(null)
+            : _onTrashPressed(null),
+      ),
+    );
+  }
+
+  List<ContextMenuEntry>? _buildMultiSelectionContextMenu(
+    AppLocalizations l10n,
+    Set<String> selectedIds,
+  ) {
+    if (selectedIds.length <= 1 ||
+        !selectedIds.contains(widget.code.selectionKey)) {
+      return null;
+    }
+
+    final selectedCodes = widget.selectedCodesBuilder?.call() ?? const <Code>[];
+    if (selectedCodes.isEmpty) {
+      return null;
+    }
+
+    final entries = <ContextMenuEntry>[];
+    final bool allTrashed = selectedCodes.every((code) => code.isTrashed);
+
+    if (allTrashed) {
+      _addTrashedMultiSelectMenuItems(entries, l10n);
+      return entries.isEmpty ? null : entries;
+    }
+
+    _addPinMenuItems(entries, l10n, selectedCodes);
+    _addTagAndTrashMenuItems(entries, l10n);
+
+    return entries.isEmpty ? null : entries;
+  }
+
+  /// Adds menu items for multi-selected trashed codes (restore, delete).
+  void _addTrashedMultiSelectMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: l10n.restore,
+        icon: Icons.restore_outlined,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.restore),
+      ),
+    );
+    entries.add(
+      MenuItem(
+        label: l10n.delete,
+        icon: Icons.delete_forever,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.deleteForever),
+      ),
+    );
+  }
+
+  /// Adds pin/unpin menu items based on selection pin state.
+  void _addPinMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+    List<Code> selectedCodes,
+  ) {
+    final bool allPinned = selectedCodes.every((code) => code.isPinned);
+    final bool anyPinned = selectedCodes.any((code) => code.isPinned);
+    final bool isMixedPinned = anyPinned && !allPinned;
+
+    if (isMixedPinned) {
+      // Show both pin and unpin options for mixed state
+      entries.add(
+        MenuItem(
+          label: l10n.pinText,
+          icon: Icons.push_pin_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.pinToggle),
+        ),
+      );
+      entries.add(
+        MenuItem(
+          label: l10n.unpinText,
+          icon: Icons.push_pin,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.unpin),
+        ),
+      );
+    } else {
+      // Show single toggle option for uniform state
+      entries.add(
+        MenuItem(
+          label: allPinned ? l10n.unpinText : l10n.pinText,
+          icon: allPinned ? Icons.push_pin : Icons.push_pin_outlined,
+          onSelected: () => _triggerMultiAction(MultiSelectAction.pinToggle),
+        ),
+      );
+    }
+  }
+
+  /// Adds tag and trash menu items for multi-selection.
+  void _addTagAndTrashMenuItems(
+    List<ContextMenuEntry> entries,
+    AppLocalizations l10n,
+  ) {
+    entries.add(
+      MenuItem(
+        label: l10n.addTag,
+        icon: Icons.local_offer_outlined,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.addTag),
+      ),
+    );
+
+    entries.add(
+      MenuItem(
+        label: l10n.trash,
+        icon: Icons.delete_outline,
+        onSelected: () => _triggerMultiAction(MultiSelectAction.trash),
+      ),
+    );
+  }
+
+  void _triggerMultiAction(MultiSelectAction action) {
+    Bus.instance.fire(MultiSelectActionRequestedEvent(action));
   }
 
   Widget _getIcon() {
@@ -526,17 +862,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  void _onNextHotpTapped() {
-    if (widget.code.type == Type.hotp) {
-      CodeStore.instance
-          .addCode(
-            widget.code.copyWith(counter: widget.code.counter + 1),
-            shouldSync: true,
-          )
-          .ignore();
-    }
-  }
-
   Future<void> _onShowNotesPressed([bool? pop]) async {
     if (mounted && pop == true) {
       Navigator.of(context).pop();
@@ -563,9 +888,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(
-            code: widget.code,
-          );
+          return SetupEnterSecretKeyPage(code: widget.code);
         },
       ),
     );

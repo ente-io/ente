@@ -13,8 +13,8 @@
   "untitled": "Untitled",
   "edit": "Edit",
   "delete": "Delete",
-  "noFilesFound": "No files here",
-  "addFiles": "Add Files",
+  "noFilesFound": "No items here",
+  "addFiles": "Add items",
   "name": "Name",
   "date": "Date",
   "pleaseWait": "Please wait...",
@@ -29,22 +29,22 @@
       }
     }
   },
-  "downloadFailed": "Download Failed",
-  "failedToDownloadOrDecrypt": "Failed to download or decrypt file",
-  "errorOpeningFile": "Error opening file",
-  "errorOpeningFileMessage": "Error opening file: {error}",
+  "downloadFailed": "Download failed",
+  "failedToDownloadOrDecrypt": "Failed to download item",
+  "errorOpeningFile": "Error opening item",
+  "errorOpeningFileMessage": "Error opening item: {error}",
   "@errorOpeningFileMessage": {
-    "description": "Error message when opening a file fails",
+    "description": "Error message when opening an item fails",
     "placeholders": {
       "error": {
         "type": "String",
-        "example": "File not found"
+        "example": "Item not found"
       }
     }
   },
-  "couldNotOpenFile": "Could not open file: {error}",
+  "couldNotOpenFile": "Could not open item: {error}",
   "@couldNotOpenFile": {
-    "description": "Error message when file cannot be opened",
+    "description": "Error message when item cannot be opened",
     "placeholders": {
       "error": {
         "type": "String",
@@ -132,10 +132,10 @@
   },
   "pleaseSelectAtLeastOneCollection": "Please select at least one collection",
   "unknownItemType": "Unknown item type",
-  "fileDeletedSuccessfully": "File deleted successfully",
-  "failedToDeleteFile": "Failed to delete file: {error}",
+  "fileDeletedSuccessfully": "Item deleted successfully",
+  "failedToDeleteFile": "Failed to delete item: {error}",
   "@failedToDeleteFile": {
-    "description": "Error message when file deletion fails",
+    "description": "Error message when item deletion fails",
     "placeholders": {
       "error": {
         "type": "String",
@@ -143,10 +143,10 @@
       }
     }
   },
-  "fileUpdatedSuccessfully": "File updated successfully!",
-  "failedToUpdateFile": "Failed to update file: {error}",
+  "fileUpdatedSuccessfully": "Item updated successfully!",
+  "failedToUpdateFile": "Failed to update item: {error}",
   "@failedToUpdateFile": {
-    "description": "Error message when file update fails",
+    "description": "Error message when item update fails",
     "placeholders": {
       "error": {
         "type": "String",
@@ -170,7 +170,7 @@
   "trash": "Trash",
   "deletedPermanently": "Deleted \"{fileName}\" permanently",
   "@deletedPermanently": {
-    "description": "Message when file is permanently deleted from trash",
+    "description": "Message when item is permanently deleted from trash",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -180,7 +180,7 @@
   },
   "failedToRestoreFile": "Failed to restore \"{fileName}\": {error}",
   "@failedToRestoreFile": {
-    "description": "Error message when file restoration fails",
+    "description": "Error message when item restoration fails",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -196,10 +196,10 @@
   "create": "Create",
   "renameCollection": "Rename collection",
   "save": "Save",
-  "deleteFile": "Delete File",
+  "deleteFile": "Delete item",
   "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
   "@deleteFileConfirmation": {
-    "description": "Confirmation message for file deletion",
+    "description": "Confirmation message for item deletion",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -209,10 +209,15 @@
   },
   "noCollectionsFound": "No collections found",
   "createYourFirstCollection": "Create your first collection to get started",
-  "createCollection": "Create Collection",
+  "createCollection": "Create collection",
   "nothingYet": "Nothing yet",
   "uploadYourFirstDocument": "Upload your first document to get started",
-  "uploadDocument": "Upload Document",
+  "collectionEmptyStateTitle": "Nothing to see here",
+  "collectionEmptyStateSubtitle": "There are no items in this collection",
+  "yourTrashIsEmpty": "Your trash is empty",
+  "homeLockerEmptyTitle": "Your Locker is empty",
+  "homeLockerEmptySubtitle": "Click the + button to get started",
+  "uploadDocument": "Upload document",
   "items": "{count} items",
   "@items": {
     "description": "Number of items in a collection",
@@ -223,9 +228,9 @@
       }
     }
   },
-  "files": "{count, plural, =0{no files} =1{1 file} other{{count} files}}",
+  "files": "{count, plural, =0{no items} =1{1 item} other{{count} items}}",
   "@files": {
-    "description": "Number of files in a collection",
+    "description": "Number of items in a collection",
     "placeholders": {
       "count": {
         "type": "int",
@@ -238,7 +243,7 @@
   "restore": "Restore",
   "restoreFile": "Restore {fileName}",
   "@restoreFile": {
-    "description": "Dialog title for restoring a file from trash",
+    "description": "Dialog title for restoring an item from trash",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -250,12 +255,25 @@
   "emptyTrash": "Empty trash",
   "emptyTrashTooltip": "Empty trash",
   "emptyTrashConfirmation": "Are you sure you want to permanently delete all items in trash? This action cannot be undone.",
-  "fileTitle": "File title",
+  "fileTitle": "Item title",
   "note": "Note",
   "optionalNote": "Optional note",
   "upload": "Upload",
   "documentsHint": "Documents",
   "searchHint": "Search...",
+  "searchEmptyTitle": "No matches found",
+  "searchEmptyDescription": "Try searching for something else.",
+  "searchEverywhereTitle": "Search everywhere for \"{query}\"",
+  "@searchEverywhereTitle": {
+    "description": "CTA title prompting the user to search globally",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "passport"
+      }
+    }
+  },
+  "searchEverywhereSubtitle": "Search across all collections and files.",
   "noCollectionsFoundForQuery": "No collections found for \"{query}\"",
   "@noCollectionsFoundForQuery": {
     "description": "Message when no collections match the search query",
@@ -271,7 +289,7 @@
   "restoring": "Restoring...",
   "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",
   "@restoredFileToCollection": {
-    "description": "Success message when file is restored to a collection",
+    "description": "Success message when an item is restored to a collection",
     "placeholders": {
       "fileName": {
         "type": "String",
@@ -288,19 +306,19 @@
   "share": "Share",
   "shareLink": "Share link",
   "creatingShareLink": "Creating link...",
-  "shareThisLink": "Anyone with this link can access your file.",
+  "shareThisLink": "Anyone with this link can access your item.",
   "copyLink": "Copy link",
   "deleteLink": "Delete link",
   "close": "Close",
   "linkCopiedToClipboard": "Link copied to clipboard",
   "deleteShareLink": "Delete link",
   "deleteShareLinkDialogTitle": "Delete link?",
-  "deleteShareLinkConfirmation": "People with this link will no longer be able to access the file.",
+  "deleteShareLinkConfirmation": "People with this link will no longer be able to access the item.",
   "deletingShareLink": "Deleting link...",
   "shareLinkDeletedSuccessfully": "Link deleted successfully",
   "failedToCreateShareLink": "Failed to create link",
   "failedToDeleteShareLink": "Failed to delete link",
-  "deletingFile": "Deleting file...",
+  "deletingFile": "Deleting item...",
   "changeEmail": "Change email",
   "authToChangeYourEmail": "Please authenticate to change your email",
   "changePasswordTitle": "Change password",
@@ -352,33 +370,52 @@
   "reddit": "Reddit",
   "information": "Information",
   "saveInformation": "Save information",
-  "informationDescription": "Save important information that can be shared and passed down to loved ones.",
-  "personalNote": "Personal note",
-  "personalNoteDescription": "Save important notes or thoughts",
-  "physicalRecords": "Physical records",
-  "physicalRecordsDescription": "Save the real-world locations of important items",
-  "accountCredentials": "Account credentials",
-  "accountCredentialsDescription": "Securely store login details for important accounts",
+  "saveToLocker": "Save to Locker",
+  "saveDocumentTitle": "Document",
+  "saveDocumentDescription": "Upload important docs.",
+  "informationDescription": "Save and share information with loved ones.",
+  "personalNote": "Note",
+  "personalNoteDescription": "Write down thoughts and instructions.",
+  "physicalRecords": "Thing",
+  "physicalRecordsDescription": "Save locations of real-world items.",
+  "accountCredentials": "Secret",
+  "accountCredentialsDescription": "Preserve account credentials.",
+  "editSecret": "Edit secret",
+  "@editSecret": {
+    "description": "Title shown when editing an existing secret"
+  },
+  "editLocation": "Edit location",
+  "@editLocation": {
+    "description": "Title shown when editing an existing location record"
+  },
+  "editNote": "Edit note",
+  "@editNote": {
+    "description": "Title shown when editing an existing note"
+  },
   "emergencyContact": "Emergency contact",
-  "emergencyContactDescription": "Save details of people to contact in emergencies",
+  "emergencyContactDescription": "Keep contact info for key people in crises.",
   "noteName": "Title",
-  "noteNameHint": "Give your note a meaningful title",
+  "noteNameHint": "Hint text",
   "noteContent": "Content",
-  "noteContentHint": "Write down important thoughts, instructions, or memories you want to preserve",
+  "noteContentHint": "Write down important thoughts or instructions",
+  "unsavedNoteChangesTitle": "Discard changes?",
+  "unsavedNoteChangesDescription": "You have unsaved changes in this note. If you go back now, they will be lost.",
+  "keepEditing": "Keep editing",
+  "discardChanges": "Discard",
   "recordName": "Record name",
   "recordNameHint": "Name of the real-world item",
   "recordLocation": "Location",
-  "recordLocationHint": "Where can this item be found? (e.g., 'Safety deposit box at First Bank, Box #123')",
+  "recordLocationHint": "Where is this item kept?",
   "recordNotes": "Notes",
-  "recordNotesHint": "Any additional details about accessing or understanding this record",
-  "credentialName": "Account name",
-  "credentialNameHint": "Name of the service or account",
+  "recordNotesHint": "Additional information about the item",
+  "credentialName": "Account",
+  "credentialNameHint": "Name of the service",
   "username": "Username",
-  "usernameHint": "Login username or email address",
+  "usernameHint": "Login ID or email",
   "password": "Password",
-  "passwordHint": "Account password",
+  "passwordHint": "Password",
   "credentialNotes": "Additional notes",
-  "credentialNotesHint": "Recovery methods, security questions, or other important details",
+  "credentialNotesHint": "Recovery methods, security questions, ...",
   "contactName": "Contact name",
   "contactNameHint": "Full name of the emergency contact",
   "contactDetails": "Contact details",
@@ -412,10 +449,10 @@
   "sendLink": "Send link",
   "setPasswordTitle": "Set password",
   "resetPasswordTitle": "Reset password",
-  "allowAddingFiles": "Allow adding files",
+  "allowAddingFiles": "Allow adding items",
   "disableDownloadWarningTitle": "Please note",
-  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your files using external tools.",
-  "allowAddFilesDescription": "Allow people with the link to also add files to the shared collection.",
+  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your items using external tools.",
+  "allowAddFilesDescription": "Allow people with the link to also add items to the shared collection.",
   "after1Hour": "After 1 hour",
   "after1Day": "After 1 day",
   "after1Week": "After 1 week",
@@ -452,7 +489,7 @@
   "createPublicLink": "Create public link",
   "addParticipants": "Add participants",
   "add": "Add",
-  "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add files to the shared collection.",
+  "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add items to the shared collection.",
   "enterEmail": "Enter email",
   "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}",
   "@viewersSuccessfullyAdded": {
@@ -481,10 +518,12 @@
   "invalidEmailAddress": "Invalid email address",
   "enterValidEmail": "Please enter a valid email address.",
   "oops": "Oops",
+  "noItemsMatchSelectedFilters": "No items match the selected filters",
+  "noCollections": "No collections",
   "youCannotShareWithYourself": "You cannot share with yourself",
   "inviteToEnte": "Invite to Ente",
   "sendInvite": "Send invite",
-  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Download Ente\n\nhttps://ente.io",
   "thisIsYourVerificationId": "This is your Verification ID",
   "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
   "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
@@ -499,7 +538,7 @@
   },
   "verificationId": "Verification ID",
   "verifyEmailID": "Verify {email}",
-  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share items.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
   "passwordLock": "Password lock",
@@ -508,7 +547,7 @@
   "removeParticipant": "Remove participant",
   "yesConvertToViewer": "Yes, convert to viewer",
   "changePermissions": "Change permissions",
-  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add files to the collection after becoming a viewer.",
+  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add items to the collection after becoming a viewer.",
   "@cannotAddMoreFilesAfterBecomingViewer": {
     "description": "Warning message when changing a collaborator to viewer",
     "placeholders": {
@@ -519,12 +558,12 @@
     }
   },
   "removeWithQuestionMark": "Remove?",
-  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection",
+  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny items added by them will also be removed from the collection",
   "yesRemove": "Yes, remove",
   "remove": "Remove",
   "viewer": "Viewer",
   "collaborator": "Collaborator",
-  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add files to the shared collection.",
+  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add items to the shared collection.",
   "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
   "@albumParticipantsCount": {
     "description": "The count of participants in an album",
@@ -548,17 +587,17 @@
     }
   },
   "leaveCollection": "Leave collection",
-  "filesAddedByYouWillBeRemovedFromTheCollection": "Files added by you will be removed from the collection",
+  "filesAddedByYouWillBeRemovedFromTheCollection": "Items added by you will be removed from the collection",
   "leaveSharedCollection": "Leave shared collection?",
   "noSystemLockFound": "No system lock found",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "legacy": "Legacy",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
-  "uploadError": "Upload Error",
+  "uploadError": "Upload error",
   "tryAdjustingYourSearchQuery": "Try adjusting your search query",
-  "noFilesFoundForQuery": "No files found for \"{query}\"",
+  "noFilesFoundForQuery": "No items found for \"{query}\"",
   "@noFilesFoundForQuery": {
-    "description": "Message when no files match the search query",
+    "description": "Message when no items match the search query",
     "placeholders": {
       "query": {
         "type": "String",
@@ -566,13 +605,13 @@
       }
     }
   },
-  "deselectAll": "Deselect All",
-  "selectAll": "Select All",
+  "deselectAll": "Deselect all",
+  "selectAll": "Select all",
   "unnamedCollection": "Unnamed Collection",
   "enteLocker": "ente Locker",
-  "uploadedFilesProgress": "Uploaded {completed}/{total} files...",
+  "uploadedFilesProgress": "Uploaded {completed}/{total} items...",
   "@uploadedFilesProgress": {
-    "description": "Progress message showing uploaded files",
+    "description": "Progress message showing uploaded items",
     "placeholders": {
       "completed": {
         "type": "int",
@@ -584,9 +623,9 @@
       }
     }
   },
-  "uploadedFilesProgressWithError": "Uploaded {completed}/{total} files... ({error})",
+  "uploadedFilesProgressWithError": "Uploaded {completed}/{total} items... ({error})",
   "@uploadedFilesProgressWithError": {
-    "description": "Progress message showing uploaded files with error",
+    "description": "Progress message showing uploaded items with error",
     "placeholders": {
       "completed": {
         "type": "int",
@@ -605,8 +644,175 @@
   "noCollectionsAvailableForSelection": "No collections available",
   "createCollectionButton": "Create collection",
   "collectionButtonLabel": "Collection",
-  "hideWindow": "Hide Window",
-  "showWindow": "Show Window",
-  "exitApp": "Exit App",
-  "lockerLogs": "Locker logs"
+  "hideWindow": "Hide window",
+  "showWindow": "Show window",
+  "exitApp": "Exit app",
+  "lockerLogs": "Locker logs",
+  "recents": "Recents",
+  "clear": "Clear",
+  "uploadAFile": "Upload an item",
+  "clickHereToUpload": "Click here to upload",
+  "saveDocument": "Save document",
+  "uploadFiles": "Upload items",
+  "filesSelected": "{count, plural, =0{No items selected} =1{1 item selected} other{{count} items selected}}",
+  "@filesSelected": {
+    "description": "Number of items selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addToCollection": "Add to collection",
+  "newCollection": "New collection",
+  "title": "Title",
+  "editItem": "Edit item",
+  "enterNewTitle": "Enter a new title",
+  "backToView": "Back to view",
+  "back": "Back",
+  "failedToLoadCollections": "Failed to load collections: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "informationCollectionName": "Information",
+  "recordSavedToMultipleCollections": "Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "copiedToClipboard": "{fieldName} copied to clipboard",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
+  "searchResultsCount": "{count, plural, =1{1 result} other{{count} results}} for \"{query}\"",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
+  "locker": "Locker",
+  "loginToEnteAccount": "Log in to your Ente account",
+  "unlockLockerPaidPlanTitle": "Coming soon!",
+  "unlockLockerPaidPlanBody": "Locker is currently available only to paid customers of Ente Photos.",
+  "checkoutEntePhotos": "Checkout Ente Photos",
+  "okay": "Okay",
+  "noAccountCta": "I don't have an account",
+  "featureSaveImportant": "Save your important documents and credentials",
+  "featurePassAutomatically": "Pass them on automatically in emergencies",
+  "featureShareAnytime": "Share them anytime",
+  "emailIdLabel": "Email",
+  "emailIdHint": "Enter your email address",
+  "loginPasswordLabel": "Password",
+  "loginPasswordHint": "Enter your password",
+  "forgotPassword": "Forgot password?",
+  "logInAction": "Log in",
+  "dontHaveAccount": "Don't have an account?",
+  "signUp": "Sign up",
+  "incorrectPassword": "Incorrect password",
+  "pleaseTryAgain": "Please try again",
+  "noInternetConnection": "No internet connection",
+  "checkInternetConnection": "Please check your internet connection and try again",
+  "verificationFailedTryAgain": "Verification failed, please try again",
+  "recreatePassword": "Recreate password",
+  "deviceCannotVerifyPassword": "Your device does not have enough memory to verify your password",
+  "useRecoveryKey": "Use recovery key",
+  "invalidEmail": "Invalid email",
+  "enterValidEmailFirst": "Please enter a valid email address first",
+  "lockerLoginIssueSubject": "Locker login issue",
+  "unnamed": "Unnamed",
+  "collectionLabel": "Collection",
+  "areYouSure": "Are you sure?",
+  "yesDeleteCollection": "Yes, delete collection",
+  "yesDeleteFile": "Yes, delete item",
+  "deleteCollectionDialogBody": "{collectionName} will be deleted permanently.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
+  "deleteMultipleCollectionsDialogBody": "{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "deleteMultipleFilesDialogBody": "{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDeleteCollections": "Yes, delete {count, plural, =1{collection} other{collections}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDeleteFiles": "Yes, delete {count, plural, =1{item} other{items}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more items",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "usage": "Usage",
+  "fileCount": "{used} / {max}",
+  "@fileCount": {
+    "description": "Display item count usage in the format 'used / max'",
+    "placeholders": {
+      "used": {
+        "type": "String",
+        "example": "8"
+      },
+      "max": {
+        "type": "String",
+        "example": "1,000"
+      }
+    }
+  }
 }

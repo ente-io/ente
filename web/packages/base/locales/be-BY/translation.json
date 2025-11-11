@@ -158,6 +158,7 @@
     "logout": "Выйсці",
     "logout_message": "Вы сапраўды хочаце выйсці?",
     "delete_account": "Выдаліць уліковы запіс",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "",
     "change_email": "Змяніць электронную пошту",
     "ok": "OK",

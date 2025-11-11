@@ -46,6 +46,7 @@ class _MapScreenState extends State<MapScreen> {
       StreamController<List<EnteFile>>.broadcast();
   MapController mapController = MapController();
   bool isLoading = true;
+  bool hasLocationData = true;
   double maxZoom = 18.0;
   double minZoom = 2.8;
   int debounceDuration = 500;
@@ -88,26 +89,39 @@ class _MapScreenState extends State<MapScreen> {
     final EnteFile? mostRecentFile = result.$1;
     final List<ImageMarker> tempMarkers = result.$2;
 
-    if (tempMarkers.isNotEmpty) {
-      center = widget.center ??
-          LatLng(
-            mostRecentFile!.location!.latitude!,
-            mostRecentFile.location!.longitude!,
-          );
-
-      if (kDebugMode) {
-        debugPrint(
-          "Info for map: center $center, initialZoom ${widget.initialZoom}",
-        );
-      }
-    } else {
+    if (tempMarkers.isEmpty) {
       showShortToast(
         context,
         AppLocalizations.of(context).noImagesWithLocation,
       );
+      if (!visibleImages.isClosed) {
+        visibleImages.sink.add([]);
+      }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        hasLocationData = false;
+        imageMarkers = tempMarkers;
+        isLoading = false;
+      });
+      return;
+    }
+
+    center = widget.center ??
+        LatLng(
+          mostRecentFile!.location!.latitude!,
+          mostRecentFile.location!.longitude!,
+        );
+
+    if (kDebugMode) {
+      debugPrint(
+        "Info for map: center $center, initialZoom ${widget.initialZoom}",
+      );
     }
 
     setState(() {
+      hasLocationData = true;
       imageMarkers = tempMarkers;
     });
 
@@ -117,6 +131,9 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     Timer(Duration(milliseconds: debounceDuration), () {
+      if (!mounted) {
+        return;
+      }
       calculateVisibleMarkers(mapController.camera.visibleBounds);
       setState(() {
         isLoading = false;
@@ -262,6 +279,7 @@ class _MapScreenState extends State<MapScreen> {
             visibleImages,
             bottomSheetDraggableAreaHeight,
             bottomUnsafeArea,
+            hasLocationData: hasLocationData,
           ),
         ),
       ),

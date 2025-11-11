@@ -994,20 +994,13 @@ class _HeatmapCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> chips = _stringListFromMeta(card.meta, "detailChips");
-    final List<dynamic> rawQuarters =
-        card.meta["quarters"] as List<dynamic>? ?? const <dynamic>[];
-    final List<_QuarterBlock> quarters = rawQuarters
-        .map(
-          (dynamic entry) => _QuarterBlock.fromJson(
-            (entry as Map).cast<String, Object?>(),
-          ),
-        )
-        .where((_QuarterBlock block) => block.grid.isNotEmpty)
-        .toList(growable: false);
+    final List<List<int>> grid = _parseHeatmapGrid(card.meta["grid"]);
     final List<String> weekdayLabels =
         (card.meta["weekdayLabels"] as List<dynamic>? ?? const <dynamic>[])
             .whereType<String>()
             .toList(growable: false);
+    final List<String> weekLabels =
+        _stringListFromMeta(card.meta, "weekLabels");
     final int maxCount = (card.meta["maxCount"] as num?)?.toInt() ?? 0;
 
     return Column(
@@ -1023,83 +1016,26 @@ class _HeatmapCardContent extends StatelessWidget {
             textTheme.bodyMuted,
             padding: const EdgeInsets.only(top: 12),
           ),
-        const SizedBox(height: 18),
-        if (quarters.isEmpty)
+        const SizedBox(height: 20),
+        if (grid.isEmpty)
           _MediaPlaceholder(
             height: 180,
             colorScheme: colorScheme,
           )
         else
-          LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              final double maxWidth = constraints.maxWidth;
-              final int columns =
-                  quarters.length <= 1 ? 1 : (maxWidth >= 280 ? 2 : 1);
-              final double spacing = columns > 1 ? 18 : 0;
-              final double itemWidth = columns > 1
-                  ? (maxWidth - ((columns - 1) * spacing)) / columns
-                  : maxWidth;
-              final int maxColumnCount = quarters
-                  .map(
-                    (_QuarterBlock block) =>
-                        block.grid.isNotEmpty ? block.grid.first.length : 0,
-                  )
-                  .fold(0, math.max);
-              const double labelColumnWidth = 20;
-              const double cellSpacing = 1.5;
-              const double fallbackCellSize = 6;
-              const double maxCellWidth = 18;
-              const double maxCellHeight = 12;
-
-              double computeCellWidth(double availableWidth) {
-                if (maxColumnCount <= 0) {
-                  return fallbackCellSize;
-                }
-                final double usable = math.max(
-                  0,
-                  availableWidth -
-                      cellSpacing * math.max(0, maxColumnCount - 1),
-                );
-                final double raw = usable / math.max(1, maxColumnCount);
-                return raw.clamp(fallbackCellSize, maxCellWidth);
-              }
-
-              final double cellWidthWithLabels =
-                  computeCellWidth(itemWidth - labelColumnWidth);
-              final double cellWidthWithoutLabels = computeCellWidth(itemWidth);
-              final double cellWidth =
-                  math.min(cellWidthWithLabels, cellWidthWithoutLabels);
-              final double cellHeight = math.min(
-                maxCellHeight,
-                cellWidth.clamp(fallbackCellSize, maxCellHeight),
-              );
-              return Wrap(
-                spacing: spacing,
-                runSpacing: 18,
-                children: <Widget>[
-                  for (final (int index, _QuarterBlock block)
-                      in quarters.indexed)
-                    SizedBox(
-                      width: itemWidth,
-                      child: _QuarterHeatmap(
-                        block: block,
-                        weekdayLabels: weekdayLabels,
-                        maxCount: maxCount,
-                        colorScheme: colorScheme,
-                        textTheme: textTheme,
-                        showDayLabels: columns == 1 || index % columns == 0,
-                        cellWidth: cellWidth,
-                        cellHeight: cellHeight,
-                        cellSpacing: cellSpacing,
-                        labelColumnWidth: labelColumnWidth,
-                      ),
-                    ),
-                ],
-              );
-            },
+          _HeatmapBackground(
+            colorScheme: colorScheme,
+            child: _YearHeatmap(
+              grid: grid,
+              weekLabels: weekLabels,
+              weekdayLabels: weekdayLabels,
+              maxCount: maxCount,
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            ),
           ),
         if (chips.isNotEmpty) ...[
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           _DetailChips(
             chips: chips,
             colorScheme: colorScheme,
@@ -1112,158 +1048,200 @@ class _HeatmapCardContent extends StatelessWidget {
   }
 }
 
-class _QuarterBlock {
-  _QuarterBlock({
-    required this.label,
-    required this.grid,
-    required this.columnLabels,
-  });
-
-  final String label;
-  final List<List<int>> grid;
-  final List<String> columnLabels;
-
-  static _QuarterBlock fromJson(Map<String, Object?> json) {
-    final List<List<int>> grid =
-        (json["grid"] as List<dynamic>? ?? const <dynamic>[])
-            .map(
-              (dynamic row) => (row as List<dynamic>)
-                  .map((dynamic value) => (value as num).toInt())
-                  .toList(growable: false),
-            )
-            .toList(growable: false);
-    final List<String> columnLabels =
-        (json["columnLabels"] as List<dynamic>? ?? const <dynamic>[])
-            .whereType<String>()
-            .toList(growable: false);
-    return _QuarterBlock(
-      label: json["label"] as String? ?? "",
-      grid: grid,
-      columnLabels: columnLabels,
-    );
+List<List<int>> _parseHeatmapGrid(Object? raw) {
+  if (raw is! List) {
+    return const <List<int>>[];
   }
+  final List<List<int>> rows = <List<int>>[];
+  for (final dynamic entry in raw) {
+    if (entry is! List) {
+      continue;
+    }
+    final List<int> parsedRow = <int>[];
+    for (final dynamic value in entry) {
+      if (value is num) {
+        parsedRow.add(value.toInt());
+      }
+    }
+    rows.add(List<int>.unmodifiable(parsedRow));
+  }
+  return List<List<int>>.unmodifiable(rows);
 }
 
-class _QuarterHeatmap extends StatelessWidget {
-  const _QuarterHeatmap({
-    required this.block,
+class _YearHeatmap extends StatelessWidget {
+  const _YearHeatmap({
+    required this.grid,
+    required this.weekLabels,
     required this.weekdayLabels,
     required this.maxCount,
     required this.colorScheme,
     required this.textTheme,
-    required this.showDayLabels,
-    required this.cellWidth,
-    required this.cellHeight,
-    required this.cellSpacing,
-    required this.labelColumnWidth,
   });
 
-  final _QuarterBlock block;
+  final List<List<int>> grid;
+  final List<String> weekLabels;
   final List<String> weekdayLabels;
   final int maxCount;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
-  final bool showDayLabels;
-  final double cellWidth;
-  final double cellHeight;
-  final double cellSpacing;
-  final double labelColumnWidth;
 
   @override
   Widget build(BuildContext context) {
-    final int columnCount = block.grid.isEmpty ? 0 : block.grid.first.length;
+    final int columnCount = grid.isNotEmpty ? grid.first.length : 0;
     if (columnCount == 0) {
       return _MediaPlaceholder(
-        height: 120,
+        height: 180,
         colorScheme: colorScheme,
       );
     }
 
-    final TextStyle axisStyle =
-        textTheme.tinyMuted.copyWith(fontSize: 8.5, height: 1.15);
-    final List<String> headerLabels = List<String>.generate(
-      columnCount,
-      (int index) =>
-          index < block.columnLabels.length ? block.columnLabels[index] : "",
-    );
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        const double labelColumnWidth = 24;
+        const double horizontalSpacing = 1.2;
+        const double verticalSpacing = 1.0;
+        const double minCellSize = 5;
+        const double maxCellWidth = 13;
+        const double maxCellHeight = 9.0;
+        const double heightCompression = 0.7;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          block.label,
-          style: textTheme.smallBold,
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            SizedBox(width: labelColumnWidth),
-            for (int columnIndex = 0;
-                columnIndex < headerLabels.length;
-                columnIndex += 1) ...[
-              SizedBox(
-                width: cellWidth,
-                child: Text(
-                  headerLabels[columnIndex],
-                  style: axisStyle,
-                  textAlign: TextAlign.center,
-                  softWrap: false,
-                  overflow: TextOverflow.fade,
-                ),
-              ),
-              SizedBox(
-                width: columnIndex == headerLabels.length - 1 ? 0 : cellSpacing,
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 4),
-        Column(
-          children: List<Widget>.generate(weekdayLabels.length, (int dayIndex) {
-            final List<int> row = block.grid.length > dayIndex
-                ? block.grid[dayIndex]
-                : const <int>[];
-            final String dayLabel =
-                dayIndex < weekdayLabels.length ? weekdayLabels[dayIndex] : "";
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: dayIndex == weekdayLabels.length - 1 ? 0 : cellSpacing,
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: labelColumnWidth,
-                    child: Visibility(
-                      visible: showDayLabels,
-                      maintainSize: true,
-                      maintainAnimation: true,
-                      maintainState: true,
-                      child: Text(
-                        dayLabel,
-                        style: axisStyle,
+        final double usableWidth = math.max(
+          0,
+          constraints.maxWidth -
+              labelColumnWidth -
+              horizontalSpacing * math.max(0, columnCount - 1),
+        );
+        final double rawCellWidth =
+            columnCount > 0 ? usableWidth / columnCount : minCellSize;
+        final double cellWidth =
+            rawCellWidth.clamp(minCellSize, maxCellWidth.toDouble()).toDouble();
+        final double compressedHeight = cellWidth * heightCompression;
+        final double cellHeight =
+            compressedHeight.clamp(minCellSize, maxCellHeight).toDouble();
+        final double gridWidth = labelColumnWidth +
+            (cellWidth * columnCount) +
+            horizontalSpacing * math.max(0, columnCount - 1);
+        final TextStyle axisStyle =
+            textTheme.tinyMuted.copyWith(fontSize: 8.0, height: 1.1);
+
+        return Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: gridWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const SizedBox(width: labelColumnWidth),
+                    for (int columnIndex = 0;
+                        columnIndex < columnCount;
+                        columnIndex += 1) ...[
+                      SizedBox(
+                        width: cellWidth,
+                        child: Text(
+                          columnIndex < weekdayLabels.length
+                              ? weekdayLabels[columnIndex]
+                              : "",
+                          style: axisStyle,
+                          textAlign: TextAlign.center,
+                          softWrap: false,
+                          overflow: TextOverflow.fade,
+                        ),
                       ),
-                    ),
-                  ),
-                  for (int columnIndex = 0;
-                      columnIndex < columnCount;
-                      columnIndex += 1) ...[
-                    _HeatmapCell(
-                      value: columnIndex < row.length ? row[columnIndex] : -1,
-                      width: cellWidth,
-                      height: cellHeight,
-                      colorScheme: colorScheme,
-                      maxCount: maxCount,
-                    ),
-                    SizedBox(
-                      width: columnIndex == columnCount - 1 ? 0 : cellSpacing,
-                    ),
+                      SizedBox(
+                        width: columnIndex == columnCount - 1
+                            ? 0
+                            : horizontalSpacing,
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            );
-          }),
+                ),
+                const SizedBox(height: 4),
+                Column(
+                  children: List<Widget>.generate(grid.length, (int rowIndex) {
+                    final List<int> row = grid[rowIndex];
+                    final String label = rowIndex < weekLabels.length
+                        ? weekLabels[rowIndex]
+                        : "";
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom:
+                            rowIndex == grid.length - 1 ? 0 : verticalSpacing,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: labelColumnWidth,
+                            child: Visibility(
+                              visible: label.isNotEmpty,
+                              maintainSize: true,
+                              maintainAnimation: true,
+                              maintainState: true,
+                              child: Text(
+                                label,
+                                style: axisStyle,
+                              ),
+                            ),
+                          ),
+                          for (int columnIndex = 0;
+                              columnIndex < columnCount;
+                              columnIndex += 1) ...[
+                            _HeatmapCell(
+                              value: columnIndex < row.length
+                                  ? row[columnIndex]
+                                  : -1,
+                              width: cellWidth,
+                              height: cellHeight,
+                              colorScheme: colorScheme,
+                              maxCount: maxCount,
+                            ),
+                            SizedBox(
+                              width: columnIndex == columnCount - 1
+                                  ? 0
+                                  : horizontalSpacing,
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _HeatmapBackground extends StatelessWidget {
+  const _HeatmapBackground({
+    required this.child,
+    required this.colorScheme,
+  });
+
+  final Widget child;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color base = Colors.black.withValues(alpha: 0.32);
+    final Color border = Colors.white.withValues(alpha: 0.16);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: base,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: border,
+          strokeAlign: BorderSide.strokeAlignInside,
         ),
-      ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
+        child: child,
+      ),
     );
   }
 }

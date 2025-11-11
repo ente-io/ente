@@ -115,23 +115,24 @@ Future<void> _requestForEncryptionPassword(
 }
 
 Future<void> _showExportWarningDialog(BuildContext context, String type) async {
-  await showChoiceActionSheet(
+  final result = await showChoiceActionSheet(
     context,
     title: context.l10n.warning,
     body: context.l10n.exportWarningDesc,
     isCritical: true,
-    firstButtonOnTap: () async {
-      if (type == "html") {
-        final data = await generateHtml(context);
-        await _exportCodes(context, data, type);
-      } else {
-        final data = await _getAuthDataForExport();
-        await _exportCodes(context, data, type);
-      }
-    },
     secondButtonLabel: context.l10n.cancel,
     firstButtonLabel: context.l10n.iUnderStand,
   );
+
+  if (result?.action == ButtonAction.first) {
+    if (type == "html") {
+      final data = await generateHtml(context);
+      await _exportCodes(context, data, type);
+    } else {
+      final data = await _getAuthDataForExport();
+      await _exportCodes(context, data, type);
+    }
+  }
 }
 
 Future<void> _exportCodes(

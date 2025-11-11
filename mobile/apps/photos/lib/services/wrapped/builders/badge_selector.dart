@@ -16,19 +16,11 @@ class WrappedBadgeSelector {
   const WrappedBadgeSelector._();
 
   static const String _kBadgeKeyConsistency = "consistency_champ";
-  static const String _kBadgeKeyGroupPhotographer = "group_photographer";
   static const String _kBadgeKeyPortraitPro = "portrait_pro";
   static const String _kBadgeKeyPeoplePerson = "people_person";
   static const String _kBadgeKeyGlobetrotter = "globetrotter";
-  static const String _kBadgeKeyNightOwl = "night_owl";
-  static const String _kBadgeKeyEarlyBird = "early_bird";
   static const String _kBadgeKeyPetParent = "pet_parent";
   static const String _kBadgeKeyMinimalist = "minimalist_shooter";
-  static const String _kBadgeKeyCurator = "curator";
-  static const String _kBadgeKeyLocalLegend = "local_legend";
-  static const String _kBadgeKeyMomentMaker = "moment_maker";
-  static const String _kBadgeKeyLiveMover = "live_mover";
-  static const String _kBadgeKeyMemoryKeeper = "memory_keeper";
 
   static const String _kPetGenericQuery =
       "A portrait photo of a beloved pet at home";
@@ -50,10 +42,12 @@ class WrappedBadgeSelector {
     required WrappedEngineContext context,
     required List<WrappedCard> existingCards,
   }) {
+    // Existing cards kept for future badge tweaks (no-op for now).
+    existingCards;
+
     final _BadgeComputationContext metrics =
         _BadgeComputationContext.fromEngineContext(
       context: context,
-      existingCards: existingCards,
     );
 
     final List<_BadgeCandidate> candidates = <_BadgeCandidate>[];
@@ -64,18 +58,11 @@ class WrappedBadgeSelector {
     }
 
     addCandidate(_buildConsistencyChamp(metrics));
-    addCandidate(_buildGroupPhotographer(metrics));
     addCandidate(_buildPortraitPro(metrics));
     addCandidate(_buildPeoplePerson(metrics));
     addCandidate(_buildGlobetrotter(metrics));
-    candidates.addAll(_buildTimeOfDayChamp(metrics));
     addCandidate(_buildPetParent(metrics));
     addCandidate(_buildMinimalist(metrics));
-    addCandidate(_buildCurator(metrics));
-    addCandidate(_buildLocalLegend(metrics));
-    addCandidate(_buildMomentMaker(metrics));
-    addCandidate(_buildLiveMover(metrics));
-    addCandidate(_buildMemoryKeeper(metrics));
 
     if (candidates.isEmpty) {
       final WrappedCard fallbackCard = WrappedCard(
@@ -88,7 +75,7 @@ class WrappedBadgeSelector {
         },
       );
       return WrappedBadgeSelection(
-        badgeKey: _kBadgeKeyMemoryKeeper,
+        badgeKey: _kBadgeKeyConsistency,
         card: fallbackCard,
         candidatesMeta: const <Map<String, Object?>>[],
       );
@@ -215,58 +202,6 @@ class WrappedBadgeSelector {
       extras: <String, Object?>{
         "longestStreakDays": metrics.longestStreakDays,
         "daysWithCaptures": metrics.daysWithCaptures,
-      },
-    );
-  }
-
-  static _BadgeCandidate? _buildGroupPhotographer(
-    _BadgeComputationContext metrics,
-  ) {
-    if (!metrics.peopleStats.hasFaceMoments) {
-      return null;
-    }
-    final int totalFaceMoments = metrics.peopleStats.totalFaceMoments;
-    if (totalFaceMoments <= 0) {
-      return null;
-    }
-    final int groupMoments = metrics.peopleStats.groupMoments;
-    final double share =
-        totalFaceMoments == 0 ? 0 : groupMoments / totalFaceMoments.toDouble();
-    final double score = _clamp01(share / 0.55);
-    final int groupPercent = _percentOf(share);
-
-    final bool eligible =
-        totalFaceMoments >= 20 && groupMoments >= 12 && score >= 0.5;
-
-    final List<String> chips = <String>[
-      "Group moments: $groupMoments",
-      "Share: $groupPercent%",
-    ];
-
-    final List<MediaRef> heroMedia = metrics.peopleStats
-        .groupSampleFileIDs(3)
-        .map(MediaRef.new)
-        .toList(growable: false);
-
-    return _BadgeCandidate(
-      key: _kBadgeKeyGroupPhotographer,
-      name: "Group Photographer",
-      title: "Group Photographer",
-      subtitle:
-          "You're the group photographer—$groupPercent% of your shots are shared moments.",
-      emoji: "🫶",
-      gradientStart: "#36D1DC",
-      gradientEnd: "#5B86E5",
-      mediaRefs: heroMedia,
-      detailChips: chips,
-      score: score,
-      eligible: eligible,
-      sampleSize: groupMoments,
-      tier: 0,
-      debugWhy: "Group share $groupPercent% ($groupMoments/$totalFaceMoments)",
-      extras: <String, Object?>{
-        "groupMoments": groupMoments,
-        "totalFaceMoments": totalFaceMoments,
       },
     );
   }
@@ -430,78 +365,6 @@ class WrappedBadgeSelector {
     );
   }
 
-  static Iterable<_BadgeCandidate> _buildTimeOfDayChamp(
-    _BadgeComputationContext metrics,
-  ) sync* {
-    if (metrics.totalCount < 60) {
-      return;
-    }
-
-    final double nightShare = metrics.nightCount / metrics.totalCount;
-    final double morningShare = metrics.morningCount / metrics.totalCount;
-    final double nightScore = _clamp01(nightShare / 0.35);
-    final double morningScore = _clamp01(morningShare / 0.35);
-
-    if (nightScore >= 0.5 && nightShare >= morningShare) {
-      final int nightPercent = _percentOf(nightShare);
-      yield _BadgeCandidate(
-        key: _kBadgeKeyNightOwl,
-        name: "Night Owl",
-        title: "Night Owl",
-        subtitle:
-            "You're a night owl—$nightPercent% after dark is your sweet spot.",
-        emoji: "🌙",
-        gradientStart: "#20002C",
-        gradientEnd: "#CBB4D4",
-        mediaRefs:
-            metrics.nightSamples.map(MediaRef.new).toList(growable: false),
-        detailChips: <String>[
-          "Night captures: ${metrics.nightCount}",
-        ],
-        score: nightScore,
-        eligible: true,
-        sampleSize: metrics.nightCount,
-        tier: 0,
-        debugWhy:
-            "Night share $nightPercent% (${metrics.nightCount}/${metrics.totalCount})",
-        extras: <String, Object?>{
-          "nightCount": metrics.nightCount,
-          "totalCount": metrics.totalCount,
-        },
-      );
-      return;
-    }
-
-    if (morningScore >= 0.5 && morningShare > nightShare) {
-      final int morningPercent = _percentOf(morningShare);
-      yield _BadgeCandidate(
-        key: _kBadgeKeyEarlyBird,
-        name: "Early Bird",
-        title: "Early Bird",
-        subtitle:
-            "You're an early bird—$morningPercent% at first light is your magic hour.",
-        emoji: "🌅",
-        gradientStart: "#FCE38A",
-        gradientEnd: "#F38181",
-        mediaRefs:
-            metrics.morningSamples.map(MediaRef.new).toList(growable: false),
-        detailChips: <String>[
-          "Early captures: ${metrics.morningCount}",
-        ],
-        score: morningScore,
-        eligible: true,
-        sampleSize: metrics.morningCount,
-        tier: 0,
-        debugWhy:
-            "Morning share $morningPercent% (${metrics.morningCount}/${metrics.totalCount})",
-        extras: <String, Object?>{
-          "morningCount": metrics.morningCount,
-          "totalCount": metrics.totalCount,
-        },
-      );
-    }
-  }
-
   static _BadgeCandidate? _buildPetParent(
     _BadgeComputationContext metrics,
   ) {
@@ -618,200 +481,6 @@ class WrappedBadgeSelector {
     );
   }
 
-  static _BadgeCandidate? _buildCurator(
-    _BadgeComputationContext metrics,
-  ) {
-    if (metrics.totalCount == 0) {
-      return null;
-    }
-    final int favoritesCount = metrics.favoritesCount;
-    final double share =
-        metrics.totalCount == 0 ? 0 : favoritesCount / metrics.totalCount;
-    final double score = _clamp01(
-      0.5 * _clamp01(favoritesCount / 150.0) + 0.5 * _clamp01(share / 0.3),
-    );
-    final bool eligible = favoritesCount >= 60 || share >= 0.20;
-
-    final int percent = _percentOf(share);
-
-    final List<String> chips = <String>[
-      "Favorites: $favoritesCount",
-      "Keeps: $percent%",
-    ];
-
-    return _BadgeCandidate(
-      key: _kBadgeKeyCurator,
-      name: "Curator",
-      title: "Curator",
-      subtitle: "You're the curator—$favoritesCount favorites handpicked.",
-      emoji: "⭐",
-      gradientStart: "#FFB75E",
-      gradientEnd: "#ED8F03",
-      mediaRefs:
-          metrics.favoriteSamples.map(MediaRef.new).toList(growable: false),
-      detailChips: chips,
-      score: score,
-      eligible: eligible,
-      sampleSize: favoritesCount,
-      tier: 0,
-      debugWhy:
-          "Favorites $favoritesCount ($percent% of ${metrics.totalCount})",
-      extras: <String, Object?>{
-        "favoritesCount": favoritesCount,
-        "favoriteSharePercent": percent,
-      },
-    );
-  }
-
-  static _BadgeCandidate? _buildLocalLegend(
-    _BadgeComputationContext metrics,
-  ) {
-    if (metrics.placesStats == null) {
-      return null;
-    }
-    if (metrics.hasMostVisitedSpotCard) {
-      return null;
-    }
-    final _BadgePlaceStats placeStats = metrics.placesStats!;
-    final _SpotHighlight? topSpot = placeStats.topSpot;
-    if (topSpot == null) {
-      return null;
-    }
-    final double score = _clamp01(
-      0.7 * _clamp01(topSpot.share / 0.25) +
-          0.3 * _clamp01(topSpot.distinctDays / 6.0),
-    );
-    final bool eligible =
-        topSpot.distinctDays >= 3 && topSpot.share >= 0.15 && score >= 0.5;
-    final int sharePercent = _percentOf(topSpot.share);
-    final String subtitle =
-        "You're a local legend—${topSpot.count} memories across ${topSpot.distinctDays} days at your go-to spot.";
-
-    final List<String> chips = <String>[
-      "Most-visited share: $sharePercent%",
-    ];
-
-    return _BadgeCandidate(
-      key: _kBadgeKeyLocalLegend,
-      name: "Local Legend",
-      title: "Local Legend",
-      subtitle: subtitle,
-      emoji: "📍",
-      gradientStart: "#F7971E",
-      gradientEnd: "#FFD200",
-      mediaRefs: topSpot.mediaIds.map(MediaRef.new).toList(growable: false),
-      detailChips: chips,
-      score: score,
-      eligible: eligible,
-      sampleSize: topSpot.count,
-      tier: 0,
-      debugWhy:
-          "Top spot share $sharePercent% (${topSpot.count}/${placeStats.totalCount})",
-      extras: <String, Object?>{
-        "topSpotCount": topSpot.count,
-        "topSpotDistinctDays": topSpot.distinctDays,
-        "topSpotSharePercent": sharePercent,
-      },
-    );
-  }
-
-  static _BadgeCandidate _buildMomentMaker(
-    _BadgeComputationContext metrics,
-  ) {
-    final double volumeScore =
-        metrics.totalCount >= 800 ? 1.0 : metrics.totalCount / 800.0;
-    final double paceScore = _clamp01(metrics.averagePerDay / 4.0);
-    final double score = _clamp01(0.5 * volumeScore + 0.5 * paceScore);
-    final bool eligible = metrics.totalCount >= 100;
-    final String subtitle =
-        "You're the moment maker—${metrics.totalCount} memories bottled, unstoppable.";
-    return _BadgeCandidate(
-      key: _kBadgeKeyMomentMaker,
-      name: "Moment Maker",
-      title: "Moment Maker",
-      subtitle: subtitle,
-      emoji: "📸",
-      gradientStart: "#2193B0",
-      gradientEnd: "#6DD5ED",
-      mediaRefs: metrics.highlightMedia,
-      detailChips: <String>[
-        "Average per day: ${metrics.averagePerDay.toStringAsFixed(1)}",
-      ],
-      score: score,
-      eligible: eligible,
-      sampleSize: metrics.totalCount,
-      tier: 1,
-      debugWhy:
-          "Total ${metrics.totalCount}, avg/day ${metrics.averagePerDay.toStringAsFixed(2)}",
-      extras: <String, Object?>{
-        "totalCount": metrics.totalCount,
-        "averagePerDay": metrics.averagePerDay,
-      },
-    );
-  }
-
-  static _BadgeCandidate _buildLiveMover(
-    _BadgeComputationContext metrics,
-  ) {
-    final int livePhotoCount = metrics.livePhotoCount;
-    final double share = metrics.photoCount == 0
-        ? 0
-        : livePhotoCount / metrics.photoCount.toDouble();
-    final double score = _clamp01(share / 0.30);
-    final int percent = _percentOf(share);
-
-    return _BadgeCandidate(
-      key: _kBadgeKeyLiveMover,
-      name: "Live Mover",
-      title: "Live Mover",
-      subtitle:
-          "You're a live mover—$percent% of your photos are stories in motion.",
-      emoji: "🎞️",
-      gradientStart: "#0F2027",
-      gradientEnd: "#2C5364",
-      mediaRefs: metrics.highlightMedia,
-      detailChips: <String>[
-        "Live photos: $livePhotoCount",
-      ],
-      score: score,
-      eligible: livePhotoCount >= 10,
-      sampleSize: livePhotoCount,
-      tier: 1,
-      debugWhy: "Live share $percent% ($livePhotoCount/${metrics.photoCount})",
-      extras: <String, Object?>{
-        "livePhotoCount": livePhotoCount,
-        "photoCount": metrics.photoCount,
-      },
-    );
-  }
-
-  static _BadgeCandidate _buildMemoryKeeper(
-    _BadgeComputationContext metrics,
-  ) {
-    return _BadgeCandidate(
-      key: _kBadgeKeyMemoryKeeper,
-      name: "Memory Keeper",
-      title: "Memory Keeper",
-      subtitle:
-          "You're the memory keeper—your ${metrics.year} stayed safe and sound.",
-      emoji: "🗂️",
-      gradientStart: "#304352",
-      gradientEnd: "#D7D2CC",
-      mediaRefs: metrics.highlightMedia,
-      detailChips: <String>[
-        "Captured: ${metrics.totalCount}",
-      ],
-      score: 1.0,
-      eligible: true,
-      sampleSize: metrics.totalCount,
-      tier: 2,
-      debugWhy: "Universal fallback",
-      extras: <String, Object?>{
-        "totalCount": metrics.totalCount,
-      },
-    );
-  }
-
   static double _clamp01(double value) {
     if (value.isNaN) {
       return 0;
@@ -904,73 +573,40 @@ class _BadgeComputationContext {
   _BadgeComputationContext({
     required this.year,
     required this.totalCount,
-    required this.photoCount,
-    required this.videoCount,
-    required this.livePhotoCount,
     required this.daysWithCaptures,
     required this.elapsedDays,
     required this.longestStreakDays,
-    required this.averagePerDay,
     required this.peopleStats,
     this.placesStats,
     required this.highlightMedia,
-    required this.favoritesCount,
-    required this.favoriteSamples,
-    required this.hasMostVisitedSpotCard,
-    required this.nightCount,
-    required this.morningCount,
-    required this.nightSamples,
-    required this.morningSamples,
     required this.petMatches,
     required this.petSampleMedia,
     required this.topPetType,
     required this.hasPetEmbedding,
-    required this.totalCountForEmbedding,
   });
 
   final int year;
   final int totalCount;
-  final int photoCount;
-  final int videoCount;
-  final int livePhotoCount;
   final int daysWithCaptures;
   final int elapsedDays;
   final int longestStreakDays;
-  final double averagePerDay;
   final _PeopleDataset peopleStats;
   final _BadgePlaceStats? placesStats;
   final List<MediaRef> highlightMedia;
-  final int favoritesCount;
-  final List<int> favoriteSamples;
-  final bool hasMostVisitedSpotCard;
-  final int nightCount;
-  final int morningCount;
-  final List<int> nightSamples;
-  final List<int> morningSamples;
   final int petMatches;
   final List<int> petSampleMedia;
   final String? topPetType;
   final bool hasPetEmbedding;
-  final int totalCountForEmbedding;
 
   static _BadgeComputationContext fromEngineContext({
     required WrappedEngineContext context,
-    required List<WrappedCard> existingCards,
   }) {
     final _StatsSnapshot statsSnapshot = _StatsSnapshot.fromContext(context);
     final _PeopleDataset peopleDataset =
         _PeopleDataset.fromContext(context.people, context.year);
     final _PlacesDataset placesDataset = _PlacesDataset.fromContext(context);
 
-    final bool hasMostVisitedSpotCard = existingCards.any(
-      (WrappedCard card) => card.type == WrappedCardType.mostVisitedSpot,
-    );
-
     final int totalCount = statsSnapshot.totalCount;
-    final double averagePerDay =
-        statsSnapshot.elapsedDays <= 0 || totalCount <= 0
-            ? 0
-            : totalCount / statsSnapshot.elapsedDays;
 
     final Set<int> highlightIds = _collectUnique(
       <List<int>>[
@@ -987,46 +623,19 @@ class _BadgeComputationContext {
     final _PetDetectionResult petDetection =
         _PetDetectionResult.fromContext(context);
 
-    final _TimeOfDaySamples timeSamples =
-        _TimeOfDaySamples.fromFiles(context.files);
-
-    final List<int> favoriteSamples = context.files
-        .where(
-          (EnteFile file) =>
-              file.uploadedFileID != null &&
-              context.favoriteUploadedFileIDs.contains(file.uploadedFileID),
-        )
-        .take(6)
-        .map((EnteFile file) => file.uploadedFileID!)
-        .toList(growable: false);
-
-    final int favoritesCount = context.favoriteUploadedFileIDs.length;
-
     return _BadgeComputationContext(
       year: context.year,
       totalCount: totalCount,
-      photoCount: statsSnapshot.photoCount,
-      videoCount: statsSnapshot.videoCount,
-      livePhotoCount: statsSnapshot.livePhotoCount,
       daysWithCaptures: statsSnapshot.daysWithCaptures,
       elapsedDays: statsSnapshot.elapsedDays,
       longestStreakDays: statsSnapshot.longestStreakDays,
-      averagePerDay: averagePerDay,
       peopleStats: peopleDataset,
       placesStats: placeStats,
       highlightMedia: highlightIds.map(MediaRef.new).toList(growable: false),
-      favoritesCount: favoritesCount,
-      favoriteSamples: favoriteSamples,
-      hasMostVisitedSpotCard: hasMostVisitedSpotCard,
-      nightCount: timeSamples.nightCount,
-      morningCount: timeSamples.morningCount,
-      nightSamples: timeSamples.nightSamples,
-      morningSamples: timeSamples.morningSamples,
       petMatches: petDetection.matchCount,
       petSampleMedia: petDetection.sampleIds,
       topPetType: petDetection.topPetType,
       hasPetEmbedding: petDetection.hasEmbeddings,
-      totalCountForEmbedding: petDetection.totalConsidered,
     );
   }
 
@@ -1061,83 +670,12 @@ class _BadgePlaceStats {
                   cluster.sampleMediaIds(2, preferDistinctDays: true),
             )
             .take(6)
-            .toList(growable: false),
-        topSpot = dataset.spotClusters.isEmpty
-            ? null
-            : _SpotHighlight(dataset.spotClusters.first, dataset.totalCount);
+            .toList(growable: false);
 
   final int totalCount;
   final int uniqueCities;
   final int uniqueCountries;
   final List<int> heroMedia;
-  final _SpotHighlight? topSpot;
-}
-
-class _SpotHighlight {
-  _SpotHighlight(
-    _PlaceClusterSummary cluster,
-    int totalGeoCount,
-  )   : count = cluster.totalCount,
-        distinctDays = cluster.distinctDays,
-        share = totalGeoCount == 0
-            ? 0
-            : cluster.totalCount / totalGeoCount.toDouble(),
-        mediaIds = cluster.sampleMediaIds(
-          PlacesCandidateBuilder._kSpotMediaCount,
-          preferDistinctDays: true,
-        );
-
-  final int count;
-  final int distinctDays;
-  final double share;
-  final List<int> mediaIds;
-}
-
-class _TimeOfDaySamples {
-  _TimeOfDaySamples({
-    required this.nightCount,
-    required this.morningCount,
-    required this.nightSamples,
-    required this.morningSamples,
-  });
-
-  final int nightCount;
-  final int morningCount;
-  final List<int> nightSamples;
-  final List<int> morningSamples;
-
-  factory _TimeOfDaySamples.fromFiles(List<EnteFile> files) {
-    int night = 0;
-    int morning = 0;
-    final List<int> nightIds = <int>[];
-    final List<int> morningIds = <int>[];
-    for (final EnteFile file in files) {
-      final int? micros = file.creationTime;
-      final int? id = file.uploadedFileID;
-      if (micros == null || id == null) {
-        continue;
-      }
-      final DateTime timestamp = DateTime.fromMicrosecondsSinceEpoch(micros);
-      final int hour = timestamp.hour;
-      if (hour >= 20 || hour <= 4) {
-        night += 1;
-        if (nightIds.length < 6) {
-          nightIds.add(id);
-        }
-      } else if (hour >= 5 && hour <= 9) {
-        morning += 1;
-        if (morningIds.length < 6) {
-          morningIds.add(id);
-        }
-      }
-    }
-    return _TimeOfDaySamples(
-      nightCount: night,
-      morningCount: morning,
-      nightSamples: nightIds,
-      morningSamples: morningIds,
-    );
-  }
 }
 
 class _PetDetectionResult {
@@ -1146,14 +684,12 @@ class _PetDetectionResult {
     required this.sampleIds,
     required this.topPetType,
     required this.hasEmbeddings,
-    required this.totalConsidered,
   });
 
   final int matchCount;
   final List<int> sampleIds;
   final String? topPetType;
   final bool hasEmbeddings;
-  final int totalConsidered;
 
   static _PetDetectionResult fromContext(WrappedEngineContext context) {
     if (context.aesthetics.clipEmbeddings.isEmpty ||
@@ -1165,7 +701,6 @@ class _PetDetectionResult {
         sampleIds: const <int>[],
         topPetType: null,
         hasEmbeddings: false,
-        totalConsidered: 0,
       );
     }
 
@@ -1197,7 +732,6 @@ class _PetDetectionResult {
         sampleIds: const <int>[],
         topPetType: null,
         hasEmbeddings: true,
-        totalConsidered: clipEmbeddings.length,
       );
     }
 
@@ -1255,7 +789,6 @@ class _PetDetectionResult {
       sampleIds: sampleIds,
       topPetType: topPetType,
       hasEmbeddings: true,
-      totalConsidered: clipEmbeddings.length,
     );
   }
 }

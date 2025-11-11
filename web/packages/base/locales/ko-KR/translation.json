@@ -158,6 +158,7 @@
     "logout": "로그아웃",
     "logout_message": "정말로 로그아웃 하시겠습니까?",
     "delete_account": "계정 삭제",
+    "delete_account_multi_app_warning": "",
     "delete_account_manually_message": "<p>회원가입에 사용한 이메일을 통해 <a>{{emailID}}</a> (으)로 메일을 보내주세요.</p><p>귀하의 요청은 72시간 내로 처리됩니다.</p>",
     "change_email": "이메일 주소 변경",
     "ok": "확인",
