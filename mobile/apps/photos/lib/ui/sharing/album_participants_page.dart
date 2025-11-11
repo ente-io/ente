@@ -210,7 +210,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   (context, index) {
                     if (index == 0 &&
                         (canManageParticipants || admins.isNotEmpty)) {
-                      return MenuSectionTitle(
+                      return const MenuSectionTitle(
                         title: 'Admins',
                         iconData: Icons.admin_panel_settings_outlined,
                       );
@@ -273,7 +273,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         menuItemColor: colorScheme.fillFaint,
                         onTap: () async {
                           await _navigateToAddUser(
-                              [ActionTypesToShow.addAdmin]);
+                            [ActionTypesToShow.addAdmin],
+                          );
                         },
                         isTopBorderRadiusRemoved: admins.isNotEmpty,
                         singleBorderRadius: 8,

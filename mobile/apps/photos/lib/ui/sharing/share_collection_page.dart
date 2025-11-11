@@ -2,10 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import 'package:photos/core/configuration.dart';
-import "package:photos/extensions/user_extension.dart";
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/collection/user.dart";
+import 'package:photos/extensions/user_extension.dart';
+import 'package:photos/generated/l10n.dart';
+import 'package:photos/models/api/collection/user.dart';
 import 'package:photos/models/collection/collection.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -13,15 +15,13 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
-import "package:photos/ui/sharing/add_participant_page.dart";
+import 'package:photos/ui/sharing/add_participant_page.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
-import "package:photos/ui/sharing/album_share_info_widget.dart";
-import "package:photos/ui/sharing/manage_album_participant.dart";
+import 'package:photos/ui/sharing/album_share_info_widget.dart';
+import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/service_locator.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class ShareCollectionPage extends StatefulWidget {
@@ -115,17 +115,16 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             menuItemColor: getEnteColorScheme(context).fillFaint,
             isTopBorderRadiusRemoved: _sharees.isNotEmpty,
             onTap: () async {
-              routeToPage(
+              await routeToPage(
                 context,
                 AddParticipantPage(
                   [widget.collection],
                   const [ActionTypesToShow.addAdmin],
                 ),
-              ).then(
-                (value) => {
-                  if (mounted) {setState(() => {})},
-                },
               );
+              if (mounted) {
+                setState(() => {});
+              }
             },
           ),
         );
@@ -180,17 +179,16 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           isTopBorderRadiusRemoved: true,
           isBottomBorderRadiusRemoved: true,
           onTap: () async {
-            routeToPage(
+            await routeToPage(
               context,
               AddParticipantPage(
                 [widget.collection],
                 const [ActionTypesToShow.addViewer],
               ),
-            ).then(
-              (value) => {
-                if (mounted) {setState(() => {})},
-              },
             );
+            if (mounted) {
+              setState(() => {});
+            }
           },
         ),
       );
