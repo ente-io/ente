@@ -23,79 +23,81 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     return Material(
-      color: enteColorScheme.backgroundElevated,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 36),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: TitleBarTitleWidget(
-                  title: AppLocalizations.of(context).whatsNew,
-                ),
+          color: enteColorScheme.backgroundElevated,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 36,
+          ),
+          Container(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TitleBarTitleWidget(
+                title: AppLocalizations.of(context).whatsNew,
               ),
             ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: _getChangeLog(context),
-            ),
-            const DividerWidget(
-              dividerType: DividerType.solid,
-            ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 16,
-                  bottom: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ButtonWidget(
-                      buttonType: ButtonType.trailingIconPrimary,
-                      buttonSize: ButtonSize.large,
-                      labelText: AppLocalizations.of(context).continueLabel,
-                      icon: Icons.arrow_forward_outlined,
-                      onTap: () async {
-                        await updateService.hideChangeLog();
-                        if (mounted && Navigator.of(context).canPop()) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    ButtonWidget(
-                      buttonType: ButtonType.trailingIconSecondary,
-                      buttonSize: ButtonSize.large,
-                      labelText: AppLocalizations.of(context).rateUs,
-                      icon: Icons.favorite_rounded,
-                      iconColor: enteColorScheme.primary500,
-                      onTap: () async {
-                        await updateService.launchReviewUrl();
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          Flexible(child: _getChangeLog(context)),
+          const DividerWidget(
+            dividerType: DividerType.solid,
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16,
+                top: 16,
+                bottom: 8,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ButtonWidget(
+                    buttonType: ButtonType.trailingIconPrimary,
+                    buttonSize: ButtonSize.large,
+                    labelText: AppLocalizations.of(context).continueLabel,
+                    icon: Icons.arrow_forward_outlined,
+                    onTap: () async {
+                      await updateService.hideChangeLog();
+                      if (mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                  const SizedBox(
+                    height: 8,
+                  ),
+                  ButtonWidget(
+                    buttonType: ButtonType.trailingIconSecondary,
+                    buttonSize: ButtonSize.large,
+                    labelText: AppLocalizations.of(context).rateUs,
+                    icon: Icons.favorite_rounded,
+                    iconColor: enteColorScheme.primary500,
+                    onTap: () async {
+                      await updateService.launchReviewUrl();
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  const SizedBox(height: 8),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _getChangeLog(BuildContext ctx) {
-    final List<ChangeLogEntry> items = [
+    final scrollController = ScrollController();
+    final List<ChangeLogEntry> items = [];
+    items.addAll([
       ChangeLogEntry(
         context.l10n.cLTitle1,
         context.l10n.cLDesc1,
@@ -106,27 +108,24 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         context.l10n.cLDesc2,
         isFeature: true,
       ),
-    ];
-    final double maxListHeight = MediaQuery.of(ctx).size.height * 0.5;
-    final scrollController = ScrollController();
-    final listView = ListView.builder(
-      controller: scrollController,
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(right: 16),
-      physics: const BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        return ChangeLogEntryWidget(entry: items[index]);
-      },
-      itemCount: items.length,
-    );
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: maxListHeight,
-      ),
+    ]);
+    return Container(
+      padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
         controller: scrollController,
+        thumbVisibility: true,
         thickness: 2.0,
-        child: listView,
+        child: ListView.builder(
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: ChangeLogEntryWidget(entry: items[index]),
+            );
+          },
+          itemCount: items.length,
+        ),
       ),
     );
   }
