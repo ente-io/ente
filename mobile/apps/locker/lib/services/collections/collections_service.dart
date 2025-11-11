@@ -419,6 +419,33 @@ class CollectionService {
     }
   }
 
+  /// Trash an empty collection directly without moving files.
+  /// The server will verify that the collection is actually empty before
+  /// deleting. If keepFiles is set as False and the collection is not empty,
+  /// then the files in the collection will be moved to trash.
+  ///
+  /// [isBulkDelete] - During bulk deletion, this event is not fired to avoid
+  /// quick refresh of the collection gallery
+  Future<void> trashEmptyCollection(
+    Collection collection, {
+    bool isBulkDelete = false,
+  }) async {
+    try {
+      await _apiClient.trashCollection(
+        collection,
+        keepFiles: true,
+        skipEventFiring: isBulkDelete,
+      );
+      if (!isBulkDelete) {
+        await sync();
+        await TrashService.instance.syncTrash();
+      }
+    } catch (e) {
+      _logger.severe("Failed to trash empty collection: $e");
+      rethrow;
+    }
+  }
+
   Future<void> moveFilesFromCurrentCollection(
     Collection collection,
     List<EnteFile> files,

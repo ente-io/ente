@@ -257,6 +257,7 @@ class CollectionApiClient {
   Future<void> trashCollection(
     Collection collection, {
     bool keepFiles = false,
+    bool skipEventFiring = false,
   }) async {
     try {
       await _enteDio.delete(
@@ -264,7 +265,13 @@ class CollectionApiClient {
         "?keepFiles=${keepFiles ? "True" : "False"}"
         "&collectionID=${collection.id}",
       );
-      await _handleCollectionDeletion(collection);
+      if (skipEventFiring) {
+        await _db.deleteCollection(collection);
+        final deletedCollection = collection.copyWith(isDeleted: true);
+        await _updateCollectionInDB(deletedCollection);
+      } else {
+        await _handleCollectionDeletion(collection);
+      }
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;

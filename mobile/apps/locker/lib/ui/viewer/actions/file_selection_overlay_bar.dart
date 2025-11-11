@@ -431,7 +431,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Future<void> _shareFileLink(BuildContext context, EnteFile file) async {
-    await FileActions.shareFileLink(context, file,);
+    await FileActions.shareFileLink(context, file);
   }
 
   Future<void> _editFile(BuildContext context, EnteFile file) async {
