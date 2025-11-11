@@ -261,15 +261,22 @@ class CollectionService {
     }
   }
 
-  Future<void> trashFile(EnteFile file, Collection collection) async {
+  Future<void> trashFile(
+    EnteFile file,
+    Collection collection, {
+    bool runSync = true,
+  }) async {
     try {
       final List<TrashRequest> requests = [];
       requests.add(TrashRequest(file.uploadedFileID!, collection.id));
       await _apiClient.trash(requests);
 
       await _db.deleteFilesFromCollection(collection, [file]);
-      await sync();
-      await TrashService.instance.syncTrash();
+
+      if (runSync) {
+        await sync();
+        await TrashService.instance.syncTrash();
+      }
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
       rethrow;
@@ -382,6 +389,7 @@ class CollectionService {
 
       await _apiClient.trashCollection(collection, keepFiles: true);
       await sync();
+      await TrashService.instance.syncTrash();
     } catch (e) {
       _logger.severe("Failed to trash collection keeping files: $e");
       rethrow;
@@ -396,12 +404,13 @@ class CollectionService {
         for (final file in files) {
           final fileCollections = await getCollectionsForFile(file);
           for (final fileCollection in fileCollections) {
-            await trashFile(file, fileCollection);
+            await trashFile(file, fileCollection, runSync: false);
           }
         }
       }
 
       await _apiClient.trashCollection(collection);
+
       await sync();
       await TrashService.instance.syncTrash();
     } catch (e) {

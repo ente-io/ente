@@ -7,6 +7,7 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
@@ -251,11 +252,16 @@ class FileActions {
             await CollectionService.instance.getCollectionsForFile(file);
 
         if (collections.isNotEmpty) {
-          await CollectionService.instance.trashFile(file, collections.first);
+          await CollectionService.instance.trashFile(
+            file,
+            collections.first,
+            runSync: false,
+          );
         }
       }
 
       await CollectionService.instance.sync();
+      await TrashService.instance.syncTrash();
 
       await dialog.hide();
 

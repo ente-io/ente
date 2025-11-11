@@ -217,6 +217,7 @@ class CollectionApiClient {
   Future<void> leaveCollection(Collection collection) async {
     await CollectionSharingService.instance.leaveCollection(collection.id);
     await _handleCollectionDeletion(collection);
+    await CollectionService.instance.sync();
   }
 
   Future<void> _handleCollectionDeletion(Collection collection) async {
@@ -224,7 +225,6 @@ class CollectionApiClient {
     final deletedCollection = collection.copyWith(isDeleted: true);
     await _updateCollectionInDB(deletedCollection);
     Bus.instance.fire(CollectionsUpdatedEvent("delete_collection"));
-    await CollectionService.instance.sync();
   }
 
   Future<void> move(

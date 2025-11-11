@@ -154,6 +154,9 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       }
     } catch (e, s) {
       _logger.severe('Failed to upload file', e, s);
+      if (progressDialog.isShowing()) {
+        await progressDialog.hide();
+      }
       await showGenericErrorDialog(
         context: context,
         error: e,
