@@ -169,7 +169,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             // Check for ctrl+F (cmd+F on macOS)
-            if ((event.metaKey || event.ctrlKey) && event.key === "f") {
+            if ((event.metaKey || event.ctrlKey) && event.key === "k") {
                 event.preventDefault();
                 selectRef.current?.focus();
             }
@@ -338,31 +338,58 @@ const createSelectStyles = (
     clearIndicator: (style) => ({ ...style, display: "none" }),
 });
 
-const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
-    <SelectComponents.Control {...props}>
-        <Stack
-            direction="row"
-            sx={{
-                alignItems: "center",
-                // Fill the entire control (the control uses display flex).
-                flex: 1,
-            }}
-        >
-            <Box
+const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
+    const isMac = navigator.userAgent.toUpperCase().includes("MAC");
+    const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+    const hasValue =
+        props.getValue().length > 0 || props.selectProps.inputValue;
+
+    return (
+        <SelectComponents.Control {...props}>
+            <Stack
+                direction="row"
                 sx={{
-                    display: "inline-flex",
-                    // Match the default padding of the ValueContainer to make
-                    // the icon look properly spaced and aligned.
-                    pl: "8px",
-                    color: "stroke.muted",
+                    alignItems: "center",
+                    // Fill the entire control (the control uses display flex).
+                    flex: 1,
                 }}
             >
-                {iconForOption(props.getValue()[0])}
-            </Box>
-            {children}
-        </Stack>
-    </SelectComponents.Control>
-);
+                <Box
+                    sx={{
+                        display: "inline-flex",
+                        // Match the default padding of the ValueContainer to make
+                        // the icon look properly spaced and aligned.
+                        pl: "8px",
+                        color: "stroke.muted",
+                    }}
+                >
+                    {iconForOption(props.getValue()[0])}
+                </Box>
+                {children}
+                {!hasValue && (
+                    <Box
+                        sx={{
+                            display: ["none", "none", "inline-flex"],
+                            alignItems: "center",
+                            pr: "8px",
+                            color: "text.faint",
+                            fontSize: "12px",
+                            fontFamily: "monospace",
+                            border: "1px solid",
+                            borderColor: "stroke.faint",
+                            borderRadius: "4px",
+                            px: "6px",
+                            py: "2px",
+                            mr: "8px",
+                        }}
+                    >
+                        {shortcutKey}
+                    </Box>
+                )}
+            </Stack>
+        </SelectComponents.Control>
+    );
+};
 
 const iconForOption = (option: SearchOption | undefined) => {
     switch (option?.suggestion.type) {
