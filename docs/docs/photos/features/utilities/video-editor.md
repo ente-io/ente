@@ -130,9 +130,3 @@ A progress dialog shows the export status while your video is being processed.
 - [Video Streaming](/photos/features/utilities/video-streaming) - Watch videos without downloading
 - [Storage Optimization](/photos/features/albums-and-organization/storage-optimization) - Manage storage with video conversion options
 - [Export](/photos/features/backup-and-sync/export) - Download and export your videos
-
-## Related FAQs
-
-- [How do I edit a video?](/photos/faq/metadata-and-editing#how-do-i-edit-video)
-- [Why is video export taking so long?](/photos/faq/troubleshooting#video-export-slow)
-- [Can I edit videos on desktop?](/photos/faq/desktop#video-editor-desktop)
