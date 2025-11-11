@@ -2,7 +2,6 @@ import 'dart:io';
 
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_utils/email_util.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/constants.dart";
@@ -35,10 +34,9 @@ class SupportSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.contactSupport,
+            makeTextBold: true,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
           onTap: () async {
             await sendEmail(context, to: supportEmail);
           },
@@ -46,16 +44,15 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         AboutMenuItemWidget(
           title: context.l10n.help,
-          url: "https://ente.io/help",
+          url: "https://help.ente.io",
         ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.suggestFeatures,
+            makeTextBold: true,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
           onTap: () async {
             // ignore: unawaited_futures
             launchUrlString(
@@ -68,10 +65,9 @@ class SupportSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.reportABug,
+            makeTextBold: true,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
           onTap: () async {
             await sendLogs(context, context.l10n.reportBug);
           },

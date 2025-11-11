@@ -10,6 +10,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
 import 'package:locker/ui/components/file_upload_dialog.dart';
+import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:logging/logging.dart';
 
 /// Abstract base class that provides file upload functionality.
@@ -30,7 +31,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
   void onFileUploadComplete();
 
   /// Opens a file picker dialog and uploads the selected file
-  Future<void> addFile() async {
+  Future<bool> addFile() async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.any,
       allowMultiple: true,
@@ -43,12 +44,15 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           .toList();
 
       if (selectedFiles.isNotEmpty) {
-        await uploadFiles(selectedFiles);
+        return await uploadFiles(selectedFiles);
       }
     }
+
+    return false;
   }
 
-  Future<void> uploadFiles(List<File> files) async {
+  Future<bool> uploadFiles(List<File> files) async {
+    var didUpload = false;
     final progressDialog = createProgressDialog(
       context,
       context.l10n.uploadedFilesProgress(0, files.length),
@@ -58,20 +62,39 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       final List<Future> futures = [];
 
       final collections = await CollectionService.instance.getCollections();
-
       final collectionsWithoutUncategorized = collections
           .where((c) => c.type != CollectionType.uncategorized)
           .toList();
 
-      // Show upload dialog for the first file to get collection selection
-      final uploadResult = await showFileUploadDialog(
-        context,
-        file: files.first,
-        collections: collectionsWithoutUncategorized,
-        selectedCollection: selectedCollection,
+      // Navigate to upload screen to get collection selection
+      final uploadResult =
+          await Navigator.of(context).push<FileUploadDialogResult>(
+        MaterialPageRoute(
+          builder: (context) => FileUploadScreen(
+            files: files,
+            collections: collectionsWithoutUncategorized,
+            selectedCollection: selectedCollection,
+          ),
+        ),
       );
 
-      if (uploadResult != null && uploadResult.selectedCollections.isNotEmpty) {
+      // Handle both regular collections and uncategorized (empty set)
+      final isUncategorizedUpload =
+          uploadResult != null && uploadResult.selectedCollections.isEmpty;
+      final isRegularUpload =
+          uploadResult != null && uploadResult.selectedCollections.isNotEmpty;
+
+      if (isUncategorizedUpload || isRegularUpload) {
+        didUpload = true;
+        if (isUncategorizedUpload) {
+          // Get the uncategorized collection for upload
+          final uncategorizedCollection = await CollectionService.instance
+              .getOrCreateUncategorizedCollection();
+          uploadResult.selectedCollections.add(uncategorizedCollection);
+        }
+
+        await progressDialog.show();
+
         int completedUploads = 0;
         for (final file in files) {
           final fileUploadFuture = FileUploader.instance
@@ -107,6 +130,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
               }
             }).catchError((e) {
               completedUploads++;
+              _logger.severe('File upload failed', e);
               progressDialog.update(
                 message: context.l10n.uploadedFilesProgressWithError(
                   completedUploads,
@@ -117,18 +141,15 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
             }),
           );
         }
-      }
-      if (futures.isNotEmpty) {
-        await progressDialog.show();
-        await Future.wait(futures);
 
-        // Sync once at the end when files are added to multiple collections
-        final shouldPerformFinalSync = (uploadResult != null &&
-            uploadResult.selectedCollections.length > 1);
+        if (futures.isNotEmpty) {
+          await Future.wait(futures);
 
-        if (shouldPerformFinalSync) {
-          // Final sync triggers UI refresh via CollectionsUpdatedEvent
-          await CollectionService.instance.sync();
+          onFileUploadComplete();
+
+          await CollectionService.instance.sync().catchError((e) {
+            _logger.warning('Background sync failed after upload', e);
+          });
         }
       }
     } catch (e, s) {
@@ -142,5 +163,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         await progressDialog.hide();
       }
     }
+
+    return didUpload;
   }
 }

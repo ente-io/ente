@@ -7,6 +7,12 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 <!-- A short summary list of changes to the Ente Photos mobile and desktop apps. For a more user-oriented list with screenshots and blog post links, see the [global changelog](https://ente.io/changelog). -->
 
+## v1.2.18 (mobile) - Nov 2025
+
+- **Jump to date** - See surrounding photos for any photo by selecting the jump to date option in the file's info pane.
+
+- **Faster video editor** - Video editor was revamped to both drastically improve its speed when editing larger videos, and also improve the UX.
+
 ## v1.2.15 (mobile) - Oct 2025
 
 - **OCR! Select text in photos** - Ente will detect if a photo or screenshot has an text and show you a button to enter text selection mode. Each line of text can be individually selected.

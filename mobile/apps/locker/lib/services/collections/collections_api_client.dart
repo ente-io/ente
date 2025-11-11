@@ -150,6 +150,48 @@ class CollectionApiClient {
     }
   }
 
+  Future<void> removeFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) return;
+
+    final params = <String, dynamic>{};
+    params["collectionID"] = collectionID;
+
+    const batchSize = 100;
+    final batchedFiles = <List<EnteFile>>[];
+    for (int i = 0; i < files.length; i += batchSize) {
+      batchedFiles.add(
+        files.sublist(i, min(i + batchSize, files.length)),
+      );
+    }
+
+    for (final batch in batchedFiles) {
+      params["fileIDs"] = <int>[];
+      for (final file in batch) {
+        if (file.uploadedFileID != null) {
+          params["fileIDs"].add(file.uploadedFileID);
+        }
+      }
+
+      if (params["fileIDs"].isNotEmpty) {
+        final response = await _enteDio.post(
+          "/collections/v3/remove-files",
+          data: params,
+        );
+        if (response.statusCode != 200) {
+          throw Exception("Failed to remove files from collection");
+        }
+
+        await _db.deleteFilesFromCollection(
+          await _db.getCollection(collectionID),
+          batch,
+        );
+      }
+    }
+  }
+
   Future<void> rename(Collection collection, String newName) async {
     final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
     final encryptedName = CryptoUtil.encryptSync(
@@ -181,6 +223,7 @@ class CollectionApiClient {
     await _db.deleteCollection(collection);
     final deletedCollection = collection.copyWith(isDeleted: true);
     await _updateCollectionInDB(deletedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("delete_collection"));
     await CollectionService.instance.sync();
   }
 
@@ -211,11 +254,17 @@ class CollectionApiClient {
     );
   }
 
-  Future<void> trashCollection(Collection collection) async {
+  Future<void> trashCollection(
+    Collection collection, {
+    bool keepFiles = false,
+  }) async {
     try {
       await _enteDio.delete(
-        "/collections/v3/${collection.id}?keepFiles=False&collectionID=${collection.id}",
+        "/collections/v3/${collection.id}"
+        "?keepFiles=${keepFiles ? "True" : "False"}"
+        "&collectionID=${collection.id}",
       );
+      await _handleCollectionDeletion(collection);
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;
@@ -429,14 +478,16 @@ class CollectionApiClient {
 
     collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
     await _updateCollectionInDB(collection);
-    Bus.instance.fire(CollectionsUpdatedEvent());
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_created");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_created"));
   }
 
   Future<void> disableShareUrl(Collection collection) async {
     await CollectionSharingService.instance.disableShareUrl(collection.id);
     collection.publicURLs.clear();
     await _updateCollectionInDB(collection);
-    Bus.instance.fire(CollectionsUpdatedEvent());
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_disabled");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_disabled"));
   }
 
   Future<void> updateShareUrl(
@@ -453,7 +504,8 @@ class CollectionApiClient {
     collection.publicURLs.clear();
     collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
     await _updateCollectionInDB(collection);
-    Bus.instance.fire(CollectionsUpdatedEvent());
+    _logger.info("Firing CollectionsUpdatedEvent: share_url_updated");
+    Bus.instance.fire(CollectionsUpdatedEvent("share_url_updated"));
   }
 
   Future<List<User>> share(

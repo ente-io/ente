@@ -294,12 +294,11 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      path: "."
-      ref: mybranched
-      resolved-ref: "539079ac2758086ef4dfb602a5f8785bf5295fb3"
-      url: "https://github.com/ente-io/chewie.git"
-    source: git
-    version: "1.10.0"
+      name: chewie
+      sha256: "44bcfc5f0dfd1de290c87c9d86a61308b3282a70b63435d5557cfd60f54a69ca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.13.0"
   cli_config:
     dependency: transitive
     description:
@@ -2175,10 +2174,10 @@ packages:
     dependency: transitive
     description:
       name: provider
-      sha256: "4abbd070a04e9ddc287673bf5a030c7ca8b685ff70218720abab8b092f53dd84"
+      sha256: "4e82183fa20e5ca25703ead7e05de9e4cceed1fbd1eadc1ac3cb6f565a09f272"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.5"
+    version: "6.1.5+1"
   pub_semver:
     dependency: transitive
     description:

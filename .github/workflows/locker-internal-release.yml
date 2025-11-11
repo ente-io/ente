@@ -43,7 +43,7 @@ jobs:
 
             - name: Build PlayStore AAB
               run: |
-                  flutter build appbundle --release
+                  flutter build appbundle --release --flavor playstore
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_locker_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
@@ -55,8 +55,9 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON_LOCKER }}
                   packageName: io.ente.locker
-                  releaseFiles: mobile/apps/locker/build/app/outputs/bundle/release/app-release.aab
+                  releaseFiles: mobile/apps/locker/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
+                  status: draft
 
             - name: Notify Discord
               uses: sarisia/actions-status-discord@v1

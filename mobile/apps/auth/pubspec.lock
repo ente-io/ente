@@ -945,10 +945,10 @@ packages:
     dependency: "direct main"
     description:
       name: hugeicons
-      sha256: b4a695c2100217a0b4d2378f0102d948925c97e37417baa6e2d9cb62ba8fb2f7
+      sha256: "036d917bd12e2dee331de7910a11417ebf6c80be1962c0d63ee945e3184f0937"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.1"
   image:
     dependency: "direct main"
     description:

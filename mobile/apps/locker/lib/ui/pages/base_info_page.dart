@@ -1,7 +1,5 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +10,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
+import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
 enum InfoPageMode { view, edit }
@@ -19,11 +18,13 @@ enum InfoPageMode { view, edit }
 abstract class BaseInfoPage<T extends InfoData> extends StatefulWidget {
   final InfoPageMode mode;
   final EnteFile? existingFile; // The file to edit, or null for new files
+  final VoidCallback? onCancelWithoutSaving;
 
   const BaseInfoPage({
     super.key,
     this.mode = InfoPageMode.edit,
     this.existingFile,
+    this.onCancelWithoutSaving,
   });
 }
 
@@ -32,6 +33,16 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
+  late InfoPageMode _initialMode;
+
+  @protected
+  InfoPageMode get currentMode => _currentMode;
+
+  @protected
+  bool get isInViewMode => _currentMode == InfoPageMode.view;
+
+  @protected
+  bool get isInEditMode => _currentMode == InfoPageMode.edit;
 
   // Current data state (can be updated after saving)
   T? _currentData;
@@ -71,10 +82,93 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   List<Widget> buildViewFields();
   bool validateForm();
 
+  bool get showCollectionSelectionTitle => true;
+  double get collectionSpacing => 24;
+
+  @protected
+  bool get isSaveEnabled => !_isLoading;
+
+  @protected
+  Future<bool> onEditModeBackPressed() async {
+    return true;
+  }
+
+  @protected
+  Future<bool> onPopRequested() async {
+    return true;
+  }
+
+  @protected
+  Widget buildAppBarTitle(BuildContext context) {
+    return TitleBarTitleWidget(
+      title: pageTitle,
+    );
+  }
+
+  @protected
+  List<Collection> get availableCollections => _availableCollections;
+
+  @protected
+  Set<int> get selectedCollectionIds => _selectedCollectionIds;
+
+  @protected
+  void toggleCollectionSelection(int collectionId) {
+    _onToggleCollection(collectionId);
+  }
+
+  @protected
+  void updateAvailableCollections(List<Collection> collections) {
+    _onCollectionsUpdated(collections);
+  }
+
+  @protected
+  Widget buildEditModeContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...buildFormFields(),
+            SizedBox(height: collectionSpacing),
+            CollectionSelectionWidget(
+              collections: _availableCollections,
+              selectedCollectionIds: _selectedCollectionIds,
+              onToggleCollection: _onToggleCollection,
+              onCollectionsUpdated: _onCollectionsUpdated,
+              titleWidget:
+                  showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @protected
+  Widget buildViewModeContent(
+    BuildContext context,
+    BoxConstraints constraints,
+  ) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: buildViewFields(),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _currentMode = widget.mode;
+    _initialMode = widget.mode;
     _loadCollections();
     loadExistingData();
   }
@@ -87,12 +181,15 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     try {
       final collections = await CollectionService.instance.getCollections();
       setState(() {
-        _availableCollections = collections;
+        // Filter out uncategorized collection (it will be shown separately)
+        _availableCollections = collections
+            .where((c) => c.type != CollectionType.uncategorized)
+            .toList();
         // Pre-select a default collection if available
-        if (collections.isNotEmpty) {
-          final defaultCollection = collections.firstWhere(
-            (c) => c.name == 'Information',
-            orElse: () => collections.first,
+        if (_availableCollections.isNotEmpty) {
+          final defaultCollection = _availableCollections.firstWhere(
+            (c) => c.name == context.l10n.informationCollectionName,
+            orElse: () => _availableCollections.first,
           );
           _selectedCollectionIds = {defaultCollection.id};
         }
@@ -229,8 +326,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one collection'),
+        SnackBar(
+          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
           backgroundColor: Colors.red,
         ),
       );
@@ -257,7 +354,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final collectionCount = selectedCollections.length;
     final message = collectionCount == 1
         ? context.l10n.recordSavedSuccessfully
-        : 'Record saved to $collectionCount collections successfully';
+        : context.l10n.recordSavedToMultipleCollections(collectionCount);
 
     // Navigate to home page and clear all previous routes
     await Navigator.of(context).pushAndRemoveUntil(
@@ -290,7 +387,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$fieldName copied to clipboard'),
+        content: Text(context.l10n.copiedToClipboard(fieldName)),
         duration: const Duration(seconds: 2),
         backgroundColor: Colors.green,
       ),
@@ -310,8 +407,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label.isNotEmpty) ...[
-          Text(label), // Use default style to match FormTextInputWidget
-          const SizedBox(height: 4),
+          Text(
+            label,
+            style: textTheme.body,
+          ), // Use default style to match FormTextInputWidget
+          const SizedBox(height: 12),
         ],
         ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -357,36 +457,79 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     );
   }
 
+  Future<void> _handleBackNavigation() async {
+    if (isInEditMode) {
+      final canLeaveEdit = await onEditModeBackPressed();
+      if (!canLeaveEdit) {
+        return;
+      }
+
+      if (currentData != null) {
+        _toggleMode();
+        return;
+      }
+    }
+
+    final shouldPop = await onPopRequested();
+    if (!shouldPop || !mounted) {
+      return;
+    }
+
+    _popAndMaybeNotifyCancel();
+  }
+
+  void _popAndMaybeNotifyCancel() {
+    final shouldNotify =
+        widget.existingFile == null && widget.onCancelWithoutSaving != null;
+    Navigator.of(context).pop();
+    if (shouldNotify) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onCancelWithoutSaving?.call();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
+    final colorScheme = getEnteColorScheme(context);
+
+    // Only intercept back gesture if:
+    // - Currently in edit mode AND
+    // - Was initially opened in view mode (editing existing note)
+    final shouldInterceptBack = isEditMode && _initialMode == InfoPageMode.view;
 
     return PopScope(
-      canPop: isViewMode,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && isEditMode) {
-          // If in edit mode and trying to go back, switch to view mode instead
-          _toggleMode();
+        if (!didPop) {
+          _handleBackNavigation();
         }
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(pageTitle),
+          backgroundColor: colorScheme.backgroundBase,
+          surfaceTintColor: Colors.transparent,
+          toolbarHeight: 48,
+          leadingWidth: 48,
+          centerTitle: false,
+          titleSpacing: 0,
+          title: buildAppBarTitle(context),
           leading: isEditMode && currentData != null
               ? IconButton(
-                  icon: Icon(
-                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
                   ),
-                  onPressed: _toggleMode,
-                  tooltip: 'Back to view',
+                  onPressed: _handleBackNavigation,
+                  tooltip: context.l10n.backToView,
                 )
               : IconButton(
-                  icon: Icon(
-                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Back',
+                  onPressed: _handleBackNavigation,
+                  tooltip: context.l10n.back,
                 ),
           automaticallyImplyLeading: false,
           actions: [
@@ -394,55 +537,41 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: _toggleMode,
-                tooltip: 'Edit',
+                tooltip: context.l10n.edit,
               ),
           ],
         ),
+        backgroundColor: colorScheme.backgroundBase,
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Fields based on current mode
-                          if (isViewMode)
-                            ...buildViewFields()
-                          else
-                            ...buildFormFields(),
-
-                          // Collection selection only in edit mode
-                          if (isEditMode) ...[
-                            const SizedBox(height: 24),
-                            CollectionSelectionWidget(
-                              collections: _availableCollections,
-                              selectedCollectionIds: _selectedCollectionIds,
-                              onToggleCollection: _onToggleCollection,
-                              onCollectionsUpdated: _onCollectionsUpdated,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (isViewMode) {
+                        return buildViewModeContent(context, constraints);
+                      }
+                      return buildEditModeContent(context, constraints);
+                    },
                   ),
                 ),
 
                 // Save button only in edit mode
                 if (isEditMode) ...[
                   const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      onTap: _isLoading ? null : _saveRecord,
-                      text: _isLoading
-                          ? context.l10n.pleaseWait
-                          : submitButtonText,
+                  SafeArea(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: GradientButton(
+                        onTap: isSaveEnabled ? _saveRecord : null,
+                        text: _isLoading
+                            ? context.l10n.pleaseWait
+                            : submitButtonText,
+                      ),
                     ),
                   ),
                 ],

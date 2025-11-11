@@ -1,7 +1,6 @@
 import "package:adaptive_theme/adaptive_theme.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
@@ -79,7 +78,6 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         title: _name(context, themeMode),
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
       isExpandable: false,
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       trailingExtraMargin: 4,

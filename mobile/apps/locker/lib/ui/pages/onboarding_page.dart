@@ -1,18 +1,16 @@
-import 'package:ente_accounts/pages/email_entry_page.dart';
-import 'package:ente_accounts/pages/login_page.dart';
+import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
-import 'package:ente_ui/components/developer_settings_widget.dart';
 import "package:ente_ui/pages/developer_settings_page.dart";
-import 'package:ente_ui/theme/ente_theme.dart';
-import "package:ente_ui/theme/ente_theme_data.dart";
+import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
+import 'package:locker/ui/pages/login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -24,167 +22,162 @@ class OnboardingPage extends StatefulWidget {
 class _OnboardingPageState extends State<OnboardingPage> {
   static const kDeveloperModeTapCountThreshold = 7;
 
+  double _featureIndex = 0;
   int _developerModeTapCount = 0;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     debugPrint("Building OnboardingPage");
     final l10n = context.l10n;
     return Scaffold(
-      body: SafeArea(
-        child: GestureDetector(
-          onTap: () async {
-            _developerModeTapCount++;
-            if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
-              _developerModeTapCount = 0;
-              final result = await showChoiceDialog(
-                context,
-                title: l10n.developerSettings,
-                firstButtonLabel: l10n.yes,
-                body: l10n.developerSettingsWarning,
-                isDismissible: false,
+      backgroundColor: colorScheme.primary700,
+      body: GestureDetector(
+        onTap: () async {
+          _developerModeTapCount++;
+          if (_developerModeTapCount >= kDeveloperModeTapCountThreshold) {
+            _developerModeTapCount = 0;
+            final result = await showChoiceDialog(
+              context,
+              title: l10n.developerSettings,
+              firstButtonLabel: l10n.yes,
+              body: l10n.developerSettingsWarning,
+              isDismissible: false,
+            );
+            if (result?.action == ButtonAction.first) {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return DeveloperSettingsPage(Configuration.instance);
+                  },
+                ),
               );
-              if (result?.action == ButtonAction.first) {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return DeveloperSettingsPage(Configuration.instance);
-                    },
-                  ),
-                );
-                setState(() {});
-              }
+              setState(() {});
             }
-          },
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                    maxWidth: 450,
-                  ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 40.0,
-                        horizontal: 40,
-                      ),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  "assets/locker.png",
-                                  width: 200,
-                                  height: 200,
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  "ente",
-                                  style: getEnteTextTheme(context).h1.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'Montserrat',
-                                      ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "Locker",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium,
-                                ),
-                                const SizedBox(height: 32),
-                                Text(
-                                  l10n.onBoardingBody,
-                                  textAlign: TextAlign.center,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge!
-                                      .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onBoardingBodyColor,
-                                      ),
-                                ),
-                              ],
-                            ),
+          }
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const Padding(padding: EdgeInsets.all(12)),
+                        Text(
+                          l10n.locker,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 100),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: GradientButton(
-                              onTap: _navigateToSignUpPage,
-                              text: l10n.newUser,
+                        ),
+                        const Padding(padding: EdgeInsets.all(28)),
+                        _getFeatureSlider(context),
+                        const Padding(padding: EdgeInsets.all(12)),
+                        DotsIndicator(
+                          dotsCount: 3,
+                          position: _featureIndex.toInt(),
+                          decorator: DotsDecorator(
+                            activeColor: Colors.white,
+                            color: Colors.white.withValues(alpha: 0.32),
+                            activeShape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Container(
-                            height: 56,
-                            width: double.infinity,
-                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                            child: Hero(
-                              tag: "log_in",
-                              child: ElevatedButton(
-                                style: Theme.of(context)
-                                    .colorScheme
-                                    .optionalActionButtonStyle,
-                                onPressed: _navigateToSignInPage,
-                                child: Text(
-                                  l10n.existingUser,
-                                  style: const TextStyle(
-                                    color: Colors.black, // same for both themes
-                                  ),
-                                ),
-                              ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
+                            size: const Size(10, 10),
+                            activeSize: const Size(20, 10),
+                            spacing: const EdgeInsets.all(6),
                           ),
-                          const SizedBox(height: 4),
-                          DeveloperSettingsWidget(Configuration.instance),
-                        ],
-                      ),
+                        ),
+                        const Padding(padding: EdgeInsets.all(28)),
+                      ],
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: colorScheme.primary700,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 18,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    minimumSize: const Size(double.infinity, 56),
+                  ),
+                  onPressed: _navigateToSignInPage,
+                  child: Text(
+                    l10n.loginToEnteAccount,
+                    style: getEnteTextTheme(context).bodyBold.copyWith(
+                          color: colorScheme.primary700,
+                        ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    showCreateNewAccountDialog(
+                      context,
+                      title: l10n.unlockLockerPaidPlanTitle,
+                      body: l10n.unlockLockerPaidPlanBody,
+                      buttonLabel: l10n.okay,
+                      assetPath: "assets/file_lock.png",
+                      icon: const SizedBox.shrink(),
+                    );
+                  },
+                  child: Text(
+                    l10n.noAccountCta,
+                    style: getEnteTextTheme(context).bodyBold.copyWith(
+                          color: Colors.white,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                  ),
+                ),
+              ),
+              const Padding(padding: EdgeInsets.all(20)),
+            ],
           ),
         ),
       ),
     );
   }
 
-  void _navigateToSignUpPage() {
-    Widget page;
-    if (Configuration.instance.getEncryptedToken() == null) {
-      page = EmailEntryPage(Configuration.instance);
-    } else {
-      // No key
-      if (Configuration.instance.getKeyAttributes() == null) {
-        // Never had a key
-        page = PasswordEntryPage(
-          Configuration.instance,
-          PasswordEntryMode.set,
-          const HomePage(),
-        );
-      } else if (Configuration.instance.getKey() == null) {
-        // Yet to decrypt the key
-        page = PasswordReentryPage(
-          Configuration.instance,
-          const HomePage(),
-        );
-      } else {
-        // All is well, user just has not subscribed
-        page = const HomePage();
-      }
-    }
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return page;
+  Widget _getFeatureSlider(BuildContext context) {
+    final l10n = context.l10n;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 420),
+      child: PageView(
+        children: [
+          FeatureItemWidget(
+            "assets/onboarding_lock.png",
+            l10n.featureSaveImportant,
+          ),
+          FeatureItemWidget(
+            "assets/onboarding_file.png",
+            l10n.featurePassAutomatically,
+          ),
+          FeatureItemWidget(
+            "assets/onboarding_share.png",
+            l10n.featureShareAnytime,
+          ),
+        ],
+        onPageChanged: (index) {
+          setState(() {
+            _featureIndex = double.parse(index.toString());
+          });
         },
       ),
     );
@@ -193,7 +186,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _navigateToSignInPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = LoginPage(Configuration.instance);
+      page = const LoginPage();
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
@@ -221,6 +214,48 @@ class _OnboardingPageState extends State<OnboardingPage> {
           return page;
         },
       ),
+    );
+  }
+}
+
+class FeatureItemWidget extends StatelessWidget {
+  final String assetPath;
+  final String featureTitleFirstLine;
+
+  const FeatureItemWidget(
+    this.assetPath,
+    this.featureTitleFirstLine, {
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Image.asset(
+          assetPath,
+          height: 200,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                featureTitleFirstLine,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
