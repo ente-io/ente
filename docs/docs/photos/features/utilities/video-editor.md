@@ -51,14 +51,13 @@ Useful for correcting videos captured in the wrong orientation.
 **On mobile:**
 
 1. Open any video in your library
-2. Tap the overflow menu (⋮) in the top-right corner
-3. Select **Edit**
-4. The video editor opens with three action buttons at the bottom:
+2. Tap the **Edit** button in the bottom actions
+3. The video editor opens with three action buttons at the bottom:
    - **Trim** - Adjust video length
    - **Crop** - Change video dimensions
    - **Rotate** - Change video orientation
-5. Make your edits using one or more tools
-6. Tap **Save copy** to create the edited version
+4. Make your edits using one or more tools
+5. Tap **Save copy** to create the edited version
 
 **What happens when you save:**
 
