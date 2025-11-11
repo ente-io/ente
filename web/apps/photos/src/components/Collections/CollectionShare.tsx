@@ -115,7 +115,8 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     onRemotePull,
 }) => {
     const settings = useSettingsSnapshot();
-    const { isInternalUser, isAdminRoleEnabled } = settings;
+    const { isInternalUser, isAdminRoleEnabled, isSurfacePublicLinkEnabled } =
+        settings;
     const { onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
 
@@ -157,7 +158,8 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     const showEmailSection = !isSharedIncoming || canManageParticipants;
     const hasPublicLink = collection.publicURLs.length > 0;
     const showPublicShare =
-        isOwner || (isSharedIncoming && hasPublicLink && isAdminRoleEnabled);
+        isOwner ||
+        (isSharedIncoming && hasPublicLink && isSurfacePublicLinkEnabled);
 
     return (
         <SidebarDrawer anchor="right" {...{ open, onClose }}>

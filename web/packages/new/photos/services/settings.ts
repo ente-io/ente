@@ -51,6 +51,10 @@ export interface Settings {
      * `true` if admin role management features are enabled.
      */
     isAdminRoleEnabled: boolean;
+    /**
+     * `true` if public link surfaces should be shown to non-owners.
+     */
+    isSurfacePublicLinkEnabled: boolean;
 
     /**
      * `true` if maps are enabled.
@@ -111,6 +115,7 @@ export interface Settings {
 const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
     isAdminRoleEnabled: false,
+    isSurfacePublicLinkEnabled: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
@@ -203,6 +208,8 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
     settings.isAdminRoleEnabled =
+        (flags?.internalUser ?? false) || isDevBuild;
+    settings.isSurfacePublicLinkEnabled =
         (flags?.internalUser ?? false) || isDevBuild;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
