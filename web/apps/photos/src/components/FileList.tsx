@@ -1110,6 +1110,12 @@ const Check = styled("input")<{ $active: boolean }>(
         transform-origin: center;
     }
 
+    @media (pointer: fine) {
+        &::after {
+            border-width: 0 2.5px 2.5px 0;
+        }
+    }
+
     /* checkmark background (filled circle) */
     &:checked::before {
         background-color: ${theme.vars.palette.accent.main};
