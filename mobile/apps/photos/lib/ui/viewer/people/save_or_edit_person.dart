@@ -327,7 +327,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           },
                         ),
                         const SizedBox(height: 32),
-                        if (!widget.isEditing) _buildMergeWithExistingButton(),
+                        if (!widget.isEditing) _getPersonItems(),
                         if (widget.isEditing)
                           Align(
                             alignment: Alignment.centerLeft,
@@ -413,78 +413,125 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     });
   }
 
-  Widget _buildMergeWithExistingButton() {
-    return StreamBuilder<List<(PersonEntity, EnteFile)>>(
-      stream: _getPersonsWithRecentFileStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          _logger.severe(
-            "Error in _getPersonsWithRecentFileStream: ${snapshot.error}",
-          );
-          return const SizedBox.shrink();
-        }
+  Widget _getPersonItems() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: StreamBuilder<List<(PersonEntity, EnteFile)>>(
+        stream: _getPersonsWithRecentFileStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            _logger.severe(
+              "Error in _getPersonItems: ${snapshot.error} ${snapshot.stackTrace}}",
+            );
+            if (kDebugMode) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${snapshot.error}'),
+                  Text('${snapshot.stackTrace}'),
+                ],
+              );
+            } else {
+              return const SizedBox.shrink();
+            }
+          } else if (snapshot.hasData) {
+            final persons = snapshot.data!;
+            final filteredResults = _inputName.isNotEmpty
+                ? persons
+                    .where(
+                      (element) => element.$1.data.name
+                          .toLowerCase()
+                          .contains(_inputName.toLowerCase()),
+                    )
+                    .toList()
+                : persons;
+            if (filteredResults.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox.shrink();
-        }
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                const horizontalEdgePadding = 20.0;
+                const gridPadding = 16.0;
+                final maxWidth = constraints.maxWidth > 0
+                    ? constraints.maxWidth
+                    : MediaQuery.of(context).size.width;
+                final availableWidth = (maxWidth - (horizontalEdgePadding * 2))
+                    .clamp(0.0, maxWidth);
+                var crossAxisCount = (availableWidth / 100).floor();
+                if (crossAxisCount <= 0) {
+                  crossAxisCount = 1;
+                }
+                final totalSpacing = (crossAxisCount - 1) * gridPadding;
+                var tileSize = (availableWidth - totalSpacing) / crossAxisCount;
+                if (!tileSize.isFinite || tileSize <= 0) {
+                  tileSize = 96;
+                }
+                const double extraVerticalSpacing = 6.0;
+                final smallFontSize =
+                    getEnteTextTheme(context).small.fontSize ?? 14;
+                final textScaleFactor =
+                    MediaQuery.textScalerOf(context).scale(smallFontSize) /
+                        smallFontSize;
+                final childAspectRatio = tileSize /
+                    (tileSize + extraVerticalSpacing + (24 * textScaleFactor));
 
-        final persons = snapshot.data ?? [];
-        if (persons.isEmpty || widget.clusterID == null) {
-          return const SizedBox.shrink();
-        }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      child: Text(
+                        context.l10n.orMergeWithExistingPerson,
+                        style: getEnteTextTheme(context).largeBold,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: gridPadding,
+                          mainAxisSpacing: gridPadding,
+                          childAspectRatio: childAspectRatio,
+                        ),
+                        itemCount: filteredResults.length,
+                        itemBuilder: (context, index) {
+                          final person = filteredResults[index];
+                          return PersonGridItem(
+                            key: ValueKey(person.$1.remoteID),
+                            person: person.$1,
+                            personFile: person.$2,
+                            size: tileSize,
+                            onTap: () async {
+                              if (userAlreadyAssigned) {
+                                return;
+                              }
+                              userAlreadyAssigned = true;
+                              await ClusterFeedbackService.instance
+                                  .addClusterToExistingPerson(
+                                person: person.$1,
+                                clusterID: widget.clusterID!,
+                              );
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: ButtonWidget(
-            shouldSurfaceExecutionStates: false,
-            buttonType: ButtonType.secondary,
-            labelText: context.l10n.mergeWithExisting,
-            onTap: () => _handleMergeWithExisting(persons),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _handleMergeWithExisting(
-    List<(PersonEntity, EnteFile)> persons,
-  ) async {
-    final selectedPerson = await routeToPage<PersonEntity>(
-      context,
-      _MergeWithExistingPersonPage(
-        persons: List<(PersonEntity, EnteFile)>.from(persons),
+                              Navigator.pop(context, person);
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            return const EnteLoadingWidget();
+          }
+        },
       ),
     );
-
-    if (selectedPerson == null) {
-      return;
-    }
-
-    await _mergeClusterWithPerson(selectedPerson);
-  }
-
-  Future<void> _mergeClusterWithPerson(PersonEntity selectedPerson) async {
-    if (userAlreadyAssigned || widget.clusterID == null) {
-      return;
-    }
-
-    try {
-      userAlreadyAssigned = true;
-      await ClusterFeedbackService.instance.addClusterToExistingPerson(
-        person: selectedPerson,
-        clusterID: widget.clusterID!,
-      );
-
-      if (!mounted) {
-        return;
-      }
-
-      Navigator.pop(context, selectedPerson);
-    } catch (e) {
-      userAlreadyAssigned = false;
-      _logger.severe("Error merging person", e);
-      await showGenericErrorDialog(context: context, error: e);
-    }
   }
 
   Stream<List<(PersonEntity, EnteFile)>>
@@ -617,110 +664,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     return personFileCounts
         .map<(PersonEntity, EnteFile)>((entry) => (entry.$1, entry.$2))
         .toList();
-  }
-}
-
-class _MergeWithExistingPersonPage extends StatefulWidget {
-  final List<(PersonEntity, EnteFile)> persons;
-
-  const _MergeWithExistingPersonPage({
-    required this.persons,
-  });
-
-  @override
-  State<_MergeWithExistingPersonPage> createState() =>
-      _MergeWithExistingPersonPageState();
-}
-
-class _MergeWithExistingPersonPageState
-    extends State<_MergeWithExistingPersonPage> {
-  final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = "";
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final filteredPersons = widget.persons.where((person) {
-      if (_searchQuery.isEmpty) {
-        return true;
-      }
-      return person.$1.data.name.toLowerCase().contains(
-            _searchQuery.toLowerCase(),
-          );
-    }).toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.mergeWithExisting),
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.trim();
-                });
-              },
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.search),
-                hintText: context.l10n.search,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                filled: true,
-                fillColor: getEnteColorScheme(context).fillFaint,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: filteredPersons.isEmpty
-                ? Center(
-                    child: Text(
-                      context.l10n.noResultsFound,
-                      style: getEnteTextTheme(context).bodyMuted,
-                    ),
-                  )
-                : GridView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 8,
-                    ),
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 170,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: filteredPersons.length,
-                    itemBuilder: (context, index) {
-                      final person = filteredPersons[index];
-                      return PersonGridItem(
-                        key: ValueKey(person.$1.remoteID),
-                        person: person.$1,
-                        personFile: person.$2,
-                        onTap: () => Navigator.pop(context, person.$1),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
