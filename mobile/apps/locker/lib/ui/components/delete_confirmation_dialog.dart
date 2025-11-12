@@ -166,7 +166,7 @@ class _DeleteConfirmationBottomSheetState
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            "Also delete items from all other collections",
+                            "Also delete items present in this collection from all other collections they are part of",
                             style: textTheme.small,
                           ),
                         ),
