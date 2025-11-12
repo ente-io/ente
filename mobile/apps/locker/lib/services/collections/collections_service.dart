@@ -607,21 +607,12 @@ class CollectionService {
     return true;
   }
 
-  // Track if default collections have been set up
-  bool _defaultCollectionsSetupCompleted = false;
-
   Future<void> setupDefaultCollections() async {
     try {
       if (Configuration.instance.getKey() == null) {
         _logger.warning(
           "Cannot setup default collections - master key not available",
         );
-        return;
-      }
-
-      // Skip if already completed
-      if (_defaultCollectionsSetupCompleted) {
-        _logger.info("Default collections already set up, skipping.");
         return;
       }
 
@@ -636,25 +627,9 @@ class CollectionService {
       // Create Documents collection if it doesn't exist
       await _getOrCreateDocumentsCollection();
 
-      _defaultCollectionsSetupCompleted = true;
       _logger.info("Default collections setup completed.");
     } catch (e, s) {
       _logger.severe("Failed to setup default collections", e, s);
-    }
-  }
-
-  /// Ensures default collections are set up if they haven't been already
-  /// This should be called from HomePage once the master key is available
-  Future<void> ensureDefaultCollections() async {
-    if (!_defaultCollectionsSetupCompleted &&
-        Configuration.instance.getKey() != null) {
-      await setupDefaultCollections();
-    } else {
-      if (_defaultCollectionsSetupCompleted) {
-        _logger.info("Default collections already setup, skipping");
-      } else {
-        _logger.warning("Master key not available, cannot setup collections");
-      }
     }
   }
 

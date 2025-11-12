@@ -290,35 +290,39 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     required colorScheme,
     required textTheme,
   }) {
-    return GestureDetector(
-      onTap: () async {
-        await _createNewCollection();
-      },
-      child: DottedBorder(
-        options: const RoundedRectDottedBorderOptions(
-          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-          strokeWidth: 1,
-          color: Color(0xFF6B6B6B),
-          dashPattern: [5, 5],
-          radius: Radius.circular(24),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.add_rounded,
-              size: 18,
-              color: colorScheme.textMuted,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              context.l10n.collectionLabel,
-              style: textTheme.body.copyWith(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: const BorderRadius.all(Radius.circular(24)),
+        onTap: () async {
+          await _createNewCollection();
+        },
+        child: DottedBorder(
+          options: const RoundedRectDottedBorderOptions(
+            padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            strokeWidth: 1,
+            color: Color(0xFF6B6B6B),
+            dashPattern: [5, 5],
+            radius: Radius.circular(24),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.add_rounded,
+                size: 18,
                 color: colorScheme.textMuted,
-                fontWeight: FontWeight.w500,
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Text(
+                context.l10n.collectionLabel,
+                style: textTheme.body.copyWith(
+                  color: colorScheme.textMuted,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
