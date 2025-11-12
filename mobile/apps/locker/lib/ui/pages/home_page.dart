@@ -74,17 +74,23 @@ class CustomLockerAppBar extends StatelessWidget
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      scaffoldKey.currentState!.openDrawer();
-                    },
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedMenu01,
-                      color: Colors.white,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () {
+                        scaffoldKey.currentState!.openDrawer();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMenu01,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                   GestureDetector(

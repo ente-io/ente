@@ -1,22 +1,22 @@
 import "package:ente_ui/components/buttons/button_widget.dart";
-import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/files/links/links_service.dart";
+import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 
 Future<void> deleteShareLink(BuildContext context, int fileID) async {
-  final result = await showChoiceDialog(
+  final confirmation = await showDeleteConfirmationDialog(
     context,
     title: context.l10n.deleteShareLinkDialogTitle,
     body: context.l10n.deleteShareLinkConfirmation,
-    firstButtonLabel: context.l10n.delete,
-    secondButtonLabel: context.l10n.cancel,
-    firstButtonType: ButtonType.critical,
-    isCritical: true,
+    deleteButtonLabel: context.l10n.delete,
+    assetPath: 'assets/file_delete_icon.png',
+    showDeleteFromAllCollectionsOption: false,
   );
-  if (result?.action == ButtonAction.first && context.mounted) {
+
+  if (confirmation?.buttonResult.action == ButtonAction.first && context.mounted) {
     final dialog = createProgressDialog(
       context,
       context.l10n.deletingShareLink,
