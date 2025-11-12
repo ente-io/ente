@@ -814,5 +814,43 @@
         "example": "1,000"
       }
     }
+  },
+  "favorite": "Favorite",
+  "unfavorite": "Unfavorite",
+  "addingToFavorites": "Adding to Favorites...",
+  "removingFromFavorites": "Removing from Favorites...",
+  "markingAsFavorites": "Marking as Favorites...",
+  "fileMarkedAsFavorite": "Item marked as favorite",
+  "fileRemovedFromFavorites": "Item removed from favorites",
+  "filesMarkedAsFavorites": "{count, plural, =1{1 item marked as favorite} other{{count} items marked as favorites}}",
+  "@filesMarkedAsFavorites": {
+    "description": "Success message when items are marked as favorites",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "allFilesAlreadyMarkedAsFavorites": "All items are already marked as favorites",
+  "failedToMarkFilesAsFavorites": "Failed to mark items as favorites: {error}",
+  "@failedToMarkFilesAsFavorites": {
+    "description": "Error message when marking items as favorites fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "failedToUpdateFavoriteStatus": "Failed to update favorite status: {error}",
+  "@failedToUpdateFavoriteStatus": {
+    "description": "Error message when updating favorite status fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
   }
 }
