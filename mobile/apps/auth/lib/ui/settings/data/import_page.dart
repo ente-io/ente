@@ -1,3 +1,6 @@
+import 'package:ente_accounts/models/user_details.dart';
+import 'package:ente_accounts/services/user_service.dart';
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -6,6 +9,7 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_widget.dart';
 import 'package:ente_auth/ui/settings/data/import/import_service.dart';
+import 'package:ente_auth/ui/settings_page.dart';
 import 'package:flutter/material.dart';
 
 enum ImportType {
@@ -20,8 +24,45 @@ enum ImportType {
   proton,
 }
 
-class ImportCodePage extends StatelessWidget {
+class ImportCodePage extends StatefulWidget {
   const ImportCodePage({super.key});
+
+  @override
+  State<ImportCodePage> createState() => _ImportCodePageState();
+}
+
+class _ImportCodePageState extends State<ImportCodePage> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ValueNotifier<String?> _emailNotifier = ValueNotifier<String?>(null);
+  late final SettingsPage _settingsPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _settingsPage = SettingsPage(
+      emailNotifier: _emailNotifier,
+      scaffoldKey: _scaffoldKey,
+    );
+    _loadUserEmail();
+  }
+
+  Future<void> _loadUserEmail() async {
+    if (Configuration.instance.hasConfiguredAccount()) {
+      try {
+        final UserDetails details =
+            await UserService.instance.getUserDetailsV2(memoryCount: false);
+        _emailNotifier.value = details.email;
+      } catch (_) {
+        // Ignore errors
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailNotifier.dispose();
+    super.dispose();
+  }
 
   static const List<ImportType> importOptions = [
     ImportType.plainText,
@@ -35,7 +76,7 @@ class ImportCodePage extends StatelessWidget {
     ImportType.lastpass,
   ];
 
-  String getTitle(BuildContext context, ImportType type) {
+  String _getTitle(BuildContext context, ImportType type) {
     switch (type) {
       case ImportType.plainText:
         return context.l10n.importTypePlainText;
@@ -63,6 +104,11 @@ class ImportCodePage extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: Drawer(
+          width: 428,
+          child: _settingsPage,
+        ),
         body: CustomScrollView(
           primary: false,
           slivers: <Widget>[
@@ -87,7 +133,7 @@ class ImportCodePage extends StatelessWidget {
                           ),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: getTitle(context, type),
+                            title: _getTitle(context, type),
                           ),
                           alignCaptionedTextToLeft: true,
                           menuItemColor: getEnteColorScheme(context).fillFaint,
