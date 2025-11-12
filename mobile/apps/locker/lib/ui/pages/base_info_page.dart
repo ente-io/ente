@@ -85,7 +85,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled => !_isLoading;
+  bool get isSaveEnabled =>
+      !_isLoading && _selectedCollectionIds.isNotEmpty;
 
   @protected
   Future<bool> onEditModeBackPressed() async {
@@ -193,9 +194,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             .where((c) => c.type != CollectionType.uncategorized)
             .map((c) => c.id)
             .toSet();
-      } else if (initialSelection.isEmpty && filteredCollections.isNotEmpty) {
-        final defaultCollection = _pickDefaultCollection(filteredCollections);
-        initialSelection = {defaultCollection.id};
       }
 
       if (!mounted) {
@@ -209,25 +207,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     } catch (e) {
       // Handle error silently or show a message
     }
-  }
-
-  Collection _pickDefaultCollection(List<Collection> collections) {
-    assert(collections.isNotEmpty, 'Collections list cannot be empty');
-
-    final infoCollectionName = context.l10n.informationCollectionName;
-    for (final collection in collections) {
-      if ((collection.name ?? '') == infoCollectionName) {
-        return collection;
-      }
-    }
-
-    for (final collection in collections) {
-      if (collection.type != CollectionType.favorites) {
-        return collection;
-      }
-    }
-
-    return collections.first;
   }
 
   void _onToggleCollection(int collectionId) {
