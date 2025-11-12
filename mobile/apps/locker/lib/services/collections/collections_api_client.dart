@@ -113,7 +113,19 @@ class CollectionApiClient {
     params["files"] = [];
     for (final file in files) {
       final int uploadedFileID = file.uploadedFileID!;
-      final fileKey = await CollectionService.instance.getFileKey(file);
+
+      // Follow Photos pattern: decrypt using file's current collectionID
+      final fileCurrentCollection =
+          await CollectionService.instance.getCollection(file.collectionID!);
+      final fileCurrentCollectionKey =
+          CryptoHelper.instance.getCollectionKey(fileCurrentCollection);
+      final fileKey = CryptoHelper.instance.getFileKey(
+        file.encryptedKey!,
+        file.keyDecryptionNonce!,
+        fileCurrentCollectionKey,
+      );
+
+      // Re-encrypt the file key with the destination collection's key
       final encryptedKeyData = CryptoUtil.encryptSync(fileKey, collectionKey);
       final String encryptedKey =
           CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
@@ -253,16 +265,39 @@ class CollectionApiClient {
     for (final batch in batchedFiles) {
       params["files"] = [];
       for (final file in batch) {
-        final fileKey = await CollectionService.instance.getFileKey(file);
+        // Follow Photos pattern: use file's collectionID to get the key
+        final fileCollection = await CollectionService.instance.getCollection(
+          file.collectionID!,
+        );
+        final fileCollectionKey =
+            CryptoHelper.instance.getCollectionKey(fileCollection);
+        final fileKey = CryptoHelper.instance.getFileKey(
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          fileCollectionKey,
+        );
+
+        // Update file's collectionID to the destination (like Photos does)
+        file.collectionID = toCollection.id;
+
+        // Re-encrypt the file key with the destination collection's key
+        final destCollectionKey =
+            CryptoHelper.instance.getCollectionKey(toCollection);
         final encryptedKeyData = CryptoUtil.encryptSync(
           fileKey,
-          CryptoHelper.instance.getCollectionKey(toCollection),
+          destCollectionKey,
         );
+
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+
         params["files"].add(
           CollectionFileItem(
             file.uploadedFileID!,
-            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
-            CryptoUtil.bin2base64(encryptedKeyData.nonce!),
+            file.encryptedKey!,
+            file.keyDecryptionNonce!,
           ).toMap(),
         );
       }
