@@ -89,7 +89,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   void dispose() {
     _debounce?.cancel();
     _nameFocsNode.dispose();
-    _debounce?.cancel();
     super.dispose();
   }
 
@@ -333,7 +332,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           },
                         ),
                         const SizedBox(height: 32),
-                        if (!widget.isEditing) _getPersonItems(),
+                        if (!widget.isEditing) _buildMergeWithExistingButton(),
                         if (widget.isEditing)
                           Align(
                             alignment: Alignment.centerLeft,
@@ -419,103 +418,77 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     });
   }
 
-  Widget _getPersonItems() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 12, 4, 0),
-      child: StreamBuilder<List<(PersonEntity, EnteFile)>>(
-        stream: _getPersonsWithRecentFileStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            _logger.severe(
-              "Error in _getPersonItems: ${snapshot.error} ${snapshot.stackTrace}}",
-            );
-            if (kDebugMode) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('${snapshot.error}'),
-                  Text('${snapshot.stackTrace}'),
-                ],
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          } else if (snapshot.hasData) {
-            final persons = snapshot.data!;
-            final searchResults = _inputName.isNotEmpty
-                ? persons
-                    .where(
-                      (element) => element.$1.data.name
-                          .toLowerCase()
-                          .contains(_inputName.toLowerCase()),
-                    )
-                    .toList()
-                : persons;
-            searchResults.sort(
-              (a, b) => a.$1.data.name.compareTo(b.$1.data.name),
-            );
-            if (searchResults.isEmpty) {
-              return const SizedBox.shrink();
-            }
-            final finalResults = _sortByCosine(searchResults);
+  Widget _buildMergeWithExistingButton() {
+    return StreamBuilder<List<(PersonEntity, EnteFile)>>(
+      stream: _getPersonsWithRecentFileStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          _logger.severe(
+            "Error in _getPersonsWithRecentFileStream: ${snapshot.error}",
+          );
+          return const SizedBox.shrink();
+        }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // left align
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 12),
-                  child: Text(
-                    context.l10n.orMergeWithExistingPerson,
-                    style: getEnteTextTheme(context).largeBold,
-                  ),
-                ),
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox.shrink();
+        }
 
-                SizedBox(
-                  height: 160, // Adjust this height based on your needs
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      scrollbars: true,
-                    ),
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(right: 8),
-                      itemCount: finalResults.length,
-                      itemBuilder: (context, index) {
-                        final person = finalResults[index];
-                        return PersonGridItem(
-                          key: ValueKey(person.$1.remoteID),
-                          person: person.$1,
-                          personFile: person.$2,
-                          onTap: () async {
-                            if (userAlreadyAssigned) {
-                              return;
-                            }
-                            userAlreadyAssigned = true;
-                            await ClusterFeedbackService.instance
-                                .addClusterToExistingPerson(
-                              person: person.$1,
-                              clusterID: widget.clusterID!,
-                            );
+        final persons = snapshot.data ?? [];
+        if (persons.isEmpty || widget.clusterID == null) {
+          return const SizedBox.shrink();
+        }
 
-                            Navigator.pop(context, person);
-                          },
-                        );
-                      },
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(width: 6);
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return const EnteLoadingWidget();
-          }
-        },
-      ),
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: context.l10n.mergeWithExisting,
+            onTap: () => _handleMergeWithExisting(persons),
+          ),
+        );
+      },
     );
+  }
+
+  Future<void> _handleMergeWithExisting(
+    List<(PersonEntity, EnteFile)> persons,
+  ) async {
+    final sortedPersons =
+        _sortByCosine(List<(PersonEntity, EnteFile)>.from(persons));
+    final selectedPerson = await routeToPage<PersonEntity>(
+      context,
+      _MergeWithExistingPersonPage(persons: sortedPersons),
+    );
+
+    if (selectedPerson == null) {
+      return;
+    }
+
+    await _mergeClusterWithPerson(selectedPerson);
+  }
+
+  Future<void> _mergeClusterWithPerson(PersonEntity selectedPerson) async {
+    if (userAlreadyAssigned || widget.clusterID == null) {
+      return;
+    }
+
+    try {
+      userAlreadyAssigned = true;
+      await ClusterFeedbackService.instance.addClusterToExistingPerson(
+        person: selectedPerson,
+        clusterID: widget.clusterID!,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pop(context, selectedPerson);
+    } catch (e) {
+      userAlreadyAssigned = false;
+      _logger.severe("Error merging person", e);
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 
   Stream<List<(PersonEntity, EnteFile)>>
@@ -707,6 +680,110 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       personAndFileID.add((person, files.first));
     }
     return personAndFileID;
+  }
+}
+
+class _MergeWithExistingPersonPage extends StatefulWidget {
+  final List<(PersonEntity, EnteFile)> persons;
+
+  const _MergeWithExistingPersonPage({
+    required this.persons,
+  });
+
+  @override
+  State<_MergeWithExistingPersonPage> createState() =>
+      _MergeWithExistingPersonPageState();
+}
+
+class _MergeWithExistingPersonPageState
+    extends State<_MergeWithExistingPersonPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredPersons = widget.persons.where((person) {
+      if (_searchQuery.isEmpty) {
+        return true;
+      }
+      return person.$1.data.name.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          );
+    }).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(context.l10n.mergeWithExisting),
+        centerTitle: false,
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.trim();
+                });
+              },
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: context.l10n.search,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                filled: true,
+                fillColor: getEnteColorScheme(context).fillFaint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: filteredPersons.isEmpty
+                ? Center(
+                    child: Text(
+                      context.l10n.noResultsFound,
+                      style: getEnteTextTheme(context).bodyMuted,
+                    ),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 170,
+                      mainAxisSpacing: 4,
+                      crossAxisSpacing: 4,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: filteredPersons.length,
+                    itemBuilder: (context, index) {
+                      final person = filteredPersons[index];
+                      return PersonGridItem(
+                        key: ValueKey(person.$1.remoteID),
+                        person: person.$1,
+                        personFile: person.$2,
+                        onTap: () => Navigator.pop(context, person.$1),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
