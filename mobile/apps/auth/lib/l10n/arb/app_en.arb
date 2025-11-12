@@ -538,7 +538,7 @@
   "errorGenericBody": "An unexpected error occurred while importing.",
   "localBackupSettingsTitle": "Local backup",
   "localBackupSidebarTitle": "Local backup",
-  "enableAutomaticBackups": "Enable automatic backups",
+  "enableAutomaticBackups": "Automatic backups",
   "backupDescription": "This will automatically backup your data to an on-device location. Backups are updated whenever entries are added, edited or deleted",
   "currentLocation": "Current backup location:",
   "securityNotice": "Security notice",

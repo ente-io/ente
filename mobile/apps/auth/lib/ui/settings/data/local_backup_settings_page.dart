@@ -1,458 +1,258 @@
-import 'dart:io';
-
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/components/buttons/button_widget.dart';
-import 'package:ente_auth/ui/components/dialog_widget.dart';
-import 'package:ente_auth/ui/components/models/button_result.dart';
-import 'package:ente_auth/ui/components/models/button_type.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:ente_auth/ui/components/captioned_text_widget.dart';
+import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
+import 'package:ente_auth/ui/settings/data/local_backup/local_backup_experience.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class LocalBackupSettingsPage extends StatefulWidget {
+const _autoBackupToggleCopy =
+    'Backs up your 2FA codes locally. The backup updates automatically whenever you add, edit, or delete a code.';
+
+class LocalBackupSettingsPage extends StatelessWidget {
   const LocalBackupSettingsPage({super.key});
 
   @override
-  State<LocalBackupSettingsPage> createState() =>
-      _LocalBackupSettingsPageState();
+  Widget build(BuildContext context) {
+    return const LocalBackupAppLockVariantPage();
+  }
 }
 
-class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
-  bool _isBackupEnabled = false;
-  String? _backupPath;
+class LocalBackupAppLockVariantPage extends StatelessWidget {
+  const LocalBackupAppLockVariantPage({super.key});
 
   @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  // to load the saved settings from SharedPreferences when the page opens.
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isBackupEnabled = prefs.getBool('isAutoBackupEnabled') ?? false;
-      _backupPath = prefs.getString('autoBackupPath');
-    });
-  }
-
-  Future<String?> _showCustomPasswordDialog() async {
-    final l10n = context.l10n;
-    final textController = TextEditingController();
-    // state variable to track password visibility
-    bool isPasswordHidden = true;
-
-    return showDialog<String>(
-      context: context,
-      barrierDismissible: false, 
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(l10n.setPasswordTitle, style: getEnteTextTheme(context).largeBold),
-              content: TextField(
-                controller: textController,
-                autofocus: true,
-                obscureText: isPasswordHidden,
-                decoration: InputDecoration(
-                  hintText: l10n.enterPassword,
-                  hintStyle: getEnteTextTheme(context).mini,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      isPasswordHidden ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        isPasswordHidden = !isPasswordHidden;
-                      });
+  Widget build(BuildContext context) {
+    return LocalBackupExperience(
+      builder: (context, controller) {
+        final l10n = context.l10n;
+        final textTheme = getEnteTextTheme(context);
+        final colorScheme = getEnteColorScheme(context);
+        return _LocalBackupVariantShell(
+          controller: controller,
+          title: l10n.localBackupSettingsTitle,
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MenuItemWidget(
+                  captionedTextWidget: CaptionedTextWidget(
+                    title: l10n.enableAutomaticBackups,
+                  ),
+                  alignCaptionedTextToLeft: true,
+                  singleBorderRadius: 12,
+                  menuItemColor: colorScheme.fillFaint,
+                  trailingWidget: ToggleSwitchWidget(
+                    value: () => controller.isBackupEnabled,
+                    onChanged: () async {
+                      await controller.toggleBackup(
+                        !controller.isBackupEnabled,
+                      );
                     },
                   ),
                 ),
-                onChanged: (text) => setState(() {}),
-              ),
-              actions: [
-                Row(
-                  children: [
-
-                    Expanded(
-                      child: ButtonWidget(
-                        buttonType: ButtonType.secondary,
-                        labelText: l10n.cancel,
-                        onTap: () async => Navigator.of(context).pop(null),
-                      ),
-                    ),
-
-                    const SizedBox(width: 8), 
-
-                    Expanded(
-                      child: ButtonWidget(
-                        buttonType: ButtonType.primary,
-                        labelText: l10n.saveAction,
-                        isDisabled: textController.text.isEmpty,
-                        onTap: () async => Navigator.of(context).pop(textController.text),
-                      ),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                  child: Text(
+                    _autoBackupToggleCopy,
+                    style: textTheme.miniFaint,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: controller.isBackupEnabled
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder<bool>(
+                              future: controller.hasPasswordConfigured(),
+                              builder: (context, snapshot) {
+                                final hasPassword = snapshot.data ?? false;
+                                final tileTitle = hasPassword
+                                    ? 'Update backup password'
+                                    : 'Set backup password';
+                                return MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: tileTitle,
+                                  ),
+                                  singleBorderRadius: 12,
+                                  alignCaptionedTextToLeft: true,
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingIcon: Icons.chevron_right_outlined,
+                                  trailingIconIsMuted: true,
+                                  onTap: () async {
+                                    await controller.updatePassword();
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 20),
+                            Material(
+                              color: colorScheme.fillFaint,
+                              borderRadius: BorderRadius.circular(12),
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () async {
+                                  await controller.changeLocation();
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Backup location',
+                                              style: textTheme.body,
+                                            ),
+                                            const SizedBox(height: 6),
+                                            _LocationPreview(
+                                              controller: controller,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          await controller.changeLocation();
+                                        },
+                                        style: TextButton.styleFrom(
+                                          backgroundColor:
+                                              colorScheme.fillMuted,
+                                          shape: const StadiumBorder(),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 18,
+                                            vertical: 12,
+                                          ),
+                                          minimumSize: const Size(0, 44),
+                                        ),
+                                        child: Text(
+                                          'Change folder',
+                                          style: textTheme.smallBold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
                 ),
               ],
-            );
-          },
+            ),
+          ),
         );
       },
     );
   }
+}
 
-  Future<ButtonResult?> _showLocationChoiceDialog({required String displayPath}) async {
-    final l10n = context.l10n;
+class _LocalBackupVariantShell extends StatelessWidget {
+  const _LocalBackupVariantShell({
+    required this.controller,
+    required this.title,
+    required this.body,
+  });
 
-    final dialogBody =
-        '${l10n.backupLocationChoiceDescription}\n\nSelected: ${_simplifyPath(displayPath)}';
-
-    final result = await showDialogWidget(
-      title: l10n.chooseBackupLocation,
-      context: context,
-      body: dialogBody, 
-      buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          labelText: l10n.saveBackup,
-          isInAlert: true,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.first,
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          labelText: l10n.changeLocation, 
-          isInAlert: true,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          labelText: l10n.cancel,
-          isInAlert: true,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.cancel,
-        ),
-      ],
-    );
-
-    return result;
-  }
-
-  Future<bool> _handleLocationSetup() async {
-
-    String currentPath = _backupPath ?? await _getDefaultBackupPath();
-
-    while (true) {
-      final result = await _showLocationChoiceDialog(displayPath: currentPath);
-
-      if (result?.action == ButtonAction.first) {
-        final prefs = await SharedPreferences.getInstance();
-        try {
-          await Directory(currentPath).create(recursive: true);
-          await prefs.setString('autoBackupPath', currentPath);
-          setState(() {
-            _backupPath = currentPath;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.initialBackupCreated)),
-          );
-          return true; 
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.noDefaultBackupFolder)),
-          );
-          return false; 
-        }
-      }
-
-      else if (result?.action == ButtonAction.second) {
-        final newPath = await FilePicker.platform.getDirectoryPath();
-        if (newPath != null) {
-          currentPath = newPath;
-        }
-        
-      }
-      
-      else {
-        return false;
-      }
-    }
-  }
-
-  Future<String> _getDefaultBackupPath() async {
-    if (Platform.isAndroid) {
-      Directory? externalDir = await getExternalStorageDirectory();
-      if (externalDir != null) {
-        String storagePath = externalDir.path.split('/Android')[0];
-        return '$storagePath/Download/EnteAuthBackups';
-      }
-    }
-
-    Directory? dir = await getDownloadsDirectory();
-    dir ??= await getApplicationDocumentsDirectory();
-    return '${dir.path}/EnteAuthBackups';
-  }
-
-  String _simplifyPath(String fullPath) {   //takes a file path string and shortens it if it matches the common Android root path.
-    const rootToRemove = '/storage/emulated/0/';
-    if (fullPath.startsWith(rootToRemove)) {
-      return fullPath.substring(rootToRemove.length);
-    }
-    return fullPath;
-  }
-
-  // opens directory picker
-  Future<bool> _pickAndSaveBackupLocation({String? successMessage}) async {
-    final prefs = await SharedPreferences.getInstance();
-    final l10n = context.l10n;
-
-    String? directoryPath = await FilePicker.platform.getDirectoryPath();
-
-    if (directoryPath != null) {
-
-      await prefs.setString('autoBackupPath', directoryPath);
-      
-      // we only set the state and create the backup if a path was chosen
-      setState(() {
-        _backupPath = directoryPath;
-      });
-      await LocalBackupService.instance.triggerAutomaticBackup();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(successMessage ?? l10n.locationUpdatedAndBackupCreated),  
-        ),
-      );
-      return true; 
-    }
-    return false; //user cancelled the file picker
-  }
-
-   Future<void> _showSetPasswordDialog() async {
-    final String? password = await _showCustomPasswordDialog();
-    if (password == null) {
-      setState(() {
-        _isBackupEnabled = false;
-      });
-      return;
-    }
-
-    if (password.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.passwordTooShort),
-        ),
-      );
-      setState(() {
-        _isBackupEnabled = false;
-      });
-      return;
-    }
-
-    const storage = FlutterSecureStorage();
-    await storage.write(key: 'autoBackupPassword', value: password);
-
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      final bool setupCompleted = await _handleLocationSetup();
-      if (!mounted) return;
-
-      if (setupCompleted) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isAutoBackupEnabled', true);
-        setState(() {
-          _isBackupEnabled = true;
-        });
-        await LocalBackupService.instance.triggerAutomaticBackup();
-      } else {
-        setState(() {
-          _isBackupEnabled = false;
-        });
-      }
-    });
-  }
+  final LocalBackupExperienceController controller;
+  final String title;
+  final Widget body;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.localBackupSettingsTitle), //text shown on appbar
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l10n.enableAutomaticBackups,  //toggle text
-                      style: getEnteTextTheme(context).largeBold,
-                    ),
-                  ),
-                  Switch.adaptive(
-                    value: _isBackupEnabled,
-                    activeColor: Theme.of(context)
-                        .colorScheme
-                        .enteTheme
-                        .colorScheme
-                        .primary400,
-                    activeTrackColor: Theme.of(context)
-                        .colorScheme
-                        .enteTheme
-                        .colorScheme
-                        .primary300,
-                    inactiveTrackColor: Theme.of(context)
-                        .colorScheme
-                        .enteTheme
-                        .colorScheme
-                        .fillMuted,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: (value) async {
-                      final prefs = await SharedPreferences.getInstance();
-
-                      if (value == true) {
-                        //when toggle is ON, show password dialog
-                        await _showSetPasswordDialog();
-                      } else {
-                        await prefs.setBool('isAutoBackupEnabled', false);
-                        setState(() {
-                          _isBackupEnabled = false;
-                        });
-                      }
-                    },
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0),
-                child: Text(
-                  l10n.backupDescription, //text below toggle
-                  style: getEnteTextTheme(context).mini,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Opacity(
-                opacity: _isBackupEnabled ? 1.0 : 0.4,
-                child: IgnorePointer(
-                  ignoring: !_isBackupEnabled,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.currentLocation, //shows current backup location
-                            style: getEnteTextTheme(context).body,
-                          ),
-                          const SizedBox(height: 4),
-                          if (_backupPath != null)
-                            Text(
-                              _simplifyPath(_backupPath!),
-                              style: getEnteTextTheme(context).small,
-                            )
-                          else
-                            FutureBuilder<String>(
-                              future: _getDefaultBackupPath(),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Text(
-                                     l10n.loadDefaultLocation, 
-                                    style: getEnteTextTheme(context)
-                                        .small
-                                        .copyWith(color: Colors.grey),
-                                  );
-                                } else if (snapshot.hasError) {
-                                  return Text(
-                                    l10n.couldNotDetermineLocation, 
-                                    style: getEnteTextTheme(context)
-                                        .small
-                                        .copyWith(color: Colors.red),
-                                  );
-                                } else {
-                                  return Text(
-                                    _simplifyPath(snapshot.data ?? ''),
-                                    style: getEnteTextTheme(context)
-                                        .small
-                                        .copyWith(color: Colors.grey),
-                                  );
-                                }
-                              },
-                            ),
-                          const SizedBox(height: 30),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () => _pickAndSaveBackupLocation(),
-                              child: Text(l10n.changeCurrentLocation),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withAlpha(26),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: Colors.orange.withAlpha(77),
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.security_outlined,
-                                  color: Colors.orange,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  l10n.securityNotice,  //security notice title
-                                  style: getEnteTextTheme(context)
-                                      .smallBold
-                                      .copyWith(
-                                        color: Colors.orange,
-                                      ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.backupSecurityNotice,  //security notice description
-                              style: getEnteTextTheme(context).mini.copyWith(
-                                    color: Colors.orange.shade700,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      appBar: AppBar(title: Text(title)),
+      body: Stack(
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: controller.hasLoaded
+                ? SafeArea(bottom: false, child: body)
+                : const _LocalBackupLoading(),
           ),
-        ),
+          if (controller.isBusy && controller.shouldShowBusyOverlay)
+            const _LocalBackupBusyOverlay(),
+        ],
       ),
     );
   }
+}
+
+class _LocalBackupBusyOverlay extends StatelessWidget {
+  const _LocalBackupBusyOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        color: _scaleAlpha(Colors.black, 0.05),
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+
+class _LocalBackupLoading extends StatelessWidget {
+  const _LocalBackupLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
+}
+
+class _LocationPreview extends StatelessWidget {
+  const _LocationPreview({required this.controller});
+
+  final LocalBackupExperienceController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final path = controller.backupPath;
+    final muted = textTheme.miniFaint.copyWith(color: Colors.grey);
+
+    if (path != null) {
+      return Text(controller.simplifyPath(path), style: textTheme.miniFaint);
+    }
+
+    return FutureBuilder<String>(
+      future: controller.resolveDefaultPath(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text(context.l10n.loadDefaultLocation, style: muted);
+        }
+        if (snapshot.hasError) {
+          return Text(
+            context.l10n.couldNotDetermineLocation,
+            style: muted.copyWith(color: Colors.redAccent),
+          );
+        }
+        return Text(
+          controller.simplifyPath(snapshot.data ?? ''),
+          style: textTheme.miniFaint,
+        );
+      },
+    );
+  }
+}
+
+Color _scaleAlpha(Color color, double factor) {
+  final normalized = (color.a * factor).clamp(0.0, 1.0);
+  return color.withValues(alpha: normalized);
 }
