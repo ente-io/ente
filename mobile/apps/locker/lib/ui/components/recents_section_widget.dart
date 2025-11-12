@@ -413,7 +413,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     }
     return name;
   }
-
 }
 
 class _FilterChipViewModel {
