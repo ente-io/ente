@@ -165,10 +165,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
-    // Handle ctrl+F keyboard shortcut to focus search
+    // Handle ctrl+K keyboard shortcut to focus search
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
-            // Check for ctrl+F (cmd+F on macOS)
+            // Check for ctrl+K (cmd+K on macOS)
             if ((event.metaKey || event.ctrlKey) && event.key === "k") {
                 event.preventDefault();
                 selectRef.current?.focus();
@@ -181,6 +181,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 
     const handleChange = (value: SearchOption | null) => {
         const type = value?.suggestion.type;
+        console.log(value, value?.suggestion.label);
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
         if (type == "collection" || type == "person") {
@@ -204,7 +205,15 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action == "input-change") setInputValue(value);
+        if (actionMeta.action == "input-change") {
+            setInputValue(value);
+
+            // If the input is cleared, also clear the selected value.
+            if (value === "") {
+                setValue(null);
+                setInputValue("");
+            }
+        }
     };
 
     const resetSearch = () => {
