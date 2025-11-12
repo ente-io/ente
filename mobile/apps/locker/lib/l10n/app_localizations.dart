@@ -2440,6 +2440,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.'**
   String deleteMultipleFilesDialogBody(int count);
 
+  /// Checkbox label asking whether to delete collection items everywhere
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete items from everywhere'**
+  String get deleteCollectionFromEverywhere;
+
   /// Button label for confirming deletion of one or more collections
   ///
   /// In en, this message translates to:

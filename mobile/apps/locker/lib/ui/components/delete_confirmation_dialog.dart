@@ -2,6 +2,7 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import 'package:locker/l10n/l10n.dart';
 
 class DeleteConfirmationResult {
   final ButtonResult buttonResult;
@@ -122,7 +123,7 @@ class _DeleteConfirmationBottomSheetState
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               if (widget.showDeleteFromAllCollectionsOption) ...[
                 GestureDetector(
                   onTap: () {
@@ -132,7 +133,11 @@ class _DeleteConfirmationBottomSheetState
                   },
                   child: SizedBox(
                     width: double.infinity,
-                    child: Row(
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 12,
+                      runSpacing: 8,
                       children: [
                         Container(
                           width: 18,
@@ -158,12 +163,10 @@ class _DeleteConfirmationBottomSheetState
                                 )
                               : null,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            "Also delete items present in this collection from all other collections they are part of",
-                            style: textTheme.small,
-                          ),
+                        Text(
+                          context.l10n.deleteCollectionFromEverywhere,
+                          style: textTheme.small,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),

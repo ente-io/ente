@@ -86,7 +86,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled => !_isLoading;
+  bool get isSaveEnabled =>
+      !_isLoading && _selectedCollectionIds.isNotEmpty;
 
   @protected
   Future<bool> onEditModeBackPressed() async {
@@ -179,23 +180,30 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _loadCollections() async {
     try {
       final collections = await CollectionService.instance.getCollections();
+      final filteredCollections = collections
+          .where((c) => c.type != CollectionType.uncategorized)
+          .toList();
+
+      Set<int> initialSelection = _selectedCollectionIds;
+
+      if (widget.existingFile != null) {
+        final fileCollections =
+            await CollectionService.instance.getCollectionsForFile(
+          widget.existingFile!,
+        );
+        initialSelection = fileCollections
+            .where((c) => c.type != CollectionType.uncategorized)
+            .map((c) => c.id)
+            .toSet();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        // Filter out uncategorized and favorites collections
-        _availableCollections = collections
-            .where(
-              (c) =>
-                  c.type != CollectionType.uncategorized &&
-                  c.type != CollectionType.favorites,
-            )
-            .toList();
-        // Pre-select a default collection if available
-        if (_availableCollections.isNotEmpty) {
-          final defaultCollection = _availableCollections.firstWhere(
-            (c) => c.name == context.l10n.informationCollectionName,
-            orElse: () => _availableCollections.first,
-          );
-          _selectedCollectionIds = {defaultCollection.id};
-        }
+        _availableCollections = filteredCollections;
+        _selectedCollectionIds = initialSelection;
       });
     } catch (e) {
       // Handle error silently or show a message
