@@ -74,7 +74,10 @@ export interface SearchBarProps {
     /**
      * Set or clear the selected {@link SearchOption}.
      */
-    onSelectSearchOption: (o: SearchOption | undefined) => void;
+    onSelectSearchOption: (
+        o: SearchOption | undefined,
+        options?: { shouldExitSearchMode?: boolean },
+    ) => void;
     /**
      * Called when the user selects the generic "People" header in the empty
      * state view.
@@ -192,7 +195,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         }
 
         // Let our parent know the selection was changed.
-        onSelectSearchOption(nullToUndefined(value));
+        // When selecting an option, we should exit search mode if needed.
+        onSelectSearchOption(nullToUndefined(value), {
+            shouldExitSearchMode: true,
+        });
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
@@ -211,6 +217,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
             if (value === "") {
                 setValue(null);
                 setInputValue("");
+                // Notify parent but don't exit search mode on mobile
+                onSelectSearchOption(undefined, {
+                    shouldExitSearchMode: false,
+                });
             }
         }
     };
@@ -223,8 +233,8 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         setValue(null);
         setInputValue("");
 
-        // Let our parent know.
-        onSelectSearchOption(undefined);
+        // Let our parent know and exit search mode entirely.
+        onSelectSearchOption(undefined, { shouldExitSearchMode: true });
     };
 
     const handleSelectPeople = () => {
