@@ -1091,7 +1091,7 @@ const Check = styled("input")<{ $active: boolean }>(
         background-color: #ddd;
         border-radius: 50%;
         margin: 6px;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
         position: relative; /* Important for Safari */
     }
     
@@ -1105,33 +1105,41 @@ const Check = styled("input")<{ $active: boolean }>(
         height: 11px;
         border: solid #333;
         border-width: 0 2px 2px 0;
-        transform: translate(-50%, -60%) rotate(45deg) scale(0);
-        transition: transform 0.3s ease;
+        transform: translate(-50%, -60%) rotate(45deg);
+        transition: border-color 0.3s ease, opacity 0.3s ease;
         transform-origin: center;
     }
 
-    @media (pointer: fine) {
-        &::after {
-            border-width: 0 2.5px 2.5px 0;
-        }
+    /* Default state - hide both */
+    visibility: hidden;
+    
+    /* When $active - show both with reduced opacity */
+    ${
+        $active &&
+        `
+        visibility: visible;
+        opacity: 0.5;
+    `
+    };
+    
+    /* Hover state - show both */
+    &:hover {
+        visibility: visible;
+        opacity: 0.7;
     }
-
-    /* checkmark background (filled circle) */
+    
+    /* Checked state - show both with full opacity and colored */
+    &:checked {
+        visibility: visible;
+        opacity: 1 !important;
+    }
+    
     &:checked::before {
         background-color: ${theme.vars.palette.accent.main};
     }
     
-    /* checkmark foreground (tick) - show it */
     &:checked::after {
         border-color: #ddd;
-        transform: translate(-50%, -60%) rotate(45deg) scale(1);
-    }
-    
-    visibility: hidden;
-    ${$active && "visibility: visible; opacity: 0.5;"};
-    &:checked {
-        visibility: visible;
-        opacity: 1 !important;
     }
 `,
 );
