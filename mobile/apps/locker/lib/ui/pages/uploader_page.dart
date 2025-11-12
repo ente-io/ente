@@ -64,8 +64,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       final collections = await CollectionService.instance.getCollections();
       final regularCollections = collections
           .where(
-            (c) => (c.type != CollectionType.uncategorized &&
-                c.type != CollectionType.favorites),
+            (c) => c.type != CollectionType.uncategorized,
           )
           .toList();
 
