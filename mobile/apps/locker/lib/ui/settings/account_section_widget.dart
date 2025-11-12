@@ -1,5 +1,4 @@
 import "package:ente_accounts/pages/delete_account_page.dart";
-import "package:ente_accounts/pages/password_entry_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_legacy/pages/emergency_page.dart";
@@ -15,7 +14,6 @@ import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:locker/ui/components/recovery_key_dialog_locker.dart";
-import "package:locker/ui/pages/home_page.dart";
 import "package:locker/ui/settings/common_settings.dart";
 
 class AccountSectionWidget extends StatelessWidget {
@@ -123,35 +121,36 @@ class AccountSectionWidget extends StatelessWidget {
           }
         },
       ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.changePassword,
-          makeTextBold: true,
-        ),
-        trailingIcon: Icons.chevron_right_outlined,
-        onTap: () async {
-          final hasAuthenticated = await LocalAuthenticationService.instance
-              .requestLocalAuthentication(
-            context,
-            l10n.authToChangeYourPassword,
-          );
-          if (hasAuthenticated) {
-            // ignore: unawaited_futures
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return PasswordEntryPage(
-                    Configuration.instance,
-                    PasswordEntryMode.update,
-                    const HomePage(),
-                  );
-                },
-              ),
-            );
-          }
-        },
-      ),
+      // TODO(aman): Re-introduce later
+      // sectionOptionSpacing,
+      // MenuItemWidget(
+      //   captionedTextWidget: CaptionedTextWidget(
+      //     title: l10n.changePassword,
+      //     makeTextBold: true,
+      //   ),
+      //   trailingIcon: Icons.chevron_right_outlined,
+      //   onTap: () async {
+      //     final hasAuthenticated = await LocalAuthenticationService.instance
+      //         .requestLocalAuthentication(
+      //       context,
+      //       l10n.authToChangeYourPassword,
+      //     );
+      //     if (hasAuthenticated) {
+      //       // ignore: unawaited_futures
+      //       Navigator.of(context).push(
+      //         MaterialPageRoute(
+      //           builder: (BuildContext context) {
+      //             return PasswordEntryPage(
+      //               Configuration.instance,
+      //               PasswordEntryMode.update,
+      //               const HomePage(),
+      //             );
+      //           },
+      //         ),
+      //       );
+      //     }
+      //   },
+      // ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
