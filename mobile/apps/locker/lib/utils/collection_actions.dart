@@ -186,6 +186,7 @@ class CollectionActions {
       for (final collection in nonEmptyCollections) {
         try {
           await CollectionService.instance.trashCollection(
+            context,
             collection,
             keepFiles: keepFiles,
           );
@@ -293,6 +294,7 @@ class CollectionActions {
       // If deleteFromAllCollections is true → keepFiles should be false (move files to trash)
       // If deleteFromAllCollections is false → keepFiles should be true (keep files in other collections)
       await CollectionService.instance.trashCollection(
+        context,
         collection,
         keepFiles: !(result?.deleteFromAllCollections ?? false),
       );

@@ -191,7 +191,7 @@ class FavoritesService {
             await _collectionService.getOrCreateUncategorizedCollection();
 
         await _collectionService.move(
-          file,
+          [file],
           favCollection!,
           targetCollection,
         );
@@ -253,7 +253,7 @@ class FavoritesService {
       }
 
       await _collectionService.move(
-        file,
+        [file],
         favCollection,
         targetCollection,
       );

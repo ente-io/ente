@@ -4,14 +4,13 @@ import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
-import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
-import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 
@@ -19,107 +18,152 @@ import "package:logging/logging.dart";
 class FileActions {
   static final _logger = Logger("FileActions");
 
-  /// Shows edit dialog for a file to update title, caption, and collections
+  /// Shows edit dialog for a file to update its collections
   static Future<void> editFile(
     BuildContext context,
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
+    _logger.info(
+      'Opening edit dialog for file ${file.uploadedFileID}',
+    );
+
     final allCollections = await CollectionService.instance.getCollections();
-    final dedupedCollections = uniqueCollectionsById(allCollections);
+    final currentCollections =
+        await CollectionService.instance.getCollectionsForFile(file);
+
+    final favoriteCollection =
+        await CollectionService.instance.getOrCreateImportantCollection();
+
+    final editableCollections = allCollections
+        .where((c) => c.type != CollectionType.uncategorized)
+        .toList();
+
+    final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 
     final result = await showFileEditDialog(
       context,
       file: file,
-      collections: dedupedCollections,
-      snackBarContext: context,
+      collections: editableCollections,
     );
 
-    if (result != null && context.mounted) {
-      List<Collection> currentCollections;
-      try {
-        currentCollections =
-            await CollectionService.instance.getCollectionsForFile(file);
-      } catch (e) {
-        currentCollections = <Collection>[];
+    if (result == null || !context.mounted) {
+      return;
+    }
+
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.pleaseWait,
+      isDismissible: false,
+    );
+    await dialog.show();
+
+    try {
+      final selectedCollectionIds =
+          result.selectedCollections.map((c) => c.id).toSet();
+
+      final wasFavorite = currentCollectionIds.contains(favoriteCollection.id);
+      final isFavoriteNow =
+          selectedCollectionIds.contains(favoriteCollection.id);
+
+      if (wasFavorite && !isFavoriteNow) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else if (!wasFavorite && isFavoriteNow) {
+        await FavoritesService.instance.addToFavorites(context, file);
       }
 
-      final currentCollectionsSet = currentCollections.toSet();
-      final selectedCollectionsSet = result.selectedCollections.toSet();
-      final collectionsToAdd =
-          selectedCollectionsSet.difference(currentCollectionsSet).toList();
-      final hasCollectionAdds = collectionsToAdd.isNotEmpty;
+      final regularCurrentIds = currentCollectionIds
+          .where((id) => id != favoriteCollection.id)
+          .toSet();
+      final regularSelectedIds = selectedCollectionIds
+          .where((id) => id != favoriteCollection.id)
+          .toSet();
 
-      final currentTitle = file.displayName;
-      final currentCaption = file.caption ?? '';
-      final hasMetadataChanged =
-          result.title != currentTitle || result.caption != currentCaption;
+      final collectionsToRemove =
+          regularCurrentIds.difference(regularSelectedIds);
 
-      if (hasMetadataChanged || hasCollectionAdds) {
-        final dialog = createProgressDialog(
-          context,
-          context.l10n.pleaseWait,
-          isDismissible: false,
-        );
-        await dialog.show();
+      final collectionsToAdd = regularSelectedIds.difference(regularCurrentIds);
 
-        try {
-          final addFutures = <Future<void>>[];
-          for (final collection in collectionsToAdd) {
-            addFutures.add(
-              CollectionService.instance.addToCollection(
-                collection,
-                file,
-                runSync: false,
-              ),
+      _logger
+          .info("=========== Collection To ADD   ${collectionsToAdd.length}");
+      _logger.info(
+        "=========== Collection To Remove.  ${collectionsToRemove.length}",
+      );
+
+      if (regularSelectedIds.isEmpty && collectionsToRemove.isNotEmpty) {
+        _logger.info('All collections deselected, moving to uncategorized');
+
+        for (final collectionId in collectionsToRemove) {
+          try {
+            final collection =
+                allCollections.firstWhere((c) => c.id == collectionId);
+            await CollectionService.instance.moveFilesFromCurrentCollection(
+              context,
+              collection,
+              [file],
+            );
+          } catch (e) {
+            final collection =
+                allCollections.firstWhere((c) => c.id == collectionId);
+            _logger.severe(
+              'Failed to remove file from ${collection.name}: $e',
             );
           }
-          if (addFutures.isNotEmpty) {
-            await Future.wait(addFutures);
-          }
-
-          final List<Future<void>> apiCalls = [];
-
-          if (hasMetadataChanged) {
-            apiCalls.add(
-              MetadataUpdaterService.instance
-                  .editFileNameAndCaption(file, result.title, result.caption),
-            );
-          }
-          await Future.wait(apiCalls);
-
-          await dialog.hide();
-
-          if (!context.mounted) {
-            return;
-          }
-
-          SnackBarUtils.showInfoSnackBar(
-            context,
-            context.l10n.fileUpdatedSuccessfully,
-          );
-
-          onSuccess?.call();
-        } catch (e) {
-          await dialog.hide();
-          if (!context.mounted) {
-            return;
-          }
-
-          SnackBarUtils.showWarningSnackBar(
-            context,
-            context.l10n.failedToUpdateFile(e.toString()),
-          );
         }
       } else {
-        if (!context.mounted) {
-          return;
+        // Add to new collections
+        for (final collectionId in collectionsToAdd) {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+
+          try {
+            await CollectionService.instance.addToCollection(
+              collection,
+              file,
+              runSync: false,
+            );
+          } catch (e) {
+            _logger.severe(
+              'Failed to move file to collection ${collection.name}: $e',
+            );
+          }
         }
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          context.l10n.noChangesWereMade,
-        );
+
+        // Remove from collections that were deselected
+        for (final collectionId in collectionsToRemove) {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance
+              .moveFilesFromCurrentCollection(context, collection, [file]);
+        }
       }
+
+      await CollectionService.instance.sync();
+
+      await dialog.hide();
+
+      if (!context.mounted) {
+        return;
+      }
+
+      SnackBarUtils.showInfoSnackBar(
+        context,
+        context.l10n.fileUpdatedSuccessfully,
+      );
+
+      onSuccess?.call();
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe('Failed to update file collections: $e');
+
+      if (!context.mounted) {
+        return;
+      }
+
+      SnackBarUtils.showWarningSnackBar(
+        context,
+        context.l10n.failedToUpdateFile(e.toString()),
+      );
     }
   }
 

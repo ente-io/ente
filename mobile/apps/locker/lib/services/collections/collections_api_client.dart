@@ -228,30 +228,49 @@ class CollectionApiClient {
   }
 
   Future<void> move(
-    EnteFile file,
+    List<EnteFile> files,
     Collection fromCollection,
     Collection toCollection,
   ) async {
+    if (files.isEmpty) {
+      _logger.info("No files to move");
+      return;
+    }
+
     final params = <String, dynamic>{};
     params["fromCollectionID"] = fromCollection.id;
     params["toCollectionID"] = toCollection.id;
-    final fileKey = await CollectionService.instance.getFileKey(file);
-    final encryptedKeyData = CryptoUtil.encryptSync(
-      fileKey,
-      CryptoHelper.instance.getCollectionKey(toCollection),
-    );
-    params["files"] = [];
-    params["files"].add(
-      CollectionFileItem(
-        file.uploadedFileID!,
-        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
-        CryptoUtil.bin2base64(encryptedKeyData.nonce!),
-      ).toMap(),
-    );
-    await _enteDio.post(
-      "/collections/move-files",
-      data: params,
-    );
+
+    // Process files in batches
+    const batchSize = 100;
+    final batchedFiles = <List<EnteFile>>[];
+    for (int i = 0; i < files.length; i += batchSize) {
+      batchedFiles.add(
+        files.sublist(i, min(i + batchSize, files.length)),
+      );
+    }
+
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        final fileKey = await CollectionService.instance.getFileKey(file);
+        final encryptedKeyData = CryptoUtil.encryptSync(
+          fileKey,
+          CryptoHelper.instance.getCollectionKey(toCollection),
+        );
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID!,
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!),
+          ).toMap(),
+        );
+      }
+      await _enteDio.post(
+        "/collections/move-files",
+        data: params,
+      );
+    }
   }
 
   Future<void> trashCollection(
