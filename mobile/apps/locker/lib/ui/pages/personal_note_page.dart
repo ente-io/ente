@@ -139,11 +139,11 @@ class _PersonalNotePageState
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Padding(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: _buildEditorSurface(
               context,
@@ -151,17 +151,17 @@ class _PersonalNotePageState
               isEditing: true,
             ),
           ),
-        ),
-        SizedBox(height: collectionSpacing),
-        CollectionSelectionWidget(
-          collections: availableCollections,
-          selectedCollectionIds: selectedCollectionIds,
-          onToggleCollection: toggleCollectionSelection,
-          onCollectionsUpdated: updateAvailableCollections,
-          titleWidget:
-              showCollectionSelectionTitle ? null : const SizedBox.shrink(),
-        ),
-      ],
+          SizedBox(height: collectionSpacing),
+          CollectionSelectionWidget(
+            collections: availableCollections,
+            selectedCollectionIds: selectedCollectionIds,
+            onToggleCollection: toggleCollectionSelection,
+            onCollectionsUpdated: updateAvailableCollections,
+            titleWidget:
+                showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
   }
 
