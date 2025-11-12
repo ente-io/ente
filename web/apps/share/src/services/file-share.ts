@@ -22,7 +22,7 @@ import type {
 export const extractFileKeyFromURL = async (
     url: URL,
 ): Promise<LinkKeyMaterial | null> => {
-    const hashValue = url.hash.slice(1).split('-')[0]; // Remove '#' prefix and take part before hyphen
+    const hashValue = url.hash.slice(1).split("-")[0]; // Remove '#' prefix and take part before hyphen
     if (!hashValue) return null;
 
     try {
