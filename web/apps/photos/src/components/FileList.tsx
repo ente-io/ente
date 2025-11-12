@@ -1068,54 +1068,59 @@ const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
 const Check = styled("input")<{ $active: boolean }>(
     ({ theme, $active }) => `
     appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     position: absolute;
-    /* Increase z-index in stacking order to capture clicks */
     z-index: 1;
     left: 0;
     outline: none;
     cursor: pointer;
+    width: 31px;
+    height: 31px;
+    box-sizing: border-box;
+    
     @media (pointer: coarse) {
         pointer-events: none;
     }
 
     &::before {
         content: "";
+        display: block; /* Critical for Safari */
         width: 19px;
         height: 19px;
         background-color: #ddd;
-        display: inline-block;
         border-radius: 50%;
-        vertical-align: bottom;
-        margin: 6px 6px;
+        margin: 6px;
         transition: background-color 0.3s ease;
-        pointer-events: inherit;
-
+        position: relative; /* Important for Safari */
     }
+    
     &::after {
         content: "";
+        display: block; /* Critical for Safari */
         position: absolute;
+        top: 50%;
+        left: 50%;
         width: 5px;
         height: 11px;
-        border-right: 2px solid #333;
-        border-bottom: 2px solid #333;
+        border: solid #333;
+        border-width: 0 2px 2px 0;
+        transform: translate(-50%, -60%) rotate(45deg) scale(0);
         transition: transform 0.3s ease;
-        pointer-events: inherit;
-        transform: translate(-18px, 9px) rotate(45deg);
+        transform-origin: center;
     }
 
     /* checkmark background (filled circle) */
     &:checked::before {
-        content: "";
         background-color: ${theme.vars.palette.accent.main};
-        border-color: ${theme.vars.palette.accent.main};
-        color: white;
     }
-    /* checkmark foreground (tick) */
+    
+    /* checkmark foreground (tick) - show it */
     &:checked::after {
-        content: "";
-        border-right: 2px solid #ddd;
-        border-bottom: 2px solid #ddd;
+        border-color: #ddd;
+        transform: translate(-50%, -60%) rotate(45deg) scale(1);
     }
+    
     visibility: hidden;
     ${$active && "visibility: visible; opacity: 0.5;"};
     &:checked {
