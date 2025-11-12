@@ -217,6 +217,7 @@ class CollectionApiClient {
   Future<void> leaveCollection(Collection collection) async {
     await CollectionSharingService.instance.leaveCollection(collection.id);
     await _handleCollectionDeletion(collection);
+    await CollectionService.instance.sync();
   }
 
   Future<void> _handleCollectionDeletion(Collection collection) async {
@@ -224,7 +225,6 @@ class CollectionApiClient {
     final deletedCollection = collection.copyWith(isDeleted: true);
     await _updateCollectionInDB(deletedCollection);
     Bus.instance.fire(CollectionsUpdatedEvent("delete_collection"));
-    await CollectionService.instance.sync();
   }
 
   Future<void> move(
@@ -257,6 +257,7 @@ class CollectionApiClient {
   Future<void> trashCollection(
     Collection collection, {
     bool keepFiles = false,
+    bool skipEventFiring = false,
   }) async {
     try {
       await _enteDio.delete(
@@ -264,7 +265,13 @@ class CollectionApiClient {
         "?keepFiles=${keepFiles ? "True" : "False"}"
         "&collectionID=${collection.id}",
       );
-      await _handleCollectionDeletion(collection);
+      if (skipEventFiring) {
+        await _db.deleteCollection(collection);
+        final deletedCollection = collection.copyWith(isDeleted: true);
+        await _updateCollectionInDB(deletedCollection);
+      } else {
+        await _handleCollectionDeletion(collection);
+      }
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;

@@ -1,8 +1,6 @@
-import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
@@ -171,38 +169,14 @@ class CollectionPopupMenuWidget extends StatelessWidget {
   }
 
   Future<void> _editCollection(BuildContext context) async {
-    await CollectionActions.editCollection(
-      context,
-      collection,
-      onSuccess: () {
-        Bus.instance.fire(
-          CollectionsUpdatedEvent("rename_collection"),
-        );
-      },
-    );
+    await CollectionActions.editCollection(context, collection);
   }
 
   Future<void> _deleteCollection(BuildContext context) async {
-    await CollectionActions.deleteCollection(
-      context,
-      collection,
-      onSuccess: () {
-        Bus.instance.fire(
-          CollectionsUpdatedEvent("delete_collection"),
-        );
-      },
-    );
+    await CollectionActions.deleteCollection(context, collection);
   }
 
   Future<void> _leaveCollection(BuildContext context) async {
-    await CollectionActions.leaveCollection(
-      context,
-      collection,
-      onSuccess: () {
-        Bus.instance.fire(
-          CollectionsUpdatedEvent("leave_collection"),
-        );
-      },
-    );
+    await CollectionActions.leaveCollection(context, collection);
   }
 }

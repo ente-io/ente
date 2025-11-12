@@ -20,6 +20,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
+import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
 import 'package:locker/utils/snack_bar_utils.dart';
@@ -140,6 +141,10 @@ class CollectionActions {
     await progressDialog.show();
 
     bool isFavoriteCollection = false;
+    final bool keepFiles = !(dialogChoice?.deleteFromAllCollections ?? false);
+    final List<Collection> emptyCollections = [];
+    final List<Collection> nonEmptyCollections = [];
+    final List<dynamic> errors = [];
 
     try {
       for (final collection in collections) {
@@ -147,14 +152,57 @@ class CollectionActions {
           isFavoriteCollection = true;
           continue;
         }
-        if (collection.type.canDelete) {
-          await CollectionService.instance.trashCollection(
-            collection,
-            keepFiles: !(dialogChoice?.deleteFromAllCollections ?? false),
-          );
+        if (!collection.type.canDelete) {
+          continue;
+        }
+
+        final fileCount =
+            await CollectionService.instance.getFileCount(collection);
+
+        if (fileCount == 0) {
+          emptyCollections.add(collection);
+        } else {
+          nonEmptyCollections.add(collection);
         }
       }
+
+      for (final collection in emptyCollections) {
+        try {
+          await CollectionService.instance.trashEmptyCollection(
+            collection,
+            isBulkDelete: true,
+          );
+        } catch (e, s) {
+          _logger.severe("Failed to trash empty collection", e, s);
+          errors.add(e);
+        }
+      }
+
+      if (emptyCollections.isNotEmpty) {
+        await CollectionService.instance.sync();
+        await TrashService.instance.syncTrash();
+      }
+
+      for (final collection in nonEmptyCollections) {
+        try {
+          await CollectionService.instance.trashCollection(
+            collection,
+            keepFiles: keepFiles,
+          );
+        } catch (e, s) {
+          _logger.severe("Failed to trash collection", e, s);
+          errors.add(e);
+        }
+      }
+
       await progressDialog.hide();
+
+      if (errors.isNotEmpty) {
+        await showGenericErrorDialog(
+          context: context,
+          error: errors.first,
+        );
+      }
 
       SnackBarUtils.showInfoSnackBar(
         context,
@@ -191,6 +239,35 @@ class CollectionActions {
         context,
         l10n.collectionCannotBeDeleted,
       );
+      return;
+    }
+
+    final fileCount = await CollectionService.instance.getFileCount(collection);
+
+    if (fileCount == 0) {
+      final progressDialog = createProgressDialog(context, l10n.pleaseWait);
+      await progressDialog.show();
+
+      try {
+        await CollectionService.instance.trashEmptyCollection(collection);
+
+        await progressDialog.hide();
+
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          l10n.collectionDeletedSuccessfully,
+        );
+
+        // Call success callback if provided
+        onSuccess?.call();
+      } catch (error) {
+        await progressDialog.hide();
+
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          l10n.failedToDeleteCollection(error.toString()),
+        );
+      }
       return;
     }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class SnackBarUtils {
   static void showInfoSnackBar(BuildContext context, String message) {
+    if (!context.mounted) return;
     final colorScheme = getEnteColorScheme(context);
     _showSnackBar(
       context,
@@ -12,6 +13,7 @@ class SnackBarUtils {
   }
 
   static void showWarningSnackBar(BuildContext context, String message) {
+    if (!context.mounted) return;
     final colorScheme = getEnteColorScheme(context);
     _showSnackBar(
       context,
