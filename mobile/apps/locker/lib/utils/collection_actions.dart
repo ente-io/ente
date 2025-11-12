@@ -23,7 +23,6 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
-import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -95,7 +94,7 @@ class CollectionActions {
           await CollectionService.instance.rename(collection, newName);
           await progressDialog.hide();
 
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
             context.l10n.collectionRenamedSuccessfully,
           );
@@ -108,7 +107,7 @@ class CollectionActions {
         } catch (error) {
           await progressDialog.hide();
 
-          SnackBarUtils.showWarningSnackBar(
+          showToast(
             context,
             context.l10n.failedToRenameCollection(error.toString()),
           );
@@ -204,7 +203,7 @@ class CollectionActions {
         );
       }
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         "${collections.length} collections deleted successfully",
       );
@@ -220,7 +219,7 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.failedToDeleteCollection(error.toString()),
       );
@@ -235,7 +234,7 @@ class CollectionActions {
   }) async {
     final l10n = context.l10n;
     if (!collection.type.canDelete) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         l10n.collectionCannotBeDeleted,
       );
@@ -253,7 +252,7 @@ class CollectionActions {
 
         await progressDialog.hide();
 
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           l10n.collectionDeletedSuccessfully,
         );
@@ -263,7 +262,7 @@ class CollectionActions {
       } catch (error) {
         await progressDialog.hide();
 
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           l10n.failedToDeleteCollection(error.toString()),
         );
@@ -299,7 +298,7 @@ class CollectionActions {
 
       await progressDialog.hide();
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         l10n.collectionDeletedSuccessfully,
       );
@@ -309,7 +308,7 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         l10n.failedToDeleteCollection(error.toString()),
       );
@@ -355,7 +354,7 @@ class CollectionActions {
       } else if (actionResult.action == ButtonAction.first) {
         onSuccess?.call();
         Navigator.of(context).pop();
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           "Leave collection successfully",
         );
@@ -404,7 +403,7 @@ class CollectionActions {
       } else if (actionResult.action == ButtonAction.first) {
         onSuccess?.call();
         Navigator.of(context).pop();
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           "Leave collection successfully",
         );

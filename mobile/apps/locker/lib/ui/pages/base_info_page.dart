@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -255,11 +256,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             _currentMode = InfoPageMode.view;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.recordSavedSuccessfully),
-              backgroundColor: Colors.green,
-            ),
+          showToast(
+            context,
+            context.l10n.recordSavedSuccessfully,
           );
         }
       }
@@ -276,13 +275,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           return e.toString();
         }();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${context.l10n.failedToSaveRecord}: $errorDetails',
-            ),
-            backgroundColor: Colors.red,
-          ),
+        showToast(
+          context,
+          '${context.l10n.failedToSaveRecord}: $errorDetails',
         );
       }
     } finally {
@@ -327,11 +322,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        context.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -374,11 +367,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     // Show success message after navigation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-          ),
+        showToast(
+          context,
+          message,
         );
       }
     });
@@ -394,12 +385,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   void _copyToClipboard(String text, String fieldName) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.copiedToClipboard(fieldName)),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
+    showToast(
+      context,
+      context.l10n.copiedToClipboard(fieldName),
     );
   }
 
