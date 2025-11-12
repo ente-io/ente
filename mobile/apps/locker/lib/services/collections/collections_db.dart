@@ -399,7 +399,9 @@ class CollectionDB extends EnteBaseDatabase {
     final placeholders = List.filled(uploadedFileIDs.length, '?').join(',');
     final result = await _db.rawQuery(
       '''
-      SELECT cf.collection_id, f.*
+      SELECT
+        cf.collection_id AS mapping_collection_id,
+        f.*
       FROM $_collectionFilesTable cf
       JOIN $_filesTable f ON cf.uploaded_file_id = f.uploaded_file_id
       WHERE cf.uploaded_file_id IN ($placeholders)
@@ -409,12 +411,10 @@ class CollectionDB extends EnteBaseDatabase {
 
     // Group files by collection ID
     for (final row in result) {
-      final collectionId = row['collection_id'] as int;
-      final file = _mapToFile(row);
+      final collectionId = row['mapping_collection_id'] as int;
+      final file = _mapToFile(row)..collectionID = collectionId;
 
-      if (!collectionToFilesMap.containsKey(collectionId)) {
-        collectionToFilesMap[collectionId] = [];
-      }
+      collectionToFilesMap.putIfAbsent(collectionId, () => []);
       collectionToFilesMap[collectionId]!.add(file);
     }
 
