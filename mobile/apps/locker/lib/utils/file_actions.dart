@@ -84,12 +84,6 @@ class FileActions {
 
       final collectionsToAdd = regularSelectedIds.difference(regularCurrentIds);
 
-      _logger
-          .info("=========== Collection To ADD   ${collectionsToAdd.length}");
-      _logger.info(
-        "=========== Collection To Remove.  ${collectionsToRemove.length}",
-      );
-
       if (regularSelectedIds.isEmpty && collectionsToRemove.isNotEmpty) {
         _logger.info('All collections deselected, moving to uncategorized');
 
@@ -111,7 +105,6 @@ class FileActions {
           }
         }
       } else {
-        // Add to new collections
         for (final collectionId in collectionsToAdd) {
           final collection =
               allCollections.firstWhere((c) => c.id == collectionId);
@@ -129,7 +122,6 @@ class FileActions {
           }
         }
 
-        // Remove from collections that were deselected
         for (final collectionId in collectionsToRemove) {
           final collection =
               allCollections.firstWhere((c) => c.id == collectionId);
