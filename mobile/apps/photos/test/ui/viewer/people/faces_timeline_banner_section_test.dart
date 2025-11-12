@@ -24,12 +24,17 @@ void main() {
             showBanner: true,
             person: person,
             onTap: () {},
+            loadTimeline: (_) async => null,
           ),
         ),
       );
 
+      await tester.pump();
+
       expect(find.byType(FacesTimelineBanner), findsOneWidget);
-      expect(find.textContaining("Faces timeline"), findsOneWidget);
+      final context = tester.element(find.byType(FacesTimelineBanner));
+      final l10n = AppLocalizations.of(context)!;
+      expect(find.text(l10n.facesTimelineBannerTitle), findsOneWidget);
     });
 
     testWidgets("hides banner when timeline is unavailable", (tester) async {
@@ -41,6 +46,7 @@ void main() {
             showBanner: false,
             person: person,
             onTap: () {},
+            loadTimeline: (_) async => null,
           ),
         ),
       );
@@ -57,6 +63,7 @@ void main() {
             showBanner: true,
             person: person,
             onTap: null,
+            loadTimeline: (_) async => null,
           ),
         ),
       );

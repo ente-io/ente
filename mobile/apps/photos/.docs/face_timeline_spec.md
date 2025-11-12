@@ -16,6 +16,7 @@ Deliver an on-device, auto-playing “faces timeline” for eligible named peopl
 - Add a new “Faces timeline” banner in the `PeoplePage` header area alongside other suggestions.
 - Banner appears only after precomputation succeeds; tap navigates to a dedicated timeline route.
 - Suppress banner if the timeline export is in progress (tracked with the same lightweight pattern used in `lib/ui/tools/similar_images_page.dart`) or the person becomes ineligible.
+- Style the entry as a “Memory Lane” pill with the first timeline face crop shown on the left, a sparkle accent, and a trailing chevron so the banner previews exactly what the playback will start with.
 
 ### Timeline Playback Experience
 - `FacesTimelinePage` presents cached crops in chronological order with cross-fade or quick dissolve transitions (≈0.8–1.0 s per frame) and optional manual controls (pause/play, next/back).
