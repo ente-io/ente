@@ -2,7 +2,6 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 
 class DeleteConfirmationResult {
   final ButtonResult buttonResult;
@@ -20,7 +19,6 @@ Future<DeleteConfirmationResult?> showDeleteConfirmationDialog(
   required String body,
   required String deleteButtonLabel,
   required String assetPath,
-  Widget? icon,
   bool showDeleteFromAllCollectionsOption = false,
 }) {
   return showModalBottomSheet<DeleteConfirmationResult>(
@@ -33,7 +31,6 @@ Future<DeleteConfirmationResult?> showDeleteConfirmationDialog(
         body: body,
         deleteButtonLabel: deleteButtonLabel,
         assetPath: assetPath,
-        icon: icon,
         showDeleteFromAllCollectionsOption: showDeleteFromAllCollectionsOption,
       );
     },
@@ -45,7 +42,6 @@ class _DeleteConfirmationBottomSheet extends StatefulWidget {
   final String body;
   final String deleteButtonLabel;
   final String assetPath;
-  final Widget? icon;
   final bool showDeleteFromAllCollectionsOption;
 
   const _DeleteConfirmationBottomSheet({
@@ -53,7 +49,6 @@ class _DeleteConfirmationBottomSheet extends StatefulWidget {
     required this.body,
     required this.deleteButtonLabel,
     required this.assetPath,
-    this.icon,
     required this.showDeleteFromAllCollectionsOption,
   });
 
@@ -176,10 +171,11 @@ class _DeleteConfirmationBottomSheetState
                 ),
                 const SizedBox(height: 20),
               ],
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 height: 56,
-                child: ElevatedButton.icon(
+                child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop(
                       DeleteConfirmationResult(
@@ -195,14 +191,7 @@ class _DeleteConfirmationBottomSheetState
                     ),
                     elevation: 0,
                   ),
-                  icon: widget.icon ??
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedFileUpload,
-                        color: Colors.white,
-                        size: 20,
-                        strokeWidth: 1.9,
-                      ),
-                  label: Text(
+                  child: Text(
                     widget.deleteButtonLabel,
                     style: textTheme.bodyBold.copyWith(
                       color: Colors.white,
