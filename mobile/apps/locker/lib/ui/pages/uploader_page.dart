@@ -62,8 +62,11 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       final List<Future> futures = [];
 
       final collections = await CollectionService.instance.getCollections();
-      final collectionsWithoutUncategorized = collections
-          .where((c) => c.type != CollectionType.uncategorized)
+      final regularCollections = collections
+          .where(
+            (c) => (c.type != CollectionType.uncategorized &&
+                c.type != CollectionType.favorites),
+          )
           .toList();
 
       // Navigate to upload screen to get collection selection
@@ -72,7 +75,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         MaterialPageRoute(
           builder: (context) => FileUploadScreen(
             files: files,
-            collections: collectionsWithoutUncategorized,
+            collections: regularCollections,
             selectedCollection: selectedCollection,
           ),
         ),
