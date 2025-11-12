@@ -33,11 +33,20 @@ class FacesTimelineBanner extends StatelessWidget {
     final Color backgroundColor = brightness == Brightness.dark
         ? colorScheme.backgroundElevated2
         : colorScheme.fillBaseGrey;
+    final TextStyle titleStyle = textTheme.body.copyWith(
+      fontFamily: "Inter",
+      fontWeight: FontWeight.w500,
+      fontSize: 16,
+      height: 20 / 16,
+      letterSpacing: -0.32,
+      color:
+          brightness == Brightness.dark ? colorScheme.textBase : Colors.black,
+    );
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        padding: const EdgeInsets.fromLTRB(9, 7, 18, 7),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(28),
@@ -52,7 +61,7 @@ class FacesTimelineBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: textTheme.bodyBold,
+                style: titleStyle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
