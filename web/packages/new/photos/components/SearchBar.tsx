@@ -181,7 +181,6 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
 
     const handleChange = (value: SearchOption | null) => {
         const type = value?.suggestion.type;
-        console.log(value, value?.suggestion.label);
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
         if (type == "collection" || type == "person") {
@@ -348,8 +347,11 @@ const createSelectStyles = (
 });
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
-    const isMac = navigator.userAgent.toUpperCase().includes("MAC");
+    const isMac =
+        typeof navigator !== "undefined" &&
+        navigator.userAgent.toUpperCase().includes("MAC");
     const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+
     const hasValue =
         props.getValue().length > 0 || props.selectProps.inputValue;
 
