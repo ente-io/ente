@@ -275,14 +275,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       _loadCollections();
     }
 
-    // Ensure default collections are created now that we're on the home page
-    // This handles the case where SignedInEvent fired before master key was available
-    CollectionService.instance.ensureDefaultCollections().then((_) {
-      _logger.info("Default collections check completed in HomePage");
-    }).catchError((error) {
-      _logger.warning("Failed to ensure default collections: $error");
-    });
-
     // Initialize sharing functionality to handle shared files
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
