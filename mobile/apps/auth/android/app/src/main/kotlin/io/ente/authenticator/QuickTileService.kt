@@ -10,6 +10,12 @@ import androidx.annotation.RequiresApi
 @RequiresApi(Build.VERSION_CODES.N)
 class QuickTileService : TileService() {
 
+    override fun onStartListening() {
+        val tile = qsTile
+        tile.subtitle = "Open Ente Auth"
+        tile.updateTile()
+    }
+
     @SuppressLint("StartActivityAndCollapseDeprecated")
     override fun onClick() {
         val intent = Intent(applicationContext, MainActivity::class.java).apply {
