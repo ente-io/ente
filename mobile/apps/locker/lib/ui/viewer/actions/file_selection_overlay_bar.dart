@@ -9,7 +9,6 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/add_to_collection_dialog.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
@@ -36,29 +35,24 @@ class FileSelectionOverlayBar extends StatefulWidget {
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   static final Logger _logger = Logger("FileSelectionOverlayBar");
-  bool _isImportant = false;
+  bool _isFavorite = false;
 
   @override
   void initState() {
     super.initState();
     widget.selectedFiles.addListener(_onSelectionChanged);
-    _checkIfImportant();
+    _checkIfFavorite();
   }
 
-  Future<void> _checkIfImportant() async {
+  Future<void> _checkIfFavorite() async {
     if (widget.selectedFiles.files.length == 1) {
       final file = widget.selectedFiles.files.first;
+      final isFav = await FileActions.isFavorite(file);
 
-      try {
-        final isFav = await FavoritesService.instance.isFavorite(file);
-
-        if (mounted) {
-          setState(() {
-            _isImportant = isFav;
-          });
-        }
-      } catch (e) {
-        _logger.severe("Error checking favorite status: $e");
+      if (mounted) {
+        setState(() {
+          _isFavorite = isFav;
+        });
       }
     }
   }
@@ -72,7 +66,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   void _onSelectionChanged() {
     if (mounted) {
       setState(() {});
-      _checkIfImportant();
+      _checkIfFavorite();
     }
   }
 
@@ -374,8 +368,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           hugeIcon: const HugeIcon(
             icon: HugeIcons.strokeRoundedStar,
           ),
-          label: _isImportant ? "Unmark" : "Important",
-          onTap: () => _toggleImportant(context, file!),
+          label: _isFavorite ? context.l10n.unfavorite : context.l10n.favorite,
+          onTap: () => _toggleFavorite(context, file!),
         ),
       );
     } else {
@@ -384,8 +378,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           hugeIcon: const HugeIcon(
             icon: HugeIcons.strokeRoundedStar,
           ),
-          label: "Important",
-          onTap: () => _markMultipleAsImportant(context, files),
+          label: context.l10n.favorite,
+          onTap: () => _markMultipleAsFavorites(context, files),
         ),
       );
     }
@@ -644,108 +638,31 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
   }
 
-  Future<void> _toggleImportant(BuildContext context, EnteFile file) async {
-    final dialog = createProgressDialog(
+  Future<void> _toggleFavorite(BuildContext context, EnteFile file) async {
+    await FileActions.toggleFavorite(
       context,
-      _isImportant ? "Removing from Important..." : "Adding to Important...",
-      isDismissible: false,
+      file,
+      onSuccess: () {
+        widget.selectedFiles.clearAll();
+        if (mounted) {
+          setState(() {
+            _isFavorite = !_isFavorite;
+          });
+        }
+      },
     );
-
-    try {
-      await dialog.show();
-
-      if (_isImportant) {
-        await FavoritesService.instance.removeFromFavorites(context, file);
-      } else {
-        await FavoritesService.instance.addToFavorites(context, file);
-      }
-
-      await dialog.hide();
-      widget.selectedFiles.clearAll();
-
-      setState(() {
-        _isImportant = !_isImportant;
-      });
-
-      if (context.mounted) {
-        final message = _isImportant
-            ? "File marked as important"
-            : "File removed from important";
-        SnackBarUtils.showInfoSnackBar(context, message);
-      }
-    } catch (e, stackTrace) {
-      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
-      await dialog.hide();
-
-      if (context.mounted) {
-        final errorMessage =
-            'Failed to update important status: ${e.toString()}';
-        SnackBarUtils.showWarningSnackBar(context, errorMessage);
-      }
-    }
   }
 
-  Future<void> _markMultipleAsImportant(
+  Future<void> _markMultipleAsFavorites(
     BuildContext context,
     List<EnteFile> files,
   ) async {
-    final dialog = createProgressDialog(
+    await FileActions.markMultipleAsImportant(
       context,
-      "Marking as Important...",
-      isDismissible: false,
+      files,
+      onSuccess: () {
+        widget.selectedFiles.clearAll();
+      },
     );
-
-    try {
-      await dialog.show();
-
-      final List<EnteFile> filesToMark = [];
-      for (final file in files) {
-        final isFav = await FavoritesService.instance.isFavorite(file);
-        if (!isFav) {
-          filesToMark.add(file);
-        }
-      }
-
-      if (filesToMark.isEmpty) {
-        await dialog.hide();
-        if (context.mounted) {
-          SnackBarUtils.showInfoSnackBar(
-            context,
-            "All files are already marked as important",
-          );
-        }
-        return;
-      }
-
-      await FavoritesService.instance.updateFavorites(
-        context,
-        filesToMark,
-        true,
-      );
-
-      await dialog.hide();
-
-      widget.selectedFiles.clearAll();
-
-      if (context.mounted) {
-        final message = filesToMark.length == 1
-            ? "1 file marked as important"
-            : "${filesToMark.length} files marked as important";
-        SnackBarUtils.showInfoSnackBar(context, message);
-      }
-    } catch (e, stackTrace) {
-      _logger.severe(
-        "Failed to mark multiple files as important: $e",
-        e,
-        stackTrace,
-      );
-      await dialog.hide();
-
-      if (context.mounted) {
-        final errorMessage =
-            'Failed to mark files as important: ${e.toString()}';
-        SnackBarUtils.showWarningSnackBar(context, errorMessage);
-      }
-    }
   }
 }

@@ -4,6 +4,7 @@ import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
@@ -15,7 +16,7 @@ import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 
-/// Utility class for common file actions like edit, share, and delete
+/// Utility class for common file actions like edit, share, delete, and favorites
 class FileActions {
   static final _logger = Logger("FileActions");
 
@@ -288,6 +289,130 @@ class FileActions {
         context: context,
         error: e,
       );
+    }
+  }
+
+  /// Checks if a file is marked as favorite/important
+  static Future<bool> isFavorite(EnteFile file) async {
+    try {
+      return await FavoritesService.instance.isFavorite(file);
+    } catch (e) {
+      _logger.severe("Error checking favorite status: $e");
+      return false;
+    }
+  }
+
+  /// Toggles favorite/important status of a single file
+  static Future<void> toggleFavorite(
+    BuildContext context,
+    EnteFile file, {
+    VoidCallback? onSuccess,
+  }) async {
+    final isCurrentlyFavorite = await isFavorite(file);
+    final dialog = createProgressDialog(
+      context,
+      isCurrentlyFavorite
+          ? context.l10n.removingFromFavorites
+          : context.l10n.addingToFavorites,
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      if (isCurrentlyFavorite) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else {
+        await FavoritesService.instance.addToFavorites(context, file);
+      }
+
+      await dialog.hide();
+
+      if (context.mounted) {
+        final message = !isCurrentlyFavorite
+            ? context.l10n.fileMarkedAsFavorite
+            : context.l10n.fileRemovedFromFavorites;
+        SnackBarUtils.showInfoSnackBar(context, message);
+      }
+
+      onSuccess?.call();
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to toggle favorite status: $e", e, stackTrace);
+      await dialog.hide();
+
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToUpdateFavoriteStatus(e.toString()),
+        );
+      }
+    }
+  }
+
+  /// Marks multiple files as important/favorite
+  static Future<void> markMultipleAsImportant(
+    BuildContext context,
+    List<EnteFile> files, {
+    VoidCallback? onSuccess,
+  }) async {
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.markingAsFavorites,
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      final List<EnteFile> filesToMark = [];
+      for (final file in files) {
+        final isFav = await FavoritesService.instance.isFavorite(file);
+        if (!isFav) {
+          filesToMark.add(file);
+        }
+      }
+
+      if (filesToMark.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          SnackBarUtils.showInfoSnackBar(
+            context,
+            context.l10n.allFilesAlreadyMarkedAsFavorites,
+          );
+        }
+        return;
+      }
+
+      await FavoritesService.instance.updateFavorites(
+        context,
+        filesToMark,
+        true,
+      );
+
+      await dialog.hide();
+
+      if (context.mounted) {
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          context.l10n.filesMarkedAsFavorites(filesToMark.length),
+        );
+      }
+
+      onSuccess?.call();
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Failed to mark multiple files as favorites: $e",
+        e,
+        stackTrace,
+      );
+      await dialog.hide();
+
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToMarkFilesAsFavorites(e.toString()),
+        );
+      }
     }
   }
 }

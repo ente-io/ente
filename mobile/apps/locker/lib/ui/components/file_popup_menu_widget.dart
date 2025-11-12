@@ -90,6 +90,29 @@ class FilePopupMenuWidget extends StatelessWidget {
         ),
       ),
       PopupMenuItem<String>(
+        value: 'toggle_favorite',
+        padding: EdgeInsets.zero,
+        height: 0,
+        child: FutureBuilder<bool>(
+          future: FileActions.isFavorite(file),
+          initialData: false,
+          builder: (context, snapshot) {
+            final isFavorite = snapshot.data ?? false;
+            return PopupMenuItemWidget(
+              icon: Icon(
+                isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+              label:
+                  isFavorite ? context.l10n.unfavorite : context.l10n.favorite,
+              isFirst: false,
+              isLast: false,
+            );
+          },
+        ),
+      ),
+      PopupMenuItem<String>(
         value: 'share_link',
         padding: EdgeInsets.zero,
         height: 0,
@@ -137,6 +160,9 @@ class FilePopupMenuWidget extends StatelessWidget {
       case 'edit':
         _editFile(context);
         break;
+      case 'toggle_favorite':
+        _toggleFavorite(context);
+        break;
       case 'share_link':
         _shareFileLink(context);
         break;
@@ -162,5 +188,12 @@ class FilePopupMenuWidget extends StatelessWidget {
 
   Future<void> _editFile(BuildContext context) async {
     await FileActions.editFile(context, file);
+  }
+
+  Future<void> _toggleFavorite(BuildContext context) async {
+    await FileActions.toggleFavorite(
+      context,
+      file,
+    );
   }
 }
