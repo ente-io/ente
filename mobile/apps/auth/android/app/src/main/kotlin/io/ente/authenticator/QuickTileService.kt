@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 class QuickTileService : TileService() {
 
     override fun onStartListening() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
         val tile = qsTile
         tile.subtitle = "Open Ente Auth"
         tile.updateTile()
