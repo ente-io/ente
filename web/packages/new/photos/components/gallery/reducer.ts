@@ -1148,7 +1148,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 searchSuggestion: undefined,
                 isRecomputingSearchResults: false,
                 pendingSearchSuggestions: [],
-                isInSearchMode: shouldExitSearchMode ? false : state.isInSearchMode,
+                isInSearchMode: shouldExitSearchMode
+                    ? false
+                    : state.isInSearchMode,
             });
         }
     }
