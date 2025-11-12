@@ -566,7 +566,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
                 // Save button only in edit mode
                 if (isEditMode) ...[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
                   SafeArea(
                     child: SizedBox(
                       width: double.infinity,
@@ -578,6 +578,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
                 ],
               ],
             ),
