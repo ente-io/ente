@@ -33,7 +33,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
-  late InfoPageMode _initialMode;
 
   @protected
   InfoPageMode get currentMode => _currentMode;
@@ -168,7 +167,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   void initState() {
     super.initState();
     _currentMode = widget.mode;
-    _initialMode = widget.mode;
     _loadCollections();
     loadExistingData();
   }
@@ -343,11 +341,18 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
 
-    // Create and upload the info file to each selected collection
-    for (final collection in selectedCollections) {
-      await InfoFileService.instance.createAndUploadInfoFile(
-        infoItem: infoItem,
-        collection: collection,
+    // Upload to the first collection
+    final uploadedFile = await InfoFileService.instance.createAndUploadInfoFile(
+      infoItem: infoItem,
+      collection: selectedCollections.first,
+    );
+
+    // Add to additional collections if multiple were selected
+    for (int i = 1; i < selectedCollections.length; i++) {
+      await CollectionService.instance.addToCollection(
+        selectedCollections[i],
+        uploadedFile,
+        runSync: false,
       );
     }
 
@@ -498,11 +503,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
     final colorScheme = getEnteColorScheme(context);
-
-    // Only intercept back gesture if:
-    // - Currently in edit mode AND
-    // - Was initially opened in view mode (editing existing note)
-    final shouldInterceptBack = isEditMode && _initialMode == InfoPageMode.view;
 
     return PopScope(
       canPop: false,
