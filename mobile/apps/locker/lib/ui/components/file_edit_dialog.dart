@@ -1,5 +1,6 @@
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -9,7 +10,6 @@ import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/utils/collection_list_util.dart';
-import 'package:locker/utils/snack_bar_utils.dart';
 
 class FileEditDialogResult {
   final String title;
@@ -126,7 +126,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
         .toList();
 
     if (selectedCollections.isEmpty) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         widget.snackBarContext,
         widget.snackBarContext.l10n.pleaseSelectAtLeastOneCollection,
       );
