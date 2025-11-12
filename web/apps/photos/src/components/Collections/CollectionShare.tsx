@@ -642,6 +642,14 @@ const AddParticipant: React.FC<AddParticipantProps> = ({
                 setEmailFieldError(t("sharing_with_self"));
                 return;
             } else if (
+                collection.owner?.email &&
+                email == collection.owner.email
+            ) {
+                setEmailFieldError(
+                    t("sharing_already_shared", { email: email }),
+                );
+                return;
+            } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
                 setEmailFieldError(
