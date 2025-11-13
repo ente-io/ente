@@ -396,6 +396,27 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     _animateToIndex(index);
   }
 
+  void _jumpToIndex(int index) {
+    if (_frames.isEmpty) {
+      return;
+    }
+    final clamped = index.clamp(0, _frames.length - 1);
+    _cardTransitionController.stop();
+    setState(() {
+      _isAnimatingCard = false;
+      _animationStartProgress = clamped.toDouble();
+      _targetIndex = clamped;
+      _stackProgress = clamped.toDouble();
+      _currentIndex = clamped;
+      final frame = _frames[clamped];
+      _previousCaptionValue = _currentCaptionValue;
+      _currentCaptionValue = frame.captionValue;
+      _currentCaptionType = frame.captionType;
+      _sliderValue = clamped.toDouble();
+    });
+    _maybeMarkTimelineSeen();
+  }
+
   void _animateToIndex(int index) {
     if (_frames.isEmpty) {
       return;
@@ -854,8 +875,9 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     if (_frames.isEmpty) {
       return;
     }
-    if (_currentIndex >= _frames.length - 1) {
-      _setCurrentFrame(0);
+    final bool atEnd = _currentIndex >= _frames.length - 1;
+    if (atEnd) {
+      _jumpToIndex(0);
     }
     _startPlayback();
   }
