@@ -6,6 +6,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
+import type { AddToAlbumPhase } from "components/AddToAlbumProgress";
+import { AddToAlbumProgress } from "components/AddToAlbumProgress";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -45,6 +47,7 @@ import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
@@ -236,6 +239,14 @@ const Page: React.FC = () => {
     } = useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
+
+    // Progress UI state for single-file add-to-album from the FileViewer
+    const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
+        open: boolean;
+        phase: AddToAlbumPhase;
+        albumId?: number;
+        fileName?: string;
+    }>({ open: false, phase: "processing" });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
@@ -1028,8 +1039,16 @@ const Page: React.FC = () => {
                         sourceCollectionSummaryID,
                     );
                     await remotePull({ silent: true });
+                    // Show custom toast with file name and navigation
+                    setAddToAlbumProgress({
+                        open: true,
+                        phase: "done",
+                        albumId: collection.id,
+                        fileName: fileFileName(file),
+                    });
                 } catch (e) {
                     onGenericError(e);
+                    // Do not show the toast on failure; handled by generic error notification
                 } finally {
                     pendingSingleFileAdd.current = undefined;
                     hideLoadingBar();
@@ -1303,6 +1322,19 @@ const Page: React.FC = () => {
                     albumNameInputVisibilityProps.onClose();
                 }}
                 onSubmit={handleAlbumNameSubmit}
+            />
+            <AddToAlbumProgress
+                open={addToAlbumProgress.open}
+                onClose={() =>
+                    setAddToAlbumProgress((s) => ({ ...s, open: false }))
+                }
+                phase={addToAlbumProgress.phase}
+                fileName={addToAlbumProgress.fileName}
+                onArrowClick={() => {
+                    if (addToAlbumProgress.albumId !== undefined) {
+                        handleSelectCollection(addToAlbumProgress.albumId);
+                    }
+                }}
             />
         </FullScreenDropZone>
     );
