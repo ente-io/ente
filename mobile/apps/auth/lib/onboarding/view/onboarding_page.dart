@@ -337,13 +337,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildFeatureSlider(BuildContext context) {
     final l10n = context.l10n;
     final features = [
-      ("assets/onboarding_lock.png", l10n.featureBackupCodes),
-      ("assets/onboarding_file.png", l10n.featureSearchEtc),
-      ("assets/onboarding_share.png", l10n.featureOpenSource),
+      ("assets/onboarding-1.png", l10n.featureBackupCodes),
+      ("assets/onboarding-2.png", l10n.featureSearchEtc),
+      ("assets/onboarding-3.png", l10n.featureOpenSource),
     ];
     assert(features.length == _featureCount);
-    return SizedBox(
-      height: 260,
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final shouldApplyFade = screenWidth >= 800;
+
+    final pageView = SizedBox(
+      height: 320,
       child: PageView.builder(
         controller: _pageController,
         itemBuilder: (context, index) {
@@ -361,6 +365,32 @@ class _OnboardingPageState extends State<OnboardingPage> {
           _startAutoScroll();
         },
       ),
+    );
+
+    if (!shouldApplyFade) {
+      return pageView;
+    }
+
+    const fadeWidth = 400.0;
+    final leftFadeEnd = fadeWidth / screenWidth;
+    final rightFadeStart = (screenWidth - fadeWidth) / screenWidth;
+
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: const [
+            Colors.transparent,
+            Colors.white,
+            Colors.white,
+            Colors.transparent,
+          ],
+          stops: [0.0, leftFadeEnd, rightFadeStart, 1.0],
+        ).createShader(bounds);
+      },
+      blendMode: BlendMode.dstIn,
+      child: pageView,
     );
   }
 
@@ -476,7 +506,7 @@ class _FeatureItemWidget extends StatelessWidget {
       children: [
         Image.asset(
           assetPath,
-          height: 132,
+          height: 188,
         ),
         const SizedBox(height: 12),
         Padding(
