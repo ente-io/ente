@@ -721,23 +721,29 @@ const Page: React.FC = () => {
 
     const handleAlbumNameSubmit = useCallback(
         async (name: string) => {
-            const collection = await createAlbum(name);
+            try {
+                const collection = await createAlbum(name);
 
-            if (pendingSingleFileAdd.current) {
-                await performCollectionOp(
-                    "add",
-                    collection,
-                    [pendingSingleFileAdd.current.file],
-                    pendingSingleFileAdd.current.sourceCollectionID,
-                );
+                if (pendingSingleFileAdd.current) {
+                    await performCollectionOp(
+                        "add",
+                        collection,
+                        [pendingSingleFileAdd.current.file],
+                        pendingSingleFileAdd.current.sourceCollectionID,
+                    );
+                }
+
+                setPostCreateAlbumOp((postCreateAlbumOp) => {
+                    // The function returned by createHandleCollectionOp does its
+                    // own progress and error reporting, defer to that.
+                    createOnSelectForCollectionOp(postCreateAlbumOp!)(
+                        collection,
+                    );
+                    return undefined;
+                });
+            } finally {
+                pendingSingleFileAdd.current = undefined;
             }
-
-            setPostCreateAlbumOp((postCreateAlbumOp) => {
-                // The function returned by createHandleCollectionOp does its
-                // own progress and error reporting, defer to that.
-                createOnSelectForCollectionOp(postCreateAlbumOp!)(collection);
-                return undefined;
-            });
         },
         [createOnSelectForCollectionOp],
     );
