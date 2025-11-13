@@ -25,6 +25,8 @@ import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -53,6 +55,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void initState() {
     const initialPage = _featureCount * 1000;
     _pageController = PageController(initialPage: initialPage);
+    _pageController.addListener(_handlePageControllerScroll);
     _currentPage = initialPage;
     _activeDotIndex = _currentPage % _featureCount;
     _triggerLogoutEvent =
@@ -66,6 +69,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   void dispose() {
     _stopAutoScroll();
+    _pageController.removeListener(_handlePageControllerScroll);
     _pageController.dispose();
     _triggerLogoutEvent.cancel();
     super.dispose();
@@ -316,6 +320,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _stopAutoScroll() {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = null;
+  }
+
+  void _handlePageControllerScroll() {
+    if (!_pageController.hasClients) {
+      return;
+    }
+
+    // Check if user is manually scrolling
+    // userScrollDirection is idle during programmatic scrolling (animateToPage)
+    // but becomes forward/reverse when user manually drags
+    if (_pageController.position.userScrollDirection != ScrollDirection.idle) {
+      _autoScrollDisabled = true;
+      _stopAutoScroll();
+    }
   }
 
   void _animateToFeature(int index) {
