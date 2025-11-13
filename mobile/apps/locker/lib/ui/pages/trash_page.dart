@@ -77,7 +77,12 @@ class _TrashPageState extends State<TrashPage> {
     final collections = await CollectionService.instance.getCollections();
 
     final availableCollections = uniqueCollectionsById(
-      collections.where((c) => !c.isDeleted).toList(),
+      collections
+          .where(
+            (c) =>
+                !c.isDeleted && c.type != CollectionType.uncategorized,
+          )
+          .toList(),
     );
 
     if (availableCollections.isEmpty) {

@@ -38,9 +38,6 @@ class _FileRestoreDialogState extends State<FileRestoreDialog> {
   void initState() {
     super.initState();
     _availableCollections = List.from(widget.collections);
-    if (_availableCollections.isNotEmpty) {
-      _selectedCollectionIds.add(_availableCollections.first.id);
-    }
   }
 
   void _toggleCollection(int collectionId) {
