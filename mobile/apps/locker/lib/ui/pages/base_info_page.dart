@@ -86,8 +86,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled =>
-      !_isLoading && _selectedCollectionIds.isNotEmpty;
+  bool get isSaveEnabled => !_isLoading && _selectedCollectionIds.isNotEmpty;
 
   @protected
   Future<bool> onEditModeBackPressed() async {

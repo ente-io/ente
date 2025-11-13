@@ -7,6 +7,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/ui/components/file_upload_dialog.dart';
@@ -159,7 +160,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                           final isSelected =
                               _selectedCollections.contains(collection);
                           return _buildCollectionChip(
-                            name: collection.name ?? context.l10n.unnamed,
+                            name:
+                                collection.displayName ?? context.l10n.unnamed,
                             isSelected: isSelected,
                             onTap: () => _onCollectionSelected(collection),
                             colorScheme: colorScheme,
