@@ -151,14 +151,11 @@ class FileActions {
         }
       }
 
+      showToast(context, context.l10n.fileUpdatedSuccessfully);
+
       await CollectionService.instance.sync();
 
       await dialog.hide();
-
-      if (!context.mounted) {
-        onSuccess?.call();
-        return;
-      }
 
       onSuccess?.call();
     } catch (e) {
@@ -315,10 +312,10 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-      showToast(
-        context,
-        context.l10n.fileDeletedSuccessfully,
-      );
+        showToast(
+          context,
+          context.l10n.fileDeletedSuccessfully,
+        );
       }
 
       onSuccess?.call();
