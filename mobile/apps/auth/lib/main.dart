@@ -33,6 +33,7 @@ import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/rendering.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tray_manager/tray_manager.dart';
@@ -70,6 +71,7 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SemanticsBinding.instance.ensureSemantics();
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
