@@ -959,8 +959,7 @@ class _FacesTimelineCard extends StatelessWidget {
     final opacity = _calculateOpacity(distance);
     final blurSigma = blurEnabled ? _calculateBlur(distance) : 0.0;
     final rotation = _calculateRotation(distance);
-    final overlayOpacity =
-        distance > 0 ? math.min(0.45, 0.12 + distance * 0.12) : 0.0;
+    final overlayOpacity = _calculateOverlayOpacity(distance);
 
     final cardShadow = _shadowForCard(distance);
     // Emphasize the active card by delaying the date reveal until the card is
@@ -1167,6 +1166,18 @@ class _FacesTimelineCard extends StatelessWidget {
     const double fadeRange = 0.55;
     final t = ((drop - fadeStart) / fadeRange).clamp(0.0, 1.0);
     return math.max(0.0, 1.0 - t);
+  }
+
+  double _calculateOverlayOpacity(double distance) {
+    if (distance <= 0) {
+      return 0;
+    }
+    const double overlayMax = 0.45;
+    const double reachDistance = 3.0;
+    final double normalized = (distance / reachDistance).clamp(0.0, 1.0);
+    final double eased = Curves.easeOutCubic.transform(normalized);
+    // Fade the lift overlay much earlier so the card looks settled sooner.
+    return overlayMax * eased;
   }
 }
 
