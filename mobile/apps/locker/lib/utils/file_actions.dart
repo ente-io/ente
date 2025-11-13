@@ -7,6 +7,7 @@ import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
+import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
@@ -18,7 +19,7 @@ import "package:logging/logging.dart";
 class FileActions {
   static final _logger = Logger("FileActions");
 
-  /// Shows edit dialog for a file to update its collections
+  /// Shows edit dialog for a file to update title
   static Future<void> editFile(
     BuildContext context,
     EnteFile file, {
@@ -59,6 +60,26 @@ class FileActions {
     await dialog.show();
 
     try {
+      final currentTitle = file.displayName;
+      final hasMetadataChanged = result.title != currentTitle;
+
+      if (hasMetadataChanged) {
+        _logger.info('Updating file metadata: title changed');
+        final metadataUpdateSuccess = await MetadataUpdaterService.instance
+            .editFileName(file, result.title);
+
+        if (!metadataUpdateSuccess) {
+          await dialog.hide();
+          if (!context.mounted) {
+            return;
+          }
+          showToast(
+            context,
+            context.l10n.failedToUpdateFile('Metadata update failed'),
+          );
+          return;
+        }
+      }
       final selectedCollectionIds =
           result.selectedCollections.map((c) => c.id).toSet();
 
@@ -130,14 +151,11 @@ class FileActions {
         }
       }
 
+      showToast(context, context.l10n.fileUpdatedSuccessfully);
+
       await CollectionService.instance.sync();
 
       await dialog.hide();
-
-      if (!context.mounted) {
-        return;
-      }
-      showToast(context, context.l10n.fileUpdatedSuccessfully);
 
       onSuccess?.call();
     } catch (e) {
