@@ -37,23 +37,36 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   static const kDeveloperModeTapCountThreshold = 7;
+  static const _featureCount = 3;
+  static const _autoScrollInterval = Duration(seconds: 4);
 
   late StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
+  late final PageController _pageController;
+  Timer? _autoScrollTimer;
 
   int _developerModeTapCount = 0;
-  double _featureIndex = 0;
+  int _activeDotIndex = 0;
+  int _currentPage = 0;
+  bool _autoScrollDisabled = false;
 
   @override
   void initState() {
+    const initialPage = _featureCount * 1000;
+    _pageController = PageController(initialPage: initialPage);
+    _currentPage = initialPage;
+    _activeDotIndex = _currentPage % _featureCount;
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       await autoLogoutAlert(context);
     });
+    _startAutoScroll();
     super.initState();
   }
 
   @override
   void dispose() {
+    _stopAutoScroll();
+    _pageController.dispose();
     _triggerLogoutEvent.cancel();
     super.dispose();
   }
@@ -112,41 +125,33 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ),
       body: GestureDetector(
         onTap: () async => _handleDeveloperTap(context),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: 420,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 32,
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 32,
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 28),
-                      _buildFeatureSlider(context),
-                      const SizedBox(height: 2),
-                      DotsIndicator(
-                        dotsCount: 3,
-                        position: _featureIndex.toInt(),
-                        decorator: DotsDecorator(
-                          activeColor: Colors.white,
-                          color: Colors.white.withValues(alpha: 0.32),
-                          activeShape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          size: const Size(10, 10),
-                          activeSize: const Size(20, 10),
-                          spacing: const EdgeInsets.all(6),
-                        ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const SizedBox(height: 28),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildFeatureSlider(context),
+                          const SizedBox(height: 12),
+                          _buildDotsIndicator(),
+                        ],
                       ),
-                      const SizedBox(height: 48),
-                      Padding(
+                    ),
+                    const SizedBox(height: 48),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 580),
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 28,
                         ),
@@ -161,6 +166,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 18,
                                   ),
+                                  minimumSize: const Size(56, 56),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
@@ -168,8 +174,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 onPressed: _navigateToSignUpPage,
                                 child: Text(
                                   l10n.signUp,
-                                  style: textTheme.bodyBold.copyWith(
+                                  style: textTheme.body.copyWith(
                                     color: Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
@@ -183,6 +190,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 18,
                                   ),
+                                  minimumSize: const Size(56, 56),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
@@ -190,8 +198,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 onPressed: _navigateToSignInPage,
                                 child: Text(
                                   l10n.logInLabel,
-                                  style: textTheme.bodyBold.copyWith(
+                                  style: textTheme.body.copyWith(
                                     color: accentColor,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
@@ -199,26 +208,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: _optForOfflineMode,
-                        child: Text(
-                          l10n.useOffline,
-                          style: textTheme.bodyBold.copyWith(
-                            color: Colors.white.withValues(alpha: 0.85),
-                            decoration: TextDecoration.underline,
-                            decorationColor: Colors.white,
-                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: _optForOfflineMode,
+                      child: Text(
+                        l10n.useOffline,
+                        style: textTheme.bodyBold.copyWith(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      const DeveloperSettingsWidget(),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    const DeveloperSettingsWidget(),
+                  ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -286,6 +295,45 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
+  void _startAutoScroll() {
+    if (_autoScrollDisabled) {
+      return;
+    }
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(_autoScrollInterval, (_) {
+      if (!_pageController.hasClients) {
+        return;
+      }
+      final nextPage = _currentPage + 1;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _stopAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = null;
+  }
+
+  void _animateToFeature(int index) {
+    if (!_pageController.hasClients) {
+      return;
+    }
+    final base = _currentPage - (_currentPage % _featureCount);
+    final targetPage = base + index;
+    if (targetPage == _currentPage) {
+      return;
+    }
+    _pageController.animateToPage(
+      targetPage,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
+
   Widget _buildFeatureSlider(BuildContext context) {
     final l10n = context.l10n;
     final features = [
@@ -293,23 +341,53 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ("assets/onboarding_file.png", l10n.featureSearchEtc),
       ("assets/onboarding_share.png", l10n.featureOpenSource),
     ];
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 320),
-      child: PageView(
-        children: features
-            .map(
-              (feature) => _FeatureItemWidget(
-                assetPath: feature.$1,
-                title: feature.$2,
-              ),
-            )
-            .toList(),
+    assert(features.length == _featureCount);
+    return SizedBox(
+      height: 260,
+      child: PageView.builder(
+        controller: _pageController,
+        itemBuilder: (context, index) {
+          final feature = features[index % features.length];
+          return _FeatureItemWidget(
+            assetPath: feature.$1,
+            title: feature.$2,
+          );
+        },
         onPageChanged: (index) {
           setState(() {
-            _featureIndex = index.toDouble();
+            _currentPage = index;
+            _activeDotIndex = index % _featureCount;
           });
+          _startAutoScroll();
         },
       ),
+    );
+  }
+
+  Widget _buildDotsIndicator() {
+    return DotsIndicator(
+      dotsCount: _featureCount,
+      position: _activeDotIndex,
+      decorator: DotsDecorator(
+        activeColor: Colors.white,
+        color: Colors.white.withValues(alpha: 0.32),
+        activeShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+        size: const Size(10, 10),
+        activeSize: const Size(20, 10),
+        spacing: const EdgeInsets.all(6),
+      ),
+      animate: true,
+      animationDuration: const Duration(milliseconds: 300),
+      onTap: (index) {
+        _autoScrollDisabled = true;
+        _stopAutoScroll();
+        _animateToFeature(index);
+      },
     );
   }
 
