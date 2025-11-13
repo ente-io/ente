@@ -252,8 +252,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: colorScheme.fillBase,
                 foregroundColor: colorScheme.backgroundBase,
+                minimumSize: const Size(double.infinity, 56),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               ),
               onPressed: _onDonePressed,
               child: Text(context.l10n.done),
