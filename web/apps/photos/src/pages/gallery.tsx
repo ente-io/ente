@@ -6,6 +6,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
+import type { AddToAlbumPhase } from "components/AddToAlbumProgress";
+import { AddToAlbumProgress } from "components/AddToAlbumProgress";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -236,6 +238,12 @@ const Page: React.FC = () => {
     } = useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
+
+    // Progress UI state for single-file add-to-album from the FileViewer
+    const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
+        open: boolean;
+        phase: AddToAlbumPhase;
+    }>({ open: false, phase: "processing" });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
@@ -1020,6 +1028,8 @@ const Page: React.FC = () => {
 
             const handleSelect = async (collection: Collection) => {
                 try {
+                    // Show add-to-album progress UI for this operation.
+                    setAddToAlbumProgress({ open: true, phase: "processing" });
                     showLoadingBar();
                     await performCollectionOp(
                         "add",
@@ -1028,8 +1038,28 @@ const Page: React.FC = () => {
                         sourceCollectionSummaryID,
                     );
                     await remotePull({ silent: true });
+                    setAddToAlbumProgress((s) => ({ ...s, phase: "done" }));
+                    // Auto-close after a short delay if done successfully.
+                    setTimeout(
+                        () =>
+                            setAddToAlbumProgress((s) => ({
+                                ...s,
+                                open: false,
+                            })),
+                        1200,
+                    );
                 } catch (e) {
                     onGenericError(e);
+                    setAddToAlbumProgress((s) => ({ ...s, phase: "failed" }));
+                    // Auto-close after a short delay if failed.
+                    setTimeout(
+                        () =>
+                            setAddToAlbumProgress((s) => ({
+                                ...s,
+                                open: false,
+                            })),
+                        2000,
+                    );
                 } finally {
                     pendingSingleFileAdd.current = undefined;
                     hideLoadingBar();
@@ -1303,6 +1333,13 @@ const Page: React.FC = () => {
                     albumNameInputVisibilityProps.onClose();
                 }}
                 onSubmit={handleAlbumNameSubmit}
+            />
+            <AddToAlbumProgress
+                open={addToAlbumProgress.open}
+                onClose={() =>
+                    setAddToAlbumProgress((s) => ({ ...s, open: false }))
+                }
+                phase={addToAlbumProgress.phase}
             />
         </FullScreenDropZone>
     );

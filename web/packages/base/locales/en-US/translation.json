@@ -687,6 +687,7 @@
     "person_favorites": "{{name}}'s favorites",
     "shared_favorites": "Shared favorites",
     "added_by_name": "Added by {{name}}",
+    "added": "{{count, number}} added",
     "unowned_files_not_processed": "Files added by other users were not processed",
     "custom_domains": "Custom domains",
     "custom_domains_desc": "Use your own domain when sharing",
