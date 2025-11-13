@@ -115,7 +115,7 @@ func (c *CollectionController) MoveFiles(ctx *gin.Context, req ente.MoveFilesReq
 		FileIDs:     fileIDs,
 	})
 	if err != nil {
-		stacktrace.Propagate(err, "Failed to verify fileOwnership")
+		return stacktrace.Propagate(err, "Failed to verify fileOwnership")
 	}
 	err = c.CollectionRepo.MoveFiles(ctx, req.ToCollectionID, req.FromCollectionID, req.Files, userID, userID)
 	return stacktrace.Propagate(err, "") // return nil if err is nil
