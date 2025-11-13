@@ -74,6 +74,7 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 			EnableDownload:  true,
 			EnableCollect:   req.EnableCollect,
 			PasswordEnabled: false,
+			MinRole:         nil,
 		}
 		return response, nil
 	}
@@ -144,6 +145,11 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 	if req.EnableJoin != nil {
 		publicCollectionToken.EnableJoin = *req.EnableJoin
 	}
+	if req.MinRole != nil {
+		role := *req.MinRole
+		rolePtr := role
+		publicCollectionToken.MinRole = &rolePtr
+	}
 	err = c.CollectionLinkRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
@@ -156,6 +162,7 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
 		EnableJoin:      publicCollectionToken.EnableJoin,
+		MinRole:         publicCollectionToken.MinRole,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
 		Nonce:           publicCollectionToken.Nonce,
 		MemLimit:        publicCollectionToken.MemLimit,
