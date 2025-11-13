@@ -14,6 +14,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/faces_timeline/faces_timeline_models.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/faces_timeline/faces_timeline_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
@@ -70,6 +71,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   bool _hasStartedPlayback = false;
   bool _allFramesLoaded = false;
   bool _timelineUnavailable = false;
+  bool _hasMarkedTimelineSeen = false;
   int _expectedFrameCount = 0;
 
   int _currentIndex = 0;
@@ -106,6 +108,8 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   }
 
   Future<void> _loadFrames() async {
+    _hasMarkedTimelineSeen =
+        localSettings.hasSeenFacesTimeline(widget.person.remoteID);
     _playTimer?.cancel();
     if (mounted) {
       setState(() {
@@ -180,6 +184,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       setState(() {
         _allFramesLoaded = true;
       });
+      _maybeMarkTimelineSeen();
     } catch (error, stackTrace) {
       _logger.severe(
         "Faces timeline failed to load",
@@ -204,6 +209,19 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       return 1;
     }
     return math.max(1, math.min(_initialFrameTarget, _expectedFrameCount));
+  }
+
+  void _maybeMarkTimelineSeen() {
+    if (_hasMarkedTimelineSeen || !_allFramesLoaded || _frames.isEmpty) {
+      return;
+    }
+    if (_currentIndex != _frames.length - 1) {
+      return;
+    }
+    _hasMarkedTimelineSeen = true;
+    unawaited(
+      localSettings.markFacesTimelineSeen(widget.person.remoteID),
+    );
   }
 
   void _handleFrameLoaded(_TimelineFrame frame, int loadedCount) {
@@ -799,6 +817,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                       _currentCaptionType = frame.captionType;
                       _isScrubbing = true;
                     });
+                    _maybeMarkTimelineSeen();
                   }
                 : null,
             onChangeEnd: frameCount > 1
@@ -811,6 +830,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                       _stackProgress = _sliderValue;
                       _isScrubbing = false;
                     });
+                    _maybeMarkTimelineSeen();
                   }
                 : null,
           ),
@@ -882,6 +902,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       _currentCaptionType = frame.captionType;
       _sliderValue = clampedIndex.toDouble();
     });
+    _maybeMarkTimelineSeen();
   }
 }
 

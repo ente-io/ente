@@ -45,6 +45,7 @@ class LocalSettings {
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
+  static const _facesTimelineSeenKey = "faces_timeline_seen_person_ids";
 
   final SharedPreferences _prefs;
 
@@ -178,6 +179,24 @@ class LocalSettings {
       _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
   Future<void> setHasSeenMLEnablingBanner() async {
     await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
+  }
+
+  bool hasSeenFacesTimeline(String personId) {
+    final seenIds = _prefs.getStringList(_facesTimelineSeenKey);
+    if (seenIds == null || seenIds.isEmpty) {
+      return false;
+    }
+    return seenIds.contains(personId);
+  }
+
+  Future<void> markFacesTimelineSeen(String personId) async {
+    final List<String> seenIds =
+        List<String>.from(_prefs.getStringList(_facesTimelineSeenKey) ?? []);
+    if (seenIds.contains(personId)) {
+      return;
+    }
+    seenIds.add(personId);
+    await _prefs.setStringList(_facesTimelineSeenKey, seenIds);
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see

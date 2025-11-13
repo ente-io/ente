@@ -33,6 +33,7 @@ import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/service_locator.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
@@ -150,16 +151,24 @@ class _PeoplePageState extends State<PeoplePage> {
     super.dispose();
   }
 
-  void _openFacesTimelinePage() {
+  Future<void> _openFacesTimelinePage() async {
     _timelineLogger.info("banner_tap person=${_person.remoteID}");
-    unawaited(routeToPage(context, FacesTimelinePage(person: _person)));
+    await routeToPage(context, FacesTimelinePage(person: _person));
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    final bool showFacesTimelineBanner =
+    final bool facesTimelineReady =
         FacesTimelineService.instance.hasReadyTimelineSync(_person.remoteID);
+    final bool hasSeenFacesTimeline =
+        localSettings.hasSeenFacesTimeline(_person.remoteID);
+    final bool showFacesTimelineBanner =
+        facesTimelineReady && !hasSeenFacesTimeline;
 
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -177,6 +186,9 @@ class _PeoplePageState extends State<PeoplePage> {
                     : _person.data.name,
                 _selectedFiles,
                 _person,
+                facesTimelineReady: facesTimelineReady,
+                onFacesTimelineTap:
+                    facesTimelineReady ? _openFacesTimelinePage : null,
               ),
             ),
             body: FutureBuilder<List<EnteFile>>(
@@ -211,7 +223,10 @@ class _PeoplePageState extends State<PeoplePage> {
                                           personEntity: _person,
                                           showTimelineBanner:
                                               showFacesTimelineBanner,
-                                          onTimelineTap: _openFacesTimelinePage,
+                                          onTimelineTap: () =>
+                                              unawaited(
+                                                _openFacesTimelinePage(),
+                                              ),
                                         );
                                 },
                               )
@@ -222,7 +237,9 @@ class _PeoplePageState extends State<PeoplePage> {
                                 loadPersonFiles: loadPersonFiles,
                                 personEntity: _person,
                                 showTimelineBanner: showFacesTimelineBanner,
-                                onTimelineTap: _openFacesTimelinePage,
+                                onTimelineTap: () => unawaited(
+                                  _openFacesTimelinePage(),
+                                ),
                               ),
                         FileSelectionOverlayBar(
                           PeoplePage.overlayType,
