@@ -247,7 +247,8 @@ class FavoritesService {
       }
 
       // If no other collection found, move to uncategorized
-      targetCollection ??= await _collectionService.getOrCreateUncategorizedCollection();
+      targetCollection ??=
+          await _collectionService.getOrCreateUncategorizedCollection();
 
       await _collectionService.move(
         [file],

@@ -1,6 +1,7 @@
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/collection_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -31,7 +32,8 @@ class CollectionRowWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final collectionName = collection.name ?? context.l10n.unnamedCollection;
+    final collectionName =
+        collection.displayName ?? context.l10n.unnamedCollection;
     final bool isFavourite = collection.type == CollectionType.favorites;
 
     return GestureDetector(

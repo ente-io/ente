@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:locker/extensions/collection_extension.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -254,7 +255,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
       final files =
           await CollectionService.instance.getFilesInCollection(collection);
       final collectionNameMatches = _containsQuery(
-        collection.name ?? '',
+        collection.displayName ?? '',
         query,
       );
       final fileMatches = files.any((file) => _searchInFile(file, query));
@@ -265,9 +266,9 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
         files: collectionNameMatches ? files : [],
       );
     } catch (e) {
-      debugPrint('Error searching in collection ${collection.name}: $e');
+      debugPrint('Error searching in collection ${collection.displayName}: $e');
       final collectionNameMatches = _containsQuery(
-        collection.name ?? '',
+        collection.displayName ?? '',
         query,
       );
       return CollectionSearchResult(
