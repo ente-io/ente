@@ -188,7 +188,7 @@ class _ManageIndividualParticipantState
             ),
             MenuSectionDescriptionWidget(
               content: adminRoleEnabled
-                  ? 'Admins and collaborators can add photos and videos to the shared album.'
+                  ? 'Admins and collaborators can add photos. Admins can also manage participants.'
                   : AppLocalizations.of(
                       context,
                     ).collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
