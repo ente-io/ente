@@ -421,10 +421,48 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   String _simplifyPath(String fullPath) {
-    const rootToRemove = '/storage/emulated/0/';
-    if (fullPath.startsWith(rootToRemove)) {
-      return fullPath.substring(rootToRemove.length);
+    if (Platform.isAndroid) {
+      const rootToRemove = '/storage/emulated/0/';
+      if (fullPath.startsWith(rootToRemove)) {
+        return fullPath.substring(rootToRemove.length);
+      }
+      return fullPath;
     }
+
+    if (Platform.isIOS) {
+      var simplified = fullPath;
+      // iOS often prepends /private when surfacing sandboxed locations.
+      const privatePrefix = '/private';
+      if (simplified.startsWith(privatePrefix)) {
+        simplified = simplified.substring(privatePrefix.length);
+      }
+
+      const markers = <String>[
+        '/File Provider Storage/',
+        '/Documents/',
+        '/tmp/',
+      ];
+
+      for (final marker in markers) {
+        final index = simplified.indexOf(marker);
+        if (index != -1) {
+          return simplified.substring(index + marker.length);
+        }
+      }
+
+      final segments = simplified
+          .split('/')
+          .where((segment) => segment.isNotEmpty)
+          .toList();
+      if (segments.length >= 2) {
+        return segments.sublist(segments.length - 2).join('/');
+      }
+      if (segments.isNotEmpty) {
+        return segments.last;
+      }
+      return simplified;
+    }
+
     return fullPath;
   }
 
