@@ -1,6 +1,5 @@
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -125,14 +124,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
 
-    if (selectedCollections.isEmpty) {
-      showToast(
-        widget.snackBarContext,
-        widget.snackBarContext.l10n.pleaseSelectAtLeastOneCollection,
-      );
-      return;
-    }
-
     final result = FileEditDialogResult(
       title: _titleController.text.trim(),
       caption: _captionController.text.trim(),
@@ -158,7 +149,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 24,
               offset: const Offset(0, 12),
             ),

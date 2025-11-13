@@ -4,6 +4,7 @@ import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/item_view_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -407,7 +408,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   String _collectionLabel(Collection collection) {
-    final name = collection.name?.trim();
+    final name = collection.displayName?.trim();
     if (name == null || name.isEmpty) {
       return 'Untitled';
     }

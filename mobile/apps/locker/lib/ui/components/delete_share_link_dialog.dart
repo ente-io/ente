@@ -16,7 +16,8 @@ Future<void> deleteShareLink(BuildContext context, int fileID) async {
     showDeleteFromAllCollectionsOption: false,
   );
 
-  if (confirmation?.buttonResult.action == ButtonAction.first && context.mounted) {
+  if (confirmation?.buttonResult.action == ButtonAction.first &&
+      context.mounted) {
     final dialog = createProgressDialog(
       context,
       context.l10n.deletingShareLink,

@@ -9,6 +9,7 @@ import "package:ente_ui/utils/dialog_util.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
+import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -407,7 +408,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TitleBarTitleWidget(
-                title: _collection.name ?? context.l10n.untitled,
+                title: _collection.displayName ?? context.l10n.untitled,
                 trailingWidgets: widget.isUncategorized
                     ? const []
                     : [

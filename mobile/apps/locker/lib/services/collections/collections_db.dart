@@ -386,6 +386,41 @@ class CollectionDB extends EnteBaseDatabase {
     return result.map((row) => _mapToCollection(row)).toList();
   }
 
+  Future<Map<int, List<EnteFile>>> getAllFilesGroupByCollectionID(
+    List<int> uploadedFileIDs,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return {};
+    }
+
+    final Map<int, List<EnteFile>> collectionToFilesMap = {};
+
+    // Query to get all collection mappings for the given file IDs
+    final placeholders = List.filled(uploadedFileIDs.length, '?').join(',');
+    final result = await _db.rawQuery(
+      '''
+      SELECT
+        cf.collection_id AS mapping_collection_id,
+        f.*
+      FROM $_collectionFilesTable cf
+      JOIN $_filesTable f ON cf.uploaded_file_id = f.uploaded_file_id
+      WHERE cf.uploaded_file_id IN ($placeholders)
+    ''',
+      uploadedFileIDs,
+    );
+
+    // Group files by collection ID
+    for (final row in result) {
+      final collectionId = row['mapping_collection_id'] as int;
+      final file = _mapToFile(row)..collectionID = collectionId;
+
+      collectionToFilesMap.putIfAbsent(collectionId, () => []);
+      collectionToFilesMap[collectionId]!.add(file);
+    }
+
+    return collectionToFilesMap;
+  }
+
   Future<List<EnteFile>> getAllFiles() async {
     final result = await _db.query(_filesTable);
     return result.map((row) => _mapToFile(row)).toList();
