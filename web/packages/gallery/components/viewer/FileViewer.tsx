@@ -481,6 +481,25 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             .catch(onGenericError);
     }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
 
+    const handleAddFileToCollection = useMemo(() => {
+        if (!onAddFileToCollection || !activeAnnotatedFile) return undefined;
+        return () => {
+            handleMoreMenuCloseIfNeeded();
+            const sourceSummaryID = fileNormalCollectionIDs
+                ?.get(activeAnnotatedFile.file.id)
+                ?.find((id) => id === activeCollectionID);
+            onAddFileToCollection(activeAnnotatedFile.file, {
+                sourceCollectionSummaryID: sourceSummaryID,
+            });
+        };
+    }, [
+        onAddFileToCollection,
+        handleMoreMenuCloseIfNeeded,
+        fileNormalCollectionIDs,
+        activeAnnotatedFile,
+        activeCollectionID,
+    ]);
+
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
             ? () => {
@@ -947,18 +966,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         )}
                     </MoreMenuItem>
                 )}
-                {onAddFileToCollection && (
-                    <MoreMenuItem
-                        onClick={() => {
-                            handleMoreMenuCloseIfNeeded();
-                            const sourceSummaryID = fileNormalCollectionIDs
-                                ?.get(activeAnnotatedFile.file.id)
-                                ?.find((id) => id === activeCollectionID);
-                            onAddFileToCollection(activeAnnotatedFile.file, {
-                                sourceCollectionSummaryID: sourceSummaryID,
-                            });
-                        }}
-                    >
+                {handleAddFileToCollection && (
+                    <MoreMenuItem onClick={handleAddFileToCollection}>
                         <MoreMenuItemTitle>
                             {t("add_to_album")}
                         </MoreMenuItemTitle>
