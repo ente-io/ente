@@ -70,9 +70,11 @@ class LocalBackupExperienceController {
 
 class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   static const _passwordKey = 'autoBackupPassword';
+  static const _locationConfiguredKey = 'hasConfiguredBackupLocation';
 
   bool _isBackupEnabled = false;
   String? _backupPath;
+  bool _hasConfiguredLocation = false;
   bool _isBusy = false;
   bool _shouldShowBusyOverlay = true;
   bool _hasLoaded = false;
@@ -94,10 +96,14 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final storedPath = prefs.getString('autoBackupPath');
+    final locationConfigured =
+        prefs.getBool(_locationConfiguredKey) ?? storedPath != null;
     if (!mounted) return;
     setState(() {
       _isBackupEnabled = prefs.getBool('isAutoBackupEnabled') ?? false;
-      _backupPath = prefs.getString('autoBackupPath');
+      _backupPath = storedPath;
+      _hasConfiguredLocation = locationConfigured;
       _hasLoaded = true;
     });
   }
@@ -124,16 +130,22 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _startEnableFlow() async {
-    final passwordConfigured = await _promptPassword(
-      forcePrompt: true,
-      disableOnCancel: true,
-      isUpdateFlow: false,
-    );
+    bool passwordConfigured = await _hasStoredPassword();
+    if (!passwordConfigured) {
+      passwordConfigured = await _promptPassword(
+        forcePrompt: true,
+        disableOnCancel: true,
+        isUpdateFlow: false,
+      );
+    }
     if (!passwordConfigured) {
       return false;
     }
 
-    final locationReady = await _handleLocationSetup();
+    bool locationReady = _hasConfiguredLocation;
+    if (!locationReady) {
+      locationReady = await _handleLocationSetup();
+    }
     if (!locationReady) {
       return false;
     }
@@ -441,9 +453,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     try {
       await Directory(path).create(recursive: true);
       await prefs.setString('autoBackupPath', path);
+      await prefs.setBool(_locationConfiguredKey, true);
       if (!mounted) return false;
       setState(() {
         _backupPath = path;
+        _hasConfiguredLocation = true;
       });
       if (successMessage != null) {
         _showSnackBar(successMessage);
