@@ -4,6 +4,7 @@ import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
@@ -17,7 +18,6 @@ import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/file_restore_dialog.dart';
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/utils/collection_list_util.dart';
-import 'package:locker/utils/snack_bar_utils.dart';
 
 class TrashPage extends StatefulWidget {
   final List<TrashFile> trashFiles;
@@ -81,7 +81,7 @@ class _TrashPageState extends State<TrashPage> {
     );
 
     if (availableCollections.isEmpty) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.noCollectionsAvailableForRestore,
       );
@@ -109,12 +109,12 @@ class _TrashPageState extends State<TrashPage> {
         _sortedTrashFiles.remove(file);
         _allTrashFiles.remove(file);
       });
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.deletedPermanently(file.displayName),
       );
     }).catchError((error) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.failedToDeleteFile(error.toString()),
       );
@@ -144,7 +144,7 @@ class _TrashPageState extends State<TrashPage> {
 
       await dialog.hide();
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         context.l10n.restoredFileToCollection(
           file.displayName,
@@ -154,7 +154,7 @@ class _TrashPageState extends State<TrashPage> {
     } catch (error) {
       await dialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.failedToRestoreFile(file.displayName, error.toString()),
       );
@@ -188,13 +188,13 @@ class _TrashPageState extends State<TrashPage> {
         _sortedTrashFiles.clear();
         _allTrashFiles.clear();
       });
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         context.l10n.trashClearedSuccessfully,
       );
       Navigator.of(context).pop();
     } catch (error) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.failedToClearTrash(error.toString()),
       );

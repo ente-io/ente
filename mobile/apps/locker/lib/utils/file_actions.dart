@@ -1,5 +1,6 @@
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -11,7 +12,6 @@ import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
-import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 
 /// Utility class for common file actions like edit, share, and delete
@@ -137,11 +137,7 @@ class FileActions {
       if (!context.mounted) {
         return;
       }
-
-      SnackBarUtils.showInfoSnackBar(
-        context,
-        context.l10n.fileUpdatedSuccessfully,
-      );
+      showToast(context, context.l10n.fileUpdatedSuccessfully);
 
       onSuccess?.call();
     } catch (e) {
@@ -151,11 +147,7 @@ class FileActions {
       if (!context.mounted) {
         return;
       }
-
-      SnackBarUtils.showWarningSnackBar(
-        context,
-        context.l10n.failedToUpdateFile(e.toString()),
-      );
+      showToast(context, context.l10n.failedToUpdateFile(e.toString()));
     }
   }
 
@@ -189,7 +181,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
         );
@@ -233,7 +225,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.fileDeletedSuccessfully,
         );
@@ -244,7 +236,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDeleteFile(e.toString()),
         );
@@ -302,7 +294,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.fileDeletedSuccessfully,
         );

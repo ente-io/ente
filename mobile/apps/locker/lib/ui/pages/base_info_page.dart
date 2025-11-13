@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -85,7 +86,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled => !_isLoading;
+  bool get isSaveEnabled =>
+      !_isLoading && _selectedCollectionIds.isNotEmpty;
 
   @protected
   Future<bool> onEditModeBackPressed() async {
@@ -178,23 +180,30 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _loadCollections() async {
     try {
       final collections = await CollectionService.instance.getCollections();
+      final filteredCollections = collections
+          .where((c) => c.type != CollectionType.uncategorized)
+          .toList();
+
+      Set<int> initialSelection = _selectedCollectionIds;
+
+      if (widget.existingFile != null) {
+        final fileCollections =
+            await CollectionService.instance.getCollectionsForFile(
+          widget.existingFile!,
+        );
+        initialSelection = fileCollections
+            .where((c) => c.type != CollectionType.uncategorized)
+            .map((c) => c.id)
+            .toSet();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        // Filter out uncategorized and favorites collections
-        _availableCollections = collections
-            .where(
-              (c) =>
-                  c.type != CollectionType.uncategorized &&
-                  c.type != CollectionType.favorites,
-            )
-            .toList();
-        // Pre-select a default collection if available
-        if (_availableCollections.isNotEmpty) {
-          final defaultCollection = _availableCollections.firstWhere(
-            (c) => c.name == context.l10n.informationCollectionName,
-            orElse: () => _availableCollections.first,
-          );
-          _selectedCollectionIds = {defaultCollection.id};
-        }
+        _availableCollections = filteredCollections;
+        _selectedCollectionIds = initialSelection;
       });
     } catch (e) {
       // Handle error silently or show a message
@@ -255,11 +264,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             _currentMode = InfoPageMode.view;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.recordSavedSuccessfully),
-              backgroundColor: Colors.green,
-            ),
+          showToast(
+            context,
+            context.l10n.recordSavedSuccessfully,
           );
         }
       }
@@ -276,13 +283,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           return e.toString();
         }();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${context.l10n.failedToSaveRecord}: $errorDetails',
-            ),
-            backgroundColor: Colors.red,
-          ),
+        showToast(
+          context,
+          '${context.l10n.failedToSaveRecord}: $errorDetails',
         );
       }
     } finally {
@@ -327,11 +330,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        context.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -374,11 +375,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     // Show success message after navigation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-          ),
+        showToast(
+          context,
+          message,
         );
       }
     });
@@ -394,12 +393,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   void _copyToClipboard(String text, String fieldName) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.copiedToClipboard(fieldName)),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
+    showToast(
+      context,
+      context.l10n.copiedToClipboard(fieldName),
     );
   }
 

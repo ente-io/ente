@@ -1,10 +1,10 @@
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
-import "package:locker/utils/snack_bar_utils.dart";
 
 Future<void> deleteShareLink(BuildContext context, int fileID) async {
   final confirmation = await showDeleteConfirmationDialog(
@@ -29,7 +29,7 @@ Future<void> deleteShareLink(BuildContext context, int fileID) async {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.shareLinkDeletedSuccessfully,
         );
@@ -38,7 +38,7 @@ Future<void> deleteShareLink(BuildContext context, int fileID) async {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           '${context.l10n.failedToDeleteShareLink}: ${e.toString()}',
         );
