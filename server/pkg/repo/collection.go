@@ -46,16 +46,17 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 		return ente.Collection{}, ente.ErrInvalidApp
 	}
 
-	err := repo.DB.QueryRow(`INSERT INTO collections(owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, magic_metadata, pub_magic_metadata, app) 
-		VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING collection_id`,
-		c.Owner.ID, c.EncryptedKey, c.KeyDecryptionNonce, c.Name, c.EncryptedName, c.NameDecryptionNonce, c.Type, c.Attributes, c.UpdationTime, c.MagicMetadata, c.PublicMagicMetadata, c.App).Scan(&c.ID)
-	if err != nil {
-		if err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index\"" {
-			return ente.Collection{}, ente.ErrFavoriteCollectionAlreadyExist
-		} else if err.Error() == "pq: duplicate key value violates unique constraint \"collections_uncategorized_constraint_index_v2\"" {
-			return ente.Collection{}, ente.ErrUncategorizeCollectionAlreadyExists
-		}
-	}
+    err := repo.DB.QueryRow(`INSERT INTO collections(owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, magic_metadata, pub_magic_metadata, app) 
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING collection_id`,
+        c.Owner.ID, c.EncryptedKey, c.KeyDecryptionNonce, c.Name, c.EncryptedName, c.NameDecryptionNonce, c.Type, c.Attributes, c.UpdationTime, c.MagicMetadata, c.PublicMagicMetadata, c.App).Scan(&c.ID)
+    if err != nil {
+        if err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index\"" ||
+            err.Error() == "pq: duplicate key value violates unique constraint \"collections_favorites_constraint_index_v2\"" {
+            return ente.Collection{}, ente.ErrFavoriteCollectionAlreadyExist
+        } else if err.Error() == "pq: duplicate key value violates unique constraint \"collections_uncategorized_constraint_index_v2\"" {
+            return ente.Collection{}, ente.ErrUncategorizeCollectionAlreadyExists
+        }
+    }
 	return c, stacktrace.Propagate(err, "")
 }
 
@@ -132,10 +133,10 @@ func (repo *CollectionRepository) GetWithSharingDetailsForUser(collectionID int6
 	}
 	return c, nil
 }
-func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata
-		FROM collections
-		WHERE owner_id = $1 and type = $2`, userID, collectionType)
+func (repo *CollectionRepository) GetCollectionByType(userID int64, collectionType string, app string) (ente.Collection, error) {
+    row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata
+        FROM collections
+        WHERE owner_id = $1 and type = $2 and app = $3`, userID, collectionType, app)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
 	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata); err != nil {

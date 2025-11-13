@@ -56,8 +56,8 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	}
 	collection, err := c.CollectionRepo.Create(collection)
 	if err != nil {
-		if err == ente.ErrUncategorizeCollectionAlreadyExists || err == ente.ErrFavoriteCollectionAlreadyExist {
-			dbCollection, err := c.CollectionRepo.GetCollectionByType(ownerID, collectionType)
+        if err == ente.ErrUncategorizeCollectionAlreadyExists || err == ente.ErrFavoriteCollectionAlreadyExist {
+            dbCollection, err := c.CollectionRepo.GetCollectionByType(ownerID, collectionType, collection.App)
 			if err != nil {
 				return ente.Collection{}, stacktrace.Propagate(err, "")
 			}
