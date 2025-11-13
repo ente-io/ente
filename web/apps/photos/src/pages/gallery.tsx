@@ -776,6 +776,7 @@ const Page: React.FC = () => {
 
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
+        options?: { shouldExitSearchMode?: boolean },
     ) => {
         if (searchOption) {
             const type = searchOption.suggestion.type;
@@ -796,7 +797,9 @@ const Page: React.FC = () => {
                 });
             }
         } else {
-            dispatch({ type: "exitSearch" });
+            // Pass shouldExitSearchMode to the reducer (defaults to true for backward compatibility)
+            const shouldExitSearchMode = options?.shouldExitSearchMode ?? true;
+            dispatch({ type: "exitSearch", shouldExitSearchMode });
         }
     };
 

@@ -1402,6 +1402,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get deleteCollectionFromEverywhere =>
+      'Also delete items from everywhere';
+
+  @override
   String yesDeleteCollections(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

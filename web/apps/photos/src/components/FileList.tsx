@@ -1049,14 +1049,16 @@ const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
         pointer-events: none;
     }
 
-    &:hover {
-        input[type="checkbox"] {
-            visibility: visible;
-            opacity: 0.5;
-        }
+    @media (pointer: fine) {
+        &:hover {
+            input[type="checkbox"] {
+                visibility: visible;
+                opacity: 0.5;
+            }
 
-        .preview-card-hover-overlay {
-            opacity: 1;
+            .preview-card-hover-overlay {
+                opacity: 1;
+            }
         }
     }
 
@@ -1066,59 +1068,78 @@ const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
 const Check = styled("input")<{ $active: boolean }>(
     ({ theme, $active }) => `
     appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
     position: absolute;
-    /* Increase z-index in stacking order to capture clicks */
     z-index: 1;
     left: 0;
     outline: none;
     cursor: pointer;
+    width: 31px;
+    height: 31px;
+    box-sizing: border-box;
+    
     @media (pointer: coarse) {
         pointer-events: none;
     }
 
     &::before {
         content: "";
+        display: block; /* Critical for Safari */
         width: 19px;
         height: 19px;
         background-color: #ddd;
-        display: inline-block;
         border-radius: 50%;
-        vertical-align: bottom;
-        margin: 6px 6px;
-        transition: background-color 0.3s ease;
-        pointer-events: inherit;
-
+        margin: 6px;
+        transition: background-color 0.3s ease, opacity 0.3s ease;
+        position: relative; /* Important for Safari */
     }
+    
     &::after {
         content: "";
+        display: block; /* Critical for Safari */
         position: absolute;
+        top: 50%;
+        left: 50%;
         width: 5px;
         height: 11px;
-        border-right: 2px solid #333;
-        border-bottom: 2px solid #333;
-        transition: transform 0.3s ease;
-        pointer-events: inherit;
-        transform: translate(-18px, 9px) rotate(45deg);
+        border: solid #333;
+        border-width: 0 2px 2px 0;
+        transform: translate(-50%, -60%) rotate(45deg);
+        transition: border-color 0.3s ease, opacity 0.3s ease;
+        transform-origin: center;
     }
 
-    /* checkmark background (filled circle) */
-    &:checked::before {
-        content: "";
-        background-color: ${theme.vars.palette.accent.main};
-        border-color: ${theme.vars.palette.accent.main};
-        color: white;
-    }
-    /* checkmark foreground (tick) */
-    &:checked::after {
-        content: "";
-        border-right: 2px solid #ddd;
-        border-bottom: 2px solid #ddd;
-    }
+    /* Default state - hide both */
     visibility: hidden;
-    ${$active && "visibility: visible; opacity: 0.5;"};
+    
+    /* When $active - show both with reduced opacity */
+    ${
+        $active &&
+        `
+        visibility: visible;
+        opacity: 0.5;
+    `
+    };
+    
+    /* Hover state - show both */
+    &:hover {
+        visibility: visible;
+        opacity: 0.7;
+    }
+    
+    /* Checked state - show both with full opacity and colored */
     &:checked {
         visibility: visible;
         opacity: 1 !important;
+    }
+    
+    &:checked::before {
+        background-color: ${theme.vars.palette.accent.main};
+    }
+    
+    &:checked::after {
+        border-color: #ddd;
     }
 `,
 );

@@ -10,7 +10,6 @@ import "package:locker/ui/components/usage_card_widget.dart";
 import "package:locker/ui/settings/about_section_widget.dart";
 import 'package:locker/ui/settings/account_section_widget.dart';
 import "package:locker/ui/settings/app_version_widget.dart";
-import "package:locker/ui/settings/security_section_widget.dart";
 import "package:locker/ui/settings/settings_title_bar_widget.dart";
 import "package:locker/ui/settings/social_section_widget.dart";
 import "package:locker/ui/settings/support_section_widget.dart";
@@ -78,10 +77,11 @@ class SettingsPage extends StatelessWidget {
         sectionSpacing,
       ]);
 
-      contents.addAll([
-        const SecuritySectionWidget(),
-        sectionSpacing,
-      ]);
+      // TODO(aman): Re-add after app-lock is implemented w/ Locker designs
+      // contents.addAll([
+      //   const SecuritySectionWidget(),
+      //   sectionSpacing,
+      // ]);
 
       if (Platform.isAndroid ||
           Platform.isWindows ||

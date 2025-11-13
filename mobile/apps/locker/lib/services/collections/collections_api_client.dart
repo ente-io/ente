@@ -113,7 +113,19 @@ class CollectionApiClient {
     params["files"] = [];
     for (final file in files) {
       final int uploadedFileID = file.uploadedFileID!;
-      final fileKey = await CollectionService.instance.getFileKey(file);
+
+      // Follow Photos pattern: decrypt using file's current collectionID
+      final fileCurrentCollection =
+          await CollectionService.instance.getCollection(file.collectionID!);
+      final fileCurrentCollectionKey =
+          CryptoHelper.instance.getCollectionKey(fileCurrentCollection);
+      final fileKey = CryptoHelper.instance.getFileKey(
+        file.encryptedKey!,
+        file.keyDecryptionNonce!,
+        fileCurrentCollectionKey,
+      );
+
+      // Re-encrypt the file key with the destination collection's key
       final encryptedKeyData = CryptoUtil.encryptSync(fileKey, collectionKey);
       final String encryptedKey =
           CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
@@ -217,6 +229,7 @@ class CollectionApiClient {
   Future<void> leaveCollection(Collection collection) async {
     await CollectionSharingService.instance.leaveCollection(collection.id);
     await _handleCollectionDeletion(collection);
+    await CollectionService.instance.sync();
   }
 
   Future<void> _handleCollectionDeletion(Collection collection) async {
@@ -224,39 +237,81 @@ class CollectionApiClient {
     final deletedCollection = collection.copyWith(isDeleted: true);
     await _updateCollectionInDB(deletedCollection);
     Bus.instance.fire(CollectionsUpdatedEvent("delete_collection"));
-    await CollectionService.instance.sync();
   }
 
   Future<void> move(
-    EnteFile file,
+    List<EnteFile> files,
     Collection fromCollection,
     Collection toCollection,
   ) async {
+    if (files.isEmpty) {
+      _logger.info("No files to move");
+      return;
+    }
+
     final params = <String, dynamic>{};
     params["fromCollectionID"] = fromCollection.id;
     params["toCollectionID"] = toCollection.id;
-    final fileKey = await CollectionService.instance.getFileKey(file);
-    final encryptedKeyData = CryptoUtil.encryptSync(
-      fileKey,
-      CryptoHelper.instance.getCollectionKey(toCollection),
-    );
-    params["files"] = [];
-    params["files"].add(
-      CollectionFileItem(
-        file.uploadedFileID!,
-        CryptoUtil.bin2base64(encryptedKeyData.encryptedData!),
-        CryptoUtil.bin2base64(encryptedKeyData.nonce!),
-      ).toMap(),
-    );
-    await _enteDio.post(
-      "/collections/move-files",
-      data: params,
-    );
+
+    // Process files in batches
+    const batchSize = 100;
+    final batchedFiles = <List<EnteFile>>[];
+    for (int i = 0; i < files.length; i += batchSize) {
+      batchedFiles.add(
+        files.sublist(i, min(i + batchSize, files.length)),
+      );
+    }
+
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        // Follow Photos pattern: use file's collectionID to get the key
+        final fileCollection = await CollectionService.instance.getCollection(
+          file.collectionID!,
+        );
+        final fileCollectionKey =
+            CryptoHelper.instance.getCollectionKey(fileCollection);
+        final fileKey = CryptoHelper.instance.getFileKey(
+          file.encryptedKey!,
+          file.keyDecryptionNonce!,
+          fileCollectionKey,
+        );
+
+        // Update file's collectionID to the destination (like Photos does)
+        file.collectionID = toCollection.id;
+
+        // Re-encrypt the file key with the destination collection's key
+        final destCollectionKey =
+            CryptoHelper.instance.getCollectionKey(toCollection);
+        final encryptedKeyData = CryptoUtil.encryptSync(
+          fileKey,
+          destCollectionKey,
+        );
+
+        file.encryptedKey =
+            CryptoUtil.bin2base64(encryptedKeyData.encryptedData!);
+        file.keyDecryptionNonce =
+            CryptoUtil.bin2base64(encryptedKeyData.nonce!);
+
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID!,
+            file.encryptedKey!,
+            file.keyDecryptionNonce!,
+          ).toMap(),
+        );
+      }
+      await _enteDio.post(
+        "/collections/move-files",
+        data: params,
+      );
+    }
   }
 
   Future<void> trashCollection(
     Collection collection, {
     bool keepFiles = false,
+    bool skipEventFiring = false,
   }) async {
     try {
       await _enteDio.delete(
@@ -264,7 +319,13 @@ class CollectionApiClient {
         "?keepFiles=${keepFiles ? "True" : "False"}"
         "&collectionID=${collection.id}",
       );
-      await _handleCollectionDeletion(collection);
+      if (skipEventFiring) {
+        await _db.deleteCollection(collection);
+        final deletedCollection = collection.copyWith(isDeleted: true);
+        await _updateCollectionInDB(deletedCollection);
+      } else {
+        await _handleCollectionDeletion(collection);
+      }
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;

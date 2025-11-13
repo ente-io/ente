@@ -13,6 +13,10 @@
   "signUp": "Sign up",
   "onBoardingGetStarted": "Get Started",
   "setupFirstAccount": "Setup your first account",
+  "allTabEmptyHint": "Nothing here yet. Tap + to add a code or open Trash to recover one.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Scan a QR Code",
   "qrCode": "QR code",
   "qr": "QR",

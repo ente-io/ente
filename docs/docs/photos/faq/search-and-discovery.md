@@ -197,7 +197,7 @@ Yes! You can tell the app not to show certain persons.
 
 **On mobile:**
 
-First, make sure the person is not named. If you already gave a name, then first press `Remove person label` in the top right menu. Now inside the unnamed grouping, press `Ignore person` from the top right menu.
+First, make sure the person is not named. If you already gave a name, then first press `Remove person label` in the top right menu. Now inside the unnamed grouping, press `Ignore person` from the top right menu. Long press on the unnamed grouping will also show the option to ignore person.
 
 To undo this action, go to a **photo containing the person**. Open the **file info** section of the photo and press on the **face thumbnail of the ignored person**. This will take you to the grouping of this person. Here you can press `Show person` to undo ignoring the person.
 

@@ -780,6 +780,10 @@
       }
     }
   },
+  "deleteCollectionFromEverywhere": "Also delete items from everywhere",
+  "@deleteCollectionFromEverywhere": {
+    "description": "Checkbox label asking whether to delete collection items everywhere"
+  },
   "yesDeleteCollections": "Yes, delete {count, plural, =1{collection} other{collections}}",
   "@yesDeleteCollections": {
     "description": "Button label for confirming deletion of one or more collections",

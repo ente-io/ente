@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -139,11 +140,11 @@ class _PersonalNotePageState
     BuildContext context,
     BoxConstraints constraints,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Padding(
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: _buildEditorSurface(
               context,
@@ -151,17 +152,17 @@ class _PersonalNotePageState
               isEditing: true,
             ),
           ),
-        ),
-        SizedBox(height: collectionSpacing),
-        CollectionSelectionWidget(
-          collections: availableCollections,
-          selectedCollectionIds: selectedCollectionIds,
-          onToggleCollection: toggleCollectionSelection,
-          onCollectionsUpdated: updateAvailableCollections,
-          titleWidget:
-              showCollectionSelectionTitle ? null : const SizedBox.shrink(),
-        ),
-      ],
+          SizedBox(height: collectionSpacing),
+          CollectionSelectionWidget(
+            collections: availableCollections,
+            selectedCollectionIds: selectedCollectionIds,
+            onToggleCollection: toggleCollectionSelection,
+            onCollectionsUpdated: updateAvailableCollections,
+            titleWidget:
+                showCollectionSelectionTitle ? null : const SizedBox.shrink(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -458,12 +459,9 @@ class _PersonalNotePageState
       return;
     }
     Clipboard.setData(ClipboardData(text: contentText));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.copiedToClipboard(context.l10n.note)),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
+    showToast(
+      context,
+      context.l10n.copiedToClipboard(context.l10n.note),
     );
   }
 

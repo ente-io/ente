@@ -211,6 +211,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/notifications",
                             },
                             {
+                                text: "Video editor",
+                                link: "/photos/features/utilities/video-editor",
+                            },
+                            {
                                 text: "Video streaming",
                                 link: "/photos/features/utilities/video-streaming",
                             },

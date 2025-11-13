@@ -71,7 +71,7 @@ class DialogWidget extends StatelessWidget {
           ? const EdgeInsets.all(0)
           : const EdgeInsets.fromLTRB(6, 8, 6, 6),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
+        color: colorScheme.backgroundElevated2,
         boxShadow: shadowFloatLight,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
@@ -226,7 +226,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
           ? const EdgeInsets.all(0)
           : const EdgeInsets.fromLTRB(6, 8, 6, 6),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
+        color: colorScheme.backgroundElevated2,
         boxShadow: shadowFloatLight,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),

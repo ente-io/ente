@@ -20,9 +20,9 @@ import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
+import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
-import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -94,7 +94,7 @@ class CollectionActions {
           await CollectionService.instance.rename(collection, newName);
           await progressDialog.hide();
 
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
             context.l10n.collectionRenamedSuccessfully,
           );
@@ -107,7 +107,7 @@ class CollectionActions {
         } catch (error) {
           await progressDialog.hide();
 
-          SnackBarUtils.showWarningSnackBar(
+          showToast(
             context,
             context.l10n.failedToRenameCollection(error.toString()),
           );
@@ -140,6 +140,10 @@ class CollectionActions {
     await progressDialog.show();
 
     bool isFavoriteCollection = false;
+    final bool keepFiles = !(dialogChoice?.deleteFromAllCollections ?? false);
+    final List<Collection> emptyCollections = [];
+    final List<Collection> nonEmptyCollections = [];
+    final List<dynamic> errors = [];
 
     try {
       for (final collection in collections) {
@@ -147,16 +151,60 @@ class CollectionActions {
           isFavoriteCollection = true;
           continue;
         }
-        if (collection.type.canDelete) {
-          await CollectionService.instance.trashCollection(
-            collection,
-            keepFiles: !(dialogChoice?.deleteFromAllCollections ?? false),
-          );
+        if (!collection.type.canDelete) {
+          continue;
+        }
+
+        final fileCount =
+            await CollectionService.instance.getFileCount(collection);
+
+        if (fileCount == 0) {
+          emptyCollections.add(collection);
+        } else {
+          nonEmptyCollections.add(collection);
         }
       }
+
+      for (final collection in emptyCollections) {
+        try {
+          await CollectionService.instance.trashEmptyCollection(
+            collection,
+            isBulkDelete: true,
+          );
+        } catch (e, s) {
+          _logger.severe("Failed to trash empty collection", e, s);
+          errors.add(e);
+        }
+      }
+
+      if (emptyCollections.isNotEmpty) {
+        await CollectionService.instance.sync();
+        await TrashService.instance.syncTrash();
+      }
+
+      for (final collection in nonEmptyCollections) {
+        try {
+          await CollectionService.instance.trashCollection(
+            context,
+            collection,
+            keepFiles: keepFiles,
+          );
+        } catch (e, s) {
+          _logger.severe("Failed to trash collection", e, s);
+          errors.add(e);
+        }
+      }
+
       await progressDialog.hide();
 
-      SnackBarUtils.showInfoSnackBar(
+      if (errors.isNotEmpty) {
+        await showGenericErrorDialog(
+          context: context,
+          error: errors.first,
+        );
+      }
+
+      showToast(
         context,
         "${collections.length} collections deleted successfully",
       );
@@ -172,7 +220,7 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.failedToDeleteCollection(error.toString()),
       );
@@ -187,10 +235,39 @@ class CollectionActions {
   }) async {
     final l10n = context.l10n;
     if (!collection.type.canDelete) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         l10n.collectionCannotBeDeleted,
       );
+      return;
+    }
+
+    final fileCount = await CollectionService.instance.getFileCount(collection);
+
+    if (fileCount == 0) {
+      final progressDialog = createProgressDialog(context, l10n.pleaseWait);
+      await progressDialog.show();
+
+      try {
+        await CollectionService.instance.trashEmptyCollection(collection);
+
+        await progressDialog.hide();
+
+        showToast(
+          context,
+          l10n.collectionDeletedSuccessfully,
+        );
+
+        // Call success callback if provided
+        onSuccess?.call();
+      } catch (error) {
+        await progressDialog.hide();
+
+        showToast(
+          context,
+          l10n.failedToDeleteCollection(error.toString()),
+        );
+      }
       return;
     }
 
@@ -216,13 +293,14 @@ class CollectionActions {
       // If deleteFromAllCollections is true → keepFiles should be false (move files to trash)
       // If deleteFromAllCollections is false → keepFiles should be true (keep files in other collections)
       await CollectionService.instance.trashCollection(
+        context,
         collection,
         keepFiles: !(result?.deleteFromAllCollections ?? false),
       );
 
       await progressDialog.hide();
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         l10n.collectionDeletedSuccessfully,
       );
@@ -232,7 +310,7 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         l10n.failedToDeleteCollection(error.toString()),
       );
@@ -278,7 +356,7 @@ class CollectionActions {
       } else if (actionResult.action == ButtonAction.first) {
         onSuccess?.call();
         Navigator.of(context).pop();
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           "Leave collection successfully",
         );
@@ -327,7 +405,7 @@ class CollectionActions {
       } else if (actionResult.action == ButtonAction.first) {
         onSuccess?.call();
         Navigator.of(context).pop();
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           "Leave collection successfully",
         );

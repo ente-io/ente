@@ -115,7 +115,7 @@ func (c *CollectionController) MoveFiles(ctx *gin.Context, req ente.MoveFilesReq
 		FileIDs:     fileIDs,
 	})
 	if err != nil {
-		stacktrace.Propagate(err, "Failed to verify fileOwnership")
+		return stacktrace.Propagate(err, "Failed to verify fileOwnership")
 	}
 	err = c.CollectionRepo.MoveFiles(ctx, req.ToCollectionID, req.FromCollectionID, req.Files, userID, userID)
 	return stacktrace.Propagate(err, "") // return nil if err is nil
@@ -132,7 +132,7 @@ func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, req ente.RemoveFi
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to verify collection access")
 	}
-	err = c.isRemoveAllowed(ctx, actorUserID, resp.Collection.Owner.ID, req.FileIDs)
+	err = c.isRemoveAllowed(ctx, actorUserID, resp.Collection.Owner.ID, resp.Role, req.FileIDs)
 	if err != nil {
 		return stacktrace.Propagate(err, "file removal check failed")
 	}
@@ -144,7 +144,7 @@ func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, req ente.RemoveFi
 }
 
 // isRemoveAllowed verifies that given set of files can be removed from the collection or not
-func (c *CollectionController) isRemoveAllowed(ctx *gin.Context, actorUserID int64, collectionOwnerID int64, fileIDs []int64) error {
+func (c *CollectionController) isRemoveAllowed(ctx *gin.Context, actorUserID int64, collectionOwnerID int64, role *ente.CollectionParticipantRole, fileIDs []int64) error {
 	ownerToFilesMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, fileIDs)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to get owner to fileIDs map")
@@ -154,15 +154,21 @@ func (c *CollectionController) isRemoveAllowed(ctx *gin.Context, actorUserID int
 		return ente.NewBadRequestWithMessage("can not remove files owned by album owner")
 	}
 
-	if collectionOwnerID != actorUserID {
-		// verify that user is only trying to remove files owned by them
-		if len(ownerToFilesMap) > 1 {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files owned by others")
-		}
-		// verify that user is only trying to remove files owned by them
-		if _, ok := ownerToFilesMap[actorUserID]; !ok {
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files owned by others")
-		}
+	if collectionOwnerID == actorUserID {
+		return nil
+	}
+
+	if role != nil && *role == ente.ADMIN {
+		return nil
+	}
+
+	// verify that user is only trying to remove files owned by them
+	if len(ownerToFilesMap) > 1 {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files owned by others")
+	}
+	// verify that user is only trying to remove files owned by them
+	if _, ok := ownerToFilesMap[actorUserID]; !ok {
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not remove files owned by others")
 	}
 	return nil
 }

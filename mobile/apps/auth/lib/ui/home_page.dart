@@ -1472,7 +1472,8 @@ class _HomePageState extends State<HomePage> {
     final crossAxisCount = _calculateGridColumnCount(context);
     _currentGridColumns = crossAxisCount;
     if (_hasLoaded) {
-      if (_filteredCodes.isEmpty && _searchText.isEmpty) {
+      final bool noCodesAnywhere = !hasNonTrashedCodes && !hasTrashedCodes;
+      if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
         return HomeEmptyStateWidget(
           onScanTap: _redirectToScannerPage,
           onManuallySetupTap: _redirectToManualEntryPage,
@@ -1481,8 +1482,18 @@ class _HomePageState extends State<HomePage> {
         final anyCodeHasError =
             _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
         final indexOffset = anyCodeHasError ? 1 : 0;
-        final itemCount = (hasNonTrashedCodes ? tags.length + 1 : 0) +
-            (hasTrashedCodes ? 1 : 0);
+        final bool showAllChip = hasNonTrashedCodes || hasTrashedCodes;
+        final bool showTrashChip = hasTrashedCodes;
+        final int itemCount =
+            (showAllChip ? 1 : 0) + tags.length + (showTrashChip ? 1 : 0);
+        final bool showAllEmptyHint =
+            showAllChip &&
+                selectedTag.isEmpty &&
+                !_isTrashOpen &&
+                _filteredCodes.isEmpty &&
+                _searchText.isEmpty &&
+                !hasNonTrashedCodes &&
+                hasTrashedCodes;
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1498,7 +1509,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 8),
                   itemCount: itemCount,
                   itemBuilder: (context, index) {
-                    if (index == 0 && hasNonTrashedCodes) {
+                    if (showAllChip && index == 0) {
                       return TagChip(
                         label: l10n.all,
                         state: selectedTag == "" && _isTrashOpen == false
@@ -1515,7 +1526,7 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
 
-                    if (index == itemCount - 1 && hasTrashedCodes) {
+                    if (showTrashChip && index == itemCount - 1) {
                       return TagChip(
                         label: l10n.trash,
                         state: _isTrashOpen
@@ -1531,7 +1542,7 @@ class _HomePageState extends State<HomePage> {
                         iconData: Icons.delete,
                       );
                     }
-                    final customTagIndex = index - 1;
+                    final customTagIndex = index - (showAllChip ? 1 : 0);
                     if (customTagIndex >= 0 && customTagIndex < tags.length) {
                       return TagChip(
                         label: tags[customTagIndex],
@@ -1563,6 +1574,25 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Builder(
                 builder: (context) {
+                  if (showAllEmptyHint) {
+                    final textStyle = Theme.of(context).textTheme.bodyLarge ??
+                        Theme.of(context).textTheme.bodyMedium ??
+                        const TextStyle();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 64.0),
+                      child: Center(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 24.0),
+                          child: Text(
+                            l10n.allTabEmptyHint,
+                            textAlign: TextAlign.center,
+                            style: textStyle,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
                   final gridView = AlignedGridView.count(
                     crossAxisCount: crossAxisCount,
                     physics: const AlwaysScrollableScrollPhysics(),

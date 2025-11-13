@@ -6,6 +6,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
+import "package:locker/extensions/collection_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
@@ -69,7 +70,7 @@ class _CollectionFlexGridViewWidgetState
         itemBuilder: (context, index) {
           final collection = _displayedCollections[index];
           final collectionName =
-              collection.name ?? context.l10n.unnamedCollection;
+              collection.displayName ?? context.l10n.unnamedCollection;
 
           return GestureDetector(
             onTap: () => _navigateToCollection(collection),

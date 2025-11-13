@@ -19,7 +19,6 @@ Ente reads and preserves:
 All this metadata is:
 
 - Encrypted before upload
-- Searchable within Ente
 - Preserved when you export
 
 ### How does Ente handle Exif data and descriptions? {#exif-handling}

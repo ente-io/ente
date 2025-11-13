@@ -148,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
           await showErrorDialog(
             context,
             context.l10n.oops,
-            'Sorry, Locker access is available only to paid customers of Ente Photos right now.',
+            context.l10n.unlockLockerPaidPlanBody,
           );
         } else {
           await showErrorDialog(
