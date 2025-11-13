@@ -284,7 +284,7 @@ export type FileViewerProps = ModalVisibilityProps & {
 
     onAddFileToCollection?: (
         file: EnteFile,
-        context: { sourceCollectionSummaryID?: number },
+        sourceCollectionSummaryID?: number,
     ) => void;
     /**
      * The ID of the currently active collection, if any (e.g., when viewing an album).
@@ -488,9 +488,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const sourceSummaryID = fileNormalCollectionIDs
                 ?.get(activeAnnotatedFile.file.id)
                 ?.find((id) => id === activeCollectionID);
-            onAddFileToCollection(activeAnnotatedFile.file, {
-                sourceCollectionSummaryID: sourceSummaryID,
-            });
+            onAddFileToCollection(
+                activeAnnotatedFile.file,
+                sourceSummaryID,
+            );
         };
     }, [
         onAddFileToCollection,
@@ -966,14 +967,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         )}
                     </MoreMenuItem>
                 )}
-                {handleAddFileToCollection && (
-                    <MoreMenuItem onClick={handleAddFileToCollection}>
-                        <MoreMenuItemTitle>
-                            {t("add_to_album")}
-                        </MoreMenuItemTitle>
-                        <AddIcon />
-                    </MoreMenuItem>
-                )}
+                {handleAddFileToCollection &&
+                    activeAnnotatedFile.annotation.isOwnFile && (
+                        <MoreMenuItem onClick={handleAddFileToCollection}>
+                            <MoreMenuItemTitle>
+                                {t("add_to_album")}
+                            </MoreMenuItemTitle>
+                            <AddIcon />
+                        </MoreMenuItem>
+                    )}
                 {canCopyImage() && (
                     <MoreMenuItem onClick={handleCopyImage}>
                         <MoreMenuItemTitle>

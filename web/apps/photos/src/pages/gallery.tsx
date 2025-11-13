@@ -175,7 +175,7 @@ const Page: React.FC = () => {
      * a target collection).
      */
     const pendingSingleFileAdd = useRef<
-        { file: EnteFile; sourceCollectionID?: number } | undefined
+        { file: EnteFile; sourceCollectionSummaryID?: number } | undefined
     >(undefined);
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
@@ -729,7 +729,7 @@ const Page: React.FC = () => {
                         "add",
                         collection,
                         [pendingSingleFileAdd.current.file],
-                        pendingSingleFileAdd.current.sourceCollectionID,
+                        pendingSingleFileAdd.current.sourceCollectionSummaryID,
                     );
                 }
 
@@ -1016,10 +1016,7 @@ const Page: React.FC = () => {
      */
     const handleAddSingleFileToCollection = useCallback(
         (file: EnteFile, sourceCollectionSummaryID?: number) => {
-            pendingSingleFileAdd.current = {
-                file,
-                sourceCollectionID: sourceCollectionSummaryID,
-            };
+            pendingSingleFileAdd.current = { file, sourceCollectionSummaryID };
 
             const handleSelect = async (collection: Collection) => {
                 try {
@@ -1285,12 +1282,7 @@ const Page: React.FC = () => {
                     onVisualFeedback={handleVisualFeedback}
                     onSelectCollection={handleSelectCollection}
                     onSelectPerson={handleSelectPerson}
-                    onAddFileToCollection={(file) =>
-                        handleAddSingleFileToCollection(
-                            file,
-                            activeCollectionID,
-                        )
-                    }
+                    onAddFileToCollection={handleAddSingleFileToCollection}
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
@@ -1303,6 +1295,13 @@ const Page: React.FC = () => {
                 title={t("new_album")}
                 label={t("album_name")}
                 submitButtonTitle={t("create")}
+                onClose={() => {
+                    // If the user dismisses the album name dialog without
+                    // submitting, clear any pending single-file add so that it
+                    // doesn't leak into a future album creation.
+                    pendingSingleFileAdd.current = undefined;
+                    albumNameInputVisibilityProps.onClose();
+                }}
                 onSubmit={handleAlbumNameSubmit}
             />
         </FullScreenDropZone>

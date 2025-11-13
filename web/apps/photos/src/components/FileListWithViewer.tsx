@@ -55,7 +55,7 @@ export type FileListWithViewerProps = {
 
     onAddFileToCollection?: (
         file: EnteFile,
-        context: { sourceCollectionSummaryID?: number },
+        sourceCollectionSummaryID?: number,
     ) => void;
 } & Pick<
     FileListProps,
