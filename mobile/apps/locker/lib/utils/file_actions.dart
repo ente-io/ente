@@ -19,7 +19,7 @@ import "package:logging/logging.dart";
 class FileActions {
   static final _logger = Logger("FileActions");
 
-  /// Shows edit dialog for a file to update title, caption, and collections
+  /// Shows edit dialog for a file to update title
   static Future<void> editFile(
     BuildContext context,
     EnteFile file, {
@@ -61,14 +61,12 @@ class FileActions {
 
     try {
       final currentTitle = file.displayName;
-      final currentCaption = file.caption ?? '';
-      final hasMetadataChanged =
-          result.title != currentTitle || result.caption != currentCaption;
+      final hasMetadataChanged = result.title != currentTitle;
 
       if (hasMetadataChanged) {
-        _logger.info('Updating file metadata: title and/or caption changed');
+        _logger.info('Updating file metadata: title changed');
         final metadataUpdateSuccess = await MetadataUpdaterService.instance
-            .editFileNameAndCaption(file, result.title, result.caption);
+            .editFileName(file, result.title);
 
         if (!metadataUpdateSuccess) {
           await dialog.hide();
@@ -158,13 +156,8 @@ class FileActions {
       await dialog.hide();
 
       if (!context.mounted) {
+        onSuccess?.call();
         return;
-      }
-
-      if (hasMetadataChanged) {
-        showToast(context, context.l10n.fileUpdatedSuccessfully);
-      } else {
-        showToast(context, context.l10n.fileUpdatedSuccessfully);
       }
 
       onSuccess?.call();
@@ -322,10 +315,10 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          context.l10n.fileDeletedSuccessfully,
-        );
+      showToast(
+        context,
+        context.l10n.fileDeletedSuccessfully,
+      );
       }
 
       onSuccess?.call();
