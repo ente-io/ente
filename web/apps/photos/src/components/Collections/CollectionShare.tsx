@@ -64,6 +64,7 @@ import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
     createPublicURL,
     deleteShareURL,
+    getCollectionByID,
     shareCollection,
     unshareCollection,
     updateCollectionLayout,
@@ -76,7 +77,13 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { wait } from "ente-utils/promise";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { Trans } from "react-i18next";
 import { z } from "zod";
 
@@ -107,7 +114,7 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     open,
     onClose,
     user,
-    collection,
+    collection: collectionProp,
     collectionSummary,
     emailByUserID,
     shareSuggestionEmails,
@@ -118,6 +125,26 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
     const { isAdminRoleEnabled, isSurfacePublicLinkEnabled } = settings;
     const { onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+
+    // Use local state for collection to handle updates from fetch
+    const [collection, setCollection] = useState(collectionProp);
+    // Track if we've fetched a collection with public URLs
+    const hasFetchedPublicURLs = useRef(false);
+
+    // Update local collection when prop changes, but don't overwrite if we've fetched newer data
+    useEffect(() => {
+        // Only update from prop if:
+        // 1. We haven't fetched public URLs yet, OR
+        // 2. The prop has public URLs (meaning it's been updated with the latest data)
+        if (
+            !hasFetchedPublicURLs.current ||
+            collectionProp?.publicURLs?.length > 0
+        ) {
+            setCollection(collectionProp);
+        }
+        // Skip the update if we've fetched public URLs but the prop doesn't have them
+        // This preserves the fetched data when parent component updates with outdated info
+    }, [collectionProp]);
 
     // TODO: Duplicated from CollectionHeader.tsx
     /**
@@ -143,22 +170,77 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
         [showLoadingBar, hideLoadingBar, onGenericError, onRemotePull],
     );
 
-    if (!collection || !collectionSummary) {
-        return <></>;
-    }
-
-    const currentSharee = collection.sharees.find(
+    const currentSharee = collection?.sharees.find(
         (sharee) => sharee.id == user.id,
     );
-    const isOwner = user.id == collection.owner?.id;
+    const isOwner = user.id == collection?.owner?.id;
     const isAdmin = currentSharee?.role == "ADMIN";
     const canManageParticipants = isOwner || (isAdminRoleEnabled && isAdmin);
-    const isSharedIncoming = collectionSummary.type == "sharedIncoming";
+    const isSharedIncoming = collectionSummary?.type == "sharedIncoming";
     const showEmailSection = !isSharedIncoming || canManageParticipants;
-    const hasPublicLink = collection.publicURLs.length > 0;
+    const hasPublicLink = collection?.publicURLs.length > 0;
     const showPublicShare =
         isOwner ||
         (isSharedIncoming && hasPublicLink && isSurfacePublicLinkEnabled);
+
+    // Use a ref to track if we've already fetched for this dialog session
+    const hasFetchedForSession = useRef(false);
+
+    // Reset the fetch flags when dialog closes
+    useEffect(() => {
+        if (!open) {
+            hasFetchedForSession.current = false;
+            hasFetchedPublicURLs.current = false;
+        }
+    }, [open]);
+
+    // Fetch collection for non-owners when the share pane opens
+    // to ensure we have the latest public link information
+    useEffect(() => {
+        const refreshCollection = async () => {
+            const shouldFetch =
+                open &&
+                collection &&
+                !isOwner &&
+                isSharedIncoming &&
+                !hasPublicLink &&
+                !hasFetchedForSession.current;
+
+            if (shouldFetch) {
+                // Mark that we've fetched to prevent infinite loops
+                hasFetchedForSession.current = true;
+                try {
+                    const latestCollection = await getCollectionByID(
+                        collection.id,
+                    );
+                    // If the fetched collection has public URLs, update local state
+                    if (latestCollection.publicURLs.length > 0) {
+                        hasFetchedPublicURLs.current = true;
+                        setCollection(latestCollection);
+                        // Also trigger remote pull to sync with parent
+                        await onRemotePull({ silent: true });
+                    }
+                } catch (e) {
+                    log.error(
+                        "[CollectionShare] Failed to refresh collection for non-owner",
+                        e,
+                    );
+                }
+            }
+        };
+        void refreshCollection();
+    }, [
+        open,
+        isOwner,
+        isSharedIncoming,
+        hasPublicLink,
+        collection,
+        onRemotePull,
+    ]);
+
+    if (!collection || !collectionSummary) {
+        return <></>;
+    }
 
     return (
         <SidebarDrawer anchor="right" {...{ open, onClose }}>
