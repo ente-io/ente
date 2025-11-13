@@ -1,6 +1,9 @@
-- Prateek & a5xwin: Add Multi-select
-- Ashil: Update auth icons
-- a5xwin: Import 2FA codes from gallery using QR image scanning
-- Tristan: Minimize to tray on Windows, macOS, and Linux
-- Adrián: Fix "Copied to Clipboard" notification visibility
-- Neeraj: Fix iOS password AutoFill for auth.ente.io
+- ExtendedGuru4883: Quick Settings tile for android
+- Prateek: Add fdroid icon
+- Prateek: Fix "X" icon not looking good in light/dark theme
+- Prateek: Tags header would show "All" even when all codes are in Trash
+- Prateek: Fix Fedora rpm build
+- Prateek: Don't show "Ente Auth" directory on iOS
+- Prateek: Custom order button will show drag screen + Tick will always be shown in sort
+- Prateek: Search notes on auth mobile & web
+- Icons added: uscis.gov, mintmobile.com,
