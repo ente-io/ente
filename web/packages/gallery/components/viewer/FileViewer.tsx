@@ -488,10 +488,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const sourceSummaryID = fileNormalCollectionIDs
                 ?.get(activeAnnotatedFile.file.id)
                 ?.find((id) => id === activeCollectionID);
-            onAddFileToCollection(
-                activeAnnotatedFile.file,
-                sourceSummaryID,
-            );
+            onAddFileToCollection(activeAnnotatedFile.file, sourceSummaryID);
         };
     }, [
         onAddFileToCollection,
@@ -672,14 +669,36 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
     const shouldIgnoreKeyboardEvent = useCallback(() => {
-        // Don't handle keydowns if any of the modals are open.
-        return (
+        // Don't handle keydowns if any of the viewer's own modals are open.
+        if (
             openFileInfo ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
             openShortcuts
-        );
+        ) {
+            return true;
+        }
+
+        // Also ignore keydowns if keyboard focus is inside an editable field
+        // (e.g., when the CollectionSelector dialog's search TextField is focused)
+        const activeElement = document.activeElement as HTMLElement | null;
+        if (activeElement) {
+            const tagName = activeElement.tagName;
+            const role = activeElement.getAttribute("role");
+            if (
+                tagName === "INPUT" ||
+                tagName === "TEXTAREA" ||
+                tagName === "SELECT" ||
+                activeElement.isContentEditable ||
+                role === "textbox" ||
+                role === "combobox"
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }, [
         openFileInfo,
         moreMenuAnchorEl,
