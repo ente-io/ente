@@ -112,10 +112,10 @@ class EnteColorScheme {
     this.gradientButtonBgColor = _gradientButtonBgColor,
     this.gradientButtonBgColors = _gradientButtonBgColors,
     this.primaryGreen = _primaryGreen,
-    this.primary700 = accentColor,
-    this.primary500 = accentColor,
-    this.primary400 = accentColor,
-    this.primary300 = accentColor,
+    this.primary700 = _primary700,
+    this.primary500 = _primary500,
+    this.primary400 = _primary400,
+    this.primary300 = _primary300,
     this.warning700 = _warning700,
     this.warning800 = _warning800,
     this.warning500 = _warning500,
@@ -247,10 +247,10 @@ const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
 const Color _primaryGreen = Color.fromRGBO(29, 185, 84, 1);
 
-const Color _primary700 = Color.fromARGB(255, 164, 0, 182);
-const Color _primary500 = Color.fromARGB(255, 204, 10, 101);
-const Color _primary400 = Color.fromARGB(255, 122, 41, 193);
-const Color _primary300 = Color.fromARGB(255, 152, 77, 244);
+const Color _primary700 = accentColor;
+const Color _primary500 = accentColor;
+const Color _primary400 = accentColor;
+const Color _primary300 = accentColor;
 
 const Color _iconButtonBrightColor = Color.fromRGBO(130, 50, 225, 1);
 const Color _iconButtonDarkColor = Color.fromRGBO(255, 150, 16, 1);
