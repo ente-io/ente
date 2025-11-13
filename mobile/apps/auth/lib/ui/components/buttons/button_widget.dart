@@ -218,7 +218,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       onTapCancel: _shouldRegisterGestures ? _onTapCancel : null,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(20)),
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
           border: widget.buttonType == ButtonType.tertiaryCritical
               ? Border.all(color: borderColor)
               : null,
@@ -227,7 +227,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           duration: const Duration(milliseconds: 16),
           width: widget.buttonSize == ButtonSize.large ? double.infinity : null,
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(20)),
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
             color: buttonColor,
           ),
           child: Padding(

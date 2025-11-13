@@ -26,7 +26,7 @@ class GradientButton extends StatefulWidget {
     this.iconData,
     this.paddingValue = 0.0,
     this.fontSize = 18,
-    this.borderRadius = 20,
+    this.borderRadius = 4,
     this.borderWidth = 1,
   });
 

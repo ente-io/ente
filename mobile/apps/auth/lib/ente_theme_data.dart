@@ -52,7 +52,7 @@ final lightThemeData = ThemeData(
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   ),
   inputDecorationTheme: const InputDecorationTheme().copyWith(
     focusedBorder: const UnderlineInputBorder(
@@ -163,7 +163,7 @@ final darkThemeData = ThemeData(
       fontSize: 16,
       fontWeight: FontWeight.w500,
     ),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   ),
   inputDecorationTheme: const InputDecorationTheme().copyWith(
     focusedBorder: const UnderlineInputBorder(
