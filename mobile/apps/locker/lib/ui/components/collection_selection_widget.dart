@@ -2,6 +2,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:locker/extensions/collection_extension.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/utils/collection_actions.dart';
@@ -145,7 +146,8 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     }
 
     for (final collection in _availableCollections) {
-      final collectionName = collection.name ?? context.l10n.unnamedCollection;
+      final collectionName =
+          collection.displayName ?? context.l10n.unnamedCollection;
       chipItems.add(
         _ChipItem(
           widget: _buildCollectionChip(
@@ -227,7 +229,8 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     required colorScheme,
     required textTheme,
   }) {
-    final collectionName = collection.name ?? context.l10n.unnamedCollection;
+    final collectionName =
+        collection.displayName ?? context.l10n.unnamedCollection;
 
     return GestureDetector(
       onTap: onTap,
@@ -290,35 +293,39 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     required colorScheme,
     required textTheme,
   }) {
-    return GestureDetector(
-      onTap: () async {
-        await _createNewCollection();
-      },
-      child: DottedBorder(
-        options: const RoundedRectDottedBorderOptions(
-          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-          strokeWidth: 1,
-          color: Color(0xFF6B6B6B),
-          dashPattern: [5, 5],
-          radius: Radius.circular(24),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.add_rounded,
-              size: 18,
-              color: colorScheme.textMuted,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              context.l10n.collectionLabel,
-              style: textTheme.body.copyWith(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: const BorderRadius.all(Radius.circular(24)),
+        onTap: () async {
+          await _createNewCollection();
+        },
+        child: DottedBorder(
+          options: const RoundedRectDottedBorderOptions(
+            padding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            strokeWidth: 1,
+            color: Color(0xFF6B6B6B),
+            dashPattern: [5, 5],
+            radius: Radius.circular(24),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.add_rounded,
+                size: 18,
                 color: colorScheme.textMuted,
-                fontWeight: FontWeight.w500,
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Text(
+                context.l10n.collectionLabel,
+                style: textTheme.body.copyWith(
+                  color: colorScheme.textMuted,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

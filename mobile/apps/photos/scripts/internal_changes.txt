@@ -1,3 +1,5 @@
+- Neeraj: (i) Show public link to album participants
+- Neeraj: (i) Admin role, only enables participant management. Photos management WIP.
 - Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
 - Neeraj: (i) Safeguards for Bitflip errors (md5, immedidate decryption)
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking

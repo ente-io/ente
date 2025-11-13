@@ -116,7 +116,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
                           child: SelectableText(
                             widget.url,
                             style: textTheme.small.copyWith(
-                              color: colorScheme.backgroundBase,
+                              color: Colors.white,
                               fontFamily: 'monospace',
                             ),
                           ),
@@ -131,10 +131,10 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
                       child: IconButton(
                         onPressed: () => _copyToClipboard(),
                         visualDensity: VisualDensity.compact,
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.copy_rounded,
                           size: 18,
-                          color: colorScheme.primary500,
+                          color: Colors.white,
                         ),
                         tooltip: 'Copy link',
                       ),

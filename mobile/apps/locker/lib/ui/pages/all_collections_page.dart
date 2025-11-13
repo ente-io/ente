@@ -4,6 +4,7 @@ import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_collections.dart';
@@ -165,6 +166,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
   Widget _buildBody(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final safeBottomInset = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = safeBottomInset + 24.0;
 
     if (_isLoading) {
       return const Center(
@@ -223,7 +226,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(
+        16.0,
+        16.0,
+        16.0,
+        bottomPadding,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -253,12 +261,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
   Widget _buildTrashHook() {
     final textTheme = getEnteTextTheme(context);
+    final borderRadius = BorderRadius.circular(20.0);
 
     return Container(
       margin: const EdgeInsets.only(top: 4.0, bottom: 16.0),
       child: InkWell(
         onTap: _openTrash,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: borderRadius,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           decoration: BoxDecoration(
@@ -267,12 +276,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               color: Theme.of(context).dividerColor.withAlpha(50),
               width: 0.5,
             ),
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: borderRadius,
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.delete_outline,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedDelete01,
                 color:
                     Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
                 size: 22,
@@ -315,12 +324,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     if (_uncategorizedCollection == null) return const SizedBox.shrink();
 
     final textTheme = getEnteTextTheme(context);
+    final borderRadius = BorderRadius.circular(20.0);
 
     return Container(
       margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
       child: InkWell(
         onTap: () => _openUncategorized(),
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: borderRadius,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           decoration: BoxDecoration(
@@ -329,12 +339,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               color: Theme.of(context).dividerColor.withAlpha(50),
               width: 0.5,
             ),
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: borderRadius,
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.folder_open_outlined,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedFolderUnknown,
                 color:
                     Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
                 size: 22,

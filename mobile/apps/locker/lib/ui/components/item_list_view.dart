@@ -2,6 +2,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_utils/ente_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
+import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
 import 'package:locker/models/item_view_type.dart';
@@ -310,7 +311,7 @@ class _CollectionListItem extends _ListItem {
 
   @override
   String get name {
-    return _collection.name ?? 'Unnamed Collection';
+    return _collection.displayName ?? 'Unnamed Collection';
   }
 
   @override

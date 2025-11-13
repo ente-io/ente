@@ -5,12 +5,12 @@ import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/text_input_widget.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/utils/file_icon_utils.dart';
-import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:path/path.dart' as path;
 
 class FileUploadDialogResult {
@@ -85,7 +85,7 @@ class _FileUploadDialogState extends State<FileUploadDialog> {
         .toList();
 
     if (selectedCollections.isEmpty) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.pleaseSelectAtLeastOneCollection,
       );
