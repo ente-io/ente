@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -280,6 +281,15 @@ export type FileViewerProps = ModalVisibilityProps & {
      * documentation about the parameters.
      */
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
+
+    onAddFileToCollection?: (
+        file: EnteFile,
+        context: { sourceCollectionSummaryID?: number },
+    ) => void;
+    /**
+     * The ID of the currently active collection, if any (e.g., when viewing an album).
+     */
+    activeCollectionID?: number;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -314,6 +324,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
+    onAddFileToCollection,
+    activeCollectionID,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -935,6 +947,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         )}
                     </MoreMenuItem>
                 )}
+                {onAddFileToCollection && (
+                    <MoreMenuItem
+                        onClick={() => {
+                            handleMoreMenuCloseIfNeeded();
+                            const sourceSummaryID = fileNormalCollectionIDs
+                                ?.get(activeAnnotatedFile.file.id)
+                                ?.find((id) => id === activeCollectionID);
+                            onAddFileToCollection(activeAnnotatedFile.file, {
+                                sourceCollectionSummaryID: sourceSummaryID,
+                            });
+                        }}
+                    >
+                        <MoreMenuItemTitle>
+                            {t("add_to_album")}
+                        </MoreMenuItemTitle>
+                        <AddIcon />
+                    </MoreMenuItem>
+                )}
                 {canCopyImage() && (
                     <MoreMenuItem onClick={handleCopyImage}>
                         <MoreMenuItemTitle>
@@ -944,6 +974,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
                     </MoreMenuItem>
                 )}
+
                 {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>

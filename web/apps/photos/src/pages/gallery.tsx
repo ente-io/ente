@@ -167,6 +167,17 @@ const Page: React.FC = () => {
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
     /**
+     * Tracks a pending file addition operation.
+     *
+     * Used to temporarily store the file and optional source collection ID
+     * when adding a single file to a collection, allowing the operation
+     * to be completed after any necessary user interactions (like selecting
+     * a target collection).
+     */
+    const pendingSingleFileAdd = useRef<
+        { file: EnteFile; sourceCollectionID?: number } | undefined
+    >(undefined);
+    /**
      * A queue to serialize calls to {@link remoteFilesPull}.
      */
     const remoteFilesPullQueue = useRef(new PromiseQueue<void>());
@@ -711,6 +722,16 @@ const Page: React.FC = () => {
     const handleAlbumNameSubmit = useCallback(
         async (name: string) => {
             const collection = await createAlbum(name);
+
+            if (pendingSingleFileAdd.current) {
+                await performCollectionOp(
+                    "add",
+                    collection,
+                    [pendingSingleFileAdd.current.file],
+                    pendingSingleFileAdd.current.sourceCollectionID,
+                );
+            }
+
             setPostCreateAlbumOp((postCreateAlbumOp) => {
                 // The function returned by createHandleCollectionOp does its
                 // own progress and error reporting, defer to that.
@@ -972,6 +993,65 @@ const Page: React.FC = () => {
         [],
     );
 
+    /**
+     * Handles adding a single file to a collection by opening a collection selector dialog.
+     *
+     * @param file - The EnteFile to be added to a collection
+     * @param sourceCollectionSummaryID - Optional ID of the source collection where the file currently resides
+     *
+     * @remarks
+     * This function stores the pending file operation, displays a collection selector modal,
+     * and handles three scenarios:
+     * - User selects an existing collection: adds the file and triggers a remote pull
+     * - User creates a new collection: sets up post-create operation and shows album name input
+     * - User cancels: clears the pending operation
+     *
+     * The function shows/hides a loading bar during the add operation and handles errors generically.
+     */
+    const handleAddSingleFileToCollection = useCallback(
+        (file: EnteFile, sourceCollectionSummaryID?: number) => {
+            pendingSingleFileAdd.current = {
+                file,
+                sourceCollectionID: sourceCollectionSummaryID,
+            };
+
+            const handleSelect = async (collection: Collection) => {
+                try {
+                    showLoadingBar();
+                    await performCollectionOp(
+                        "add",
+                        collection,
+                        [file],
+                        sourceCollectionSummaryID,
+                    );
+                    await remotePull({ silent: true });
+                } catch (e) {
+                    onGenericError(e);
+                } finally {
+                    pendingSingleFileAdd.current = undefined;
+                    hideLoadingBar();
+                }
+            };
+
+            const handleCreate = () => {
+                setPostCreateAlbumOp("add");
+                showAlbumNameInput();
+            };
+
+            handleOpenCollectionSelector({
+                action: "add",
+                sourceCollectionSummaryID,
+                onSelectCollection: (collection) =>
+                    void handleSelect(collection),
+                onCreateCollection: handleCreate,
+                onCancel: () => {
+                    pendingSingleFileAdd.current = undefined;
+                },
+            });
+        },
+        [handleOpenCollectionSelector, remotePull, onGenericError],
+    );
+
     const showAppDownloadFooter =
         state.collectionFiles.length < 30 && !isInSearchMode;
 
@@ -1199,6 +1279,12 @@ const Page: React.FC = () => {
                     onVisualFeedback={handleVisualFeedback}
                     onSelectCollection={handleSelectCollection}
                     onSelectPerson={handleSelectPerson}
+                    onAddFileToCollection={(file) =>
+                        handleAddSingleFileToCollection(
+                            file,
+                            activeCollectionID,
+                        )
+                    }
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
