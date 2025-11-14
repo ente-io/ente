@@ -129,14 +129,17 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                     }
                     return ListView.separated(
                       itemBuilder: (context, index) {
-                        if (sectionResults.length == index) {
+                        if (index == 0 && widget.sectionType.isCTAVisible) {
                           return SearchableItemPlaceholder(
                             widget.sectionType,
                           );
                         }
-                        if (sectionResults[index] is AlbumSearchResult) {
+                        final adjustedIndex = widget.sectionType.isCTAVisible
+                            ? index - 1
+                            : index;
+                        if (sectionResults[adjustedIndex] is AlbumSearchResult) {
                           final albumSectionResult =
-                              sectionResults[index] as AlbumSearchResult;
+                              sectionResults[adjustedIndex] as AlbumSearchResult;
                           return SearchableItemWidget(
                             albumSectionResult,
                             resultCount:
@@ -146,7 +149,7 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                             ),
                             onResultTap: () {
                               RecentSearches()
-                                  .add(sectionResults[index].name());
+                                  .add(sectionResults[adjustedIndex].name());
 
                               routeToPage(
                                 context,
@@ -162,12 +165,12 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
 
                         if (widget.sectionType == SectionType.magic) {
                           final magicSectionResult =
-                              sectionResults[index] as GenericSearchResult;
+                              sectionResults[adjustedIndex] as GenericSearchResult;
                           return SearchableItemWidget(
                             magicSectionResult,
                             onResultTap: () {
                               RecentSearches()
-                                  .add(sectionResults[index].name());
+                                  .add(sectionResults[adjustedIndex].name());
                               routeToPage(
                                 context,
                                 MagicResultScreen(
@@ -187,19 +190,19 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                               );
                             },
                           );
-                        } else if (sectionResults[index]
+                        } else if (sectionResults[adjustedIndex]
                             is GenericSearchResult) {
                           final result =
-                              sectionResults[index] as GenericSearchResult;
+                              sectionResults[adjustedIndex] as GenericSearchResult;
                           return SearchableItemWidget(
-                            sectionResults[index],
+                            sectionResults[adjustedIndex],
                             onResultTap: result.onResultTap != null
                                 ? () => result.onResultTap!(context)
                                 : null,
                           );
                         }
                         return SearchableItemWidget(
-                          sectionResults[index],
+                          sectionResults[adjustedIndex],
                         );
                       },
                       separatorBuilder: (context, index) {
