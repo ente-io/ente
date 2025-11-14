@@ -59,6 +59,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   final Logger _logger = Logger("FacesTimelinePage");
   late final AnimationController _cardTransitionController;
   double _stackProgress = 0;
+  late final ValueNotifier<double> _stackProgressNotifier;
   double _animationStartProgress = 0;
   int _targetIndex = 0;
   bool _isAnimatingCard = false;
@@ -94,6 +95,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     )
       ..addListener(_onCardAnimationTick)
       ..addStatusListener(_onCardAnimationStatusChanged);
+    _stackProgressNotifier = ValueNotifier<double>(_stackProgress);
     unawaited(_loadFrames());
   }
 
@@ -104,7 +106,17 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       ..removeListener(_onCardAnimationTick)
       ..removeStatusListener(_onCardAnimationStatusChanged)
       ..dispose();
+    _stackProgressNotifier.dispose();
     super.dispose();
+  }
+
+  void _updateStackProgress(double value) {
+    _stackProgress = value;
+    const double epsilon = 1e-6;
+    if ((_stackProgressNotifier.value - value).abs() <= epsilon) {
+      return;
+    }
+    _stackProgressNotifier.value = value;
   }
 
   Future<void> _loadFrames() async {
@@ -153,7 +165,6 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _frames.clear();
         _hasStartedPlayback = false;
         _loggedPlaybackStart = false;
-        _stackProgress = 0;
         _animationStartProgress = 0;
         _targetIndex = 0;
         _isAnimatingCard = false;
@@ -164,6 +175,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _currentCaptionType = _CaptionType.yearsAgo;
         _maxCaptionDigits = 1;
       });
+      _updateStackProgress(0);
       _cardTransitionController
         ..stop()
         ..value = 0;
@@ -233,7 +245,6 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       if (isFirstFrame) {
         _currentIndex = 0;
         _sliderValue = 0;
-        _stackProgress = 0;
         _animationStartProgress = 0;
         _targetIndex = 0;
         _isAnimatingCard = false;
@@ -243,6 +254,9 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         _currentCaptionType = frame.captionType;
       }
     });
+    if (isFirstFrame) {
+      _updateStackProgress(0);
+    }
     if (!_hasStartedPlayback && loadedCount >= _initialFrameThreshold) {
       _hasStartedPlayback = true;
       _startPlayback();
@@ -402,11 +416,11 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     }
     final clamped = index.clamp(0, _frames.length - 1);
     _cardTransitionController.stop();
+    _updateStackProgress(clamped.toDouble());
     setState(() {
       _isAnimatingCard = false;
       _animationStartProgress = clamped.toDouble();
       _targetIndex = clamped;
-      _stackProgress = clamped.toDouble();
       _currentIndex = clamped;
       final frame = _frames[clamped];
       _previousCaptionValue = _currentCaptionValue;
@@ -528,7 +542,16 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: _buildFrameView(context),
+                                        child: ValueListenableBuilder<double>(
+                                          valueListenable:
+                                              _stackProgressNotifier,
+                                          builder: (context, stackProgress, _) {
+                                            return _buildFrameView(
+                                              context,
+                                              stackProgress,
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -555,7 +578,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     );
   }
 
-  Widget _buildFrameView(BuildContext context) {
+  Widget _buildFrameView(BuildContext context, double currentStackProgress) {
     final colorScheme = getEnteColorScheme(context);
     if (_frames.isEmpty) {
       return Center(
@@ -588,7 +611,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         ),
       );
     }
-    final stackProgress = _stackProgress.clamp(
+    final stackProgress = currentStackProgress.clamp(
       0.0,
       (_frames.length - 1).toDouble(),
     );
@@ -828,9 +851,9 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
             onChanged: frameCount > 1
                 ? (value) {
                     final clamped = value.clamp(0.0, maxValue);
+                    _updateStackProgress(clamped);
                     setState(() {
                       _sliderValue = clamped;
-                      _stackProgress = clamped;
                       _currentIndex = clamped.round().clamp(0, frameCount - 1);
                       final frame = _frames[_currentIndex];
                       _previousCaptionValue = _currentCaptionValue;
@@ -845,12 +868,13 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                 ? (value) {
                     final target =
                         value.round().clamp(0, frameCount - 1).toInt();
+                    final double targetProgress = target.toDouble();
                     setState(() {
                       _currentIndex = target;
-                      _sliderValue = target.toDouble();
-                      _stackProgress = _sliderValue;
+                      _sliderValue = targetProgress;
                       _isScrubbing = false;
                     });
+                    _updateStackProgress(targetProgress);
                     _maybeMarkTimelineSeen();
                   }
                 : null,
@@ -896,9 +920,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     if (progress == null) {
       return;
     }
-    setState(() {
-      _stackProgress = progress;
-    });
+    _updateStackProgress(progress);
   }
 
   void _onCardAnimationStatusChanged(AnimationStatus status) {
@@ -909,21 +931,21 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     if (_frames.isEmpty) {
       setState(() {
         _isAnimatingCard = false;
-        _stackProgress = 0;
       });
+      _updateStackProgress(0);
       return;
     }
     final clampedIndex = _targetIndex.clamp(0, _frames.length - 1);
     setState(() {
       _isAnimatingCard = false;
       _currentIndex = clampedIndex;
-      _stackProgress = clampedIndex.toDouble();
       final frame = _frames[clampedIndex];
       _previousCaptionValue = _currentCaptionValue;
       _currentCaptionValue = frame.captionValue;
       _currentCaptionType = frame.captionType;
       _sliderValue = clampedIndex.toDouble();
     });
+    _updateStackProgress(clampedIndex.toDouble());
     _maybeMarkTimelineSeen();
   }
 }
@@ -1163,7 +1185,15 @@ class _FacesTimelineCard extends StatelessWidget {
     if (distance <= 0) {
       return 0;
     }
-    return math.min(20, (distance + 0.3) * 6);
+    // Drop blur aggressively once the card is mostly in view so the hero frame
+    // looks sharp as soon as it settles.
+    const double clearDistance = 0.15;
+    const double blurMultiplier = 10;
+    final double effective = math.max(0, distance - clearDistance);
+    return math.min(
+      20,
+      (effective + 0.05) * blurMultiplier,
+    );
   }
 
   double _calculateRotation(double distance) {
