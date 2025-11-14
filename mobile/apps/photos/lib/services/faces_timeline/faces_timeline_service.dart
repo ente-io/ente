@@ -31,6 +31,7 @@ class FacesTimelineService {
 
   static const _minimumYears = 5;
   static const _minimumFacesPerYear = 4;
+  static const _minimumEligibleAgeYears = 5;
   static const _recomputeCooldown = Duration(hours: 24);
 
   final Logger _logger = Logger("FacesTimelineService");
@@ -254,6 +255,8 @@ class FacesTimelineService {
     int nowMicros,
   ) async {
     final personId = person.remoteID;
+    final minCreationTimeMicros =
+        minimumEligibleCreationTimeMicros(person.data.birthDate);
     final faceIds = await _mlDataDB.getFaceIDsForPerson(personId);
     if (faceIds.isEmpty) {
       _logger.fine(
@@ -312,9 +315,16 @@ class FacesTimelineService {
       );
     }
 
+    if (minCreationTimeMicros != null) {
+      faces.removeWhere(
+        (face) => face.creationTimeMicros < minCreationTimeMicros,
+      );
+    }
+
     if (faces.isEmpty) {
       _logger.fine(
-        "Faces timeline: person $personId has no usable faces after filtering, marking ineligible",
+        "Faces timeline: person $personId has no usable faces after filtering,"
+        " marking ineligible",
       );
       final timeline = FacesTimelinePersonTimeline(
         personId: personId,
@@ -331,6 +341,8 @@ class FacesTimelineService {
         "faces": faces.map((face) => face.toJson()).toList(),
         "minYears": _minimumYears,
         "minFaces": _minimumFacesPerYear,
+        if (minCreationTimeMicros != null)
+          "minCreationTime": minCreationTimeMicros,
       },
       taskName: "faces_timeline_select_${person.remoteID}",
     );
@@ -432,6 +444,28 @@ class FacesTimelineService {
         .toSet();
     readyPersonIds.value = current;
   }
+
+  @visibleForTesting
+  static int? minimumEligibleCreationTimeMicros(String? birthDateString) {
+    if (birthDateString == null || birthDateString.isEmpty) {
+      return null;
+    }
+    final birthDate = DateTime.tryParse(birthDateString);
+    if (birthDate == null) {
+      return null;
+    }
+    final targetYear = birthDate.year + _minimumEligibleAgeYears;
+    final targetMonth = birthDate.month;
+    final daysInTargetMonth = DateTime(targetYear, targetMonth + 1, 0).day;
+    final targetDay =
+        birthDate.day > daysInTargetMonth ? daysInTargetMonth : birthDate.day;
+    final cutoff = DateTime(
+      targetYear,
+      targetMonth,
+      targetDay,
+    );
+    return cutoff.microsecondsSinceEpoch;
+  }
 }
 
 class _TimelineFaceData {
@@ -479,8 +513,15 @@ Map<String, dynamic> selectTimelineEntriesTask(Map<String, dynamic> param) {
       (param["faces"] as List<dynamic>).cast<Map<String, dynamic>>();
   final minYears = param["minYears"] as int;
   final minFacesPerYear = param["minFaces"] as int;
+  final minCreationTimeMicros = param["minCreationTime"] as int?;
 
   final faces = facesJson.map(_TimelineFaceData.fromJson).toList();
+
+  if (minCreationTimeMicros != null) {
+    faces.removeWhere(
+      (face) => face.creationTimeMicros < minCreationTimeMicros,
+    );
+  }
 
   if (faces.isEmpty) {
     return {"status": "ineligible", "eligibleYearCount": 0};

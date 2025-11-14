@@ -4,8 +4,7 @@ import "package:photos/services/faces_timeline/faces_timeline_service.dart";
 Map<String, dynamic> _buildFace(
   String faceId,
   int fileId,
-  DateTime creationDate,
-  {
+  DateTime creationDate, {
   double score = 0.9,
   double blur = 50.0,
 }) {
@@ -133,10 +132,12 @@ void main() {
       final entries =
           (result["entries"] as List<dynamic>).cast<Map<String, dynamic>>();
       final faceIds = entries.map((entry) => entry["faceId"]).toList();
-      expect(faceIds, containsAll(<String>[
-        "sharp-and-high-score",
-        "high-resolution",
-      ]));
+      expect(
+          faceIds,
+          containsAll(<String>[
+            "sharp-and-high-score",
+            "high-resolution",
+          ]));
       expect(faceIds.length, equals(4));
       expect(faceIds, isNot(contains("low-score")));
     });
@@ -228,6 +229,102 @@ void main() {
       }
       expect(dayCounts.keys.length, equals(3));
       expect(dayCounts.values.any((count) => count > 1), isTrue);
+    });
+
+    test("excludes faces captured before minimum creation time", () {
+      final faces = <Map<String, dynamic>>[];
+      for (int year = 2008; year < 2017; year++) {
+        for (int index = 0; index < 4; index++) {
+          faces.add(
+            _buildFace(
+              "face-$year-$index",
+              year * 1000 + index,
+              DateTime(year, index + 1, 1),
+            ),
+          );
+        }
+      }
+
+      final cutoff = DateTime(2010, 1, 1).microsecondsSinceEpoch;
+      final result = selectTimelineEntriesTask({
+        "faces": faces,
+        "minYears": 5,
+        "minFaces": 4,
+        "minCreationTime": cutoff,
+      });
+
+      expect(result["status"], equals("ready"));
+      final years = (result["years"] as List<dynamic>).cast<int>();
+      expect(years.first, equals(2010));
+      expect(years.length, equals(7));
+      expect(years, isNot(contains(2008)));
+      expect(years, isNot(contains(2009)));
+    });
+
+    test("minimum creation time affects eligibility counts", () {
+      final faces = <Map<String, dynamic>>[];
+      for (int year = 2012; year < 2018; year++) {
+        for (int index = 0; index < 4; index++) {
+          faces.add(
+            _buildFace(
+              "face-$year-$index",
+              year * 10 + index,
+              DateTime(year, 6, 1).add(Duration(days: index * 30)),
+            ),
+          );
+        }
+      }
+
+      final cutoff = DateTime(2014, 1, 1).microsecondsSinceEpoch;
+      final result = selectTimelineEntriesTask({
+        "faces": faces,
+        "minYears": 5,
+        "minFaces": 4,
+        "minCreationTime": cutoff,
+      });
+
+      expect(result["status"], equals("ineligible"));
+      expect(result["eligibleYearCount"], equals(4));
+      expect(result["entries"], isNull);
+    });
+  });
+
+  group("minimum eligible creation time", () {
+    test("returns null when birthdate missing", () {
+      expect(
+        FacesTimelineService.minimumEligibleCreationTimeMicros(null),
+        isNull,
+      );
+      expect(
+        FacesTimelineService.minimumEligibleCreationTimeMicros(""),
+        isNull,
+      );
+    });
+
+    test("returns null for invalid birthdate string", () {
+      expect(
+        FacesTimelineService.minimumEligibleCreationTimeMicros("invalid"),
+        isNull,
+      );
+    });
+
+    test("computes fifth birthday cutoff", () {
+      final birthDate = DateTime(2010, 6, 15);
+      final cutoff = FacesTimelineService.minimumEligibleCreationTimeMicros(
+        "2010-06-15",
+      );
+      final expected =
+          DateTime(birthDate.year + 5, birthDate.month, birthDate.day)
+              .microsecondsSinceEpoch;
+      expect(cutoff, equals(expected));
+    });
+
+    test("clamps day for leap birthdays", () {
+      final cutoff = FacesTimelineService.minimumEligibleCreationTimeMicros(
+        "2012-02-29",
+      );
+      final expected = DateTime(2017, 2, 28).microsecondsSinceEpoch;
+      expect(cutoff, equals(expected));
     });
   });
 }

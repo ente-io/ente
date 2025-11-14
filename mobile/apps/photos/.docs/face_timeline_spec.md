@@ -6,6 +6,7 @@ Deliver an on-device, auto-playing “faces timeline” for eligible named peopl
 ### Eligibility & Precomputation
 - Run background precomputation per person after ML syncs or people data changes.
 - Skip people marked ignored/hidden or lacking ≥5 distinct calendar years that each contribute ≥4 faces (based on file `creationTime`); a year only counts toward eligibility if it independently meets that four-face threshold.
+- When a birthdate is known, ignore faces captured before the person's fifth birthday so ages 0–4 neither count toward eligibility nor appear in playback.
 - Group faces by year, sort chronologically, and select four samples spread across the year (prefer quarterly spacing; gracefully accept uneven distributions).
 - Store the resulting ordered face list with metadata (faceID, fileID, creationTime, optional crop bytes) in a local cache keyed by personID.
 - Persist the ordered timeline metadata for all people in a single JSON cache (e.g., `faces_timeline/cache.json`) that maps each eligible `personID` to the face ordering, timestamps, and auxiliary playback data; continue to rely on the existing face thumbnail cache for the actual crop bytes.
