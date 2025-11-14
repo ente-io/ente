@@ -362,6 +362,8 @@ const Page: React.FC = () => {
 
             // Check for pending album join BEFORE fetching data
             console.log("[Gallery] Checking for pending album join");
+            let joinedAlbumInfo: { id: number; name: string } | null = null;
+
             if (hasPendingAlbumToJoin()) {
                 console.log("[Gallery] Found pending album join, processing...");
                 try {
@@ -372,15 +374,11 @@ const Page: React.FC = () => {
                     const joinedCollectionId = await processPendingAlbumJoin();
                     if (joinedCollectionId) {
                         console.log("[Gallery] Album joined successfully, collection ID:", joinedCollectionId);
-                        // Add a small delay to ensure backend has processed the join
-                        await new Promise(resolve => setTimeout(resolve, 500));
-
-                        // Show custom toast
-                        setAlbumJoinedToast({
-                            open: true,
-                            albumId: joinedCollectionId,
-                            albumName: albumName,
-                        });
+                        // Store the info to show toast after data is loaded
+                        joinedAlbumInfo = {
+                            id: joinedCollectionId,
+                            name: albumName,
+                        };
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
@@ -396,6 +394,16 @@ const Page: React.FC = () => {
 
             // Fetch data from remote (this will include the newly joined album if any)
             await remotePull();
+
+            // Now that data is loaded, show the toast if we joined an album
+            if (joinedAlbumInfo) {
+                console.log("[Gallery] Showing joined album toast after data load");
+                setAlbumJoinedToast({
+                    open: true,
+                    albumId: joinedAlbumInfo.id,
+                    albumName: joinedAlbumInfo.name,
+                });
+            }
 
             // Clear the first load message if needed.
             setIsFirstLoad(false);
