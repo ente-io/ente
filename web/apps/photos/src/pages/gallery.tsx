@@ -169,7 +169,6 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
-    const [pendingJoinedAlbumID, setPendingJoinedAlbumID] = useState<number | null>(null);
 
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
@@ -352,23 +351,17 @@ const Page: React.FC = () => {
                 trashItems: await savedTrashItems(),
             });
 
-            // Fetch data from remote.
-            await remotePull();
-
-            // Check for pending album join after authentication
+            // Check for pending album join BEFORE fetching data
+            let joinedCollectionId: number | null = null;
             console.log("[Gallery] Checking for pending album join");
             if (hasPendingAlbumToJoin()) {
                 console.log("[Gallery] Found pending album join, processing...");
                 try {
-                    const joinedCollectionId = await processPendingAlbumJoin();
+                    joinedCollectionId = await processPendingAlbumJoin();
                     if (joinedCollectionId) {
-                        console.log("[Gallery] Album joined successfully, refreshing collections");
+                        console.log("[Gallery] Album joined successfully, collection ID:", joinedCollectionId);
                         // Add a small delay to ensure backend has processed the join
-                        await new Promise(resolve => setTimeout(resolve, 1000));
-                        // Refresh collections after joining
-                        await remotePull({ silent: false });
-                        // Store the ID to navigate to after state is initialized
-                        setPendingJoinedAlbumID(joinedCollectionId);
+                        await new Promise(resolve => setTimeout(resolve, 500));
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
@@ -380,6 +373,15 @@ const Page: React.FC = () => {
                 }
             } else {
                 console.log("[Gallery] No pending album join");
+            }
+
+            // Fetch data from remote (this will include the newly joined album if any)
+            await remotePull();
+
+            // Navigate to the joined album if we just joined one
+            if (joinedCollectionId) {
+                console.log("[Gallery] Navigating to joined album:", joinedCollectionId);
+                dispatch({ type: "showCollection", collectionID: joinedCollectionId });
             }
 
             // Clear the first load message if needed.
@@ -410,14 +412,6 @@ const Page: React.FC = () => {
         }
     }, [state.user, userDetails]);
 
-    useEffect(() => {
-        // Navigate to the joined album once state is initialized
-        if (state?.user && pendingJoinedAlbumID) {
-            console.log("[Gallery] Navigating to joined album:", pendingJoinedAlbumID);
-            dispatch({ type: "showCollection", collectionID: pendingJoinedAlbumID });
-            setPendingJoinedAlbumID(null); // Clear after navigation
-        }
-    }, [state?.user, pendingJoinedAlbumID, dispatch]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
