@@ -152,16 +152,30 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   Widget _buildRecentsTable(BuildContext context) {
-    if (_displayedFiles.isEmpty) {
-      return EmptyStateWidget(
-        assetPath: "assets/empty_state.png",
-        subtitle: context.l10n.noItemsMatchSelectedFilters,
-      );
-    }
-
-    return ItemListView(
-      files: _displayedFiles,
-      viewType: _viewType ?? ItemViewType.listView,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      switchInCurve: Curves.easeInOutExpo,
+      switchOutCurve: Curves.easeInOutExpo,
+      layoutBuilder: (currentChild, previousChildren) {
+        return Stack(
+          alignment: Alignment.topCenter,
+          children: <Widget>[
+            ...previousChildren,
+            if (currentChild != null) currentChild,
+          ],
+        );
+      },
+      child: _displayedFiles.isEmpty
+          ? EmptyStateWidget(
+              key: const ValueKey('empty_state'),
+              assetPath: "assets/empty_state.png",
+              subtitle: context.l10n.noItemsMatchSelectedFilters,
+            )
+          : ItemListView(
+              key: const ValueKey('items_list'),
+              files: _displayedFiles,
+              viewType: _viewType ?? ItemViewType.listView,
+            ),
     );
   }
 
