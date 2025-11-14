@@ -1,3 +1,4 @@
+import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
@@ -169,19 +170,14 @@ export const processPendingAlbumJoin = async (): Promise<boolean> => {
     console.log("[Join Album] Found pending join for collection:", context.collectionID);
 
     try {
-        // Fetch user's key attributes to get public key
-        console.log("[Join Album] Fetching user key attributes");
-        const authHeaders = await authenticatedRequestHeaders();
-        const response = await fetch(await apiURL("/users/key-attributes"), {
-            headers: authHeaders,
-        });
-
-        if (!response.ok) {
-            console.error("[Join Album] Failed to fetch key attributes, status:", response.status);
-            throw new Error("Failed to fetch user key attributes");
+        // Get user's key attributes from local storage
+        console.log("[Join Album] Getting user key attributes from local storage");
+        const keyAttributes = savedKeyAttributes();
+        if (!keyAttributes) {
+            console.error("[Join Album] Key attributes not found in local storage");
+            throw new Error("Key attributes not found. Please try logging in again.");
         }
 
-        const keyAttributes = (await response.json()) as { publicKey: string };
         const publicKey = keyAttributes.publicKey;
         console.log("[Join Album] Got public key, encrypting collection key");
 
