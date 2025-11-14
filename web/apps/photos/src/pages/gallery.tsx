@@ -258,7 +258,7 @@ const Page: React.FC = () => {
         favoriteFileIDs: new Set(),
         collectionNameByID: new Map(),
         fileNormalCollectionIDs: new Map(),
-        normalCollectionSummaries: [],
+        normalCollectionSummaries: new Map(),
         pendingFavoriteUpdates: new Map(),
         pendingVisibilityUpdates: new Map(),
         isInSearchMode: false,
@@ -285,12 +285,12 @@ const Page: React.FC = () => {
     const barCollectionSummaries = useMemo(
         () =>
             barMode == "hidden-albums"
-                ? state.hiddenCollectionSummaries
-                : state.normalCollectionSummaries,
+                ? state?.hiddenCollectionSummaries ?? new Map()
+                : normalCollectionSummaries,
         [
             barMode,
-            state.hiddenCollectionSummaries,
-            state.normalCollectionSummaries,
+            state?.hiddenCollectionSummaries,
+            normalCollectionSummaries,
         ],
     );
 
