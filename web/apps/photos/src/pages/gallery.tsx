@@ -169,6 +169,7 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [pendingJoinedAlbumID, setPendingJoinedAlbumID] = useState<number | null>(null);
 
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
@@ -241,7 +242,7 @@ const Page: React.FC = () => {
         [],
     );
 
-    // Local aliases.
+    // Local aliases - provide defaults when state is not yet initialized
     const {
         user,
         favoriteFileIDs,
@@ -252,22 +253,32 @@ const Page: React.FC = () => {
         pendingVisibilityUpdates,
         isInSearchMode,
         filteredFiles,
-    } = state;
+    } = state || {
+        user: undefined,
+        favoriteFileIDs: new Set(),
+        collectionNameByID: new Map(),
+        fileNormalCollectionIDs: new Map(),
+        normalCollectionSummaries: [],
+        pendingFavoriteUpdates: new Map(),
+        pendingVisibilityUpdates: new Map(),
+        isInSearchMode: false,
+        filteredFiles: [],
+    };
 
     // Derived aliases.
-    const barMode = state.view?.type ?? "albums";
+    const barMode = state?.view?.type ?? "albums";
     const activeCollectionID =
-        state.view?.type == "people"
+        state?.view?.type == "people"
             ? undefined
-            : state.view?.activeCollectionSummaryID;
+            : state?.view?.activeCollectionSummaryID;
     const activeCollection =
-        state.view?.type == "people" ? undefined : state.view?.activeCollection;
+        state?.view?.type == "people" ? undefined : state?.view?.activeCollection;
     const activeCollectionSummary =
-        state.view?.type == "people"
+        state?.view?.type == "people"
             ? undefined
-            : state.view?.activeCollectionSummary;
+            : state?.view?.activeCollectionSummary;
     const activePerson =
-        state.view?.type == "people" ? state.view.activePerson : undefined;
+        state?.view?.type == "people" ? state?.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
 
     // TODO: Move into reducer
@@ -356,8 +367,8 @@ const Page: React.FC = () => {
                         await new Promise(resolve => setTimeout(resolve, 1000));
                         // Refresh collections after joining
                         await remotePull({ silent: false });
-                        // Navigate directly to the joined album
-                        dispatch({ type: "showCollection", collectionID: joinedCollectionId });
+                        // Store the ID to navigate to after state is initialized
+                        setPendingJoinedAlbumID(joinedCollectionId);
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
@@ -398,6 +409,15 @@ const Page: React.FC = () => {
             dispatch({ type: "setUserDetails", userDetails });
         }
     }, [state.user, userDetails]);
+
+    useEffect(() => {
+        // Navigate to the joined album once state is initialized
+        if (state?.user && pendingJoinedAlbumID) {
+            console.log("[Gallery] Navigating to joined album:", pendingJoinedAlbumID);
+            dispatch({ type: "showCollection", collectionID: pendingJoinedAlbumID });
+            setPendingJoinedAlbumID(null); // Clear after navigation
+        }
+    }, [state?.user, pendingJoinedAlbumID, dispatch]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
