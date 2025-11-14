@@ -7,6 +7,7 @@ import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -51,11 +52,8 @@ class LocalBackupExperienceController {
   Future<void> runManualBackup({bool showSnackBar = true}) =>
       _state._runManualBackup(showSnackBar: showSnackBar);
 
-  Future<bool> updatePassword() => _state._promptPassword(
-        forcePrompt: true,
-        disableOnCancel: false,
-        isUpdateFlow: true,
-      );
+  Future<bool> updatePassword(BuildContext context) =>
+      _state._updatePassword(context);
 
   Future<bool> hasPasswordConfigured() => _state._hasStoredPassword();
 
@@ -191,6 +189,25 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         });
       }
     }
+  }
+
+  Future<bool> _updatePassword(BuildContext context) async {
+    // Request app lock authentication first
+    final hasAuthenticated =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      'Authenticate to update backup password',
+    );
+
+    if (!hasAuthenticated) {
+      return false;
+    }
+
+    return _promptPassword(
+      forcePrompt: true,
+      disableOnCancel: false,
+      isUpdateFlow: true,
+    );
   }
 
   Future<bool> _promptPassword({
@@ -446,14 +463,21 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       for (final marker in markers) {
         final index = simplified.indexOf(marker);
         if (index != -1) {
-          return simplified.substring(index + marker.length);
+          final afterMarker = simplified.substring(index + marker.length);
+          if (afterMarker.isNotEmpty) {
+            return afterMarker;
+          }
+          final fallbackSegments =
+              marker.split('/').where((segment) => segment.isNotEmpty).toList();
+          if (fallbackSegments.isNotEmpty) {
+            return fallbackSegments.last;
+          }
+          return simplified;
         }
       }
 
-      final segments = simplified
-          .split('/')
-          .where((segment) => segment.isNotEmpty)
-          .toList();
+      final segments =
+          simplified.split('/').where((segment) => segment.isNotEmpty).toList();
       if (segments.length >= 2) {
         return segments.sublist(segments.length - 2).join('/');
       }
