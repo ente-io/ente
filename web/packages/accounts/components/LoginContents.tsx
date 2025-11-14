@@ -13,7 +13,7 @@ import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import { AccountsPageTitleWithCaption } from "./LoginComponents";
 
@@ -39,6 +39,15 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
     host,
 }) => {
     const router = useRouter();
+    const [isJoinAlbumContext, setIsJoinAlbumContext] = useState(false);
+
+    useEffect(() => {
+        // Check if we're in a join album context
+        const joinAlbumContext = localStorage.getItem(
+            "ente_join_album_context",
+        );
+        setIsJoinAlbumContext(!!joinAlbumContext);
+    }, []);
 
     const loginUser = useCallback(
         async (email: string, setFieldError: (message: string) => void) => {
@@ -94,7 +103,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
     return (
         <>
             <AccountsPageTitleWithCaption>
-                {t("login")}
+                {isJoinAlbumContext ? t("login_to_join_album") : t("login")}
             </AccountsPageTitleWithCaption>
             <form onSubmit={formik.handleSubmit}>
                 <TextField
