@@ -42,7 +42,12 @@ class FlagService {
 
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser || kDebugMode;
+  /// Returns true if the user is an internal user, respecting the debug toggle.
+  bool get internalUser {
+    final isDisabled = _prefs.getBool("ls.internal_user_disabled") ?? false;
+    return (flags.internalUser || kDebugMode) && !isDisabled;
+  }
+
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
 
