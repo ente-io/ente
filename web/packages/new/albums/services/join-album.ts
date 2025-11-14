@@ -50,45 +50,12 @@ export const storeJoinAlbumContext = (
 
 /**
  * Retrieve stored album context after authentication.
- * First checks URL parameters (for cross-origin flow), then localStorage.
+ * Checks localStorage for the stored context.
  */
 export const getJoinAlbumContext = (): JoinAlbumContext | null => {
-    // First check if context is in URL (for cross-origin redirect)
-    const urlParams = new URLSearchParams(window.location.search);
-    const joinAlbumParam = urlParams.get("joinAlbum");
-
-    if (joinAlbumParam && joinAlbumParam !== "true") {
-        console.log("[Join Album] Found context in URL parameter");
-        try {
-            const decodedContext = JSON.parse(atob(joinAlbumParam)) as JoinAlbumContext;
-            // Check if context is still valid (24 hours)
-            const isValid = Date.now() - decodedContext.timestamp < 24 * 60 * 60 * 1000;
-
-            console.log("[Join Album] URL context retrieved:", {
-                collectionID: decodedContext.collectionID,
-                isValid,
-                age: Date.now() - decodedContext.timestamp,
-            });
-
-            if (isValid) {
-                // Store in localStorage for this origin
-                localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(decodedContext));
-                // Clean up URL
-                urlParams.delete("joinAlbum");
-                const newUrl = urlParams.toString()
-                    ? `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`
-                    : `${window.location.pathname}${window.location.hash}`;
-                window.history.replaceState(null, "", newUrl);
-                return decodedContext;
-            }
-        } catch (error) {
-            console.error("[Join Album] Failed to parse URL context:", error);
-        }
-    }
-
-    // Fall back to localStorage (for same-origin flow)
+    // Check localStorage for stored context
     const stored = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
-    console.log("[Join Album] Retrieving from localStorage, stored:", !!stored);
+    console.log("[Join Album] Checking localStorage for context, found:", !!stored);
 
     if (!stored) return null;
 

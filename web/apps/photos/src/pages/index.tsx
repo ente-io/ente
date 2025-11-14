@@ -42,6 +42,21 @@ const Page: React.FC = () => {
         void (async () => {
             refreshHost();
             const currentURL = new URL(window.location.href);
+
+            // Store join album context immediately if present in URL
+            // This ensures it survives the authentication flow
+            const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
+            if (joinAlbumParam && joinAlbumParam !== "true") {
+                console.log("[Index] Storing join album context from URL");
+                try {
+                    const decodedContext = JSON.parse(atob(joinAlbumParam));
+                    localStorage.setItem("ente_join_album_context", JSON.stringify(decodedContext));
+                    console.log("[Index] Join album context stored successfully");
+                } catch (error) {
+                    console.error("[Index] Failed to store join album context:", error);
+                }
+            }
+
             const albumsURL = new URL(albumsAppOrigin());
             currentURL.pathname = router.pathname;
             if (
@@ -65,15 +80,9 @@ const Page: React.FC = () => {
                     (await masterKeyFromSession()) &&
                     (await savedAuthToken())
                 ) {
-                    // Check if there's a join album context in the URL
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const joinAlbumParam = urlParams.get("joinAlbum");
-                    if (joinAlbumParam) {
-                        // Preserve the join context when redirecting to gallery
-                        await router.push(`/gallery?joinAlbum=${encodeURIComponent(joinAlbumParam)}`);
-                    } else {
-                        await router.push("/gallery");
-                    }
+                    // Context is now stored in localStorage, so we can just redirect to gallery
+                    console.log("[Index] User already authenticated, redirecting to gallery");
+                    await router.push("/gallery");
                 } else if (savedPartialLocalUser()?.email) {
                     await router.push("/verify");
                 }
