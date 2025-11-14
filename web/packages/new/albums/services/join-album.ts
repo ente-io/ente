@@ -143,6 +143,13 @@ export const joinPublicAlbum = async (
         hasEncryptedKey: !!encryptedKey,
     });
 
+    const requestBody = { collectionID, encryptedKey };
+    console.log("[Join Album] Request body:", {
+        collectionID,
+        encryptedKeyLength: encryptedKey.length,
+        encryptedKeyPrefix: encryptedKey.substring(0, 20) + "...",
+    });
+
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -150,15 +157,30 @@ export const joinPublicAlbum = async (
             ...authHeaders,
             "X-Auth-Access-Token": accessToken,
         },
-        body: JSON.stringify({ collectionID, encryptedKey }),
+        body: JSON.stringify(requestBody),
     });
 
     console.log("[Join Album] API response status:", response.status);
+    console.log("[Join Album] Response headers:", Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
-        const errorData = (await response.json()) as { message?: string };
-        console.error("[Join Album] API error:", errorData);
-        throw new Error(errorData.message ?? "Failed to join album");
+        let errorMessage = `Failed to join album (status: ${response.status})`;
+        try {
+            const errorData = (await response.json()) as { message?: string; code?: string };
+            console.error("[Join Album] API error response:", errorData);
+            errorMessage = errorData.message ?? errorMessage;
+        } catch (e) {
+            console.error("[Join Album] Failed to parse error response:", e);
+        }
+        throw new Error(errorMessage);
+    }
+
+    // Log successful response
+    try {
+        const responseData = await response.json();
+        console.log("[Join Album] API success response:", responseData);
+    } catch {
+        console.log("[Join Album] API returned success with no JSON body");
     }
 };
 
