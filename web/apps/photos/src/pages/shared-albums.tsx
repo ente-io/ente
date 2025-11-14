@@ -734,15 +734,16 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             // For mobile devices, redirect to app stores
             const userAgent = navigator.userAgent || navigator.vendor;
             const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+            const isAndroid = /Android/.test(userAgent);
 
             if (isIOS) {
                 return "https://apps.apple.com/app/id1542026904";
-            } else {
-                // Android or other mobile platforms
+            } else if (isAndroid) {
                 return "https://play.google.com/store/apps/details?id=io.ente.photos";
             }
+            // For other touchscreen devices, fall back to web
         }
-        // For desktop, always redirect to web.ente.io
+        // For desktop or other platforms, redirect to web.ente.io
         return "https://web.ente.io";
     };
 
