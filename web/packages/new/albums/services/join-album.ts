@@ -17,7 +17,7 @@ const JOIN_ALBUM_CONTEXT_KEY = "ente_join_album_context";
 export interface JoinAlbumContext {
     accessToken: string;
     collectionKey: string;  // Base64 encoded collection key for API calls
-    collectionKeyHash: string;  // Original hash value from URL (base58 or hex)
+    collectionKeyHash: string;  // Original hash value from URL (base58 or hex) - MUST preserve original
     collectionID: number;
 }
 
@@ -31,6 +31,23 @@ export const storeJoinAlbumContext = (
     collectionKeyHash: string,
     collection: Collection,
 ) => {
+    // Validate that we're not accidentally using the base64 key as the hash
+    if (collectionKey === collectionKeyHash) {
+        console.error("[Join Album] ERROR: collectionKey and collectionKeyHash are the same! This is likely a bug.");
+        console.error("collectionKey (should be base64):", collectionKey);
+        console.error("collectionKeyHash (should be original hash):", collectionKeyHash);
+    }
+
+    // Additional validation: base64 strings often end with = while base58 doesn't
+    if (collectionKeyHash.endsWith("=") && !collectionKey.endsWith("=")) {
+        console.warn("[Join Album] WARNING: collectionKeyHash looks like base64, but should be the original hash!");
+        console.warn("Possible parameter swap detected. Swapping them to fix.");
+        // Swap them if they appear to be reversed
+        const temp = collectionKey;
+        collectionKey = collectionKeyHash;
+        collectionKeyHash = temp;
+    }
+
     const context: JoinAlbumContext = {
         accessToken,
         collectionKey,
@@ -42,6 +59,11 @@ export const storeJoinAlbumContext = (
         collectionID: context.collectionID,
         hasAccessToken: !!context.accessToken,
         hasCollectionKey: !!context.collectionKey,
+        collectionKeyPreview: context.collectionKey.substring(0, 10) + "...",
+        collectionKeyHashPreview: context.collectionKeyHash.substring(0, 10) + "...",
+        collectionKeyIsBase64: context.collectionKey.endsWith("="),
+        collectionKeyHashIsBase58: !context.collectionKeyHash.endsWith("="),
+        fullCollectionKeyHash: context.collectionKeyHash,
     });
 
     localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(context));
@@ -214,6 +236,15 @@ export const getAuthRedirectURL = (): string => {
         return "/";
     }
 
+    console.log("[Join Album] Generating auth redirect URL with context:", {
+        accessToken: context.accessToken,
+        collectionKeyPreview: context.collectionKey.substring(0, 10) + "...",
+        collectionKeyHashPreview: context.collectionKeyHash.substring(0, 10) + "...",
+        collectionKeyIsBase64: context.collectionKey.endsWith("="),
+        collectionKeyHashIsBase58: !context.collectionKeyHash.endsWith("="),
+        fullCollectionKeyHash: context.collectionKeyHash,
+    });
+
     // In development, redirect to the photos app on port 3000
     // In production, this would be https://web.ente.io or the custom endpoint
     const isDevelopment = window.location.hostname === "localhost";
@@ -223,5 +254,9 @@ export const getAuthRedirectURL = (): string => {
 
     // Use the simplified URL format: joinAlbum?=accessToken#collectionKeyHash
     // The collectionKeyHash is the original hash value from the URL (base58 or hex)
-    return `${photosAppURL}/?joinAlbum=${context.accessToken}#${context.collectionKeyHash}`;
+    const redirectURL = `${photosAppURL}/?joinAlbum=${context.accessToken}#${context.collectionKeyHash}`;
+
+    console.log("[Join Album] Generated redirect URL:", redirectURL);
+
+    return redirectURL;
 };
