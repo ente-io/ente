@@ -153,8 +153,8 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         let collectionID = context.collectionID;
         if (collectionID === 0) {
             console.log("[DEBUG] Collection ID is 0, fetching actual collection...");
-            // Import the pullCollection function dynamically
-            const { pullCollection } = await import("ente-gallery/services/share");
+            // Import the pullCollection function dynamically from the correct module
+            const { pullCollection } = await import("./public-collection");
             const { collection } = await pullCollection(context.accessToken, context.collectionKey);
             collectionID = collection.id;
             console.log("[DEBUG] Fetched actual collection ID:", collectionID);
