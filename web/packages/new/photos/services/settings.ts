@@ -5,7 +5,10 @@
 import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { isDevBuild } from "ente-base/env";
 import log from "ente-base/log";
-import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
+import {
+    updateChecksumProtectedUploadsEnabled,
+    updateShouldDisableCFUploadProxy,
+} from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod";
 import {
@@ -44,6 +47,14 @@ export interface Settings {
      * `true` if the current user is an internal user.
      */
     isInternalUser: boolean;
+    /**
+     * `true` if admin role management features are enabled.
+     */
+    isAdminRoleEnabled: boolean;
+    /**
+     * `true` if public link surfaces should be shown to non-owners.
+     */
+    isSurfacePublicLinkEnabled: boolean;
 
     /**
      * `true` if maps are enabled.
@@ -103,6 +114,8 @@ export interface Settings {
 
 const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
+    isAdminRoleEnabled: false,
+    isSurfacePublicLinkEnabled: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
@@ -149,6 +162,7 @@ export const initSettings = () => {
 
 export const logoutSettings = () => {
     _state = new SettingsState();
+    updateChecksumProtectedUploadsEnabled(false);
 };
 
 /**
@@ -193,6 +207,9 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
+    settings.isAdminRoleEnabled = (flags?.internalUser ?? false) || isDevBuild;
+    settings.isSurfacePublicLinkEnabled =
+        (flags?.internalUser ?? false) || isDevBuild;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
@@ -200,6 +217,9 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     if (flags?.customDomain) settings.customDomain = flags.customDomain;
     if (flags?.customDomainCNAME)
         settings.customDomainCNAME = flags.customDomainCNAME;
+    updateChecksumProtectedUploadsEnabled(
+        isDevBuild || settings.isInternalUser,
+    );
     setSettingsSnapshot(settings);
 };
 

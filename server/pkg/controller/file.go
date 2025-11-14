@@ -65,6 +65,9 @@ const StorageOverflowAboveSubscriptionLimit = int64(1024 * 1024 * 50)
 // MaxFileSize is the maximum file size a user can upload
 const MaxFileSize = int64(1024 * 1024 * 1024 * 10)
 
+// LockerMaxFileSize is the maximum file size (200 MiB) allowed for locker uploads
+const LockerMaxFileSize = int64(200 * 1024 * 1024)
+
 // MaxUploadURLsLimit indicates the max number of upload urls which can be request in one go
 const MaxUploadURLsLimit = 50
 
@@ -159,6 +162,9 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 	if fileSize > MaxFileSize {
 		return file, stacktrace.Propagate(ente.ErrFileTooLarge, "")
 	}
+	if app == ente.Locker && fileSize > LockerMaxFileSize {
+		return file, stacktrace.Propagate(ente.ErrFileTooLarge, "locker upload exceeds 200 MiB limit")
+	}
 	if file.File.Size != 0 && file.File.Size != fileSize {
 		return file, stacktrace.Propagate(ente.ErrBadRequest, "mismatch in file size")
 	}
@@ -204,10 +210,26 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		}
 		return file, stacktrace.Propagate(err, "")
 	}
-	if usage == fileSize+thumbnailSize {
-		go c.EmailNotificationCtrl.OnFirstFileUpload(file.OwnerID, userAgent)
+	if usage == fileSize+thumbnailSize && app == ente.Photos {
+		go c.maybeSendFirstUploadEmail(file.OwnerID, userAgent)
 	}
 	return file, nil
+}
+
+func (c *FileController) maybeSendFirstUploadEmail(userID int64, userAgent string) {
+	ctx := context.Background()
+	hasTrashItems, err := c.TrashRepository.HasItems(ctx, userID)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"user_id": userID,
+		}).WithError(err).Error("Failed to determine trash state before sending first upload email")
+		return
+	}
+	if !hasTrashItems {
+		c.EmailNotificationCtrl.OnFirstFileUpload(userID, userAgent)
+		return
+	}
+	log.WithField("user_id", userID).Debug("Skipping first upload email because trash is not empty")
 }
 
 // Update verifies permissions and updates the specified file

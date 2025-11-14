@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/spf13/viper"
+	"golang.org/x/net/idna"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
@@ -77,6 +78,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		// Changing it to false will hide the option and disable multi part upload for everyone
 		// except internal user.rt
 		EnableMobMultiPart: true,
+		ServerApiFlag:      ente.UploadV2,
 		CastUrl:            viper.GetString("apps.cast"),
 		EmbedUrl:           viper.GetString("apps.embed-albums"),
 		CustomDomainCNAME:  viper.GetString("apps.custom-domain.cname"),
@@ -106,7 +108,27 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 }
 
 func (c *Controller) DomainOwner(ctx *gin.Context, domain string) (*int64, error) {
-	return c.Repo.DomainOwner(ctx, domain)
+	ownerID, err := c.Repo.DomainOwner(ctx, domain)
+	if err == nil || !errors.Is(err, &ente.ErrNotFoundError) {
+		return ownerID, err
+	}
+
+	// Retry with ASCII/Unicode variants so IDN domains stored in either form still resolve.
+	var candidates []string
+	if asciiDomain, convErr := idna.ToASCII(domain); convErr == nil && asciiDomain != domain {
+		candidates = append(candidates, asciiDomain)
+	}
+	if unicodeDomain, convErr := idna.ToUnicode(domain); convErr == nil && unicodeDomain != domain {
+		candidates = append(candidates, unicodeDomain)
+	}
+
+	for _, candidate := range candidates {
+		ownerID, candidateErr := c.Repo.DomainOwner(ctx, candidate)
+		if candidateErr == nil || !errors.Is(candidateErr, &ente.ErrNotFoundError) {
+			return ownerID, candidateErr
+		}
+	}
+	return ownerID, err
 }
 
 func (c *Controller) _validateRequest(userID int64, key string, valuePtr *string, byAdmin bool) error {

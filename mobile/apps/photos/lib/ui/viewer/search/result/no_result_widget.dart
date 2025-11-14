@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/clear_and_unfocus_search_bar_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -21,7 +22,9 @@ class _NoResultWidgetState extends State<NoResultWidget> {
     super.initState();
     searchTypes = SectionType.values.toList(growable: true);
     // remove face and content sectionType
-    searchTypes.remove(SectionType.magic);
+    searchTypes.removeWhere(
+      (type) => type == SectionType.magic || type == SectionType.wrapped,
+    );
   }
 
   @override
@@ -32,13 +35,19 @@ class _NoResultWidgetState extends State<NoResultWidget> {
         .then((value) {
       if (value.isEmpty) return;
       for (int i = 0; i < searchTypes.length; i++) {
+        final SectionType sectionType = searchTypes[i];
+        final int sectionIndex = SectionType.values.indexOf(sectionType);
+        if (sectionIndex < 0 || sectionIndex >= value.length) {
+          continue;
+        }
+        final List<SearchResult> sectionResults = value[sectionIndex];
         final querySuggestions = <String>[];
-        for (int j = 0; j < 2 && j < value[i].length; j++) {
-          querySuggestions.add(value[i][j].name());
+        for (int j = 0; j < 2 && j < sectionResults.length; j++) {
+          querySuggestions.add(sectionResults[j].name());
         }
         if (querySuggestions.isNotEmpty) {
           searchTypeToQuerySuggestion.addAll({
-            searchTypes[i].sectionTitle(context): querySuggestions,
+            sectionType.sectionTitle(context): querySuggestions,
           });
         }
       }

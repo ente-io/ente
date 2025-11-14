@@ -151,6 +151,15 @@ const DeleteAccountDialogContents: React.FC<
         <form onSubmit={formik.handleSubmit}>
             <Stack sx={{ gap: "24px" }}>
                 <Stack sx={{ gap: "4px" }}>
+                    <Typography
+                        sx={{
+                            fontWeight: 800,
+                            mb: "24px",
+                            color: "critical.main",
+                        }}
+                    >
+                        {t("delete_account_multi_app_warning")}
+                    </Typography>
                     <Typography>{t("delete_account_reason_label")}</Typography>
                     <DropdownInput
                         options={deleteReasonOptions()}

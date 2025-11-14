@@ -2,12 +2,13 @@ import "dart:math";
 
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/collection_extension.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
 
-class CollectionFlexGridViewWidget extends StatefulWidget {
+class CollectionFlexGridViewWidget extends StatelessWidget {
   final List<Collection> collections;
   const CollectionFlexGridViewWidget({
     super.key,
@@ -15,22 +16,10 @@ class CollectionFlexGridViewWidget extends StatefulWidget {
   });
 
   @override
-  State<CollectionFlexGridViewWidget> createState() =>
-      _CollectionFlexGridViewWidgetState();
-}
-
-class _CollectionFlexGridViewWidgetState
-    extends State<CollectionFlexGridViewWidget> {
-  late List<Collection> _displayedCollections;
-
-  @override
-  void initState() {
-    super.initState();
-    _displayedCollections = widget.collections;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
@@ -42,77 +31,59 @@ class _CollectionFlexGridViewWidgetState
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
+          childAspectRatio: 2.4,
         ),
-        itemCount: min(_displayedCollections.length, 4),
+        itemCount: min(collections.length, 4),
         itemBuilder: (context, index) {
-          final collection = _displayedCollections[index];
+          final collection = collections[index];
           final collectionName =
-              collection.name ?? context.l10n.unnamedCollection;
+              collection.displayName ?? context.l10n.unnamedCollection;
 
           return GestureDetector(
-            onTap: () => _navigateToCollection(collection),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CollectionPage(collection: collection),
+                ),
+              );
+            },
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
+                borderRadius: BorderRadius.circular(20),
+                color: colorScheme.backdropBase,
               ),
-              padding: const EdgeInsets.all(12),
-              child: Stack(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      FutureBuilder<int>(
-                        future:
-                            CollectionService.instance.getFileCount(collection),
-                        builder: (context, snapshot) {
-                          final fileCount = snapshot.data ?? 0;
-                          return Text(
-                            context.l10n.items(fileCount),
-                            style: getEnteTextTheme(context).small.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                            textAlign: TextAlign.left,
-                          );
-                        },
-                      ),
-                    ],
+                  Container(
+                    height: 32,
+                    width: 32,
+                    padding: const EdgeInsets.all(6),
+                    child: collection.type == CollectionType.favorites
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedStar,
+                            color: colorScheme.primary700,
+                          )
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedWallet05,
+                            color: colorScheme.textBase,
+                          ),
                   ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      collectionName,
+                      style: textTheme.bodyBold,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                  ),
                 ],
               ),
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _navigateToCollection(Collection collection) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CollectionPage(collection: collection),
       ),
     );
   }

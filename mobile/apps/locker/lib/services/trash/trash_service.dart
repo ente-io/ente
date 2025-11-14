@@ -7,6 +7,7 @@ import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_in_event.dart";
 import 'package:ente_network/network.dart';
+import "package:locker/events/collections_updated_event.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
@@ -90,6 +91,13 @@ class TrashService {
           "sinceTime": sinceTime,
         },
       );
+      final List<Collection> allCollections =
+          await CollectionService.instance.getCollections(
+        includeDeleted: true,
+      );
+      final Map<int, Collection> collectionMap = {
+        for (final collection in allCollections) collection.id: collection,
+      };
       int latestUpdatedAtTime = 0;
       final trashedFiles = <TrashFile>[];
       final deletedUploadIDs = <int>[];
@@ -120,12 +128,7 @@ class TrashService {
             item["file"]["thumbnail"]["decryptionHeader"];
         trash.metadataDecryptionHeader =
             item["file"]["metadata"]["decryptionHeader"];
-        // TODO: Refactor
-        final collections = await CollectionService.instance.getCollections();
-        final Collection? collection =
-            collections.where((c) => c.id == trash.collectionID).isNotEmpty
-                ? collections.firstWhere((c) => c.id == trash.collectionID)
-                : null;
+        final Collection? collection = collectionMap[trash.collectionID];
         if (collection == null) {
           continue;
         }
@@ -255,7 +258,9 @@ class TrashService {
         data: params,
       );
       await _trashDB.delete(files.map((e) => e.uploadedFileID!).toList());
-      // Force reload home gallery to pull in the restored files
+      // Refresh collections so restored files are immediately available in UI
+      await CollectionService.instance.sync();
+      Bus.instance.fire(CollectionsUpdatedEvent("file_restore"));
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;

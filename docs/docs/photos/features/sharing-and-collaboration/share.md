@@ -97,8 +97,8 @@ comments and reactions.
 
 ## Limitations
 
-Sharing is only available to paid customers. This limitation safeguards against
-potential platform abuse.
+Peer-to-peer sharing between Ente users is available on every plan, including
+the free tier. Creating public links is only available to paid customers.This limitation helps safeguard against potential platform abuse.
 
 ## Related topics
 

@@ -3,7 +3,6 @@ import "package:ente_auth/onboarding/model/tag_enums.dart";
 import "package:ente_auth/store/code_display_store.dart";
 import "package:ente_auth/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:gradient_borders/box_borders/gradient_box_border.dart";
 
 class TagChip extends StatelessWidget {
   final String label;
@@ -24,31 +23,19 @@ class TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final color = state == TagChipState.selected ||
-            Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : colorScheme.tagTextUnselectedColor;
+    final textTheme = getEnteTextTheme(context);
+    final isSelected = state == TagChipState.selected;
+    final textColor = isSelected ? Colors.white : colorScheme.textBase;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        constraints: const BoxConstraints(minHeight: 40),
         decoration: BoxDecoration(
-          color: state == TagChipState.selected
-              ? colorScheme.tagChipSelectedColor
-              : colorScheme.tagChipUnselectedColor,
-          borderRadius: BorderRadius.circular(100),
-          border: GradientBoxBorder(
-            gradient: LinearGradient(
-              colors: state == TagChipState.selected
-                  ? colorScheme.tagChipSelectedGradient
-                  : colorScheme.tagChipUnselectedGradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16)
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16)
             .copyWith(right: 0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -63,23 +50,21 @@ class TagChip extends StatelessWidget {
                     Icon(
                       iconData,
                       size: label.isNotEmpty ? 16 : 20,
-                      color: color,
+                      color: textColor,
                     ),
                   if (iconData != null && label.isNotEmpty)
                     const SizedBox(width: 8),
                   if (label.isNotEmpty)
                     Text(
                       label,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 14,
+                      style: textTheme.small.copyWith(
+                        color: textColor,
                       ),
                     ),
                 ],
               ),
             ),
-            if (state == TagChipState.selected &&
-                action == TagChipAction.check) ...[
+            if (isSelected && action == TagChipAction.check) ...[
               const SizedBox(width: 16),
               const Icon(
                 Icons.check,
@@ -87,8 +72,7 @@ class TagChip extends StatelessWidget {
                 color: Colors.white,
               ),
               const SizedBox(width: 16),
-            ] else if (state == TagChipState.selected &&
-                action == TagChipAction.menu) ...[
+            ] else if (isSelected && action == TagChipAction.menu) ...[
               SizedBox(
                 width: 48,
                 child: PopupMenuButton<int>(

@@ -42,10 +42,6 @@ To make the process concrete, let's assume we're trying to use _pics.example.org
 
 The first step is to let Ente know about the domain or subdomain you wish to use by linking it to your account.
 
-> [!WARNING]
->
-> Currently (Sep 2025) the ability to link a custom domain is only present in Ente's web app, [web.ente.io](https://web.ente.io).
-
 Head over to Settings > Preferences > Custom domains, in the domain field enter "pics.example.org" (replace with your subdomain) and press "Save". That's it. The linking is done.
 
 ### Step 2 - Add DNS entry
@@ -91,10 +87,6 @@ If your domain is not working, go through the following checklist.
 ## Using
 
 Using is trivial. When you open an album's sharing options and copy the link to it, Ente will automatically copy the link that uses your configured domain.
-
-> [!WARNING]
->
-> Currently (Sep 2025) the ability to automatically substitute your custom domain is present in Ente's web and mobile apps, but not in the desktop app (The next desktop version to be released will have that ability too).
 
 ## Unsetting
 

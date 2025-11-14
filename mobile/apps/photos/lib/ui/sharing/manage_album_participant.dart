@@ -3,6 +3,7 @@ import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -32,13 +33,18 @@ class ManageIndividualParticipant extends StatefulWidget {
 
 class _ManageIndividualParticipantState
     extends State<ManageIndividualParticipant> {
-  final CollectionActions collectionActions =
-      CollectionActions(CollectionsService.instance);
+  final CollectionActions collectionActions = CollectionActions(
+    CollectionsService.instance,
+  );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final adminRoleEnabled = flagService.enableAdminRole;
+    final isAdmin = widget.user.isAdmin;
+    final isCollaborator = widget.user.isCollaborator;
+    final isViewer = widget.user.isViewer;
     bool isConvertToViewSuccess = false;
     return Scaffold(
       appBar: AppBar(),
@@ -52,31 +58,59 @@ class _ManageIndividualParticipantState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  const SizedBox(height: 12),
                   TitleBarTitleWidget(
                     title: AppLocalizations.of(context).manage,
                   ),
                   Text(
                     widget.user.displayName ?? widget.user.email,
                     textAlign: TextAlign.left,
-                    style:
-                        textTheme.small.copyWith(color: colorScheme.textMuted),
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textMuted,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 12),
             MenuSectionTitle(title: AppLocalizations.of(context).addedAs),
+            if (adminRoleEnabled)
+              MenuItemWidget(
+                captionedTextWidget: const CaptionedTextWidget(title: 'Admin'),
+                leadingIcon: Icons.admin_panel_settings_outlined,
+                menuItemColor: colorScheme.fillFaint,
+                trailingIcon: isAdmin ? Icons.check : null,
+                onTap: isAdmin
+                    ? null
+                    : () async {
+                        final result =
+                            await collectionActions.addEmailToCollection(
+                          context,
+                          widget.collection,
+                          widget.user.email,
+                          CollectionParticipantRole.admin,
+                        );
+                        if (result && mounted) {
+                          widget.user.role =
+                              CollectionParticipantRole.admin.toStringVal();
+                          setState(() => {});
+                        }
+                      },
+                isBottomBorderRadiusRemoved: true,
+              ),
+            if (adminRoleEnabled)
+              DividerWidget(
+                dividerType: DividerType.menu,
+                bgColor: colorScheme.fillFaint,
+              ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: AppLocalizations.of(context).collaborator,
               ),
               leadingIcon: Icons.edit_outlined,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              trailingIcon: widget.user.isCollaborator ? Icons.check : null,
-              onTap: widget.user.isCollaborator
+              menuItemColor: colorScheme.fillFaint,
+              trailingIcon: isCollaborator ? Icons.check : null,
+              onTap: isCollaborator
                   ? null
                   : () async {
                       final result =
@@ -93,29 +127,31 @@ class _ManageIndividualParticipantState
                         setState(() => {});
                       }
                     },
+              isTopBorderRadiusRemoved: adminRoleEnabled,
               isBottomBorderRadiusRemoved: true,
             ),
             DividerWidget(
               dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).fillFaint,
+              bgColor: colorScheme.fillFaint,
             ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: AppLocalizations.of(context).viewer,
               ),
               leadingIcon: Icons.photo_outlined,
-              leadingIconColor: getEnteColorScheme(context).strokeBase,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              trailingIcon: widget.user.isViewer ? Icons.check : null,
+              leadingIconColor: colorScheme.strokeBase,
+              menuItemColor: colorScheme.fillFaint,
+              trailingIcon: isViewer ? Icons.check : null,
               showOnlyLoadingState: true,
-              onTap: widget.user.isViewer
+              onTap: isViewer
                   ? null
                   : () async {
                       final actionResult = await showChoiceActionSheet(
                         context,
                         title: AppLocalizations.of(context).changePermissions,
-                        firstButtonLabel:
-                            AppLocalizations.of(context).yesConvertToViewer,
+                        firstButtonLabel: AppLocalizations.of(
+                          context,
+                        ).yesConvertToViewer,
                         body: AppLocalizations.of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
                           user: widget.user.displayName ?? widget.user.email,
@@ -151,8 +187,11 @@ class _ManageIndividualParticipantState
               isTopBorderRadiusRemoved: true,
             ),
             MenuSectionDescriptionWidget(
-              content: AppLocalizations.of(context)
-                  .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
+              content: adminRoleEnabled
+                  ? 'Admins and collaborators can add photos. Admins can also manage participants.'
+                  : AppLocalizations.of(
+                      context,
+                    ).collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
             ),
             const SizedBox(height: 24),
             MenuSectionTitle(
@@ -166,7 +205,7 @@ class _ManageIndividualParticipantState
               ),
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              menuItemColor: colorScheme.fillFaint,
               surfaceExecutionStates: false,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(

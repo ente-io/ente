@@ -4,6 +4,8 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
+import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
 
 class CreationTimeItem extends StatefulWidget {
@@ -22,24 +24,30 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       widget.file.creationTime!,
       isUtc: true,
     ).toLocal();
-    return InfoItemWidget(
-      key: const ValueKey("Creation time"),
-      leadingIcon: Icons.calendar_today_outlined,
-      title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
-          .format(dateTime),
-      subtitleSection: Future.value([
-        Text(
-          getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: getEnteTextTheme(context).miniMuted,
-        ),
-      ]),
-      editOnTap: ((widget.file.ownerID == null ||
-                  widget.file.ownerID == widget.currentUserID) &&
-              widget.file.uploadedFileID != null)
-          ? () {
-              _showDateTimePicker(widget.file);
-            }
-          : null,
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        routeToPage(context, JumpToDateGallery(fileToJumpTo: widget.file));
+      },
+      child: InfoItemWidget(
+        key: const ValueKey("Creation time"),
+        leadingIcon: Icons.calendar_today_outlined,
+        title: DateFormat.yMMMEd(Localizations.localeOf(context).languageCode)
+            .format(dateTime),
+        subtitleSection: Future.value([
+          Text(
+            getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+            style: getEnteTextTheme(context).miniMuted,
+          ),
+        ]),
+        editOnTap: ((widget.file.ownerID == null ||
+                    widget.file.ownerID == widget.currentUserID) &&
+                widget.file.uploadedFileID != null)
+            ? () {
+                _showDateTimePicker(widget.file);
+              }
+            : null,
+      ),
     );
   }
 

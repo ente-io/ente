@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.14-beta+1213
+version: 1.2.19-beta+1218
 publish_to: none
 
 environment:
@@ -25,16 +25,14 @@ dependencies:
   app_links: ^6.4.0
   archive: ^4.0.7
   async: ^2.11.0
+  audio_session: ^0.2.2
   battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info
       ref: 95c7a9f
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
-  chewie:
-    git:
-      url: https://github.com/ente-io/chewie.git
-      ref: mybranched
+  chewie: 1.13.0
   collection: #dart
   computer: # logged task name in verbose in fork
     git: "https://github.com/ente-io/computer.git"
@@ -117,6 +115,7 @@ dependencies:
   image: ^4.0.17
   in_app_purchase: 3.2.1
   intl: ^0.19.0
+  just_audio: ^0.10.5
   latlong2: ^0.9.0
   launcher_icon_switcher: ^0.0.2
   like_button: ^2.0.5
@@ -135,11 +134,12 @@ dependencies:
   media_kit_libs_ios_video:
   media_kit_libs_video:
   media_kit_video:
+  mesh_gradient: ^1.3.8
   ml_linalg: ^13.11.31
   mobile_ocr:
     git:
-      url: https://github.com/laurenspriem/mobile_ocr
-      ref: 7d613ed61dcf9797ab2dfdc78b62422704eccc4f
+      url: https://github.com/ente-io/mobile_ocr
+      ref: b6eb61dd1606f1b140bbfc9f1f5d1af8b27dfc3b
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -188,7 +188,7 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
-  rive: ^0.13.20
+  rive: 0.14.0-dev.13
   rust_lib_photos:
     path: rust_builder
   screenshot: ^3.0.0
@@ -343,6 +343,7 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
+    - assets/rewind_badges/
     - assets/video-editor/
     - assets/image-editor/
     - assets/icons/

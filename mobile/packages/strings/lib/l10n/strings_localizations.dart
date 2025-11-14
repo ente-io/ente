@@ -509,6 +509,12 @@ abstract class StringsLocalizations {
   /// **'No, delete account'**
   String get noDeleteAccountAction;
 
+  /// Warning message shown before account deletion
+  ///
+  /// In en, this message translates to:
+  /// **'This will delete your Ente Auth, Ente Photos and Ente Locker account.'**
+  String get deleteAccountWarning;
+
   /// Title for authentication dialog before account deletion
   ///
   /// In en, this message translates to:
@@ -1360,6 +1366,18 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Trusted contacts'**
   String get trustedContacts;
+
+  /// No description provided for @legacyInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} has invited you to be a trusted contact'**
+  String legacyInvite(String email);
+
+  /// No description provided for @acceptTrustInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept invite'**
+  String get acceptTrustInvite;
 
   /// No description provided for @addTrustedContact.
   ///

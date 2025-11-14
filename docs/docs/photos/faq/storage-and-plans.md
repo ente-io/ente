@@ -429,7 +429,6 @@ When your subscription expires, you enter a **30-day grace period** before your 
 **To avoid losing your data:**
 
 1. **Renew your subscription** before the grace period ends:
-
     - All your data will be immediately accessible again
     - Uploads will resume automatically
     - No data loss
@@ -555,6 +554,8 @@ The same prorating calculation applies as described above.
 ### How can I update my payment method? {#update-payment}
 
 You can view and manage your payment method by clicking on the green subscription card within the Ente app, and selecting the "Manage payment method" button.
+
+**Note:** On iOS, the "Manage payment method" option is not available. iOS users must manage their subscriptions and payment methods through the Apple App Store.
 
 You will be able to see all of your previous invoices, with details regarding their payment status. In case of failed payments, you will also have an option to retry those charges.
 

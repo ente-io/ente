@@ -12,6 +12,8 @@ import "package:shared_preferences/shared_preferences.dart";
 import "model.dart";
 
 class FlagService {
+  static const int _uploadV2Flag = 1 << 0;
+
   final SharedPreferences _prefs;
   final Dio _enteDio;
 
@@ -41,6 +43,8 @@ class FlagService {
   bool get disableCFWorker => flags.disableCFWorker;
 
   bool get internalUser => flags.internalUser || kDebugMode;
+  bool get enableAdminRole => internalUser;
+  bool get surfacePublicLink => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -50,6 +54,8 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
+  bool get enteWrapped => false; // TODO: lau: set to true before December release
+
   bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
@@ -57,6 +63,9 @@ class FlagService {
   bool get hasGrantedMLConsent => flags.faceSearchEnabled;
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
+
+  bool get enableUploadV2 =>
+      internalUser && ((flags.serverApiFlag & _uploadV2Flag) != 0);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
@@ -70,9 +79,9 @@ class FlagService {
 
   bool get widgetSharedAlbums => internalUser;
 
-  bool get useNativeVideoEditor => internalUser;
+  bool get useNativeVideoEditor => true;
 
-  bool get useWidgetV2 => kDebugMode;
+  bool get useWidgetV2 => internalUser;
 
   bool get facesTimeline => internalUser;
 

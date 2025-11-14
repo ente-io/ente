@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller"
-	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/controller"
 	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -42,37 +42,44 @@ type CollectionLinkController struct {
 }
 
 func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
-	accessToken := shortuuid.New()[0:AccessTokenLength]
 	app := auth.GetApp(ctx)
-	err := c.CollectionLinkRepo.
-		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
-	if err != nil {
-		if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
-			collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID}, app)
-			if err2 != nil {
-				return ente.PublicURL{}, stacktrace.Propagate(err2, "")
-			}
-			if publicUrls, ok := collectionToPubUrlMap[req.CollectionID]; ok {
-				if len(publicUrls) > 0 {
-					return publicUrls[0], nil
+	for attempt := 0; attempt < 5; attempt++ {
+		accessToken := shortuuid.New()[0:AccessTokenLength]
+		err := c.CollectionLinkRepo.
+			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
+		if errors.Is(err, ente.ErrAccessTokenInUse) {
+			continue
+		}
+		if err != nil {
+			if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
+				collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID}, app)
+				if err2 != nil {
+					return ente.PublicURL{}, stacktrace.Propagate(err2, "")
 				}
+				if publicUrls, ok := collectionToPubUrlMap[req.CollectionID]; ok {
+					if len(publicUrls) > 0 {
+						return publicUrls[0], nil
+					}
+				}
+				// ideally we should never reach here
+				return ente.PublicURL{}, stacktrace.NewError("Unexpected state")
 			}
-			// ideally we should never reach here
-			return ente.PublicURL{}, stacktrace.NewError("Unexpected state")
-		} else {
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
+
+		response := ente.PublicURL{
+			URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
+			ValidTill:       req.ValidTill,
+			DeviceLimit:     req.DeviceLimit,
+			EnableDownload:  true,
+			EnableCollect:   req.EnableCollect,
+			PasswordEnabled: false,
+			MinRole:         nil,
+		}
+		return response, nil
 	}
 
-	response := ente.PublicURL{
-		URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
-		ValidTill:       req.ValidTill,
-		DeviceLimit:     req.DeviceLimit,
-		EnableDownload:  true,
-		EnableCollect:   req.EnableCollect,
-		PasswordEnabled: false,
-	}
-	return response, nil
+	return ente.PublicURL{}, stacktrace.Propagate(ente.ErrAccessTokenInUse, "failed to generate unique access token for collection link")
 }
 
 func (c *CollectionLinkController) GetActiveCollectionLinkToken(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
@@ -138,6 +145,11 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 	if req.EnableJoin != nil {
 		publicCollectionToken.EnableJoin = *req.EnableJoin
 	}
+	if req.MinRole != nil {
+		role := *req.MinRole
+		rolePtr := role
+		publicCollectionToken.MinRole = &rolePtr
+	}
 	err = c.CollectionLinkRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
@@ -150,6 +162,7 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
 		EnableJoin:      publicCollectionToken.EnableJoin,
+		MinRole:         publicCollectionToken.MinRole,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
 		Nonce:           publicCollectionToken.Nonce,
 		MemLimit:        publicCollectionToken.MemLimit,
@@ -171,7 +184,7 @@ func (c *CollectionLinkController) VerifyPassword(ctx *gin.Context, req ente.Ver
 }
 
 func (c *CollectionLinkController) ValidateJWTToken(ctx *gin.Context, jwtToken string, passwordHash string) error {
-    return validateJWTToken(c.JwtSecret, jwtToken, passwordHash)
+	return validateJWTToken(c.JwtSecret, jwtToken, passwordHash)
 }
 
 func (c *CollectionLinkController) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {

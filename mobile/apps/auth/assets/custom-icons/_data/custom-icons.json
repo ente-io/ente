@@ -667,6 +667,9 @@
       "title": "G2A"
     },
     {
+      "title": "Garena"
+    },
+    {
       "title": "Gate.io",
       "slug": "gateio.svg"
     },
@@ -1041,6 +1044,13 @@
     },
     {
       "title": "Mintos"
+    },
+    {
+      "title": "Mint Mobile",
+      "slug": "mintmobile",
+      "altNames": [
+        "MintMobile"
+      ]
     },
     {
       "title": "Mistral",
@@ -1705,6 +1715,12 @@
       "title": "Titan"
     },
     {
+      "title": "Tokopedia",
+      "altNames": [
+        "Tokped"
+      ]
+    },
+    {
       "title": "TorGuard"
     },
     {
@@ -1758,10 +1774,7 @@
       ]
     },
     {
-      "title": "Twitter",
-      "altNames": [
-        "X"
-      ]
+      "title": "Twitter"
     },
     {
       "title": "Ubiquiti",
@@ -1809,6 +1822,14 @@
       "altNames": [
         "UOLLET",
         "uollet.com.br"
+      ]
+    },
+    {
+      "title": "uscis",
+      "altNames": [
+        "USCIS",
+        "myuscis",
+        "uscis.gov"
       ]
     },
     {
@@ -1894,12 +1915,6 @@
     },
     {
       "title": "WYZE"
-    },
-    {
-      "title": "X",
-      "altNames": [
-        "Twitter"
-      ]
     },
     {
       "title": "Xbox",
@@ -2019,6 +2034,24 @@
         "ESET Protect",
         "ESET Small Business Security",
         "ESET Home Security"
+      ]
+    },
+    {
+      "title": "Binghamton University",
+      "slug": "binghamton_university",
+      "altNames": [
+        "Binghamton",
+        "Binghamton Univ",
+        "Binghamton University SSO",
+        "BingOTP"
+      ]
+    },
+    {
+      "title": "IBM",
+      "slug": "ibm",
+      "altNames": [
+        "International Business Machines",
+        "IBMid"
       ]
     }
   ]

@@ -1,0 +1,10 @@
+- Prateek: Add new onboarding, update button radius, update tags style
+- ExtendedGuru4883: Quick Settings tile for android
+- Prateek: Add fdroid icon
+- Prateek: Fix "X" icon not looking good in light/dark theme
+- Prateek: Tags header would show "All" even when all codes are in Trash
+- Prateek: Fix Fedora rpm build
+- Prateek: Don't show "Ente Auth" directory on iOS
+- Prateek: Custom order button will show drag screen + Tick will always be shown in sort
+- Prateek: Search notes on auth mobile & web
+- Icons added: uscis.gov, mintmobile.com,

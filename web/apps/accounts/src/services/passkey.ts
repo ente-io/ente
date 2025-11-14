@@ -343,6 +343,7 @@ const isAllowedRedirectScheme = (url: URL) =>
     url.protocol === "https:" ||
     url.protocol === "ente:" ||
     url.protocol === "enteauth:" ||
+    url.protocol === "entelocker:" ||
     url.protocol === "ente-cli:";
 
 export const isWhitelistedRedirect = (redirectURL: URL) => {
@@ -352,6 +353,7 @@ export const isWhitelistedRedirect = (redirectURL: URL) => {
     return (
         redirectURL.protocol === "ente:" ||
         redirectURL.protocol === "enteauth:" ||
+        redirectURL.protocol === "entelocker:" ||
         redirectURL.protocol === "ente-cli:" ||
         _isWhitelistedRedirect(redirectURL)
     );

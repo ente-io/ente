@@ -188,7 +188,7 @@ func (repo *FileRepository) CreateMetaFile(
 		EncryptedKey:       metaFile.EncryptedKey,
 		KeyDecryptionNonce: metaFile.KeyDecryptionNonce,
 		Info:               info,
-		CollectionID:       collectionOwnerID,
+		CollectionID:       metaFile.CollectionID,
 	}
 	return &file, stacktrace.Propagate(err, "")
 }

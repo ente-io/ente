@@ -185,6 +185,9 @@ export type CollectionType = (typeof collectionTypes)[number];
  * - "COLLABORATOR" - Can additionally add files from the collection, and remove
  *   files that they added from the collection (i.e., files they "own").
  *
+ * - "ADMIN" - Can manage participants (invite/remove) similar to the owner, but
+ *   cannot delete the collection or remove the owner.
+ *
  * - "OWNER" - The owner of the collection. Can remove any file, including those
  *   added by other users, from the collection.
  *
@@ -194,6 +197,7 @@ export type CollectionType = (typeof collectionTypes)[number];
 export type CollectionParticipantRole =
     | "VIEWER"
     | "COLLABORATOR"
+    | "ADMIN"
     | "OWNER"
     | "UNKNOWN";
 
@@ -201,7 +205,7 @@ export type CollectionParticipantRole =
  * A subset of {@link CollectionParticipantRole} that are applicable when
  * sharing a collection with another Ente user.
  */
-export type CollectionNewParticipantRole = "VIEWER" | "COLLABORATOR";
+export type CollectionNewParticipantRole = "VIEWER" | "COLLABORATOR" | "ADMIN";
 
 /**
  * Information about the user associated with a collection, either as an owner,

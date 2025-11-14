@@ -211,6 +211,10 @@ export const sidebar = [
                                 link: "/photos/features/utilities/notifications",
                             },
                             {
+                                text: "Video editor",
+                                link: "/photos/features/utilities/video-editor",
+                            },
+                            {
                                 text: "Video streaming",
                                 link: "/photos/features/utilities/video-streaming",
                             },
@@ -220,6 +224,7 @@ export const sidebar = [
             },
             {
                 text: "FAQ",
+                link: "/photos/faq/",
                 collapsed: true,
                 items: [
                     {
@@ -245,6 +250,10 @@ export const sidebar = [
                     {
                         text: "Search and Discovery",
                         link: "/photos/faq/search-and-discovery",
+                    },
+                    {
+                        text: "Security and Privacy",
+                        link: "/photos/faq/security-and-privacy",
                     },
                     {
                         text: "Sharing and Collaboration",

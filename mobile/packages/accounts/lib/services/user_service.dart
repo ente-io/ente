@@ -61,14 +61,23 @@ class UserService {
   late ValueNotifier<String?> emailValueNotifier;
   late BaseConfiguration _config;
   late BaseHomePage _homePage;
+  late String _clientPackageName;
+  late String _passkeyRedirectUrl;
 
   UserService._privateConstructor();
 
   static final UserService instance = UserService._privateConstructor();
 
-  Future<void> init(BaseConfiguration config, BaseHomePage homePage) async {
+  Future<void> init(
+    BaseConfiguration config,
+    BaseHomePage homePage, {
+    required String clientPackageName,
+    required String passkeyRedirectUrl,
+  }) async {
     _config = config;
     _homePage = homePage;
+    _clientPackageName = clientPackageName;
+    _passkeyRedirectUrl = passkeyRedirectUrl;
     emailValueNotifier = ValueNotifier<String?>(config.getEmail());
     _preferences = await SharedPreferences.getInstance();
   }
@@ -129,6 +138,14 @@ class UserService {
             context,
             context.strings.oops,
             context.strings.emailNotRegistered,
+          ),
+        );
+      }  else if (enteErrCode != null && enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
+        unawaited(
+          showErrorDialog(
+            context,
+            context.strings.oops,
+            "Registration is temporarily paused",
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
@@ -262,7 +279,7 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       } else {
         throw Exception("Log out action failed");
       }
@@ -271,7 +288,7 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
@@ -362,12 +379,20 @@ class UserService {
     try {
       final userPassword = _config.getVolatilePassword();
       await _saveConfiguration(response);
+      if (!context.mounted) {
+        await dialog.hide();
+        return;
+      }
+      final navigator = Navigator.of(context, rootNavigator: true);
       if (userPassword == null) {
         await dialog.hide();
+        if (!context.mounted) {
+          return;
+        }
         // ignore: unawaited_futures
-        Navigator.of(context).pushAndRemoveUntil(
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (BuildContext context) {
+            builder: (BuildContext _) {
               return PasswordReentryPage(
                 _config,
                 _homePage,
@@ -376,6 +401,7 @@ class UserService {
           ),
           (route) => route.isFirst,
         );
+        return;
       } else {
         Widget page;
         if (_config.getEncryptedToken() != null) {
@@ -389,16 +415,20 @@ class UserService {
           throw Exception("unexpected response during passkey verification");
         }
         await dialog.hide();
+        if (!context.mounted) {
+          return;
+        }
 
         // ignore: unawaited_futures
-        Navigator.of(context).pushAndRemoveUntil(
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (BuildContext context) {
+            builder: (BuildContext _) {
               return page;
             },
           ),
           (route) => route.isFirst,
         );
+        return;
       }
     } catch (e) {
       _logger.severe(e);
@@ -442,6 +472,8 @@ class UserService {
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
             accountsUrl: accountsUrl,
+            redirectUrl: _passkeyRedirectUrl,
+            clientPackage: _clientPackageName,
           );
         } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -767,6 +799,8 @@ class UserService {
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
           accountsUrl: accountsUrl,
+          redirectUrl: _passkeyRedirectUrl,
+          clientPackage: _clientPackageName,
         );
       } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);

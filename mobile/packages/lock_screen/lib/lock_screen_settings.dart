@@ -248,7 +248,7 @@ class LockScreenSettings {
     }
   }
 
-  Future<bool> isDeviceSupported() async{
+  Future<bool> isDeviceSupported() async {
     return await LocalAuthentication().isDeviceSupported();
   }
 }

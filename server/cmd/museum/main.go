@@ -100,7 +100,7 @@ func main() {
 	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
 	viper.SetDefault("apps.embed-albums", "https://embed.ente.io")
 	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
-	viper.SetDefault("apps.public-locker", "https://locker.ente.io")
+	viper.SetDefault("apps.public-locker", "https://share.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
 	viper.SetDefault("apps.family", "https://family.ente.io")
@@ -387,6 +387,11 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	server := gin.New()
+
+	clientIPHeader := viper.GetString("internal.trusted-client-ip-header")
+	if clientIPHeader != "" {
+		server.TrustedPlatform = clientIPHeader
+	}
 
 	p := ginprometheus.NewPrometheus("museum")
 	p.ReqCntURLLabelMappingFn = urlSanitizer
@@ -852,6 +857,9 @@ func runServer(environment string, server *gin.Engine) {
 			port = viper.GetInt("http.port")
 		}
 		log.Infof("starting server on port %d", port)
+		if server.TrustedPlatform != "" {
+			log.Infof("trusted platform header: %s", server.TrustedPlatform)
+		}
 		server.Run(fmt.Sprintf(":%d", port))
 	}
 }

@@ -92,6 +92,24 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Update Linux AppData metadata
+              run: |
+                  APPDATA_FILE="linux/packaging/enteauth.appdata.xml"
+                  RELEASE_DATE=$(date -u +%Y-%m-%d)
+
+                  # Extract version from tag (e.g., auth-v4.4.8 -> 4.4.8)
+                  VERSION_NAME=$(echo "${{ github.ref_name }}" | sed 's/^auth-v//')
+
+                  # Create new release entry
+                  NEW_RELEASE="        <release version=\"${VERSION_NAME}\" date=\"${RELEASE_DATE}\" />"
+
+                  # Insert new release entry after <releases> tag
+                  sed -i "/<releases>/a\\${NEW_RELEASE}" "$APPDATA_FILE"
+
+                  echo "✅ Updated $APPDATA_FILE with version ${VERSION_NAME}"
+                  echo "Release entry added:"
+                  echo "$NEW_RELEASE"
+
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:
@@ -128,6 +146,10 @@ jobs:
                   sudo apt-get install -y libsecret-1-dev libsodium-dev libfuse2 ninja-build libgtk-3-dev dpkg-dev pkg-config rpm patchelf libsqlite3-dev locate libayatana-appindicator3-dev libffi-dev libtiff5 xz-utils libarchive-tools libcurl4-openssl-dev
                   sudo updatedb --localpaths='/usr/lib/x86_64-linux-gnu'
 
+            - name: Install fpm for RPM packaging
+              run: |
+                  sudo gem install fpm
+
             - name: Install appimagetool
               run: |
                   wget -O appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
@@ -137,11 +159,13 @@ jobs:
             - name: Build desktop app
               run: |
                   flutter config --enable-linux-desktop
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  # RPM
-                  flutter_distributor package --platform=linux --targets=rpm --skip-clean
-                  mv dist/**/*-*-linux.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
+                  # Build Linux app
+                  flutter build linux --release
+                  # RPM - using custom build script
+                  ./linux/packaging/build_rpm.sh
+                  mv dist/*/*.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
                   # APPIMAGE
+                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
                   flutter_distributor package --platform=linux --targets=appimage --skip-clean
                   mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
                   # DEB
@@ -200,8 +224,9 @@ jobs:
                   flutter config --enable-windows-desktop
                   # dart pub global activate flutter_distributor
                   dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  make innoinstall
-                  flutter_distributor package --platform=windows --targets=exe --skip-clean
+                  choco install innosetup -y
+                  flutter_distributor.bat package --platform=windows --targets=exe --skip-clean
+                  shopt -s globstar
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
               shell: bash
 

@@ -203,6 +203,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               padding: const EdgeInsets.only(
                                 right: horizontalPadding / 2,
                               ),
+                              key: ValueKey(
+                                'incoming_${collections.incoming[index].id}',
+                              ),
                               child: AlbumRowItemWidget(
                                 collections.incoming[index],
                                 sideOfThumbnail,
@@ -258,6 +261,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                             return Padding(
                               padding: const EdgeInsets.only(
                                 right: horizontalPadding / 2,
+                              ),
+                              key: ValueKey(
+                                'outgoing_${collections.outgoing[index].id}',
                               ),
                               child: AlbumRowItemWidget(
                                 collections.outgoing[index],

@@ -69,6 +69,16 @@ Add an iframe to your HTML with the public link as the source, replacing `albums
 >
 > If you're using a custom domain for your public links, then replace your custom domain with `embed.ente.io`. The easy method will automatically do this for you.
 
+### Embedding in WordPress (Block Editor)
+
+WordPress supports Ente embeds using the Custom HTML block:
+
+1. Open the page or post in the WordPress editor.
+2. Click the block inserter and choose **Browse all** to expand the block list (the Custom HTML block may not appear in the quick list).
+3. Search for or select **Custom HTML**.
+4. Paste the iframe embed code that you copied from Ente.
+5. Publish or update the page to make the embedded album live.
+
 ### Customizing the embed
 
 You can customize the appearance by adjusting the iframe attributes:

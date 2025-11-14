@@ -112,9 +112,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     AppLock.of(context)!.setEnabled(!appLock);
     await _configuration.setSystemLockScreen(!appLock);
     await _lockscreenSetting.removePinAndPassword();
-    if (appLock == true) {
-      await _lockscreenSetting.setHideAppContent(false);
-    }
     setState(() {
       _initializeSettings();
       appLock = !appLock;
@@ -305,42 +302,44 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         textAlign: TextAlign.left,
                                       ),
                                     ),
-                                    const SizedBox(
-                                      height: 24,
-                                    ),
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: AppLocalizations.of(context)
-                                            .hideContent,
-                                      ),
-                                      alignCaptionedTextToLeft: true,
-                                      singleBorderRadius: 8,
-                                      menuItemColor: colorTheme.fillFaint,
-                                      trailingWidget: ToggleSwitchWidget(
-                                        value: () => hideAppContent,
-                                        onChanged: () => _tapHideContent(),
-                                      ),
-                                      trailingIconColor: colorTheme.tabIcon,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 14,
-                                        left: 14,
-                                        right: 12,
-                                      ),
-                                      child: Text(
-                                        Platform.isAndroid
-                                            ? AppLocalizations.of(context)
-                                                .hideContentDescriptionAndroid
-                                            : AppLocalizations.of(context)
-                                                .hideContentDescriptionIos,
-                                        style: textTheme.miniFaint,
-                                        textAlign: TextAlign.left,
-                                      ),
-                                    ),
                                   ],
                                 )
                               : Container(),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: appLock ? 24 : 8),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: AppLocalizations.of(context).hideContent,
+                              ),
+                              alignCaptionedTextToLeft: true,
+                              singleBorderRadius: 8,
+                              menuItemColor: colorTheme.fillFaint,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () => hideAppContent,
+                                onChanged: () => _tapHideContent(),
+                              ),
+                              trailingIconColor: colorTheme.tabIcon,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 14,
+                                left: 14,
+                                right: 12,
+                              ),
+                              child: Text(
+                                Platform.isAndroid
+                                    ? AppLocalizations.of(context)
+                                        .hideContentDescriptionAndroid
+                                    : AppLocalizations.of(context)
+                                        .hideContentDescriptionIos,
+                                style: textTheme.miniFaint,
+                                textAlign: TextAlign.left,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

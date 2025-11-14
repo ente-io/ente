@@ -427,7 +427,6 @@ This ensures smooth operation and prevents conflicts.
 Yes! On desktop, you have two options:
 
 1. **Watch folders**: Automatically sync specific folders (recommended for ongoing backup)
-
     - Continuous monitoring and automatic uploads
     - See watch folders section above
 

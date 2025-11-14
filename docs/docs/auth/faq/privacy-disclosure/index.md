@@ -28,7 +28,7 @@ This is your email address, used for account creation and communication.
 
 ### User Content
 
-This are your 2FA secrets, end-to-end encrypted with a key that only you have
+These are your 2FA secrets, end-to-end encrypted with a key that only you have
 access to.
 
 ### Identifiers

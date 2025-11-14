@@ -152,8 +152,8 @@ git clone https://github.com/ente-io/ente
     # Replace this with actual endpoint for Albums
     export NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002
     ```
-3. Build the needed applications (Photos, Accounts, Auth, Cast) as per your
-   needs:
+3. Build the needed applications (Photos, Accounts, Auth, Cast, Public Locker, Embed) as per
+   your needs:
 
     ```shell
     # These commands are executed inside web directory
@@ -168,6 +168,12 @@ git clone https://github.com/ente-io/ente
 
     # Build cast. Build output to be served is present at apps/cast/out
     yarn build:cast
+
+    # Build public locker. Build output to be served is present at apps/share/out
+    yarn build:share
+
+    # Build embed. Build output to be served is present at apps/embed/out
+    yarn build:embed
     ```
 
 4. Copy the output files to `/var/www/ente/apps` for easier management.
@@ -183,6 +189,10 @@ git clone https://github.com/ente-io/ente
     sudo cp -r apps/auth/out /var/www/ente/apps/auth
     # Cast
     sudo cp -r apps/cast/out /var/www/ente/apps/cast
+    # Public Locker
+    sudo cp -r apps/share/out /var/www/ente/apps/share
+    # Embed
+    sudo cp -r apps/embed/out /var/www/ente/apps/embed
     ```
 
 5. Set up file server using Caddy by editing `Caddyfile`, present at
@@ -219,7 +229,25 @@ git clone https://github.com/ente-io/ente
         file_server
         try_files {path} {path}.html /index.html
     }
+
+    :3005 {
+        root * /var/www/ente/apps/out/share
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+
+    :3006 {
+        root * /var/www/ente/apps/out/embed
+        file_server
+        try_files {path} {path}.html /index.html
+    }
     ```
+
+    ::: tip Important for Share App
+
+    The share web app (Public Locker) specifically requires all routes to be served through `/index.html` as it uses client-side routing with a single entry point. The `try_files` directive with `/index.html` as the fallback is essential for proper functionality. Without this configuration, direct links to shared albums and routes will result in 404 errors.
+
+    :::
 
     The web application for Ente Photos should be accessible at
     http://localhost:3000, check out the

@@ -20,7 +20,25 @@ Albums in Ente are collections that help you organize your photos and videos. Si
 - **Multiple membership**: A single photo can exist in many albums without using extra storage
 - **Device-independent**: Albums you create in Ente are separate from folders on your device
 
-You can create albums by uploading photos from your device, manually adding photos to new albums, or automatically through features like [watch folders](/photos/features/backup-and-sync/watch-folders) on desktop.
+## Create a new album
+
+Create albums to organize your photos and videos into collections.
+
+### On mobile
+
+- Open the **Albums** tab
+- Tap the **Add new** button
+- Enter a name for your album
+- Tap **Create**
+
+### On web / desktop
+
+- Click the All Albums button (down arrow) in the top right corner
+- Click the **New album** button
+- Enter a name for your album
+- Click **Create** or press Enter
+
+You can also create albums by uploading photos from your device, manually adding photos to new albums, or automatically through features like [watch folders](/photos/features/backup-and-sync/watch-folders) on desktop.
 
 ## Rename album
 
@@ -92,6 +110,31 @@ Keep your favorite albums at the top by pinning them for quick access.
 - Open the album
 - Tap the overflow menu (three dots) in the top right corner
 - Tap **Pin album** or **Unpin album**
+
+## Empty albums
+
+Empty albums are albums that contain no photos or videos. They can occur in two ways:
+
+**During import:**
+
+Albums are automatically created whenever Ente detects any file that belongs to an album, even if that file is unsupported (for example, a text file). This can sometimes result in empty albums if there are no valid photo or video files inside.
+
+**Manual creation:**
+
+When you create an album but don't add any photos to it, the album remains empty.
+
+### Delete empty albums
+
+If you have multiple empty albums cluttering your album list, you can bulk delete them all at once.
+
+**On mobile:**
+
+1. Open the **Albums** tab
+2. If you have more than 2 empty albums, you'll see a "Delete empty albums" button
+3. Tap the button
+4. Confirm the deletion
+
+This will delete all empty albums from your library. The feature only appears after your initial sync is complete and when you have more than 2 empty albums.
 
 ## Uploading nested folders from desktop {#preserving-folder-structure}
 

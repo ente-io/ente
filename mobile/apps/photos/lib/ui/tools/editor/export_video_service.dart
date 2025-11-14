@@ -64,7 +64,15 @@ class ExportService {
             completer.complete();
           }
         },
-        null, // No log callback
+        (log) {
+          final message = log.getMessage();
+          if (message.isEmpty) {
+            return;
+          }
+
+          final level = log.getLevel();
+          _logger.info('FFmpeg[$level] $message');
+        },
         (statistics) {
           // Statistics callback for progress
           if (onProgress != null) {
