@@ -728,8 +728,18 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         );
     }
 
+    // Get the signup URL - redirect to web.ente.io or localhost:3000
+    const getSignupURL = () => {
+        const isDevelopment = window.location.hostname === "localhost";
+        if (isDevelopment) {
+            return "http://localhost:3000";
+        }
+        // In production, replace "albums." with "web." in the origin
+        return window.location.origin.replace("albums.", "web.");
+    };
+
     return (
-        <Button color="accent" href="https://ente.io">
+        <Button color="accent" href={getSignupURL()}>
             {isTouchscreen ? t("install") : t("sign_up")}
         </Button>
     );
