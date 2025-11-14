@@ -37,6 +37,7 @@ export const supportedLocales = [
     "ar-SA" /* Arabic */,
     "tr-TR" /* Turkish */,
     "cs-CZ" /* Czech */,
+    "el-GR" /* Greek */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -204,6 +205,8 @@ const closestSupportedLocale = (
             return "tr-TR";
         } else if (ls.startsWith("cs")) {
             return "cs-CZ";
+        } else if (ls.startsWith("el")) {
+            return "el-GR";
         }
     }
 

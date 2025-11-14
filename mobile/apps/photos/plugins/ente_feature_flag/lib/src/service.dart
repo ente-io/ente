@@ -43,6 +43,8 @@ class FlagService {
   bool get disableCFWorker => flags.disableCFWorker;
 
   bool get internalUser => flags.internalUser || kDebugMode;
+  bool get enableAdminRole => internalUser;
+  bool get surfacePublicLink => internalUser;
 
   bool get betaUser => flags.betaUser;
 

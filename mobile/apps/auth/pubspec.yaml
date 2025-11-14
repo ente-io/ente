@@ -20,6 +20,7 @@ dependencies:
   convert: ^3.1.1
   device_info_plus: ^9.1.1
   dio: ^5.8.0+1
+  dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0

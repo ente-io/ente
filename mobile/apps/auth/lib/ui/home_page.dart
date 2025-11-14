@@ -1159,8 +1159,7 @@ class _HomePageState extends State<HomePage> {
     _isImportingFromGallery = true;
 
     try {
-      final Code? newCode =
-          await pickCodeFromGallery(context, logger: _logger);
+      final Code? newCode = await pickCodeFromGallery(context, logger: _logger);
       if (newCode == null) {
         return;
       }
@@ -1499,7 +1498,7 @@ class _HomePageState extends State<HomePage> {
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!anyCodeHasError)
+            if (!anyCodeHasError) ...[
               SizedBox(
                 height: 48,
                 child: ListView.separated(
@@ -1570,6 +1569,8 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ),
+              const SizedBox(height: 8),
+            ],
             Expanded(
               child: Builder(
                 builder: (context) {

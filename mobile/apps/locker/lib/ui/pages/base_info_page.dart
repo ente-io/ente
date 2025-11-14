@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -33,7 +34,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
-  late InfoPageMode _initialMode;
 
   @protected
   InfoPageMode get currentMode => _currentMode;
@@ -86,7 +86,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled => !_isLoading;
+  bool get isSaveEnabled => !_isLoading && _selectedCollectionIds.isNotEmpty;
 
   @protected
   Future<bool> onEditModeBackPressed() async {
@@ -168,7 +168,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   void initState() {
     super.initState();
     _currentMode = widget.mode;
-    _initialMode = widget.mode;
     _loadCollections();
     loadExistingData();
   }
@@ -180,19 +179,30 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _loadCollections() async {
     try {
       final collections = await CollectionService.instance.getCollections();
-      setState(() {
-        // Filter out uncategorized collection (it will be shown separately)
-        _availableCollections = collections
+      final filteredCollections = collections
+          .where((c) => c.type != CollectionType.uncategorized)
+          .toList();
+
+      Set<int> initialSelection = _selectedCollectionIds;
+
+      if (widget.existingFile != null) {
+        final fileCollections =
+            await CollectionService.instance.getCollectionsForFile(
+          widget.existingFile!,
+        );
+        initialSelection = fileCollections
             .where((c) => c.type != CollectionType.uncategorized)
-            .toList();
-        // Pre-select a default collection if available
-        if (_availableCollections.isNotEmpty) {
-          final defaultCollection = _availableCollections.firstWhere(
-            (c) => c.name == context.l10n.informationCollectionName,
-            orElse: () => _availableCollections.first,
-          );
-          _selectedCollectionIds = {defaultCollection.id};
-        }
+            .map((c) => c.id)
+            .toSet();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _availableCollections = filteredCollections;
+        _selectedCollectionIds = initialSelection;
       });
     } catch (e) {
       // Handle error silently or show a message
@@ -253,11 +263,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             _currentMode = InfoPageMode.view;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.recordSavedSuccessfully),
-              backgroundColor: Colors.green,
-            ),
+          showToast(
+            context,
+            context.l10n.recordSavedSuccessfully,
           );
         }
       }
@@ -274,13 +282,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           return e.toString();
         }();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${context.l10n.failedToSaveRecord}: $errorDetails',
-            ),
-            backgroundColor: Colors.red,
-          ),
+        showToast(
+          context,
+          '${context.l10n.failedToSaveRecord}: $errorDetails',
         );
       }
     } finally {
@@ -325,11 +329,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        context.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -339,11 +341,18 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
 
-    // Create and upload the info file to each selected collection
-    for (final collection in selectedCollections) {
-      await InfoFileService.instance.createAndUploadInfoFile(
-        infoItem: infoItem,
-        collection: collection,
+    // Upload to the first collection
+    final uploadedFile = await InfoFileService.instance.createAndUploadInfoFile(
+      infoItem: infoItem,
+      collection: selectedCollections.first,
+    );
+
+    // Add to additional collections if multiple were selected
+    for (int i = 1; i < selectedCollections.length; i++) {
+      await CollectionService.instance.addToCollection(
+        selectedCollections[i],
+        uploadedFile,
+        runSync: false,
       );
     }
 
@@ -365,11 +374,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     // Show success message after navigation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-          ),
+        showToast(
+          context,
+          message,
         );
       }
     });
@@ -385,12 +392,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   void _copyToClipboard(String text, String fieldName) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.copiedToClipboard(fieldName)),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
+    showToast(
+      context,
+      context.l10n.copiedToClipboard(fieldName),
     );
   }
 
@@ -495,11 +499,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final isEditMode = _currentMode == InfoPageMode.edit;
     final colorScheme = getEnteColorScheme(context);
 
-    // Only intercept back gesture if:
-    // - Currently in edit mode AND
-    // - Was initially opened in view mode (editing existing note)
-    final shouldInterceptBack = isEditMode && _initialMode == InfoPageMode.view;
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -562,7 +561,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
                 // Save button only in edit mode
                 if (isEditMode) ...[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
                   SafeArea(
                     child: SizedBox(
                       width: double.infinity,
@@ -574,6 +573,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                       ),
                     ),
                   ),
+                  const SizedBox(height: 8),
                 ],
               ],
             ),

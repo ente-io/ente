@@ -7,6 +7,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/ui/components/file_upload_dialog.dart';
@@ -155,20 +156,16 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                       spacing: 8,
                       runSpacing: 12,
                       children: [
-                        ...widget.collections
-                            .where(
-                          (collection) =>
-                              collection.type != CollectionType.uncategorized,
-                        )
-                            .map((collection) {
+                        ...widget.collections.map((collection) {
                           final isSelected =
                               _selectedCollections.contains(collection);
                           return _buildCollectionChip(
-                            collection.name ?? context.l10n.unnamed,
-                            isSelected,
-                            () => _onCollectionSelected(collection),
-                            colorScheme,
-                            textTheme,
+                            name:
+                                collection.displayName ?? context.l10n.unnamed,
+                            isSelected: isSelected,
+                            onTap: () => _onCollectionSelected(collection),
+                            colorScheme: colorScheme,
+                            textTheme: textTheme,
                           );
                         }),
                         _buildNewCollectionChip(colorScheme, textTheme),
@@ -288,13 +285,13 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     });
   }
 
-  Widget _buildCollectionChip(
-    String name,
-    bool isSelected,
-    VoidCallback onTap,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _buildCollectionChip({
+    required String name,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required EnteColorScheme colorScheme,
+    required EnteTextTheme textTheme,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(

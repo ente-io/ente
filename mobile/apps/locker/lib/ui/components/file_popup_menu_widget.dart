@@ -1,21 +1,13 @@
-import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/files/links/links_service.dart";
-import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
-import "package:locker/ui/components/delete_confirmation_dialog.dart";
-import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
-import "package:locker/ui/components/share_link_dialog.dart";
-import "package:locker/utils/collection_list_util.dart";
-import "package:locker/utils/snack_bar_utils.dart";
+import "package:locker/utils/file_actions.dart";
 
 class FilePopupMenuWidget extends StatelessWidget {
   final EnteFile file;
@@ -143,192 +135,32 @@ class FilePopupMenuWidget extends StatelessWidget {
 
     switch (action) {
       case 'edit':
-        _showEditDialog(context);
+        _editFile(context);
         break;
       case 'share_link':
-        _shareLink(context);
+        _shareFileLink(context);
         break;
       case 'delete':
-        _showDeleteConfirmationDialog(context);
+        _deleteFile(context);
         break;
     }
   }
 
-  Future<void> _shareLink(BuildContext context) async {
-    final dialog = createProgressDialog(
-      context,
-      context.l10n.creatingShareLink,
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      final shareableLink = await LinksService.instance.getOrCreateLink(file);
-
-      await dialog.hide();
-
-      if (context.mounted) {
-        await showShareLinkDialog(
-          context,
-          shareableLink.fullURL!,
-          shareableLink.linkID,
-          file,
-        );
-      }
-    } catch (e) {
-      await dialog.hide();
-
-      if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
-        );
-      }
-    }
-  }
-
-  Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
-    final result = await showDeleteConfirmationDialog(
-      context,
-      title: context.l10n.areYouSure,
-      body: context.l10n.deleteMultipleFilesDialogBody(1),
-      deleteButtonLabel: context.l10n.yesDeleteFiles(1),
-      assetPath: "assets/file_delete_icon.png",
-    );
-
-    if (result?.buttonResult.action == ButtonAction.first && context.mounted) {
-      await _deleteFile(context);
-    }
+  Future<void> _shareFileLink(BuildContext context) async {
+    await FileActions.shareFileLink(context, file);
   }
 
   Future<void> _deleteFile(BuildContext context) async {
-    final dialog = createProgressDialog(
+    await FileActions.deleteFile(
       context,
-      context.l10n.deletingFile,
-      isDismissible: false,
+      file,
+      onSuccess: () {
+        Bus.instance.fire(CollectionsUpdatedEvent('file_deleted'));
+      },
     );
-
-    try {
-      await dialog.show();
-
-      final collections =
-          await CollectionService.instance.getCollectionsForFile(file);
-      if (collections.isNotEmpty) {
-        await CollectionService.instance.trashFile(file, collections.first);
-      }
-
-      await dialog.hide();
-      if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
-          context,
-          context.l10n.fileDeletedSuccessfully,
-        );
-      }
-    } catch (e) {
-      await dialog.hide();
-
-      if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          context.l10n.failedToDeleteFile(e.toString()),
-        );
-      }
-    }
   }
 
-  Future<void> _showEditDialog(BuildContext context) async {
-    final allCollections = await CollectionService.instance.getCollections();
-    final dedupedCollections = uniqueCollectionsById(allCollections);
-
-    final result = await showFileEditDialog(
-      context,
-      file: file,
-      collections: dedupedCollections,
-      snackBarContext: context,
-    );
-
-    if (result != null && context.mounted) {
-      List<Collection> currentCollections;
-      try {
-        currentCollections =
-            await CollectionService.instance.getCollectionsForFile(file);
-      } catch (e) {
-        currentCollections = <Collection>[];
-      }
-
-      final currentCollectionsSet = currentCollections.toSet();
-      final selectedCollectionsSet = result.selectedCollections.toSet();
-      final collectionsToAdd =
-          selectedCollectionsSet.difference(currentCollectionsSet).toList();
-      final hasCollectionAdds = collectionsToAdd.isNotEmpty;
-
-      final currentTitle = file.displayName;
-      final currentCaption = file.caption ?? '';
-      final hasMetadataChanged =
-          result.title != currentTitle || result.caption != currentCaption;
-
-      if (hasMetadataChanged || hasCollectionAdds) {
-        final dialog = createProgressDialog(
-          context,
-          context.l10n.pleaseWait,
-          isDismissible: false,
-        );
-        await dialog.show();
-
-        try {
-          final addFutures = <Future<void>>[];
-          for (final collection in collectionsToAdd) {
-            addFutures.add(
-              CollectionService.instance.addToCollection(
-                collection,
-                file,
-                runSync: false,
-              ),
-            );
-          }
-          if (addFutures.isNotEmpty) {
-            await Future.wait(addFutures);
-          }
-
-          final List<Future<void>> apiCalls = [];
-          if (hasMetadataChanged) {
-            apiCalls.add(
-              MetadataUpdaterService.instance
-                  .editFileNameAndCaption(file, result.title, result.caption),
-            );
-          }
-          await Future.wait(apiCalls);
-
-          await dialog.hide();
-
-          if (!context.mounted) {
-            return;
-          }
-          SnackBarUtils.showInfoSnackBar(
-            context,
-            context.l10n.fileUpdatedSuccessfully,
-          );
-        } catch (e) {
-          await dialog.hide();
-          if (!context.mounted) {
-            return;
-          }
-
-          SnackBarUtils.showWarningSnackBar(
-            context,
-            context.l10n.failedToUpdateFile(e.toString()),
-          );
-        }
-      } else {
-        if (!context.mounted) {
-          return;
-        }
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          context.l10n.noChangesWereMade,
-        );
-      }
-    }
+  Future<void> _editFile(BuildContext context) async {
+    await FileActions.editFile(context, file);
   }
 }

@@ -1,24 +1,23 @@
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/favorites_service.dart";
-import "package:locker/services/files/links/links_service.dart";
-import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/add_to_collection_dialog.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
-import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/selection_action_button_widget.dart";
-import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/utils/collection_list_util.dart";
+import "package:locker/utils/file_actions.dart";
 import "package:locker/utils/file_util.dart";
-import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -285,7 +284,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             ),
             label: context.l10n.share,
             onTap: () => isSingleSelection
-                ? _shareLink(context, file!)
+                ? _shareFileLink(context, file!)
                 : _shareMultipleFiles(context),
           ),
         ),
@@ -367,7 +366,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             icon: HugeIcons.strokeRoundedPencilEdit02,
           ),
           label: context.l10n.edit,
-          onTap: () => _showEditDialog(context, file!),
+          onTap: () => _editFile(context, file!),
         ),
       );
       actions.add(
@@ -416,7 +415,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     } catch (e, stackTrace) {
       _logger.severe("Failed to download files: $e", e, stackTrace);
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDownloadOrDecrypt,
         );
@@ -425,133 +424,18 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   void _shareMultipleFiles(BuildContext context) {
-    SnackBarUtils.showWarningSnackBar(
+    showToast(
       context,
       "Sharing multiple files is coming soon",
     );
   }
 
-  Future<void> _shareLink(BuildContext context, EnteFile file) async {
-    final dialog = createProgressDialog(
-      context,
-      context.l10n.creatingShareLink,
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      // Get or create the share link
-      final shareableLink = await LinksService.instance.getOrCreateLink(file);
-
-      await dialog.hide();
-
-      // Show the link dialog with copy and delete options
-      if (context.mounted) {
-        await showShareLinkDialog(
-          context,
-          shareableLink.fullURL!,
-          shareableLink.linkID,
-          file,
-        );
-      }
-    } catch (e) {
-      await dialog.hide();
-
-      if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
-        );
-      }
-    }
+  Future<void> _shareFileLink(BuildContext context, EnteFile file) async {
+    await FileActions.shareFileLink(context, file);
   }
 
-  Future<void> _showEditDialog(BuildContext context, EnteFile file) async {
-    final allCollections = await CollectionService.instance.getCollections();
-    final dedupedCollections = uniqueCollectionsById(allCollections);
-
-    final result = await showFileEditDialog(
-      context,
-      file: file,
-      collections: dedupedCollections,
-      snackBarContext: context,
-    );
-
-    if (result != null && context.mounted) {
-      List<Collection> currentCollections;
-      try {
-        currentCollections =
-            await CollectionService.instance.getCollectionsForFile(file);
-      } catch (e) {
-        currentCollections = <Collection>[];
-      }
-
-      final currentCollectionsSet = currentCollections.toSet();
-      final selectedCollectionsSet = result.selectedCollections.toSet();
-      final collectionsToAdd =
-          selectedCollectionsSet.difference(currentCollectionsSet).toList();
-      final hasCollectionAdds = collectionsToAdd.isNotEmpty;
-
-      final currentTitle = file.displayName;
-      final currentCaption = file.caption ?? '';
-      final hasMetadataChanged =
-          result.title != currentTitle || result.caption != currentCaption;
-
-      if (hasMetadataChanged || hasCollectionAdds) {
-        final dialog = createProgressDialog(
-          context,
-          context.l10n.pleaseWait,
-          isDismissible: false,
-        );
-        await dialog.show();
-
-        try {
-          final addFutures = <Future<void>>[];
-          for (final collection in collectionsToAdd) {
-            addFutures.add(
-              CollectionService.instance.addToCollection(
-                collection,
-                file,
-                runSync: false,
-              ),
-            );
-          }
-          if (addFutures.isNotEmpty) {
-            await Future.wait(addFutures);
-          }
-
-          final List<Future<void>> apiCalls = [];
-
-          if (hasMetadataChanged) {
-            apiCalls.add(
-              MetadataUpdaterService.instance
-                  .editFileNameAndCaption(file, result.title, result.caption),
-            );
-          }
-          await Future.wait(apiCalls);
-
-          await dialog.hide();
-
-          SnackBarUtils.showInfoSnackBar(
-            context,
-            context.l10n.fileUpdatedSuccessfully,
-          );
-        } catch (e) {
-          await dialog.hide();
-
-          SnackBarUtils.showWarningSnackBar(
-            context,
-            context.l10n.failedToUpdateFile(e.toString()),
-          );
-        }
-      } else {
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          context.l10n.noChangesWereMade,
-        );
-      }
-    }
+  Future<void> _editFile(BuildContext context, EnteFile file) async {
+    await FileActions.editFile(context, file);
   }
 
   Future<void> _showAddToDialog(
@@ -633,7 +517,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         if (addFutures.isEmpty) {
           await dialog.hide();
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
             context.l10n.noChangesWereMade,
           );
@@ -650,7 +534,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         widget.selectedFiles.clearAll();
 
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.fileUpdatedSuccessfully,
         );
@@ -660,7 +544,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           'Failed add-to operation: $e',
         );
 
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToUpdateFile(e.toString()),
         );
@@ -669,54 +553,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Future<void> _deleteFile(BuildContext context, EnteFile file) async {
-    final confirmation = await showDeleteConfirmationDialog(
+    await FileActions.deleteFile(
       context,
-      title: context.l10n.areYouSure,
-      body: context.l10n.deleteMultipleFilesDialogBody(1),
-      deleteButtonLabel: context.l10n.yesDeleteFiles(1),
-      assetPath: "assets/file_delete_icon.png",
+      file,
+      onSuccess: () {
+        widget.selectedFiles.clearAll();
+        Bus.instance.fire(CollectionsUpdatedEvent('file_deleted'));
+      },
     );
-
-    if (confirmation?.buttonResult.action != ButtonAction.first) {
-      return;
-    }
-
-    final dialog = createProgressDialog(
-      context,
-      context.l10n.deletingFile,
-      isDismissible: false,
-    );
-
-    try {
-      await dialog.show();
-
-      final collections =
-          await CollectionService.instance.getCollectionsForFile(file);
-      if (collections.isNotEmpty) {
-        await CollectionService.instance.trashFile(file, collections.first);
-      }
-
-      await dialog.hide();
-
-      widget.selectedFiles.clearAll();
-
-      SnackBarUtils.showInfoSnackBar(
-        context,
-        context.l10n.fileDeletedSuccessfully,
-      );
-    } catch (e, stackTrace) {
-      await dialog.hide();
-
-      _logger.severe(
-        'Failed to delete file ${file.uploadedFileID}: $e',
-        e,
-        stackTrace,
-      );
-      if (!context.mounted) {
-        return;
-      }
-      await showGenericErrorDialog(context: context, error: e);
-    }
   }
 
   Future<void> _deleteMultipleFile(
@@ -761,7 +605,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
       widget.selectedFiles.clearAll();
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         context.l10n.fileDeletedSuccessfully,
       );
@@ -792,7 +636,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     } catch (e, stackTrace) {
       _logger.severe("Failed to download file: $e", e, stackTrace);
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDownloadOrDecrypt,
         );
@@ -827,7 +671,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         final message = _isImportant
             ? "File marked as important"
             : "File removed from important";
-        SnackBarUtils.showInfoSnackBar(context, message);
+        showToast(context, message);
       }
     } catch (e, stackTrace) {
       _logger.severe("Failed to toggle important status: $e", e, stackTrace);
@@ -836,7 +680,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (context.mounted) {
         final errorMessage =
             'Failed to update important status: ${e.toString()}';
-        SnackBarUtils.showWarningSnackBar(context, errorMessage);
+        showToast(context, errorMessage);
       }
     }
   }
@@ -865,7 +709,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (filesToMark.isEmpty) {
         await dialog.hide();
         if (context.mounted) {
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
             "All files are already marked as important",
           );
@@ -887,7 +731,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         final message = filesToMark.length == 1
             ? "1 file marked as important"
             : "${filesToMark.length} files marked as important";
-        SnackBarUtils.showInfoSnackBar(context, message);
+        showToast(context, message);
       }
     } catch (e, stackTrace) {
       _logger.severe(
@@ -900,7 +744,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (context.mounted) {
         final errorMessage =
             'Failed to mark files as important: ${e.toString()}';
-        SnackBarUtils.showWarningSnackBar(context, errorMessage);
+        showToast(context, errorMessage);
       }
     }
   }

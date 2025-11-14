@@ -170,7 +170,12 @@ Future<void> _init(bool bool, {String? via}) async {
   await CodeDisplayStore.instance.init();
   await Configuration.instance.init([AuthenticatorDB.instance]);
   await Network.instance.init(Configuration.instance);
-  await UserService.instance.init(Configuration.instance, const HomePage());
+  await UserService.instance.init(
+    Configuration.instance,
+    const HomePage(),
+    clientPackageName: 'io.ente.auth',
+    passkeyRedirectUrl: 'enteauth://passkey',
+  );
   await AuthenticatorService.instance.init();
   await BillingService.instance.init();
   await NotificationService.instance.init();

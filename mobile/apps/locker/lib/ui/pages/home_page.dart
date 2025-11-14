@@ -74,17 +74,23 @@ class CustomLockerAppBar extends StatelessWidget
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      scaffoldKey.currentState!.openDrawer();
-                    },
-                    child: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedMenu01,
-                      color: Colors.white,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () {
+                        scaffoldKey.currentState!.openDrawer();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: HugeIcon(
+                          icon: HugeIcons.strokeRoundedMenu01,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                   GestureDetector(
@@ -268,14 +274,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     if (CollectionService.instance.hasCompletedFirstSync()) {
       _loadCollections();
     }
-
-    // Ensure default collections are created now that we're on the home page
-    // This handles the case where SignedInEvent fired before master key was available
-    CollectionService.instance.ensureDefaultCollections().then((_) {
-      _logger.info("Default collections check completed in HomePage");
-    }).catchError((error) {
-      _logger.warning("Failed to ensure default collections: $error");
-    });
 
     // Initialize sharing functionality to handle shared files
     WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -4,6 +4,7 @@ import "dart:typed_data";
 
 import "package:ente_ui/components/progress_dialog.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
@@ -17,7 +18,6 @@ import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
 import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
-import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 import "package:open_file/open_file.dart";
 import "package:path/path.dart" as p;
@@ -103,7 +103,7 @@ class FileUtil {
     }
 
     if (!(Platform.isAndroid || Platform.isIOS)) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         'Downloads are only supported on Android and iOS',
       );
@@ -180,19 +180,19 @@ class FileUtil {
             ? '${savedNames.first} saved to Downloads'
             : '${savedNames.length} files saved to Downloads';
         _logger.info('Files saved: $savedPaths');
-        SnackBarUtils.showInfoSnackBar(context, message);
+        showToast(context, message);
       }
 
       return true;
     } catch (e, s) {
       _logger.severe('Failed to save files to Downloads', e, s);
       if (e is UnsupportedError) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           'This file type is not supported for download',
         );
       } else {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDownloadOrDecrypt,
         );

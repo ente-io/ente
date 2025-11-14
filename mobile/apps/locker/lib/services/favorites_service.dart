@@ -191,7 +191,7 @@ class FavoritesService {
             await _collectionService.getOrCreateUncategorizedCollection();
 
         await _collectionService.move(
-          file,
+          [file],
           favCollection!,
           targetCollection,
         );
@@ -247,13 +247,11 @@ class FavoritesService {
       }
 
       // If no other collection found, move to uncategorized
-      if (targetCollection == null) {
-        targetCollection =
-            await _collectionService.getOrCreateUncategorizedCollection();
-      }
+      targetCollection ??=
+          await _collectionService.getOrCreateUncategorizedCollection();
 
       await _collectionService.move(
-        file,
+        [file],
         favCollection,
         targetCollection,
       );
