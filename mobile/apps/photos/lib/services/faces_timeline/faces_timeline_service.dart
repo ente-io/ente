@@ -29,7 +29,7 @@ class FacesTimelineService {
 
   static final FacesTimelineService instance = FacesTimelineService._internal();
 
-  static const _minimumYears = 7;
+  static const _minimumYears = 5;
   static const _minimumFacesPerYear = 4;
   static const _recomputeCooldown = Duration(hours: 24);
 

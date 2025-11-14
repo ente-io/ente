@@ -21,9 +21,9 @@ Map<String, dynamic> _buildFace(
 
 void main() {
   group("Faces timeline selection", () {
-    test("returns ready when at least seven eligible years are present", () {
+    test("returns ready when at least five eligible years are present", () {
       final faces = <Map<String, dynamic>>[];
-      for (int year = 2010; year < 2017; year++) {
+      for (int year = 2010; year < 2015; year++) {
         for (int index = 0; index < 5; index++) {
           faces.add(
             _buildFace(
@@ -37,17 +37,17 @@ void main() {
 
       final result = selectTimelineEntriesTask({
         "faces": faces,
-        "minYears": 7,
+        "minYears": 5,
         "minFaces": 4,
       });
 
       expect(result["status"], equals("ready"));
       final years = (result["years"] as List<dynamic>).cast<int>();
-      expect(years, equals(List<int>.generate(7, (i) => 2010 + i)));
+      expect(years, equals(List<int>.generate(5, (i) => 2010 + i)));
 
       final entries =
           (result["entries"] as List<dynamic>).cast<Map<String, dynamic>>();
-      expect(entries.length, equals(28));
+      expect(entries.length, equals(20));
       final faceIds = entries.map((entry) => entry["faceId"]).toSet();
       expect(faceIds.length, equals(entries.length));
 
@@ -58,9 +58,9 @@ void main() {
       }
     });
 
-    test("returns ineligible when fewer than seven years qualify", () {
+    test("returns ineligible when fewer than five years qualify", () {
       final faces = <Map<String, dynamic>>[];
-      for (int year = 2011; year < 2017; year++) {
+      for (int year = 2011; year < 2015; year++) {
         for (int index = 0; index < 4; index++) {
           faces.add(
             _buildFace(
@@ -74,12 +74,12 @@ void main() {
 
       final result = selectTimelineEntriesTask({
         "faces": faces,
-        "minYears": 7,
+        "minYears": 5,
         "minFaces": 4,
       });
 
       expect(result["status"], equals("ineligible"));
-      expect(result["eligibleYearCount"], equals(6));
+      expect(result["eligibleYearCount"], equals(4));
       expect(result["entries"], isNull);
     });
 
