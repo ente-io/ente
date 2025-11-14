@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/onboarding/model/tag_enums.dart';
+import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -200,45 +202,28 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 children: [
                   ..._allTags.map((tag) {
                     final isSelected = _selectedTagsInSheet.contains(tag);
-                    return ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(tag),
-                            if (isSelected) ...[
-                            const SizedBox(width: 6),
-                            const Icon(Icons.check, size: 16, color: Colors.white,),
-                          ],
-                        ],
-                      ),
-                      selected: isSelected,
-                      showCheckmark: false, 
-                      onSelected: (selected) {
+                    return TagChip(
+                      label: tag,
+                      action: TagChipAction.check,
+                      state: isSelected
+                          ? TagChipState.selected
+                          : TagChipState.unselected,
+                      onTap: () {
                         setState(() {
-                          if (selected) {
-                            _selectedTagsInSheet.add(tag);
-                          } 
-                          else {
+                          if (isSelected) {
                             _selectedTagsInSheet.remove(tag);
+                          } else {
+                            _selectedTagsInSheet.add(tag);
                           }
                         });
                       },
-                      selectedColor: colorScheme.primary400,
-                      backgroundColor: colorScheme.fillFaint,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : colorScheme.textBase,
-                      ),
-                      side: BorderSide.none,
-                      shape: const StadiumBorder(),
                     );
                   }),
-                  ActionChip(
-                    avatar: const Icon(Icons.add, size: 18),
-                    label: Text(context.l10n.addNew),
-                    onPressed: _showCreateTagDialog,
-                    side: BorderSide.none,
-                    shape: const StadiumBorder(),
-                    backgroundColor: colorScheme.fillFaint,
+                  TagChip(
+                    label: context.l10n.addNew,
+                    iconData: Icons.add,
+                    state: TagChipState.unselected,
+                    onTap: _showCreateTagDialog,
                   ),
                 ],
               ),
