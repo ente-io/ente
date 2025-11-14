@@ -698,6 +698,16 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
 
+        // Temporary debug logging
+        console.log("[DEBUG] handleJoinAlbum values:", {
+            accessTokenLength: accessToken?.length,
+            collectionKeyLength: collectionKey?.length,
+            currentHashLength: currentHash?.length,
+            currentHashPreview: currentHash?.substring(0, 50) + "...",
+            collectionKeyPreview: collectionKey?.substring(0, 50) + "...",
+            fullCurrentURL: window.location.href,
+        });
+
         // Store the album context before redirecting to auth
         storeJoinAlbumContext(
             accessToken,

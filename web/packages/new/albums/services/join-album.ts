@@ -31,6 +31,16 @@ export const storeJoinAlbumContext = (
     collectionKeyHash: string,
     collection: Collection,
 ) => {
+    // Temporary debug logging
+    console.log("[DEBUG] storeJoinAlbumContext called with:", {
+        accessTokenLength: accessToken?.length,
+        collectionKeyLength: collectionKey?.length,
+        collectionKeyHashLength: collectionKeyHash?.length,
+        collectionKeyPreview: collectionKey?.substring(0, 50) + "...",
+        collectionKeyHashPreview: collectionKeyHash?.substring(0, 50) + "...",
+        collectionID: collection.id,
+    });
+
     const context: JoinAlbumContext = {
         accessToken,
         collectionKey,
@@ -83,6 +93,15 @@ export const joinPublicAlbum = async (
     const authHeaders = await authenticatedRequestHeaders();
     const url = await apiURL("/collections/join-link");
 
+    // Temporary debug logging
+    console.log("[DEBUG] joinPublicAlbum request:", {
+        url,
+        collectionID,
+        accessTokenLength: accessToken?.length,
+        encryptedKeyLength: encryptedKey?.length,
+        encryptedKeyPreview: encryptedKey?.substring(0, 50) + "...",
+    });
+
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -97,6 +116,7 @@ export const joinPublicAlbum = async (
         let errorMessage = `Failed to join album (status: ${response.status})`;
         try {
             const errorData = (await response.json()) as { message?: string; code?: string };
+            console.error("[DEBUG] API error response:", errorData);
             errorMessage = errorData.message ?? errorMessage;
         } catch {
             // Ignore parse error, use default message
@@ -118,7 +138,32 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         return null;
     }
 
+    // Temporary debug logging
+    console.log("[DEBUG] processPendingAlbumJoin context:", {
+        collectionID: context.collectionID,
+        accessTokenLength: context.accessToken?.length,
+        collectionKeyLength: context.collectionKey?.length,
+        collectionKeyHashLength: context.collectionKeyHash?.length,
+        collectionKeyPreview: context.collectionKey?.substring(0, 50) + "...",
+        collectionKeyHashPreview: context.collectionKeyHash?.substring(0, 50) + "...",
+    });
+
     try {
+        // If collectionID is 0 (placeholder), we need to fetch the actual collection first
+        let collectionID = context.collectionID;
+        if (collectionID === 0) {
+            console.log("[DEBUG] Collection ID is 0, fetching actual collection...");
+            // Import the pullCollection function dynamically
+            const { pullCollection } = await import("ente-gallery/services/share");
+            const { collection } = await pullCollection(context.accessToken, context.collectionKey);
+            collectionID = collection.id;
+            console.log("[DEBUG] Fetched actual collection ID:", collectionID);
+
+            // Update the context with the actual collection ID
+            const updatedContext = { ...context, collectionID };
+            localStorage.setItem("ente_join_album_context", JSON.stringify(updatedContext));
+        }
+
         // Get user's key attributes from local storage
         const keyAttributes = savedKeyAttributes();
         if (!keyAttributes) {
@@ -126,25 +171,26 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         }
 
         const publicKey = keyAttributes.publicKey;
+        console.log("[DEBUG] Public key length:", publicKey?.length);
 
         // Encrypt the collection key with user's public key
         // The collection key is already base64 encoded, and boxSeal expects base64
         const encryptedKey = await boxSeal(context.collectionKey, publicKey);
+        console.log("[DEBUG] Encrypted key length:", encryptedKey?.length);
 
         // Join the album
         await joinPublicAlbum(
             context.accessToken,
-            context.collectionID,
+            collectionID,
             encryptedKey,
         );
-
-        const collectionID = context.collectionID;
 
         // Clear the context after successful join
         clearJoinAlbumContext();
 
         return collectionID;
     } catch (error) {
+        console.error("[DEBUG] Error in processPendingAlbumJoin:", error);
         // Don't clear context on error - let user retry
         throw error;
     }
