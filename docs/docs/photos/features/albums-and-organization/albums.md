@@ -136,8 +136,6 @@ If you have multiple empty albums cluttering your album list, you can bulk delet
 
 This will delete all empty albums from your library. The feature only appears after your initial sync is complete and when you have more than 2 empty albums.
 
-> **Note**: This feature only deletes albums that are completely empty. Albums with at least one photo will not be affected.
-
 ## Uploading nested folders from desktop {#preserving-folder-structure}
 
 When you upload photos and videos from your computer using the desktop app - whether by dragging and dropping a folder or zip file, or by setting up [watch folders](/photos/features/backup-and-sync/watch-folders) - you can choose how to handle nested folder structures.
