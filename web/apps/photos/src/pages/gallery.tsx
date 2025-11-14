@@ -348,17 +348,24 @@ const Page: React.FC = () => {
                 trashItems: await savedTrashItems(),
             });
 
+            // Show the initial state while data loads
+            dispatch({ type: "showAll" });
+
             // Check for pending album join BEFORE fetching data
-            let joinedCollectionId: number | null = null;
             console.log("[Gallery] Checking for pending album join");
             if (hasPendingAlbumToJoin()) {
                 console.log("[Gallery] Found pending album join, processing...");
                 try {
-                    joinedCollectionId = await processPendingAlbumJoin();
+                    const joinedCollectionId = await processPendingAlbumJoin();
                     if (joinedCollectionId) {
                         console.log("[Gallery] Album joined successfully, collection ID:", joinedCollectionId);
                         // Add a small delay to ensure backend has processed the join
                         await new Promise(resolve => setTimeout(resolve, 500));
+                        // Show success notification
+                        showMiniDialog({
+                            title: t("success"),
+                            message: t("album_joined_successfully"),
+                        });
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
@@ -374,15 +381,6 @@ const Page: React.FC = () => {
 
             // Fetch data from remote (this will include the newly joined album if any)
             await remotePull();
-
-            // Now show the appropriate view
-            if (joinedCollectionId) {
-                console.log("[Gallery] Navigating to joined album:", joinedCollectionId);
-                dispatch({ type: "showCollection", collectionID: joinedCollectionId });
-            } else {
-                // Show the initial state only if we're not navigating to a joined album
-                dispatch({ type: "showAll" });
-            }
 
             // Clear the first load message if needed.
             setIsFirstLoad(false);
