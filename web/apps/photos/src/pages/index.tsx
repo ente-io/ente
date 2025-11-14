@@ -65,7 +65,15 @@ const Page: React.FC = () => {
                     (await masterKeyFromSession()) &&
                     (await savedAuthToken())
                 ) {
-                    await router.push("/gallery");
+                    // Check if there's a join album context in the URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const joinAlbumParam = urlParams.get("joinAlbum");
+                    if (joinAlbumParam) {
+                        // Preserve the join context when redirecting to gallery
+                        await router.push(`/gallery?joinAlbum=${encodeURIComponent(joinAlbumParam)}`);
+                    } else {
+                        await router.push("/gallery");
+                    }
                 } else if (savedPartialLocalUser()?.email) {
                     await router.push("/verify");
                 }

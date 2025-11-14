@@ -50,10 +50,45 @@ export const storeJoinAlbumContext = (
 
 /**
  * Retrieve stored album context after authentication.
+ * First checks URL parameters (for cross-origin flow), then localStorage.
  */
 export const getJoinAlbumContext = (): JoinAlbumContext | null => {
+    // First check if context is in URL (for cross-origin redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    const joinAlbumParam = urlParams.get("joinAlbum");
+
+    if (joinAlbumParam && joinAlbumParam !== "true") {
+        console.log("[Join Album] Found context in URL parameter");
+        try {
+            const decodedContext = JSON.parse(atob(joinAlbumParam)) as JoinAlbumContext;
+            // Check if context is still valid (24 hours)
+            const isValid = Date.now() - decodedContext.timestamp < 24 * 60 * 60 * 1000;
+
+            console.log("[Join Album] URL context retrieved:", {
+                collectionID: decodedContext.collectionID,
+                isValid,
+                age: Date.now() - decodedContext.timestamp,
+            });
+
+            if (isValid) {
+                // Store in localStorage for this origin
+                localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(decodedContext));
+                // Clean up URL
+                urlParams.delete("joinAlbum");
+                const newUrl = urlParams.toString()
+                    ? `${window.location.pathname}?${urlParams.toString()}${window.location.hash}`
+                    : `${window.location.pathname}${window.location.hash}`;
+                window.history.replaceState(null, "", newUrl);
+                return decodedContext;
+            }
+        } catch (error) {
+            console.error("[Join Album] Failed to parse URL context:", error);
+        }
+    }
+
+    // Fall back to localStorage (for same-origin flow)
     const stored = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
-    console.log("[Join Album] Retrieving context, stored:", !!stored);
+    console.log("[Join Album] Retrieving from localStorage, stored:", !!stored);
 
     if (!stored) return null;
 
@@ -62,7 +97,7 @@ export const getJoinAlbumContext = (): JoinAlbumContext | null => {
         // Check if context is still valid (24 hours)
         const isValid = Date.now() - context.timestamp < 24 * 60 * 60 * 1000;
 
-        console.log("[Join Album] Context retrieved:", {
+        console.log("[Join Album] LocalStorage context retrieved:", {
             collectionID: context.collectionID,
             isValid,
             age: Date.now() - context.timestamp,
@@ -70,7 +105,7 @@ export const getJoinAlbumContext = (): JoinAlbumContext | null => {
 
         return isValid ? context : null;
     } catch (error) {
-        console.error("[Join Album] Failed to parse context:", error);
+        console.error("[Join Album] Failed to parse localStorage context:", error);
         return null;
     }
 };
@@ -192,6 +227,12 @@ export const processPendingAlbumJoin = async (): Promise<boolean> => {
  * This preserves the intent to join an album across the auth flow.
  */
 export const getAuthRedirectURL = (): string => {
+    const context = getJoinAlbumContext();
+    if (!context) {
+        console.error("[Join Album] No context found when generating redirect URL");
+        return "/";
+    }
+
     // In development, redirect to the photos app on port 3000
     // In production, this would be https://web.ente.io or the custom endpoint
     const isDevelopment = window.location.hostname === "localhost";
@@ -199,5 +240,7 @@ export const getAuthRedirectURL = (): string => {
         ? "http://localhost:3000"
         : window.location.origin.replace("albums.", "web.");
 
-    return `${photosAppURL}/?joinAlbum=true`;
+    // Encode the context in the URL since localStorage is not shared across origins
+    const encodedContext = btoa(JSON.stringify(context));
+    return `${photosAppURL}/?joinAlbum=${encodeURIComponent(encodedContext)}`;
 };
