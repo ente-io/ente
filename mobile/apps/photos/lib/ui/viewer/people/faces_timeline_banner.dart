@@ -330,7 +330,6 @@ class _FacesTimelineBannerSectionState
         file,
         [face],
         useFullFile: true,
-        personOrClusterID: widget.person.remoteID,
         useTempCache: false,
       );
       final Uint8List? bytes = cropMap?[face.faceID];

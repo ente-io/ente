@@ -412,7 +412,6 @@ class FacesTimelineService {
           file,
           selectedFaces,
           useFullFile: true,
-          personOrClusterID: personId,
           useTempCache: false,
         );
       } catch (error, stackTrace) {
