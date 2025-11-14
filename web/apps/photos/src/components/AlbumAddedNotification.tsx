@@ -55,7 +55,7 @@ export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
                         <Box>
                             <Typography variant="h3">
                                 {/* Intentionally using a simple title for clarity */}
-                                {t("add_to_album")}
+                                {t("added_to_album")}
                             </Typography>
                             {fileName && (
                                 <Typography
