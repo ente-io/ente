@@ -19,12 +19,16 @@ class PasskeyPage extends StatefulWidget {
   final String sessionID;
   final String totp2FASessionID;
   final String accountsUrl;
+  final String redirectUrl;
+  final String clientPackage;
 
   const PasskeyPage(
     this.config,
     this.sessionID, {
     required this.totp2FASessionID,
     required this.accountsUrl,
+    required this.redirectUrl,
+    required this.clientPackage,
     super.key,
   });
 
@@ -51,8 +55,8 @@ class _PasskeyPageState extends State<PasskeyPage> {
     await launchUrlString(
       "${widget.accountsUrl}/passkeys/verify?"
       "passkeySessionID=${widget.sessionID}"
-      "&redirect=enteauth://passkey"
-      "&clientPackage=io.ente.auth",
+      "&redirect=${widget.redirectUrl}"
+      "&clientPackage=${widget.clientPackage}",
       mode: LaunchMode.externalApplication,
     );
   }
@@ -91,7 +95,8 @@ class _PasskeyPageState extends State<PasskeyPage> {
       return;
     }
     try {
-      if (mounted && link.toLowerCase().startsWith("enteauth://passkey")) {
+      final expectedPrefix = widget.redirectUrl.toLowerCase();
+      if (mounted && link.toLowerCase().startsWith(expectedPrefix)) {
         if (widget.config.isLoggedIn()) {
           _logger.info('ignored deeplink: already configured');
           showToast(context, 'Account is already configured.');
