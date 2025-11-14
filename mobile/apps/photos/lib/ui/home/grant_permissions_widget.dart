@@ -87,7 +87,15 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           ),
         ),
       ),
-      floatingActionButton: Container(
+      floatingActionButton: _buildActionArea(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildActionArea(BuildContext context) {
+    final showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
+    if (!showOnlyNewFeature) {
+      return Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
@@ -99,48 +107,65 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           ],
         ),
         width: double.infinity,
-        padding: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-          bottom: 16,
+        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+        child: SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            key: const ValueKey("grantPermissionButton"),
+            onPressed: _onTapLegacyContinue,
+            child: Text(AppLocalizations.of(context).continueLabel),
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                key: const ValueKey("onlyNewPhotosButton"),
-                onPressed: _onTapOnlyNewPhotos,
-                child: Text(context.l10n.backupOnlyNewPhotos),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                key: const ValueKey("selectFoldersButton"),
-                onPressed: _onTapSelectFolders,
-                child: Text(context.l10n.selectFoldersToBackup),
-              ),
-            ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              key: const ValueKey("skipForNowButton"),
-              behavior: HitTestBehavior.opaque,
-              onTap: _onTapSkip,
-              child: Text(
-                context.l10n.skipForNow,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall!
-                    .copyWith(decoration: TextDecoration.underline),
-              ),
-            ),
-          ],
-        ),
+      );
+    }
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: getEnteColorScheme(context).backgroundBase,
+            spreadRadius: 190,
+            blurRadius: 30,
+            offset: const Offset(0, 170),
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey("onlyNewPhotosButton"),
+              onPressed: _onTapOnlyNewPhotos,
+              child: Text(context.l10n.backupOnlyNewPhotos),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey("selectFoldersButton"),
+              onPressed: _onTapSelectFolders,
+              child: Text(context.l10n.selectFoldersToBackup),
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            key: const ValueKey("skipForNowButton"),
+            behavior: HitTestBehavior.opaque,
+            onTap: _onTapSkip,
+            child: Text(
+              context.l10n.skipForNow,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall!
+                  .copyWith(decoration: TextDecoration.underline),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -194,6 +219,25 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       setState(() {});
     }
     Bus.instance.fire(PermissionGrantedEvent());
+  }
+
+  Future<void> _onTapLegacyContinue() async {
+    try {
+      final state = await permissionService.requestPhotoMangerPermissions();
+      _logger.info("Permission state: $state");
+      if (state == PermissionState.authorized ||
+          state == PermissionState.limited) {
+        await onPermissionGranted(state);
+      } else {
+        await _showPermissionDeniedDialog();
+      }
+    } catch (e) {
+      _logger.severe(
+        "Failed to request permission: ${e.toString()}",
+        e,
+      );
+      showGenericErrorDialog(context: context, error: e).ignore();
+    }
   }
 
   Future<void> _showPermissionDeniedDialog() async {

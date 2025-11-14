@@ -23,6 +23,7 @@ class BackupSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final showOnlyNewToggle = flagService.enableOnlyBackupFuturePhotos;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -101,40 +102,42 @@ class BackupSettingsScreen extends StatelessWidget {
                               isBottomBorderRadiusRemoved:
                                   flagService.enableMobMultiPart,
                             ),
-                            DividerWidget(
-                              dividerType: DividerType.menuNoIcon,
-                              bgColor: colorScheme.fillFaint,
-                            ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: AppLocalizations.of(context)
-                                    .backupOnlyNewPhotos,
+                            if (showOnlyNewToggle) ...[
+                              DividerWidget(
+                                dividerType: DividerType.menuNoIcon,
+                                bgColor: colorScheme.fillFaint,
                               ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: ToggleSwitchWidget(
-                                value: () => Configuration.instance
-                                    .isOnlyNewBackupEnabled(),
-                                onChanged: () async {
-                                  final isEnabled = Configuration.instance
-                                      .isOnlyNewBackupEnabled();
-                                  if (!isEnabled) {
-                                    await Configuration.instance
-                                        .setOnlyNewSinceNow();
-                                    await BackupPreferenceService.instance
-                                        .autoSelectAllFoldersIfEligible();
-                                    SyncService.instance.sync().ignore();
-                                  } else {
-                                    await Configuration.instance
-                                        .clearOnlyNewSince();
-                                    SyncService.instance.sync().ignore();
-                                  }
-                                },
+                              MenuItemWidget(
+                                captionedTextWidget: CaptionedTextWidget(
+                                  title: AppLocalizations.of(context)
+                                      .backupOnlyNewPhotos,
+                                ),
+                                menuItemColor: colorScheme.fillFaint,
+                                trailingWidget: ToggleSwitchWidget(
+                                  value: () => Configuration.instance
+                                      .isOnlyNewBackupEnabled(),
+                                  onChanged: () async {
+                                    final isEnabled = Configuration.instance
+                                        .isOnlyNewBackupEnabled();
+                                    if (!isEnabled) {
+                                      await Configuration.instance
+                                          .setOnlyNewSinceNow();
+                                      await BackupPreferenceService.instance
+                                          .autoSelectAllFoldersIfEligible();
+                                      SyncService.instance.sync().ignore();
+                                    } else {
+                                      await Configuration.instance
+                                          .clearOnlyNewSince();
+                                      SyncService.instance.sync().ignore();
+                                    }
+                                  },
+                                ),
+                                singleBorderRadius: 8,
+                                alignCaptionedTextToLeft: true,
+                                isTopBorderRadiusRemoved: true,
+                                isGestureDetectorDisabled: true,
                               ),
-                              singleBorderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              isTopBorderRadiusRemoved: true,
-                              isGestureDetectorDisabled: true,
-                            ),
+                            ],
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,
