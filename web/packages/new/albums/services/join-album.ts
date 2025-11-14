@@ -150,6 +150,12 @@ export const processPendingAlbumJoin = async (): Promise<boolean> => {
  * This preserves the intent to join an album across the auth flow.
  */
 export const getAuthRedirectURL = (): string => {
-    const baseURL = window.location.origin;
-    return `${baseURL}/?joinAlbum=true`;
+    // In development, redirect to the photos app on port 3000
+    // In production, this would be https://web.ente.io or the custom endpoint
+    const isDevelopment = window.location.hostname === "localhost";
+    const photosAppURL = isDevelopment
+        ? "http://localhost:3000"
+        : window.location.origin.replace("albums.", "web.");
+
+    return `${photosAppURL}/?joinAlbum=true`;
 };
