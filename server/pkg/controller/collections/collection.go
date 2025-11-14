@@ -44,6 +44,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 		return ente.Collection{}, stacktrace.Propagate(keyErr, "Unable to get keyAttributes")
 	}
 	collectionType := collection.Type
+	app := collection.App
 	collection.Owner.ID = ownerID
 	collection.UpdationTime = time.Microseconds()
 	// [20th Dec 2022] Patch on server side untill majority of the existing mobile clients upgrade to a version higher > 0.7.0
@@ -57,7 +58,7 @@ func (c *CollectionController) Create(collection ente.Collection, ownerID int64)
 	collection, err := c.CollectionRepo.Create(collection)
 	if err != nil {
         if err == ente.ErrUncategorizeCollectionAlreadyExists || err == ente.ErrFavoriteCollectionAlreadyExist {
-            dbCollection, err := c.CollectionRepo.GetCollectionByType(ownerID, collectionType, collection.App)
+            dbCollection, err := c.CollectionRepo.GetCollectionByType(ownerID, collectionType, app)
 			if err != nil {
 				return ente.Collection{}, stacktrace.Propagate(err, "")
 			}
