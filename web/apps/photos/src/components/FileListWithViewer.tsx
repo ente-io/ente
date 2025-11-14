@@ -13,7 +13,7 @@ import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
 import {
@@ -57,11 +57,6 @@ export type FileListWithViewerProps = {
         file: EnteFile,
         sourceCollectionSummaryID?: number,
     ) => void;
-    /**
-     * Provides a callback that closes the file viewer, allowing parents to
-     * dismiss it programmatically.
-     */
-    onRegisterCloseFileViewer?: (close?: () => void) => void;
 } & Pick<
     FileListProps,
     | "mode"
@@ -132,7 +127,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onAddFileToCollection,
-    onRegisterCloseFileViewer,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -159,12 +153,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
     }, [onSetOpenFileViewer]);
-
-    useEffect(() => {
-        if (!onRegisterCloseFileViewer) return;
-        onRegisterCloseFileViewer(handleCloseFileViewer);
-        return () => onRegisterCloseFileViewer(undefined);
-    }, [onRegisterCloseFileViewer, handleCloseFileViewer]);
 
     const handleTriggerRemotePull = useCallback(
         () => void onRemotePull(),
