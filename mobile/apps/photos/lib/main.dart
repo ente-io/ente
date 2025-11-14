@@ -314,9 +314,13 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
     await FacesTimelineService.instance.init();
-    FacesTimelineService.instance
-        .queueFullRecompute(force: true, trigger: "startup")
-        .ignore();
+    if (flagService.facesTimeline) {
+      FacesTimelineService.instance
+          .queueFullRecompute(force: true, trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Faces timeline disabled via feature flag");
+    }
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;

@@ -74,6 +74,8 @@ class FlagService {
 
   bool get useWidgetV2 => kDebugMode;
 
+  bool get facesTimeline => internalUser;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }

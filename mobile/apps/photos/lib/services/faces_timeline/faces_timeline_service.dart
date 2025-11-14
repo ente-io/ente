@@ -13,6 +13,7 @@ import "package:photos/models/faces_timeline/faces_timeline_models.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/faces_timeline/faces_timeline_cache_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -55,6 +56,8 @@ class FacesTimelineService {
 
   StreamSubscription<PeopleChangedEvent>? _peopleChangedSubscription;
 
+  bool get isFeatureEnabled => flagService.facesTimeline;
+
   Future<void> init() async {
     if (_initialized) return;
     await _cacheService.init();
@@ -74,6 +77,12 @@ class FacesTimelineService {
     bool force = false,
     String trigger = "",
   }) async {
+    if (!isFeatureEnabled) {
+      _logger.fine(
+        "Faces timeline full recompute skipped ($trigger): feature disabled",
+      );
+      return;
+    }
     if (!PersonService.isInitialized) {
       _logger.warning(
         "Faces timeline full recompute skipped: PersonService not initialized",
@@ -99,6 +108,12 @@ class FacesTimelineService {
     bool force = false,
     String trigger = "",
   }) {
+    if (!isFeatureEnabled) {
+      _logger.fine(
+        "Faces timeline recompute skipped for $personId ($trigger): feature disabled",
+      );
+      return;
+    }
     if (personId.isEmpty) return;
     _precomputeQueue.addTask(personId, () async {
       await _recomputeTimelineForPerson(
@@ -110,14 +125,19 @@ class FacesTimelineService {
   }
 
   Future<FacesTimelinePersonTimeline?> getTimeline(String personId) {
+    if (!isFeatureEnabled) return Future.value(null);
     return _cacheService.getTimeline(personId);
   }
 
   bool hasReadyTimelineSync(String personId) {
+    if (!isFeatureEnabled) {
+      return false;
+    }
     return readyPersonIds.value.contains(personId);
   }
 
   Future<bool> hasReadyTimeline(String personId) async {
+    if (!isFeatureEnabled) return false;
     final timeline = await _cacheService.getTimeline(personId);
     return timeline?.isReady ?? false;
   }
@@ -134,6 +154,12 @@ class FacesTimelineService {
   }
 
   void _handlePeopleChange(PeopleChangedEvent event) {
+    if (!isFeatureEnabled) {
+      _logger.fine(
+        "Faces timeline people change ignored (${event.type.name}): feature disabled",
+      );
+      return;
+    }
     final personId = event.person?.remoteID;
     switch (event.type) {
       case PeopleEventType.saveOrEditPerson:
@@ -169,6 +195,12 @@ class FacesTimelineService {
     required bool force,
     required String trigger,
   }) async {
+    if (!isFeatureEnabled) {
+      _logger.fine(
+        "Faces timeline compute skipped for $personId ($trigger): feature disabled",
+      );
+      return;
+    }
     if (!PersonService.isInitialized) {
       _logger.warning(
         "Faces timeline recompute skipped for $personId: PersonService not initialized",

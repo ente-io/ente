@@ -85,6 +85,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   double _currentCaptionValue = 0;
   _CaptionType _currentCaptionType = _CaptionType.yearsAgo;
   int _maxCaptionDigits = 1;
+  bool get _featureEnabled => flagService.facesTimeline;
 
   @override
   void initState() {
@@ -96,7 +97,11 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       ..addListener(_onCardAnimationTick)
       ..addStatusListener(_onCardAnimationStatusChanged);
     _stackProgressNotifier = ValueNotifier<double>(_stackProgress);
-    unawaited(_loadFrames());
+    if (_featureEnabled) {
+      unawaited(_loadFrames());
+    } else {
+      _timelineUnavailable = true;
+    }
   }
 
   @override
@@ -466,6 +471,21 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 
   @override
   Widget build(BuildContext context) {
+    if (!_featureEnabled) {
+      final l10n = context.l10n;
+      final colorScheme = getEnteColorScheme(context);
+      final textTheme = getEnteTextTheme(context);
+      return Scaffold(
+        appBar: AppBar(title: Text(l10n.facesTimelineAppBarTitle)),
+        body: Center(
+          child: Text(
+            l10n.facesTimelineUnavailable,
+            style: textTheme.body.copyWith(color: colorScheme.textBase),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
     return Theme(
       data: darkThemeData,
       child: Builder(

@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/faces_timeline_changed_event.dart";
 import "package:photos/models/faces_timeline/faces_timeline_models.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/faces_timeline/faces_timeline_cache_service.dart";
 import "package:photos/services/faces_timeline/faces_timeline_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -27,10 +28,12 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
   String? _info;
   StreamSubscription<FacesTimelineChangedEvent>? _timelineSubscription;
 
+  bool get _featureEnabled => flagService.facesTimeline;
+
   @override
   void initState() {
     super.initState();
-    if (kDebugMode) {
+    if (kDebugMode && _featureEnabled) {
       _reloadTimeline();
       _timelineSubscription = Bus.instance
           .on<FacesTimelineChangedEvent>()
@@ -119,7 +122,7 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kDebugMode) return const SizedBox.shrink();
+    if (!kDebugMode || !_featureEnabled) return const SizedBox.shrink();
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final timeline = _timeline;
