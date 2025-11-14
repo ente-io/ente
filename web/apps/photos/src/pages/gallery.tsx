@@ -1046,6 +1046,8 @@ const Page: React.FC = () => {
 
             const handleSelect = async (collection: Collection) => {
                 try {
+                    // Show add-to-album progress UI for this operation.
+                    setAddToAlbumProgress({ open: true, phase: "processing" });
                     showLoadingBar();
                     await performCollectionOp(
                         "add",
