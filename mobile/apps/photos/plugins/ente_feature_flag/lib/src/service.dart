@@ -88,6 +88,8 @@ class FlagService {
 
   bool get useWidgetV2 => internalUser;
 
+  bool get facesTimeline => internalUser;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }
