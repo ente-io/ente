@@ -32,10 +32,13 @@ export const storeJoinAlbumContext = (
     collection: Collection,
 ) => {
     console.log("[Join Album] storeJoinAlbumContext called with:", {
+        accessToken: accessToken.substring(0, 10) + "...",
         collectionKey: collectionKey.substring(0, 10) + "...",
         collectionKeyHash: collectionKeyHash.substring(0, 10) + "...",
         collectionKeyEndsWithEquals: collectionKey.endsWith("="),
         collectionKeyHashEndsWithEquals: collectionKeyHash.endsWith("="),
+        collectionKeyLength: collectionKey.length,
+        collectionKeyHashLength: collectionKeyHash.length,
         fullCollectionKey: collectionKey,
         fullCollectionKeyHash: collectionKeyHash,
     });
@@ -47,18 +50,51 @@ export const storeJoinAlbumContext = (
         console.error("collectionKeyHash (should be original hash):", collectionKeyHash);
     }
 
-    // Additional validation: base64 strings often end with = while base58 doesn't
-    if (collectionKeyHash.endsWith("=") && !collectionKey.endsWith("=")) {
-        console.warn("[Join Album] WARNING: collectionKeyHash looks like base64, but should be the original hash!");
-        console.warn("Possible parameter swap detected. Swapping them to fix.");
-        // Swap them if they appear to be reversed
+    // Validation: Check if parameters are in correct order
+    // Base64 contains +, /, = characters. Base58 doesn't contain these.
+    // Hex only contains 0-9, a-f characters
+    const isBase64 = (str: string): boolean => {
+        return /[+/=]/.test(str) || (str.length === 44 && /^[A-Za-z0-9+/]+=*$/.test(str));
+    };
+
+    const isBase58 = (str: string): boolean => {
+        // Base58 doesn't contain 0, O, I, l, +, /, =
+        return !/[0OIl+/=]/.test(str) && /^[1-9A-HJ-NP-Za-km-z]+$/.test(str);
+    };
+
+    const collectionKeyIsBase64 = isBase64(collectionKey);
+    const collectionKeyHashIsBase64 = isBase64(collectionKeyHash);
+    const collectionKeyIsBase58 = isBase58(collectionKey);
+    const collectionKeyHashIsBase58 = isBase58(collectionKeyHash);
+
+    console.log("[Join Album] Validation check:", {
+        collectionKeyIsBase64,
+        collectionKeyHashIsBase64,
+        collectionKeyIsBase58,
+        collectionKeyHashIsBase58,
+    });
+
+    // IMPORTANT: collectionKey should be base64 (for API), collectionKeyHash should be original (base58/hex)
+    if (collectionKeyHashIsBase64 && collectionKeyIsBase58) {
+        console.warn("[Join Album] WARNING: Parameters appear to be swapped!");
+        console.warn("collectionKey should be base64, but appears to be base58:", collectionKey.substring(0, 20) + "...");
+        console.warn("collectionKeyHash should be base58/hex, but appears to be base64:", collectionKeyHash.substring(0, 20) + "...");
+        // Swap them to fix the issue
         const temp = collectionKey;
         collectionKey = collectionKeyHash;
         collectionKeyHash = temp;
-        console.log("[Join Album] After swap:", {
-            collectionKey: collectionKey.substring(0, 10) + "...",
-            collectionKeyHash: collectionKeyHash.substring(0, 10) + "...",
+        console.log("[Join Album] After swap - fixed:", {
+            collectionKey: collectionKey.substring(0, 10) + "... (now base64)",
+            collectionKeyHash: collectionKeyHash.substring(0, 10) + "... (now base58)",
         });
+    } else if (!collectionKeyIsBase64 && !collectionKeyHashIsBase64) {
+        // Neither appears to be base64 - might both be base58 or hex
+        console.warn("[Join Album] WARNING: Neither value appears to be base64!");
+        console.warn("This might indicate an issue with parameter passing.");
+    } else if (collectionKeyIsBase64 && collectionKeyHashIsBase64) {
+        // Both appear to be base64 - this is wrong
+        console.error("[Join Album] ERROR: Both values appear to be base64!");
+        console.error("The collectionKeyHash should be the original hash from the URL.");
     }
 
     const context: JoinAlbumContext = {
@@ -255,6 +291,9 @@ export const getAuthRedirectURL = (): string => {
         collectionKeyHashPreview: context.collectionKeyHash.substring(0, 10) + "...",
         collectionKeyIsBase64: context.collectionKey.endsWith("="),
         collectionKeyHashIsBase58: !context.collectionKeyHash.endsWith("="),
+        collectionKeyLength: context.collectionKey.length,
+        collectionKeyHashLength: context.collectionKeyHash.length,
+        fullCollectionKey: context.collectionKey,
         fullCollectionKeyHash: context.collectionKeyHash,
     });
 
