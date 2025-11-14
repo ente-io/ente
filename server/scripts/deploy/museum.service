@@ -5,7 +5,7 @@ After=docker.service
 
 [Service]
 Restart=on-failure
-ExecStartPre=docker pull rg.fr-par.scw.cloud/ente/museum-prod
+# ExecStartPre=docker pull rg.fr-par.scw.cloud/ente/museum-prod
 ExecStartPre=-docker stop museum
 ExecStartPre=-docker rm museum
 ExecStart=docker run --name museum \
