@@ -6,8 +6,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Link, Stack, Typography } from "@mui/material";
-import type { AddToAlbumPhase } from "components/AddToAlbumProgress";
-import { AddToAlbumProgress } from "components/AddToAlbumProgress";
+import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
+import { AlbumAddedNotification } from "components/AlbumAddedNotification";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -1341,7 +1341,7 @@ const Page: React.FC = () => {
                 }}
                 onSubmit={handleAlbumNameSubmit}
             />
-            <AddToAlbumProgress
+            <AlbumAddedNotification
                 open={addToAlbumProgress.open}
                 onClose={() =>
                     setAddToAlbumProgress((s) => ({ ...s, open: false }))

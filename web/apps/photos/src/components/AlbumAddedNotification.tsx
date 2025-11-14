@@ -1,4 +1,3 @@
-// TODO: Review AddToAlbumProgress for accessibility and consistent UI patterns.
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import {
@@ -15,7 +14,7 @@ import React from "react";
 
 export type AddToAlbumPhase = "processing" | "done" | "failed";
 
-interface AddToAlbumProgressProps {
+interface AlbumAddedNotificationProps {
     open: boolean;
     onClose: () => void;
     phase: AddToAlbumPhase;
@@ -26,9 +25,10 @@ interface AddToAlbumProgressProps {
 }
 
 /**
- * Minimal progress UI for add-to-album operations.
+ * Success notification shown after files are added to an album.
+ * Provides navigation to the album via an arrow button.
  */
-export const AddToAlbumProgress: React.FC<AddToAlbumProgressProps> = ({
+export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
     open,
     onClose,
     phase,
