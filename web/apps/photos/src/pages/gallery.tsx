@@ -326,9 +326,6 @@ const Page: React.FC = () => {
             initSettings();
             setupSelectAllKeyBoardShortcutHandler();
 
-            // Show the initial state while the rest of the sequence proceeds.
-            dispatch({ type: "showAll" });
-
             // If this is the user's first login on this client, then show them
             // a message informing the that the initial load might take time.
             setIsFirstLoad(getAndClearIsFirstLogin());
@@ -339,7 +336,7 @@ const Page: React.FC = () => {
                 showPlanSelector();
             }
 
-            // Initialize the reducer.
+            // Initialize the reducer FIRST before any dispatches
             const user = ensureLocalUser();
             const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
@@ -378,10 +375,13 @@ const Page: React.FC = () => {
             // Fetch data from remote (this will include the newly joined album if any)
             await remotePull();
 
-            // Navigate to the joined album if we just joined one
+            // Now show the appropriate view
             if (joinedCollectionId) {
                 console.log("[Gallery] Navigating to joined album:", joinedCollectionId);
                 dispatch({ type: "showCollection", collectionID: joinedCollectionId });
+            } else {
+                // Show the initial state only if we're not navigating to a joined album
+                dispatch({ type: "showAll" });
             }
 
             // Clear the first load message if needed.
