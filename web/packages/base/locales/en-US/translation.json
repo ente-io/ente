@@ -48,6 +48,7 @@
     "album_name": "Album name",
     "album_created": "Album created",
     "join_album": "Join album",
+    "joined_album": "Joined album",
     "album_joined_successfully": "Album joined successfully",
     "album_join_failed": "Failed to join album",
     "close": "Close",

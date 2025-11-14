@@ -47,6 +47,7 @@ import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
 import {
+    getJoinAlbumContext,
     hasPendingAlbumToJoin,
     processPendingAlbumJoin,
 } from "ente-new/albums/services/join-album";
@@ -150,7 +151,7 @@ import {
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, watchFolderView } =
+    const { showLoadingBar, hideLoadingBar, watchFolderView, showNotification } =
         usePhotosAppContext();
 
     const isOffline = useIsOffline();
@@ -356,15 +357,26 @@ const Page: React.FC = () => {
             if (hasPendingAlbumToJoin()) {
                 console.log("[Gallery] Found pending album join, processing...");
                 try {
+                    // Get the album name before processing (as processing clears the context)
+                    const context = getJoinAlbumContext();
+                    const albumName = context?.collectionName || t("album");
+
                     const joinedCollectionId = await processPendingAlbumJoin();
                     if (joinedCollectionId) {
                         console.log("[Gallery] Album joined successfully, collection ID:", joinedCollectionId);
                         // Add a small delay to ensure backend has processed the join
                         await new Promise(resolve => setTimeout(resolve, 500));
-                        // Show success notification
-                        showMiniDialog({
-                            title: t("success"),
-                            message: t("album_joined_successfully"),
+
+                        // Show notification toast
+                        showNotification({
+                            color: "primary",
+                            title: t("joined_album"),
+                            caption: albumName.length > 16
+                                ? albumName.substring(0, 16) + "..."
+                                : albumName,
+                            onClick: () => {
+                                dispatch({ type: "showCollectionSummary", collectionSummaryID: joinedCollectionId });
+                            },
                         });
                     }
                 } catch (error) {
