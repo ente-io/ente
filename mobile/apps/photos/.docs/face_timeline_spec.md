@@ -4,7 +4,8 @@
 Deliver an on-device, auto-playing “faces timeline” for eligible named people that highlights their visual journey over the years and enables sharing a rendered video.
 
 ### Eligibility & Precomputation
-- Run background precomputation per person after ML syncs or people data changes.
+- Run the initial full precomputation once after the feature initializes; subsequent recomputes run only when people data changes (e.g., new faces added/removed or edits) and respect the service cooldown described below.
+- Each person’s timeline obeys a 90-day cooldown between automatic recomputes so the cached experience stays stable even if multiple syncs occur; requests arriving during the cooldown are skipped unless a future manual override flow is added.
 - Skip people marked ignored/hidden or lacking ≥5 distinct calendar years that each contribute ≥4 faces (based on file `creationTime`); a year only counts toward eligibility if it independently meets that four-face threshold.
 - When a birthdate is known, ignore faces captured before the person's fifth birthday so ages 0–4 neither count toward eligibility nor appear in playback.
 - Group faces by year, sort chronologically, and select four samples spread across the year (prefer quarterly spacing; gracefully accept uneven distributions).
@@ -38,7 +39,7 @@ Deliver an on-device, auto-playing “faces timeline” for eligible named peopl
 - If export fails, notify the user and leave the share action disabled until a retry succeeds.
 
 ### Performance & Reliability
-- Execute precomputation in a background isolate with throttling (e.g., max once per person per day) to limit resource spikes.
+- Execute precomputation in a background isolate with throttling: the worker queue stays single-threaded and each person can only recompute automatically once every ~90 days unless we introduce an explicit user-triggered override later.
 - Ensure the timeline plays offline by relying on cached crops and locally stored payloads.
 - Add logging (non-PII) for eligibility results, banner impressions, playback starts, and share attempts.
 

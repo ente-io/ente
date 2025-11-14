@@ -318,7 +318,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await FacesTimelineService.instance.init();
     if (flagService.facesTimeline) {
       FacesTimelineService.instance
-          .queueFullRecompute(force: true, trigger: "startup")
+          .queueFullRecompute(trigger: "startup")
           .ignore();
     } else {
       _logger.info("Faces timeline disabled via feature flag");

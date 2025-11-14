@@ -33,7 +33,7 @@ class FacesTimelineService {
   static const _minimumYears = 5;
   static const _minimumFacesPerYear = 4;
   static const _minimumEligibleAgeYears = 5;
-  static const _recomputeCooldown = Duration(hours: 24);
+  static const _recomputeCooldown = Duration(days: 90);
 
   final Logger _logger = Logger("FacesTimelineService");
   final FacesTimelineCacheService _cacheService =
@@ -169,18 +169,11 @@ class FacesTimelineService {
         if (personId != null) {
           schedulePersonRecompute(
             personId,
-            force: true,
             trigger: "people_event_${event.type.name}",
           );
         } else {
-          queueFullRecompute(
-            force: true,
-            trigger: "people_event_${event.type.name}",
-          );
+          queueFullRecompute(trigger: "people_event_${event.type.name}");
         }
-        break;
-      case PeopleEventType.syncDone:
-        queueFullRecompute(force: true, trigger: "sync_done");
         break;
       case PeopleEventType.defaultType:
         if (personId != null) {
