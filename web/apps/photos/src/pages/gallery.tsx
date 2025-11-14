@@ -47,8 +47,7 @@ import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
-import { type ItemVisibility } from "ente-media/file-metadata";
+import { fileFileName, type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -180,6 +179,7 @@ const Page: React.FC = () => {
     const pendingSingleFileAdd = useRef<
         { file: EnteFile; sourceCollectionSummaryID?: number } | undefined
     >(undefined);
+    const closeFileViewerRef = useRef<(() => void) | undefined>(undefined);
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
      */
@@ -742,6 +742,17 @@ const Page: React.FC = () => {
                         [pendingSingleFileAdd.current.file],
                         pendingSingleFileAdd.current.sourceCollectionSummaryID,
                     );
+
+                    await remotePull({ silent: true });
+                    //Show custom toast with file name and navigation
+                    setAddToAlbumProgress({
+                        open: true,
+                        phase: "done",
+                        albumId: collection.id,
+                        fileName: fileFileName(
+                            pendingSingleFileAdd.current.file,
+                        ),
+                    });
                 }
 
                 setPostCreateAlbumOp((postCreateAlbumOp) => {
@@ -756,7 +767,7 @@ const Page: React.FC = () => {
                 pendingSingleFileAdd.current = undefined;
             }
         },
-        [createOnSelectForCollectionOp],
+        [createOnSelectForCollectionOp, remotePull],
     );
 
     const createFileOpHandler = (op: FileOp) => () => {
@@ -1004,6 +1015,10 @@ const Page: React.FC = () => {
         },
         [],
     );
+
+    const registerCloseFileViewer = useCallback((closer?: () => void) => {
+        closeFileViewerRef.current = closer;
+    }, []);
 
     const handleCloseCollectionSelector = useCallback(
         () => setOpenCollectionSelector(false),
@@ -1302,6 +1317,7 @@ const Page: React.FC = () => {
                     onSelectCollection={handleSelectCollection}
                     onSelectPerson={handleSelectPerson}
                     onAddFileToCollection={handleAddSingleFileToCollection}
+                    onRegisterCloseFileViewer={registerCloseFileViewer}
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
@@ -1331,6 +1347,7 @@ const Page: React.FC = () => {
                 phase={addToAlbumProgress.phase}
                 fileName={addToAlbumProgress.fileName}
                 onArrowClick={() => {
+                    closeFileViewerRef.current?.();
                     if (addToAlbumProgress.albumId !== undefined) {
                         handleSelectCollection(addToAlbumProgress.albumId);
                     }
