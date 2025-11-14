@@ -939,6 +939,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           files,
           showDialog: showDialog,
           showUIFeedback: false,
+          maintainScrollAnchor: false,
         );
       },
       child: Container(
@@ -972,6 +973,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     Set<EnteFile> filesToDelete, {
     bool showDialog = true,
     bool showUIFeedback = true,
+    bool maintainScrollAnchor = true,
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
@@ -987,6 +989,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
               filesToDelete,
               true,
               showUIFeedback: showUIFeedback,
+              maintainScrollAnchor: maintainScrollAnchor,
             );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
@@ -1001,6 +1004,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         filesToDelete,
         true,
         showUIFeedback: showUIFeedback,
+        maintainScrollAnchor: maintainScrollAnchor,
       );
     }
   }
@@ -1009,12 +1013,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     Set<EnteFile> filesToDelete,
     bool createSymlink, {
     bool showUIFeedback = true,
+    bool maintainScrollAnchor = true,
   }) async {
     if (filesToDelete.isEmpty) {
       return;
     }
     SimilarFiles? anchorGroup;
-    {
+    if (maintainScrollAnchor) {
       final beforeFiltered = _filteredGroups;
       final plannedDeletes = Set<EnteFile>.from(filesToDelete);
       final topIndex = _getTopMostVisibleIndex();
@@ -1143,7 +1148,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
 
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
-    if (anchorGroup != null && _itemScrollController.isAttached) {
+    if (maintainScrollAnchor &&
+        anchorGroup != null &&
+        _itemScrollController.isAttached) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final afterFiltered = _filteredGroups;
         final newIndex =
