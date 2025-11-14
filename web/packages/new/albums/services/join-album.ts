@@ -19,7 +19,6 @@ export interface JoinAlbumContext {
     collectionKey: string;  // Base64 encoded collection key for API calls
     collectionKeyHash: string;  // Original hash value from URL (base58 or hex)
     collectionID: number;
-    collectionName?: string;  // Album name for display in notifications
 }
 
 /**
@@ -37,7 +36,6 @@ export const storeJoinAlbumContext = (
         collectionKey,
         collectionKeyHash,
         collectionID: collection.id,
-        collectionName: collection.name,
     };
 
     localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(context));
@@ -123,16 +121,14 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
     try {
         // If collectionID is 0 (placeholder), we need to fetch the actual collection first
         let collectionID = context.collectionID;
-        let collectionName = context.collectionName;
         if (collectionID === 0) {
             // Import the pullCollection function dynamically from the correct module
             const { pullCollection } = await import("./public-collection");
             const { collection } = await pullCollection(context.accessToken, context.collectionKey);
             collectionID = collection.id;
-            collectionName = collection.name;
 
-            // Update the context with the actual collection ID and name
-            const updatedContext = { ...context, collectionID, collectionName };
+            // Update the context with the actual collection ID
+            const updatedContext = { ...context, collectionID };
             localStorage.setItem("ente_join_album_context", JSON.stringify(updatedContext));
         }
 

@@ -61,14 +61,13 @@ const Page: React.FC = () => {
                         tempURL.hash = collectionKeyHash;
                         const collectionKey = await extractCollectionKeyFromShareURL(tempURL);
 
-                        // For now, we don't have the collection ID or name, so we'll use placeholders
-                        // The actual collection ID and name will be fetched when we pull the collection
+                        // For now, we don't have the collection ID, so we'll use a placeholder
+                        // The actual collection ID will be fetched when we pull the collection
                         const context = {
                             accessToken,
                             collectionKey,  // Base64 for API calls
                             collectionKeyHash,  // Original hash from URL
                             collectionID: 0, // Will be updated when collection is fetched
-                            collectionName: undefined, // Will be updated when collection is fetched
                         };
                         localStorage.setItem("ente_join_album_context", JSON.stringify(context));
                     }

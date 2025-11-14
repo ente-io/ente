@@ -176,7 +176,6 @@ const Page: React.FC = () => {
     const [albumJoinedToast, setAlbumJoinedToast] = useState<{
         open: boolean;
         albumId?: number;
-        albumName?: string;
     }>({ open: false });
 
     /**
@@ -361,21 +360,13 @@ const Page: React.FC = () => {
             dispatch({ type: "showAll" });
 
             // Check for pending album join BEFORE fetching data
-            let joinedAlbumInfo: { id: number; name: string } | null = null;
+            let joinedAlbumId: number | null = null;
 
             if (hasPendingAlbumToJoin()) {
                 try {
-                    // Get the album name before processing (as processing clears the context)
-                    const context = getJoinAlbumContext();
-                    const albumName = context?.collectionName || t("album");
-
                     const joinedCollectionId = await processPendingAlbumJoin();
                     if (joinedCollectionId) {
-                        // Store the info to show toast after data is loaded
-                        joinedAlbumInfo = {
-                            id: joinedCollectionId,
-                            name: albumName,
-                        };
+                        joinedAlbumId = joinedCollectionId;
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
@@ -390,11 +381,10 @@ const Page: React.FC = () => {
             await remotePull();
 
             // Now that data is loaded, show the toast if we joined an album
-            if (joinedAlbumInfo) {
+            if (joinedAlbumId) {
                 setAlbumJoinedToast({
                     open: true,
-                    albumId: joinedAlbumInfo.id,
-                    albumName: joinedAlbumInfo.name,
+                    albumId: joinedAlbumId,
                 });
             }
 
@@ -1288,22 +1278,6 @@ const Page: React.FC = () => {
                             <Box>
                                 <Typography variant="h3">
                                     {t("joined_album")}
-                                </Typography>
-                                <Typography
-                                    variant="body"
-                                    sx={{
-                                        fontWeight: "regular",
-                                        color: "text.muted",
-                                        marginTop: "4px",
-                                    }}
-                                >
-                                    {albumJoinedToast.albumName &&
-                                    albumJoinedToast.albumName.length > 16
-                                        ? albumJoinedToast.albumName.substring(
-                                              0,
-                                              16,
-                                          ) + "..."
-                                        : albumJoinedToast.albumName}
                                 </Typography>
                             </Box>
                             <Stack direction="row" sx={{ gap: 1 }}>
