@@ -156,15 +156,15 @@ export const joinPublicAlbum = async (
  * Process the pending album join after authentication.
  * This should be called after successful sign-in/sign-up.
  *
- * @returns true if an album was successfully joined, false otherwise
+ * @returns The collection ID if an album was successfully joined, null otherwise
  */
-export const processPendingAlbumJoin = async (): Promise<boolean> => {
+export const processPendingAlbumJoin = async (): Promise<number | null> => {
     console.log("[Join Album] Processing pending album join");
     const context = getJoinAlbumContext();
 
     if (!context) {
         console.log("[Join Album] No pending context found");
-        return false;
+        return null;
     }
 
     console.log("[Join Album] Found pending join for collection:", context.collectionID);
@@ -196,10 +196,12 @@ export const processPendingAlbumJoin = async (): Promise<boolean> => {
 
         console.log("[Join Album] Successfully joined album!");
 
+        const collectionID = context.collectionID;
+
         // Clear the context after successful join
         clearJoinAlbumContext();
 
-        return true;
+        return collectionID;
     } catch (error) {
         console.error("[Join Album] Failed to join album:", error);
         // Don't clear context on error - let user retry

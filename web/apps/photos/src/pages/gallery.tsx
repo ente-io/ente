@@ -349,17 +349,15 @@ const Page: React.FC = () => {
             if (hasPendingAlbumToJoin()) {
                 console.log("[Gallery] Found pending album join, processing...");
                 try {
-                    const joined = await processPendingAlbumJoin();
-                    if (joined) {
+                    const joinedCollectionId = await processPendingAlbumJoin();
+                    if (joinedCollectionId) {
                         console.log("[Gallery] Album joined successfully, refreshing collections");
                         // Add a small delay to ensure backend has processed the join
                         await new Promise(resolve => setTimeout(resolve, 1000));
                         // Refresh collections after joining
                         await remotePull({ silent: false });
-                        showMiniDialog({
-                            title: t("success"),
-                            message: t("album_joined_successfully"),
-                        });
+                        // Navigate directly to the joined album
+                        dispatch({ type: "showCollection", collectionID: joinedCollectionId });
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
