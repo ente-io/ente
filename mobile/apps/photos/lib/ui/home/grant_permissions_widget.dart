@@ -28,6 +28,10 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   @override
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
+    final headerText = showOnlyNewFeature
+        ? context.l10n.chooseHowEnteBacksUp
+        : AppLocalizations.of(context).entePhotosPerm;
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -68,7 +72,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
                 child: StyledText(
-                  text: AppLocalizations.of(context).entePhotosPerm,
+                  text: headerText,
                   style: Theme.of(context)
                       .textTheme
                       .headlineSmall!
@@ -87,13 +91,18 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           ),
         ),
       ),
-      floatingActionButton: _buildActionArea(context),
+      floatingActionButton: _buildActionArea(
+        context,
+        showOnlyNewFeature,
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _buildActionArea(BuildContext context) {
-    final showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
+  Widget _buildActionArea(
+    BuildContext context,
+    bool showOnlyNewFeature,
+  ) {
     if (!showOnlyNewFeature) {
       return Container(
         decoration: BoxDecoration(
