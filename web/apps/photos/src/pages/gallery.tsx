@@ -47,6 +47,10 @@ import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
 import {
+    hasPendingAlbumToJoin,
+    processPendingAlbumJoin,
+} from "ente-new/albums/services/join-album";
+import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
@@ -339,6 +343,25 @@ const Page: React.FC = () => {
 
             // Fetch data from remote.
             await remotePull();
+
+            // Check for pending album join after authentication
+            if (hasPendingAlbumToJoin()) {
+                try {
+                    await processPendingAlbumJoin();
+                    // Refresh collections after joining
+                    await remotePull({ silent: true });
+                    showMiniDialog({
+                        title: t("success"),
+                        message: t("album_joined_successfully"),
+                    });
+                } catch (error) {
+                    log.error("Failed to join album", error);
+                    showMiniDialog({
+                        title: t("error"),
+                        message: t("album_join_failed"),
+                    });
+                }
+            }
 
             // Clear the first load message if needed.
             setIsFirstLoad(false);
