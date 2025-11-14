@@ -43,15 +43,10 @@ class FlagService {
   bool get disableCFWorker => flags.disableCFWorker;
 
   /// Returns true if the user is an internal user, respecting the debug toggle.
-  /// Use [isInternalUserOrDebug] for UI visibility that should persist even when disabled.
   bool get internalUser {
     final isDisabled = _prefs.getBool("ls.internal_user_disabled") ?? false;
     return (flags.internalUser || kDebugMode) && !isDisabled;
   }
-
-  /// Returns true if the user is an internal user OR in debug mode,
-  /// ignoring the debug toggle. Use this for showing debug UI elements.
-  bool get isInternalUserOrDebug => flags.internalUser || kDebugMode;
 
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
