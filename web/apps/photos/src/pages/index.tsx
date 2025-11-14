@@ -48,6 +48,12 @@ const Page: React.FC = () => {
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 console.log("[Index] Storing join album context from URL");
+                console.log("[Index] Current URL received:", {
+                    fullURL: window.location.href,
+                    hash: window.location.hash,
+                    hashLength: window.location.hash.length,
+                    searchParams: window.location.search,
+                });
                 try {
                     // New simplified format: joinAlbum?=accessToken#collectionKeyHash
                     const accessToken = joinAlbumParam;

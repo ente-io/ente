@@ -712,7 +712,13 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         storeJoinAlbumContext(accessToken, collectionKey, currentHash, publicCollection);
 
         // Redirect to authentication page with join album flag
-        window.location.href = getAuthRedirectURL();
+        const redirectURL = getAuthRedirectURL();
+        console.log("[Join Album] About to redirect to:", redirectURL);
+        console.log("[Join Album] URL parts:", {
+            hasHashInURL: redirectURL.includes("#"),
+            hashPart: redirectURL.split("#")[1] || "NO HASH",
+        });
+        window.location.href = redirectURL;
     };
 
     if (enableJoin) {
