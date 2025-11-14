@@ -45,6 +45,8 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Please allow access to camera so that Ente can scan and backup your documents.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
