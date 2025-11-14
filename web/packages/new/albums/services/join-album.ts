@@ -16,8 +16,8 @@ const JOIN_ALBUM_CONTEXT_KEY = "ente_join_album_context";
 
 export interface JoinAlbumContext {
     accessToken: string;
-    collectionKey: string;  // Base64 encoded collection key for API calls
-    collectionKeyHash: string;  // Original hash value from URL (base58 or hex)
+    collectionKey: string; // Base64 encoded collection key for API calls
+    collectionKeyHash: string; // Original hash value from URL (base58 or hex)
     collectionID: number;
 }
 
@@ -96,7 +96,10 @@ export const joinPublicAlbum = async (
     if (!response.ok) {
         let errorMessage = `Failed to join album (status: ${response.status})`;
         try {
-            const errorData = (await response.json()) as { message?: string; code?: string };
+            const errorData = (await response.json()) as {
+                message?: string;
+                code?: string;
+            };
             errorMessage = errorData.message ?? errorMessage;
         } catch {
             // Ignore parse error, use default message
@@ -124,18 +127,26 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         if (collectionID === 0) {
             // Import the pullCollection function dynamically from the correct module
             const { pullCollection } = await import("./public-collection");
-            const { collection } = await pullCollection(context.accessToken, context.collectionKey);
+            const { collection } = await pullCollection(
+                context.accessToken,
+                context.collectionKey,
+            );
             collectionID = collection.id;
 
             // Update the context with the actual collection ID
             const updatedContext = { ...context, collectionID };
-            localStorage.setItem("ente_join_album_context", JSON.stringify(updatedContext));
+            localStorage.setItem(
+                "ente_join_album_context",
+                JSON.stringify(updatedContext),
+            );
         }
 
         // Get user's key attributes from local storage
         const keyAttributes = savedKeyAttributes();
         if (!keyAttributes) {
-            throw new Error("Key attributes not found. Please try logging in again.");
+            throw new Error(
+                "Key attributes not found. Please try logging in again.",
+            );
         }
 
         const publicKey = keyAttributes.publicKey;
@@ -145,11 +156,7 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         const encryptedKey = await boxSeal(context.collectionKey, publicKey);
 
         // Join the album
-        await joinPublicAlbum(
-            context.accessToken,
-            collectionID,
-            encryptedKey,
-        );
+        await joinPublicAlbum(context.accessToken, collectionID, encryptedKey);
 
         // Clear the context after successful join
         clearJoinAlbumContext();

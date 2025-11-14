@@ -7,7 +7,16 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Box, DialogTitle, IconButton, Link, Paper, Snackbar, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    DialogTitle,
+    IconButton,
+    Link,
+    Paper,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -50,7 +59,6 @@ import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
 import {
-    getJoinAlbumContext,
     hasPendingAlbumToJoin,
     processPendingAlbumJoin,
 } from "ente-new/albums/services/join-album";
@@ -279,7 +287,9 @@ const Page: React.FC = () => {
             ? undefined
             : state?.view?.activeCollectionSummaryID;
     const activeCollection =
-        state?.view?.type == "people" ? undefined : state?.view?.activeCollection;
+        state?.view?.type == "people"
+            ? undefined
+            : state?.view?.activeCollection;
     const activeCollectionSummary =
         state?.view?.type == "people"
             ? undefined
@@ -292,13 +302,9 @@ const Page: React.FC = () => {
     const barCollectionSummaries = useMemo(
         () =>
             barMode == "hidden-albums"
-                ? state?.hiddenCollectionSummaries ?? new Map()
+                ? (state?.hiddenCollectionSummaries ?? new Map())
                 : normalCollectionSummaries,
-        [
-            barMode,
-            state?.hiddenCollectionSummaries,
-            normalCollectionSummaries,
-        ],
+        [barMode, state?.hiddenCollectionSummaries, normalCollectionSummaries],
     );
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
@@ -372,7 +378,10 @@ const Page: React.FC = () => {
                     log.error("Failed to join album", error);
                     showMiniDialog({
                         title: t("error"),
-                        message: t("album_join_failed") + ": " + (error as Error).message,
+                        message:
+                            t("album_join_failed") +
+                            ": " +
+                            (error as Error).message,
                     });
                 }
             }
@@ -382,10 +391,7 @@ const Page: React.FC = () => {
 
             // Now that data is loaded, show the toast if we joined an album
             if (joinedAlbumId) {
-                setAlbumJoinedToast({
-                    open: true,
-                    albumId: joinedAlbumId,
-                });
+                setAlbumJoinedToast({ open: true, albumId: joinedAlbumId });
             }
 
             // Clear the first load message if needed.
@@ -415,7 +421,6 @@ const Page: React.FC = () => {
             dispatch({ type: "setUserDetails", userDetails });
         }
     }, [state.user, userDetails]);
-
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
@@ -1286,7 +1291,8 @@ const Page: React.FC = () => {
                                         if (albumJoinedToast.albumId) {
                                             dispatch({
                                                 type: "showCollectionSummary",
-                                                collectionSummaryID: albumJoinedToast.albumId,
+                                                collectionSummaryID:
+                                                    albumJoinedToast.albumId,
                                             });
                                         }
                                         setAlbumJoinedToast({ open: false });
