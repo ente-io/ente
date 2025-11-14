@@ -698,26 +698,16 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
 
-        // Debug logging to verify the values
-        console.log("[Join Album Debug] Values being stored:", {
-            accessToken,
-            collectionKey: collectionKey.substring(0, 10) + "...",
-            currentHash: currentHash.substring(0, 10) + "...",
-            collectionKeyIsBase64: collectionKey.endsWith("="),
-            currentHashIsBase58: !currentHash.endsWith("="),
-            fullCurrentHash: currentHash,
-        });
-
         // Store the album context before redirecting to auth
-        storeJoinAlbumContext(accessToken, collectionKey, currentHash, publicCollection);
+        storeJoinAlbumContext(
+            accessToken,
+            collectionKey,
+            currentHash,
+            publicCollection,
+        );
 
         // Redirect to authentication page with join album flag
         const redirectURL = getAuthRedirectURL();
-        console.log("[Join Album] About to redirect to:", redirectURL);
-        console.log("[Join Album] URL parts:", {
-            hasHashInURL: redirectURL.includes("#"),
-            hashPart: redirectURL.split("#")[1] || "NO HASH",
-        });
         window.location.href = redirectURL;
     };
 
