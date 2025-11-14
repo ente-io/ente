@@ -94,6 +94,13 @@ class MemoriesCacheService {
   Future<void> setShowAnyMemories(bool value) async {
     await _prefs.setBool(_showAnyMemoryKey, value);
     Bus.instance.fire(MemoriesSettingChanged());
+    if (!value) {
+      await Future.wait([
+        _clearAllScheduledOnThisDayNotifications(),
+      ]);
+    } else {
+      queueUpdateCache();
+    }
   }
 
   bool get enableSmartMemories =>
