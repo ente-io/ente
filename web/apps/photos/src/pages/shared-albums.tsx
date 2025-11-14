@@ -676,7 +676,7 @@ interface GoToEnteProps {
     publicCollection?: Collection;
     /** Access token for the public link */
     accessToken?: string;
-    /** Collection key from URL */
+    /** Collection key from URL (base64 encoded) */
     collectionKey?: string;
 }
 
@@ -695,8 +695,11 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             return;
         }
 
+        // Get the original hash directly from the current URL
+        const currentHash = window.location.hash.slice(1);
+
         // Store the album context before redirecting to auth
-        storeJoinAlbumContext(accessToken, collectionKey, publicCollection);
+        storeJoinAlbumContext(accessToken, collectionKey, currentHash, publicCollection);
 
         // Redirect to authentication page with join album flag
         window.location.href = getAuthRedirectURL();

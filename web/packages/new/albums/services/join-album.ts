@@ -16,10 +16,9 @@ const JOIN_ALBUM_CONTEXT_KEY = "ente_join_album_context";
 
 export interface JoinAlbumContext {
     accessToken: string;
-    collectionKey: string;
+    collectionKey: string;  // Base64 encoded collection key for API calls
+    collectionKeyHash: string;  // Original hash value from URL (base58 or hex)
     collectionID: number;
-    collectionName?: string;
-    timestamp: number;
 }
 
 /**
@@ -29,19 +28,18 @@ export interface JoinAlbumContext {
 export const storeJoinAlbumContext = (
     accessToken: string,
     collectionKey: string,
+    collectionKeyHash: string,
     collection: Collection,
 ) => {
     const context: JoinAlbumContext = {
         accessToken,
         collectionKey,
+        collectionKeyHash,
         collectionID: collection.id,
-        collectionName: collection.name || undefined,
-        timestamp: Date.now(),
     };
 
     console.log("[Join Album] Storing context:", {
         collectionID: context.collectionID,
-        collectionName: context.collectionName,
         hasAccessToken: !!context.accessToken,
         hasCollectionKey: !!context.collectionKey,
     });
@@ -62,16 +60,12 @@ export const getJoinAlbumContext = (): JoinAlbumContext | null => {
 
     try {
         const context = JSON.parse(stored) as JoinAlbumContext;
-        // Check if context is still valid (24 hours)
-        const isValid = Date.now() - context.timestamp < 24 * 60 * 60 * 1000;
 
         console.log("[Join Album] LocalStorage context retrieved:", {
             collectionID: context.collectionID,
-            isValid,
-            age: Date.now() - context.timestamp,
         });
 
-        return isValid ? context : null;
+        return context;
     } catch (error) {
         console.error("[Join Album] Failed to parse localStorage context:", error);
         return null;
@@ -227,7 +221,7 @@ export const getAuthRedirectURL = (): string => {
         ? "http://localhost:3000"
         : window.location.origin.replace("albums.", "web.");
 
-    // Encode the context in the URL since localStorage is not shared across origins
-    const encodedContext = btoa(JSON.stringify(context));
-    return `${photosAppURL}/?joinAlbum=${encodeURIComponent(encodedContext)}`;
+    // Use the simplified URL format: joinAlbum?=accessToken#collectionKeyHash
+    // The collectionKeyHash is the original hash value from the URL (base58 or hex)
+    return `${photosAppURL}/?joinAlbum=${context.accessToken}#${context.collectionKeyHash}`;
 };

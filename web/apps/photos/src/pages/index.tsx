@@ -49,9 +49,30 @@ const Page: React.FC = () => {
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 console.log("[Index] Storing join album context from URL");
                 try {
-                    const decodedContext = JSON.parse(atob(joinAlbumParam));
-                    localStorage.setItem("ente_join_album_context", JSON.stringify(decodedContext));
-                    console.log("[Index] Join album context stored successfully");
+                    // New simplified format: joinAlbum?=accessToken#collectionKeyHash
+                    const accessToken = joinAlbumParam;
+                    const collectionKeyHash = currentURL.hash.slice(1); // Remove the # character
+
+                    if (accessToken && collectionKeyHash) {
+                        // Import the necessary functions to convert the collection key
+                        const { extractCollectionKeyFromShareURL } = await import("ente-gallery/services/share");
+
+                        // Convert the hash to base64 for API calls
+                        const tempURL = new URL(window.location.href);
+                        tempURL.hash = collectionKeyHash;
+                        const collectionKey = await extractCollectionKeyFromShareURL(tempURL);
+
+                        // For now, we don't have the collection ID, so we'll use a placeholder
+                        // The actual collection ID will be fetched when we pull the collection
+                        const context = {
+                            accessToken,
+                            collectionKey,  // Base64 for API calls
+                            collectionKeyHash,  // Original hash from URL
+                            collectionID: 0, // Will be updated when collection is fetched
+                        };
+                        localStorage.setItem("ente_join_album_context", JSON.stringify(context));
+                        console.log("[Index] Join album context stored successfully");
+                    }
                 } catch (error) {
                     console.error("[Index] Failed to store join album context:", error);
                 }
