@@ -36,7 +36,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Disable internal user",
+            title: "Disable internal user features",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingWidget: ToggleSwitchWidget(
