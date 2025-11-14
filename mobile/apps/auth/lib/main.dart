@@ -181,5 +181,8 @@ Future<void> _init(bool bool, {String? via}) async {
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
-  await LockScreenSettings.instance.init(Configuration.instance);
+  await LockScreenSettings.instance.init(
+    Configuration.instance,
+    hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+  );
 }
