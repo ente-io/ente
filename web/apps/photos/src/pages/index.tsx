@@ -47,13 +47,6 @@ const Page: React.FC = () => {
             // This ensures it survives the authentication flow
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
-                console.log("[Index] Storing join album context from URL");
-                console.log("[Index] Current URL received:", {
-                    fullURL: window.location.href,
-                    hash: window.location.hash,
-                    hashLength: window.location.hash.length,
-                    searchParams: window.location.search,
-                });
                 try {
                     // New simplified format: joinAlbum?=accessToken#collectionKeyHash
                     const accessToken = joinAlbumParam;
@@ -63,33 +56,21 @@ const Page: React.FC = () => {
                         // Import the necessary functions to convert the collection key
                         const { extractCollectionKeyFromShareURL } = await import("ente-gallery/services/share");
 
-                        console.log("[Index] Processing join album URL:", {
-                            accessToken: accessToken.substring(0, 10) + "...",
-                            collectionKeyHash: collectionKeyHash.substring(0, 10) + "...",
-                            hashEndsWithEquals: collectionKeyHash.endsWith("="),
-                            fullHash: collectionKeyHash,
-                        });
-
                         // Convert the hash to base64 for API calls
                         const tempURL = new URL(window.location.href);
                         tempURL.hash = collectionKeyHash;
                         const collectionKey = await extractCollectionKeyFromShareURL(tempURL);
 
-                        console.log("[Index] Converted hash to collection key:", {
-                            collectionKey: collectionKey.substring(0, 10) + "...",
-                            collectionKeyEndsWithEquals: collectionKey.endsWith("="),
-                        });
-
-                        // For now, we don't have the collection ID, so we'll use a placeholder
-                        // The actual collection ID will be fetched when we pull the collection
+                        // For now, we don't have the collection ID or name, so we'll use placeholders
+                        // The actual collection ID and name will be fetched when we pull the collection
                         const context = {
                             accessToken,
                             collectionKey,  // Base64 for API calls
                             collectionKeyHash,  // Original hash from URL
                             collectionID: 0, // Will be updated when collection is fetched
+                            collectionName: undefined, // Will be updated when collection is fetched
                         };
                         localStorage.setItem("ente_join_album_context", JSON.stringify(context));
-                        console.log("[Index] Join album context stored successfully with original hash");
                     }
                 } catch (error) {
                     console.error("[Index] Failed to store join album context:", error);
@@ -120,7 +101,6 @@ const Page: React.FC = () => {
                     (await savedAuthToken())
                 ) {
                     // Context is now stored in localStorage, so we can just redirect to gallery
-                    console.log("[Index] User already authenticated, redirecting to gallery");
                     await router.push("/gallery");
                 } else if (savedPartialLocalUser()?.email) {
                     await router.push("/verify");

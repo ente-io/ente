@@ -361,11 +361,9 @@ const Page: React.FC = () => {
             dispatch({ type: "showAll" });
 
             // Check for pending album join BEFORE fetching data
-            console.log("[Gallery] Checking for pending album join");
             let joinedAlbumInfo: { id: number; name: string } | null = null;
 
             if (hasPendingAlbumToJoin()) {
-                console.log("[Gallery] Found pending album join, processing...");
                 try {
                     // Get the album name before processing (as processing clears the context)
                     const context = getJoinAlbumContext();
@@ -373,7 +371,6 @@ const Page: React.FC = () => {
 
                     const joinedCollectionId = await processPendingAlbumJoin();
                     if (joinedCollectionId) {
-                        console.log("[Gallery] Album joined successfully, collection ID:", joinedCollectionId);
                         // Store the info to show toast after data is loaded
                         joinedAlbumInfo = {
                             id: joinedCollectionId,
@@ -382,14 +379,11 @@ const Page: React.FC = () => {
                     }
                 } catch (error) {
                     log.error("Failed to join album", error);
-                    console.error("[Gallery] Failed to join album:", error);
                     showMiniDialog({
                         title: t("error"),
                         message: t("album_join_failed") + ": " + (error as Error).message,
                     });
                 }
-            } else {
-                console.log("[Gallery] No pending album join");
             }
 
             // Fetch data from remote (this will include the newly joined album if any)
@@ -397,7 +391,6 @@ const Page: React.FC = () => {
 
             // Now that data is loaded, show the toast if we joined an album
             if (joinedAlbumInfo) {
-                console.log("[Gallery] Showing joined album toast after data load");
                 setAlbumJoinedToast({
                     open: true,
                     albumId: joinedAlbumInfo.id,
