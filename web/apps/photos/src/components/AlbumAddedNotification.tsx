@@ -74,8 +74,8 @@ export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
                             {onArrowClick && (
                                 <FilledIconButton
                                     onClick={() => {
-                                        onArrowClick();
                                         onClose();
+                                        onArrowClick();
                                     }}
                                 >
                                     <ArrowForwardIcon />

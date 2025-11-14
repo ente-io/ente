@@ -843,10 +843,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         if (!files.length) {
             // If there are no more files left, close the viewer.
             handleClose();
-        } else {
+        } else if (open && activeAnnotatedFile) {
+            // Only refresh if the viewer is still open and we have an active file.
+            // This prevents race conditions when navigating away (e.g., when clicking
+            // the navigate button in AlbumAddedNotification while the viewer is open).
             psRef.current?.refreshSlideOnFilesUpdateIfNeeded();
         }
-    }, [handleClose, files]);
+    }, [handleClose, files, open, activeAnnotatedFile]);
 
     useEffect(() => {
         // This effect might get triggered when the none of the files that were
