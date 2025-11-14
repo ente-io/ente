@@ -38,6 +38,13 @@ export const storeJoinAlbumContext = (
         timestamp: Date.now(),
     };
 
+    console.log("[Join Album] Storing context:", {
+        collectionID: context.collectionID,
+        collectionName: context.collectionName,
+        hasAccessToken: !!context.accessToken,
+        hasCollectionKey: !!context.collectionKey,
+    });
+
     localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(context));
 };
 
@@ -46,14 +53,24 @@ export const storeJoinAlbumContext = (
  */
 export const getJoinAlbumContext = (): JoinAlbumContext | null => {
     const stored = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
+    console.log("[Join Album] Retrieving context, stored:", !!stored);
+
     if (!stored) return null;
 
     try {
         const context = JSON.parse(stored) as JoinAlbumContext;
         // Check if context is still valid (24 hours)
         const isValid = Date.now() - context.timestamp < 24 * 60 * 60 * 1000;
+
+        console.log("[Join Album] Context retrieved:", {
+            collectionID: context.collectionID,
+            isValid,
+            age: Date.now() - context.timestamp,
+        });
+
         return isValid ? context : null;
-    } catch {
+    } catch (error) {
+        console.error("[Join Album] Failed to parse context:", error);
         return null;
     }
 };
@@ -82,8 +99,16 @@ export const joinPublicAlbum = async (
     encryptedKey: string,
 ): Promise<void> => {
     const authHeaders = await authenticatedRequestHeaders();
+    const url = await apiURL("/collections/join-link");
 
-    const response = await fetch(await apiURL("/collections/join-link"), {
+    console.log("[Join Album] Making API request:", {
+        url,
+        collectionID,
+        hasAccessToken: !!accessToken,
+        hasEncryptedKey: !!encryptedKey,
+    });
+
+    const response = await fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -93,8 +118,11 @@ export const joinPublicAlbum = async (
         body: JSON.stringify({ collectionID, encryptedKey }),
     });
 
+    console.log("[Join Album] API response status:", response.status);
+
     if (!response.ok) {
         const errorData = (await response.json()) as { message?: string };
+        console.error("[Join Album] API error:", errorData);
         throw new Error(errorData.message ?? "Failed to join album");
     }
 };
@@ -106,40 +134,54 @@ export const joinPublicAlbum = async (
  * @returns true if an album was successfully joined, false otherwise
  */
 export const processPendingAlbumJoin = async (): Promise<boolean> => {
+    console.log("[Join Album] Processing pending album join");
     const context = getJoinAlbumContext();
-    if (!context) return false;
+
+    if (!context) {
+        console.log("[Join Album] No pending context found");
+        return false;
+    }
+
+    console.log("[Join Album] Found pending join for collection:", context.collectionID);
 
     try {
         // Fetch user's key attributes to get public key
+        console.log("[Join Album] Fetching user key attributes");
         const authHeaders = await authenticatedRequestHeaders();
         const response = await fetch(await apiURL("/users/key-attributes"), {
             headers: authHeaders,
         });
 
         if (!response.ok) {
+            console.error("[Join Album] Failed to fetch key attributes, status:", response.status);
             throw new Error("Failed to fetch user key attributes");
         }
 
         const keyAttributes = (await response.json()) as { publicKey: string };
         const publicKey = keyAttributes.publicKey;
+        console.log("[Join Album] Got public key, encrypting collection key");
 
         // Encrypt the collection key with user's public key
         // The collection key is already base64 encoded, and boxSeal expects base64
         const encryptedKey = await boxSeal(context.collectionKey, publicKey);
+        console.log("[Join Album] Collection key encrypted");
 
         // Join the album
+        console.log("[Join Album] Calling join API for collection:", context.collectionID);
         await joinPublicAlbum(
             context.accessToken,
             context.collectionID,
             encryptedKey,
         );
 
+        console.log("[Join Album] Successfully joined album!");
+
         // Clear the context after successful join
         clearJoinAlbumContext();
 
         return true;
     } catch (error) {
-        console.error("Failed to join album:", error);
+        console.error("[Join Album] Failed to join album:", error);
         // Don't clear context on error - let user retry
         throw error;
     }

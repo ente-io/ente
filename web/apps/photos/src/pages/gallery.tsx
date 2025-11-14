@@ -345,9 +345,12 @@ const Page: React.FC = () => {
             await remotePull();
 
             // Check for pending album join after authentication
+            console.log("[Gallery] Checking for pending album join");
             if (hasPendingAlbumToJoin()) {
+                console.log("[Gallery] Found pending album join, processing...");
                 try {
                     await processPendingAlbumJoin();
+                    console.log("[Gallery] Album joined, refreshing collections");
                     // Refresh collections after joining
                     await remotePull({ silent: true });
                     showMiniDialog({
@@ -356,11 +359,14 @@ const Page: React.FC = () => {
                     });
                 } catch (error) {
                     log.error("Failed to join album", error);
+                    console.error("[Gallery] Failed to join album:", error);
                     showMiniDialog({
                         title: t("error"),
                         message: t("album_join_failed"),
                     });
                 }
+            } else {
+                console.log("[Gallery] No pending album join");
             }
 
             // Clear the first load message if needed.
