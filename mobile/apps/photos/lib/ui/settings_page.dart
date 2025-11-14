@@ -169,7 +169,7 @@ class SettingsPage extends StatelessWidget {
       const AboutSectionWidget(),
     ]);
 
-    if (hasLoggedIn && flagService.internalUser) {
+    if (hasLoggedIn && flagService.isInternalUserOrDebug) {
       contents.addAll([sectionSpacing, const DebugSectionWidget()]);
       contents.addAll([sectionSpacing, const MLDebugSectionWidget()]);
     }

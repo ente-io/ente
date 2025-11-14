@@ -45,6 +45,7 @@ class LocalSettings {
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
   static const kEnableDatabaseLogging = "enable_db_logging";
+  static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
 
@@ -236,6 +237,13 @@ class LocalSettings {
 
   Future<void> setEnableDatabaseLogging(bool value) async {
     await _prefs.setBool(kEnableDatabaseLogging, value);
+  }
+
+  bool get isInternalUserDisabled =>
+      _prefs.getBool(_kInternalUserDisabled) ?? false;
+
+  Future<void> setInternalUserDisabled(bool value) async {
+    await _prefs.setBool(_kInternalUserDisabled, value);
   }
 
   int wrapped2025ResumeIndex() {
