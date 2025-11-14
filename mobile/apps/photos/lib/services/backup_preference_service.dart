@@ -11,8 +11,7 @@ class BackupPreferenceService {
 
   Future<void> autoSelectAllFoldersIfEligible() async {
     final config = Configuration.instance;
-    if (config.hasManualFolderSelection() ||
-        config.hasDismissedFolderSelection()) {
+    if (config.hasManualFolderSelection()) {
       return;
     }
     await _setAllFoldersShouldBackup(true);

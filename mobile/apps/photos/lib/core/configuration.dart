@@ -66,8 +66,6 @@ class Configuration {
   static const keyOnboardingPermissionSkipped = "onboarding_permission_skipped";
   static const keyHasManualBackupFolderSelection =
       "has_manual_backup_folder_selection";
-  static const keyHasDismissedFolderSelection =
-      "has_dismissed_backup_folder_selection";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
@@ -742,14 +740,6 @@ class Configuration {
 
   bool hasManualFolderSelection() {
     return _preferences.getBool(keyHasManualBackupFolderSelection) ?? false;
-  }
-
-  Future<void> setHasDismissedFolderSelection(bool value) async {
-    await _preferences.setBool(keyHasDismissedFolderSelection, value);
-  }
-
-  bool hasDismissedFolderSelection() {
-    return _preferences.getBool(keyHasDismissedFolderSelection) ?? false;
   }
 
   @visibleForTesting

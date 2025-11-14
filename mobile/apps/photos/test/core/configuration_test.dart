@@ -37,18 +37,10 @@ void main() {
 
   test("manual folder selection flags persist", () async {
     expect(Configuration.instance.hasManualFolderSelection(), isFalse);
-    expect(Configuration.instance.hasDismissedFolderSelection(), isFalse);
-
     await Configuration.instance.setHasManualFolderSelection(true);
-    await Configuration.instance.setHasDismissedFolderSelection(true);
-
     expect(Configuration.instance.hasManualFolderSelection(), isTrue);
-    expect(Configuration.instance.hasDismissedFolderSelection(), isTrue);
 
     await Configuration.instance.setHasManualFolderSelection(false);
-    await Configuration.instance.setHasDismissedFolderSelection(false);
-
     expect(Configuration.instance.hasManualFolderSelection(), isFalse);
-    expect(Configuration.instance.hasDismissedFolderSelection(), isFalse);
   });
 }
