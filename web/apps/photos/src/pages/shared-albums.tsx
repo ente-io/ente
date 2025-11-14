@@ -558,22 +558,31 @@ export default function PublicCollectionGallery() {
                                 <EnteLogoLink href="https://ente.io">
                                     <EnteLogo height={15} />
                                 </EnteLogoLink>
-                                {onAddPhotos ? (
-                                    <AddPhotosButton onClick={onAddPhotos} />
-                                ) : (
-                                    <GoToEnte
-                                        enableJoin={
-                                            publicCollection?.publicURLs[0]
-                                                ?.enableJoin
-                                        }
-                                        publicCollection={publicCollection}
-                                        accessToken={
-                                            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                                            credentials.current?.accessToken
-                                        }
-                                        collectionKey={collectionKey.current}
-                                    />
-                                )}
+                                <Stack direction="row" spacing={2}>
+                                    {onAddPhotos && (
+                                        <AddPhotosButton
+                                            onClick={onAddPhotos}
+                                        />
+                                    )}
+                                    {!onAddPhotos ||
+                                    publicCollection?.publicURLs[0]
+                                        ?.enableJoin ? (
+                                        <GoToEnte
+                                            enableJoin={
+                                                publicCollection?.publicURLs[0]
+                                                    ?.enableJoin
+                                            }
+                                            publicCollection={publicCollection}
+                                            accessToken={
+                                                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                                                credentials.current?.accessToken
+                                            }
+                                            collectionKey={
+                                                collectionKey.current
+                                            }
+                                        />
+                                    ) : null}
+                                </Stack>
                             </SpacedRow>
                         )}
                     </NavbarBase>
