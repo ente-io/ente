@@ -3,9 +3,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloseIcon from "@mui/icons-material/Close";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Link, Stack, Typography } from "@mui/material";
+import { Box, DialogTitle, IconButton, Link, Paper, Snackbar, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -28,6 +30,7 @@ import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
+import { FilledIconButton } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
@@ -151,7 +154,7 @@ import {
  */
 const Page: React.FC = () => {
     const { logout, showMiniDialog, onGenericError } = useBaseContext();
-    const { showLoadingBar, hideLoadingBar, watchFolderView, showNotification } =
+    const { showLoadingBar, hideLoadingBar, watchFolderView } =
         usePhotosAppContext();
 
     const isOffline = useIsOffline();
@@ -170,6 +173,11 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [albumJoinedToast, setAlbumJoinedToast] = useState<{
+        open: boolean;
+        albumId?: number;
+        albumName?: string;
+    }>({ open: false });
 
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
@@ -367,16 +375,11 @@ const Page: React.FC = () => {
                         // Add a small delay to ensure backend has processed the join
                         await new Promise(resolve => setTimeout(resolve, 500));
 
-                        // Show notification toast
-                        showNotification({
-                            color: "primary",
-                            title: t("joined_album"),
-                            caption: albumName.length > 16
-                                ? albumName.substring(0, 16) + "..."
-                                : albumName,
-                            onClick: () => {
-                                dispatch({ type: "showCollectionSummary", collectionSummaryID: joinedCollectionId });
-                            },
+                        // Show custom toast
+                        setAlbumJoinedToast({
+                            open: true,
+                            albumId: joinedCollectionId,
+                            albumName: albumName,
                         });
                     }
                 } catch (error) {
@@ -1268,6 +1271,66 @@ const Page: React.FC = () => {
                 submitButtonTitle={t("create")}
                 onSubmit={handleAlbumNameSubmit}
             />
+            <Snackbar
+                open={albumJoinedToast.open}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+                <Paper sx={{ width: "min(360px, 100svw)" }}>
+                    <DialogTitle>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Box>
+                                <Typography variant="h3">
+                                    {t("joined_album")}
+                                </Typography>
+                                <Typography
+                                    variant="body"
+                                    sx={{
+                                        fontWeight: "regular",
+                                        color: "text.muted",
+                                        marginTop: "4px",
+                                    }}
+                                >
+                                    {albumJoinedToast.albumName &&
+                                    albumJoinedToast.albumName.length > 16
+                                        ? albumJoinedToast.albumName.substring(
+                                              0,
+                                              16,
+                                          ) + "..."
+                                        : albumJoinedToast.albumName}
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" sx={{ gap: 1 }}>
+                                <FilledIconButton
+                                    onClick={() => {
+                                        if (albumJoinedToast.albumId) {
+                                            dispatch({
+                                                type: "showCollectionSummary",
+                                                collectionSummaryID: albumJoinedToast.albumId,
+                                            });
+                                        }
+                                        setAlbumJoinedToast({ open: false });
+                                    }}
+                                >
+                                    <ArrowForwardIcon />
+                                </FilledIconButton>
+                                <FilledIconButton
+                                    onClick={() =>
+                                        setAlbumJoinedToast({ open: false })
+                                    }
+                                >
+                                    <CloseIcon />
+                                </FilledIconButton>
+                            </Stack>
+                        </Stack>
+                    </DialogTitle>
+                </Paper>
+            </Snackbar>
         </FullScreenDropZone>
     );
 };
