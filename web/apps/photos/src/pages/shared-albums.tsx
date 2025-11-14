@@ -728,18 +728,26 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         );
     }
 
-    // Get the signup URL - redirect to web.ente.io or localhost:3000
-    const getSignupURL = () => {
-        const isDevelopment = window.location.hostname === "localhost";
-        if (isDevelopment) {
-            return "http://localhost:3000";
+    // Get the appropriate URL for signup/install
+    const getActionURL = () => {
+        if (isTouchscreen) {
+            // For mobile devices, redirect to app stores
+            const userAgent = navigator.userAgent || navigator.vendor;
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+
+            if (isIOS) {
+                return "https://apps.apple.com/app/id1542026904";
+            } else {
+                // Android or other mobile platforms
+                return "https://play.google.com/store/apps/details?id=io.ente.photos";
+            }
         }
-        // In production, replace "albums." with "web." in the origin
-        return window.location.origin.replace("albums.", "web.");
+        // For desktop, always redirect to web.ente.io
+        return "https://web.ente.io";
     };
 
     return (
-        <Button color="accent" href={getSignupURL()}>
+        <Button color="accent" href={getActionURL()}>
             {isTouchscreen ? t("install") : t("sign_up")}
         </Button>
     );
