@@ -47,7 +47,7 @@ import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName, type ItemVisibility } from "ente-media/file-metadata";
+import { type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -245,7 +245,7 @@ const Page: React.FC = () => {
         open: boolean;
         phase: AddToAlbumPhase;
         albumId?: number;
-        fileName?: string;
+        albumName?: string;
     }>({ open: false, phase: "processing" });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
@@ -744,14 +744,12 @@ const Page: React.FC = () => {
                     );
 
                     await remotePull({ silent: true });
-                    //Show custom toast with file name and navigation
+                    // Show custom toast with album name and navigation
                     setAddToAlbumProgress({
                         open: true,
                         phase: "done",
                         albumId: collection.id,
-                        fileName: fileFileName(
-                            pendingSingleFileAdd.current.file,
-                        ),
+                        albumName: collection.name,
                     });
                 }
 
@@ -1056,12 +1054,12 @@ const Page: React.FC = () => {
                         sourceCollectionSummaryID,
                     );
                     await remotePull({ silent: true });
-                    // Show custom toast with file name and navigation
+                    // Show custom toast with album name and navigation
                     setAddToAlbumProgress({
                         open: true,
                         phase: "done",
                         albumId: collection.id,
-                        fileName: fileFileName(file),
+                        albumName: collection.name,
                     });
                 } catch (e) {
                     onGenericError(e);
@@ -1347,7 +1345,7 @@ const Page: React.FC = () => {
                     setAddToAlbumProgress((s) => ({ ...s, open: false }))
                 }
                 phase={addToAlbumProgress.phase}
-                fileName={addToAlbumProgress.fileName}
+                albumName={addToAlbumProgress.albumName}
                 onArrowClick={() => {
                     closeFileViewerRef.current?.();
                     if (addToAlbumProgress.albumId !== undefined) {

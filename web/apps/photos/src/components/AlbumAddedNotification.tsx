@@ -18,8 +18,8 @@ interface AlbumAddedNotificationProps {
     open: boolean;
     onClose: () => void;
     phase: AddToAlbumPhase;
-    /** The file name to show as subtitle (truncated). */
-    fileName?: string;
+    /** The destination album name to show as subtitle (truncated). */
+    albumName?: string;
     /** Called when the arrow CTA is clicked to navigate to the album. */
     onArrowClick?: () => void;
 }
@@ -32,7 +32,7 @@ export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
     open,
     onClose,
     phase,
-    fileName,
+    albumName,
     onArrowClick,
 }) => {
     // Only show the toast once the operation completes successfully.
@@ -57,7 +57,7 @@ export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
                                 {/* Intentionally using a simple title for clarity */}
                                 {t("added_to_album")}
                             </Typography>
-                            {fileName && (
+                            {albumName && (
                                 <Typography
                                     variant="body"
                                     sx={{
@@ -66,7 +66,7 @@ export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
                                         marginTop: "4px",
                                     }}
                                 >
-                                    {truncate(fileName, 15)}
+                                    {truncate(albumName, 20)}
                                 </Typography>
                             )}
                         </Box>
