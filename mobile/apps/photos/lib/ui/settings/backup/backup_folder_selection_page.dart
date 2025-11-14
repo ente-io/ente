@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:animated_list_plus/animated_list_plus.dart';
@@ -5,13 +6,19 @@ import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/generated/l10n.dart';
+import 'package:photos/l10n/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -39,33 +46,99 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<DeviceCollection>? _deviceCollections;
   Map<String, int>? _pathIDToItemCount;
+  StreamSubscription<SyncStatusUpdate>? _syncSubscription;
 
   @override
   void initState() {
-    FilesDB.instance
-        .getDeviceCollections(includeCoverThumbnail: true)
-        .then((files) async {
-      _pathIDToItemCount =
-          await FilesDB.instance.getDevicePathIDToImportedFileCount();
-      setState(() {
-        _deviceCollections = files;
-        _deviceCollections!.sort((first, second) {
-          return first.name.toLowerCase().compareTo(second.name.toLowerCase());
-        });
-        for (final file in _deviceCollections!) {
-          _allDevicePathIDs.add(file.id);
-          if (file.shouldBackup) {
-            _selectedDevicePathIDs.add(file.id);
-          }
-        }
-        if (widget.isOnboarding) {
-          _selectedDevicePathIDs.addAll(_allDevicePathIDs);
-        }
-        _selectedDevicePathIDs
-            .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
-      });
-    });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDeviceCollections();
+    });
+  }
+
+  @override
+  void dispose() {
+    _syncSubscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadDeviceCollections() async {
+    final hasPermission = await _ensurePermissions();
+    if (!hasPermission) {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+      _syncSubscription ??=
+          Bus.instance.on<SyncStatusUpdate>().listen((event) async {
+        if (!mounted) {
+          return;
+        }
+        if (event.status == SyncStatus.completedFirstGalleryImport) {
+          await _fetchDeviceCollections();
+        }
+      });
+      LocalSyncService.instance.sync().ignore();
+      return;
+    }
+    await _fetchDeviceCollections();
+  }
+
+  Future<void> _fetchDeviceCollections() async {
+    await _syncSubscription?.cancel();
+    _syncSubscription = null;
+    final files = await FilesDB.instance
+        .getDeviceCollections(includeCoverThumbnail: true);
+    final pathCounts =
+        await FilesDB.instance.getDevicePathIDToImportedFileCount();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _pathIDToItemCount = pathCounts;
+      _deviceCollections = files;
+      _deviceCollections!.sort((first, second) {
+        return first.name.toLowerCase().compareTo(second.name.toLowerCase());
+      });
+      for (final file in _deviceCollections!) {
+        _allDevicePathIDs.add(file.id);
+        if (file.shouldBackup) {
+          _selectedDevicePathIDs.add(file.id);
+        }
+      }
+      if (widget.isOnboarding) {
+        _selectedDevicePathIDs.addAll(_allDevicePathIDs);
+      }
+      _selectedDevicePathIDs
+          .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
+    });
+  }
+
+  Future<bool> _ensurePermissions() async {
+    if (permissionService.hasGrantedPermissions()) {
+      return true;
+    }
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      return true;
+    }
+    if (!mounted) {
+      return false;
+    }
+    await showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+    );
+    return false;
   }
 
   @override
@@ -189,7 +262,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           key: const ValueKey("skipBackupButton"),
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(false);
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 8),
@@ -233,7 +306,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
-      Navigator.of(context).pop();
+      await Configuration.instance.setHasManualFolderSelection(true);
+      await Configuration.instance.setHasDismissedFolderSelection(false);
+      if (context.mounted) {
+        Navigator.of(context).pop(true);
+      }
     } catch (e, s) {
       _logger.severe("Failed to updated backup folder", e, s);
       await dialog.hide();

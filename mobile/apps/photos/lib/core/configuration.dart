@@ -4,6 +4,7 @@ import "dart:io";
 
 import 'package:bip39/bip39.dart' as bip39;
 import "package:ente_crypto/ente_crypto.dart";
+import 'package:flutter/foundation.dart';
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -61,6 +62,12 @@ class Configuration {
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
+  static const keyBackupOnlyNewSinceEpoch = "backup_only_new_since_epoch";
+  static const keyOnboardingPermissionSkipped = "onboarding_permission_skipped";
+  static const keyHasManualBackupFolderSelection =
+      "has_manual_backup_folder_selection";
+  static const keyHasDismissedFolderSelection =
+      "has_dismissed_backup_folder_selection";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
@@ -702,6 +709,52 @@ class Configuration {
 
   Future<void> setSelectAllFoldersForBackup(bool value) async {
     await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
+  }
+
+  int? getOnlyNewSinceEpoch() {
+    return _preferences.getInt(keyBackupOnlyNewSinceEpoch);
+  }
+
+  bool isOnlyNewBackupEnabled() {
+    return _preferences.containsKey(keyBackupOnlyNewSinceEpoch);
+  }
+
+  Future<void> setOnlyNewSinceNow() async {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    await _preferences.setInt(keyBackupOnlyNewSinceEpoch, now);
+  }
+
+  Future<void> clearOnlyNewSince() async {
+    await _preferences.remove(keyBackupOnlyNewSinceEpoch);
+  }
+
+  Future<void> setOnboardingPermissionSkipped(bool v) async {
+    await _preferences.setBool(keyOnboardingPermissionSkipped, v);
+  }
+
+  bool hasOnboardingPermissionSkipped() {
+    return _preferences.getBool(keyOnboardingPermissionSkipped) ?? false;
+  }
+
+  Future<void> setHasManualFolderSelection(bool value) async {
+    await _preferences.setBool(keyHasManualBackupFolderSelection, value);
+  }
+
+  bool hasManualFolderSelection() {
+    return _preferences.getBool(keyHasManualBackupFolderSelection) ?? false;
+  }
+
+  Future<void> setHasDismissedFolderSelection(bool value) async {
+    await _preferences.setBool(keyHasDismissedFolderSelection, value);
+  }
+
+  bool hasDismissedFolderSelection() {
+    return _preferences.getBool(keyHasDismissedFolderSelection) ?? false;
+  }
+
+  @visibleForTesting
+  void overridePreferencesForTests(SharedPreferences preferences) {
+    _preferences = preferences;
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {

@@ -552,7 +552,11 @@ class RemoteSyncService {
   }
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
-    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
+    List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
+    originalFiles = filterFilesBasedOnOnlyNew(
+      originalFiles,
+      _config.getOnlyNewSinceEpoch(),
+    );
     if (originalFiles.isEmpty) {
       return originalFiles;
     }
@@ -589,6 +593,19 @@ class RemoteSyncService {
     _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
+  }
+
+  @visibleForTesting
+  List<EnteFile> filterFilesBasedOnOnlyNew(
+    List<EnteFile> files,
+    int? onlyNewSince,
+  ) {
+    if (onlyNewSince == null) {
+      return files;
+    }
+    return files
+        .where((file) => (file.creationTime ?? 0) >= onlyNewSince)
+        .toList();
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {

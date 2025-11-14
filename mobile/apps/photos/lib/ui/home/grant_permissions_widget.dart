@@ -1,6 +1,4 @@
 import "dart:async";
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
@@ -10,6 +8,8 @@ import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import 'package:photos/services/backup_preference_service.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -104,50 +104,117 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           right: 20,
           bottom: 16,
         ),
-        child: OutlinedButton(
-          key: const ValueKey("grantPermissionButton"),
-          child: Text(AppLocalizations.of(context).continueLabel),
-          onPressed: () async {
-            try {
-              final state =
-                  await permissionService.requestPhotoMangerPermissions();
-              _logger.info("Permission state: $state");
-              if (state == PermissionState.authorized ||
-                  state == PermissionState.limited) {
-                await onPermissionGranted(state);
-              } else if (state == PermissionState.denied) {
-                await showChoiceDialog(
-                  context,
-                  title: context.l10n.allowPermTitle,
-                  body: context.l10n.allowPermBody,
-                  firstButtonLabel: context.l10n.openSettings,
-                  firstButtonOnTap: () async {
-                    if (Platform.isIOS) {
-                      await PhotoManager.openSetting();
-                    }
-                  },
-                );
-              } else {
-                throw Exception("Unknown permission state: $state");
-              }
-            } catch (e) {
-              _logger.severe(
-                "Failed to request permission: ${e.toString()}",
-                e,
-              );
-              showGenericErrorDialog(context: context, error: e).ignore();
-            }
-          },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                key: const ValueKey("onlyNewPhotosButton"),
+                onPressed: _onTapOnlyNewPhotos,
+                child: Text(context.l10n.backupOnlyNewPhotos),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                key: const ValueKey("selectFoldersButton"),
+                onPressed: _onTapSelectFolders,
+                child: Text(context.l10n.selectFoldersToBackup),
+              ),
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              key: const ValueKey("skipForNowButton"),
+              behavior: HitTestBehavior.opaque,
+              onTap: _onTapSkip,
+              child: Text(
+                context.l10n.skipForNow,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall!
+                    .copyWith(decoration: TextDecoration.underline),
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Future<void> onPermissionGranted(PermissionState state) async {
+  Future<void> _onTapOnlyNewPhotos() async {
+    try {
+      final state = await permissionService.requestPhotoMangerPermissions();
+      _logger.info("Permission state: $state");
+      if (state == PermissionState.authorized ||
+          state == PermissionState.limited) {
+        await Configuration.instance.setOnlyNewSinceNow();
+        await BackupPreferenceService.instance.autoSelectAllFoldersIfEligible();
+        unawaited(LocalSyncService.instance.sync());
+        await onPermissionGranted(
+          state,
+          shouldMarkLimitedFolders: false,
+        );
+      } else {
+        await _showPermissionDeniedDialog();
+      }
+    } catch (e) {
+      _logger.severe(
+        "Failed to request permission: ${e.toString()}",
+        e,
+      );
+      showGenericErrorDialog(context: context, error: e).ignore();
+    }
+  }
+
+  Future<void> _onTapSelectFolders() async {
+    try {
+      final state = await permissionService.requestPhotoMangerPermissions();
+      _logger.info("Permission state: $state");
+      if (state == PermissionState.authorized ||
+          state == PermissionState.limited) {
+        await onPermissionGranted(state);
+      } else {
+        await _showPermissionDeniedDialog();
+      }
+    } catch (e) {
+      _logger.severe(
+        "Failed to request permission: ${e.toString()}",
+        e,
+      );
+      showGenericErrorDialog(context: context, error: e).ignore();
+    }
+  }
+
+  Future<void> _onTapSkip() async {
+    await Configuration.instance.setOnboardingPermissionSkipped(true);
+    if (mounted) {
+      setState(() {});
+    }
+    Bus.instance.fire(PermissionGrantedEvent());
+  }
+
+  Future<void> _showPermissionDeniedDialog() async {
+    await showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+    );
+  }
+
+  Future<void> onPermissionGranted(
+    PermissionState state, {
+    bool shouldMarkLimitedFolders = true,
+  }) async {
     _logger.info("Permission granted " + state.toString());
     await permissionService.onUpdatePermission(state);
-    if (state == PermissionState.limited) {
+    if (shouldMarkLimitedFolders && state == PermissionState.limited) {
       // when limited permission is granted, by default mark all folders for
       // backup
       await Configuration.instance.setSelectAllFoldersForBackup(true);
