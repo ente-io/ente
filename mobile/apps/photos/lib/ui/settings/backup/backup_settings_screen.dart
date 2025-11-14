@@ -5,6 +5,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/backup_preference_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -121,9 +122,11 @@ class BackupSettingsScreen extends StatelessWidget {
                                         .setOnlyNewSinceNow();
                                     await BackupPreferenceService.instance
                                         .autoSelectAllFoldersIfEligible();
+                                    SyncService.instance.sync().ignore();
                                   } else {
                                     await Configuration.instance
                                         .clearOnlyNewSince();
+                                    SyncService.instance.sync().ignore();
                                   }
                                 },
                               ),
