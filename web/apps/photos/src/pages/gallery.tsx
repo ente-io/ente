@@ -179,7 +179,6 @@ const Page: React.FC = () => {
     const pendingSingleFileAdd = useRef<
         { file: EnteFile; sourceCollectionSummaryID?: number } | undefined
     >(undefined);
-    const closeFileViewerRef = useRef<(() => void) | undefined>(undefined);
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
      */
@@ -1014,10 +1013,6 @@ const Page: React.FC = () => {
         [],
     );
 
-    const registerCloseFileViewer = useCallback((closer?: () => void) => {
-        closeFileViewerRef.current = closer;
-    }, []);
-
     const handleCloseCollectionSelector = useCallback(
         () => setOpenCollectionSelector(false),
         [],
@@ -1317,7 +1312,6 @@ const Page: React.FC = () => {
                     onSelectCollection={handleSelectCollection}
                     onSelectPerson={handleSelectPerson}
                     onAddFileToCollection={handleAddSingleFileToCollection}
-                    onRegisterCloseFileViewer={registerCloseFileViewer}
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
@@ -1346,12 +1340,6 @@ const Page: React.FC = () => {
                 }
                 phase={addToAlbumProgress.phase}
                 albumName={addToAlbumProgress.albumName}
-                onArrowClick={() => {
-                    closeFileViewerRef.current?.();
-                    if (addToAlbumProgress.albumId !== undefined) {
-                        handleSelectCollection(addToAlbumProgress.albumId);
-                    }
-                }}
             />
         </FullScreenDropZone>
     );

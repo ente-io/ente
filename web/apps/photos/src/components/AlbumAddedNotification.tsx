@@ -1,4 +1,3 @@
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import {
     Box,
@@ -20,20 +19,16 @@ interface AlbumAddedNotificationProps {
     phase: AddToAlbumPhase;
     /** The destination album name to show as subtitle (truncated). */
     albumName?: string;
-    /** Called when the arrow CTA is clicked to navigate to the album. */
-    onArrowClick?: () => void;
 }
 
 /**
  * Success notification shown after files are added to an album.
- * Provides navigation to the album via an arrow button.
  */
 export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
     open,
     onClose,
     phase,
     albumName,
-    onArrowClick,
 }) => {
     // Only show the toast once the operation completes successfully.
     const shouldShow = open && phase === "done";
@@ -71,16 +66,6 @@ export const AlbumAddedNotification: React.FC<AlbumAddedNotificationProps> = ({
                             )}
                         </Box>
                         <Stack direction="row" sx={{ gap: 1 }}>
-                            {onArrowClick && (
-                                <FilledIconButton
-                                    onClick={() => {
-                                        onClose();
-                                        onArrowClick();
-                                    }}
-                                >
-                                    <ArrowForwardIcon />
-                                </FilledIconButton>
-                            )}
                             <FilledIconButton
                                 onClick={onClose}
                                 aria-label={t("close")}
