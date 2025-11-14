@@ -31,6 +31,15 @@ export const storeJoinAlbumContext = (
     collectionKeyHash: string,
     collection: Collection,
 ) => {
+    console.log("[Join Album] storeJoinAlbumContext called with:", {
+        collectionKey: collectionKey.substring(0, 10) + "...",
+        collectionKeyHash: collectionKeyHash.substring(0, 10) + "...",
+        collectionKeyEndsWithEquals: collectionKey.endsWith("="),
+        collectionKeyHashEndsWithEquals: collectionKeyHash.endsWith("="),
+        fullCollectionKey: collectionKey,
+        fullCollectionKeyHash: collectionKeyHash,
+    });
+
     // Validate that we're not accidentally using the base64 key as the hash
     if (collectionKey === collectionKeyHash) {
         console.error("[Join Album] ERROR: collectionKey and collectionKeyHash are the same! This is likely a bug.");
@@ -46,6 +55,10 @@ export const storeJoinAlbumContext = (
         const temp = collectionKey;
         collectionKey = collectionKeyHash;
         collectionKeyHash = temp;
+        console.log("[Join Album] After swap:", {
+            collectionKey: collectionKey.substring(0, 10) + "...",
+            collectionKeyHash: collectionKeyHash.substring(0, 10) + "...",
+        });
     }
 
     const context: JoinAlbumContext = {

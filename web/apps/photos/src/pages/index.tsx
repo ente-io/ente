@@ -57,10 +57,22 @@ const Page: React.FC = () => {
                         // Import the necessary functions to convert the collection key
                         const { extractCollectionKeyFromShareURL } = await import("ente-gallery/services/share");
 
+                        console.log("[Index] Processing join album URL:", {
+                            accessToken: accessToken.substring(0, 10) + "...",
+                            collectionKeyHash: collectionKeyHash.substring(0, 10) + "...",
+                            hashEndsWithEquals: collectionKeyHash.endsWith("="),
+                            fullHash: collectionKeyHash,
+                        });
+
                         // Convert the hash to base64 for API calls
                         const tempURL = new URL(window.location.href);
                         tempURL.hash = collectionKeyHash;
                         const collectionKey = await extractCollectionKeyFromShareURL(tempURL);
+
+                        console.log("[Index] Converted hash to collection key:", {
+                            collectionKey: collectionKey.substring(0, 10) + "...",
+                            collectionKeyEndsWithEquals: collectionKey.endsWith("="),
+                        });
 
                         // For now, we don't have the collection ID, so we'll use a placeholder
                         // The actual collection ID will be fetched when we pull the collection
@@ -71,7 +83,7 @@ const Page: React.FC = () => {
                             collectionID: 0, // Will be updated when collection is fetched
                         };
                         localStorage.setItem("ente_join_album_context", JSON.stringify(context));
-                        console.log("[Index] Join album context stored successfully");
+                        console.log("[Index] Join album context stored successfully with original hash");
                     }
                 } catch (error) {
                     console.error("[Index] Failed to store join album context:", error);
