@@ -78,6 +78,10 @@ import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import {
+    getAuthRedirectURL,
+    storeJoinAlbumContext,
+} from "ente-new/albums/services/join-album";
+import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
     savedLastPublicCollectionReferralCode,
@@ -554,11 +558,31 @@ export default function PublicCollectionGallery() {
                                 <EnteLogoLink href="https://ente.io">
                                     <EnteLogo height={15} />
                                 </EnteLogoLink>
-                                {onAddPhotos ? (
-                                    <AddPhotosButton onClick={onAddPhotos} />
-                                ) : (
-                                    <GoToEnte />
-                                )}
+                                <Stack direction="row" spacing={2}>
+                                    {onAddPhotos && (
+                                        <AddPhotosButton
+                                            onClick={onAddPhotos}
+                                        />
+                                    )}
+                                    {!onAddPhotos ||
+                                    publicCollection?.publicURLs[0]
+                                        ?.enableJoin ? (
+                                        <GoToEnte
+                                            enableJoin={
+                                                publicCollection?.publicURLs[0]
+                                                    ?.enableJoin
+                                            }
+                                            publicCollection={publicCollection}
+                                            accessToken={
+                                                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                                                credentials.current?.accessToken
+                                            }
+                                            collectionKey={
+                                                collectionKey.current
+                                            }
+                                        />
+                                    ) : null}
+                                </Stack>
                             </SpacedRow>
                         )}
                     </NavbarBase>
@@ -654,12 +678,77 @@ const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     );
 };
 
-const GoToEnte: React.FC = () => {
+interface GoToEnteProps {
+    /** If true, shows "Join Album" button instead of "Sign Up" */
+    enableJoin?: boolean;
+    /** Collection to join (required if enableJoin is true) */
+    publicCollection?: Collection;
+    /** Access token for the public link */
+    accessToken?: string;
+    /** Collection key from URL (base64 encoded) */
+    collectionKey?: string;
+}
+
+const GoToEnte: React.FC<GoToEnteProps> = ({
+    enableJoin,
+    publicCollection,
+    accessToken,
+    collectionKey,
+}) => {
     // Touchscreen devices are overwhemingly likely to be Android or iOS.
     const isTouchscreen = useIsTouchscreen();
 
+    const handleJoinAlbum = () => {
+        if (!publicCollection || !accessToken || !collectionKey) {
+            log.error("Missing required data for join album");
+            return;
+        }
+
+        // Get the original hash directly from the current URL
+        const currentHash = window.location.hash.slice(1);
+
+        // Store the album context before redirecting to auth
+        storeJoinAlbumContext(
+            accessToken,
+            collectionKey,
+            currentHash,
+            publicCollection,
+        );
+
+        // Redirect to authentication page with join album flag
+        const redirectURL = getAuthRedirectURL();
+        window.location.href = redirectURL;
+    };
+
+    if (enableJoin) {
+        return (
+            <Button color="accent" onClick={handleJoinAlbum}>
+                {t("join_album")}
+            </Button>
+        );
+    }
+
+    // Get the appropriate URL for signup/install
+    const getActionURL = () => {
+        if (isTouchscreen) {
+            // For mobile devices, redirect to app stores
+            const userAgent = navigator.userAgent || navigator.vendor;
+            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
+            const isAndroid = /Android/.test(userAgent);
+
+            if (isIOS) {
+                return "https://apps.apple.com/app/id1542026904";
+            } else if (isAndroid) {
+                return "https://play.google.com/store/apps/details?id=io.ente.photos";
+            }
+            // For other touchscreen devices, fall back to web
+        }
+        // For desktop or other platforms, redirect to web.ente.io
+        return "https://web.ente.io";
+    };
+
     return (
-        <Button color="accent" href="https://ente.io">
+        <Button color="accent" href={getActionURL()}>
             {isTouchscreen ? t("install") : t("sign_up")}
         </Button>
     );
