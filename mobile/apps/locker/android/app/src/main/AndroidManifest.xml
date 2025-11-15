@@ -4,7 +4,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Storage permissions for saving files -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />

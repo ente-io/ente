@@ -73,9 +73,6 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - photo_manager (3.7.1):
-    - Flutter
-    - FlutterMacOS
   - privacy_screen (0.0.1):
     - Flutter
   - SDWebImage (5.21.3):
@@ -120,7 +117,6 @@ DEPENDENCIES:
   - open_file_ios (from `.symlinks/plugins/open_file_ios/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -174,8 +170,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
-  photo_manager:
-    :path: ".symlinks/plugins/photo_manager/ios"
   privacy_screen:
     :path: ".symlinks/plugins/privacy_screen/ios"
   sentry_flutter:
@@ -214,7 +208,6 @@ SPEC CHECKSUMS:
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  photo_manager: 1d80ae07a89a67dfbcae95953a1e5a24af7c3e62
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   SDWebImage: 16309af6d214ba3f77a7c6f6fdda888cb313a50a
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854

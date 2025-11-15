@@ -21,7 +21,6 @@ import "package:locker/ui/pages/physical_records_page.dart";
 import "package:logging/logging.dart";
 import "package:open_file/open_file.dart";
 import "package:path/path.dart" as p;
-import "package:photo_manager/photo_manager.dart";
 
 class FileUtil {
   static final Logger _logger = Logger("FileUtil");
@@ -288,28 +287,14 @@ class FileUtil {
     }
 
     try {
-      // Determine file type and use appropriate save method
-      final isImage = _isImageExtension(extension);
-      String? savedPath;
-
-      if (isImage) {
-        // Save images to gallery using PhotoManager
-        final assetEntity = await PhotoManager.editor.saveImageWithPath(
-          decryptedFile.path,
-          title: targetFileName,
-        );
-        savedPath = assetEntity.relativePath;
-      } else {
-        // For PDFs, text files, and other non-image files
-        final fileBytes = await decryptedFile.readAsBytes();
-        savedPath = await _saveFileToDownloads(
-          bytes: fileBytes,
-          fileName: targetFileName,
-          extension: extension,
-        );
-        if (savedPath == null) {
-          throw Exception('Failed to save file to Downloads');
-        }
+      final fileBytes = await decryptedFile.readAsBytes();
+      final savedPath = await _saveFileToDownloads(
+        bytes: fileBytes,
+        fileName: targetFileName,
+        extension: extension,
+      );
+      if (savedPath == null) {
+        throw Exception('Failed to save file to Downloads');
       }
 
       progressDialog.update(
@@ -328,21 +313,7 @@ class FileUtil {
     }
   }
 
-  static bool _isImageExtension(String extension) {
-    const imageExtensions = <String>{
-      'png',
-      'jpg',
-      'jpeg',
-      'gif',
-      'heic',
-      'heif',
-      'webp',
-      'svg',
-    };
-    return imageExtensions.contains(extension.toLowerCase());
-  }
-
-  /// Saves non-image files (PDF, TXT, JSON) to Downloads folder
+  /// Saves files to the Downloads folder (when supported by the platform)
   /// Returns the path where the file was saved, or null if it failed
   static Future<String?> _saveFileToDownloads({
     required Uint8List bytes,
