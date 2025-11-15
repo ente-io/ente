@@ -253,20 +253,24 @@ class CollectionActions {
 
         await progressDialog.hide();
 
-        showToast(
-          context,
-          l10n.collectionDeletedSuccessfully,
-        );
+        if (context.mounted) {
+          showToast(
+            context,
+            l10n.collectionDeletedSuccessfully,
+          );
+        }
 
         // Call success callback if provided
         onSuccess?.call();
       } catch (error) {
         await progressDialog.hide();
 
-        showToast(
-          context,
-          l10n.failedToDeleteCollection(error.toString()),
-        );
+        if (context.mounted) {
+          showToast(
+            context,
+            l10n.failedToDeleteCollection(error.toString()),
+          );
+        }
       }
       return;
     }
@@ -300,20 +304,24 @@ class CollectionActions {
 
       await progressDialog.hide();
 
-      showToast(
-        context,
-        l10n.collectionDeletedSuccessfully,
-      );
+      if (context.mounted) {
+        showToast(
+          context,
+          l10n.collectionDeletedSuccessfully,
+        );
+      }
 
       // Call success callback if provided
       onSuccess?.call();
     } catch (error) {
       await progressDialog.hide();
 
-      showToast(
-        context,
-        l10n.failedToDeleteCollection(error.toString()),
-      );
+      if (context.mounted) {
+        showToast(
+          context,
+          l10n.failedToDeleteCollection(error.toString()),
+        );
+      }
     }
   }
 

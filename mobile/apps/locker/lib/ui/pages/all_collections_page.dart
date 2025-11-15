@@ -51,7 +51,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     _collectionsUpdatedSub =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       if (!mounted) return;
-      await _loadCollections();
+      await _loadCollections(showLoading: false);
     });
     if (widget.viewType == UISectionType.homeCollections) {
       showTrash = true;
@@ -65,8 +65,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     super.dispose();
   }
 
-  Future<void> _loadCollections() async {
-    if (mounted) {
+  Future<void> _loadCollections({bool showLoading = true}) async {
+    if (mounted && showLoading) {
       setState(() {
         _isLoading = true;
         _error = null;
@@ -115,13 +115,17 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           : 0;
 
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        if (showLoading) {
+          setState(() {
+            _isLoading = false;
+          });
+        } else {
+          setState(() {});
+        }
       }
     } catch (e) {
       _logger.severe("Failed to load collections", e);
-      if (mounted) {
+      if (mounted && showLoading) {
         setState(() {
           _error = context.l10n.failedToLoadCollections(e.toString());
           _isLoading = false;

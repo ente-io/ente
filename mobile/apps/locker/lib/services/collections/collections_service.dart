@@ -381,8 +381,9 @@ class CollectionService {
   Future<void> move(
     List<EnteFile> files,
     Collection from,
-    Collection to,
-  ) async {
+    Collection to, {
+    bool runSync = true,
+  }) async {
     if (files.isEmpty) {
       _logger.info("No files to move");
       return;
@@ -403,12 +404,11 @@ class CollectionService {
 
       // Add to target collection
       await _db.addFilesToCollection(to, files);
-
-      // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent('files_moved'));
-
+      
       // Let sync update the local state to ensure consistency
-      await sync();
+      if (runSync) {
+        await sync();
+      }
     } catch (e, stackTrace) {
       _logger.severe("Failed to move files: $e", e, stackTrace);
       rethrow;
@@ -627,6 +627,7 @@ class CollectionService {
           entry.value,
           collection,
           toCollection,
+          runSync: false,
         );
       }
     }
