@@ -2,9 +2,11 @@ import "dart:io";
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/wake_lock_service.dart";
+import 'package:photos/generated/l10n.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/backup_preference_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -21,6 +23,7 @@ class BackupSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final showOnlyNewToggle = flagService.enableOnlyBackupFuturePhotos;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -99,6 +102,42 @@ class BackupSettingsScreen extends StatelessWidget {
                               isBottomBorderRadiusRemoved:
                                   flagService.enableMobMultiPart,
                             ),
+                            if (showOnlyNewToggle) ...[
+                              DividerWidget(
+                                dividerType: DividerType.menuNoIcon,
+                                bgColor: colorScheme.fillFaint,
+                              ),
+                              MenuItemWidget(
+                                captionedTextWidget: CaptionedTextWidget(
+                                  title: AppLocalizations.of(context)
+                                      .backupOnlyNewPhotos,
+                                ),
+                                menuItemColor: colorScheme.fillFaint,
+                                trailingWidget: ToggleSwitchWidget(
+                                  value: () => Configuration.instance
+                                      .isOnlyNewBackupEnabled(),
+                                  onChanged: () async {
+                                    final isEnabled = Configuration.instance
+                                        .isOnlyNewBackupEnabled();
+                                    if (!isEnabled) {
+                                      await Configuration.instance
+                                          .setOnlyNewSinceNow();
+                                      await BackupPreferenceService.instance
+                                          .autoSelectAllFoldersIfEligible();
+                                      SyncService.instance.sync().ignore();
+                                    } else {
+                                      await Configuration.instance
+                                          .clearOnlyNewSince();
+                                      SyncService.instance.sync().ignore();
+                                    }
+                                  },
+                                ),
+                                singleBorderRadius: 8,
+                                alignCaptionedTextToLeft: true,
+                                isTopBorderRadiusRemoved: true,
+                                isGestureDetectorDisabled: true,
+                              ),
+                            ],
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,

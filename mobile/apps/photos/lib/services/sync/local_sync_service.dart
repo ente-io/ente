@@ -60,7 +60,9 @@ class LocalSyncService {
       _registerChangeCallback();
     } else {
       Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
-        _registerChangeCallback();
+        if (permissionService.hasGrantedPermissions()) {
+          _registerChangeCallback();
+        }
       });
     }
   }

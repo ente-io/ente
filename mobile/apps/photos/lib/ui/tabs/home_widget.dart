@@ -659,7 +659,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
+    final skipPermissionGate =
+        Configuration.instance.hasOnboardingPermissionSkipped();
+    final onlyNewEnabled = Configuration.instance.isOnlyNewBackupEnabled();
+    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport() ||
+        skipPermissionGate ||
+        onlyNewEnabled;
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: PopScope(
@@ -733,12 +738,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LandingPageWidget();
     }
     if (!permissionService.hasGrantedPermissions()) {
-      entityService.syncEntities().then((_) {
-        PersonService.instance.refreshPersonCache();
-      });
-      return const GrantPermissionsWidget();
+      if (!Configuration.instance.hasOnboardingPermissionSkipped()) {
+        entityService.syncEntities().then((_) {
+          PersonService.instance.refreshPersonCache();
+        });
+        return const GrantPermissionsWidget();
+      }
     }
-    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+    final onlyNewEnabled = Configuration.instance.isOnlyNewBackupEnabled();
+    final skipPermissionGate =
+        Configuration.instance.hasOnboardingPermissionSkipped();
+    if (!onlyNewEnabled &&
+        !skipPermissionGate &&
+        !LocalSyncService.instance.hasCompletedFirstImport()) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&
