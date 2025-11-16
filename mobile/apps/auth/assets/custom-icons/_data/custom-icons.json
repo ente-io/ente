@@ -270,6 +270,10 @@
       ]
     },
     {
+      "title": "Borrowell",
+      "slug": "borrowell"
+    },
+    {
       "title": "Brave Creators",
       "slug": "brave_creators",
       "altNames": [
@@ -546,6 +550,10 @@
       "altNames": [
         "Murena"
       ]
+    },
+    {
+      "title": "Ecobee",
+      "slug": "ecobee"
     },
     {
       "title": "emeritihealth",
