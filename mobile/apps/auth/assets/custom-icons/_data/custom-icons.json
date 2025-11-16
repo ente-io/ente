@@ -2053,6 +2053,15 @@
         "International Business Machines",
         "IBMid"
       ]
+    },
+    {
+      "title": "Peking University",
+      "slug": "peking_university",
+      "altNames": [
+        "北京大学",
+        "PKU",
+        "Peking Univ"
+      ]
     }
   ]
 }
