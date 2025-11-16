@@ -791,6 +791,10 @@
       "slug": "id_me"
     },
     {
+      "title": "IDrive",
+      "slug": "idrive"
+    },
+    {
       "title": "ImmoScout24",
       "slug": "immo_scout_24",
       "altNames": [
@@ -1384,6 +1388,10 @@
       ]
     },
     {
+      "title": "Questrade",
+      "slug": "questrade"
+    },
+    {
       "title": "R10.net",
       "slug": "r10",
       "altNames": [
@@ -1836,6 +1844,15 @@
   "title": "VHV",
   "slug": "vhv", 
   "altNames": ["VHV", "VHV Versicherung"]
+    },
+    {
+      "title": "Via Rail",
+      "slug": "via_rail",
+      "altNames": [
+        "Via",
+        "VIA Rail",
+        "Via Rail Canada"
+      ]
     },
     {
       "title": "Vikunja"
