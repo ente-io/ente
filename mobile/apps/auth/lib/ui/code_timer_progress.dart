@@ -69,19 +69,19 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: widget.isCompactMode ? 1 : 3,
+      width: double.infinity,
       child: ValueListenableBuilder<double>(
         valueListenable: _progress,
         builder: (context, progress, _) {
-          return CustomPaint(
-            key: Key(progress.toString()), // Add key here
-            painter: _ProgressPainter(
-              progress: progress,
-              color: progress > 0.4
-                  ? getEnteColorScheme(context).primary700
-                  : Colors.orange,
-            ),
-            size: const Size.fromHeight(double.infinity),
-          );
+      return CustomPaint(
+        key: Key(progress.toString()), // Add key here
+        painter: _ProgressPainter(
+          progress: progress,
+          color: progress > 0.4
+              ? getEnteColorScheme(context).primary700
+              : Colors.orange,
+        ),
+      );
         },
       ),
     );
