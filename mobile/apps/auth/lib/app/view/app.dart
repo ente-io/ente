@@ -245,24 +245,23 @@ class _AppState extends State<App>
   }
 
   Widget _materialAppBuilder(BuildContext context, Widget? widget) {
-    Widget errorWidget = Center(
-      child: Text(context.l10n.somethingWentWrongMessage),
-    );
-    if (widget is Scaffold || widget is Navigator) {
-      errorWidget = Scaffold(body: Center(child: errorWidget));
-    }
-
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      if (kDebugMode) {
-        return ErrorWidget.builder(details);
-      }
-      _renderErrorLogger.severe(
-        'Unhandled rendering error',
-        details.exception,
-        details.stack,
+    if (!kDebugMode) {
+      Widget errorWidget = Center(
+        child: Text(context.l10n.somethingWentWrongMessage),
       );
-      return errorWidget;
-    };
+      if (widget is Scaffold || widget is Navigator) {
+        errorWidget = Scaffold(body: Center(child: errorWidget));
+      }
+
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        _renderErrorLogger.severe(
+          'Unhandled rendering error',
+          details.exception,
+          details.stack,
+        );
+        return errorWidget;
+      };
+    }
 
     if (widget != null) {
       return widget;
