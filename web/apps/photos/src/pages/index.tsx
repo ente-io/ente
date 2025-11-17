@@ -60,10 +60,21 @@ const Page: React.FC = () => {
 
                         // FIRST: Check if we already have a context for this token
                         // This is critical for password-protected albums
+                        console.log("[Index] Checking for existing context in localStorage...");
                         const existingCheck = localStorage.getItem("ente_join_album_context");
+                        console.log("[Index] Existing context check result:", {
+                            found: !!existingCheck,
+                            length: existingCheck?.length || 0,
+                        });
+
                         if (existingCheck) {
                             try {
                                 const existing = JSON.parse(existingCheck);
+                                console.log("[Index] Parsed existing context:", {
+                                    hasJWT: !!existing.accessTokenJWT,
+                                    accessToken: existing.accessToken,
+                                    matches: existing.accessToken === accessToken,
+                                });
                                 if (existing.accessToken === accessToken && existing.accessTokenJWT) {
                                     console.log("[Index] ✓ Found existing context with JWT, not modifying");
                                     return; // Don't modify existing context with JWT
@@ -71,6 +82,10 @@ const Page: React.FC = () => {
                             } catch (e) {
                                 console.log("[Index] Error checking existing context:", e);
                             }
+                        } else {
+                            console.log("[Index] No existing context in localStorage");
+                            // Debug: Check what keys are in localStorage
+                            console.log("[Index] localStorage keys:", Object.keys(localStorage));
                         }
 
                         // Import the necessary functions to convert the collection key
