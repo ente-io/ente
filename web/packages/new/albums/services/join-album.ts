@@ -259,7 +259,9 @@ export const getAuthRedirectURL = (): string => {
     // Use the simplified URL format: joinAlbum?=accessToken#collectionKeyHash
     // For password-protected albums, include JWT as a query parameter to survive cross-origin redirect
     // The collectionKeyHash is the original hash value from the URL (base58 or hex)
-    const jwtParam = context.accessTokenJWT ? `&jwt=${encodeURIComponent(context.accessTokenJWT)}` : "";
+    const jwtParam = context.accessTokenJWT
+        ? `&jwt=${encodeURIComponent(context.accessTokenJWT)}`
+        : "";
     const redirectURL = `${photosAppURL}/?joinAlbum=${context.accessToken}${jwtParam}#${context.collectionKeyHash}`;
 
     return redirectURL;

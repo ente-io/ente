@@ -3,34 +3,52 @@ import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import type { Collection } from "ente-media/collection";
 import { Notification } from "ente-new/photos/components/Notification";
-import { t } from "i18next";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { useState } from "react";
 
 interface TopNavButtonsProps {
     onAddPhotos?: () => void;
     downloadAllFiles: () => void;
     enableDownload?: boolean;
+    publicCollection?: Collection;
+    accessToken?: string;
+    collectionKey?: string;
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    credentials?: React.MutableRefObject<PublicAlbumsCredentials | undefined>;
 }
 
 export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
     onAddPhotos,
     downloadAllFiles,
     enableDownload,
+    publicCollection,
+    accessToken,
+    collectionKey,
+    credentials,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+
+    const {
+        handleJoinAlbum,
+        handleSignUpOrInstall,
+        buttonText,
+        isJoinEnabled,
+    } = useJoinAlbum({
+        enableJoin: publicCollection?.publicURLs[0]?.enableJoin,
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
 
     const handleShare = () => {
         if (typeof window !== "undefined") {
             void navigator.clipboard.writeText(window.location.href);
             setShowCopiedMessage(true);
             setTimeout(() => setShowCopiedMessage(false), 2000);
-        }
-    };
-
-    const handleSignUp = () => {
-        if (typeof window !== "undefined") {
-            window.open("https://ente.io", "_blank", "noopener");
         }
     };
 
@@ -55,9 +73,17 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                     </NavButton>
                 )}
 
-                <SignUpButton onClick={handleSignUp}>
-                    {t("sign_up")}
-                </SignUpButton>
+                {(!onAddPhotos || isJoinEnabled) && (
+                    <SignUpButton
+                        onClick={
+                            isJoinEnabled
+                                ? handleJoinAlbum
+                                : handleSignUpOrInstall
+                        }
+                    >
+                        {buttonText}
+                    </SignUpButton>
+                )}
             </ButtonContainer>
 
             <Notification

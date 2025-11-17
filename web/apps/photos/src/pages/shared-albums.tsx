@@ -550,6 +550,12 @@ export default function PublicCollectionGallery() {
                     collection={publicCollection}
                     onAddPhotos={onAddPhotos}
                     enableDownload={downloadEnabled}
+                    accessToken={
+                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                        credentials.current?.accessToken
+                    }
+                    collectionKey={collectionKey.current}
+                    credentials={credentials}
                 />
             ) : (
                 <>

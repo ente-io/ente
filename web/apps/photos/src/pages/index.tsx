@@ -62,8 +62,12 @@ const Page: React.FC = () => {
 
                         // FIRST: Check if we already have a context for this token
                         // This is critical for password-protected albums
-                        console.log("[Index] Checking for existing context in localStorage...");
-                        const existingCheck = localStorage.getItem("ente_join_album_context");
+                        console.log(
+                            "[Index] Checking for existing context in localStorage...",
+                        );
+                        const existingCheck = localStorage.getItem(
+                            "ente_join_album_context",
+                        );
                         console.log("[Index] Existing context check result:", {
                             found: !!existingCheck,
                             length: existingCheck?.length || 0,
@@ -72,22 +76,40 @@ const Page: React.FC = () => {
                         if (existingCheck) {
                             try {
                                 const existing = JSON.parse(existingCheck);
-                                console.log("[Index] Parsed existing context:", {
-                                    hasJWT: !!existing.accessTokenJWT,
-                                    accessToken: existing.accessToken,
-                                    matches: existing.accessToken === accessToken,
-                                });
-                                if (existing.accessToken === accessToken && existing.accessTokenJWT) {
-                                    console.log("[Index] ✓ Found existing context with JWT, not modifying");
+                                console.log(
+                                    "[Index] Parsed existing context:",
+                                    {
+                                        hasJWT: !!existing.accessTokenJWT,
+                                        accessToken: existing.accessToken,
+                                        matches:
+                                            existing.accessToken ===
+                                            accessToken,
+                                    },
+                                );
+                                if (
+                                    existing.accessToken === accessToken &&
+                                    existing.accessTokenJWT
+                                ) {
+                                    console.log(
+                                        "[Index] ✓ Found existing context with JWT, not modifying",
+                                    );
                                     return; // Don't modify existing context with JWT
                                 }
                             } catch (e) {
-                                console.log("[Index] Error checking existing context:", e);
+                                console.log(
+                                    "[Index] Error checking existing context:",
+                                    e,
+                                );
                             }
                         } else {
-                            console.log("[Index] No existing context in localStorage");
+                            console.log(
+                                "[Index] No existing context in localStorage",
+                            );
                             // Debug: Check what keys are in localStorage
-                            console.log("[Index] localStorage keys:", Object.keys(localStorage));
+                            console.log(
+                                "[Index] localStorage keys:",
+                                Object.keys(localStorage),
+                            );
                         }
 
                         // Import the necessary functions to convert the collection key
@@ -111,20 +133,24 @@ const Page: React.FC = () => {
                             try {
                                 existingContext =
                                     JSON.parse(existingContextStr);
-                                console.log(
-                                    "[Index] Found existing context:",
-                                    {
-                                        hasJWT: !!existingContext.accessTokenJWT,
-                                        existingAccessToken: existingContext.accessToken,
-                                        newAccessToken: accessToken,
-                                        match: existingContext.accessToken === accessToken,
-                                    }
-                                );
+                                console.log("[Index] Found existing context:", {
+                                    hasJWT: !!existingContext.accessTokenJWT,
+                                    existingAccessToken:
+                                        existingContext.accessToken,
+                                    newAccessToken: accessToken,
+                                    match:
+                                        existingContext.accessToken ===
+                                        accessToken,
+                                });
 
                                 // Only update if it's a different access token
-                                if (existingContext.accessToken !== accessToken) {
+                                if (
+                                    existingContext.accessToken !== accessToken
+                                ) {
                                     shouldUpdateContext = true;
-                                    console.log("[Index] Different access token, will update context");
+                                    console.log(
+                                        "[Index] Different access token, will update context",
+                                    );
                                 } else {
                                     // Same access token - NEVER overwrite if existing has JWT
                                     // This preserves the JWT from password-protected albums
@@ -132,26 +158,32 @@ const Page: React.FC = () => {
                                         "[Index] Same access token, keeping existing context:",
                                         {
                                             hasJWT: !!existingContext.accessTokenJWT,
-                                            collectionID: existingContext.collectionID,
-                                        }
+                                            collectionID:
+                                                existingContext.collectionID,
+                                        },
                                     );
                                     shouldUpdateContext = false;
                                 }
                             } catch {
                                 // Parse error, will create new context
                                 shouldUpdateContext = true;
-                                console.log("[Index] Failed to parse existing context, will create new");
+                                console.log(
+                                    "[Index] Failed to parse existing context, will create new",
+                                );
                             }
                         } else {
                             // No existing context, create new
                             shouldUpdateContext = true;
-                            console.log("[Index] No existing context found, will create new");
+                            console.log(
+                                "[Index] No existing context found, will create new",
+                            );
                         }
 
                         if (shouldUpdateContext) {
                             // Get JWT from URL parameter (passed for password-protected albums)
                             // This survives cross-origin redirects (e.g., localhost:3002 → localhost:3000)
-                            let accessTokenJWT = jwtFromURL || existingContext?.accessTokenJWT;
+                            const accessTokenJWT =
+                                jwtFromURL || existingContext?.accessTokenJWT;
 
                             console.log("[Index] JWT source:", {
                                 fromURL: !!jwtFromURL,
@@ -164,11 +196,10 @@ const Page: React.FC = () => {
                                 accessToken,
                                 collectionKey, // Base64 for API calls
                                 collectionKeyHash, // Original hash from URL
-                                collectionID: existingContext?.collectionID || 0, // Preserve collection ID if exists
+                                collectionID:
+                                    existingContext?.collectionID || 0, // Preserve collection ID if exists
                                 // Include JWT token if found
-                                ...(accessTokenJWT && {
-                                    accessTokenJWT,
-                                }),
+                                ...(accessTokenJWT && { accessTokenJWT }),
                             };
 
                             console.log(
@@ -176,7 +207,7 @@ const Page: React.FC = () => {
                                 {
                                     hasJWT: !!context.accessTokenJWT,
                                     accessToken: context.accessToken,
-                                }
+                                },
                             );
                             localStorage.setItem(
                                 "ente_join_album_context",
