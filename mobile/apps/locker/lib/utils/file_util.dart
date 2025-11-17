@@ -152,16 +152,17 @@ class FileUtil {
 
         final sanitizedName = _sanitizeFileName(file.displayName);
         final baseName = _baseNameWithoutExtension(sanitizedName);
-        final extension = _extensionWithoutDot(sanitizedName);
+        final fileExtension = _extensionWithoutDot(file.displayName);
 
         final String? savedPath = await _saveRegularFile(
           file: file,
-          targetFileName: extension.isEmpty ? baseName : "$baseName.$extension",
+          targetFileName:
+              fileExtension.isEmpty ? baseName : "$baseName.$fileExtension",
           context: context,
           progressDialog: dialog,
           currentIndex: index,
           totalCount: total,
-          extension: extension,
+          fileExtension: fileExtension,
         );
 
         savedNames.add(file.displayName);
@@ -205,7 +206,7 @@ class FileUtil {
     required ProgressDialog progressDialog,
     required int currentIndex,
     required int totalCount,
-    required String extension,
+    required String fileExtension,
   }) async {
     final fileKey = await CollectionService.instance.getFileKey(file);
 
@@ -236,7 +237,7 @@ class FileUtil {
       final savedPath = await _saveFile(
         bytes: fileBytes,
         fileName: baseName,
-        extension: extension,
+        fileExtension: fileExtension,
       );
 
       if (savedPath == null) {
@@ -265,7 +266,7 @@ class FileUtil {
   static Future<String?> _saveFile({
     required Uint8List bytes,
     required String fileName,
-    required String extension,
+    required String fileExtension,
   }) async {
     if (!Platform.isAndroid && !Platform.isIOS) {
       _logger.warning('File saving only supported on Android and iOS');
@@ -278,7 +279,7 @@ class FileUtil {
       final savedPath = await FileSaver.instance.saveAs(
         name: baseName,
         bytes: bytes,
-        fileExtension: extension,
+        fileExtension: fileExtension,
         mimeType: MimeType.other,
       );
 
