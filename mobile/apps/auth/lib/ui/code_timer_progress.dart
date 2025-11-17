@@ -73,15 +73,15 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
       child: ValueListenableBuilder<double>(
         valueListenable: _progress,
         builder: (context, progress, _) {
-      return CustomPaint(
-        key: Key(progress.toString()), // Add key here
-        painter: _ProgressPainter(
-          progress: progress,
-          color: progress > 0.4
-              ? getEnteColorScheme(context).primary700
-              : Colors.orange,
-        ),
-      );
+          return CustomPaint(
+            key: Key(progress.toString()), // Add key here
+            painter: _ProgressPainter(
+              progress: progress,
+              color: progress > 0.4
+                  ? getEnteColorScheme(context).primary700
+                  : Colors.orange,
+            ),
+          );
         },
       ),
     );
