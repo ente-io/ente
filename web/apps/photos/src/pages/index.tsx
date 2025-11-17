@@ -67,41 +67,55 @@ const Page: React.FC = () => {
                         const existingContextStr = localStorage.getItem(
                             "ente_join_album_context",
                         );
-                        let existingContext = null;
+                        let existingContext: any = null;
                         if (existingContextStr) {
                             try {
                                 existingContext =
                                     JSON.parse(existingContextStr);
                                 console.log(
-                                    "[Index] Found existing context with JWT:",
-                                    !!existingContext.accessTokenJWT,
+                                    "[Index] Found existing context:",
+                                    {
+                                        hasJWT: !!existingContext.accessTokenJWT,
+                                        existingAccessToken: existingContext.accessToken,
+                                        newAccessToken: accessToken,
+                                        match: existingContext.accessToken === accessToken,
+                                    }
                                 );
                             } catch {
                                 // Ignore parse error
                             }
                         }
 
-                        // For now, we don't have the collection ID, so we'll use a placeholder
-                        // The actual collection ID will be fetched when we pull the collection
-                        const context = {
-                            accessToken,
-                            collectionKey, // Base64 for API calls
-                            collectionKeyHash, // Original hash from URL
-                            collectionID: 0, // Will be updated when collection is fetched
-                            // Preserve JWT token if it exists (for password-protected albums)
-                            ...(existingContext?.accessTokenJWT && {
-                                accessTokenJWT: existingContext.accessTokenJWT,
-                            }),
-                        };
+                        // If we already have a context for the same access token, don't overwrite it
+                        // This preserves the JWT token for password-protected albums
+                        if (existingContext && existingContext.accessToken === accessToken) {
+                            console.log(
+                                "[Index] Keeping existing context with JWT:",
+                                !!existingContext.accessTokenJWT,
+                            );
+                        } else {
+                            // Create new context or update if different access token
+                            const context = {
+                                accessToken,
+                                collectionKey, // Base64 for API calls
+                                collectionKeyHash, // Original hash from URL
+                                collectionID: existingContext?.collectionID || 0, // Preserve collection ID if exists
+                                // Preserve JWT token if it exists and same collection
+                                ...(existingContext?.accessTokenJWT &&
+                                    existingContext.accessToken === accessToken && {
+                                    accessTokenJWT: existingContext.accessTokenJWT,
+                                }),
+                            };
 
-                        console.log(
-                            "[Index] Storing join album context with JWT:",
-                            !!context.accessTokenJWT,
-                        );
-                        localStorage.setItem(
-                            "ente_join_album_context",
-                            JSON.stringify(context),
-                        );
+                            console.log(
+                                "[Index] Storing new/updated join album context with JWT:",
+                                !!context.accessTokenJWT,
+                            );
+                            localStorage.setItem(
+                                "ente_join_album_context",
+                                JSON.stringify(context),
+                            );
+                        }
                     }
                 } catch (error) {
                     console.error(
