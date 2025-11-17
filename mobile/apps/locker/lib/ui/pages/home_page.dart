@@ -450,7 +450,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   Future<void> _loadRecentFiles(List<Collection> collections) async {
     final allFiles = <EnteFile>[];
 
-    allFiles.addAll(await CollectionService.instance.getAllFiles());
+    for (final collection in collections) {
+      allFiles.addAll(
+        await CollectionService.instance.getFilesInCollection(collection),
+      );
+    }
 
     final uniqueFiles = <EnteFile>[];
     final seenHashes = <String>{};
