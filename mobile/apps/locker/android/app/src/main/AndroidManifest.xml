@@ -72,6 +72,11 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Allow flutter_email_sender to discover installed mail clients on Android 11+ -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
     </queries>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 </manifest>
