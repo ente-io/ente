@@ -97,7 +97,7 @@ class CustomLockerAppBar extends StatelessWidget
                     onLongPress: () {
                       sendLogs(
                         context,
-                        'vishnu@ente.io',
+                        'support@ente.io',
                         subject: context.l10n.lockerLogs,
                         body: 'Debug logs for Locker app.\n\n',
                       );
