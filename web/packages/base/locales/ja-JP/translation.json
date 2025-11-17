@@ -225,6 +225,7 @@
     "delete_album": "アルバムを削除",
     "delete_album_title": "アルバムを削除しますか？",
     "delete_album_message": "このアルバムに含まれている写真 (およびビデオ) を <a>すべて</a> 他のアルバムからも削除しますか？",
+    "delete_album_message_no_photos": "",
     "delete_photos": "写真を削除",
     "keep_photos": "写真を残す",
     "share_album": "アルバムを共有",

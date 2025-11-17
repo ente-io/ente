@@ -225,6 +225,7 @@
     "delete_album": "Удалить альбом",
     "delete_album_title": "Удалить альбом?",
     "delete_album_message": "Также удалить фотографии (и видео), которые есть в этом альбоме из <a>всех</a> других альбомов, где они есть?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Удалить фото",
     "keep_photos": "Оставить фото",
     "share_album": "Поделиться альбомом",

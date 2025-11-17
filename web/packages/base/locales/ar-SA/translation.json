@@ -225,6 +225,7 @@
     "delete_album": "حذف الألبوم",
     "delete_album_title": "حذف الألبوم؟",
     "delete_album_message": "هل تريد أيضًا حذف الصور (ومقاطع الفيديو) الموجودة في هذا الألبوم من <a>جميع</a> الألبومات الأخرى التي هي جزء منها؟",
+    "delete_album_message_no_photos": "",
     "delete_photos": "حذف الصور",
     "keep_photos": "الاحتفاظ بالصور",
     "share_album": "مشاركة الألبوم",

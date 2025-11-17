@@ -225,6 +225,7 @@
     "delete_album": "Vymazat album",
     "delete_album_title": "Vymazat album?",
     "delete_album_message": "Odstranit také fotky (a videa) přítomné v tomto albu ze <a>všech</a> dalších alb, kterých jsou součástí?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Odstranit fotografie",
     "keep_photos": "Ponechat fotky",
     "share_album": "Sdílet album",
