@@ -48,14 +48,16 @@ const Page: React.FC = () => {
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 try {
-                    // New simplified format: joinAlbum?=accessToken#collectionKeyHash
+                    // New simplified format: joinAlbum?=accessToken&jwt=<jwtToken>#collectionKeyHash
                     const accessToken = joinAlbumParam;
                     const collectionKeyHash = currentURL.hash.slice(1); // Remove the # character
+                    const jwtFromURL = currentURL.searchParams.get("jwt"); // JWT for password-protected albums
 
                     if (accessToken && collectionKeyHash) {
                         console.log("[Index] Processing joinAlbum parameter:", {
                             accessToken,
                             hashLength: collectionKeyHash.length,
+                            hasJWTInURL: !!jwtFromURL,
                         });
 
                         // FIRST: Check if we already have a context for this token
@@ -147,25 +149,15 @@ const Page: React.FC = () => {
                         }
 
                         if (shouldUpdateContext) {
-                            // Try to retrieve JWT from localForage if not in existing context
-                            // This handles the case where the JWT was saved but the redirect
-                            // happened before localStorage sync completed
-                            let accessTokenJWT = existingContext?.accessTokenJWT;
+                            // Get JWT from URL parameter (passed for password-protected albums)
+                            // This survives cross-origin redirects (e.g., localhost:3002 → localhost:3000)
+                            let accessTokenJWT = jwtFromURL || existingContext?.accessTokenJWT;
 
-                            if (!accessTokenJWT) {
-                                try {
-                                    const { savedPublicCollectionAccessTokenJWT } = await import(
-                                        "ente-new/albums/services/public-albums-fdb"
-                                    );
-                                    accessTokenJWT = await savedPublicCollectionAccessTokenJWT(accessToken);
-                                    console.log("[Index] Retrieved JWT from localForage:", {
-                                        hasJWT: !!accessTokenJWT,
-                                        jwtLength: accessTokenJWT?.length,
-                                    });
-                                } catch (error) {
-                                    console.log("[Index] Failed to retrieve JWT from localForage:", error);
-                                }
-                            }
+                            console.log("[Index] JWT source:", {
+                                fromURL: !!jwtFromURL,
+                                fromExisting: !!existingContext?.accessTokenJWT,
+                                finalHasJWT: !!accessTokenJWT,
+                            });
 
                             // Create new context or update if different access token
                             const context = {
