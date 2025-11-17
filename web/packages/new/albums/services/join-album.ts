@@ -1,6 +1,7 @@
 import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
+import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 
@@ -40,6 +41,12 @@ export const storeJoinAlbumContext = async (
     // Get the JWT token if this is a password-protected album
     const accessTokenJWT =
         await savedPublicCollectionAccessTokenJWT(accessToken);
+
+    log.info("[Join Album] Storing context with JWT:", {
+        accessToken,
+        hasJWT: !!accessTokenJWT,
+        jwtLength: accessTokenJWT?.length,
+    });
 
     const context: JoinAlbumContext = {
         accessToken,
@@ -95,6 +102,13 @@ export const joinPublicAlbum = async (
     const authHeaders = await authenticatedRequestHeaders();
     const url = await apiURL("/collections/join-link");
 
+    log.info("[Join Album] API Request:", {
+        collectionID,
+        hasAccessToken: !!accessToken,
+        hasJWT: !!accessTokenJWT,
+        jwtLength: accessTokenJWT?.length,
+    });
+
     const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -135,6 +149,13 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
     if (!context) {
         return null;
     }
+
+    log.info("[Join Album] Processing with context:", {
+        hasAccessToken: !!context.accessToken,
+        hasJWT: !!context.accessTokenJWT,
+        jwtLength: context.accessTokenJWT?.length,
+        collectionID: context.collectionID,
+    });
 
     try {
         // If collectionID is 0 (placeholder), we need to fetch the actual collection first
