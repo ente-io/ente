@@ -100,7 +100,7 @@ class FilePopupMenuWidget extends StatelessWidget {
             color: colorScheme.textBase,
             size: 20,
           ),
-          label: "Download",
+          label: "Save",
           isFirst: false,
           isLast: false,
         ),
