@@ -339,6 +339,7 @@
     "successful_uploads": "アップロード成功",
     "upload_to_album": "アルバムにアップロード",
     "add_to_album": "アルバムに追加",
+    "added_to_album": "",
     "move_to_album": "アルバムに移動",
     "unhide_to_album": "アルバムを再表示する",
     "restore_to_album": "アルバムに戻す",

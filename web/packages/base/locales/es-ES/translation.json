@@ -339,6 +339,7 @@
     "successful_uploads": "Subidas exitosas",
     "upload_to_album": "Subir al álbum",
     "add_to_album": "Añadir al álbum",
+    "added_to_album": "",
     "move_to_album": "Mover al álbum",
     "unhide_to_album": "Hacer visible al álbum",
     "restore_to_album": "Restaurar al álbum",

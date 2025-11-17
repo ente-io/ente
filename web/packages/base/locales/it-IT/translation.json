@@ -339,6 +339,7 @@
     "successful_uploads": "Caricamenti eseguiti con successo",
     "upload_to_album": "Carica nell'album",
     "add_to_album": "Aggiungi all'album",
+    "added_to_album": "",
     "move_to_album": "Sposta nell'album",
     "unhide_to_album": "Mostra nell'album",
     "restore_to_album": "Ripristina nell'album",

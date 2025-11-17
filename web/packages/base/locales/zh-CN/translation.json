@@ -339,6 +339,7 @@
     "successful_uploads": "上传成功",
     "upload_to_album": "上传至相册",
     "add_to_album": "添加到相册",
+    "added_to_album": "",
     "move_to_album": "移动到相册",
     "unhide_to_album": "取消隐藏到相册",
     "restore_to_album": "恢复到相册",

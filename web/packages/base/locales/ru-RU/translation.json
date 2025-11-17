@@ -339,6 +339,7 @@
     "successful_uploads": "Успешные загрузки",
     "upload_to_album": "Загрузить в альбом",
     "add_to_album": "Добавить в альбом",
+    "added_to_album": "",
     "move_to_album": "Перейти к альбому",
     "unhide_to_album": "Отобразить в альбоме",
     "restore_to_album": "Восстановить в альбом",
