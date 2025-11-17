@@ -147,16 +147,35 @@ const Page: React.FC = () => {
                         }
 
                         if (shouldUpdateContext) {
+                            // Try to retrieve JWT from localForage if not in existing context
+                            // This handles the case where the JWT was saved but the redirect
+                            // happened before localStorage sync completed
+                            let accessTokenJWT = existingContext?.accessTokenJWT;
+
+                            if (!accessTokenJWT) {
+                                try {
+                                    const { savedPublicCollectionAccessTokenJWT } = await import(
+                                        "ente-new/albums/services/public-albums-fdb"
+                                    );
+                                    accessTokenJWT = await savedPublicCollectionAccessTokenJWT(accessToken);
+                                    console.log("[Index] Retrieved JWT from localForage:", {
+                                        hasJWT: !!accessTokenJWT,
+                                        jwtLength: accessTokenJWT?.length,
+                                    });
+                                } catch (error) {
+                                    console.log("[Index] Failed to retrieve JWT from localForage:", error);
+                                }
+                            }
+
                             // Create new context or update if different access token
                             const context = {
                                 accessToken,
                                 collectionKey, // Base64 for API calls
                                 collectionKeyHash, // Original hash from URL
                                 collectionID: existingContext?.collectionID || 0, // Preserve collection ID if exists
-                                // Preserve JWT token if it exists and same collection
-                                ...(existingContext?.accessTokenJWT &&
-                                    existingContext.accessToken === accessToken && {
-                                    accessTokenJWT: existingContext.accessTokenJWT,
+                                // Include JWT token if found
+                                ...(accessTokenJWT && {
+                                    accessTokenJWT,
                                 }),
                             };
 
