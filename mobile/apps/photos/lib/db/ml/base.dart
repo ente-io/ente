@@ -46,6 +46,10 @@ abstract class IMLDataDB<T> {
     String personID,
   );
   Future<Set<String>> getFaceIDsForPerson(String personID);
+  Future<Map<T, ({double x, double y})>> getPersonRelativeFaceCoordinates(
+    String personID,
+    List<T> fileIDs,
+  );
   Future<Iterable<double>> getBlurValuesForCluster(String clusterID);
   Future<Map<String, String?>> getFaceIdsToClusterIds(Iterable<String> faceIds);
   Future<Map<T, Set<String>>> getFileIdToClusterIds();

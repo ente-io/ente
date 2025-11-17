@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:convert";
 import "dart:math";
 
 import "package:collection/collection.dart";
@@ -15,6 +16,7 @@ import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
@@ -615,6 +617,49 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       [personID, limit],
     );
     return faceIdsResult.map((e) => e[faceIDColumn] as String).toList();
+  }
+
+  @override
+
+  /// Returns a map of file IDs to the person's face center in each file.
+  ///
+  /// Both `x` and `y` are normalized to the range [0, 1], measured from the
+  /// top-left of the image, and represent the midpoint of the detected face box.
+  Future<Map<int, ({double x, double y})>> getPersonRelativeFaceCoordinates(
+    String personID,
+    List<int> fileIDs,
+  ) async {
+    if (fileIDs.isEmpty) {
+      return {};
+    }
+    final db = await instance.asyncDB;
+    final uniqueFileIDs = fileIDs.toSet().toList(growable: false);
+    final placeholders = List.filled(uniqueFileIDs.length, '?').join(', ');
+    final query = '''
+      SELECT $facesTable.$fileIDColumn, $facesTable.$faceDetectionColumn, $facesTable.$faceScore
+      FROM $facesTable
+      INNER JOIN $faceClustersTable ON $facesTable.$faceIDColumn = $faceClustersTable.$faceIDColumn
+      INNER JOIN $clusterPersonTable ON $faceClustersTable.$clusterIDColumn = $clusterPersonTable.$clusterIDColumn
+      WHERE $clusterPersonTable.$personIdColumn = ?
+        AND $facesTable.$fileIDColumn IN ($placeholders)
+      ORDER BY $facesTable.$faceScore DESC
+    ''';
+    final List<Object?> params = [personID, ...uniqueFileIDs];
+    final List<Map<String, dynamic>> rows = await db.getAll(query, params);
+    final Map<int, ({double x, double y})> result = {};
+    for (final row in rows) {
+      final fileID = row[fileIDColumn] as int;
+      if (result.containsKey(fileID)) {
+        continue;
+      }
+      final detectionJson = row[faceDetectionColumn] as String;
+      final detectionMap = json.decode(detectionJson) as Map<String, dynamic>;
+      final box = FaceBox.fromJson(detectionMap['box'] as Map<String, dynamic>);
+      final double centerX = (box.x + (box.width / 2)).clamp(0.0, 1.0);
+      final double centerY = (box.y + (box.height / 2)).clamp(0.0, 1.0);
+      result[fileID] = (x: centerX, y: centerY);
+    }
+    return result;
   }
 
   @override
