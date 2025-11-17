@@ -31,24 +31,36 @@ class InputDialogSheet extends StatefulWidget {
 class _InputDialogSheetState extends State<InputDialogSheet> {
   late final TextEditingController _textController;
   bool _isSubmitting = false;
+  bool _isInputValid = false;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.initialValue ?? '');
+    _isInputValid = _textController.text.trim().isNotEmpty;
+    _textController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
+    _textController.removeListener(_onTextChanged);
     _textController.dispose();
     super.dispose();
+  }
+
+  void _onTextChanged() {
+    final isValid = _textController.text.trim().isNotEmpty;
+    if (isValid != _isInputValid) {
+      setState(() {
+        _isInputValid = isValid;
+      });
+    }
   }
 
   Future<void> _onSubmit() async {
     final text = _textController.text.trim();
 
-    if (text.isEmpty) {
-      Navigator.of(context).pop();
+    if (text.isEmpty || _isSubmitting) {
       return;
     }
 
@@ -150,7 +162,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
             SizedBox(
               width: double.infinity,
               child: GradientButton(
-                onTap: _isSubmitting ? null : _onSubmit,
+                onTap: !_isInputValid || _isSubmitting ? null : _onSubmit,
                 text: widget.submitButtonLabel,
               ),
             ),
