@@ -5,7 +5,7 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 
 # Changelog - Ente Photos
 
-<!-- A short summary list of changes to the Ente Photos mobile and desktop apps. For a more user-oriented list with screenshots and blog post links, see the [global changelog](https://ente.io/changelog). -->
+A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
 ## v1.2.18 (mobile) - Nov 2025
 
