@@ -153,10 +153,6 @@ class FileUtil {
           continue;
         }
 
-        if (!_isSupportedExtension(extension)) {
-          throw UnsupportedError('Unsupported file type for download');
-        }
-
         final targetFileName =
             extension.isEmpty ? baseName : "$baseName.$extension";
 
@@ -464,21 +460,5 @@ class FileUtil {
         context.l10n.couldNotOpenFile(e.toString()),
       );
     }
-  }
-
-  static bool _isSupportedExtension(String extension) {
-    const supported = <String>{
-      'png',
-      'jpg',
-      'jpeg',
-      'gif',
-      'heic',
-      'heif',
-      'webp',
-      'svg',
-      'pdf',
-      'txt',
-    };
-    return supported.contains(extension.toLowerCase());
   }
 }
