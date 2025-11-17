@@ -225,6 +225,7 @@
     "delete_album": "Albümü sil",
     "delete_album_title": "Albüm silinsin mi?",
     "delete_album_message": "Bu albümde bulunan fotoğrafları (ve videoları) yer aldıkları <a>tüm</a> diğer albümlerden de silmek istiyor musunuz?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Fotoğrafları sil",
     "keep_photos": "Fotoğrafları sakla",
     "share_album": "Albümü paylaş",

@@ -225,6 +225,7 @@
     "delete_album": "Hapus album",
     "delete_album_title": "Hapus album?",
     "delete_album_message": "Hapus foto (dan video) yang ada dalam album ini dari <a>semua</a> album lain yang juga menampungnya?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Hapus foto",
     "keep_photos": "",
     "share_album": "Bagikan album",

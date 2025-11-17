@@ -1535,6 +1535,11 @@ const getGoogleLikeMetadataFile = (
     const modificationTime = Math.floor(metadata.modificationTime / 1e6);
     const result: Record<string, unknown> = {
         title: fileExportName,
+        photoTakenTime: {
+            timestamp: `${creationTime}`,
+            formatted: dateTimeFormatter.format(creationTime * 1000),
+        },
+        // Deprecated, future versions will not write this field.
         creationTime: {
             timestamp: `${creationTime}`,
             formatted: dateTimeFormatter.format(creationTime * 1000),

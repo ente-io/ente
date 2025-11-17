@@ -1,0 +1,35 @@
+<svg version="1.1" id="Layer_1" xmlns:x="ns_extend;" xmlns:i="ns_ai;" xmlns:graph="ns_graphs;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 51.7 72" style="enable-background:new 0 0 51.7 72;" xml:space="preserve">
+ <style type="text/css">
+  .st0{fill-rule:evenodd;clip-rule:evenodd;fill:#00B7E5;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#B076C0;}
+	.st2{fill-rule:evenodd;clip-rule:evenodd;fill:#3A13A0;}
+ </style>
+ <metadata>
+  <sfw xmlns="ns_sfw;">
+   <slices>
+   </slices>
+   <sliceSourceBounds bottomLeftOrigin="true" height="72" width="51.7" x="-197.8" y="0.8">
+   </sliceSourceBounds>
+  </sfw>
+ </metadata>
+ <desc>
+  Created with Sketch.
+ </desc>
+ <g id="_x32_a.-Login-Page-Hi-Fi">
+  <g id="_x32_.2.1---Tablet_x2C_-Forgot-Password" transform="translate(-42.000000, -16.000000)">
+   <g id="Logo" transform="translate(42.000000, 16.000000)">
+    <path id="Fill-1" class="st0" d="M25.8,20.3c-10.5,0-19.6,6.3-23.6,15.3c-0.1,0.1-0.1,0.2-0.2,0.4C2,35.9,2,35.8,1.9,35.6
+				c-1.2-3-1.9-6.3-1.9-9.8V0h25.8c14.3,0,25.8,11.6,25.8,25.8c0,3.6-0.8,7-2.1,10.2C45.6,26.8,36.5,20.3,25.8,20.3z">
+    </path>
+    <path id="Fill-3" class="st1" d="M49.6,36c-0.1,0.1-0.1,0.3-0.2,0.4c-4,9-13.1,15.3-23.6,15.3C15.2,51.7,6,45.2,2.1,36
+				C0.8,39.1,0,42.6,0,46.2V72h25.8c14.3,0,25.8-11.6,25.8-25.8c0-3.5-0.7-6.8-1.9-9.8C49.7,36.2,49.6,36.1,49.6,36">
+    </path>
+    <path id="Fill-5" class="st2" d="M25.8,51.7c10.5,0,19.6-6.3,23.6-15.3c0.1-0.1,0.1-0.2,0.2-0.4c-3.9-9.2-13.1-15.7-23.7-15.7
+				c-10.5,0-19.6,6.3-23.6,15.3c-0.1,0.1-0.1,0.2-0.2,0.4C6,45.2,15.2,51.7,25.8,51.7">
+    </path>
+    <g id="Clip-22">
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

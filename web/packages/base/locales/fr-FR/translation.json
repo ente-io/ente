@@ -225,6 +225,7 @@
     "delete_album": "Supprimer l'album",
     "delete_album_title": "Supprimer l'album?",
     "delete_album_message": "Supprimer aussi les photos (et vidéos) présentes dans cet album depuis <a>tous</a> les autres albums dont ils font partie?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Supprimer des photos",
     "keep_photos": "Conserver des photos",
     "share_album": "Partager l'album",

@@ -225,6 +225,7 @@
     "delete_album": "Excluir álbum",
     "delete_album_title": "Excluir álbum?",
     "delete_album_message": "E excluir as fotos (e vídeos) presentes neste álbum de <a>TODOS</a> os outros álbuns que eles fazem parte?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Excluir fotos",
     "keep_photos": "Manter fotos",
     "share_album": "Compartilhar álbum",

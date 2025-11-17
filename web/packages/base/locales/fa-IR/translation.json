@@ -225,6 +225,7 @@
     "delete_album": "",
     "delete_album_title": "",
     "delete_album_message": "",
+    "delete_album_message_no_photos": "",
     "delete_photos": "",
     "keep_photos": "",
     "share_album": "",

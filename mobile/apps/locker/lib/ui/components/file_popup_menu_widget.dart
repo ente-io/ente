@@ -8,6 +8,7 @@ import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/utils/file_actions.dart";
+import "package:locker/utils/file_util.dart";
 
 class FilePopupMenuWidget extends StatelessWidget {
   final EnteFile file;
@@ -90,6 +91,21 @@ class FilePopupMenuWidget extends StatelessWidget {
         ),
       ),
       PopupMenuItem<String>(
+        value: 'download',
+        padding: EdgeInsets.zero,
+        height: 0,
+        child: PopupMenuItemWidget(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedDownload01,
+            color: colorScheme.textBase,
+            size: 20,
+          ),
+          label: "Save",
+          isFirst: false,
+          isLast: false,
+        ),
+      ),
+      PopupMenuItem<String>(
         value: 'share_link',
         padding: EdgeInsets.zero,
         height: 0,
@@ -137,6 +153,9 @@ class FilePopupMenuWidget extends StatelessWidget {
       case 'edit':
         _editFile(context);
         break;
+      case 'download':
+        _downloadFile(context);
+        break;
       case 'share_link':
         _shareFileLink(context);
         break;
@@ -148,6 +167,10 @@ class FilePopupMenuWidget extends StatelessWidget {
 
   Future<void> _shareFileLink(BuildContext context) async {
     await FileActions.shareFileLink(context, file);
+  }
+
+  Future<void> _downloadFile(BuildContext context) async {
+    await FileUtil.downloadFile(context, file);
   }
 
   Future<void> _deleteFile(BuildContext context) async {
