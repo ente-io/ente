@@ -225,6 +225,7 @@
     "delete_album": "Ištrinti albumą",
     "delete_album_title": "Ištrinti albumą?",
     "delete_album_message": "Taip pat ištrinti šiame albume esančias nuotraukas (ir vaizdo įrašus) iš <a>visų</a> kitų albumų, kuriuose jos yra dalis?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Ištrinti nuotraukas",
     "keep_photos": "Laikyti nuotraukas",
     "share_album": "Bendrinti albumą",

@@ -225,6 +225,7 @@
     "delete_album": "删除相册",
     "delete_album_title": "要删除相册吗？",
     "delete_album_message": "也删除此相册中存在的照片(和视频)，从 <a>他们所加入的所有</a> 个其他相册？",
+    "delete_album_message_no_photos": "",
     "delete_photos": "删除照片",
     "keep_photos": "保留照片",
     "share_album": "共享相册",
