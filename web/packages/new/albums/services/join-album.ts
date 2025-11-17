@@ -42,10 +42,14 @@ export const storeJoinAlbumContext = async (
     const accessTokenJWT =
         await savedPublicCollectionAccessTokenJWT(accessToken);
 
-    log.info("[Join Album] Storing context with JWT:", {
+    log.info("[Join Album] Retrieving JWT from storage:", {
         accessToken,
+        storageKey: `public-${accessToken}-passkey`,
         hasJWT: !!accessTokenJWT,
         jwtLength: accessTokenJWT?.length,
+        jwtPreview: accessTokenJWT
+            ? accessTokenJWT.substring(0, 20) + "..."
+            : null,
     });
 
     const context: JoinAlbumContext = {
@@ -123,23 +127,28 @@ export const joinPublicAlbum = async (
     const authHeaders = await authenticatedRequestHeaders();
     const url = await apiURL("/collections/join-link");
 
+    const headers = {
+        "Content-Type": "application/json",
+        ...authHeaders,
+        "X-Auth-Access-Token": accessToken,
+        ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }), // Include JWT for password-protected albums
+    };
+
     log.info("[Join Album] API Request:", {
         collectionID,
         hasAccessToken: !!accessToken,
         hasJWT: !!accessTokenJWT,
         jwtLength: accessTokenJWT?.length,
+        jwtPreview: accessTokenJWT
+            ? accessTokenJWT.substring(0, 20) + "..."
+            : null,
+        headers: Object.keys(headers),
+        hasJWTHeader: "X-Auth-Access-Token-JWT" in headers,
     });
 
     const response = await fetch(url, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...authHeaders,
-            "X-Auth-Access-Token": accessToken,
-            ...(accessTokenJWT && {
-                "X-Auth-Access-Token-JWT": accessTokenJWT,
-            }), // Include JWT for password-protected albums
-        },
+        headers,
         body: JSON.stringify({ collectionID, encryptedKey }),
     });
 

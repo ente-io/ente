@@ -387,16 +387,29 @@ export default function PublicCollectionGallery() {
     ) => {
         try {
             const accessToken = credentials.current!.accessToken;
+            log.info(
+                "[Shared Albums] Verifying password for accessToken:",
+                accessToken,
+            );
             const accessTokenJWT = await verifyPublicAlbumPassword(
                 publicCollection!.publicURLs[0]!,
                 password,
                 accessToken,
             );
+            log.info("[Shared Albums] JWT obtained:", {
+                accessToken,
+                jwtLength: accessTokenJWT.length,
+                jwtPreview: accessTokenJWT.substring(0, 20) + "...",
+            });
             credentials.current!.accessTokenJWT = accessTokenJWT;
             downloadManager.setPublicAlbumsCredentials(credentials.current);
             await savePublicCollectionAccessTokenJWT(
                 accessToken,
                 accessTokenJWT,
+            );
+            log.info(
+                "[Shared Albums] JWT saved to localStorage with key:",
+                `public-${accessToken}-passkey`,
             );
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
@@ -580,6 +593,7 @@ export default function PublicCollectionGallery() {
                                             collectionKey={
                                                 collectionKey.current
                                             }
+                                            credentials={credentials}
                                         />
                                     ) : null}
                                 </Stack>
@@ -687,6 +701,9 @@ interface GoToEnteProps {
     accessToken?: string;
     /** Collection key from URL (base64 encoded) */
     collectionKey?: string;
+    /** Credentials ref for JWT token access */
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
+    credentials?: React.MutableRefObject<PublicAlbumsCredentials | undefined>;
 }
 
 const GoToEnte: React.FC<GoToEnteProps> = ({
@@ -694,6 +711,7 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
     publicCollection,
     accessToken,
     collectionKey,
+    credentials,
 }) => {
     // Touchscreen devices are overwhemingly likely to be Android or iOS.
     const isTouchscreen = useIsTouchscreen();
@@ -706,6 +724,17 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
 
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
+
+        // Log the current state before attempting to store context
+        const hasCredentialsJWT = credentials?.current
+            ? !!credentials.current.accessTokenJWT
+            : false;
+        log.info("[Shared Albums] handleJoinAlbum called:", {
+            accessToken,
+            isPasswordProtected:
+                !!publicCollection.publicURLs[0]?.passwordEnabled,
+            hasCredentialsJWT,
+        });
 
         // Check if on mobile and try deep link first
         if (isTouchscreen) {
@@ -731,6 +760,21 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 // Set a timeout to check if we're still on the page
                 // If we are, the app didn't open, so proceed with web flow
                 setTimeout(async () => {
+                    // If this is a password-protected album and we have the JWT, ensure it's saved
+                    const jwtToken = credentials?.current?.accessTokenJWT;
+                    if (
+                        publicCollection.publicURLs[0]?.passwordEnabled &&
+                        jwtToken
+                    ) {
+                        log.info(
+                            "[Shared Albums] Ensuring JWT is saved before redirect (iOS)",
+                        );
+                        await savePublicCollectionAccessTokenJWT(
+                            accessToken,
+                            jwtToken,
+                        );
+                    }
+
                     // Store the album context before redirecting to auth
                     await storeJoinAlbumContext(
                         accessToken,
@@ -755,6 +799,21 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 setTimeout(async () => {
                     // Check if we're still on the page (app didn't open)
                     if (document.visibilityState === "visible") {
+                        // If this is a password-protected album and we have the JWT, ensure it's saved
+                        const jwtToken = credentials?.current?.accessTokenJWT;
+                        if (
+                            publicCollection.publicURLs[0]?.passwordEnabled &&
+                            jwtToken
+                        ) {
+                            log.info(
+                                "[Shared Albums] Ensuring JWT is saved before redirect (Android)",
+                            );
+                            await savePublicCollectionAccessTokenJWT(
+                                accessToken,
+                                jwtToken,
+                            );
+                        }
+
                         // Store the album context before redirecting to auth
                         await storeJoinAlbumContext(
                             accessToken,
@@ -774,6 +833,21 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
 
                 setTimeout(async () => {
                     if (document.visibilityState === "visible") {
+                        // If this is a password-protected album and we have the JWT, ensure it's saved
+                        const jwtToken = credentials?.current?.accessTokenJWT;
+                        if (
+                            publicCollection.publicURLs[0]?.passwordEnabled &&
+                            jwtToken
+                        ) {
+                            log.info(
+                                "[Shared Albums] Ensuring JWT is saved before redirect (other mobile)",
+                            );
+                            await savePublicCollectionAccessTokenJWT(
+                                accessToken,
+                                jwtToken,
+                            );
+                        }
+
                         // Store the album context before redirecting to auth
                         await storeJoinAlbumContext(
                             accessToken,
@@ -790,6 +864,15 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             }
         } else {
             // Desktop or non-mobile: use the standard web flow
+            // If this is a password-protected album and we have the JWT, ensure it's saved
+            const jwtToken = credentials?.current?.accessTokenJWT;
+            if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
+                log.info(
+                    "[Shared Albums] Ensuring JWT is saved before redirect",
+                );
+                await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
+            }
+
             // Store the album context before redirecting to auth
             await storeJoinAlbumContext(
                 accessToken,

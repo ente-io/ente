@@ -235,10 +235,18 @@ export const removePublicCollectionLastSyncTime = async (
  */
 export const savedPublicCollectionAccessTokenJWT = async (
     accessToken: string,
-) =>
-    LocalString.parse(
-        await localForage.getItem(`public-${accessToken}-passkey`),
-    );
+) => {
+    const key = `public-${accessToken}-passkey`;
+    const value = await localForage.getItem(key);
+    console.log("[Public Albums FDB] Retrieving JWT:", {
+        accessToken,
+        key,
+        hasValue: !!value,
+        valueType: typeof value,
+        valueLength: typeof value === "string" ? value.length : null,
+    });
+    return LocalString.parse(value);
+};
 
 /**
  * Update the access token JWT in our local database for the given public
@@ -251,7 +259,14 @@ export const savePublicCollectionAccessTokenJWT = async (
     accessToken: string,
     passwordJWT: string,
 ) => {
-    await localForage.setItem(`public-${accessToken}-passkey`, passwordJWT);
+    const key = `public-${accessToken}-passkey`;
+    console.log("[Public Albums FDB] Saving JWT:", {
+        accessToken,
+        key,
+        jwtLength: passwordJWT?.length,
+        jwtPreview: passwordJWT ? passwordJWT.substring(0, 20) + "..." : null,
+    });
+    await localForage.setItem(key, passwordJWT);
 };
 
 /**
