@@ -225,6 +225,7 @@
     "delete_album": "Xóa album",
     "delete_album_title": "Xóa album?",
     "delete_album_message": "Xóa luôn ảnh (và video) trong album này <a>khỏi toàn bộ album khác</a> cũng đang chứa chúng?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Xóa ảnh",
     "keep_photos": "Giữ ảnh",
     "share_album": "Chia sẻ album",

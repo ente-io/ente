@@ -225,6 +225,7 @@
     "delete_album": "Poista albumi",
     "delete_album_title": "Poistetaanko albumi?",
     "delete_album_message": "Poistetaanko tämän albumin kuvat (ja videot) myös <a>kaikilta</a> muilta albumeilta, joilla ne ovat?",
+    "delete_album_message_no_photos": "",
     "delete_photos": "",
     "keep_photos": "",
     "share_album": "",

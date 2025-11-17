@@ -225,6 +225,7 @@
     "delete_album": "Radera album",
     "delete_album_title": "Radera album?",
     "delete_album_message": "",
+    "delete_album_message_no_photos": "",
     "delete_photos": "Radera foton",
     "keep_photos": "Behåll foton",
     "share_album": "Dela album",
