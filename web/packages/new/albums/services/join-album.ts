@@ -19,23 +19,34 @@ export interface JoinAlbumContext {
     collectionKey: string; // Base64 encoded collection key for API calls
     collectionKeyHash: string; // Original hash value from URL (base58 or hex)
     collectionID: number;
+    accessTokenJWT?: string; // JWT token for password-protected albums
 }
 
 /**
  * Store the album context before redirecting to auth.
  * This preserves the album information across the authentication flow.
  */
-export const storeJoinAlbumContext = (
+export const storeJoinAlbumContext = async (
     accessToken: string,
     collectionKey: string,
     collectionKeyHash: string,
     collection: Collection,
 ) => {
+    // Import the function to get saved JWT token for password-protected albums
+    const { savedPublicCollectionAccessTokenJWT } = await import(
+        "./public-albums-fdb"
+    );
+
+    // Get the JWT token if this is a password-protected album
+    const accessTokenJWT =
+        await savedPublicCollectionAccessTokenJWT(accessToken);
+
     const context: JoinAlbumContext = {
         accessToken,
         collectionKey,
         collectionKeyHash,
         collectionID: collection.id,
+        ...(accessTokenJWT && { accessTokenJWT }), // Include JWT if present
     };
 
     localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(context));
@@ -79,6 +90,7 @@ export const joinPublicAlbum = async (
     accessToken: string,
     collectionID: number,
     encryptedKey: string,
+    accessTokenJWT?: string,
 ): Promise<void> => {
     const authHeaders = await authenticatedRequestHeaders();
     const url = await apiURL("/collections/join-link");
@@ -89,6 +101,9 @@ export const joinPublicAlbum = async (
             "Content-Type": "application/json",
             ...authHeaders,
             "X-Auth-Access-Token": accessToken,
+            ...(accessTokenJWT && {
+                "X-Auth-Access-Token-JWT": accessTokenJWT,
+            }), // Include JWT for password-protected albums
         },
         body: JSON.stringify({ collectionID, encryptedKey }),
     });
@@ -155,8 +170,13 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         // The collection key is already base64 encoded, and boxSeal expects base64
         const encryptedKey = await boxSeal(context.collectionKey, publicKey);
 
-        // Join the album
-        await joinPublicAlbum(context.accessToken, collectionID, encryptedKey);
+        // Join the album (include JWT token if present for password-protected albums)
+        await joinPublicAlbum(
+            context.accessToken,
+            collectionID,
+            encryptedKey,
+            context.accessTokenJWT,
+        );
 
         // Clear the context after successful join
         clearJoinAlbumContext();

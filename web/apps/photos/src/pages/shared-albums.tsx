@@ -698,7 +698,7 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
     // Touchscreen devices are overwhemingly likely to be Android or iOS.
     const isTouchscreen = useIsTouchscreen();
 
-    const handleJoinAlbum = () => {
+    const handleJoinAlbum = async () => {
         if (!publicCollection || !accessToken || !collectionKey) {
             log.error("Missing required data for join album");
             return;
@@ -730,9 +730,9 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
 
                 // Set a timeout to check if we're still on the page
                 // If we are, the app didn't open, so proceed with web flow
-                setTimeout(() => {
+                setTimeout(async () => {
                     // Store the album context before redirecting to auth
-                    storeJoinAlbumContext(
+                    await storeJoinAlbumContext(
                         accessToken,
                         collectionKey,
                         currentHash,
@@ -752,11 +752,11 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 window.location.href = intentURL;
 
                 // Set a timeout as fallback in case intent doesn't work
-                setTimeout(() => {
+                setTimeout(async () => {
                     // Check if we're still on the page (app didn't open)
                     if (document.visibilityState === "visible") {
                         // Store the album context before redirecting to auth
-                        storeJoinAlbumContext(
+                        await storeJoinAlbumContext(
                             accessToken,
                             collectionKey,
                             currentHash,
@@ -772,10 +772,10 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 // For other mobile devices, try the custom scheme with fallback
                 window.location.href = deepLinkURL;
 
-                setTimeout(() => {
+                setTimeout(async () => {
                     if (document.visibilityState === "visible") {
                         // Store the album context before redirecting to auth
-                        storeJoinAlbumContext(
+                        await storeJoinAlbumContext(
                             accessToken,
                             collectionKey,
                             currentHash,
@@ -791,7 +791,7 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         } else {
             // Desktop or non-mobile: use the standard web flow
             // Store the album context before redirecting to auth
-            storeJoinAlbumContext(
+            await storeJoinAlbumContext(
                 accessToken,
                 collectionKey,
                 currentHash,
