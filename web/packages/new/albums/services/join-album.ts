@@ -53,10 +53,21 @@ export const storeJoinAlbumContext = async (
         collectionKey,
         collectionKeyHash,
         collectionID: collection.id,
-        ...(accessTokenJWT && { accessTokenJWT }), // Include JWT if present
     };
 
-    localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, JSON.stringify(context));
+    // Add JWT token if present
+    if (accessTokenJWT) {
+        context.accessTokenJWT = accessTokenJWT;
+    }
+
+    const serializedContext = JSON.stringify(context);
+    log.info("[Join Album] Storing serialized context:", {
+        contextKeys: Object.keys(context),
+        hasJWTInContext: "accessTokenJWT" in context,
+        serializedLength: serializedContext.length,
+    });
+
+    localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, serializedContext);
 };
 
 /**
@@ -65,12 +76,22 @@ export const storeJoinAlbumContext = async (
  */
 export const getJoinAlbumContext = (): JoinAlbumContext | null => {
     const stored = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
-    if (!stored) return null;
+    if (!stored) {
+        log.info("[Join Album] No stored context found");
+        return null;
+    }
 
     try {
         const context = JSON.parse(stored) as JoinAlbumContext;
+        log.info("[Join Album] Retrieved context:", {
+            contextKeys: Object.keys(context),
+            hasJWTInContext: "accessTokenJWT" in context,
+            jwtLength: context.accessTokenJWT?.length,
+            storedLength: stored.length,
+        });
         return context;
     } catch (error) {
+        log.error("[Join Album] Failed to parse stored context", error);
         return null;
     }
 };
