@@ -707,17 +707,101 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
 
-        // Store the album context before redirecting to auth
-        storeJoinAlbumContext(
-            accessToken,
-            collectionKey,
-            currentHash,
-            publicCollection,
-        );
+        // Check if on mobile and try deep link first
+        if (isTouchscreen) {
+            const userAgent = navigator.userAgent || "";
+            const isIOS =
+                userAgent.includes("iPad") ||
+                userAgent.includes("iPhone") ||
+                userAgent.includes("iPod");
+            const isAndroid = userAgent.includes("Android");
 
-        // Redirect to authentication page with join album flag
-        const redirectURL = getAuthRedirectURL();
-        window.location.href = redirectURL;
+            // Build the deep link URL
+            // Format: ente://shared-album?accessToken={token}#{hash}
+            const deepLinkURL = `ente://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
+
+            if (isIOS) {
+                // For iOS, try universal link first, then custom scheme
+                // Universal links work better for app detection
+                const universalLink = `https://web.ente.io/shared-albums?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
+
+                // Try to open the app using the universal link
+                window.location.href = universalLink;
+
+                // Set a timeout to check if we're still on the page
+                // If we are, the app didn't open, so proceed with web flow
+                setTimeout(() => {
+                    // Store the album context before redirecting to auth
+                    storeJoinAlbumContext(
+                        accessToken,
+                        collectionKey,
+                        currentHash,
+                        publicCollection,
+                    );
+
+                    // Redirect to authentication page with join album flag
+                    const redirectURL = getAuthRedirectURL();
+                    window.location.href = redirectURL;
+                }, 2500);
+            } else if (isAndroid) {
+                // For Android, use intent URL with fallback
+                // This provides a smoother experience with automatic fallback
+                const intentURL = `intent://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=ente;package=io.ente.photos;end`;
+
+                // Try to open the app using the intent
+                window.location.href = intentURL;
+
+                // Set a timeout as fallback in case intent doesn't work
+                setTimeout(() => {
+                    // Check if we're still on the page (app didn't open)
+                    if (document.visibilityState === "visible") {
+                        // Store the album context before redirecting to auth
+                        storeJoinAlbumContext(
+                            accessToken,
+                            collectionKey,
+                            currentHash,
+                            publicCollection,
+                        );
+
+                        // Redirect to authentication page with join album flag
+                        const redirectURL = getAuthRedirectURL();
+                        window.location.href = redirectURL;
+                    }
+                }, 2500);
+            } else {
+                // For other mobile devices, try the custom scheme with fallback
+                window.location.href = deepLinkURL;
+
+                setTimeout(() => {
+                    if (document.visibilityState === "visible") {
+                        // Store the album context before redirecting to auth
+                        storeJoinAlbumContext(
+                            accessToken,
+                            collectionKey,
+                            currentHash,
+                            publicCollection,
+                        );
+
+                        // Redirect to authentication page with join album flag
+                        const redirectURL = getAuthRedirectURL();
+                        window.location.href = redirectURL;
+                    }
+                }, 2500);
+            }
+        } else {
+            // Desktop or non-mobile: use the standard web flow
+            // Store the album context before redirecting to auth
+            storeJoinAlbumContext(
+                accessToken,
+                collectionKey,
+                currentHash,
+                publicCollection,
+            );
+
+            // Redirect to authentication page with join album flag
+            const redirectURL = getAuthRedirectURL();
+            window.location.href = redirectURL;
+        }
     };
 
     if (enableJoin) {
@@ -732,9 +816,12 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
     const getActionURL = () => {
         if (isTouchscreen) {
             // For mobile devices, redirect to app stores
-            const userAgent = navigator.userAgent || navigator.vendor;
-            const isIOS = /iPad|iPhone|iPod/.test(userAgent);
-            const isAndroid = /Android/.test(userAgent);
+            const userAgent = navigator.userAgent || "";
+            const isIOS =
+                userAgent.includes("iPad") ||
+                userAgent.includes("iPhone") ||
+                userAgent.includes("iPod");
+            const isAndroid = userAgent.includes("Android");
 
             if (isIOS) {
                 return "https://apps.apple.com/app/id1542026904";
