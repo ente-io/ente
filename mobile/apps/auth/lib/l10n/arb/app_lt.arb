@@ -9,7 +9,13 @@
   "onBoardingBody": "Saugiai kurkite savo atsargines 2FA kodų kopijas",
   "onBoardingGetStarted": "Pradėti",
   "setupFirstAccount": "Nustatykite savo pirmąją paskyrą",
+  "allTabEmptyHint": "Čia dar nieko nėra. Palieskite +, kad pridėtumėte kodą, arba atverkite šiukšlinę, kad jį atkurtumėte.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Skenuoti QR kodą",
+  "qrCode": "QR kodas",
+  "qr": "QR",
   "importEnterSetupKey": "Įvesti sąrankos raktą",
   "importAccountPageTitle": "Įvesti paskyros duomenis",
   "secretCanNotBeEmpty": "Paslaptis negali būti tuščia.",

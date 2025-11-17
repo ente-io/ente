@@ -7,9 +7,19 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Proteggi i tuoi codici 2FA",
+  "featureBackupCodes": "Crittografia end-to-end\nbackup e sincronizzazione",
+  "featureSearchEtc": "Ricerca, Tag, Condivisione,\nCodice successivo e molto altro ancora",
+  "featureOpenSource": "Open source e\nverificato da esperti di sicurezza",
+  "signUp": "Iscriviti",
   "onBoardingGetStarted": "Per iniziare",
   "setupFirstAccount": "Configura il tuo primo account",
+  "allTabEmptyHint": "Non c'è ancora nulla qui. Tocca + per aggiungere un codice o apri il Cestino per recuperarne uno.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Scansiona un codice QR",
+  "qrCode": "Codice QR",
+  "qr": "QR",
   "importEnterSetupKey": "Inserisci il codice segreto",
   "importAccountPageTitle": "Inserisci i dettagli del tuo account",
   "secretCanNotBeEmpty": "La chiave segreta è obbligatoria",
@@ -138,6 +148,7 @@
   "existingUser": "Accedi",
   "newUser": "Nuovo utente",
   "delete": "Cancella",
+  "addTag": "Aggiungi tag",
   "enterYourPasswordHint": "Inserisci la tua password",
   "forgotPassword": "Password dimenticata",
   "oops": "Oops",
@@ -300,6 +311,7 @@
   "checking": "Controllo...",
   "youAreOnTheLatestVersion": "Stai utilizzando l'ultima versione",
   "warning": "Attenzione",
+  "note": "Nota",
   "exportWarningDesc": "Il file esportato contiene informazioni sensibili. Si prega di memorizzarlo in maniera sicura.",
   "iUnderStand": "Ho capito",
   "@iUnderStand": {
@@ -368,6 +380,7 @@
   "useOffline": "Utilizzare senza backup",
   "signInToBackup": "Accedi per salvare i tuoi codici",
   "singIn": "Accedi",
+  "sigInBackupReminder": "Ente eseguirà automaticamente il backup dei codici dopo l'accesso.\n\nConsigliamo comunque di esportare i codici come backup aggiuntivo.",
   "offlineModeWarning": "Hai scelto di procedere senza backup. Si prega di eseguire backup manuali per assicurarsi che i codici siano al sicuro.",
   "showLargeIcons": "Mostra icone grandi",
   "compactMode": "Modalità compatta",
@@ -544,5 +557,31 @@
   "couldNotDetermineLocation": "Impossibile determinare la posizione...",
   "saveBackup": "Salva backup",
   "changeLocation": "Cambia posizione",
-  "changeCurrentLocation": "Cambia la posizione corrente"
+  "changeCurrentLocation": "Cambia la posizione corrente",
+  "done": "Fatto",
+  "addNew": "Aggiungi nuovo",
+  "selected": "selezionato",
+  "moveMultipleToTrashMessage": "Sei sicuro di voler spostare {count} elementi nel cestino?",
+  "nSelected": "{count, plural, one {}=1{1 selezionato} other{{count} selezionati}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, one {}=1{1 elemento fissato} other{{count} elementi fissati}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  }
 }

@@ -7,8 +7,16 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Zabezpiecz swoje kody 2FA",
+  "featureBackupCodes": "Kompleksowo szyfrowane\nkopie zapasowe i synchronizacja",
+  "featureSearchEtc": "Szukaj, tagi, udostępnianie,\nnastępny kod i wiele więcej",
+  "featureOpenSource": "Oprogramowanie typu open source,\naudytowane przez ekspertów ds. bezpieczeństwa",
+  "signUp": "Zarejestruj się",
   "onBoardingGetStarted": "Wprowadzenie",
   "setupFirstAccount": "Skonfiguruj pierwsze konto",
+  "allTabEmptyHint": "Nic tu nie ma. Stuknij +, aby dodać kod lub otwórz kosz, aby go odzyskać.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Zeskanuj kod QR",
   "qrCode": "Kod QR",
   "qr": "QR",

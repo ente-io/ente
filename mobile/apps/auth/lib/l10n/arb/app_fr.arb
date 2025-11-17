@@ -7,8 +7,16 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Sécurisez vos codes A2F",
+  "featureBackupCodes": "Synchronisation et sauvegarde cryptés de bout-en-bout",
+  "featureSearchEtc": "Recherche, Tags, Partage,\nCode suivant et bien plus encore",
+  "featureOpenSource": "Open source et\naudité par des experts en sécurité",
+  "signUp": "S'inscrire",
   "onBoardingGetStarted": "Premiers pas",
   "setupFirstAccount": "Configurez votre premier compte",
+  "allTabEmptyHint": "Rien ici pour l'instant. Appuyez sur + pour ajouter un code ou ouvrez la corbeille pour en récupérer un.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Scannez un QR Code",
   "qrCode": "QR code",
   "qr": "QR",
