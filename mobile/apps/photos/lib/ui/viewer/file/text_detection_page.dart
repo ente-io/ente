@@ -3,12 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:mobile_ocr/mobile_ocr.dart';
 import 'package:photos/l10n/l10n.dart';
-import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/models/file/file.dart';
+import 'package:photos/ui/viewer/file/zoomable_image.dart';
 
 class TextDetectionPage extends StatefulWidget {
+  final EnteFile file;
   final String imagePath;
 
-  const TextDetectionPage({required this.imagePath, super.key});
+  const TextDetectionPage({
+    required this.file,
+    required this.imagePath,
+    super.key,
+  });
 
   @override
   State<TextDetectionPage> createState() => _TextDetectionPageState();
@@ -23,15 +29,24 @@ class _TextDetectionPageState extends State<TextDetectionPage> {
       backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
+          fit: StackFit.expand,
           children: [
+            IgnorePointer(
+              child: ZoomableImage(
+                widget.file,
+                tagPrefix: "text_detection_",
+                backgroundDecoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+              ),
+            ),
             TextDetectorWidget(
               imagePath: widget.imagePath,
               autoDetect: true,
-              backgroundColor: Colors.black,
+              backgroundColor: Colors.transparent,
               showUnselectedBoundaries: true,
               strings: TextDetectorStrings(
                 processingOverlayMessage: l10n.ocrProcessingOverlayMessage,
-                loadingIndicatorLabel: l10n.ocrLoadingIndicatorLabel,
                 selectionHint: l10n.ocrSelectionHint,
                 noTextDetected: l10n.ocrNoTextDetected,
                 retryButtonLabel: l10n.ocrRetryButtonLabel,
@@ -40,9 +55,6 @@ class _TextDetectionPageState extends State<TextDetectionPage> {
                 imageNotFoundError: l10n.ocrImageNotFoundError,
                 imageDecodeFailedError: l10n.ocrImageDecodeFailedError,
                 genericDetectError: l10n.ocrGenericDetectError,
-              ),
-              loadingWidget: const Center(
-                child: EnteLoadingWidget(color: Colors.white, size: 24),
               ),
               onTextCopied: (text) {
                 HapticFeedback.lightImpact();
