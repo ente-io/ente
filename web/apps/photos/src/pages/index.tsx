@@ -53,6 +53,26 @@ const Page: React.FC = () => {
                     const collectionKeyHash = currentURL.hash.slice(1); // Remove the # character
 
                     if (accessToken && collectionKeyHash) {
+                        console.log("[Index] Processing joinAlbum parameter:", {
+                            accessToken,
+                            hashLength: collectionKeyHash.length,
+                        });
+
+                        // FIRST: Check if we already have a context for this token
+                        // This is critical for password-protected albums
+                        const existingCheck = localStorage.getItem("ente_join_album_context");
+                        if (existingCheck) {
+                            try {
+                                const existing = JSON.parse(existingCheck);
+                                if (existing.accessToken === accessToken && existing.accessTokenJWT) {
+                                    console.log("[Index] ✓ Found existing context with JWT, not modifying");
+                                    return; // Don't modify existing context with JWT
+                                }
+                            } catch (e) {
+                                console.log("[Index] Error checking existing context:", e);
+                            }
+                        }
+
                         // Import the necessary functions to convert the collection key
                         const { extractCollectionKeyFromShareURL } =
                             await import("ente-gallery/services/share");
@@ -68,6 +88,8 @@ const Page: React.FC = () => {
                             "ente_join_album_context",
                         );
                         let existingContext: any = null;
+                        let shouldUpdateContext = false;
+
                         if (existingContextStr) {
                             try {
                                 existingContext =
@@ -81,19 +103,35 @@ const Page: React.FC = () => {
                                         match: existingContext.accessToken === accessToken,
                                     }
                                 );
+
+                                // Only update if it's a different access token
+                                if (existingContext.accessToken !== accessToken) {
+                                    shouldUpdateContext = true;
+                                    console.log("[Index] Different access token, will update context");
+                                } else {
+                                    // Same access token - NEVER overwrite if existing has JWT
+                                    // This preserves the JWT from password-protected albums
+                                    console.log(
+                                        "[Index] Same access token, keeping existing context:",
+                                        {
+                                            hasJWT: !!existingContext.accessTokenJWT,
+                                            collectionID: existingContext.collectionID,
+                                        }
+                                    );
+                                    shouldUpdateContext = false;
+                                }
                             } catch {
-                                // Ignore parse error
+                                // Parse error, will create new context
+                                shouldUpdateContext = true;
+                                console.log("[Index] Failed to parse existing context, will create new");
                             }
+                        } else {
+                            // No existing context, create new
+                            shouldUpdateContext = true;
+                            console.log("[Index] No existing context found, will create new");
                         }
 
-                        // If we already have a context for the same access token, don't overwrite it
-                        // This preserves the JWT token for password-protected albums
-                        if (existingContext && existingContext.accessToken === accessToken) {
-                            console.log(
-                                "[Index] Keeping existing context with JWT:",
-                                !!existingContext.accessTokenJWT,
-                            );
-                        } else {
+                        if (shouldUpdateContext) {
                             // Create new context or update if different access token
                             const context = {
                                 accessToken,
@@ -108,8 +146,11 @@ const Page: React.FC = () => {
                             };
 
                             console.log(
-                                "[Index] Storing new/updated join album context with JWT:",
-                                !!context.accessTokenJWT,
+                                "[Index] Storing new/updated join album context:",
+                                {
+                                    hasJWT: !!context.accessTokenJWT,
+                                    accessToken: context.accessToken,
+                                }
                             );
                             localStorage.setItem(
                                 "ente_join_album_context",
