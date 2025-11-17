@@ -29,21 +29,32 @@ func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
-	// hide private metadata before returning files info in diff
-	for idx := range diff {
-		if diff[idx].OwnerID != userID {
-			diff[idx].MagicMetadata = nil
-		}
-		if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
-			// This indicates that the file is deleted, but we still have a stale entry in the collection
-			log.WithFields(log.Fields{
-				"file_id":       diff[idx].ID,
-				"collection_id": cID,
-				"updated_at":    diff[idx].UpdationTime,
-			}).Warning("stale collection_file found")
-			diff[idx].IsDeleted = true
-		}
-	}
+    // hide private metadata before returning files info in diff
+    for idx := range diff {
+        if diff[idx].OwnerID != userID {
+            diff[idx].MagicMetadata = nil
+            // Strip action fields from non-owners regardless of deletion state
+            diff[idx].Action = nil
+            diff[idx].ActionUserID = nil
+        }
+        // Treat action markers as soft-deletes for non-owners
+        if diff[idx].Action != nil && !diff[idx].IsDeleted {
+            if *diff[idx].Action == "REMOVE" || *diff[idx].Action == "DELETE" || *diff[idx].Action == "DELETE_SUGGESTED" {
+                if diff[idx].OwnerID != userID { // non-owner view: mask as deleted
+                    diff[idx].IsDeleted = true
+                }
+            }
+        }
+        if diff[idx].Metadata.EncryptedData == "-" && !diff[idx].IsDeleted {
+            // This indicates that the file is deleted, but we still have a stale entry in the collection
+            log.WithFields(log.Fields{
+                "file_id":       diff[idx].ID,
+                "collection_id": cID,
+                "updated_at":    diff[idx].UpdationTime,
+            }).Warning("stale collection_file found")
+            diff[idx].IsDeleted = true
+        }
+    }
 	return diff, hasMore, nil
 }
 

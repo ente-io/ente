@@ -1,13 +1,14 @@
 package collections
 
 import (
-	"fmt"
-	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/access"
-	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/stacktrace"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+    "fmt"
+    "github.com/ente-io/museum/ente"
+    "github.com/ente-io/museum/pkg/controller/access"
+    "github.com/ente-io/museum/pkg/utils/auth"
+    time "github.com/ente-io/museum/pkg/utils/time"
+    "github.com/ente-io/stacktrace"
+    "github.com/gin-gonic/gin"
+    log "github.com/sirupsen/logrus"
 )
 
 // AddFiles adds files to a collection
@@ -123,24 +124,152 @@ func (c *CollectionController) MoveFiles(ctx *gin.Context, req ente.MoveFilesReq
 
 // RemoveFilesV3 removes files from a collection as long as owner(s) of the file is different from collection owner
 func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, req ente.RemoveFilesV3Request) error {
-	actorUserID := auth.GetUserID(ctx.Request.Header)
-	resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
-		CollectionID: req.CollectionID,
-		ActorUserID:  actorUserID,
-		VerifyOwner:  false,
-	})
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to verify collection access")
-	}
-	err = c.isRemoveAllowed(ctx, actorUserID, resp.Collection.Owner.ID, resp.Role, req.FileIDs)
-	if err != nil {
-		return stacktrace.Propagate(err, "file removal check failed")
-	}
-	err = c.CollectionRepo.RemoveFilesV3(ctx, req.CollectionID, req.FileIDs)
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to remove files")
-	}
-	return nil
+    actorUserID := auth.GetUserID(ctx.Request.Header)
+    accessResp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+        CollectionID: req.CollectionID,
+        ActorUserID:  actorUserID,
+        VerifyOwner:  false,
+    })
+    if err != nil {
+        return stacktrace.Propagate(err, "failed to verify collection access")
+    }
+
+    collectionOwnerID := accessResp.Collection.Owner.ID
+    role := accessResp.Role
+
+    // Partition fileIDs by owner
+    ownerToFilesMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
+    if err != nil {
+        return stacktrace.Propagate(err, "failed to get owner to fileIDs map")
+    }
+    // Files owned by collection owner
+    ownerOwned := ownerToFilesMap[collectionOwnerID]
+    // Files owned by others (excluding owner)
+    others := make([]int64, 0)
+    for _, fid := range req.FileIDs {
+        // If not in ownerOwned, it's others
+        found := false
+        for _, of := range ownerOwned {
+            if of == fid { found = true; break }
+        }
+        if !found {
+            others = append(others, fid)
+        }
+    }
+
+    // If admin is trying to remove owner's files
+    if len(ownerOwned) > 0 && role != nil && *role == ente.ADMIN && actorUserID != collectionOwnerID {
+        // Populate collection_files with action for owner's files
+        if err := c.CollectionRepo.SuggestDelete(ctx, req.CollectionID, actorUserID, ownerOwned, "REMOVE"); err != nil {
+            return stacktrace.Propagate(err, "failed to set remove action for owner's files")
+        }
+        // Create collection actions entries for owner to act (REMOVE) per file
+        now := time.Microseconds()
+        for i := range ownerOwned {
+            fid := ownerOwned[i]
+            _, err := c.CollectionActionsRepo.Create(ctx, collectionOwnerID, actorUserID, req.CollectionID, &fid, nil, "REMOVE", true, now)
+            if err != nil {
+                return stacktrace.Propagate(err, "failed to create collection action REMOVE")
+            }
+        }
+    } else if len(ownerOwned) > 0 {
+        // Otherwise enforce existing removal rules
+        if err := c.isRemoveAllowed(ctx, actorUserID, collectionOwnerID, role, req.FileIDs); err != nil {
+            return stacktrace.Propagate(err, "file removal check failed")
+        }
+    }
+
+    // Remove files owned by others if allowed
+    if len(others) > 0 {
+        // Validate removal for others set
+        if err := c.isRemoveAllowed(ctx, actorUserID, collectionOwnerID, role, others); err != nil {
+            return stacktrace.Propagate(err, "file removal check failed for others")
+        }
+        if err := c.CollectionRepo.RemoveFilesV3(ctx, req.CollectionID, others); err != nil {
+            return stacktrace.Propagate(err, "failed to remove files")
+        }
+        // Optionally, create pending actions for those owners to delete their files (DELETE_SUGGESTION)
+        // Group by owner and create entries
+        ownersMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, others)
+        if err == nil {
+            for uid, fids := range ownersMap {
+                if uid == actorUserID { continue }
+                now := time.Microseconds()
+                for i := range fids {
+                    fid := fids[i]
+                    _, _ = c.CollectionActionsRepo.Create(ctx, uid, actorUserID, req.CollectionID, &fid, nil, "DELETE_SUGGESTED", true, now)
+                }
+            }
+        }
+    }
+    return nil
+}
+
+// SuggestDeleteInSharedCollection sets DELETE_SUGGESTED action for files owned by others.
+// Only collection owner or admins can call this. Acting user cannot target their own files.
+func (c *CollectionController) SuggestDeleteInSharedCollection(ctx *gin.Context, req ente.SuggestDeleteRequest) error {
+    actorUserID := auth.GetUserID(ctx.Request.Header)
+    accessResp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+        CollectionID: req.CollectionID,
+        ActorUserID:  actorUserID,
+        VerifyOwner:  false,
+    })
+    if err != nil {
+        return stacktrace.Propagate(err, "failed to verify collection access")
+    }
+    // Only owner or admin can suggest
+    if accessResp.Role == nil || (*accessResp.Role != ente.OWNER && *accessResp.Role != ente.ADMIN) {
+        return stacktrace.Propagate(ente.ErrPermissionDenied, "role not allowed to suggest delete")
+    }
+    // Validate all fileIDs exist in the collection
+    if err := c.CollectionRepo.VerifyAllFileIDsExistsInCollection(ctx, req.CollectionID, req.FileIDs); err != nil {
+        return stacktrace.Propagate(err, "file not found in collection")
+    }
+    // Ensure none of the files belong to actor
+    ownerMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
+    if err != nil {
+        return stacktrace.Propagate(err, "failed to get owner map")
+    }
+    if _, ok := ownerMap[actorUserID]; ok {
+        return stacktrace.Propagate(ente.ErrPermissionDenied, "can not suggest delete for actor-owned files")
+    }
+    // Partition into owner-owned and others
+    ownerID := accessResp.Collection.Owner.ID
+    ownersMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
+    if err != nil {
+        return stacktrace.Propagate(err, "failed to get owner map")
+    }
+    now := time.Microseconds()
+    // For owner-owned files: set collection_files actions for both REMOVE and DELETE_SUGGESTED and create pending actions
+    if fids, ok := ownersMap[ownerID]; ok {
+        if err := c.CollectionRepo.SuggestDelete(ctx, req.CollectionID, actorUserID, fids, "REMOVE"); err != nil {
+            return stacktrace.Propagate(err, "failed to set REMOVE action for owner files")
+        }
+        if err := c.CollectionRepo.SuggestDelete(ctx, req.CollectionID, actorUserID, fids, "DELETE_SUGGESTED"); err != nil {
+            return stacktrace.Propagate(err, "failed to set DELETE_SUGGESTED action for owner files")
+        }
+        for i := range fids {
+            fid := fids[i]
+            if _, err := c.CollectionActionsRepo.Create(ctx, ownerID, actorUserID, req.CollectionID, &fid, nil, "REMOVE", true, now); err != nil {
+                return stacktrace.Propagate(err, "failed to create collection action REMOVE")
+            }
+            if _, err := c.CollectionActionsRepo.Create(ctx, ownerID, actorUserID, req.CollectionID, &fid, nil, "DELETE_SUGGESTED", true, now); err != nil {
+                return stacktrace.Propagate(err, "failed to create collection action DELETE_SUGGESTED")
+            }
+        }
+    }
+    // For other owners: remove from collection and create DELETE_SUGGESTED pending action
+    for uid, fids := range ownersMap {
+        if uid == ownerID || uid == actorUserID { continue }
+        if err := c.CollectionRepo.RemoveFilesV3(ctx, req.CollectionID, fids); err != nil {
+            return stacktrace.Propagate(err, "failed to remove other owners' files")
+        }
+        for i := range fids {
+            fid := fids[i]
+            _, _ = c.CollectionActionsRepo.Create(ctx, uid, actorUserID, req.CollectionID, &fid, nil, "DELETE_SUGGESTED", true, now)
+        }
+    }
+    return nil
 }
 
 // isRemoveAllowed verifies that given set of files can be removed from the collection or not

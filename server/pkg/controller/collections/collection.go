@@ -33,8 +33,9 @@ type CollectionController struct {
 	UserRepo           *repo.UserRepository
 	FileRepo           *repo.FileRepository
 	QueueRepo          *repo.QueueRepository
-	CastRepo           *cast.Repository
-	TaskRepo           *repo.TaskLockRepository
+    CastRepo           *cast.Repository
+    TaskRepo           *repo.TaskLockRepository
+    CollectionActionsRepo *repo.CollectionActionsRepository
 }
 
 // Create creates a collection

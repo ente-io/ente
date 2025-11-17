@@ -34,11 +34,19 @@ func (c *CollectionController) GetCastDiff(ctx *gin.Context, sinceTime int64) ([
 	if err != nil {
 		return nil, false, stacktrace.Propagate(err, "")
 	}
-	// hide private metadata before returning files info in diff
-	for idx := range diff {
-		if diff[idx].MagicMetadata != nil {
-			diff[idx].MagicMetadata = nil
-		}
-	}
+    // hide private metadata before returning files info in diff
+    for idx := range diff {
+        if diff[idx].MagicMetadata != nil {
+            diff[idx].MagicMetadata = nil
+        }
+        // For cast diffs, treat action markers as deleted and strip action details
+        if diff[idx].Action != nil && !diff[idx].IsDeleted {
+            if *diff[idx].Action == "REMOVE" || *diff[idx].Action == "DELETE" || *diff[idx].Action == "DELETE_SUGGESTED" {
+                diff[idx].IsDeleted = true
+            }
+        }
+        diff[idx].Action = nil
+        diff[idx].ActionUserID = nil
+    }
 	return diff, hasMore, nil
 }

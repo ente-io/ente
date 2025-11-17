@@ -310,6 +310,25 @@ func (h *CollectionHandler) RemoveFilesV3(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// SuggestDeleteInSharedCollection allows collection owner or admins to suggest deletion
+// of files owned by others in a shared collection. The request must exclude files owned by the actor.
+func (h *CollectionHandler) SuggestDeleteInSharedCollection(c *gin.Context) {
+    var request ente.SuggestDeleteRequest
+    if err := c.ShouldBindJSON(&request); err != nil {
+        handler.Error(c, stacktrace.Propagate(err, ""))
+        return
+    }
+    if len(request.FileIDs) > DefaultMaxBatchSize {
+        handler.Error(c, stacktrace.Propagate(ente.ErrBatchSizeTooLarge, ""))
+        return
+    }
+    if err := h.Controller.SuggestDeleteInSharedCollection(c, request); err != nil {
+        handler.Error(c, stacktrace.Propagate(err, ""))
+        return
+    }
+    c.Status(http.StatusOK)
+}
+
 // GetDiffV2 returns the diff within a collection since a timestamp
 func (h *CollectionHandler) GetDiffV2(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)

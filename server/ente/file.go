@@ -9,21 +9,24 @@ import (
 
 // File represents an encrypted file in the system
 type File struct {
-	ID                 int64          `json:"id"`
-	OwnerID            int64          `json:"ownerID"`
-	CollectionID       int64          `json:"collectionID"`
-	CollectionOwnerID  *int64         `json:"collectionOwnerID"`
-	EncryptedKey       string         `json:"encryptedKey"`
-	KeyDecryptionNonce string         `json:"keyDecryptionNonce"`
-	File               FileAttributes `json:"file" binding:"required"`
-	Thumbnail          FileAttributes `json:"thumbnail" binding:"required"`
-	Metadata           FileAttributes `json:"metadata" binding:"required"`
-	// IsDeleted is True when the file ID is removed from the  CollectionID
-	IsDeleted          bool           `json:"isDeleted"`
-	UpdationTime       int64          `json:"updationTime"`
-	MagicMetadata      *MagicMetadata `json:"magicMetadata,omitempty"`
-	PubicMagicMetadata *MagicMetadata `json:"pubMagicMetadata,omitempty"`
-	Info               *FileInfo      `json:"info,omitempty"`
+    ID                 int64          `json:"id"`
+    OwnerID            int64          `json:"ownerID"`
+    CollectionID       int64          `json:"collectionID"`
+    CollectionOwnerID  *int64         `json:"collectionOwnerID"`
+    EncryptedKey       string         `json:"encryptedKey"`
+    KeyDecryptionNonce string         `json:"keyDecryptionNonce"`
+    File               FileAttributes `json:"file" binding:"required"`
+    Thumbnail          FileAttributes `json:"thumbnail" binding:"required"`
+    Metadata           FileAttributes `json:"metadata" binding:"required"`
+    // IsDeleted is True when the file ID is removed from the  CollectionID
+    IsDeleted          bool           `json:"isDeleted"`
+    UpdationTime       int64          `json:"updationTime"`
+    MagicMetadata      *MagicMetadata `json:"magicMetadata,omitempty"`
+    PubicMagicMetadata *MagicMetadata `json:"pubMagicMetadata,omitempty"`
+    Info               *FileInfo      `json:"info,omitempty"`
+    // Action and ActionUser are optionally set to drive client-side behavior during diffs
+    Action             *string        `json:"action,omitempty"`
+    ActionUserID       *int64         `json:"actionUser,omitempty"`
 }
 
 type MetaFile struct {

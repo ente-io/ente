@@ -1,12 +1,12 @@
 package repo
 
 import (
-	"context"
-	"database/sql"
-	"errors"
-	"fmt"
-	"strconv"
-	"strings"
+    "context"
+    "database/sql"
+    "errors"
+    "fmt"
+    "strconv"
+    "strings"
 
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
@@ -814,26 +814,36 @@ func (repo *FileRepository) GetTotalFileCount() (int64, error) {
 }
 
 func convertRowsToFiles(rows *sql.Rows) ([]ente.File, error) {
-	defer rows.Close()
-	files := make([]ente.File, 0)
-	for rows.Next() {
-		var (
-			file         ente.File
-			updationTime float64
-		)
-		err := rows.Scan(&file.ID, &file.OwnerID, &file.CollectionID, &file.CollectionOwnerID,
-			&file.EncryptedKey, &file.KeyDecryptionNonce,
-			&file.File.DecryptionHeader, &file.Thumbnail.DecryptionHeader,
-			&file.Metadata.DecryptionHeader,
-			&file.Metadata.EncryptedData, &file.MagicMetadata, &file.PubicMagicMetadata,
-			&file.Info, &file.IsDeleted, &updationTime)
-		if err != nil {
-			return files, stacktrace.Propagate(err, "")
-		}
-		file.UpdationTime = int64(updationTime)
-		files = append(files, file)
-	}
-	return files, nil
+    defer rows.Close()
+    files := make([]ente.File, 0)
+    for rows.Next() {
+        var (
+            file         ente.File
+            updationTime float64
+            actionUser   sql.NullInt64
+            action       sql.NullString
+        )
+        err := rows.Scan(&file.ID, &file.OwnerID, &file.CollectionID, &file.CollectionOwnerID,
+            &file.EncryptedKey, &file.KeyDecryptionNonce,
+            &file.File.DecryptionHeader, &file.Thumbnail.DecryptionHeader,
+            &file.Metadata.DecryptionHeader,
+            &file.Metadata.EncryptedData, &file.MagicMetadata, &file.PubicMagicMetadata,
+            &file.Info, &actionUser, &action, &file.IsDeleted, &updationTime)
+        if err != nil {
+            return files, stacktrace.Propagate(err, "")
+        }
+        if actionUser.Valid {
+            v := actionUser.Int64
+            file.ActionUserID = &v
+        }
+        if action.Valid {
+            v := action.String
+            file.Action = &v
+        }
+        file.UpdationTime = int64(updationTime)
+        files = append(files, file)
+    }
+    return files, nil
 }
 
 // scheduleDeletion added a list of files's object ids to delete queue for deletion from datastore
