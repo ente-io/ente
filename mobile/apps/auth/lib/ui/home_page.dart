@@ -1610,17 +1610,15 @@ class _HomePageState extends State<HomePage> {
 
                       final code = _filteredCodes[newIndex];
 
-                      return ClipRect(
-                        child: CodeWidget(
-                          key: ValueKey(
-                            '${code.hashCode}_${newIndex}_$_codeSortKey',
-                          ),
-                          code,
-                          isCompactMode: isCompactMode,
-                          sortKey: _codeSortKey,
-                          enableDesktopContextActions: PlatformUtil.isDesktop(),
-                          selectedCodesBuilder: _selectedCodesForContextMenu,
+                      return CodeWidget(
+                        key: ValueKey(
+                          '${code.hashCode}_${newIndex}_$_codeSortKey',
                         ),
+                        code,
+                        isCompactMode: isCompactMode,
+                        sortKey: _codeSortKey,
+                        enableDesktopContextActions: PlatformUtil.isDesktop(),
+                        selectedCodesBuilder: _selectedCodesForContextMenu,
                       );
                     }),
                     itemCount: _filteredCodes.length + indexOffset,
