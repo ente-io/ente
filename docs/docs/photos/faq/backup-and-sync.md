@@ -208,6 +208,17 @@ Because they're stored as one file, you won't see them as separate items in your
 - **On web**: Hover over a Live Photo to see it animate
 - **On desktop**: Hover over a Live Photo to play it
 
+**Sharing Live Photos:**
+
+Live Photos behave differently depending on how you share them:
+
+- **Using "Send link"**: The recipient gets the full Live Photo with both image and video components
+- **Using the "Share" option**: Only the still image is shared
+- **Using "Download"**: Downloads the complete Live Photo (image + video)
+- **Using "Share" button to save/download**: Only saves the still image
+
+If you want someone to receive the full Live Photo experience, use either "Send link" or have them use the "Download" option.
+
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}
