@@ -92,6 +92,10 @@ class FlagService {
 
   bool get facesTimeline => internalUser;
 
+  Future<void> refreshFlags() async {
+    await _fetch();
+  }
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }

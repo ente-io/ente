@@ -24,12 +24,44 @@ class GrantPermissionsWidget extends StatefulWidget {
 
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
+  bool _showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
+
+  @override
+  void initState() {
+    super.initState();
+    _ensureFlagsLoaded();
+  }
+
+  @override
+  void dispose() {
+    _flagRefresh?.cancel();
+    super.dispose();
+  }
+
+  StreamSubscription<void>? _flagRefresh;
+
+  void _ensureFlagsLoaded() {
+    if (_showOnlyNewFeature) {
+      return;
+    }
+    _flagRefresh =
+        Stream<void>.fromFuture(flagService.refreshFlags()).listen((_) {
+      final bool updated = flagService.enableOnlyBackupFuturePhotos;
+      if (updated != _showOnlyNewFeature && mounted) {
+        setState(() {
+          _showOnlyNewFeature = updated;
+        });
+      }
+    })
+          ..onError((Object error, StackTrace stackTrace) {
+            _logger.warning("Failed to refresh flags", error, stackTrace);
+          });
+  }
 
   @override
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
-    final showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
-    final headerText = showOnlyNewFeature
+    final headerText = _showOnlyNewFeature
         ? context.l10n.chooseHowEnteBacksUp
         : AppLocalizations.of(context).entePhotosPerm;
     return Scaffold(
@@ -93,7 +125,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       ),
       floatingActionButton: _buildActionArea(
         context,
-        showOnlyNewFeature,
+        _showOnlyNewFeature,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
