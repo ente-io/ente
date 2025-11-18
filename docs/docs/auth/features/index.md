@@ -153,12 +153,13 @@ at any time.
 Easily add or share entries using QR codes:
 
 - **Add by scanning (mobile):** On mobile, you can add a new entry by scanning
-  the QR code provided by the service. Access the QR scanner from:
-    - The SpeedDial button (FAB) in the bottom-right corner
-    - The QR code scanner page directly from the main menu
+  the QR code provided by the service. Access the QR scanner from the SpeedDial
+  button (FAB) in the bottom-right corner, which offers the "Scan a QR Code"
+  option.
 
   This quickly adds the entry to Ente Auth. On supported platforms, you can also
-  import QR codes from images saved on your device.
+  import QR codes from images saved on your device by selecting "Import from
+  Gallery" from the SpeedDial button.
 
 - **Show entry as QR code:** On all apps, you can long-press (mobile) or
   right-click (desktop) a code and select "QR". This allows you to easily share
