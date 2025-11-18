@@ -2076,8 +2076,5 @@
   },
   "playfulKids": "Playful kids",
   "coastalCliffs": "Cliffs by the sea",
-  "chooseHowEnteBacksUp": "<i>Choose how </i>Ente backs up your photos",
-  "backupOnlyNewPhotos": "Back up only new photos",
-  "selectFoldersToBackup": "Select folders to back up",
-  "skipForNow": "Skip for now"
+  "chooseHowEnteBacksUp": "Choose how Ente backs up your photos"
 }

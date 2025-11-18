@@ -13,6 +13,7 @@ import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/local_settings.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
@@ -26,6 +27,10 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
   bool _showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
   final LocalSettings _localSettings = localSettings;
+  final Debouncer _onlyNewActionDebouncer = Debouncer(
+    const Duration(milliseconds: 500),
+    leading: true,
+  );
 
   @override
   void initState() {
@@ -36,6 +41,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   @override
   void dispose() {
     _flagRefresh?.cancel();
+    _onlyNewActionDebouncer.cancelDebounceTimer();
     super.dispose();
   }
 
@@ -63,7 +69,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     final headerText = _showOnlyNewFeature
-        ? context.l10n.chooseHowEnteBacksUp
+        ? "<i>Choose how </i>Ente backs up your photos"
         : AppLocalizations.of(context).entePhotosPerm;
     return Scaffold(
       body: SingleChildScrollView(
@@ -180,26 +186,28 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             width: double.infinity,
             child: OutlinedButton(
               key: const ValueKey("onlyNewPhotosButton"),
-              onPressed: _onTapOnlyNewPhotos,
-              child: Text(context.l10n.backupOnlyNewPhotos),
+              onPressed: () => _onlyNewActionDebouncer.run(() async {
+                await _onTapOnlyNewPhotos();
+              }),
+              child: const Text("Backup only new photos"),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               key: const ValueKey("selectFoldersButton"),
               onPressed: _onTapSelectFolders,
-              child: Text(context.l10n.selectFoldersToBackup),
+              child: const Text("Select folders to backup"),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           GestureDetector(
             key: const ValueKey("skipForNowButton"),
             behavior: HitTestBehavior.opaque,
             onTap: _onTapSkip,
             child: Text(
-              context.l10n.skipForNow,
+              "Skip",
               style: Theme.of(context)
                   .textTheme
                   .bodySmall!

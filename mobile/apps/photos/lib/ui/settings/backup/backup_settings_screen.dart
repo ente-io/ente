@@ -17,10 +17,15 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
   static final Logger _logger = Logger('BackupSettingsScreen');
+  static final Debouncer _onlyNewToggleDebouncer = Debouncer(
+    const Duration(milliseconds: 500),
+    leading: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -110,14 +115,13 @@ class BackupSettingsScreen extends StatelessWidget {
                                 bgColor: colorScheme.fillFaint,
                               ),
                               MenuItemWidget(
-                                captionedTextWidget: CaptionedTextWidget(
-                                  title: AppLocalizations.of(context)
-                                      .backupOnlyNewPhotos,
+                                captionedTextWidget: const CaptionedTextWidget(
+                                  title: "Back up only new photos",
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 trailingWidget: ToggleSwitchWidget(
-                                  value: () => localSettings
-                                      .isOnlyNewBackupEnabled,
+                                  value: () =>
+                                      localSettings.isOnlyNewBackupEnabled,
                                   onChanged: () async {
                                     final isEnabled =
                                         localSettings.isOnlyNewBackupEnabled;
@@ -125,12 +129,13 @@ class BackupSettingsScreen extends StatelessWidget {
                                       await _setOnlyNewSinceNow();
                                       await BackupPreferenceService.instance
                                           .autoSelectAllFoldersIfEligible();
-                                      SyncService.instance.sync().ignore();
                                     } else {
                                       await localSettings
                                           .clearOnlyNewSinceEpoch();
-                                      SyncService.instance.sync().ignore();
                                     }
+                                    await _onlyNewToggleDebouncer.run(() async {
+                                      SyncService.instance.sync().ignore();
+                                    });
                                   },
                                 ),
                                 singleBorderRadius: 8,
