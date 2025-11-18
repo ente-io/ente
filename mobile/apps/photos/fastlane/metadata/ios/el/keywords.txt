@@ -1,1 +1,1 @@
-photos,photography,family,privacy,cloud,backup,videos,photo,encryption,storage,album,alternative
+φωτογραφίες,φωτογραφία,οικογένεια,ιδιωτικότητα,cloud,backup,βίντεο,videos,κρυπτογράφηση,αποθήκευση,αποθηκευτικός χώρος,άλμπουμ,εναλλακτική

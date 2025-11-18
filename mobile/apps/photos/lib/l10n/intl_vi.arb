@@ -118,6 +118,10 @@
   "enterYourPassword": "Nhập mật khẩu của bạn",
   "welcomeBack": "Chào mừng trở lại!",
   "contactSupport": "Liên hệ hỗ trợ",
+  "locationPickerTip": "Bạn cũng có thể thêm vị trí tập trung vào ảnh từ phần thông tin của ảnh",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Mật khẩu không đúng",
   "pleaseTryAgain": "Vui lòng thử lại",
   "recreatePasswordTitle": "Tạo lại mật khẩu",
@@ -1849,6 +1853,18 @@
   "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại luồng",
   "videoPreviewAlreadyExists": "Bản xem trước video đã tồn tại",
   "videoAlreadyInQueue": "Tệp video đã có trong hàng đợi",
+  "videoExportFailed": "Tạo video không thành công. Vui lòng thử lại.",
+  "videoExportSuccess": "Đã tạo video thành công tại {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Đã thêm vào hàng đợi",
   "creatingStream": "Đang tạo luồng",
   "similarImages": "Ảnh giống nhau",
