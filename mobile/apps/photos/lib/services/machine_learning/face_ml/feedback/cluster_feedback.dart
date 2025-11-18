@@ -723,7 +723,7 @@ class ClusterFeedbackService<T> {
               .toSet();
           final overlap = personFileIDs.intersection(suggestionSet);
           if (overlap.isNotEmpty &&
-              ((overlap.length / suggestionSet.length) > 0.5)) {
+              ((overlap.length / suggestionSet.length) > 0.1)) {
             await mlDataDB.captureNotPersonFeedback(
               personID: p.remoteID,
               clusterID: suggestion.$1,

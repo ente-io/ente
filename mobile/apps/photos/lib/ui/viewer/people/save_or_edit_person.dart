@@ -480,7 +480,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                       child: Text(
                         context.l10n.orMergeWithExistingPerson,
                         style: getEnteTextTheme(context).largeBold,
