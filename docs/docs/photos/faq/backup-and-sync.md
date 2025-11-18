@@ -196,7 +196,7 @@ Yes! Ente fully supports Live Photos from iPhone.
 
 **How it works:**
 
-When you back up a Live Photo, Ente automatically detects it and packages both the image and video components together into a single encrypted ZIP file. This keeps the two parts linked together.
+When you back up a Live Photo, Ente automatically detects it by analyzing the file name, file path, and creation date (both components must be created within a day of each other). Once detected, Ente packages both the image and video components together into a single encrypted ZIP file. This keeps the two parts linked together.
 
 Ente uses a special hash (unique identifier) that combines both components, ensuring they remain associated with each other. This means when you download or view your Live Photo later, both parts are always retrieved together.
 
