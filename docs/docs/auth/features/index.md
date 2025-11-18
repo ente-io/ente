@@ -158,6 +158,11 @@ Easily add or share entries using QR codes:
   images saved on your device by using the "Import from Gallery" button
   available in the QR scanner page itself.
 
+  > **Note**: The "Import from Gallery" feature is particularly useful when you
+  > have a screenshot or photo of a QR code. Simply save the QR code image to
+  > your device and use this feature to import it without needing to display it
+  > on another screen.
+
 - **Show entry as QR code:** On all apps, you can long-press (mobile) or
   right-click (desktop) a code and select "QR". This allows you to easily share
   the complete entry (including the secret) with others by letting them scan the
