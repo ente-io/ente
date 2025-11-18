@@ -1,11 +1,9 @@
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
+import { photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
-import {
-    getAuthRedirectURL,
-    storeJoinAlbumContext,
-} from "ente-new/albums/services/join-album";
+import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
 import { savePublicCollectionAccessTokenJWT } from "ente-new/albums/services/public-albums-fdb";
 import { t } from "i18next";
 
@@ -83,7 +81,7 @@ export const useJoinAlbum = ({
             if (isIOS) {
                 // For iOS, try universal link first, then custom scheme
                 // Universal links work better for app detection
-                const universalLink = `https://web.ente.io/shared-albums?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
+                const universalLink = `${photosAppOrigin()}/shared-albums?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
 
                 // Try to open the app using the universal link
                 window.location.href = universalLink;
@@ -114,8 +112,14 @@ export const useJoinAlbum = ({
                         publicCollection,
                     );
 
-                    // Redirect to authentication page with join album flag
-                    const redirectURL = getAuthRedirectURL();
+                    // Redirect directly to web app with joinAlbum parameter
+                    const webAppURL = photosAppOrigin();
+
+                    const jwtParam = jwtToken
+                        ? `&jwt=${encodeURIComponent(jwtToken)}`
+                        : "";
+                    const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+
                     window.location.href = redirectURL;
                 }, 2500);
             } else if (isAndroid) {
@@ -153,8 +157,14 @@ export const useJoinAlbum = ({
                             publicCollection,
                         );
 
-                        // Redirect to authentication page with join album flag
-                        const redirectURL = getAuthRedirectURL();
+                        // Redirect directly to web app with joinAlbum parameter
+                        const webAppURL = photosAppOrigin();
+
+                        const jwtParam = jwtToken
+                            ? `&jwt=${encodeURIComponent(jwtToken)}`
+                            : "";
+                        const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+
                         window.location.href = redirectURL;
                     }
                 }, 2500);
@@ -187,8 +197,14 @@ export const useJoinAlbum = ({
                             publicCollection,
                         );
 
-                        // Redirect to authentication page with join album flag
-                        const redirectURL = getAuthRedirectURL();
+                        // Redirect directly to web app with joinAlbum parameter
+                        const webAppURL = photosAppOrigin();
+
+                        const jwtParam = jwtToken
+                            ? `&jwt=${encodeURIComponent(jwtToken)}`
+                            : "";
+                        const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+
                         window.location.href = redirectURL;
                     }
                 }, 2500);
@@ -212,8 +228,14 @@ export const useJoinAlbum = ({
                 publicCollection,
             );
 
-            // Redirect to authentication page with join album flag
-            const redirectURL = getAuthRedirectURL();
+            // Redirect directly to web app with joinAlbum parameter
+            const webAppURL = photosAppOrigin();
+
+            const jwtParam = jwtToken
+                ? `&jwt=${encodeURIComponent(jwtToken)}`
+                : "";
+            const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+
             window.location.href = redirectURL;
         }
     };
@@ -244,11 +266,11 @@ export const useJoinAlbum = ({
                 );
             } else {
                 // For other touchscreen devices, fall back to web
-                window.open("https://web.ente.io", "_blank", "noopener");
+                window.open(photosAppOrigin(), "_blank", "noopener");
             }
         } else {
-            // For desktop or other platforms, redirect to web.ente.io
-            window.open("https://web.ente.io", "_blank", "noopener");
+            // For desktop or other platforms, redirect to photos app
+            window.open(photosAppOrigin(), "_blank", "noopener");
         }
     };
 

@@ -60,6 +60,7 @@ import log from "ente-base/log";
 import {
     albumsAppOrigin,
     isCustomAlbumsAppOrigin,
+    photosAppOrigin,
     shouldOnlyServeAlbumsApp,
 } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
@@ -77,10 +78,7 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import {
-    getAuthRedirectURL,
-    storeJoinAlbumContext,
-} from "ente-new/albums/services/join-album";
+import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
@@ -167,13 +165,7 @@ export default function PublicCollectionGallery() {
             }
 
             // Build the web app URL for authentication
-            // Derive from the current location origin (which is the albums app origin)
-            // In production: albums.ente.io -> web.ente.io
-            // In custom/development: preserves the origin structure (e.g., 192.168.0.61:3002 -> 192.168.0.61:3000)
-            const currentOrigin = window.location.origin;
-            const webAppURL = isCustomAlbumsAppOrigin
-                ? currentOrigin.replace(/:3002$/, ":3000") // Custom endpoint: change port 3002 -> 3000
-                : currentOrigin.replace("albums.", "web."); // Production: albums.ente.io -> web.ente.io
+            const webAppURL = photosAppOrigin();
 
             const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
             const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
@@ -820,7 +812,13 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             // Fallback to web auth if app doesn't open
             setTimeout(() => {
                 if (document.visibilityState === "visible") {
-                    const redirectURL = getAuthRedirectURL();
+                    const webAppURL = photosAppOrigin();
+
+                    const jwtParam = jwtToken
+                        ? `&jwt=${encodeURIComponent(jwtToken)}`
+                        : "";
+                    const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+
                     log.info(
                         "[Shared Albums] Deep link failed, redirecting to:",
                         { redirectURL },
@@ -829,8 +827,14 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 }
             }, 2000);
         } else {
-            // Desktop: Use action=join redirect (will be handled by detection logic)
-            const redirectURL = getAuthRedirectURL();
+            // Desktop: Redirect directly to web app with joinAlbum parameter
+            const webAppURL = photosAppOrigin();
+
+            const jwtParam = jwtToken
+                ? `&jwt=${encodeURIComponent(jwtToken)}`
+                : "";
+            const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+
             log.info("[Shared Albums] Redirecting to:", { redirectURL });
             window.location.href = redirectURL;
         }
@@ -862,8 +866,8 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             }
             // For other touchscreen devices, fall back to web
         }
-        // For desktop or other platforms, redirect to web.ente.io
-        return "https://web.ente.io";
+        // For desktop or other platforms, redirect to photos app
+        return photosAppOrigin();
     };
 
     return (
