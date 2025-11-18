@@ -128,23 +128,32 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           ),
         ),
       ),
-      floatingActionButton: _buildActionArea(
-        context,
-        _showOnlyNewFeature,
-      ),
+      floatingActionButton: _showOnlyNewFeature
+          ? _buildNewFeatureActionArea(context)
+          : Container(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: getEnteColorScheme(context).backgroundBase,
+                    spreadRadius: 190,
+                    blurRadius: 30,
+                    offset: const Offset(0, 170),
+                  ),
+                ],
+              ),
+              width: double.infinity,
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: const ValueKey("grantPermissionButton"),
+                  onPressed: _onTapLegacyContinue,
+                  child: Text(AppLocalizations.of(context).continueLabel),
+                ),
+              ),
+            ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-  }
-
-  Widget _buildActionArea(
-    BuildContext context,
-    bool showOnlyNewFeature,
-  ) {
-    if (showOnlyNewFeature) {
-      return _buildNewFeatureActionArea(context);
-    } else {
-      return _buildLegacyActionArea(context);
-    }
   }
 
   Future<void> _onTapOnlyNewPhotos() async {
@@ -262,31 +271,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     } else {
       return AppLocalizations.of(context).entePhotosPerm;
     }
-  }
-
-  Widget _buildLegacyActionArea(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: getEnteColorScheme(context).backgroundBase,
-            spreadRadius: 190,
-            blurRadius: 30,
-            offset: const Offset(0, 170),
-          ),
-        ],
-      ),
-      width: double.infinity,
-      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-      child: SizedBox(
-        width: double.infinity,
-        child: OutlinedButton(
-          key: const ValueKey("grantPermissionButton"),
-          onPressed: _onTapLegacyContinue,
-          child: Text(AppLocalizations.of(context).continueLabel),
-        ),
-      ),
-    );
   }
 
   Widget _buildNewFeatureActionArea(BuildContext context) {
