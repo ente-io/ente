@@ -796,34 +796,24 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             publicCollection,
         );
 
-        // On mobile: Try to open the app directly using custom URL schemes
-        // This is necessary because App Links don't work for same-domain navigation within a browser
+        // On mobile: Try to open the app directly by constructing an albums.ente.io URL
+        // that will trigger App Links. Use a special path to indicate this is a join request.
         if (isTouchscreen) {
-            const userAgent = navigator.userAgent || "";
-            const isAndroid = userAgent.includes("Android");
+            // Construct a URL that the app will recognize
+            // Format: https://albums.ente.io/join-public-album?t=TOKEN#HASH
+            const albumsOrigin = albumsAppOrigin();
+            const deepLinkURL = `${albumsOrigin}/join-public-album?t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-            if (isAndroid) {
-                // For Android, use intent URL which will open app or fall back gracefully
-                const intentURL = `intent://join-album?t=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=ente;package=io.ente.photos;end`;
-                window.location.href = intentURL;
+            // Try opening via App Link
+            window.location.href = deepLinkURL;
 
-                // Fallback to web auth if app doesn't open
-                setTimeout(() => {
-                    if (document.visibilityState === "visible") {
-                        const redirectURL = getAuthRedirectURL();
-                        window.location.href = redirectURL;
-                    }
-                }, 2000);
-            } else {
-                // For iOS and other mobile, try custom scheme then fallback
-                const deepLinkURL = `ente://join-album?t=${encodeURIComponent(accessToken)}#${currentHash}`;
-                window.location.href = deepLinkURL;
-
-                setTimeout(() => {
+            // Fallback to web auth if app doesn't open
+            setTimeout(() => {
+                if (document.visibilityState === "visible") {
                     const redirectURL = getAuthRedirectURL();
                     window.location.href = redirectURL;
-                }, 2000);
-            }
+                }
+            }, 2000);
         } else {
             // Desktop: Use App Links approach (will be handled by action=join detection)
             const redirectURL = getAuthRedirectURL();
