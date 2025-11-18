@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
@@ -425,12 +424,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     final double indicatorSize = isCompactMode ? 16 : 20;
     const double indicatorPadding = 4;
     final double indicatorSlotWidth = indicatorSize + indicatorPadding;
-    final TextStyle? issuerStyle = isCompactMode
-        ? Theme.of(context).textTheme.bodyMedium
-        : Theme.of(context).textTheme.titleLarge;
-    final double issuerLineHeight =
-        (issuerStyle?.fontSize ?? 16) * (issuerStyle?.height ?? 1.0);
-    final double rowHeight = math.max(issuerLineHeight, indicatorSize);
 
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
@@ -441,72 +434,66 @@ class _CodeWidgetState extends State<CodeWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: rowHeight,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      AnimatedContainer(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeInOut,
+                      width: isSelected ? indicatorSlotWidth : 0,
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeInOut,
-                        width: isSelected ? indicatorSlotWidth : 0,
-                        height: rowHeight,
-                        alignment: Alignment.centerLeft,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 180),
-                          switchInCurve: Curves.easeIn,
-                          switchOutCurve: Curves.easeOut,
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(
-                            opacity: animation,
-                            child:
-                                ScaleTransition(scale: animation, child: child),
-                          ),
-                          child: isSelected
-                              ? Align(
-                                  key: const ValueKey('selected-indicator'),
-                                  alignment: Alignment.centerLeft,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: indicatorPadding,
-                                    ),
-                                    child: SizedBox(
-                                      width: indicatorSize,
-                                      height: indicatorSize,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.circle,
-                                            color: colorScheme.primary400,
-                                            size: indicatorSize,
-                                          ),
-                                          Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                            size: isCompactMode ? 8 : 12,
-                                          ),
-                                        ],
-                                      ),
+                        switchInCurve: Curves.easeIn,
+                        switchOutCurve: Curves.easeOut,
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child:
+                              ScaleTransition(scale: animation, child: child),
+                        ),
+                        child: isSelected
+                            ? Align(
+                                key: const ValueKey('selected-indicator'),
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: indicatorPadding,
+                                  ),
+                                  child: SizedBox(
+                                    width: indicatorSize,
+                                    height: indicatorSize,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: colorScheme.primary400,
+                                          size: indicatorSize,
+                                        ),
+                                        Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: isCompactMode ? 8 : 12,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            safeDecode(widget.code.issuer).trim(),
-                            style: issuerStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        safeDecode(widget.code.issuer).trim(),
+                        style: isCompactMode
+                            ? Theme.of(context).textTheme.bodyMedium
+                            : Theme.of(context).textTheme.titleLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 if (!isCompactMode) const SizedBox(height: 2),
                 Text(
