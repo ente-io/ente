@@ -5,10 +5,12 @@ import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
+import 'package:photos/l10n/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
@@ -42,30 +44,66 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   void initState() {
-    FilesDB.instance
-        .getDeviceCollections(includeCoverThumbnail: true)
-        .then((files) async {
-      _pathIDToItemCount =
-          await FilesDB.instance.getDevicePathIDToImportedFileCount();
-      setState(() {
-        _deviceCollections = files;
-        _deviceCollections!.sort((first, second) {
-          return first.name.toLowerCase().compareTo(second.name.toLowerCase());
-        });
-        for (final file in _deviceCollections!) {
-          _allDevicePathIDs.add(file.id);
-          if (file.shouldBackup) {
-            _selectedDevicePathIDs.add(file.id);
-          }
-        }
-        if (widget.isOnboarding && !localSettings.hasManualFolderSelection) {
-          _selectedDevicePathIDs.addAll(_allDevicePathIDs);
-        }
-        _selectedDevicePathIDs
-            .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
-      });
-    });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDeviceCollections();
+    });
+  }
+
+  Future<void> _loadDeviceCollections() async {
+    final hasPermission = await _ensurePermissions();
+    if (!hasPermission) {
+      return;
+    }
+    final files = await FilesDB.instance
+        .getDeviceCollections(includeCoverThumbnail: true);
+    _pathIDToItemCount =
+        await FilesDB.instance.getDevicePathIDToImportedFileCount();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _deviceCollections = files;
+      _deviceCollections!.sort((first, second) {
+        return first.name.toLowerCase().compareTo(second.name.toLowerCase());
+      });
+      for (final file in _deviceCollections!) {
+        _allDevicePathIDs.add(file.id);
+        if (file.shouldBackup) {
+          _selectedDevicePathIDs.add(file.id);
+        }
+      }
+      if (widget.isOnboarding) {
+        _selectedDevicePathIDs.addAll(_allDevicePathIDs);
+      }
+      _selectedDevicePathIDs
+          .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
+    });
+  }
+
+  Future<bool> _ensurePermissions() async {
+    if (permissionService.hasGrantedPermissions()) {
+      return true;
+    }
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      return true;
+    }
+    if (!mounted) {
+      return false;
+    }
+    await showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+    );
+    return false;
   }
 
   @override
