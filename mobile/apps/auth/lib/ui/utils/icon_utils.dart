@@ -42,8 +42,7 @@ class IconUtils {
 
       while (simpleEntry != null && customEntry != null) {
         if (simpleEntry.key.compareTo(customEntry.key) <= 0) {
-          simpleIconPath =
-              "assets/simple-icons/icons/${simpleEntry.key}.svg";
+          simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
           if (!processedIconPaths.contains(simpleIconPath)) {
             allIcons[simpleEntry.key] = AllIconData(
               title: simpleEntry.key,
@@ -52,7 +51,8 @@ class IconUtils {
             );
             processedIconPaths.add(simpleIconPath);
           }
-          simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
+          simpleEntry =
+              simpleIterator.moveNext() ? simpleIterator.current : null;
         } else {
           customIconPath =
               "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
@@ -164,22 +164,31 @@ class IconUtils {
     BuildContext context,
   ) {
     final iconColor = _getAdaptiveColor(color, context);
-    return SvgPicture.asset(
-      path,
-      width: width,
-      semanticsLabel: title,
-      colorFilter: iconColor != null
-          ? ColorFilter.mode(
-              iconColor,
-              BlendMode.srcIn,
-            )
-          : null,
-      errorBuilder: (context, error, stackTrace) {
-        Logger("IconUtils")
-            .warning("Failed to load icon $path", error, stackTrace);
-        return _fallbackAvatar(title, width, context);
-      },
-    );
+    try {
+      return SvgPicture.asset(
+        path,
+        width: width,
+        semanticsLabel: title,
+        colorFilter: iconColor != null
+            ? ColorFilter.mode(
+                iconColor,
+                BlendMode.srcIn,
+              )
+            : null,
+        errorBuilder: (context, error, stackTrace) {
+          Logger("IconUtils")
+              .warning("Failed to load icon $path", error, stackTrace);
+          return _fallbackAvatar(title, width, context);
+        },
+      );
+    } catch (e, s) {
+      Logger("IconUtils").warning(
+        "Failed to create SVG icon for '$title' at path '$path'",
+        e,
+        s,
+      );
+      return _fallbackAvatar(title, width, context);
+    }
   }
 
   Widget _fallbackAvatar(String provider, double width, BuildContext context) {
@@ -194,9 +203,11 @@ class IconUtils {
       child: Text(
         providerTitle.toUpperCase()[0],
         style: showLargeIcon
-            ? getEnteTextTheme(context).h3Bold
+            ? getEnteTextTheme(context)
+                .h3Bold
                 .copyWith(color: Colors.white, fontSize: width * 0.6)
-            : getEnteTextTheme(context).body
+            : getEnteTextTheme(context)
+                .body
                 .copyWith(color: Colors.white, fontSize: width * 0.6),
       ),
     );

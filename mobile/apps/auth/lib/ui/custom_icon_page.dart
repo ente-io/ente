@@ -5,6 +5,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 
 class CustomIconPage extends StatefulWidget {
   final Map<String, AllIconData> allIcons;
@@ -178,22 +179,35 @@ class _CustomIconPageState extends State<CustomIconPage> {
                       String? color = iconData.color;
                       String? slug = iconData.slug;
                       Widget iconWidget;
-                      if (iconType == IconType.simpleIcon) {
-                        final simpleIconPath = normalizeSimpleIconName(title);
-                        iconWidget = IconUtils.instance.getSVGIcon(
-                          "assets/simple-icons/icons/$simpleIconPath.svg",
-                          title,
-                          color,
-                          40,
-                          context,
+                      try {
+                        if (iconType == IconType.simpleIcon) {
+                          final simpleIconPath = normalizeSimpleIconName(title);
+                          iconWidget = IconUtils.instance.getSVGIcon(
+                            "assets/simple-icons/icons/$simpleIconPath.svg",
+                            title,
+                            color,
+                            40,
+                            context,
+                          );
+                        } else {
+                          iconWidget = IconUtils.instance.getSVGIcon(
+                            "assets/custom-icons/icons/${slug ?? title}.svg",
+                            title,
+                            color,
+                            40,
+                            context,
+                          );
+                        }
+                      } catch (e, s) {
+                        Logger("CustomIconPage").warning(
+                          "Failed to render icon '$title'",
+                          e,
+                          s,
                         );
-                      } else {
-                        iconWidget = IconUtils.instance.getSVGIcon(
-                          "assets/custom-icons/icons/${slug ?? title}.svg",
-                          title,
-                          color,
-                          40,
+                        iconWidget = IconUtils.instance.getIcon(
                           context,
+                          title,
+                          width: 40,
                         );
                       }
 
