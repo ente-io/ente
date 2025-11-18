@@ -796,12 +796,40 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             publicCollection,
         );
 
-        // Redirect to albums.ente.io with action=join parameter
-        // On mobile with app installed: App Links/Universal Links will open the app
-        // On mobile without app / desktop: Will open in browser, then redirect to web.ente.io for auth
-        const redirectURL = getAuthRedirectURL();
-        log.info("[Shared Albums] Redirecting to:", { redirectURL });
-        window.location.href = redirectURL;
+        // On mobile: Try to open the app directly using custom URL schemes
+        // This is necessary because App Links don't work for same-domain navigation within a browser
+        if (isTouchscreen) {
+            const userAgent = navigator.userAgent || "";
+            const isAndroid = userAgent.includes("Android");
+
+            if (isAndroid) {
+                // For Android, use intent URL which will open app or fall back gracefully
+                const intentURL = `intent://join-album?t=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=ente;package=io.ente.photos;end`;
+                window.location.href = intentURL;
+
+                // Fallback to web auth if app doesn't open
+                setTimeout(() => {
+                    if (document.visibilityState === "visible") {
+                        const redirectURL = getAuthRedirectURL();
+                        window.location.href = redirectURL;
+                    }
+                }, 2000);
+            } else {
+                // For iOS and other mobile, try custom scheme then fallback
+                const deepLinkURL = `ente://join-album?t=${encodeURIComponent(accessToken)}#${currentHash}`;
+                window.location.href = deepLinkURL;
+
+                setTimeout(() => {
+                    const redirectURL = getAuthRedirectURL();
+                    window.location.href = redirectURL;
+                }, 2000);
+            }
+        } else {
+            // Desktop: Use App Links approach (will be handled by action=join detection)
+            const redirectURL = getAuthRedirectURL();
+            log.info("[Shared Albums] Redirecting to:", { redirectURL });
+            window.location.href = redirectURL;
+        }
     };
 
     if (enableJoin) {
