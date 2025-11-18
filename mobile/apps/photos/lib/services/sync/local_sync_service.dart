@@ -42,8 +42,6 @@ class LocalSyncService {
   Completer<void>? _existingSync;
   late Debouncer _changeCallbackDebouncer;
   final Lock _lock = Lock();
-  bool get _shouldAutoBackupAllFolders =>
-      localSettings.hasSelectedAllFoldersForBackup;
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
@@ -154,7 +152,7 @@ class LocalSyncService {
         await getDeviceFolderWithCountAndCoverID();
     final bool hasUpdated = await _db.updateDeviceCoverWithCount(
       result,
-      shouldBackup: _shouldAutoBackupAllFolders,
+      shouldBackup: localSettings.hasSelectedAllFoldersForBackup,
     );
     // do not fire UI update event during first sync. Otherwise the next screen
     // to shop the backup folder is skipped
@@ -286,7 +284,7 @@ class LocalSyncService {
       // of newly discovered device paths
       await FilesDB.instance.insertLocalAssets(
         result.item1,
-        shouldAutoBackup: _shouldAutoBackupAllFolders,
+        shouldAutoBackup: localSettings.hasSelectedAllFoldersForBackup,
       );
 
       _logger.info(
