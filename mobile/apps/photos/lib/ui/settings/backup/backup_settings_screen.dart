@@ -110,7 +110,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                       _shouldShowOnlyNewToggle(),
                             ),
                             if (_shouldShowOnlyNewToggle())
-                              ..._buildOnlyNewToggleSection(colorScheme),
+                              ..._buildOnlyNewToggleSection(
+                                  context, colorScheme),
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,
@@ -191,7 +192,10 @@ class BackupSettingsScreen extends StatelessWidget {
     return flagService.enableOnlyBackupFuturePhotos;
   }
 
-  List<Widget> _buildOnlyNewToggleSection(dynamic colorScheme) {
+  List<Widget> _buildOnlyNewToggleSection(
+    BuildContext context,
+    dynamic colorScheme,
+  ) {
     return [
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
@@ -210,12 +214,15 @@ class BackupSettingsScreen extends StatelessWidget {
               await _setOnlyNewSinceNow();
               await BackupPreferenceService.instance
                   .autoSelectAllFoldersIfEligible();
+              _onlyNewToggleDebouncer.run(() async {
+                await SyncService.instance.sync();
+              });
             } else {
               await localSettings.clearOnlyNewSinceEpoch();
+              _onlyNewToggleDebouncer.run(() async {
+                await SyncService.instance.sync();
+              });
             }
-            _onlyNewToggleDebouncer.run(() async {
-              await SyncService.instance.sync();
-            });
           },
         ),
         singleBorderRadius: 8,

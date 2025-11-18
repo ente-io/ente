@@ -1,10 +1,15 @@
 import "package:flutter/material.dart";
+import "package:photo_manager/photo_manager.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SearchTabEmptyState extends StatelessWidget {
@@ -38,13 +43,39 @@ class SearchTabEmptyState extends StatelessWidget {
               labelText: AppLocalizations.of(context).addYourPhotosNow,
               icon: Icons.arrow_forward_outlined,
               onTap: () async {
-                // ignore: unawaited_futures
-                routeToPage(
-                  context,
-                  const BackupFolderSelectionPage(
-                    isFirstBackup: false,
-                  ),
-                );
+                if (permissionService.hasGrantedPermissions()) {
+                  await routeToPage(
+                    context,
+                    const BackupFolderSelectionPage(
+                      isFirstBackup: false,
+                    ),
+                  );
+                } else {
+                  final state =
+                      await permissionService.requestPhotoMangerPermissions();
+                  if (state == PermissionState.authorized ||
+                      state == PermissionState.limited) {
+                    await permissionService.onUpdatePermission(state);
+                    if (context.mounted) {
+                      await routeToPage(
+                        context,
+                        const LoadingPhotosWidget(),
+                      );
+                    }
+                  } else {
+                    if (context.mounted) {
+                      await showChoiceDialog(
+                        context,
+                        title: context.l10n.allowPermTitle,
+                        body: context.l10n.allowPermBody,
+                        firstButtonLabel: context.l10n.openSettings,
+                        firstButtonOnTap: () async {
+                          await PhotoManager.openSetting();
+                        },
+                      );
+                    }
+                  }
+                }
               },
             ),
           ],
