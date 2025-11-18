@@ -36,6 +36,28 @@ Highlight your frequently used services by pinning them to the top of your code
 list. To pin a code, long-press (mobile) or right-click (desktop) the code and
 select "Pin".
 
+### Multi-select
+
+Select multiple codes to perform bulk operations and access additional options.
+
+**On mobile:**
+
+- Tap and hold on a code to enter multi-select mode
+- Tap additional codes to add them to your selection
+- Use the toolbar that appears at the bottom to perform actions on all selected
+  codes
+
+**On desktop:**
+
+- Right-click on a code and select "Select" to enter multi-select mode, or
+  click on the checkbox that appears when hovering over a code
+- Click additional codes to add them to your selection
+- Use the toolbar that appears at the top to perform actions on all selected
+  codes
+
+Available actions in multi-select mode include sharing, tagging, pinning,
+copying, and trashing multiple codes at once.
+
 ### Notes
 
 Add additional information to your codes using notes. Notes can be added during
@@ -101,9 +123,10 @@ specified period of time (options: Immediately, 5s, 15s, 1m, 5m, 30m).
 
 Ente Auth offers various import and export options for your codes.
 
-- **Export:** Export your codes in plain text, as an encrypted file, or
-  automatically via the CLI.
-- **Import:** Import codes from various other authentication apps.
+- **Export:** Export your codes in plain text, as an encrypted file, in Google
+  Authenticator format, or automatically via the CLI.
+- **Import:** Import codes from various other authentication apps, including
+  Google Authenticator.
 
 For detailed instructions, refer to the [migration guides](../migration/).
 
@@ -130,7 +153,13 @@ at any time.
 Easily add or share entries using QR codes:
 
 - **Add by scanning (mobile):** On mobile, you can add a new entry by scanning
-  the QR code provided by the service. This quickly adds the entry to Ente Auth.
+  the QR code provided by the service. Access the QR scanner from:
+    - The SpeedDial button (FAB) in the bottom-right corner
+    - The QR code scanner page directly from the main menu
+
+  This quickly adds the entry to Ente Auth. On supported platforms, you can also
+  import QR codes from images saved on your device.
+
 - **Show entry as QR code:** On all apps, you can long-press (mobile) or
   right-click (desktop) a code and select "QR". This allows you to easily share
   the complete entry (including the secret) with others by letting them scan the
