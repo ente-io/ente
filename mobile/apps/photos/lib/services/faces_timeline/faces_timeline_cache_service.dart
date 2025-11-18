@@ -60,12 +60,69 @@ class FacesTimelineCacheService {
     return cache[personId];
   }
 
+  Future<FacesTimelineComputeLogEntry?> getComputeLogEntry(
+    String personId,
+  ) async {
+    final cache = await getCache();
+    return cache.computeLog[personId];
+  }
+
+  Future<Map<String, FacesTimelineComputeLogEntry>> getComputeLog() async {
+    final cache = await getCache();
+    return Map<String, FacesTimelineComputeLogEntry>.from(cache.computeLog);
+  }
+
   Future<void> upsertTimeline(FacesTimelinePersonTimeline timeline) async {
     await _ensureInitialized();
     await _lock.synchronized(() async {
       final currentCache = await _loadCacheUnsafe();
       final updatedCache = currentCache.copyWithTimeline(timeline);
       _cache = updatedCache;
+      await _writeCacheUnsafe();
+    });
+  }
+
+  Future<void> upsertComputeLogEntry(
+    FacesTimelineComputeLogEntry entry,
+  ) async {
+    await _ensureInitialized();
+    await _lock.synchronized(() async {
+      final currentCache = await _loadCacheUnsafe();
+      final updatedCache = currentCache.copyWithComputeLogEntry(entry);
+      _cache = updatedCache;
+      await _writeCacheUnsafe();
+    });
+  }
+
+  Future<void> removeComputeLogEntry(String personId) async {
+    await _ensureInitialized();
+    await _lock.synchronized(() async {
+      final currentCache = await _loadCacheUnsafe();
+      if (!currentCache.computeLog.containsKey(personId)) {
+        return;
+      }
+      final updatedLog = Map<String, FacesTimelineComputeLogEntry>.from(
+        currentCache.computeLog,
+      )..remove(personId);
+      _cache = currentCache.copyWithComputeLog(
+        entries: updatedLog,
+        logVersion: currentCache.computeLogVersion,
+      );
+      await _writeCacheUnsafe();
+    });
+  }
+
+  Future<void> ensureComputeLogVersion(int version) async {
+    await _ensureInitialized();
+    await _lock.synchronized(() async {
+      final currentCache = await _loadCacheUnsafe();
+      if (currentCache.computeLogVersion == version) {
+        return;
+      }
+      _cache = currentCache.copyWithComputeLog(
+        entries: {},
+        logVersion: version,
+      );
       await _writeCacheUnsafe();
     });
   }

@@ -103,24 +103,90 @@ class FacesTimelinePersonTimeline {
   }
 }
 
+class FacesTimelineComputeLogEntry {
+  final String personId;
+  final String? name;
+  final String? birthDate;
+  final int faceCount;
+  final int lastComputedMicros;
+  final int logicVersion;
+
+  const FacesTimelineComputeLogEntry({
+    required this.personId,
+    required this.faceCount,
+    required this.lastComputedMicros,
+    required this.logicVersion,
+    this.name,
+    this.birthDate,
+  });
+
+  Map<String, dynamic> toJson() => {
+        "personId": personId,
+        "name": name,
+        "birthDate": birthDate,
+        "faceCount": faceCount,
+        "lastComputed": lastComputedMicros,
+        "logicVersion": logicVersion,
+      };
+
+  factory FacesTimelineComputeLogEntry.fromJson(Map<String, dynamic> json) {
+    return FacesTimelineComputeLogEntry(
+      personId: json["personId"] as String,
+      name: json["name"] as String?,
+      birthDate: json["birthDate"] as String?,
+      faceCount: json["faceCount"] as int? ?? 0,
+      lastComputedMicros: json["lastComputed"] as int? ?? 0,
+      logicVersion: json["logicVersion"] as int? ?? 0,
+    );
+  }
+
+  FacesTimelineComputeLogEntry copyWith({
+    String? name,
+    String? birthDate,
+    int? faceCount,
+    int? lastComputedMicros,
+    int? logicVersion,
+  }) {
+    return FacesTimelineComputeLogEntry(
+      personId: personId,
+      name: name ?? this.name,
+      birthDate: birthDate ?? this.birthDate,
+      faceCount: faceCount ?? this.faceCount,
+      lastComputedMicros: lastComputedMicros ?? this.lastComputedMicros,
+      logicVersion: logicVersion ?? this.logicVersion,
+    );
+  }
+}
+
 class FacesTimelineCachePayload {
   static const currentVersion = 1;
+  static const currentComputeLogVersion = 1;
 
   final int version;
   final Map<String, FacesTimelinePersonTimeline> timelines;
+  final int computeLogVersion;
+  final Map<String, FacesTimelineComputeLogEntry> computeLog;
 
   const FacesTimelineCachePayload({
     required this.version,
     required this.timelines,
+    required this.computeLogVersion,
+    required this.computeLog,
   });
 
   FacesTimelineCachePayload.empty()
       : version = currentVersion,
-        timelines = {};
+        timelines = {},
+        computeLogVersion = currentComputeLogVersion,
+        computeLog = {};
 
   Map<String, dynamic> toJson() => {
         "version": version,
         "people": timelines.map((key, value) => MapEntry(key, value.toJson())),
+        "computeLogVersion": computeLogVersion,
+        "computeLog": computeLog.map(
+          (key, value) => MapEntry(key, value.toJson()),
+        ),
       };
 
   String toEncodedJson() => jsonEncode(toJson());
@@ -133,15 +199,56 @@ class FacesTimelineCachePayload {
   FacesTimelineCachePayload copyWithTimeline(
     FacesTimelinePersonTimeline timeline,
   ) {
-    final updated = Map<String, FacesTimelinePersonTimeline>.from(timelines);
-    updated[timeline.personId] = timeline;
-    return FacesTimelineCachePayload(version: version, timelines: updated);
+    final updatedTimelines =
+        Map<String, FacesTimelinePersonTimeline>.from(timelines);
+    updatedTimelines[timeline.personId] = timeline;
+    return FacesTimelineCachePayload(
+      version: version,
+      timelines: updatedTimelines,
+      computeLogVersion: computeLogVersion,
+      computeLog: computeLog,
+    );
   }
 
   FacesTimelineCachePayload copyWithoutPerson(String personId) {
-    final updated = Map<String, FacesTimelinePersonTimeline>.from(timelines)
-      ..remove(personId);
-    return FacesTimelineCachePayload(version: version, timelines: updated);
+    final updatedTimelines =
+        Map<String, FacesTimelinePersonTimeline>.from(timelines)
+          ..remove(personId);
+    final updatedLog =
+        Map<String, FacesTimelineComputeLogEntry>.from(computeLog)
+          ..remove(personId);
+    return FacesTimelineCachePayload(
+      version: version,
+      timelines: updatedTimelines,
+      computeLogVersion: computeLogVersion,
+      computeLog: updatedLog,
+    );
+  }
+
+  FacesTimelineCachePayload copyWithComputeLogEntry(
+    FacesTimelineComputeLogEntry entry,
+  ) {
+    final updatedLog =
+        Map<String, FacesTimelineComputeLogEntry>.from(computeLog);
+    updatedLog[entry.personId] = entry;
+    return FacesTimelineCachePayload(
+      version: version,
+      timelines: timelines,
+      computeLogVersion: computeLogVersion,
+      computeLog: updatedLog,
+    );
+  }
+
+  FacesTimelineCachePayload copyWithComputeLog({
+    required Map<String, FacesTimelineComputeLogEntry> entries,
+    required int logVersion,
+  }) {
+    return FacesTimelineCachePayload(
+      version: version,
+      timelines: timelines,
+      computeLogVersion: logVersion,
+      computeLog: entries,
+    );
   }
 
   factory FacesTimelineCachePayload.fromJson(Map<String, dynamic> json) {
@@ -153,9 +260,20 @@ class FacesTimelineCachePayload {
         Map<String, dynamic>.from(entry.value as Map),
       );
     }
+    final computeLogVersion =
+        json["computeLogVersion"] as int? ?? currentComputeLogVersion;
+    final computeLogJson = json["computeLog"] as Map<String, dynamic>? ?? {};
+    final computeLog = <String, FacesTimelineComputeLogEntry>{};
+    for (final entry in computeLogJson.entries) {
+      computeLog[entry.key] = FacesTimelineComputeLogEntry.fromJson(
+        Map<String, dynamic>.from(entry.value as Map),
+      );
+    }
     return FacesTimelineCachePayload(
       version: jsonVersion,
       timelines: timelines,
+      computeLogVersion: computeLogVersion,
+      computeLog: computeLog,
     );
   }
 }

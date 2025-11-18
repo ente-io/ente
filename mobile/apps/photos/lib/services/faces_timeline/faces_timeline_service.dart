@@ -23,6 +23,7 @@ import "package:photos/utils/standalone/task_queue.dart";
 typedef _TimelineComputationResult = ({
   FacesTimelinePersonTimeline timeline,
   Map<int, EnteFile> filesById,
+  int faceCount,
 });
 
 class FacesTimelineService {
@@ -33,7 +34,10 @@ class FacesTimelineService {
   static const _minimumYears = 5;
   static const _minimumFacesPerYear = 4;
   static const _minimumEligibleAgeYears = 5;
-  static const _recomputeCooldown = Duration(days: 90);
+  static const _recomputeCooldown = Duration(hours: 2);
+  static const _timelineLogicVersion = 2;
+  static const _startupBackfillDelay = Duration(seconds: 15);
+  static const _startupBackfillBatchSize = 200;
 
   final Logger _logger = Logger("FacesTimelineService");
   final FacesTimelineCacheService _cacheService =
@@ -51,25 +55,30 @@ class FacesTimelineService {
   );
 
   final Map<String, int> _lastForcedComputeMicros = {};
+  final Map<String, _PendingRecomputeRequest> _pendingRequests = {};
 
   bool _initialized = false;
 
   StreamSubscription<PeopleChangedEvent>? _peopleChangedSubscription;
+  Timer? _startupBackfillTimer;
 
   bool get isFeatureEnabled => flagService.facesTimeline;
 
   Future<void> init() async {
     if (_initialized) return;
     await _cacheService.init();
+    await _cacheService.ensureComputeLogVersion(_timelineLogicVersion);
     await _refreshReadyPersonIds();
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
           _handlePeopleChange,
         );
+    _scheduleStartupBackfill();
     _initialized = true;
   }
 
   Future<void> dispose() async {
     await _peopleChangedSubscription?.cancel();
+    _startupBackfillTimer?.cancel();
     readyPersonIds.dispose();
   }
 
@@ -115,13 +124,35 @@ class FacesTimelineService {
       return;
     }
     if (personId.isEmpty) return;
+    final normalizedTrigger = trigger.isEmpty ? "unspecified" : trigger.trim();
+    final existing = _pendingRequests[personId];
+    if (existing != null) {
+      existing.merge(force: force, trigger: normalizedTrigger);
+    } else {
+      _pendingRequests[personId] = _PendingRecomputeRequest(
+        force: force,
+        trigger: normalizedTrigger,
+      );
+    }
     _precomputeQueue.addTask(personId, () async {
+      final request = _pendingRequests.remove(personId) ??
+          _PendingRecomputeRequest(
+            force: force,
+            trigger: normalizedTrigger,
+          );
       await _recomputeTimelineForPerson(
         personId,
-        force: force,
-        trigger: trigger,
+        force: request.force,
+        trigger: request.trigger,
       );
-    }).ignore();
+    }).catchError((error, stackTrace) {
+      _pendingRequests.remove(personId);
+      _logger.warning(
+        "Faces timeline recompute task failed to enqueue for $personId",
+        error,
+        stackTrace,
+      );
+    });
   }
 
   Future<FacesTimelinePersonTimeline?> getTimeline(String personId) {
@@ -143,6 +174,7 @@ class FacesTimelineService {
   }
 
   Future<void> _handleIgnoredPerson(String personId) async {
+    _pendingRequests.remove(personId);
     await _cacheService.removeTimeline(personId);
     await _refreshReadyPersonIds();
     Bus.instance.fire(
@@ -160,30 +192,218 @@ class FacesTimelineService {
       );
       return;
     }
-    final personId = event.person?.remoteID;
-    switch (event.type) {
-      case PeopleEventType.saveOrEditPerson:
-      case PeopleEventType.addedClusterToPerson:
-      case PeopleEventType.removedFaceFromCluster:
-      case PeopleEventType.removedFilesFromCluster:
-        if (personId != null) {
-          schedulePersonRecompute(
-            personId,
-            trigger: "people_event_${event.type.name}",
-          );
-        } else {
-          queueFullRecompute(trigger: "people_event_${event.type.name}");
-        }
-        break;
-      case PeopleEventType.defaultType:
-        if (personId != null) {
-          schedulePersonRecompute(personId, trigger: "people_default");
-        }
-        break;
-      case PeopleEventType.syncDone:
-        // No action needed for timeline on sync completion
-        break;
+    if (event.type == PeopleEventType.syncDone) {
+      return;
     }
+    unawaited(_processPeopleChange(event));
+  }
+
+  Future<void> _processPeopleChange(PeopleChangedEvent event) async {
+    final person = event.person;
+    if (person == null) {
+      _logger.warning(
+        "Faces timeline: people event ${event.type.name} missing person data",
+      );
+      _scheduleStartupBackfill();
+      return;
+    }
+    if (person.data.isIgnored) {
+      await _handleIgnoredPerson(person.remoteID);
+      return;
+    }
+    final String triggerPrefix = "people_event_${event.type.name}";
+    final logEntry = await _cacheService.getComputeLogEntry(person.remoteID);
+    if (logEntry == null) {
+      _logger.info(
+        "Faces timeline: no compute log for ${person.remoteID}, forcing recompute ($triggerPrefix)",
+      );
+      schedulePersonRecompute(
+        person.remoteID,
+        force: true,
+        trigger: "${triggerPrefix}_no_log",
+      );
+      return;
+    }
+    final Set<String> faceIds =
+        await _mlDataDB.getFaceIDsForPerson(person.remoteID);
+    final currentFaceCount = faceIds.length;
+    final bool nameChanged = (logEntry.name ?? "") != person.data.name;
+    final bool birthDateChanged =
+        (logEntry.birthDate ?? "") != (person.data.birthDate ?? "");
+    final bool faceCountChanged = logEntry.faceCount != currentFaceCount;
+
+    if (!nameChanged && !birthDateChanged && !faceCountChanged) {
+      _logger.fine(
+        "Faces timeline: ${person.remoteID} change ignored "
+        "(no name/dob/face count deltas)",
+      );
+      return;
+    }
+
+    final timeline = await _cacheService.getTimeline(person.remoteID);
+    final Set<String> currentFaceIdSet = faceIds;
+
+    if (_timelineFacesMissing(timeline, currentFaceIdSet)) {
+      final trigger = "${triggerPrefix}_face_removed";
+      _logger.info(
+        "Faces timeline: recompute scheduled for ${person.remoteID} ($trigger)",
+      );
+      schedulePersonRecompute(person.remoteID, trigger: trigger);
+      return;
+    }
+
+    if (birthDateChanged) {
+      final trigger = "${triggerPrefix}_birthdate_changed";
+      _logger.info(
+        "Faces timeline: recompute scheduled for ${person.remoteID} ($trigger)",
+      );
+      schedulePersonRecompute(person.remoteID, trigger: trigger);
+      return;
+    }
+
+    if (!faceCountChanged) {
+      _logger.fine(
+        "Faces timeline: ${person.remoteID} change skipped after checks "
+        "(nameChanged=$nameChanged, faceCountChanged=$faceCountChanged)",
+      );
+      return;
+    }
+
+    final facesPerYear = await _countEligibleFacesByYear(person, faceIds);
+    if (_hasNewYearWithTenFaces(timeline, facesPerYear)) {
+      final trigger = "${triggerPrefix}_new_year";
+      _logger.info(
+        "Faces timeline: recompute scheduled for ${person.remoteID} ($trigger)",
+      );
+      schedulePersonRecompute(person.remoteID, trigger: trigger);
+      return;
+    }
+
+    _logger.fine(
+      "Faces timeline: ${person.remoteID} change skipped "
+      "(nameChanged=$nameChanged, birthDateChanged=$birthDateChanged, "
+      "faceCountChanged=$faceCountChanged)",
+    );
+  }
+
+  void _scheduleStartupBackfill() {
+    if (!isFeatureEnabled) return;
+    _startupBackfillTimer?.cancel();
+    _startupBackfillTimer = Timer(_startupBackfillDelay, () {
+      if (!isFeatureEnabled) {
+        return;
+      }
+      unawaited(_runStartupBackfill());
+    });
+  }
+
+  Future<void> _runStartupBackfill() async {
+    if (!isFeatureEnabled) return;
+    if (!PersonService.isInitialized) {
+      _logger.warning(
+        "Faces timeline startup diff skipped: PersonService not initialized",
+      );
+      return;
+    }
+    try {
+      final persons = await PersonService.instance.getPersons();
+      final computeLog = await _cacheService.getComputeLog();
+      final alreadyComputed = computeLog.values
+          .where((entry) => entry.logicVersion == _timelineLogicVersion)
+          .map((entry) => entry.personId)
+          .toSet();
+      final missingIds = <String>[];
+      for (final person in persons) {
+        if (person.data.isIgnored) continue;
+        if (alreadyComputed.contains(person.remoteID)) continue;
+        missingIds.add(person.remoteID);
+        if (missingIds.length >= _startupBackfillBatchSize) {
+          break;
+        }
+      }
+      if (missingIds.isEmpty) {
+        _logger.fine("Faces timeline startup diff: all persons covered");
+        return;
+      }
+      for (final personId in missingIds) {
+        schedulePersonRecompute(
+          personId,
+          force: true,
+          trigger: "startup_diff",
+        );
+      }
+      _logger.info(
+        "Faces timeline startup diff queued ${missingIds.length} persons",
+      );
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "Faces timeline startup diff failed",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  Future<Map<int, int>> _countEligibleFacesByYear(
+    PersonEntity person,
+    Iterable<String> faceIds,
+  ) async {
+    if (faceIds.isEmpty) {
+      return {};
+    }
+    final uniqueFileIds =
+        faceIds.map(getFileIdFromFaceId<int>).toSet().toList();
+    final fileMap = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
+    final minCreationTime = minimumEligibleCreationTimeMicros(
+      person.data.birthDate,
+    );
+    final counts = <int, int>{};
+    for (final faceId in faceIds) {
+      final fileId = getFileIdFromFaceId<int>(faceId);
+      final file = fileMap[fileId];
+      final creationTime = file?.creationTime;
+      if (creationTime == null || creationTime <= 0) {
+        continue;
+      }
+      if (minCreationTime != null && creationTime < minCreationTime) {
+        continue;
+      }
+      final year = DateTime.fromMicrosecondsSinceEpoch(creationTime).year;
+      counts[year] = (counts[year] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  bool _timelineFacesMissing(
+    FacesTimelinePersonTimeline? timeline,
+    Set<String> currentFaceIds,
+  ) {
+    if (timeline == null || timeline.entries.isEmpty) {
+      return false;
+    }
+    for (final entry in timeline.entries) {
+      if (!currentFaceIds.contains(entry.faceId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _hasNewYearWithTenFaces(
+    FacesTimelinePersonTimeline? timeline,
+    Map<int, int> facesPerYear,
+  ) {
+    if (facesPerYear.isEmpty) {
+      return false;
+    }
+    final timelineYears =
+        timeline?.entries.map((entry) => entry.year).toSet() ?? {};
+    for (final entry in facesPerYear.entries) {
+      if (!timelineYears.contains(entry.key) && entry.value >= 10) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> _recomputeTimelineForPerson(
@@ -255,6 +475,16 @@ class FacesTimelineService {
     try {
       final result = await _computeTimeline(person, nowMicros);
       await _cacheService.upsertTimeline(result.timeline);
+      await _cacheService.upsertComputeLogEntry(
+        FacesTimelineComputeLogEntry(
+          personId: person.remoteID,
+          name: person.data.name,
+          birthDate: person.data.birthDate,
+          faceCount: result.faceCount,
+          lastComputedMicros: nowMicros,
+          logicVersion: _timelineLogicVersion,
+        ),
+      );
       await _refreshReadyPersonIds();
       Bus.instance.fire(
         FacesTimelineChangedEvent(
@@ -286,6 +516,7 @@ class FacesTimelineService {
     final minCreationTimeMicros =
         minimumEligibleCreationTimeMicros(person.data.birthDate);
     final faceIds = await _mlDataDB.getFaceIDsForPerson(personId);
+    final totalFaceCount = faceIds.length;
     if (faceIds.isEmpty) {
       _logger.fine(
         "Faces timeline: person $personId has no faces, marking ineligible",
@@ -296,7 +527,11 @@ class FacesTimelineService {
         updatedAtMicros: nowMicros,
         entries: const [],
       );
-      return (timeline: timeline, filesById: const <int, EnteFile>{});
+      return (
+        timeline: timeline,
+        filesById: const <int, EnteFile>{},
+        faceCount: totalFaceCount
+      );
     }
 
     final List<int> uniqueFileIds =
@@ -360,7 +595,11 @@ class FacesTimelineService {
         updatedAtMicros: nowMicros,
         entries: const [],
       );
-      return (timeline: timeline, filesById: fileMap);
+      return (
+        timeline: timeline,
+        filesById: fileMap,
+        faceCount: totalFaceCount
+      );
     }
 
     final selectionResult = await Computer.shared().compute(
@@ -388,7 +627,11 @@ class FacesTimelineService {
         updatedAtMicros: nowMicros,
         entries: const [],
       );
-      return (timeline: timeline, filesById: fileMap);
+      return (
+        timeline: timeline,
+        filesById: fileMap,
+        faceCount: totalFaceCount
+      );
     }
 
     final entriesJson = (selectionResult["entries"] as List<dynamic>)
@@ -419,7 +662,7 @@ class FacesTimelineService {
       "(frames=${entries.length}, years=$years)",
     );
 
-    return (timeline: timeline, filesById: fileMap);
+    return (timeline: timeline, filesById: fileMap, faceCount: totalFaceCount);
   }
 
   Future<void> _ensureFaceCrops(
@@ -670,4 +913,27 @@ int _compareFaceQuality(_TimelineFaceData a, _TimelineFaceData b) {
 int _dayKeyForMicros(int micros) {
   final localDate = DateTime.fromMicrosecondsSinceEpoch(micros);
   return localDate.year * 10000 + localDate.month * 100 + localDate.day;
+}
+
+class _PendingRecomputeRequest {
+  bool force;
+  final Set<String> _triggers;
+
+  _PendingRecomputeRequest({
+    required this.force,
+    required String trigger,
+  }) : _triggers = {_normalizeTrigger(trigger)};
+
+  void merge({required bool force, required String trigger}) {
+    this.force = this.force || force;
+    _triggers.add(_normalizeTrigger(trigger));
+  }
+
+  String get trigger => _triggers.join("|");
+
+  static String _normalizeTrigger(String trigger) {
+    final trimmed = trigger.trim();
+    if (trimmed.isEmpty) return "unspecified";
+    return trimmed;
+  }
 }
