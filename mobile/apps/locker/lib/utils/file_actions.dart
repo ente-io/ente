@@ -3,16 +3,23 @@ import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
+import "package:locker/ui/pages/account_credentials_page.dart";
+import "package:locker/ui/pages/base_info_page.dart";
+import "package:locker/ui/pages/emergency_contact_page.dart";
+import "package:locker/ui/pages/personal_note_page.dart";
+import "package:locker/ui/pages/physical_records_page.dart";
 import "package:logging/logging.dart";
 
 /// Utility class for common file actions like edit, share, and delete
@@ -25,6 +32,11 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
+    if (InfoFileService.instance.isInfoFile(file)) {
+      await _editInfoFile(context, file);
+      return;
+    }
+
     _logger.info(
       'Opening edit dialog for file ${file.uploadedFileID}',
     );
@@ -171,6 +183,54 @@ class FileActions {
       }
       showToast(context, context.l10n.failedToUpdateFile(e.toString()));
     }
+  }
+
+  static Future<void> _editInfoFile(
+    BuildContext context,
+    EnteFile file,
+  ) async {
+    Widget page;
+    final infoItem = InfoFileService.instance.extractInfoFromFile(file);
+
+    if (infoItem == null) {
+      _logger.warning(
+        'File ${file.uploadedFileID} marked as info file but no info payload found',
+      );
+      return;
+    }
+
+    switch (infoItem.type) {
+      case InfoType.note:
+        page = PersonalNotePage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+      case InfoType.accountCredential:
+        page = AccountCredentialsPage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+      case InfoType.physicalRecord:
+        page = PhysicalRecordsPage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+      case InfoType.emergencyContact:
+        page = EmergencyContactPage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => page,
+      ),
+    );
   }
 
   /// Creates and shows a shareable link for a file
