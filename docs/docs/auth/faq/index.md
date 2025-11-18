@@ -101,8 +101,8 @@ The HTML export generates individual QR codes for each of your codes, making it
 easy to import them into Google Authenticator or other compatible authenticator
 apps.
 
-> **Note**: For security reasons, this export is unencrypted. Handle the
-> exported HTML file carefully and delete it after importing your codes.
+> **Note**: This export is unencrypted. Handle the exported HTML file carefully
+> and delete it after importing your codes.
 
 ### What information about my codes is stored on Ente server?
 
