@@ -133,7 +133,7 @@ class CustomLockerAppBar extends StatelessWidget
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
                     hintStyle: TextStyle(
-                      color: colorScheme.textMuted,
+                      color: colorScheme.iconColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
