@@ -123,8 +123,8 @@ specified period of time (options: Immediately, 5s, 15s, 1m, 5m, 30m).
 
 Ente Auth offers various import and export options for your codes.
 
-- **Export:** Export your codes in plain text, as an encrypted file, in Google
-  Authenticator format, or automatically via the CLI.
+- **Export:** Export your codes in plain text, as an encrypted file, in a
+  format that Google Authenticator can import, or automatically via the CLI.
 - **Import:** Import codes from various other authentication apps, including
   Google Authenticator.
 

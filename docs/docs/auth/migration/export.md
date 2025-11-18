@@ -6,17 +6,17 @@ description: Guide for exporting your 2FA codes out from Ente Auth
 # Exporting your data out of Ente Auth
 
 Ente Auth provides multiple export formats to suit different use cases. You can
-export your codes in encrypted format, plain text, or Google Authenticator
-format for easy migration.
+export your codes in encrypted format, plain text, or in a format that Google
+Authenticator can import for easy migration.
 
 ## Export Formats
 
-### Google Authenticator Export
+### Export for Google Authenticator
 
-Export your codes in Google Authenticator format for easy migration to other
-authenticator apps that support this format.
+Export your codes in a format that can be imported by Google Authenticator and
+other compatible authenticator apps.
 
-**To export to Google Authenticator format:**
+**To export for Google Authenticator:**
 
 1. Open `Settings > Data > Export`
 2. Select "Google Authenticator"
@@ -24,10 +24,10 @@ authenticator apps that support this format.
 4. A QR code will be generated that you can scan with Google Authenticator or
    other compatible apps
 
-This format is useful when migrating to apps that support Google Authenticator
-imports, as it packages multiple codes into a single QR code or file.
+This is useful when migrating to apps that support Google Authenticator
+imports, as it packages multiple codes into a single QR code.
 
-> **Note**: For security reasons, this export format is unencrypted. Handle the
+> **Note**: For security reasons, this export is unencrypted. Handle the
 > exported QR code carefully and delete it after use.
 
 ## Auth Encrypted Export format
