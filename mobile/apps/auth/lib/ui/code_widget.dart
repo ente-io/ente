@@ -16,7 +16,7 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
-import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -861,14 +861,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (mounted && pop == true) {
       Navigator.of(context).pop();
     }
-    await showChoiceDialog(
-      context,
-      title: context.l10n.notes,
-      body: widget.code.note,
-      firstButtonLabel: context.l10n.close,
-      firstButtonType: ButtonType.secondary,
-      secondButtonLabel: null,
-    );
+    await showNotesDialog(context, widget.code.note);
   }
 
   Future<void> _onEditPressed([bool? pop]) async {
