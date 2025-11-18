@@ -49,9 +49,7 @@ Select multiple codes to perform bulk operations and access additional options.
 
 **On desktop:**
 
-- Right-click on a code and select "Select" to enter multi-select mode, or
-  click on the checkbox that appears when hovering over a code, or long-press a
-  code
+- Long-press on a code to enter multi-select mode
 - Click additional codes to add them to your selection
 - Use the toolbar that appears at the bottom to perform actions on all selected
   codes
