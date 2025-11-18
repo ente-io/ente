@@ -186,12 +186,30 @@ Open `Settings > Backup > Backup status` to see:
 
 ### Does Ente backup Live Photos from iPhone? {#live-photos-backup}
 
-Yes! Ente backs up both components of Live Photos:
+Yes! Ente fully supports Live Photos from iPhone and Motion Photos from Android.
 
-- The photo component
-- The video component
+**What gets backed up:**
 
-Both are preserved in their original quality.
+- The still image (HEIC, JPEG, etc.)
+- The video clip (MOV, MP4, etc.)
+- Both components in their original quality with no compression
+
+**How it works:**
+
+When you back up a Live Photo, Ente automatically detects it and uploads both the image and video components together. They're stored as a single encrypted file, so you won't see them as separate items in your library.
+
+**How to view:**
+
+- **On mobile**: Long-press a Live Photo to play the video
+- **On web**: Hover over a Live Photo to see it animate
+- **On desktop**: Hover over a Live Photo to play it
+
+**Platform support:**
+
+- **iPhone**: Native Live Photos (iOS format)
+- **Android**: Motion Photos (Google Pixel and other devices)
+
+Both formats work the same way in Ente - the image and video are kept together and play back seamlessly.
 
 ## Background Sync
 
