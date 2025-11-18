@@ -217,8 +217,6 @@ Live Photos behave differently depending on how you share them:
 - **Using "Download"**: Downloads the complete Live Photo (image + video)
 - **Using "Share" button to save/download**: Only saves the still image
 
-If you want someone to receive the full Live Photo experience, use either "Send link" or have them use the "Download" option.
-
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}
