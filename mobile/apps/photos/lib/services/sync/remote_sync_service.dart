@@ -443,7 +443,8 @@ class RemoteSyncService {
         }
       }
     }
-    if (moreFilesMarkedForBackup && !localSettings.hasSelectedAllFoldersForBackup) {
+    if (moreFilesMarkedForBackup &&
+        !localSettings.hasSelectedAllFoldersForBackup) {
       // "force reload due to display new files"
       Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
@@ -604,11 +605,14 @@ class RemoteSyncService {
       return files;
     }
     final fallbackTimestamp = DateTime.now().microsecondsSinceEpoch;
-    return files
-        .where(
-          (file) => (file.creationTime ?? fallbackTimestamp) >= onlyNewSince,
-        )
-        .toList();
+    return files.where((file) {
+      final creationTime = file.creationTime;
+      if (creationTime == null || creationTime == 0) {
+        // Missing creation time should not block uploads meant for recent-only
+        return true;
+      }
+      return creationTime >= onlyNewSince;
+    }).toList();
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
