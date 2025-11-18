@@ -118,6 +118,10 @@
   "enterYourPassword": "Passwort eingeben",
   "welcomeBack": "Willkommen zurück!",
   "contactSupport": "Support kontaktieren",
+  "locationPickerTip": "Du kannst auch vom Infobildschirm eines Fotos aus einen Ort zentriert um das Foto hinzufügen",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Falsches Passwort",
   "pleaseTryAgain": "Bitte versuche es erneut",
   "recreatePasswordTitle": "Passwort wiederherstellen",
@@ -1849,6 +1853,18 @@
   "addedToStreamRecreationQueue": "Zur Warteschlange für Neuerstellung der Streams hinzugefügt",
   "videoPreviewAlreadyExists": "Videovorschau existiert bereits",
   "videoAlreadyInQueue": "Videodatei existiert bereits in der Warteschlange",
+  "videoExportFailed": "Erstellung des Videos fehlgeschlagen. Bitte versuche es erneut.",
+  "videoExportSuccess": "Video erfolgreich unter {path} erstellt",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Zur Warteschlange hinzugefügt",
   "creatingStream": "Stream wird erzeugt",
   "similarImages": "Ähnliche Bilder",

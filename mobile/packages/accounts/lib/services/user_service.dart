@@ -61,14 +61,23 @@ class UserService {
   late ValueNotifier<String?> emailValueNotifier;
   late BaseConfiguration _config;
   late BaseHomePage _homePage;
+  late String _clientPackageName;
+  late String _passkeyRedirectUrl;
 
   UserService._privateConstructor();
 
   static final UserService instance = UserService._privateConstructor();
 
-  Future<void> init(BaseConfiguration config, BaseHomePage homePage) async {
+  Future<void> init(
+    BaseConfiguration config,
+    BaseHomePage homePage, {
+    required String clientPackageName,
+    required String passkeyRedirectUrl,
+  }) async {
     _config = config;
     _homePage = homePage;
+    _clientPackageName = clientPackageName;
+    _passkeyRedirectUrl = passkeyRedirectUrl;
     emailValueNotifier = ValueNotifier<String?>(config.getEmail());
     _preferences = await SharedPreferences.getInstance();
   }
@@ -463,6 +472,8 @@ class UserService {
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
             accountsUrl: accountsUrl,
+            redirectUrl: _passkeyRedirectUrl,
+            clientPackage: _clientPackageName,
           );
         } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -788,6 +799,8 @@ class UserService {
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
           accountsUrl: accountsUrl,
+          redirectUrl: _passkeyRedirectUrl,
+          clientPackage: _clientPackageName,
         );
       } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);

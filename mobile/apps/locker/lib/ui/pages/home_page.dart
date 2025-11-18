@@ -58,7 +58,6 @@ class CustomLockerAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final hasQuery = searchController.text.isNotEmpty;
     final showClearIcon = isSearchActive || hasQuery;
 
@@ -97,17 +96,14 @@ class CustomLockerAppBar extends StatelessWidget
                     onLongPress: () {
                       sendLogs(
                         context,
-                        'vishnu@ente.io',
+                        'support@ente.io',
                         subject: context.l10n.lockerLogs,
                         body: 'Debug logs for Locker app.\n\n',
                       );
                     },
-                    child: Text(
-                      context.l10n.locker,
-                      style: textTheme.h3Bold.copyWith(
-                        color: Colors.white,
-                        fontFamily: 'Montserrat',
-                      ),
+                    child: Image.asset(
+                      'assets/locker-logo.png',
+                      height: 28,
                     ),
                   ),
                   const SizedBox(width: 48),
@@ -133,7 +129,7 @@ class CustomLockerAppBar extends StatelessWidget
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
                     hintStyle: TextStyle(
-                      color: colorScheme.textMuted,
+                      color: colorScheme.iconColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),

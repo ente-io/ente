@@ -118,6 +118,10 @@
   "enterYourPassword": "Ingresa tu contraseña",
   "welcomeBack": "¡Bienvenido de nuevo!",
   "contactSupport": "Contactar con soporte",
+  "locationPickerTip": "También puedes añadir una ubicación centrada en una foto desde la pantalla de información de la foto",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Contraseña incorrecta",
   "pleaseTryAgain": "Por favor, inténtalo nuevamente",
   "recreatePasswordTitle": "Recrear contraseña",
@@ -1849,6 +1853,18 @@
   "addedToStreamRecreationQueue": "Añadido a la cola de grabación de transmisiones",
   "videoPreviewAlreadyExists": "La vista previa de vídeo ya existe",
   "videoAlreadyInQueue": "El archivo de vídeo ya está en la cola",
+  "videoExportFailed": "Falló la creación de vídeo. Por favor, inténtalo de nuevo.",
+  "videoExportSuccess": "Vídeo creado con éxito en {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Añadido a la cola",
   "creatingStream": "Creando transmisión",
   "similarImages": "Imágenes similares",

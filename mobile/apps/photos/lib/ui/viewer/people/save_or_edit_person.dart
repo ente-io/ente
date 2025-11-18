@@ -1,19 +1,15 @@
 import 'dart:async';
 import "dart:io";
-import "dart:math" show max;
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
-import "package:ml_linalg/linalg.dart" as ml;
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/ml/db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
@@ -72,7 +68,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
-  Map<String, double> _personToMaxSimilarity = {};
   PersonEntity? person;
   final _nameFocsNode = FocusNode();
 
@@ -89,7 +84,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   void dispose() {
     _debounce?.cancel();
     _nameFocsNode.dispose();
-    _debounce?.cancel();
     super.dispose();
   }
 
@@ -421,7 +415,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   Widget _getPersonItems() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 12, 4, 0),
+      padding: const EdgeInsets.only(top: 12),
       child: StreamBuilder<List<(PersonEntity, EnteFile)>>(
         stream: _getPersonsWithRecentFileStream(),
         builder: (context, snapshot) {
@@ -442,7 +436,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             }
           } else if (snapshot.hasData) {
             final persons = snapshot.data!;
-            final searchResults = _inputName.isNotEmpty
+            final filteredResults = _inputName.isNotEmpty
                 ? persons
                     .where(
                       (element) => element.$1.data.name
@@ -451,64 +445,86 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                     )
                     .toList()
                 : persons;
-            searchResults.sort(
-              (a, b) => a.$1.data.name.compareTo(b.$1.data.name),
-            );
-            if (searchResults.isEmpty) {
+            if (filteredResults.isEmpty) {
               return const SizedBox.shrink();
             }
-            final finalResults = _sortByCosine(searchResults);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // left align
-                Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 12),
-                  child: Text(
-                    context.l10n.orMergeWithExistingPerson,
-                    style: getEnteTextTheme(context).largeBold,
-                  ),
-                ),
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                const horizontalEdgePadding = 20.0;
+                const gridPadding = 16.0;
+                final maxWidth = constraints.maxWidth > 0
+                    ? constraints.maxWidth
+                    : MediaQuery.of(context).size.width;
+                final availableWidth = (maxWidth - (horizontalEdgePadding * 2))
+                    .clamp(0.0, maxWidth);
+                var crossAxisCount = (availableWidth / 100).floor();
+                if (crossAxisCount <= 0) {
+                  crossAxisCount = 1;
+                }
+                final totalSpacing = (crossAxisCount - 1) * gridPadding;
+                var tileSize = (availableWidth - totalSpacing) / crossAxisCount;
+                if (!tileSize.isFinite || tileSize <= 0) {
+                  tileSize = 96;
+                }
+                const double extraVerticalSpacing = 6.0;
+                final smallFontSize =
+                    getEnteTextTheme(context).small.fontSize ?? 14;
+                final textScaleFactor =
+                    MediaQuery.textScalerOf(context).scale(smallFontSize) /
+                        smallFontSize;
+                final childAspectRatio = tileSize /
+                    (tileSize + extraVerticalSpacing + (24 * textScaleFactor));
 
-                SizedBox(
-                  height: 160, // Adjust this height based on your needs
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      scrollbars: true,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      child: Text(
+                        context.l10n.orMergeWithExistingPerson,
+                        style: getEnteTextTheme(context).largeBold,
+                      ),
                     ),
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.only(right: 8),
-                      itemCount: finalResults.length,
-                      itemBuilder: (context, index) {
-                        final person = finalResults[index];
-                        return PersonGridItem(
-                          key: ValueKey(person.$1.remoteID),
-                          person: person.$1,
-                          personFile: person.$2,
-                          onTap: () async {
-                            if (userAlreadyAssigned) {
-                              return;
-                            }
-                            userAlreadyAssigned = true;
-                            await ClusterFeedbackService.instance
-                                .addClusterToExistingPerson(
-                              person: person.$1,
-                              clusterID: widget.clusterID!,
-                            );
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: gridPadding,
+                          mainAxisSpacing: gridPadding,
+                          childAspectRatio: childAspectRatio,
+                        ),
+                        itemCount: filteredResults.length,
+                        itemBuilder: (context, index) {
+                          final person = filteredResults[index];
+                          return PersonGridItem(
+                            key: ValueKey(person.$1.remoteID),
+                            person: person.$1,
+                            personFile: person.$2,
+                            size: tileSize,
+                            onTap: () async {
+                              if (userAlreadyAssigned) {
+                                return;
+                              }
+                              userAlreadyAssigned = true;
+                              await ClusterFeedbackService.instance
+                                  .addClusterToExistingPerson(
+                                person: person.$1,
+                                clusterID: widget.clusterID!,
+                              );
 
-                            Navigator.pop(context, person);
-                          },
-                        );
-                      },
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(width: 6);
-                      },
+                              Navigator.pop(context, person);
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  ],
+                );
+              },
             );
           } else {
             return const EnteLoadingWidget();
@@ -523,74 +539,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     if (_cachedPersons.isEmpty) {
       _cachedPersons = await _getPersonsWithRecentFile();
     }
-    if (widget.clusterID != null) {
-      if (_personToMaxSimilarity.isEmpty) {
-        _personToMaxSimilarity = await _calculateSimilarityWithPersons();
-      }
-    }
     yield _cachedPersons;
-  }
-
-  Future<Map<String, double>> _calculateSimilarityWithPersons() async {
-    // Get all cluster summaries from DB
-    final allClusterSummary = await MLDataDB.instance.getAllClusterSummary();
-
-    // Get current cluster embedding
-    final currentClusterEmbeddingData =
-        allClusterSummary[widget.clusterID!]?.$1;
-    if (currentClusterEmbeddingData == null) return {};
-    final ml.Vector currentClusterEmbedding = ml.Vector.fromList(
-      EVector.fromBuffer(currentClusterEmbeddingData).values,
-      dtype: ml.DType.float32,
-    );
-
-    // Get all cluster embeddings
-    final persons = _cachedPersons.map((e) => e.$1).toList();
-    final clusterToPerson = <String, String>{};
-    for (final person in persons) {
-      for (final cluster in person.data.assigned) {
-        clusterToPerson[cluster.id] = person.remoteID;
-      }
-    }
-    allClusterSummary
-        .removeWhere((key, value) => !clusterToPerson.containsKey(key));
-    final Map<String, ml.Vector> allClusterEmbeddings = allClusterSummary.map(
-      (key, value) => MapEntry(
-        key,
-        ml.Vector.fromList(
-          EVector.fromBuffer(value.$1).values,
-          dtype: ml.DType.float32,
-        ),
-      ),
-    );
-
-    // Calculate cosine similarity between current cluster and all clusters
-    for (final entry in allClusterEmbeddings.entries) {
-      final personId = clusterToPerson[entry.key]!;
-      final similarity = currentClusterEmbedding.dot(entry.value);
-      _personToMaxSimilarity[personId] = max(
-        _personToMaxSimilarity[personId] ?? double.negativeInfinity,
-        similarity,
-      );
-    }
-    return _personToMaxSimilarity;
-  }
-
-  List<(PersonEntity, EnteFile)> _sortByCosine(
-    List<(PersonEntity, EnteFile)> searchResults,
-  ) {
-    if (widget.clusterID == null || _personToMaxSimilarity.isEmpty) {
-      return searchResults;
-    }
-
-    // Sort search results based on cosine similarity
-    searchResults.sort((a, b) {
-      final similarityA = _personToMaxSimilarity[a.$1.remoteID] ?? 0;
-      final similarityB = _personToMaxSimilarity[b.$1.remoteID] ?? 0;
-      return similarityB.compareTo(similarityA);
-    });
-
-    return searchResults;
   }
 
   Future<PersonEntity?> addNewPerson(
@@ -694,7 +643,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     if (excludeHidden) {
       persons.removeWhere((person) => person.data.isIgnored);
     }
-    final List<(PersonEntity, EnteFile)> personAndFileID = [];
+    final List<(PersonEntity, EnteFile, int)> personFileCounts = [];
     for (final person in persons) {
       final clustersToFiles =
           await SearchService.instance.getClusterFilesForPersonID(
@@ -707,9 +656,14 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         );
         continue;
       }
-      personAndFileID.add((person, files.first));
+      personFileCounts.add((person, files.first, files.length));
     }
-    return personAndFileID;
+    personFileCounts.sort(
+      (a, b) => b.$3.compareTo(a.$3),
+    );
+    return personFileCounts
+        .map<(PersonEntity, EnteFile)>((entry) => (entry.$1, entry.$2))
+        .toList();
   }
 }
 

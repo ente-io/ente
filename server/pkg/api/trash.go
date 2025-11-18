@@ -71,16 +71,17 @@ func (t *TrashHandler) Delete(c *gin.Context) {
 
 // Empty deletes eligible files from the trash
 func (t *TrashHandler) Empty(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	var request ente.EmptyTrashRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	err := t.Controller.EmptyTrash(c, userID, request)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
+    userID := auth.GetUserID(c.Request.Header)
+    enteApp := auth.GetApp(c)
+    var request ente.EmptyTrashRequest
+    if err := c.ShouldBindJSON(&request); err != nil {
+        handler.Error(c, stacktrace.Propagate(err, ""))
+        return
+    }
+    err := t.Controller.EmptyTrash(c, userID, request, enteApp)
+    if err != nil {
+        handler.Error(c, stacktrace.Propagate(err, ""))
+        return
+    }
+    c.Status(http.StatusOK)
 }

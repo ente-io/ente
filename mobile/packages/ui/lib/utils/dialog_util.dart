@@ -158,7 +158,7 @@ Future<ButtonResult?> showGenericErrorDialog({
         onTap: () async {
           await sendLogs(
             context,
-            context.strings.contactSupport,
+            "support@ente.io",
             postShare: () {},
           );
         },

@@ -7,8 +7,16 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "妥善保管您的双重认证代码",
+  "featureBackupCodes": "端到端加密\n备份与同步",
+  "featureSearchEtc": "搜索、标签、分享、\n下一个代码等等",
+  "featureOpenSource": "开源且经\n安全专家审计",
+  "signUp": "注册",
   "onBoardingGetStarted": "开始",
   "setupFirstAccount": "设置您的第一个账户",
+  "allTabEmptyHint": "这里暂时没有内容。点按 + 添加代码，或打开回收站恢复代码。",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "扫描二维码",
   "qrCode": "二维码",
   "qr": "二维码",

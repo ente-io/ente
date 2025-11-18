@@ -23,6 +23,7 @@ class PopupMenuItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return GestureDetector(
       onTap: onTap,
@@ -44,9 +45,11 @@ class PopupMenuItemWidget extends StatelessWidget {
             bottomRight: isLast ? const Radius.circular(15) : Radius.zero,
           ),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: isLast ? 16 + bottomPadding : 16,
         ),
         child: Row(
           children: [

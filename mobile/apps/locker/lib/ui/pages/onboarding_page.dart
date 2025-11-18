@@ -3,6 +3,7 @@ import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import "package:ente_ui/pages/developer_settings_page.dart";
+import "package:ente_ui/pages/web_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -127,15 +128,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: () {
-                    showCreateNewAccountDialog(
+                  onPressed: () async {
+                    final result = await showCreateNewAccountDialog(
                       context,
                       title: l10n.unlockLockerPaidPlanTitle,
                       body: l10n.unlockLockerPaidPlanBody,
-                      buttonLabel: l10n.okay,
+                      buttonLabel: l10n.checkoutEntePhotos,
                       assetPath: "assets/file_lock.png",
                       icon: const SizedBox.shrink(),
                     );
+
+                    if (result?.action == ButtonAction.first) {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return WebPage(
+                              l10n.checkoutEntePhotos,
+                              "https://ente.io/",
+                            );
+                          },
+                        ),
+                      );
+                    }
                   },
                   child: Text(
                     l10n.noAccountCta,

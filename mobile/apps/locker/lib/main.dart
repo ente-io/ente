@@ -167,7 +167,12 @@ Future<void> _init(bool bool, {String? via}) async {
     ]);
 
     await Network.instance.init(Configuration.instance);
-    await UserService.instance.init(Configuration.instance, const HomePage());
+    await UserService.instance.init(
+      Configuration.instance,
+      const HomePage(),
+      clientPackageName: 'io.ente.locker',
+      passkeyRedirectUrl: 'entelocker://passkey',
+    );
     await LockScreenSettings.instance.init(Configuration.instance);
     await CollectionApiClient.instance.init();
     await CollectionService.instance.init();

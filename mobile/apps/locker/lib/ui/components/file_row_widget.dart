@@ -44,7 +44,7 @@ class FileRowWidget extends StatelessWidget {
         if (onLongPressCallback != null) {
           onLongPressCallback!(file);
         } else {
-          FileUtil.openFile(context, file);
+          // FileUtil.openFile(context, file);
         }
       },
       child: ListenableBuilder(
