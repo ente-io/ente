@@ -147,6 +147,42 @@ export default function PublicCollectionGallery() {
 
     const router = useRouter();
 
+    // Handle action=join parameter: redirect to web.ente.io for authentication
+    // This MUST run before any other logic to ensure proper redirect on desktop/mobile-without-app
+    // On mobile with app installed, App Links/Universal Links will open the app before this code runs
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get("action");
+
+        if (action === "join") {
+            const t = params.get("t");
+            const jwt = params.get("jwt");
+            const hash = window.location.hash;
+
+            if (!t) {
+                log.error(
+                    "[Join Album] Missing access token in action=join URL",
+                );
+                return;
+            }
+
+            // Build the web.ente.io URL for authentication
+            const isDevelopment = window.location.hostname === "localhost";
+            const webAppURL = isDevelopment
+                ? "http://localhost:3000"
+                : "https://web.ente.io";
+
+            const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
+            const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
+
+            log.info("[Join Album] Redirecting to web app for auth:", {
+                redirectURL,
+            });
+
+            window.location.href = redirectURL;
+        }
+    }, []);
+
     const showPublicLinkExpiredMessage = () =>
         showMiniDialog({
             title: t("link_expired"),
@@ -465,42 +501,6 @@ export default function PublicCollectionGallery() {
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
     };
-
-    // Handle action=join parameter: redirect to web.ente.io for authentication
-    // This is triggered when the user comes from a "Join Album" button click
-    // On mobile, App Links/Universal Links will open the app instead of reaching here
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const action = params.get("action");
-
-        if (action === "join") {
-            const t = params.get("t");
-            const jwt = params.get("jwt");
-            const hash = window.location.hash;
-
-            if (!t) {
-                log.error(
-                    "[Join Album] Missing access token in action=join URL",
-                );
-                return;
-            }
-
-            // Build the web.ente.io URL for authentication
-            const isDevelopment = window.location.hostname === "localhost";
-            const webAppURL = isDevelopment
-                ? "http://localhost:3000"
-                : "https://web.ente.io";
-
-            const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
-            const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
-
-            log.info("[Join Album] Redirecting to web app for auth:", {
-                redirectURL,
-            });
-
-            window.location.href = redirectURL;
-        }
-    }, []);
 
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
