@@ -268,43 +268,31 @@ const Page: React.FC = () => {
         pendingVisibilityUpdates,
         isInSearchMode,
         filteredFiles,
-    } = state || {
-        user: undefined,
-        favoriteFileIDs: new Set(),
-        collectionNameByID: new Map(),
-        fileNormalCollectionIDs: new Map(),
-        normalCollectionSummaries: new Map(),
-        pendingFavoriteUpdates: new Map(),
-        pendingVisibilityUpdates: new Map(),
-        isInSearchMode: false,
-        filteredFiles: [],
-    };
+    } = state;
 
     // Derived aliases.
-    const barMode = state?.view?.type ?? "albums";
+    const barMode = state.view?.type ?? "albums";
     const activeCollectionID =
-        state?.view?.type == "people"
+        state.view?.type == "people"
             ? undefined
-            : state?.view?.activeCollectionSummaryID;
+            : state.view?.activeCollectionSummaryID;
     const activeCollection =
-        state?.view?.type == "people"
-            ? undefined
-            : state?.view?.activeCollection;
+        state.view?.type == "people" ? undefined : state.view?.activeCollection;
     const activeCollectionSummary =
-        state?.view?.type == "people"
+        state.view?.type == "people"
             ? undefined
-            : state?.view?.activeCollectionSummary;
+            : state.view?.activeCollectionSummary;
     const activePerson =
-        state?.view?.type == "people" ? state?.view.activePerson : undefined;
+        state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
 
     // TODO: Move into reducer
     const barCollectionSummaries = useMemo(
         () =>
             barMode == "hidden-albums"
-                ? (state?.hiddenCollectionSummaries ?? new Map())
+                ? state.hiddenCollectionSummaries
                 : normalCollectionSummaries,
-        [barMode, state?.hiddenCollectionSummaries, normalCollectionSummaries],
+        [barMode, state.hiddenCollectionSummaries, normalCollectionSummaries],
     );
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);

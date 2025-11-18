@@ -466,6 +466,42 @@ export default function PublicCollectionGallery() {
         setUploadTypeSelectorView(false);
     };
 
+    // Handle action=join parameter: redirect to web.ente.io for authentication
+    // This is triggered when the user comes from a "Join Album" button click
+    // On mobile, App Links/Universal Links will open the app instead of reaching here
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get("action");
+
+        if (action === "join") {
+            const t = params.get("t");
+            const jwt = params.get("jwt");
+            const hash = window.location.hash;
+
+            if (!t) {
+                log.error(
+                    "[Join Album] Missing access token in action=join URL",
+                );
+                return;
+            }
+
+            // Build the web.ente.io URL for authentication
+            const isDevelopment = window.location.hostname === "localhost";
+            const webAppURL = isDevelopment
+                ? "http://localhost:3000"
+                : "https://web.ente.io";
+
+            const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
+            const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
+
+            log.info("[Join Album] Redirecting to web app for auth:", {
+                redirectURL,
+            });
+
+            window.location.href = redirectURL;
+        }
+    }, []);
+
     const fileListHeader = useMemo<FileListHeaderOrFooter | undefined>(
         () =>
             publicCollection && publicFiles
@@ -742,155 +778,27 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             hasCredentialsJWT,
         });
 
-        // Check if on mobile and try deep link first
-        if (isTouchscreen) {
-            const userAgent = navigator.userAgent || "";
-            const isIOS =
-                userAgent.includes("iPad") ||
-                userAgent.includes("iPhone") ||
-                userAgent.includes("iPod");
-            const isAndroid = userAgent.includes("Android");
-
-            // Build the deep link URL
-            // Format: ente://shared-album?accessToken={token}#{hash}
-            const deepLinkURL = `ente://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
-
-            if (isIOS) {
-                // For iOS, try universal link first, then custom scheme
-                // Universal links work better for app detection
-                const universalLink = `https://web.ente.io/shared-albums?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
-
-                // Try to open the app using the universal link
-                window.location.href = universalLink;
-
-                // Set a timeout to check if we're still on the page
-                // If we are, the app didn't open, so proceed with web flow
-                setTimeout(async () => {
-                    // If this is a password-protected album and we have the JWT, ensure it's saved
-                    const jwtToken = credentials?.current?.accessTokenJWT;
-                    if (
-                        publicCollection.publicURLs[0]?.passwordEnabled &&
-                        jwtToken
-                    ) {
-                        log.info(
-                            "[Shared Albums] Ensuring JWT is saved before redirect (iOS)",
-                        );
-                        await savePublicCollectionAccessTokenJWT(
-                            accessToken,
-                            jwtToken,
-                        );
-                    }
-
-                    // Store the album context before redirecting to auth
-                    await storeJoinAlbumContext(
-                        accessToken,
-                        collectionKey,
-                        currentHash,
-                        publicCollection,
-                    );
-
-                    // Redirect to authentication page with join album flag
-                    const redirectURL = getAuthRedirectURL();
-                    window.location.href = redirectURL;
-                }, 2500);
-            } else if (isAndroid) {
-                // For Android, use intent URL with fallback
-                // This provides a smoother experience with automatic fallback
-                const intentURL = `intent://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=ente;package=io.ente.photos;end`;
-
-                // Try to open the app using the intent
-                window.location.href = intentURL;
-
-                // Set a timeout as fallback in case intent doesn't work
-                setTimeout(async () => {
-                    // Check if we're still on the page (app didn't open)
-                    if (document.visibilityState === "visible") {
-                        // If this is a password-protected album and we have the JWT, ensure it's saved
-                        const jwtToken = credentials?.current?.accessTokenJWT;
-                        if (
-                            publicCollection.publicURLs[0]?.passwordEnabled &&
-                            jwtToken
-                        ) {
-                            log.info(
-                                "[Shared Albums] Ensuring JWT is saved before redirect (Android)",
-                            );
-                            await savePublicCollectionAccessTokenJWT(
-                                accessToken,
-                                jwtToken,
-                            );
-                        }
-
-                        // Store the album context before redirecting to auth
-                        await storeJoinAlbumContext(
-                            accessToken,
-                            collectionKey,
-                            currentHash,
-                            publicCollection,
-                        );
-
-                        // Redirect to authentication page with join album flag
-                        const redirectURL = getAuthRedirectURL();
-                        window.location.href = redirectURL;
-                    }
-                }, 2500);
-            } else {
-                // For other mobile devices, try the custom scheme with fallback
-                window.location.href = deepLinkURL;
-
-                setTimeout(async () => {
-                    if (document.visibilityState === "visible") {
-                        // If this is a password-protected album and we have the JWT, ensure it's saved
-                        const jwtToken = credentials?.current?.accessTokenJWT;
-                        if (
-                            publicCollection.publicURLs[0]?.passwordEnabled &&
-                            jwtToken
-                        ) {
-                            log.info(
-                                "[Shared Albums] Ensuring JWT is saved before redirect (other mobile)",
-                            );
-                            await savePublicCollectionAccessTokenJWT(
-                                accessToken,
-                                jwtToken,
-                            );
-                        }
-
-                        // Store the album context before redirecting to auth
-                        await storeJoinAlbumContext(
-                            accessToken,
-                            collectionKey,
-                            currentHash,
-                            publicCollection,
-                        );
-
-                        // Redirect to authentication page with join album flag
-                        const redirectURL = getAuthRedirectURL();
-                        window.location.href = redirectURL;
-                    }
-                }, 2500);
-            }
-        } else {
-            // Desktop or non-mobile: use the standard web flow
-            // If this is a password-protected album and we have the JWT, ensure it's saved
-            const jwtToken = credentials?.current?.accessTokenJWT;
-            if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
-                log.info(
-                    "[Shared Albums] Ensuring JWT is saved before redirect",
-                );
-                await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
-            }
-
-            // Store the album context before redirecting to auth
-            await storeJoinAlbumContext(
-                accessToken,
-                collectionKey,
-                currentHash,
-                publicCollection,
-            );
-
-            // Redirect to authentication page with join album flag
-            const redirectURL = getAuthRedirectURL();
-            window.location.href = redirectURL;
+        // If this is a password-protected album and we have the JWT, ensure it's saved
+        const jwtToken = credentials?.current?.accessTokenJWT;
+        if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
+            log.info("[Shared Albums] Ensuring JWT is saved before redirect");
+            await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
         }
+
+        // Store the album context before redirecting to auth
+        await storeJoinAlbumContext(
+            accessToken,
+            collectionKey,
+            currentHash,
+            publicCollection,
+        );
+
+        // Redirect to albums.ente.io with action=join parameter
+        // On mobile with app installed: App Links/Universal Links will open the app
+        // On mobile without app / desktop: Will open in browser, then redirect to web.ente.io for auth
+        const redirectURL = getAuthRedirectURL();
+        log.info("[Shared Albums] Redirecting to:", { redirectURL });
+        window.location.href = redirectURL;
     };
 
     if (enableJoin) {

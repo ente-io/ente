@@ -263,8 +263,8 @@ export const savePublicCollectionAccessTokenJWT = async (
     console.log("[Public Albums FDB] Saving JWT:", {
         accessToken,
         key,
-        jwtLength: passwordJWT?.length,
-        jwtPreview: passwordJWT ? passwordJWT.substring(0, 20) + "..." : null,
+        jwtLength: passwordJWT.length,
+        jwtPreview: passwordJWT.substring(0, 20) + "...",
     });
     await localForage.setItem(key, passwordJWT);
 };

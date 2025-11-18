@@ -187,61 +187,61 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         collectionID: context.collectionID,
     });
 
-    try {
-        // If collectionID is 0 (placeholder), we need to fetch the actual collection first
-        let collectionID = context.collectionID;
-        if (collectionID === 0) {
-            // Import the pullCollection function dynamically from the correct module
-            const { pullCollection } = await import("./public-collection");
-            const { collection } = await pullCollection(
-                context.accessToken,
-                context.collectionKey,
-            );
-            collectionID = collection.id;
-
-            // Update the context with the actual collection ID
-            const updatedContext = { ...context, collectionID };
-            localStorage.setItem(
-                "ente_join_album_context",
-                JSON.stringify(updatedContext),
-            );
-        }
-
-        // Get user's key attributes from local storage
-        const keyAttributes = savedKeyAttributes();
-        if (!keyAttributes) {
-            throw new Error(
-                "Key attributes not found. Please try logging in again.",
-            );
-        }
-
-        const publicKey = keyAttributes.publicKey;
-
-        // Encrypt the collection key with user's public key
-        // The collection key is already base64 encoded, and boxSeal expects base64
-        const encryptedKey = await boxSeal(context.collectionKey, publicKey);
-
-        // Join the album (include JWT token if present for password-protected albums)
-        await joinPublicAlbum(
+    // If collectionID is 0 (placeholder), we need to fetch the actual collection first
+    let collectionID = context.collectionID;
+    if (collectionID === 0) {
+        // Import the pullCollection function dynamically from the correct module
+        const { pullCollection } = await import("./public-collection");
+        const { collection } = await pullCollection(
             context.accessToken,
-            collectionID,
-            encryptedKey,
-            context.accessTokenJWT,
+            context.collectionKey,
         );
+        collectionID = collection.id;
 
-        // Clear the context after successful join
-        clearJoinAlbumContext();
-
-        return collectionID;
-    } catch (error) {
-        // Don't clear context on error - let user retry
-        throw error;
+        // Update the context with the actual collection ID
+        const updatedContext = { ...context, collectionID };
+        localStorage.setItem(
+            "ente_join_album_context",
+            JSON.stringify(updatedContext),
+        );
     }
+
+    // Get user's key attributes from local storage
+    const keyAttributes = savedKeyAttributes();
+    if (!keyAttributes) {
+        throw new Error(
+            "Key attributes not found. Please try logging in again.",
+        );
+    }
+
+    const publicKey = keyAttributes.publicKey;
+
+    // Encrypt the collection key with user's public key
+    // The collection key is already base64 encoded, and boxSeal expects base64
+    const encryptedKey = await boxSeal(context.collectionKey, publicKey);
+
+    // Join the album (include JWT token if present for password-protected albums)
+    await joinPublicAlbum(
+        context.accessToken,
+        collectionID,
+        encryptedKey,
+        context.accessTokenJWT,
+    );
+
+    // Clear the context after successful join
+    // Note: If any error occurs above, this won't execute and context will be preserved for retry
+    clearJoinAlbumContext();
+
+    return collectionID;
 };
 
 /**
  * Get the redirect URL for authentication with join album context.
  * This preserves the intent to join an album across the auth flow.
+ *
+ * Uses albums.ente.io with action=join parameter, which triggers App Links/Universal Links
+ * on mobile to automatically open the app if installed. If opened in browser (desktop or
+ * app not installed), the web page detects action=join and redirects to web.ente.io for auth.
  */
 export const getAuthRedirectURL = (): string => {
     const context = getJoinAlbumContext();
@@ -249,20 +249,20 @@ export const getAuthRedirectURL = (): string => {
         return "/";
     }
 
-    // In development, redirect to the photos app on port 3000
-    // In production, this would be https://web.ente.io or the custom endpoint
+    // In development, use localhost
+    // In production, use albums.ente.io (configured as App Link/Universal Link)
     const isDevelopment = window.location.hostname === "localhost";
-    const photosAppURL = isDevelopment
+    const albumsAppURL = isDevelopment
         ? "http://localhost:3000"
-        : window.location.origin.replace("albums.", "web.");
+        : "https://albums.ente.io";
 
-    // Use the simplified URL format: joinAlbum?=accessToken#collectionKeyHash
-    // For password-protected albums, include JWT as a query parameter to survive cross-origin redirect
+    // Use action=join to indicate this is a join flow
+    // For password-protected albums, include JWT as a query parameter
     // The collectionKeyHash is the original hash value from the URL (base58 or hex)
     const jwtParam = context.accessTokenJWT
         ? `&jwt=${encodeURIComponent(context.accessTokenJWT)}`
         : "";
-    const redirectURL = `${photosAppURL}/?joinAlbum=${context.accessToken}${jwtParam}#${context.collectionKeyHash}`;
+    const redirectURL = `${albumsAppURL}/?action=join&t=${context.accessToken}${jwtParam}#${context.collectionKeyHash}`;
 
     return redirectURL;
 };

@@ -18,6 +18,7 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
+import type { JoinAlbumContext } from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -75,7 +76,9 @@ const Page: React.FC = () => {
 
                         if (existingCheck) {
                             try {
-                                const existing = JSON.parse(existingCheck);
+                                const existing = JSON.parse(
+                                    existingCheck,
+                                ) as JoinAlbumContext;
                                 console.log(
                                     "[Index] Parsed existing context:",
                                     {
@@ -126,13 +129,14 @@ const Page: React.FC = () => {
                         const existingContextStr = localStorage.getItem(
                             "ente_join_album_context",
                         );
-                        let existingContext: any = null;
+                        let existingContext: JoinAlbumContext | null = null;
                         let shouldUpdateContext = false;
 
                         if (existingContextStr) {
                             try {
-                                existingContext =
-                                    JSON.parse(existingContextStr);
+                                existingContext = JSON.parse(
+                                    existingContextStr,
+                                ) as JoinAlbumContext;
                                 console.log("[Index] Found existing context:", {
                                     hasJWT: !!existingContext.accessTokenJWT,
                                     existingAccessToken:
@@ -192,12 +196,12 @@ const Page: React.FC = () => {
                             });
 
                             // Create new context or update if different access token
-                            const context = {
+                            const context: JoinAlbumContext = {
                                 accessToken,
                                 collectionKey, // Base64 for API calls
                                 collectionKeyHash, // Original hash from URL
                                 collectionID:
-                                    existingContext?.collectionID || 0, // Preserve collection ID if exists
+                                    existingContext?.collectionID ?? 0, // Preserve collection ID if exists
                                 // Include JWT token if found
                                 ...(accessTokenJWT && { accessTokenJWT }),
                             };
