@@ -35,7 +35,6 @@ class BackupFolderSelectionPage extends StatefulWidget {
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Logger _logger = Logger((_BackupFolderSelectionPageState).toString());
-  final _localSettings = localSettings;
   final Set<String> _allDevicePathIDs = <String>{};
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<DeviceCollection>? _deviceCollections;
@@ -59,7 +58,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             _selectedDevicePathIDs.add(file.id);
           }
         }
-        if (widget.isOnboarding && !_localSettings.hasManualFolderSelection) {
+        if (widget.isOnboarding && !localSettings.hasManualFolderSelection) {
           _selectedDevicePathIDs.addAll(_allDevicePathIDs);
         }
         _selectedDevicePathIDs
@@ -226,15 +225,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       for (String pathID in _allDevicePathIDs) {
         syncStatus[pathID] = _selectedDevicePathIDs.contains(pathID);
       }
-      await _localSettings.setHasSelectedAnyBackupFolder(
+      await localSettings.setHasSelectedAnyBackupFolder(
         _selectedDevicePathIDs.isNotEmpty,
       );
-      await _localSettings.setSelectAllFoldersForBackup(
+      await localSettings.setSelectAllFoldersForBackup(
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
-      await _localSettings.setHasManualFolderSelection(true);
+      await localSettings.setHasManualFolderSelection(true);
       if (context.mounted) {
         Navigator.of(context).pop(true);
       }
