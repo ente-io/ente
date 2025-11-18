@@ -403,21 +403,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                         l10n.nextTotpTitle,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: _nextCode,
-                        builder: (context, value, child) {
-                          return Material(
-                            type: MaterialType.transparency,
-                            child: Text(
-                              _getFormattedCode(value),
-                              style: TextStyle(
-                                fontSize: widget.isCompactMode ? 12 : 18,
-                                color: Colors.grey,
-                              ),
-                              textDirection: TextDirection.ltr,
-                            ),
-                          );
-                        },
+                      InkWell(
+                        onTap: _onNextHotpTapped,
+                        child: const Icon(
+                          Icons.forward_outlined,
+                          size: 32,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -826,6 +818,17 @@ class _CodeWidgetState extends State<CodeWidget> {
       confirmationMessage: context.l10n.copiedNextToClipboard,
     );
     _updateCodeMetadata().ignore();
+  }
+
+  void _onNextHotpTapped() {
+    if (widget.code.type == Type.hotp) {
+      CodeStore.instance
+          .addCode(
+            widget.code.copyWith(counter: widget.code.counter + 1),
+            shouldSync: true,
+          )
+          .ignore();
+    }
   }
 
   Future<void> _updateCodeMetadata() async {
