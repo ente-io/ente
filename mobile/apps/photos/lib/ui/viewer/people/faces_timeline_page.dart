@@ -286,12 +286,12 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       );
       if (face != null) {
         try {
-        final cropMap = await getCachedFaceCrops(
-          file,
-          [face],
-          useFullFile: true,
-          useTempCache: false,
-        );
+          final cropMap = await getCachedFaceCrops(
+            file,
+            [face],
+            useFullFile: true,
+            useTempCache: false,
+          );
           final Uint8List? bytes = cropMap?[face.faceID];
           if (bytes != null && bytes.isNotEmpty) {
             image = MemoryImage(bytes);

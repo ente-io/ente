@@ -14,6 +14,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
@@ -33,7 +34,6 @@ import "package:photos/ui/viewer/people/link_email_screen.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/service_locator.dart";
 
 class PeoplePage extends StatefulWidget {
   final String tagPrefix;
@@ -253,12 +253,12 @@ class _PeoplePageState extends State<PeoplePage> {
                                 personEntity: _person,
                                 facesTimelineEnabled: featureEnabled,
                                 showTimelineBanner: showFacesTimelineBanner,
-                                onTimelineTap: featureEnabled &&
-                                        facesTimelineReady
-                                    ? () => unawaited(
-                                          _openFacesTimelinePage(),
-                                        )
-                                    : null,
+                                onTimelineTap:
+                                    featureEnabled && facesTimelineReady
+                                        ? () => unawaited(
+                                              _openFacesTimelinePage(),
+                                            )
+                                        : null,
                               ),
                         FileSelectionOverlayBar(
                           PeoplePage.overlayType,
@@ -369,7 +369,8 @@ class _GalleryState extends State<_Gallery> {
                   ),
                 ),
           FacesTimelineBannerSection(
-            showBanner: widget.facesTimelineEnabled && widget.showTimelineBanner,
+            showBanner:
+                widget.facesTimelineEnabled && widget.showTimelineBanner,
             person: widget.personEntity,
             onTap: widget.facesTimelineEnabled ? widget.onTimelineTap : null,
           ),

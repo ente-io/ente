@@ -36,11 +36,11 @@ class FacesTimelineEntry {
   });
 
   Map<String, dynamic> toJson() => {
-    "faceId": faceId,
-    "fileId": fileId,
-    "creationTime": creationTimeMicros,
-    "year": year,
-  };
+        "faceId": faceId,
+        "fileId": fileId,
+        "creationTime": creationTimeMicros,
+        "year": year,
+      };
 
   factory FacesTimelineEntry.fromJson(Map<String, dynamic> json) {
     return FacesTimelineEntry(
@@ -68,11 +68,11 @@ class FacesTimelinePersonTimeline {
   bool get isReady => status == FacesTimelineStatus.ready;
 
   Map<String, dynamic> toJson() => {
-    "personId": personId,
-    "status": facesTimelineStatusToString(status),
-    "updatedAt": updatedAtMicros,
-    "entries": entries.map((entry) => entry.toJson()).toList(),
-  };
+        "personId": personId,
+        "status": facesTimelineStatusToString(status),
+        "updatedAt": updatedAtMicros,
+        "entries": entries.map((entry) => entry.toJson()).toList(),
+      };
 
   factory FacesTimelinePersonTimeline.fromJson(Map<String, dynamic> json) {
     final Iterable entriesJson = json["entries"] as Iterable? ?? [];
@@ -114,12 +114,14 @@ class FacesTimelineCachePayload {
     required this.timelines,
   });
 
-  FacesTimelineCachePayload.empty() : version = currentVersion, timelines = {};
+  FacesTimelineCachePayload.empty()
+      : version = currentVersion,
+        timelines = {};
 
   Map<String, dynamic> toJson() => {
-    "version": version,
-    "people": timelines.map((key, value) => MapEntry(key, value.toJson())),
-  };
+        "version": version,
+        "people": timelines.map((key, value) => MapEntry(key, value.toJson())),
+      };
 
   String toEncodedJson() => jsonEncode(toJson());
 
