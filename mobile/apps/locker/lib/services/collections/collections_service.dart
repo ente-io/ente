@@ -236,6 +236,21 @@ class CollectionService {
     }
   }
 
+  /// Removes orphaned files that exist in files table but have no collection mappings.
+  /// This is a one-time cleanup for files deleted from trash before the fix was applied.
+  ///
+  /// This migration fix can be removed after a year or so (around Nov 2026)
+  /// once all users have had the corrected trash deletion logic applied.
+  Future<void> cleanupOrphanedFiles() async {
+    try {
+      await _db.cleanupOrphanedFiles();
+      _logger.info("Cleaned up orphaned files from database");
+    } catch (e) {
+      _logger.severe("Failed to cleanup orphaned files: $e");
+      rethrow;
+    }
+  }
+
   /// Adds a file to a collection. By default this triggers a full sync to
   /// update local state. Set [runSync] to false to delay syncing (useful when
   /// adding the same file to multiple collections during an upload).
@@ -277,8 +292,8 @@ class CollectionService {
       await _db.deleteFilesFromCollection(collection, [file]);
 
       if (runSync) {
-        await sync();
         await TrashService.instance.syncTrash();
+        await sync();
       }
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
@@ -316,6 +331,9 @@ class CollectionService {
   }
 
   Future<void> _init() async {
+    // One-time cleanup of orphaned files from before the trash deletion fix
+    unawaited(cleanupOrphanedFiles());
+
     // ignore: unawaited_futures
     sync().then((_) {
       if (Configuration.instance.getKey() != null) {
