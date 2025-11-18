@@ -609,8 +609,8 @@ class RemoteSyncService {
     return files.where((file) {
       final creationTime = file.creationTime;
       if (creationTime == null || creationTime == 0) {
-        // Missing creation time should not block uploads meant for recent-only
-        return true;
+        // Missing creation time - assume old file, exclude from only-new backups
+        return false;
       }
       return creationTime >= onlyNewSince;
     }).toList();
