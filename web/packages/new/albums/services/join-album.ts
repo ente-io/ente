@@ -2,7 +2,7 @@ import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
-import { apiURL } from "ente-base/origins";
+import { albumsAppOrigin, apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 
 /**
@@ -249,12 +249,8 @@ export const getAuthRedirectURL = (): string => {
         return "/";
     }
 
-    // In development, use localhost
-    // In production, use albums.ente.io (configured as App Link/Universal Link)
-    const isDevelopment = window.location.hostname === "localhost";
-    const albumsAppURL = isDevelopment
-        ? "http://localhost:3000"
-        : "https://albums.ente.io";
+    // Use the configured albums app origin (respects NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT)
+    const albumsAppURL = albumsAppOrigin();
 
     // Use action=join to indicate this is a join flow
     // For password-protected albums, include JWT as a query parameter

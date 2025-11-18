@@ -166,11 +166,14 @@ export default function PublicCollectionGallery() {
                 return;
             }
 
-            // Build the web.ente.io URL for authentication
-            const isDevelopment = window.location.hostname === "localhost";
-            const webAppURL = isDevelopment
-                ? "http://localhost:3000"
-                : "https://web.ente.io";
+            // Build the web app URL for authentication
+            // Derive from the current location origin (which is the albums app origin)
+            // In production: albums.ente.io -> web.ente.io
+            // In custom/development: preserves the origin structure (e.g., 192.168.0.61:3002 -> 192.168.0.61:3000)
+            const currentOrigin = window.location.origin;
+            const webAppURL = isCustomAlbumsAppOrigin
+                ? currentOrigin.replace(/:3002$/, ":3000") // Custom endpoint: change port 3002 -> 3000
+                : currentOrigin.replace("albums.", "web."); // Production: albums.ente.io -> web.ente.io
 
             const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
             const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
