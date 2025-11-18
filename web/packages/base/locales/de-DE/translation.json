@@ -339,6 +339,7 @@
     "successful_uploads": "Erfolgreiche Uploads",
     "upload_to_album": "In Album hochladen",
     "add_to_album": "Zum Album hinzufügen",
+    "added_to_album": "",
     "move_to_album": "Zum Album verschieben",
     "unhide_to_album": "In Album wieder sichtbar machen",
     "restore_to_album": "In Album wiederherstellen",
