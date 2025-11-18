@@ -133,8 +133,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                       await localSettings
                                           .clearOnlyNewSinceEpoch();
                                     }
-                                    await _onlyNewToggleDebouncer.run(() async {
-                                      SyncService.instance.sync().ignore();
+                                    _onlyNewToggleDebouncer.run(() async {
+                                      await SyncService.instance.sync();
                                     });
                                   },
                                 ),
