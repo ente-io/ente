@@ -242,6 +242,7 @@
     "date": "Date",
     "description": "Description",
     "file_type": "File type",
+    "settings": "Settings",
     "magic": "Magic",
     "photos_count_zero": "No memories",
     "photos_count_one": "1 memory",
