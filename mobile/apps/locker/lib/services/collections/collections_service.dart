@@ -238,6 +238,9 @@ class CollectionService {
 
   /// Removes orphaned files that exist in files table but have no collection mappings.
   /// This is a one-time cleanup for files deleted from trash before the fix was applied.
+  ///
+  /// This migration fix can be removed after a year or so (around Nov 2026)
+  /// once all users have had the corrected trash deletion logic applied.
   Future<void> cleanupOrphanedFiles() async {
     try {
       await _db.cleanupOrphanedFiles();
