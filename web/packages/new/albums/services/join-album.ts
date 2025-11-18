@@ -1,4 +1,5 @@
 import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
@@ -189,13 +190,15 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
 
     // If collectionID is 0 (placeholder), we need to fetch the actual collection first
     let collectionID = context.collectionID;
+    let collection: Collection | undefined;
     if (collectionID === 0) {
         // Import the pullCollection function dynamically from the correct module
         const { pullCollection } = await import("./public-collection");
-        const { collection } = await pullCollection(
+        const result = await pullCollection(
             context.accessToken,
             context.collectionKey,
         );
+        collection = result.collection;
         collectionID = collection.id;
 
         // Update the context with the actual collection ID
@@ -204,6 +207,24 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
             "ente_join_album_context",
             JSON.stringify(updatedContext),
         );
+    } else {
+        // Fetch the collection to check ownership
+        const { pullCollection } = await import("./public-collection");
+        const result = await pullCollection(
+            context.accessToken,
+            context.collectionKey,
+        );
+        collection = result.collection;
+    }
+
+    // Check if the user is the owner of the album
+    const currentUser = ensureLocalUser();
+    if (collection.owner.id === currentUser.id) {
+        log.info(
+            "[Join Album] User is the owner of the album, skipping join and clearing intent",
+        );
+        clearJoinAlbumContext();
+        return null;
     }
 
     // Get user's key attributes from local storage
