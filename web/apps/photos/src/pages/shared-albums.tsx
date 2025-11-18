@@ -797,8 +797,8 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         );
 
         // On mobile: Try to open the app directly by constructing an albums.ente.io URL
-        // that will trigger App Links. Use a special path to indicate this is a join request.
-        if (isTouchscreen) {
+        // that will trigger App Links. This only works for production domains, not local IPs.
+        if (isTouchscreen && !isCustomAlbumsAppOrigin) {
             // Construct a URL that the app will recognize
             // Format: https://albums.ente.io/join-public-album?t=TOKEN#HASH
             const albumsOrigin = albumsAppOrigin();
@@ -815,7 +815,7 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 }
             }, 2000);
         } else {
-            // Desktop: Use App Links approach (will be handled by action=join detection)
+            // Desktop or custom endpoint: Use action=join redirect (will be handled by detection logic)
             const redirectURL = getAuthRedirectURL();
             log.info("[Shared Albums] Redirecting to:", { redirectURL });
             window.location.href = redirectURL;
