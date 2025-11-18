@@ -180,6 +180,9 @@ class FacesTimelineService {
           schedulePersonRecompute(personId, trigger: "people_default");
         }
         break;
+      case PeopleEventType.syncDone:
+        // No action needed for timeline on sync completion
+        break;
     }
   }
 
