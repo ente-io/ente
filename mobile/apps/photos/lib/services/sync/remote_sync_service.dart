@@ -554,10 +554,7 @@ class RemoteSyncService {
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
     List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
-    originalFiles = filterFilesBasedOnOnlyNew(
-      originalFiles,
-      localSettings.onlyNewSinceEpoch,
-    );
+    originalFiles = _applyOnlyNewFilterIfEnabled(originalFiles);
     if (originalFiles.isEmpty) {
       return originalFiles;
     }
@@ -594,6 +591,14 @@ class RemoteSyncService {
     _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
+  }
+
+  List<EnteFile> _applyOnlyNewFilterIfEnabled(List<EnteFile> files) {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return filterFilesBasedOnOnlyNew(files, localSettings.onlyNewSinceEpoch);
+    } else {
+      return files;
+    }
   }
 
   @visibleForTesting

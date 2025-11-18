@@ -68,9 +68,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   @override
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
-    final headerText = _showOnlyNewFeature
-        ? "<i>Choose how </i>Ente backs up your photos"
-        : AppLocalizations.of(context).entePhotosPerm;
+    final headerText = _getHeaderText(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -142,81 +140,11 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     BuildContext context,
     bool showOnlyNewFeature,
   ) {
-    if (!showOnlyNewFeature) {
-      return Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: getEnteColorScheme(context).backgroundBase,
-              spreadRadius: 190,
-              blurRadius: 30,
-              offset: const Offset(0, 170),
-            ),
-          ],
-        ),
-        width: double.infinity,
-        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-        child: SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            key: const ValueKey("grantPermissionButton"),
-            onPressed: _onTapLegacyContinue,
-            child: Text(AppLocalizations.of(context).continueLabel),
-          ),
-        ),
-      );
+    if (showOnlyNewFeature) {
+      return _buildNewFeatureActionArea(context);
+    } else {
+      return _buildLegacyActionArea(context);
     }
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: getEnteColorScheme(context).backgroundBase,
-            spreadRadius: 190,
-            blurRadius: 30,
-            offset: const Offset(0, 170),
-          ),
-        ],
-      ),
-      width: double.infinity,
-      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              key: const ValueKey("onlyNewPhotosButton"),
-              onPressed: () => _onlyNewActionDebouncer.run(() async {
-                await _onTapOnlyNewPhotos();
-              }),
-              child: const Text("Backup only new photos"),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              key: const ValueKey("selectFoldersButton"),
-              onPressed: _onTapSelectFolders,
-              child: const Text("Select folders to backup"),
-            ),
-          ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            key: const ValueKey("skipForNowButton"),
-            behavior: HitTestBehavior.opaque,
-            onTap: _onTapSkip,
-            child: Text(
-              "Skip",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(decoration: TextDecoration.underline),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _onTapOnlyNewPhotos() async {
@@ -326,5 +254,92 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     }
     _logger.info("Setting only-new backup threshold to $now");
     await _localSettings.setOnlyNewSinceEpoch(now);
+  }
+
+  String _getHeaderText(BuildContext context) {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return "<i>Choose how </i>Ente backs up your photos";
+    } else {
+      return AppLocalizations.of(context).entePhotosPerm;
+    }
+  }
+
+  Widget _buildLegacyActionArea(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: getEnteColorScheme(context).backgroundBase,
+            spreadRadius: 190,
+            blurRadius: 30,
+            offset: const Offset(0, 170),
+          ),
+        ],
+      ),
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton(
+          key: const ValueKey("grantPermissionButton"),
+          onPressed: _onTapLegacyContinue,
+          child: Text(AppLocalizations.of(context).continueLabel),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNewFeatureActionArea(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: getEnteColorScheme(context).backgroundBase,
+            spreadRadius: 190,
+            blurRadius: 30,
+            offset: const Offset(0, 170),
+          ),
+        ],
+      ),
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey("onlyNewPhotosButton"),
+              onPressed: () => _onlyNewActionDebouncer.run(() async {
+                await _onTapOnlyNewPhotos();
+              }),
+              child: const Text("Backup only new photos"),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey("selectFoldersButton"),
+              onPressed: _onTapSelectFolders,
+              child: const Text("Select folders to backup"),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            key: const ValueKey("skipForNowButton"),
+            behavior: HitTestBehavior.opaque,
+            onTap: _onTapSkip,
+            child: Text(
+              "Skip",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall!
+                  .copyWith(decoration: TextDecoration.underline),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

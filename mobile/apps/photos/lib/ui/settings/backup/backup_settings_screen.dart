@@ -30,7 +30,6 @@ class BackupSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final showOnlyNewToggle = flagService.enableOnlyBackupFuturePhotos;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -107,43 +106,11 @@ class BackupSettingsScreen extends StatelessWidget {
                               isTopBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
                               isBottomBorderRadiusRemoved:
-                                  flagService.enableMobMultiPart,
+                                  flagService.enableMobMultiPart ||
+                                      _shouldShowOnlyNewToggle(),
                             ),
-                            if (showOnlyNewToggle) ...[
-                              DividerWidget(
-                                dividerType: DividerType.menuNoIcon,
-                                bgColor: colorScheme.fillFaint,
-                              ),
-                              MenuItemWidget(
-                                captionedTextWidget: const CaptionedTextWidget(
-                                  title: "Back up only new photos",
-                                ),
-                                menuItemColor: colorScheme.fillFaint,
-                                trailingWidget: ToggleSwitchWidget(
-                                  value: () =>
-                                      localSettings.isOnlyNewBackupEnabled,
-                                  onChanged: () async {
-                                    final isEnabled =
-                                        localSettings.isOnlyNewBackupEnabled;
-                                    if (!isEnabled) {
-                                      await _setOnlyNewSinceNow();
-                                      await BackupPreferenceService.instance
-                                          .autoSelectAllFoldersIfEligible();
-                                    } else {
-                                      await localSettings
-                                          .clearOnlyNewSinceEpoch();
-                                    }
-                                    _onlyNewToggleDebouncer.run(() async {
-                                      await SyncService.instance.sync();
-                                    });
-                                  },
-                                ),
-                                singleBorderRadius: 8,
-                                alignCaptionedTextToLeft: true,
-                                isTopBorderRadiusRemoved: true,
-                                isGestureDetectorDisabled: true,
-                              ),
-                            ],
+                            if (_shouldShowOnlyNewToggle())
+                              ..._buildOnlyNewToggleSection(colorScheme),
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,
@@ -218,6 +185,45 @@ class BackupSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _shouldShowOnlyNewToggle() {
+    return flagService.enableOnlyBackupFuturePhotos;
+  }
+
+  List<Widget> _buildOnlyNewToggleSection(dynamic colorScheme) {
+    return [
+      DividerWidget(
+        dividerType: DividerType.menuNoIcon,
+        bgColor: colorScheme.fillFaint,
+      ),
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Back up only new photos",
+        ),
+        menuItemColor: colorScheme.fillFaint,
+        trailingWidget: ToggleSwitchWidget(
+          value: () => localSettings.isOnlyNewBackupEnabled,
+          onChanged: () async {
+            final isEnabled = localSettings.isOnlyNewBackupEnabled;
+            if (!isEnabled) {
+              await _setOnlyNewSinceNow();
+              await BackupPreferenceService.instance
+                  .autoSelectAllFoldersIfEligible();
+            } else {
+              await localSettings.clearOnlyNewSinceEpoch();
+            }
+            _onlyNewToggleDebouncer.run(() async {
+              await SyncService.instance.sync();
+            });
+          },
+        ),
+        singleBorderRadius: 8,
+        alignCaptionedTextToLeft: true,
+        isTopBorderRadiusRemoved: true,
+        isGestureDetectorDisabled: true,
+      ),
+    ];
   }
 
   Future<void> _setOnlyNewSinceNow() async {

@@ -659,11 +659,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final skipPermissionGate = localSettings.hasOnboardingPermissionSkipped;
-    final onlyNewEnabled = localSettings.isOnlyNewBackupEnabled;
-    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport() ||
-        skipPermissionGate ||
-        onlyNewEnabled;
+    final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: PopScope(
@@ -736,19 +732,13 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!permissionService.hasGrantedPermissions()) {
-      if (!localSettings.hasOnboardingPermissionSkipped) {
-        entityService.syncEntities().then((_) {
-          PersonService.instance.refreshPersonCache();
-        });
-        return const GrantPermissionsWidget();
-      }
+    if (_shouldShowPermissionWidget()) {
+      entityService.syncEntities().then((_) {
+        PersonService.instance.refreshPersonCache();
+      });
+      return const GrantPermissionsWidget();
     }
-    final onlyNewEnabled = localSettings.isOnlyNewBackupEnabled;
-    final skipPermissionGate = localSettings.hasOnboardingPermissionSkipped;
-    if (!onlyNewEnabled &&
-        !skipPermissionGate &&
-        !LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (_shouldShowLoadingWidget()) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&
@@ -768,10 +758,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    _showShowBackupHook =
-        !localSettings.hasSelectedAnyBackupFolder &&
-            !permissionService.hasGrantedLimitedPermissions() &&
-            CollectionsService.instance.getActiveCollections().isEmpty;
+    _showShowBackupHook = _shouldShowBackupHook();
 
     return Stack(
       children: [
@@ -984,5 +971,40 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       }
     }
+  }
+
+  bool _shouldEnableDrawer() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return LocalSyncService.instance.hasCompletedFirstImport() ||
+          localSettings.hasOnboardingPermissionSkipped ||
+          localSettings.isOnlyNewBackupEnabled;
+    } else {
+      return LocalSyncService.instance.hasCompletedFirstImport();
+    }
+  }
+
+  bool _shouldShowPermissionWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return !permissionService.hasGrantedPermissions() &&
+          !localSettings.hasOnboardingPermissionSkipped;
+    } else {
+      return !permissionService.hasGrantedPermissions();
+    }
+  }
+
+  bool _shouldShowLoadingWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return !localSettings.isOnlyNewBackupEnabled &&
+          !localSettings.hasOnboardingPermissionSkipped &&
+          !LocalSyncService.instance.hasCompletedFirstImport();
+    } else {
+      return !LocalSyncService.instance.hasCompletedFirstImport();
+    }
+  }
+
+  bool _shouldShowBackupHook() {
+    return !localSettings.hasSelectedAnyBackupFolder &&
+        !permissionService.hasGrantedLimitedPermissions() &&
+        CollectionsService.instance.getActiveCollections().isEmpty;
   }
 }
