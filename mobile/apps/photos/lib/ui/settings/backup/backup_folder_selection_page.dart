@@ -44,35 +44,31 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   void initState() {
-    _ensurePermissions().then((hasPermission) {
-      if (!hasPermission) {
+    _ensurePermissions();
+    FilesDB.instance
+        .getDeviceCollections(includeCoverThumbnail: true)
+        .then((files) async {
+      _pathIDToItemCount =
+          await FilesDB.instance.getDevicePathIDToImportedFileCount();
+      if (!mounted) {
         return;
       }
-      FilesDB.instance
-          .getDeviceCollections(includeCoverThumbnail: true)
-          .then((files) async {
-        _pathIDToItemCount =
-            await FilesDB.instance.getDevicePathIDToImportedFileCount();
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _deviceCollections = files;
-          _deviceCollections!.sort((first, second) {
-            return first.name.toLowerCase().compareTo(second.name.toLowerCase());
-          });
-          for (final file in _deviceCollections!) {
-            _allDevicePathIDs.add(file.id);
-            if (file.shouldBackup) {
-              _selectedDevicePathIDs.add(file.id);
-            }
-          }
-          if (widget.isOnboarding) {
-            _selectedDevicePathIDs.addAll(_allDevicePathIDs);
-          }
-          _selectedDevicePathIDs
-              .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
+      setState(() {
+        _deviceCollections = files;
+        _deviceCollections!.sort((first, second) {
+          return first.name.toLowerCase().compareTo(second.name.toLowerCase());
         });
+        for (final file in _deviceCollections!) {
+          _allDevicePathIDs.add(file.id);
+          if (file.shouldBackup) {
+            _selectedDevicePathIDs.add(file.id);
+          }
+        }
+        if (widget.isOnboarding) {
+          _selectedDevicePathIDs.addAll(_allDevicePathIDs);
+        }
+        _selectedDevicePathIDs
+            .removeWhere((folder) => !_allDevicePathIDs.contains(folder));
       });
     });
     super.initState();
