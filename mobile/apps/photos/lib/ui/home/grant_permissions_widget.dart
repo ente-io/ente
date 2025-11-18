@@ -143,13 +143,10 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
               ),
               width: double.infinity,
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  key: const ValueKey("grantPermissionButton"),
-                  onPressed: _onTapLegacyContinue,
-                  child: Text(AppLocalizations.of(context).continueLabel),
-                ),
+              child: OutlinedButton(
+                key: const ValueKey("grantPermissionButton"),
+                onPressed: _onTapLegacyContinue,
+                child: Text(AppLocalizations.of(context).continueLabel),
               ),
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
