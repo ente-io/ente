@@ -4,7 +4,6 @@ import "dart:io";
 
 import 'package:bip39/bip39.dart' as bip39;
 import "package:ente_crypto/ente_crypto.dart";
-import 'package:flutter/foundation.dart';
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -37,7 +36,6 @@ import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
-
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,10 +61,6 @@ class Configuration {
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
-  static const keyBackupOnlyNewSinceEpoch = "backup_only_new_since_epoch";
-  static const keyOnboardingPermissionSkipped = "onboarding_permission_skipped";
-  static const keyHasManualBackupFolderSelection =
-      "has_manual_backup_folder_selection";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
@@ -694,9 +688,20 @@ class Configuration {
     return _volatilePassword;
   }
 
-  @visibleForTesting
-  void overridePreferencesForTests(SharedPreferences preferences) {
-    _preferences = preferences;
+  Future<void> setHasSelectedAnyBackupFolder(bool val) async {
+    await _preferences.setBool(keyHasSelectedAnyBackupFolder, val);
+  }
+
+  bool hasSelectedAnyBackupFolder() {
+    return _preferences.getBool(keyHasSelectedAnyBackupFolder) ?? false;
+  }
+
+  bool hasSelectedAllFoldersForBackup() {
+    return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
+  }
+
+  Future<void> setSelectAllFoldersForBackup(bool value) async {
+    await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {

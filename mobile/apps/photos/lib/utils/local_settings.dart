@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -51,15 +50,15 @@ class LocalSettings {
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _facesTimelineSeenKey = "faces_timeline_seen_person_ids";
   static const _keyHasSelectedAnyBackupFolder =
-      Configuration.keyHasSelectedAnyBackupFolder;
+      "has_selected_any_folder_for_backup";
   static const _keyHasSelectedAllFoldersForBackup =
-      Configuration.hasSelectedAllFoldersForBackupKey;
+      "has_selected_all_folders_for_backup";
   static const _keyShouldAutoSelectFolders =
-      Configuration.keyHasManualBackupFolderSelection;
+      "has_manual_backup_folder_selection";
   static const _keyOnboardingPermissionSkipped =
-      Configuration.keyOnboardingPermissionSkipped;
+      "onboarding_permission_skipped";
   static const _keyOnlyNewSinceEpoch =
-      Configuration.keyBackupOnlyNewSinceEpoch;
+      "backup_only_new_since_epoch";
 
   final SharedPreferences _prefs;
 
