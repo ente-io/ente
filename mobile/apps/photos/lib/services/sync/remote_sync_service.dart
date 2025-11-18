@@ -604,7 +604,6 @@ class RemoteSyncService {
     if (onlyNewSince == null) {
       return files;
     }
-    final fallbackTimestamp = DateTime.now().microsecondsSinceEpoch;
     return files.where((file) {
       final creationTime = file.creationTime;
       if (creationTime == null || creationTime == 0) {
