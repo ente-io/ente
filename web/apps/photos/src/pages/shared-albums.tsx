@@ -805,12 +805,13 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
 
             if (isAndroid) {
                 // Android: Use Intent URL format which preserves the HTTPS URL structure
-                // Format: intent://albums.ente.io/?t=TOKEN#HASH#Intent;scheme=https;package=io.ente.photos;end
-                deepLinkURL = `intent://albums.ente.io/?t=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=https;package=io.ente.photos;end`;
+                // Include action=join so the app knows to auto-join the album
+                // Format: intent://albums.ente.io/?action=join&t=TOKEN#HASH#Intent;scheme=https;package=io.ente.photos;end
+                deepLinkURL = `intent://albums.ente.io/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=https;package=io.ente.photos;end`;
             } else {
-                // iOS: Use custom scheme
-                // Format: ente://albums.ente.io/?t=TOKEN#HASH
-                deepLinkURL = `ente://albums.ente.io/?t=${encodeURIComponent(accessToken)}#${currentHash}`;
+                // iOS: Use custom scheme with action=join parameter
+                // Format: ente://albums.ente.io/?action=join&t=TOKEN#HASH
+                deepLinkURL = `ente://albums.ente.io/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
             }
 
             log.info("[Shared Albums] Attempting deep link:", { deepLinkURL });
