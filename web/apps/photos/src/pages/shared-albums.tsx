@@ -796,26 +796,29 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             publicCollection,
         );
 
-        // On mobile: Try to open the app directly by constructing an albums.ente.io URL
-        // that will trigger App Links. This only works for production domains, not local IPs.
-        if (isTouchscreen && !isCustomAlbumsAppOrigin) {
-            // Construct a URL that the app will recognize
-            // Format: https://albums.ente.io/join-public-album?t=TOKEN#HASH
-            const albumsOrigin = albumsAppOrigin();
-            const deepLinkURL = `${albumsOrigin}/join-public-album?t=${encodeURIComponent(accessToken)}#${currentHash}`;
+        // On mobile: Use custom URL scheme to open the app
+        // Format: ente://albums.ente.io/?t=TOKEN#HASH
+        // This works locally AND in production (no domain verification needed)
+        if (isTouchscreen) {
+            // Use custom scheme with albums.ente.io host so app recognizes it
+            const deepLinkURL = `ente://albums.ente.io/?t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-            // Try opening via App Link
+            log.info("[Shared Albums] Attempting deep link:", { deepLinkURL });
             window.location.href = deepLinkURL;
 
             // Fallback to web auth if app doesn't open
             setTimeout(() => {
                 if (document.visibilityState === "visible") {
                     const redirectURL = getAuthRedirectURL();
+                    log.info(
+                        "[Shared Albums] Deep link failed, redirecting to:",
+                        { redirectURL },
+                    );
                     window.location.href = redirectURL;
                 }
             }, 2000);
         } else {
-            // Desktop or custom endpoint: Use action=join redirect (will be handled by detection logic)
+            // Desktop: Use action=join redirect (will be handled by detection logic)
             const redirectURL = getAuthRedirectURL();
             log.info("[Shared Albums] Redirecting to:", { redirectURL });
             window.location.href = redirectURL;
