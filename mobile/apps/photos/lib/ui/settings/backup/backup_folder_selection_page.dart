@@ -65,9 +65,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Future<void> _loadDeviceCollections() async {
     final hasPermission = await _ensurePermissions();
     if (!hasPermission) {
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
       return;
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
