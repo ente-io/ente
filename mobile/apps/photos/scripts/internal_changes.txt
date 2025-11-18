@@ -1,3 +1,4 @@
+- Laurens: (i) People Memory Lane feature
 - Laurens: Fix OCR for HEIC files on Android
 - Laurens: Improve UI for merging cluster with person
 - Laurens: Improve scroll position for similar images after bulk delete

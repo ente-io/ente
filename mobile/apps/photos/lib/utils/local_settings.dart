@@ -48,6 +48,7 @@ class LocalSettings {
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
+  static const _facesTimelineSeenKey = "faces_timeline_seen_person_ids";
 
   final SharedPreferences _prefs;
 
@@ -181,6 +182,24 @@ class LocalSettings {
       _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
   Future<void> setHasSeenMLEnablingBanner() async {
     await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
+  }
+
+  bool hasSeenFacesTimeline(String personId) {
+    final seenIds = _prefs.getStringList(_facesTimelineSeenKey);
+    if (seenIds == null || seenIds.isEmpty) {
+      return false;
+    }
+    return seenIds.contains(personId);
+  }
+
+  Future<void> markFacesTimelineSeen(String personId) async {
+    final List<String> seenIds =
+        List<String>.from(_prefs.getStringList(_facesTimelineSeenKey) ?? []);
+    if (seenIds.contains(personId)) {
+      return;
+    }
+    seenIds.add(personId);
+    await _prefs.setStringList(_facesTimelineSeenKey, seenIds);
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see
