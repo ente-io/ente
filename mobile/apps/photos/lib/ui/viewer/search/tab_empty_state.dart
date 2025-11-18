@@ -7,13 +7,44 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class SearchTabEmptyState extends StatelessWidget {
   const SearchTabEmptyState({super.key});
+
+  Future<void> _handleAddPhotos(BuildContext context) async {
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      if (context.mounted) {
+        await routeToPage(
+          context,
+          const BackupFolderSelectionPage(
+            isFirstBackup: false,
+          ),
+        );
+      }
+    } else {
+      if (context.mounted) {
+        await showChoiceDialog(
+          context,
+          title: context.l10n.allowPermTitle,
+          body: context.l10n.allowPermBody,
+          firstButtonLabel: context.l10n.openSettings,
+          firstButtonOnTap: () async {
+            await PhotoManager.openSetting();
+          },
+        );
+        // Re-check permissions after dialog is dismissed
+        if (context.mounted) {
+          await _handleAddPhotos(context);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,39 +74,7 @@ class SearchTabEmptyState extends StatelessWidget {
               labelText: AppLocalizations.of(context).addYourPhotosNow,
               icon: Icons.arrow_forward_outlined,
               onTap: () async {
-                if (permissionService.hasGrantedPermissions()) {
-                  await routeToPage(
-                    context,
-                    const BackupFolderSelectionPage(
-                      isFirstBackup: false,
-                    ),
-                  );
-                } else {
-                  final state =
-                      await permissionService.requestPhotoMangerPermissions();
-                  if (state == PermissionState.authorized ||
-                      state == PermissionState.limited) {
-                    await permissionService.onUpdatePermission(state);
-                    if (context.mounted) {
-                      await routeToPage(
-                        context,
-                        const LoadingPhotosWidget(),
-                      );
-                    }
-                  } else {
-                    if (context.mounted) {
-                      await showChoiceDialog(
-                        context,
-                        title: context.l10n.allowPermTitle,
-                        body: context.l10n.allowPermBody,
-                        firstButtonLabel: context.l10n.openSettings,
-                        firstButtonOnTap: () async {
-                          await PhotoManager.openSetting();
-                        },
-                      );
-                    }
-                  }
-                }
+                await _handleAddPhotos(context);
               },
             ),
           ],

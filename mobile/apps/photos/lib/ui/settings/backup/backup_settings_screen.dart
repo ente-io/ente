@@ -111,7 +111,9 @@ class BackupSettingsScreen extends StatelessWidget {
                             ),
                             if (_shouldShowOnlyNewToggle())
                               ..._buildOnlyNewToggleSection(
-                                  context, colorScheme),
+                                context,
+                                colorScheme,
+                              ),
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,

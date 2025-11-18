@@ -7,7 +7,6 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/home/loading_photos_widget.dart';
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
@@ -103,68 +102,62 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   Future<void> _handleBackupFolderTap(BuildContext context) async {
-    if (permissionService.hasGrantedPermissions()) {
-      await routeToPage(
-        context,
-        const BackupFolderSelectionPage(
-          isFirstBackup: false,
-        ),
-      );
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      if (context.mounted) {
+        await routeToPage(
+          context,
+          const BackupFolderSelectionPage(
+            isFirstBackup: false,
+          ),
+        );
+      }
     } else {
-      final state = await permissionService.requestPhotoMangerPermissions();
-      if (state == PermissionState.authorized ||
-          state == PermissionState.limited) {
-        await permissionService.onUpdatePermission(state);
+      if (context.mounted) {
+        await showChoiceDialog(
+          context,
+          title: context.l10n.allowPermTitle,
+          body: context.l10n.allowPermBody,
+          firstButtonLabel: context.l10n.openSettings,
+          firstButtonOnTap: () async {
+            await PhotoManager.openSetting();
+          },
+        );
+        // Re-check permissions after dialog is dismissed
         if (context.mounted) {
-          await routeToPage(
-            context,
-            const LoadingPhotosWidget(),
-          );
-        }
-      } else {
-        if (context.mounted) {
-          await showChoiceDialog(
-            context,
-            title: context.l10n.allowPermTitle,
-            body: context.l10n.allowPermBody,
-            firstButtonLabel: context.l10n.openSettings,
-            firstButtonOnTap: () async {
-              await PhotoManager.openSetting();
-            },
-          );
+          await _handleBackupFolderTap(context);
         }
       }
     }
   }
 
   Future<void> _handleBackupSettingsTap(BuildContext context) async {
-    if (permissionService.hasGrantedPermissions()) {
-      await routeToPage(
-        context,
-        const BackupSettingsScreen(),
-      );
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      if (context.mounted) {
+        await routeToPage(
+          context,
+          const BackupSettingsScreen(),
+        );
+      }
     } else {
-      final state = await permissionService.requestPhotoMangerPermissions();
-      if (state == PermissionState.authorized ||
-          state == PermissionState.limited) {
-        await permissionService.onUpdatePermission(state);
+      if (context.mounted) {
+        await showChoiceDialog(
+          context,
+          title: context.l10n.allowPermTitle,
+          body: context.l10n.allowPermBody,
+          firstButtonLabel: context.l10n.openSettings,
+          firstButtonOnTap: () async {
+            await PhotoManager.openSetting();
+          },
+        );
+        // Re-check permissions after dialog is dismissed
         if (context.mounted) {
-          await routeToPage(
-            context,
-            const LoadingPhotosWidget(),
-          );
-        }
-      } else {
-        if (context.mounted) {
-          await showChoiceDialog(
-            context,
-            title: context.l10n.allowPermTitle,
-            body: context.l10n.allowPermBody,
-            firstButtonLabel: context.l10n.openSettings,
-            firstButtonOnTap: () async {
-              await PhotoManager.openSetting();
-            },
-          );
+          await _handleBackupSettingsTap(context);
         }
       }
     }
