@@ -82,6 +82,25 @@ remaining offline codes into the newly created account so you keep them.
 Yes, you can download Ente Auth on multiple devices and sync the codes with
 end-to-end encryption.
 
+### How do I export my codes to Google Authenticator? {#export-google-authenticator}
+
+Ente Auth supports exporting your codes in a format that Google Authenticator
+and other compatible authenticator apps can import.
+
+**To export for Google Authenticator:**
+
+1. Open `Settings > Data > Export`
+2. Select "Google Authenticator"
+3. Choose the codes you want to export
+4. A QR code will be generated that you can scan with Google Authenticator or
+   other compatible apps
+
+This is useful when migrating to apps that support Google Authenticator
+imports, as it packages multiple codes into a single QR code.
+
+> **Note**: For security reasons, this export is unencrypted. Handle the
+> exported QR code carefully and delete it after use.
+
 ### What information about my codes is stored on Ente server?
 
 Due to E2EE, the server doesn't know anything about your codes. Everything is

@@ -125,6 +125,7 @@ Ente Auth offers various import and export options for your codes.
 
 - **Export:** Export your codes in plain text, as an encrypted file, in a
   format that Google Authenticator can import, or automatically via the CLI.
+  Learn more about [exporting to Google Authenticator](../faq/#export-google-authenticator).
 - **Import:** Import codes from various other authentication apps, including
   Google Authenticator.
 
