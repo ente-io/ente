@@ -105,7 +105,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           _selectedDevicePathIDs.add(file.id);
         }
       }
-      if (widget.isOnboarding) {
+      if (widget.isOnboarding &&
+          !Configuration.instance.hasManualFolderSelection()) {
         _selectedDevicePathIDs.addAll(_allDevicePathIDs);
       }
       _selectedDevicePathIDs

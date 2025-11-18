@@ -603,8 +603,11 @@ class RemoteSyncService {
     if (onlyNewSince == null) {
       return files;
     }
+    final fallbackTimestamp = DateTime.now().microsecondsSinceEpoch;
     return files
-        .where((file) => (file.creationTime ?? 0) >= onlyNewSince)
+        .where(
+          (file) => (file.creationTime ?? fallbackTimestamp) >= onlyNewSince,
+        )
         .toList();
   }
 

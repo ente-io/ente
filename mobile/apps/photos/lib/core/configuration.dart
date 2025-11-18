@@ -37,6 +37,7 @@ import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
+import "package:photos/utils/local_settings.dart";
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -694,52 +695,57 @@ class Configuration {
   }
 
   Future<void> setHasSelectedAnyBackupFolder(bool val) async {
-    await _preferences.setBool(keyHasSelectedAnyBackupFolder, val);
+    await localSettings.setHasSelectedAnyBackupFolder(val);
   }
 
   bool hasSelectedAnyBackupFolder() {
-    return _preferences.getBool(keyHasSelectedAnyBackupFolder) ?? false;
+    return localSettings.hasSelectedAnyBackupFolder;
   }
 
   bool hasSelectedAllFoldersForBackup() {
-    return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
+    return localSettings.hasSelectedAllFoldersForBackup;
   }
 
   Future<void> setSelectAllFoldersForBackup(bool value) async {
-    await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
+    await localSettings.setSelectAllFoldersForBackup(value);
   }
 
   int? getOnlyNewSinceEpoch() {
-    return _preferences.getInt(keyBackupOnlyNewSinceEpoch);
+    return localSettings.onlyNewSinceEpoch;
   }
 
   bool isOnlyNewBackupEnabled() {
-    return _preferences.containsKey(keyBackupOnlyNewSinceEpoch);
+    return localSettings.isOnlyNewBackupEnabled;
   }
 
   Future<void> setOnlyNewSinceNow() async {
     final now = DateTime.now().microsecondsSinceEpoch;
-    await _preferences.setInt(keyBackupOnlyNewSinceEpoch, now);
+    if (now <= 0) {
+      _logger.severe("Invalid timestamp for only-new backup: $now");
+      return;
+    }
+    _logger.info("Setting only-new backup threshold to $now");
+    await localSettings.setOnlyNewSinceEpoch(now);
   }
 
   Future<void> clearOnlyNewSince() async {
-    await _preferences.remove(keyBackupOnlyNewSinceEpoch);
+    await localSettings.clearOnlyNewSinceEpoch();
   }
 
   Future<void> setOnboardingPermissionSkipped(bool v) async {
-    await _preferences.setBool(keyOnboardingPermissionSkipped, v);
+    await localSettings.setOnboardingPermissionSkipped(v);
   }
 
   bool hasOnboardingPermissionSkipped() {
-    return _preferences.getBool(keyOnboardingPermissionSkipped) ?? false;
+    return localSettings.hasOnboardingPermissionSkipped;
   }
 
   Future<void> setHasManualFolderSelection(bool value) async {
-    await _preferences.setBool(keyHasManualBackupFolderSelection, value);
+    await localSettings.setHasManualFolderSelection(value);
   }
 
   bool hasManualFolderSelection() {
-    return _preferences.getBool(keyHasManualBackupFolderSelection) ?? false;
+    return localSettings.hasManualFolderSelection;
   }
 
   @visibleForTesting

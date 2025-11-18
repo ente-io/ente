@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -49,6 +50,16 @@ class LocalSettings {
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
   static const _facesTimelineSeenKey = "faces_timeline_seen_person_ids";
+  static const _keyHasSelectedAnyBackupFolder =
+      Configuration.keyHasSelectedAnyBackupFolder;
+  static const _keyHasSelectedAllFoldersForBackup =
+      Configuration.hasSelectedAllFoldersForBackupKey;
+  static const _keyShouldAutoSelectFolders =
+      Configuration.keyHasManualBackupFolderSelection;
+  static const _keyOnboardingPermissionSkipped =
+      Configuration.keyOnboardingPermissionSkipped;
+  static const _keyOnlyNewSinceEpoch =
+      Configuration.keyBackupOnlyNewSinceEpoch;
 
   final SharedPreferences _prefs;
 
@@ -256,6 +267,46 @@ class LocalSettings {
 
   Future<void> setEnableDatabaseLogging(bool value) async {
     await _prefs.setBool(kEnableDatabaseLogging, value);
+  }
+
+  bool get hasSelectedAnyBackupFolder =>
+      _prefs.getBool(_keyHasSelectedAnyBackupFolder) ?? false;
+
+  Future<void> setHasSelectedAnyBackupFolder(bool value) async {
+    await _prefs.setBool(_keyHasSelectedAnyBackupFolder, value);
+  }
+
+  bool get hasSelectedAllFoldersForBackup =>
+      _prefs.getBool(_keyHasSelectedAllFoldersForBackup) ?? false;
+
+  Future<void> setSelectAllFoldersForBackup(bool value) async {
+    await _prefs.setBool(_keyHasSelectedAllFoldersForBackup, value);
+  }
+
+  bool get hasManualFolderSelection =>
+      _prefs.getBool(_keyShouldAutoSelectFolders) ?? false;
+
+  Future<void> setHasManualFolderSelection(bool value) async {
+    await _prefs.setBool(_keyShouldAutoSelectFolders, value);
+  }
+
+  bool get hasOnboardingPermissionSkipped =>
+      _prefs.getBool(_keyOnboardingPermissionSkipped) ?? false;
+
+  Future<void> setOnboardingPermissionSkipped(bool value) async {
+    await _prefs.setBool(_keyOnboardingPermissionSkipped, value);
+  }
+
+  int? get onlyNewSinceEpoch => _prefs.getInt(_keyOnlyNewSinceEpoch);
+
+  bool get isOnlyNewBackupEnabled => _prefs.containsKey(_keyOnlyNewSinceEpoch);
+
+  Future<void> setOnlyNewSinceEpoch(int timestamp) async {
+    await _prefs.setInt(_keyOnlyNewSinceEpoch, timestamp);
+  }
+
+  Future<void> clearOnlyNewSinceEpoch() async {
+    await _prefs.remove(_keyOnlyNewSinceEpoch);
   }
 
   bool get isInternalUserDisabled =>
