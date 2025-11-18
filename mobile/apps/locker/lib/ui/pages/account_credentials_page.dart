@@ -150,19 +150,15 @@ class _AccountCredentialsPageState
         controller: _passwordController,
         obscureText: !_passwordVisible,
         textInputAction: TextInputAction.next,
-        trailing: IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
-          iconSize: 20,
-          visualDensity: VisualDensity.compact,
-          icon: Icon(
-            _passwordVisible ? Icons.visibility : Icons.visibility_off,
-          ),
-          onPressed: () {
+        trailing: GestureDetector(
+          onTap: () {
             setState(() {
               _passwordVisible = !_passwordVisible;
             });
           },
+          child: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {

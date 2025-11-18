@@ -109,7 +109,8 @@ class _LoginPasswordVerificationPageState
     } on DioException catch (e, s) {
       await dialog.hide();
       final String? enteErrCode = e.response?.data["code"];
-      if (enteErrCode != null && enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+      if (enteErrCode != null &&
+          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
         await _showContactSupportDialog(
           context,
           context.strings.oops,
@@ -192,7 +193,7 @@ class _LoginPasswordVerificationPageState
     if (dialogChoice!.action == ButtonAction.first) {
       await sendLogs(
         context,
-        context.strings.contactSupport,
+        "support@ente.io",
         postShare: () {},
       );
     }

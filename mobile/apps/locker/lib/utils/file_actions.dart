@@ -52,6 +52,10 @@ class FileActions {
       return;
     }
 
+    // Fetch collections in case new ones were created during file edit dialog
+    final updatedAllCollections =
+        await CollectionService.instance.getCollections();
+
     final dialog = createProgressDialog(
       context,
       context.l10n.pleaseWait,
@@ -111,7 +115,7 @@ class FileActions {
         for (final collectionId in collectionsToRemove) {
           try {
             final collection =
-                allCollections.firstWhere((c) => c.id == collectionId);
+                updatedAllCollections.firstWhere((c) => c.id == collectionId);
             await CollectionService.instance.moveFilesFromCurrentCollection(
               context,
               collection,
@@ -119,7 +123,7 @@ class FileActions {
             );
           } catch (e) {
             final collection =
-                allCollections.firstWhere((c) => c.id == collectionId);
+                updatedAllCollections.firstWhere((c) => c.id == collectionId);
             _logger.severe(
               'Failed to remove file from ${collection.name}: $e',
             );
@@ -128,7 +132,7 @@ class FileActions {
       } else {
         for (final collectionId in collectionsToAdd) {
           final collection =
-              allCollections.firstWhere((c) => c.id == collectionId);
+              updatedAllCollections.firstWhere((c) => c.id == collectionId);
 
           try {
             await CollectionService.instance.addToCollection(
@@ -145,7 +149,7 @@ class FileActions {
 
         for (final collectionId in collectionsToRemove) {
           final collection =
-              allCollections.firstWhere((c) => c.id == collectionId);
+              updatedAllCollections.firstWhere((c) => c.id == collectionId);
           await CollectionService.instance
               .moveFilesFromCurrentCollection(context, collection, [file]);
         }

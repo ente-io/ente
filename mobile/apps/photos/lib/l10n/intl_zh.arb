@@ -118,6 +118,10 @@
   "enterYourPassword": "输入您的密码",
   "welcomeBack": "欢迎回来！",
   "contactSupport": "联系支持",
+  "locationPickerTip": "您也可以在照片的详情界面上添加以照片为中心的定位",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "密码错误",
   "pleaseTryAgain": "请重试",
   "recreatePasswordTitle": "重新创建密码",
@@ -1849,6 +1853,18 @@
   "addedToStreamRecreationQueue": "已添加到流重建队列",
   "videoPreviewAlreadyExists": "视频预览已存在",
   "videoAlreadyInQueue": "视频文件已存在于队列中",
+  "videoExportFailed": "视频创建失败，请重试。",
+  "videoExportSuccess": "视频已成功创建于 {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "已添加至队列",
   "creatingStream": "正在创建流",
   "similarImages": "相似图片",

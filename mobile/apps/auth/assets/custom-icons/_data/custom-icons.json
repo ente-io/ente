@@ -270,6 +270,10 @@
       ]
     },
     {
+      "title": "Borrowell",
+      "slug": "borrowell"
+    },
+    {
       "title": "Brave Creators",
       "slug": "brave_creators",
       "altNames": [
@@ -548,6 +552,10 @@
       ]
     },
     {
+      "title": "Ecobee",
+      "slug": "ecobee"
+    },
+    {
       "title": "emeritihealth",
       "altNames": [
         "Emeriti Health",
@@ -789,6 +797,10 @@
     {
       "title": "ID.me",
       "slug": "id_me"
+    },
+    {
+      "title": "IDrive",
+      "slug": "idrive"
     },
     {
       "title": "ImmoScout24",
@@ -1384,6 +1396,10 @@
       ]
     },
     {
+      "title": "Questrade",
+      "slug": "questrade"
+    },
+    {
       "title": "R10.net",
       "slug": "r10",
       "altNames": [
@@ -1838,6 +1854,15 @@
   "altNames": ["VHV", "VHV Versicherung"]
     },
     {
+      "title": "Via Rail",
+      "slug": "via_rail",
+      "altNames": [
+        "Via",
+        "VIA Rail",
+        "Via Rail Canada"
+      ]
+    },
+    {
       "title": "Vikunja"
     },
     {
@@ -2052,6 +2077,15 @@
       "altNames": [
         "International Business Machines",
         "IBMid"
+      ]
+    },
+    {
+      "title": "Peking University",
+      "slug": "peking_university",
+      "altNames": [
+        "北京大学",
+        "PKU",
+        "Peking Univ"
       ]
     }
   ]
