@@ -207,7 +207,7 @@ export const sidebarSearchOptionsForString = (
     searchString: string,
 ): SearchOption[] => {
     const normalized = searchString.trim().toLowerCase();
-    if (!normalized) return [];
+    if (normalized.length < 2) return []; // avoid noisy single-letter matches
 
     return sidebarActions
         .filter(({ available }) => !available || available())
