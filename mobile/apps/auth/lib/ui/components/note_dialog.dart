@@ -27,91 +27,143 @@ Future<void> showNotesDialog(
       return Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 360),
-            decoration: BoxDecoration(
-              color: colorScheme.backgroundElevated,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: shadowFloatLight,
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(20),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(dialogContext).pop(),
+          child: Center(
+            child: GestureDetector(
+              onTap: () {},
+              child: Container(
+                constraints:
+                    const BoxConstraints(maxWidth: 360, maxHeight: 700),
+                decoration: BoxDecoration(
+                  color: colorScheme.backgroundElevated,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: shadowFloatLight,
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          dialogContext.l10n.notes,
-                          style: TextStyle(
-                            color: colorScheme.textBase,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            height: 1.22,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              dialogContext.l10n.notes,
+                              style: TextStyle(
+                                color: colorScheme.textBase,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                height: 1.22,
+                              ),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () =>
+                                  Navigator.of(dialogContext).pop(),
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.of(dialogContext).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Stack(
-                      children: [
+                        const SizedBox(height: 8),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(20, 20, 20, 72),
+                          constraints: const BoxConstraints(maxHeight: 520),
                           decoration: ShapeDecoration(
                             color: noteBackground,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: SelectableText(
-                            trimmedNote,
-                            style: TextStyle(
-                              color: colorScheme.textBase,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              height: 1.64,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 8,
-                          bottom: 8,
-                          child: IconButton(
-                            constraints: const BoxConstraints(
-                              minHeight: 40,
-                              minWidth: 40,
-                            ),
-                            padding: const EdgeInsets.all(8),
-                            visualDensity: VisualDensity.compact,
-                            tooltip: 'Copy note',
-                            onPressed: () async {
-                              await FlutterClipboard.copy(trimmedNote);
-                              Navigator.of(dialogContext).pop();
-                              showToast(
-                                dialogContext,
-                                dialogContext.l10n.copiedToClipboard,
-                              );
-                            },
-                            icon: const HugeIcon(
-                              icon: HugeIcons.strokeRoundedCopy01,
-                              size: 22,
-                            ),
+                          child: Stack(
+                            children: [
+                              Scrollbar(
+                                thumbVisibility: true,
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    20,
+                                    20,
+                                    72,
+                                  ),
+                                  child: SelectableText(
+                                    trimmedNote,
+                                    contextMenuBuilder: (
+                                      context,
+                                      EditableTextState state,
+                                    ) {
+                                      return AdaptiveTextSelectionToolbar
+                                          .buttonItems(
+                                        anchors: state.contextMenuAnchors,
+                                        buttonItems: <ContextMenuButtonItem>[
+                                          ContextMenuButtonItem(
+                                            onPressed: () {
+                                              state.copySelection(
+                                                SelectionChangedCause.toolbar,
+                                              );
+                                            },
+                                            type: ContextMenuButtonType.copy,
+                                          ),
+                                          ContextMenuButtonItem(
+                                            onPressed: () {
+                                              state.selectAll(
+                                                SelectionChangedCause.toolbar,
+                                              );
+                                            },
+                                            type:
+                                                ContextMenuButtonType.selectAll,
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                    style: TextStyle(
+                                      color: colorScheme.textBase,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.64,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                right: 8,
+                                bottom: 8,
+                                child: Material(
+                                  color: Theme.of(dialogContext)
+                                      .colorScheme
+                                      .surfaceContainerHighest
+                                      .withValues(alpha: 0.7),
+                                  shape: const CircleBorder(),
+                                  child: InkWell(
+                                    customBorder: const CircleBorder(),
+                                    onTap: () async {
+                                      await FlutterClipboard.copy(trimmedNote);
+                                      Navigator.of(dialogContext).pop();
+                                      showToast(
+                                        dialogContext,
+                                        dialogContext.l10n.copiedToClipboard,
+                                      );
+                                    },
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: HugeIcon(
+                                        icon: HugeIcons.strokeRoundedCopy01,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
