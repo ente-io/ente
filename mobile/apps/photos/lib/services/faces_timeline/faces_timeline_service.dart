@@ -46,8 +46,8 @@ class FacesTimelineService {
   final FilesDB _filesDB = FilesDB.instance;
   final TaskQueue<String> _precomputeQueue = TaskQueue(
     maxConcurrentTasks: 1,
-    taskTimeout: const Duration(minutes: 2),
-    maxQueueSize: 200,
+    taskTimeout: const Duration(minutes: 5),
+    maxQueueSize: 1000,
   );
 
   final ValueNotifier<Set<String>> readyPersonIds = ValueNotifier<Set<String>>(
