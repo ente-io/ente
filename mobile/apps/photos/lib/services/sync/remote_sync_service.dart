@@ -443,7 +443,7 @@ class RemoteSyncService {
         }
       }
     }
-    if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
+    if (moreFilesMarkedForBackup && !localSettings.hasSelectedAllFoldersForBackup) {
       // "force reload due to display new files"
       Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
@@ -463,7 +463,7 @@ class RemoteSyncService {
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
-      Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
+      localSettings.setSelectAllFoldersForBackup(false).ignore();
     }
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),
@@ -555,7 +555,7 @@ class RemoteSyncService {
     List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
     originalFiles = filterFilesBasedOnOnlyNew(
       originalFiles,
-      _config.getOnlyNewSinceEpoch(),
+      localSettings.onlyNewSinceEpoch,
     );
     if (originalFiles.isEmpty) {
       return originalFiles;

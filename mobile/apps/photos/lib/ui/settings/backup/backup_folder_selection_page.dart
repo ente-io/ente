@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -42,6 +41,7 @@ class BackupFolderSelectionPage extends StatefulWidget {
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Logger _logger = Logger((_BackupFolderSelectionPageState).toString());
+  final _localSettings = localSettings;
   final Set<String> _allDevicePathIDs = <String>{};
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<DeviceCollection>? _deviceCollections;
@@ -105,8 +105,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           _selectedDevicePathIDs.add(file.id);
         }
       }
-      if (widget.isOnboarding &&
-          !Configuration.instance.hasManualFolderSelection()) {
+      if (widget.isOnboarding && !_localSettings.hasManualFolderSelection) {
         _selectedDevicePathIDs.addAll(_allDevicePathIDs);
       }
       _selectedDevicePathIDs
@@ -296,15 +295,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       for (String pathID in _allDevicePathIDs) {
         syncStatus[pathID] = _selectedDevicePathIDs.contains(pathID);
       }
-      await Configuration.instance.setHasSelectedAnyBackupFolder(
+      await _localSettings.setHasSelectedAnyBackupFolder(
         _selectedDevicePathIDs.isNotEmpty,
       );
-      await Configuration.instance.setSelectAllFoldersForBackup(
+      await _localSettings.setSelectAllFoldersForBackup(
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
-      await Configuration.instance.setHasManualFolderSelection(true);
+      await _localSettings.setHasManualFolderSelection(true);
       if (context.mounted) {
         Navigator.of(context).pop(true);
       }

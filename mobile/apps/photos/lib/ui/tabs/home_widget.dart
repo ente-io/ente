@@ -659,9 +659,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final skipPermissionGate =
-        Configuration.instance.hasOnboardingPermissionSkipped();
-    final onlyNewEnabled = Configuration.instance.isOnlyNewBackupEnabled();
+    final skipPermissionGate = localSettings.hasOnboardingPermissionSkipped;
+    final onlyNewEnabled = localSettings.isOnlyNewBackupEnabled;
     final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport() ||
         skipPermissionGate ||
         onlyNewEnabled;
@@ -738,16 +737,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LandingPageWidget();
     }
     if (!permissionService.hasGrantedPermissions()) {
-      if (!Configuration.instance.hasOnboardingPermissionSkipped()) {
+      if (!localSettings.hasOnboardingPermissionSkipped) {
         entityService.syncEntities().then((_) {
           PersonService.instance.refreshPersonCache();
         });
         return const GrantPermissionsWidget();
       }
     }
-    final onlyNewEnabled = Configuration.instance.isOnlyNewBackupEnabled();
-    final skipPermissionGate =
-        Configuration.instance.hasOnboardingPermissionSkipped();
+    final onlyNewEnabled = localSettings.isOnlyNewBackupEnabled;
+    final skipPermissionGate = localSettings.hasOnboardingPermissionSkipped;
     if (!onlyNewEnabled &&
         !skipPermissionGate &&
         !LocalSyncService.instance.hasCompletedFirstImport()) {
@@ -771,7 +769,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     _showShowBackupHook =
-        !Configuration.instance.hasSelectedAnyBackupFolder() &&
+        !localSettings.hasSelectedAnyBackupFolder &&
             !permissionService.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
 

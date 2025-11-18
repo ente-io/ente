@@ -2,7 +2,6 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -13,6 +12,7 @@ import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
+import 'package:photos/utils/local_settings.dart';
 import "package:styled_text/styled_text.dart";
 
 class GrantPermissionsWidget extends StatefulWidget {
@@ -25,6 +25,7 @@ class GrantPermissionsWidget extends StatefulWidget {
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
   bool _showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
+  final LocalSettings _localSettings = localSettings;
 
   @override
   void initState() {
@@ -216,7 +217,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       _logger.info("Permission state: $state");
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
-        await Configuration.instance.setOnlyNewSinceNow();
+        await _setOnlyNewSinceNow();
         await BackupPreferenceService.instance.autoSelectAllFoldersIfEligible();
         unawaited(LocalSyncService.instance.sync());
         await onPermissionGranted(
@@ -255,7 +256,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Future<void> _onTapSkip() async {
-    await Configuration.instance.setOnboardingPermissionSkipped(true);
+    await _localSettings.setOnboardingPermissionSkipped(true);
     if (mounted) {
       setState(() {});
     }
@@ -299,13 +300,23 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }) async {
     _logger.info("Permission granted " + state.toString());
     await permissionService.onUpdatePermission(state);
-    await Configuration.instance.setOnboardingPermissionSkipped(false);
+    await _localSettings.setOnboardingPermissionSkipped(false);
     if (shouldMarkLimitedFolders && state == PermissionState.limited) {
       // when limited permission is granted, by default mark all folders for
       // backup
-      await Configuration.instance.setSelectAllFoldersForBackup(true);
+      await _localSettings.setSelectAllFoldersForBackup(true);
     }
     SyncService.instance.onPermissionGranted().ignore();
     Bus.instance.fire(PermissionGrantedEvent());
+  }
+
+  Future<void> _setOnlyNewSinceNow() async {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    if (now <= 0) {
+      _logger.severe("Invalid timestamp for only-new backup: $now");
+      return;
+    }
+    _logger.info("Setting only-new backup threshold to $now");
+    await _localSettings.setOnlyNewSinceEpoch(now);
   }
 }

@@ -1,6 +1,7 @@
 import "dart:io";
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/service_locator.dart';
@@ -19,6 +20,7 @@ import 'package:photos/ui/components/toggle_switch_widget.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
+  static final Logger _logger = Logger('BackupSettingsScreen');
 
   @override
   Widget build(BuildContext context) {
@@ -114,20 +116,19 @@ class BackupSettingsScreen extends StatelessWidget {
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 trailingWidget: ToggleSwitchWidget(
-                                  value: () => Configuration.instance
-                                      .isOnlyNewBackupEnabled(),
+                                  value: () => localSettings
+                                      .isOnlyNewBackupEnabled,
                                   onChanged: () async {
-                                    final isEnabled = Configuration.instance
-                                        .isOnlyNewBackupEnabled();
+                                    final isEnabled =
+                                        localSettings.isOnlyNewBackupEnabled;
                                     if (!isEnabled) {
-                                      await Configuration.instance
-                                          .setOnlyNewSinceNow();
+                                      await _setOnlyNewSinceNow();
                                       await BackupPreferenceService.instance
                                           .autoSelectAllFoldersIfEligible();
                                       SyncService.instance.sync().ignore();
                                     } else {
-                                      await Configuration.instance
-                                          .clearOnlyNewSince();
+                                      await localSettings
+                                          .clearOnlyNewSinceEpoch();
                                       SyncService.instance.sync().ignore();
                                     }
                                   },
@@ -212,5 +213,15 @@ class BackupSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _setOnlyNewSinceNow() async {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    if (now <= 0) {
+      _logger.severe("Invalid timestamp for only-new backup: $now");
+      return;
+    }
+    _logger.info("Setting only-new backup threshold to $now");
+    await localSettings.setOnlyNewSinceEpoch(now);
   }
 }

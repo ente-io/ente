@@ -1,8 +1,8 @@
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_collection.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 
 class BackupPreferenceService {
@@ -12,15 +12,15 @@ class BackupPreferenceService {
   final Logger _logger = Logger('BackupPreferenceService');
 
   Future<void> autoSelectAllFoldersIfEligible() async {
-    final config = Configuration.instance;
-    if (config.hasManualFolderSelection() ||
-        config.hasSelectedAnyBackupFolder()) {
+    final settings = localSettings;
+    if (settings.hasManualFolderSelection ||
+        settings.hasSelectedAnyBackupFolder) {
       return;
     }
-    await config.setHasManualFolderSelection(true);
+    await settings.setHasManualFolderSelection(true);
     await _setAllFoldersShouldBackup(true);
-    await config.setSelectAllFoldersForBackup(true);
-    await config.setHasSelectedAnyBackupFolder(true);
+    await settings.setSelectAllFoldersForBackup(true);
+    await settings.setHasSelectedAnyBackupFolder(true);
     _logger.info('Auto-selected all folders for backup');
   }
 
