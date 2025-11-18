@@ -796,12 +796,22 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
             publicCollection,
         );
 
-        // On mobile: Use custom URL scheme to open the app
-        // Format: ente://albums.ente.io/?t=TOKEN#HASH
-        // This works locally AND in production (no domain verification needed)
+        // On mobile: Use platform-specific deep linking
         if (isTouchscreen) {
-            // Use custom scheme with albums.ente.io host so app recognizes it
-            const deepLinkURL = `ente://albums.ente.io/?t=${encodeURIComponent(accessToken)}#${currentHash}`;
+            const userAgent = navigator.userAgent || "";
+            const isAndroid = userAgent.includes("Android");
+
+            let deepLinkURL: string;
+
+            if (isAndroid) {
+                // Android: Use Intent URL format which preserves the HTTPS URL structure
+                // Format: intent://albums.ente.io/?t=TOKEN#HASH#Intent;scheme=https;package=io.ente.photos;end
+                deepLinkURL = `intent://albums.ente.io/?t=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=https;package=io.ente.photos;end`;
+            } else {
+                // iOS: Use custom scheme
+                // Format: ente://albums.ente.io/?t=TOKEN#HASH
+                deepLinkURL = `ente://albums.ente.io/?t=${encodeURIComponent(accessToken)}#${currentHash}`;
+            }
 
             log.info("[Shared Albums] Attempting deep link:", { deepLinkURL });
             window.location.href = deepLinkURL;
