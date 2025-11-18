@@ -67,6 +67,8 @@ class _CodeWidgetState extends State<CodeWidget> {
   int _codeTimeStep = -1;
   int lastRefreshTime = 0;
   bool ignorePin = false;
+  // Cached localization string to avoid BuildContext access in async callbacks
+  String _errorText = 'Error';
 
   @override
   void initState() {
@@ -77,6 +79,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     _everySecondTimer = Timer.periodic(const Duration(milliseconds: 500), (
       Timer t,
     ) {
+      if (!mounted) return;
       int newStep = 0;
       int epochSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (widget.code.type != Type.hotp) {
@@ -124,6 +127,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       _isInitialized = true;
     }
     final l10n = context.l10n;
+    // Cache the localized error label for use in timer callbacks
+    _errorText = l10n.error;
 
     Widget getCardContents(AppLocalizations l10n, {required bool isSelected}) {
       final colorScheme = getEnteColorScheme(context);
@@ -1045,7 +1050,8 @@ class _CodeWidgetState extends State<CodeWidget> {
     try {
       return getOTP(widget.code);
     } catch (e) {
-      return context.l10n.error;
+      // Avoid accessing BuildContext from async timer callbacks
+      return _errorText;
     }
   }
 
@@ -1054,7 +1060,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       assert(widget.code.type.isTOTPCompatible);
       return getNextTotp(widget.code);
     } catch (e) {
-      return context.l10n.error;
+      // Avoid accessing BuildContext from async timer callbacks
+      return _errorText;
     }
   }
 
