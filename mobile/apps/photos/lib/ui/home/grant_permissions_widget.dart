@@ -253,13 +253,28 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Future<void> _setOnlyNewSinceNow() async {
-    final now = DateTime.now().microsecondsSinceEpoch;
-    if (now <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $now");
+    // Calculate 7 days ago at 12 AM (start of day)
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+    final threshold = DateTime(
+      sevenDaysAgo.year,
+      sevenDaysAgo.month,
+      sevenDaysAgo.day,
+      0, // hour: 12 AM
+      0, // minute
+      0, // second
+      0, // millisecond
+      0, // microsecond
+    ).microsecondsSinceEpoch;
+
+    if (threshold <= 0) {
+      _logger.severe("Invalid timestamp for only-new backup: $threshold");
       return;
     }
-    _logger.info("Setting only-new backup threshold to $now");
-    await _localSettings.setOnlyNewSinceEpoch(now);
+    _logger.info(
+      "Setting only-new backup threshold to $threshold (7 days ago at 12 AM)",
+    );
+    await _localSettings.setOnlyNewSinceEpoch(threshold);
   }
 
   String _getHeaderText(BuildContext context) {
@@ -294,7 +309,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
               onPressed: () => _onlyNewActionDebouncer.run(() async {
                 await _onTapOnlyNewPhotos();
               }),
-              child: const Text("Backup only new photos"),
+              child: const Text("Start with latest backups"),
             ),
           ),
           const SizedBox(height: 12),
@@ -303,7 +318,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
             child: OutlinedButton(
               key: const ValueKey("selectFoldersButton"),
               onPressed: _onTapSelectFolders,
-              child: const Text("Select folders to backup"),
+              child: const Text("Select folders"),
             ),
           ),
           const SizedBox(height: 16),
