@@ -368,6 +368,9 @@ func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) erro
 		}
 		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, restrictionMsg)
 	}
+	if err := c.UserAuthRepo.EnsureLockerRolloutAccess(userID); err != nil {
+		return stacktrace.Propagate(err, "locker access: rollout check failed")
+	}
 	return nil
 }
 

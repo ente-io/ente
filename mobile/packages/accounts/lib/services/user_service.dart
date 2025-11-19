@@ -148,6 +148,14 @@ class UserService {
             "Registration is temporarily paused",
           ),
         );
+      } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
+        unawaited(
+          showErrorDialog(
+            context,
+            "We're out of beta seats for now",
+            "This preview access has reached capacity. We'll be opening it to more users soon.",
+          ),
+        );
       } else if (e.response != null && e.response!.statusCode == 403) {
         unawaited(
           showErrorDialog(
