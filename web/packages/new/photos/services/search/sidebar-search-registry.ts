@@ -12,6 +12,33 @@ export interface SidebarAction {
     available?: () => boolean;
 }
 
+export interface SidebarActionContext {
+    // top-level sidebar controls
+    onClose: () => void;
+    onShowCollectionSummary: (
+        collectionSummaryID: number,
+        isHidden?: boolean,
+    ) => Promise<void>;
+    showAccount: () => void;
+    showPreferences: () => void;
+    showHelp: () => void;
+    onShowExport: () => void;
+    onLogout: () => void;
+    onRouteToDeduplicate: () => Promise<unknown>;
+    onShowWatchFolder: () => void;
+    pseudoIDs: {
+        uncategorized: number;
+        archive: number;
+        hidden: number;
+        trash: number;
+    };
+
+    // nested drawer hooks
+    setPendingAccountAction: (a: SidebarActionID | undefined) => void;
+    setPendingPreferencesAction: (a: SidebarActionID | undefined) => void;
+    setPendingHelpAction: (a: SidebarActionID | undefined) => void;
+}
+
 const shortcutsCategory = t("shortcuts", { defaultValue: "Shortcuts" });
 const preferencesCategory = t("preferences");
 const accountCategory = t("account");
@@ -219,6 +246,89 @@ export const sidebarSearchOptionsForString = (
             fileCount: 0,
             previewFiles: [],
         }));
+};
+
+export const performSidebarAction = async (
+    actionID: SidebarActionID,
+    ctx: SidebarActionContext,
+): Promise<void> => {
+    switch (actionID) {
+        case "shortcuts.uncategorized":
+            return ctx
+                .onShowCollectionSummary(ctx.pseudoIDs.uncategorized, false)
+                .then(() => ctx.onClose());
+        case "shortcuts.archive":
+            return ctx
+                .onShowCollectionSummary(ctx.pseudoIDs.archive, false)
+                .then(() => ctx.onClose());
+        case "shortcuts.hidden":
+            return ctx
+                .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
+                .then(() => ctx.onClose());
+        case "shortcuts.trash":
+            return ctx
+                .onShowCollectionSummary(ctx.pseudoIDs.trash, false)
+                .then(() => ctx.onClose());
+
+        case "utility.account":
+            ctx.showAccount();
+            return Promise.resolve();
+
+        case "utility.watchFolders":
+            ctx.onShowWatchFolder();
+            return Promise.resolve();
+
+        case "utility.deduplicate":
+            return ctx.onRouteToDeduplicate().then(() => ctx.onClose());
+
+        case "utility.preferences":
+            ctx.showPreferences();
+            return Promise.resolve();
+
+        case "utility.help":
+            ctx.showHelp();
+            return Promise.resolve();
+
+        case "utility.export":
+            ctx.onShowExport();
+            ctx.onClose();
+            return Promise.resolve();
+
+        case "utility.logout":
+            ctx.onLogout();
+            return Promise.resolve();
+
+        case "account.recoveryKey":
+        case "account.twoFactor":
+        case "account.passkeys":
+        case "account.changePassword":
+        case "account.changeEmail":
+        case "account.deleteAccount":
+            ctx.setPendingAccountAction(actionID);
+            ctx.showAccount();
+            return Promise.resolve();
+
+        case "preferences.language":
+        case "preferences.theme":
+        case "preferences.customDomains":
+        case "preferences.map":
+        case "preferences.advanced":
+        case "preferences.mlSearch":
+        case "preferences.streamableVideos":
+            ctx.setPendingPreferencesAction(actionID);
+            ctx.showPreferences();
+            return Promise.resolve();
+
+        case "help.helpCenter":
+        case "help.blog":
+        case "help.requestFeature":
+        case "help.support":
+        case "help.viewLogs":
+        case "help.testUpload":
+            ctx.setPendingHelpAction(actionID);
+            ctx.showHelp();
+            return Promise.resolve();
+    }
 };
 
 const matchesSearch = (

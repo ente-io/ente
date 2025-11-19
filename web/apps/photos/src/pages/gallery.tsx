@@ -110,7 +110,10 @@ import {
     filterSearchableFiles,
     updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
-import type { SearchOption } from "ente-new/photos/services/search/types";
+import {
+    type SearchOption,
+    type SidebarActionID,
+} from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
@@ -199,6 +202,9 @@ const Page: React.FC = () => {
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
+    const [pendingSidebarAction, setPendingSidebarAction] = useState<
+        SidebarActionID | undefined
+    >(undefined);
 
     /**
      * The last time (epoch milliseconds) when we prompted the user for their
@@ -790,6 +796,13 @@ const Page: React.FC = () => {
                     type: "showPerson",
                     personID: searchOption.suggestion.person.id,
                 });
+            } else if (type == "sidebarAction") {
+                setPendingSidebarAction(searchOption.suggestion.actionID);
+                showSidebar();
+
+                const shouldExitSearchMode =
+                    options?.shouldExitSearchMode ?? true;
+                dispatch({ type: "exitSearch", shouldExitSearchMode });
             } else {
                 dispatch({
                     type: "enterSearchMode",
@@ -1140,6 +1153,8 @@ const Page: React.FC = () => {
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
                 }
+                pendingAction={pendingSidebarAction}
+                onActionHandled={() => setPendingSidebarAction(undefined)}
                 onShowPlanSelector={showPlanSelector}
                 onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 onShowExport={showExport}
