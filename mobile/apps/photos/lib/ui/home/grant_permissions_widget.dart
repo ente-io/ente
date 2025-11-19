@@ -33,36 +33,9 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   );
 
   @override
-  void initState() {
-    super.initState();
-    _ensureFlagsLoaded();
-  }
-
-  @override
   void dispose() {
-    _flagRefresh?.cancel();
     _onlyNewActionDebouncer.cancelDebounceTimer();
     super.dispose();
-  }
-
-  StreamSubscription<void>? _flagRefresh;
-
-  void _ensureFlagsLoaded() {
-    if (_showOnlyNewFeature) {
-      return;
-    }
-    _flagRefresh =
-        Stream<void>.fromFuture(flagService.refreshFlags()).listen((_) {
-      final bool updated = flagService.enableOnlyBackupFuturePhotos;
-      if (updated != _showOnlyNewFeature && mounted) {
-        setState(() {
-          _showOnlyNewFeature = updated;
-        });
-      }
-    })
-          ..onError((Object error, StackTrace stackTrace) {
-            _logger.warning("Failed to refresh flags", error, stackTrace);
-          });
   }
 
   @override
