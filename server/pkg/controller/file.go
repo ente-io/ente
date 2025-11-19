@@ -313,7 +313,7 @@ func (c *FileController) Update(ctx context.Context, userID int64, file ente.Fil
 			ThumbnailSize: thumbnailSize,
 		}
 	}
-	err = c.FileRepo.Update(file, fileSize, thumbnailSize, diff, oldObjects, isDuplicateRequest)
+	err = c.FileRepo.Update(file, fileSize, thumbnailSize, diff, oldObjects, isDuplicateRequest, app)
 	if err != nil {
 		return response, stacktrace.Propagate(err, "")
 	}
@@ -674,7 +674,7 @@ func (c *FileController) UpdateThumbnail(ctx *gin.Context, fileID int64, newThum
 		// delete old object only if newThumbnail object key different.
 		oldObject = &existingThumbnailObjectKey
 	}
-	err = c.FileRepo.UpdateThumbnail(ctx, fileID, userID, newThumbnail, newThumbnailSize, diff, oldObject)
+	err = c.FileRepo.UpdateThumbnail(ctx, fileID, userID, newThumbnail, newThumbnailSize, diff, oldObject, app)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}

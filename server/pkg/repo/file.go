@@ -107,7 +107,7 @@ func (repo *FileRepository) Create(
 		tx.Rollback()
 		return file, -1, stacktrace.Propagate(err, "")
 	}
-	usage, err := repo.updateUsage(ctx, tx, file.OwnerID, usageDiff)
+	usage, err := repo.updateUsage(ctx, tx, file.OwnerID, usageDiff, app)
 	if err != nil {
 		tx.Rollback()
 		return file, -1, stacktrace.Propagate(err, "")
@@ -278,7 +278,7 @@ func (repo *FileRepository) ResetNeedsReplication(file ente.File, hotDC string) 
 }
 
 // Update updates the entry in the database for the given file
-func (repo *FileRepository) Update(file ente.File, fileSize int64, thumbnailSize int64, usageDiff int64, oldObjects []string, isDuplicateRequest bool) error {
+func (repo *FileRepository) Update(file ente.File, fileSize int64, thumbnailSize int64, usageDiff int64, oldObjects []string, isDuplicateRequest bool, app ente.App) error {
 	hotDC := repo.S3Config.GetHotDataCenter()
 	dcsForNewEntry := pq.StringArray{hotDC}
 
@@ -333,14 +333,14 @@ func (repo *FileRepository) Update(file ente.File, fileSize int64, thumbnailSize
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = tx.ExecContext(ctx, `UPDATE object_keys 
+	_, err = tx.ExecContext(ctx, `UPDATE object_keys
 			SET object_key = $1, size = $2, datacenters = $3 WHERE file_id = $4 AND o_type = $5`,
 		file.Thumbnail.ObjectKey, thumbnailSize, dcsForNewEntry, file.ID, ente.THUMBNAIL)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = repo.updateUsage(ctx, tx, file.OwnerID, usageDiff)
+	_, err = repo.updateUsage(ctx, tx, file.OwnerID, usageDiff, app)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
@@ -445,7 +445,7 @@ func (repo *FileRepository) UpdateMagicAttributes(
 }
 
 // Update updates the entry in the database for the given file
-func (repo *FileRepository) UpdateThumbnail(ctx context.Context, fileID int64, userID int64, thumbnail ente.FileAttributes, thumbnailSize int64, usageDiff int64, oldThumbnailObject *string) error {
+func (repo *FileRepository) UpdateThumbnail(ctx context.Context, fileID int64, userID int64, thumbnail ente.FileAttributes, thumbnailSize int64, usageDiff int64, oldThumbnailObject *string, app ente.App) error {
 	hotDC := repo.S3Config.GetHotDataCenter()
 	dcsForNewEntry := pq.StringArray{hotDC}
 
@@ -494,14 +494,14 @@ func (repo *FileRepository) UpdateThumbnail(ctx context.Context, fileID int64, u
 			return stacktrace.Propagate(err, "")
 		}
 	}
-	_, err = tx.ExecContext(ctx, `UPDATE object_keys 
+	_, err = tx.ExecContext(ctx, `UPDATE object_keys
 			SET object_key = $1, size = $2, datacenters = $3 WHERE file_id = $4 AND o_type = $5`,
 		thumbnail.ObjectKey, thumbnailSize, dcsForNewEntry, fileID, ente.THUMBNAIL)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
 	}
-	_, err = repo.updateUsage(ctx, tx, userID, usageDiff)
+	_, err = repo.updateUsage(ctx, tx, userID, usageDiff, app)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "")
@@ -844,18 +844,53 @@ func (repo *FileRepository) scheduleDeletion(ctx context.Context, tx *sql.Tx, fi
 	if err != nil {
 		return stacktrace.Propagate(err, "file object deletion failed for fileIDs: %v", fileIDs)
 	}
-	totalObjectSize := int64(0)
+
+	// Group files by app to update the correct usage table
+	filesByApp := make(map[ente.App][]int64)
+	sizeByApp := make(map[ente.App]int64)
+
 	for _, object := range objectsToBeDeleted {
-		totalObjectSize += object.FileSize
+		// Get the app for this file by querying its collection
+		var app string
+		err := tx.QueryRowContext(ctx, `
+			SELECT c.app
+			FROM collection_files cf
+			JOIN collections c ON cf.collection_id = c.collection_id
+			WHERE cf.file_id = $1
+			LIMIT 1`, object.FileID).Scan(&app)
+
+		if err != nil {
+			// If no collection found, default to Photos for backward compatibility
+			app = string(ente.Photos)
+		}
+
+		enteApp := ente.App(app)
+		filesByApp[enteApp] = append(filesByApp[enteApp], object.FileID)
+		sizeByApp[enteApp] += object.FileSize
 	}
-	diff = diff - (totalObjectSize)
-	_, err = repo.updateUsage(ctx, tx, userID, diff)
-	return stacktrace.Propagate(err, "")
+
+	// Update usage for each app separately
+	for app, size := range sizeByApp {
+		diff = -(size)
+		_, err = repo.updateUsage(ctx, tx, userID, diff, app)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to update %s usage", app)
+		}
+	}
+
+	return nil
 }
 
 // updateUsage updates the storage usage of a user and returns the updated value
-func (repo *FileRepository) updateUsage(ctx context.Context, tx *sql.Tx, userID int64, diff int64) (int64, error) {
-	row := tx.QueryRowContext(ctx, `SELECT storage_consumed FROM usage WHERE user_id = $1 FOR UPDATE`, userID)
+// It writes to either usage or locker_usage table based on the app parameter
+func (repo *FileRepository) updateUsage(ctx context.Context, tx *sql.Tx, userID int64, diff int64, app ente.App) (int64, error) {
+	tableName := "usage"
+	if app == ente.Locker {
+		tableName = "locker_usage"
+	}
+
+	query := fmt.Sprintf(`SELECT storage_consumed FROM %s WHERE user_id = $1 FOR UPDATE`, tableName)
+	row := tx.QueryRowContext(ctx, query, userID)
 	var usage int64
 	err := row.Scan(&usage)
 	if err != nil {
@@ -866,11 +901,12 @@ func (repo *FileRepository) updateUsage(ctx context.Context, tx *sql.Tx, userID 
 		}
 	}
 	newUsage := usage + diff
-	_, err = tx.ExecContext(ctx, `INSERT INTO usage (user_id, storage_consumed)
-			VALUES ($1, $2)
-			ON CONFLICT (user_id) DO UPDATE
-				SET storage_consumed = $2`,
-		userID, newUsage)
+
+	updateQuery := fmt.Sprintf(`INSERT INTO %s (user_id, storage_consumed)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id) DO UPDATE
+			SET storage_consumed = $2`, tableName)
+	_, err = tx.ExecContext(ctx, updateQuery, userID, newUsage)
 	if err != nil {
 		return -1, stacktrace.Propagate(err, "")
 	}

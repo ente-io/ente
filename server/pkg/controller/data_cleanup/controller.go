@@ -164,37 +164,54 @@ func (c *DeleteUserCleanupController) completeCleanup(ctx context.Context, item 
 // This check act as another data-integrity check for our db. If even after multiple attempts, storage is still not zero
 // we mark the clean-up as done.
 func (c *DeleteUserCleanupController) storageCheck(ctx context.Context, item *entity.DataCleanup) error {
-	usage, err := c.UsageRepo.GetUsage(item.UserID)
+	// Check both Photos and Locker usage
+	photosUsage, err := c.UsageRepo.GetUsage(item.UserID)
 	if err != nil {
-		return stacktrace.Propagate(err, "")
+		return stacktrace.Propagate(err, "failed to get photos usage")
 	}
-	if usage != 0 {
+
+	lockerUsage, err := c.UsageRepo.GetLockerUsage(item.UserID)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to get locker usage")
+	}
+
+	totalUsage := photosUsage + lockerUsage
+
+	if totalUsage != 0 {
+		log.WithFields(log.Fields{
+			"user_id":       item.UserID,
+			"photos_usage":  photosUsage,
+			"locker_usage":  lockerUsage,
+			"total_usage":   totalUsage,
+			"flow":          "delete_user_data",
+		}).Info("user still has storage consumed")
+
 		// check if trash still has entry
 		timeStamp, err2 := c.TrashRepo.GetTimeStampForLatestNonDeletedEntry(item.UserID)
 		if err2 != nil {
 			return stacktrace.Propagate(err2, "failed to fetch timestamp")
 		}
 		// no entry in trash
-        if timeStamp != nil {
-            log.WithFields(log.Fields{
-                "user_id":   item.UserID,
-                "flow":      "delete_user_data",
-                "timeStamp": timeStamp,
-            }).Info("trash is not empty")
-            // Enqueue empty-trash for both apps
-            err = c.TrashRepo.EmptyTrash(ctx, item.UserID, *timeStamp, ente.Photos)
-            if err != nil {
-                return stacktrace.Propagate(err, "")
-            }
-            err = c.TrashRepo.EmptyTrash(ctx, item.UserID, *timeStamp, ente.Locker)
-            if err != nil {
-                return stacktrace.Propagate(err, "")
-            }
-        } else if item.StageAttemptCount >= maxStorageCheckAttempt {
-            // Note: if storage is still not zero after maxStorageCheckAttempt attempts and trash is empty, mark the clean-up as done
-            return c.completeCleanup(ctx, item)
-        }
-        return fmt.Errorf("storage consumed is not zero: %d", usage)
+		if timeStamp != nil {
+			log.WithFields(log.Fields{
+				"user_id":   item.UserID,
+				"flow":      "delete_user_data",
+				"timeStamp": timeStamp,
+			}).Info("trash is not empty")
+			// Enqueue empty-trash for both apps
+			err = c.TrashRepo.EmptyTrash(ctx, item.UserID, *timeStamp, ente.Photos)
+			if err != nil {
+				return stacktrace.Propagate(err, "")
+			}
+			err = c.TrashRepo.EmptyTrash(ctx, item.UserID, *timeStamp, ente.Locker)
+			if err != nil {
+				return stacktrace.Propagate(err, "")
+			}
+		} else if item.StageAttemptCount >= maxStorageCheckAttempt {
+			// Note: if storage is still not zero after maxStorageCheckAttempt attempts and trash is empty, mark the clean-up as done
+			return c.completeCleanup(ctx, item)
+		}
+		return fmt.Errorf("storage consumed is not zero: photos=%d, locker=%d, total=%d", photosUsage, lockerUsage, totalUsage)
 	}
 	return c.completeCleanup(ctx, item)
 }
