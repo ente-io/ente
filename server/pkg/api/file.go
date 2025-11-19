@@ -81,7 +81,6 @@ func (h *FileHandler) CreateMetaFile(c *gin.Context) {
 	}
 	file.UpdationTime = time.Microseconds()
 
-	// get an ente.App from the ?app= query parameter with a default of photos
 	enteApp := auth.GetApp(c)
 	file.OwnerID = userID
 	file.IsDeleted = false

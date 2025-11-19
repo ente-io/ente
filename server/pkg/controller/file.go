@@ -80,7 +80,7 @@ const (
 	DeletedObjectQueueLock = "deleted_objects_queue_lock"
 )
 
-func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.File) error {
+func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.File, app ente.App) error {
 	objectPathPrefix := strconv.FormatInt(userID, 10) + "/"
 	if !strings.HasPrefix(file.File.ObjectKey, objectPathPrefix) || !strings.HasPrefix(file.Thumbnail.ObjectKey, objectPathPrefix) {
 		return stacktrace.Propagate(ente.ErrBadRequest, "Incorrect object key reported")
@@ -105,6 +105,9 @@ func (c *FileController) validateFileCreateOrUpdateReq(userID int64, file ente.F
 		collection, err := c.CollectionRepo.Get(file.CollectionID)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
+		}
+		if ente.App(collection.App) != app {
+			return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("ctx app is different from collection app=%s collectionApp=%s", app, collection.App))
 		}
 		// Verify that user owns the collection.
 		// Warning: Do not remove this check
@@ -139,7 +142,7 @@ func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, 
 		size, err := c.sizeOf(file.Thumbnail.ObjectKey)
 		thumbChan <- sizeResult{size, err}
 	}()
-	err := c.validateFileCreateOrUpdateReq(userID, file)
+	err := c.validateFileCreateOrUpdateReq(userID, file, app)
 	if err != nil {
 		return file, stacktrace.Propagate(err, "")
 	}
@@ -235,7 +238,7 @@ func (c *FileController) maybeSendFirstUploadEmail(userID int64, userAgent strin
 // Update verifies permissions and updates the specified file
 func (c *FileController) Update(ctx context.Context, userID int64, file ente.File, app ente.App) (ente.UpdateFileResponse, error) {
 	var response ente.UpdateFileResponse
-	err := c.validateFileCreateOrUpdateReq(userID, file)
+	err := c.validateFileCreateOrUpdateReq(userID, file, app)
 	if err != nil {
 		return response, stacktrace.Propagate(err, "")
 	}
