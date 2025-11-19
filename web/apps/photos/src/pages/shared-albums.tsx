@@ -158,9 +158,6 @@ export default function PublicCollectionGallery() {
             const hash = window.location.hash;
 
             if (!t) {
-                log.error(
-                    "[Join Album] Missing access token in action=join URL",
-                );
                 return;
             }
 
@@ -169,10 +166,6 @@ export default function PublicCollectionGallery() {
 
             const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
             const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
-
-            log.info("[Join Album] Redirecting to web app for auth:", {
-                redirectURL,
-            });
 
             window.location.href = redirectURL;
         }
@@ -418,29 +411,16 @@ export default function PublicCollectionGallery() {
     ) => {
         try {
             const accessToken = credentials.current!.accessToken;
-            log.info(
-                "[Shared Albums] Verifying password for accessToken:",
-                accessToken,
-            );
             const accessTokenJWT = await verifyPublicAlbumPassword(
                 publicCollection!.publicURLs[0]!,
                 password,
                 accessToken,
             );
-            log.info("[Shared Albums] JWT obtained:", {
-                accessToken,
-                jwtLength: accessTokenJWT.length,
-                jwtPreview: accessTokenJWT.substring(0, 20) + "...",
-            });
             credentials.current!.accessTokenJWT = accessTokenJWT;
             downloadManager.setPublicAlbumsCredentials(credentials.current);
             await savePublicCollectionAccessTokenJWT(
                 accessToken,
                 accessTokenJWT,
-            );
-            log.info(
-                "[Shared Albums] JWT saved to localStorage with key:",
-                `public-${accessToken}-passkey`,
             );
         } catch (e) {
             log.error("Failed to verifyLinkPassword", e);
@@ -755,28 +735,15 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
 
     const handleJoinAlbum = async () => {
         if (!publicCollection || !accessToken || !collectionKey) {
-            log.error("Missing required data for join album");
             return;
         }
 
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
 
-        // Log the current state before attempting to store context
-        const hasCredentialsJWT = credentials?.current
-            ? !!credentials.current.accessTokenJWT
-            : false;
-        log.info("[Shared Albums] handleJoinAlbum called:", {
-            accessToken,
-            isPasswordProtected:
-                !!publicCollection.publicURLs[0]?.passwordEnabled,
-            hasCredentialsJWT,
-        });
-
         // If this is a password-protected album and we have the JWT, ensure it's saved
         const jwtToken = credentials?.current?.accessTokenJWT;
         if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
-            log.info("[Shared Albums] Ensuring JWT is saved before redirect");
             await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
         }
 
@@ -806,7 +773,6 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 deepLinkURL = `ente://albums.ente.io/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
             }
 
-            log.info("[Shared Albums] Attempting deep link:", { deepLinkURL });
             window.location.href = deepLinkURL;
 
             // Fallback to web auth if app doesn't open
@@ -819,10 +785,6 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                         : "";
                     const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
 
-                    log.info(
-                        "[Shared Albums] Deep link failed, redirecting to:",
-                        { redirectURL },
-                    );
                     window.location.href = redirectURL;
                 }
             }, 2000);
@@ -835,7 +797,6 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
                 : "";
             const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
 
-            log.info("[Shared Albums] Redirecting to:", { redirectURL });
             window.location.href = redirectURL;
         }
     };

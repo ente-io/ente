@@ -1,6 +1,5 @@
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
-import log from "ente-base/log";
 import { photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
@@ -47,23 +46,11 @@ export const useJoinAlbum = ({
 
     const handleJoinAlbum = async () => {
         if (!publicCollection || !accessToken || !collectionKey) {
-            log.error("Missing required data for join album");
             return;
         }
 
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
-
-        // Log the current state before attempting to store context
-        const hasCredentialsJWT = credentials?.current
-            ? !!credentials.current.accessTokenJWT
-            : false;
-        log.info("[Shared Albums] handleJoinAlbum called:", {
-            accessToken,
-            isPasswordProtected:
-                !!publicCollection.publicURLs[0]?.passwordEnabled,
-            hasCredentialsJWT,
-        });
 
         // Check if on mobile and try deep link first
         if (isTouchscreen) {
@@ -95,9 +82,6 @@ export const useJoinAlbum = ({
                         publicCollection.publicURLs[0]?.passwordEnabled &&
                         jwtToken
                     ) {
-                        log.info(
-                            "[Shared Albums] Ensuring JWT is saved before redirect (iOS)",
-                        );
                         await savePublicCollectionAccessTokenJWT(
                             accessToken,
                             jwtToken,
@@ -140,9 +124,6 @@ export const useJoinAlbum = ({
                             publicCollection.publicURLs[0]?.passwordEnabled &&
                             jwtToken
                         ) {
-                            log.info(
-                                "[Shared Albums] Ensuring JWT is saved before redirect (Android)",
-                            );
                             await savePublicCollectionAccessTokenJWT(
                                 accessToken,
                                 jwtToken,
@@ -180,9 +161,6 @@ export const useJoinAlbum = ({
                             publicCollection.publicURLs[0]?.passwordEnabled &&
                             jwtToken
                         ) {
-                            log.info(
-                                "[Shared Albums] Ensuring JWT is saved before redirect (other mobile)",
-                            );
                             await savePublicCollectionAccessTokenJWT(
                                 accessToken,
                                 jwtToken,
@@ -214,9 +192,6 @@ export const useJoinAlbum = ({
             // If this is a password-protected album and we have the JWT, ensure it's saved
             const jwtToken = credentials?.current?.accessTokenJWT;
             if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
-                log.info(
-                    "[Shared Albums] Ensuring JWT is saved before redirect",
-                );
                 await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
             }
 

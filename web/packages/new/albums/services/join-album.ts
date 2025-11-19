@@ -2,7 +2,6 @@ import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
-import log from "ente-base/log";
 import { albumsAppOrigin, apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 
@@ -43,16 +42,6 @@ export const storeJoinAlbumContext = async (
     const accessTokenJWT =
         await savedPublicCollectionAccessTokenJWT(accessToken);
 
-    log.info("[Join Album] Retrieving JWT from storage:", {
-        accessToken,
-        storageKey: `public-${accessToken}-passkey`,
-        hasJWT: !!accessTokenJWT,
-        jwtLength: accessTokenJWT?.length,
-        jwtPreview: accessTokenJWT
-            ? accessTokenJWT.substring(0, 20) + "..."
-            : null,
-    });
-
     const context: JoinAlbumContext = {
         accessToken,
         collectionKey,
@@ -66,11 +55,6 @@ export const storeJoinAlbumContext = async (
     }
 
     const serializedContext = JSON.stringify(context);
-    log.info("[Join Album] Storing serialized context:", {
-        contextKeys: Object.keys(context),
-        hasJWTInContext: "accessTokenJWT" in context,
-        serializedLength: serializedContext.length,
-    });
 
     localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, serializedContext);
 };
@@ -82,21 +66,13 @@ export const storeJoinAlbumContext = async (
 export const getJoinAlbumContext = (): JoinAlbumContext | null => {
     const stored = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
     if (!stored) {
-        log.info("[Join Album] No stored context found");
         return null;
     }
 
     try {
         const context = JSON.parse(stored) as JoinAlbumContext;
-        log.info("[Join Album] Retrieved context:", {
-            contextKeys: Object.keys(context),
-            hasJWTInContext: "accessTokenJWT" in context,
-            jwtLength: context.accessTokenJWT?.length,
-            storedLength: stored.length,
-        });
         return context;
-    } catch (error) {
-        log.error("[Join Album] Failed to parse stored context", error);
+    } catch {
         return null;
     }
 };
@@ -135,18 +111,6 @@ export const joinPublicAlbum = async (
         ...(accessTokenJWT && { "X-Auth-Access-Token-JWT": accessTokenJWT }), // Include JWT for password-protected albums
     };
 
-    log.info("[Join Album] API Request:", {
-        collectionID,
-        hasAccessToken: !!accessToken,
-        hasJWT: !!accessTokenJWT,
-        jwtLength: accessTokenJWT?.length,
-        jwtPreview: accessTokenJWT
-            ? accessTokenJWT.substring(0, 20) + "..."
-            : null,
-        headers: Object.keys(headers),
-        hasJWTHeader: "X-Auth-Access-Token-JWT" in headers,
-    });
-
     const response = await fetch(url, {
         method: "POST",
         headers,
@@ -181,13 +145,6 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         return null;
     }
 
-    log.info("[Join Album] Processing with context:", {
-        hasAccessToken: !!context.accessToken,
-        hasJWT: !!context.accessTokenJWT,
-        jwtLength: context.accessTokenJWT?.length,
-        collectionID: context.collectionID,
-    });
-
     // If collectionID is 0 (placeholder), we need to fetch the actual collection first
     let collectionID = context.collectionID;
     let collection: Collection | undefined;
@@ -220,9 +177,6 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
     // Check if the user is the owner of the album
     const currentUser = ensureLocalUser();
     if (collection.owner.id === currentUser.id) {
-        log.info(
-            "[Join Album] User is the owner of the album, skipping join and clearing intent",
-        );
         clearJoinAlbumContext();
         return null;
     }

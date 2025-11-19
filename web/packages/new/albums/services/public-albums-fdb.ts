@@ -238,13 +238,6 @@ export const savedPublicCollectionAccessTokenJWT = async (
 ) => {
     const key = `public-${accessToken}-passkey`;
     const value = await localForage.getItem(key);
-    console.log("[Public Albums FDB] Retrieving JWT:", {
-        accessToken,
-        key,
-        hasValue: !!value,
-        valueType: typeof value,
-        valueLength: typeof value === "string" ? value.length : null,
-    });
     return LocalString.parse(value);
 };
 
@@ -260,12 +253,6 @@ export const savePublicCollectionAccessTokenJWT = async (
     passwordJWT: string,
 ) => {
     const key = `public-${accessToken}-passkey`;
-    console.log("[Public Albums FDB] Saving JWT:", {
-        accessToken,
-        key,
-        jwtLength: passwordJWT.length,
-        jwtPreview: passwordJWT.substring(0, 20) + "...",
-    });
     await localForage.setItem(key, passwordJWT);
 };
 
