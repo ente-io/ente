@@ -427,6 +427,7 @@ class _PeopleDataset {
     required this.selfPersonID,
     required this.totalNamedFaceCount,
     required this.totalFaceMoments,
+    required this.totalNamedFaceMoments,
     required this.groupMoments,
     required this.soloMoments,
     required this.duoMoments,
@@ -443,6 +444,7 @@ class _PeopleDataset {
   final String? selfPersonID;
   final int totalNamedFaceCount;
   final int totalFaceMoments;
+  final int totalNamedFaceMoments;
   final int groupMoments;
   final int soloMoments;
   final int duoMoments;
@@ -495,6 +497,7 @@ class _PeopleDataset {
 
     int totalNamedFaceCount = 0;
     int totalFaceMoments = 0;
+    int totalNamedFaceMoments = 0;
     int groupMoments = 0;
     int soloMoments = 0;
     int duoMoments = 0;
@@ -512,12 +515,28 @@ class _PeopleDataset {
           faces.any(
             (WrappedFaceRef face) => face.personID == selfPersonID,
           );
+      final bool hasNamedPerson = faces.any(
+        (WrappedFaceRef face) {
+          final String? personID = face.personID;
+          if (personID == null) {
+            return false;
+          }
+          final WrappedPersonEntry? entry = context.persons[personID];
+          if (entry == null || entry.isHidden || entry.isMe) {
+            return false;
+          }
+          return entry.displayName.trim().isNotEmpty;
+        },
+      );
       final int highQualityCount =
           faces.where((WrappedFaceRef face) => face.isHighQuality).length;
       final int effectiveCount =
           highQualityCount > 0 ? highQualityCount : faces.length;
       if (effectiveCount > 0) {
         totalFaceMoments += 1;
+        if (hasNamedPerson) {
+          totalNamedFaceMoments += 1;
+        }
       }
       if (effectiveCount >= 3) {
         groupMoments += 1;
@@ -609,6 +628,7 @@ class _PeopleDataset {
       selfPersonID: selfPersonID,
       totalNamedFaceCount: totalNamedFaceCount,
       totalFaceMoments: totalFaceMoments,
+      totalNamedFaceMoments: totalNamedFaceMoments,
       groupMoments: groupMoments,
       soloMoments: soloMoments,
       duoMoments: duoMoments,
@@ -625,6 +645,7 @@ class _PeopleDataset {
       selfPersonID: null,
       totalNamedFaceCount: 0,
       totalFaceMoments: 0,
+      totalNamedFaceMoments: 0,
       groupMoments: 0,
       soloMoments: 0,
       duoMoments: 0,

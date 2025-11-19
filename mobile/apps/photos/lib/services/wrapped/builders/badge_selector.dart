@@ -152,13 +152,12 @@ class WrappedBadgeSelector {
   static _BadgeCandidate _buildConsistencyChamp(
     _BadgeComputationContext metrics,
   ) {
-    final double streakScore =
-        metrics.longestStreakDays <= 0 ? 0 : metrics.longestStreakDays / 14.0;
-    final double activeRatio = metrics.elapsedDays <= 0
+    final double streakScore = metrics.longestStreakDays <= 0
         ? 0
-        : metrics.daysWithCaptures / metrics.elapsedDays;
+        : metrics.longestStreakDays / 150.0;
+    final double activeRatio = metrics.daysWithCaptures / 365.0;
     final double score = _clamp01(
-      0.6 * _clamp01(streakScore) + 0.4 * _clamp01(activeRatio / 0.5),
+      0.5 * _clamp01(streakScore) + 0.5 * _clamp01(activeRatio),
     );
 
     final bool eligible = metrics.daysWithCaptures >= 15 &&
@@ -210,7 +209,7 @@ class WrappedBadgeSelector {
     final int soloMoments = metrics.peopleStats.soloMoments;
     final double share =
         totalFaceMoments == 0 ? 0 : soloMoments / totalFaceMoments.toDouble();
-    final double score = _clamp01(share / 0.60);
+    final double score = _clamp01(share);
     final int soloPercent = _percentOf(share);
     final bool eligible =
         totalFaceMoments >= 20 && soloMoments >= 12 && score >= 0.5;
@@ -252,19 +251,21 @@ class WrappedBadgeSelector {
     if (!metrics.peopleStats.hasFaceMoments || metrics.totalCount <= 0) {
       return null;
     }
-    final int totalFaceMoments = metrics.peopleStats.totalFaceMoments;
-    if (totalFaceMoments <= 0) {
+    final int totalNamedMoments =
+        metrics.peopleStats.totalNamedFaceMoments;
+    if (totalNamedMoments <= 0) {
       return null;
     }
-    final double share = totalFaceMoments / metrics.totalCount.toDouble();
-    final double score = _clamp01(share / 0.50);
+    final double share =
+        totalNamedMoments / metrics.totalCount.toDouble();
+    final double score = _clamp01(share);
     final int percent = _percentOf(share);
 
-    final bool eligible =
-        metrics.totalCount >= 80 && totalFaceMoments >= 16 && score >= 0.45;
+    final bool eligible = metrics.totalCount >= 80 &&
+        totalNamedMoments >= 16 && score >= 0.45;
 
     final List<String> chips = <String>[
-      "Moments with people: $totalFaceMoments",
+      "Moments with people: $totalNamedMoments",
     ];
 
     final List<MediaRef> heroMedia = metrics.peopleStats.topNamedPeople
@@ -288,11 +289,11 @@ class WrappedBadgeSelector {
       detailChips: chips,
       score: score,
       eligible: eligible,
-      sampleSize: totalFaceMoments,
+      sampleSize: totalNamedMoments,
       debugWhy:
-          "People coverage $percent% ($totalFaceMoments/${metrics.totalCount})",
+          "People coverage $percent% ($totalNamedMoments/${metrics.totalCount})",
       extras: <String, Object?>{
-        "totalFaceMoments": totalFaceMoments,
+        "totalNamedMoments": totalNamedMoments,
         "totalCount": metrics.totalCount,
       },
     );
@@ -312,10 +313,11 @@ class WrappedBadgeSelector {
       return null;
     }
 
-    final double score = _clamp01(
-      0.6 * _clamp01(uniqueCities / 5.0) +
-          0.4 * _clamp01(uniqueCountries / 3.0),
-    );
+    final int outsidePrimaryCount = placeStats.outsidePrimaryCountryCount;
+    final double outsideShare = metrics.totalCount == 0
+        ? 0
+        : outsidePrimaryCount / metrics.totalCount.toDouble();
+    final double score = _clamp01(outsideShare);
     final bool eligible = geoCount >= 40 &&
         (uniqueCities >= 3 || uniqueCountries >= 2) &&
         score >= 0.45;
@@ -323,10 +325,13 @@ class WrappedBadgeSelector {
     final int geoSharePercent =
         metrics.totalCount == 0 ? 0 : _percentOf(geoCount / metrics.totalCount);
 
+    final int awayPercent = _percentOf(outsideShare);
+
     final List<String> chips = <String>[
       "Cities: $uniqueCities",
       "Countries: $uniqueCountries",
       "Geotagged: $geoSharePercent%",
+      "Away from base: $awayPercent%",
     ];
 
     return _BadgeCandidate(
@@ -344,7 +349,7 @@ class WrappedBadgeSelector {
       eligible: eligible,
       sampleSize: geoCount,
       debugWhy:
-          "$uniqueCities cities, $uniqueCountries countries, share $geoSharePercent%",
+          "$uniqueCities cities, $uniqueCountries countries, outside share $awayPercent%",
       extras: <String, Object?>{
         "uniqueCities": uniqueCities,
         "uniqueCountries": uniqueCountries,
@@ -364,7 +369,7 @@ class WrappedBadgeSelector {
     final double share = metrics.totalCount == 0
         ? 0
         : petMatches / metrics.totalCount.toDouble();
-    final double score = _clamp01(share / 0.25);
+    final double score = _clamp01(share);
     final int percent = _percentOf(share);
     final bool eligible = petMatches >= 6 && share >= 0.10;
 
@@ -637,26 +642,87 @@ class _BadgeComputationContext {
 }
 
 class _BadgePlaceStats {
-  _BadgePlaceStats(_PlacesDataset dataset)
-      : totalCount = dataset.totalCount,
-        uniqueCities = dataset.cityClusters.length,
-        uniqueCountries = dataset.cityClusters
-            .map((_PlaceClusterSummary summary) => summary.label?.country)
-            .whereType<String>()
-            .toSet()
-            .length,
-        heroMedia = dataset.cityClusters
-            .expand(
-              (_PlaceClusterSummary cluster) =>
-                  cluster.sampleMediaIds(2, preferDistinctDays: true),
-            )
-            .take(6)
-            .toList(growable: false);
+  _BadgePlaceStats._({
+    required this.totalCount,
+    required this.uniqueCities,
+    required this.uniqueCountries,
+    required this.heroMedia,
+    required this.primaryCountryCount,
+    required this.outsidePrimaryCountryCount,
+  });
+
+  factory _BadgePlaceStats(_PlacesDataset dataset) {
+    final int totalCount = dataset.totalCount;
+    final List<_PlaceClusterSummary> cityClusters = dataset.cityClusters;
+    final int uniqueCities = cityClusters.length;
+    final int uniqueCountries = cityClusters
+        .map((_PlaceClusterSummary summary) => summary.label?.country)
+        .whereType<String>()
+        .toSet()
+        .length;
+    final List<int> heroMedia = cityClusters
+        .expand(
+          (_PlaceClusterSummary cluster) =>
+              cluster.sampleMediaIds(2, preferDistinctDays: true),
+        )
+        .take(6)
+        .toList(growable: false);
+
+    final int primaryCountryCount = _primaryCountryCaptureCount(
+      totalCount: totalCount,
+      clusters: cityClusters,
+    );
+    final int outsidePrimaryCountryCount =
+        math.max(totalCount - primaryCountryCount, 0);
+
+    return _BadgePlaceStats._(
+      totalCount: totalCount,
+      uniqueCities: uniqueCities,
+      uniqueCountries: uniqueCountries,
+      heroMedia: heroMedia,
+      primaryCountryCount: primaryCountryCount,
+      outsidePrimaryCountryCount: outsidePrimaryCountryCount,
+    );
+  }
+
+  static int _primaryCountryCaptureCount({
+    required int totalCount,
+    required List<_PlaceClusterSummary> clusters,
+  }) {
+    if (totalCount <= 0) {
+      return 0;
+    }
+    if (clusters.isEmpty) {
+      return totalCount;
+    }
+    final Map<String, int> histogram = <String, int>{};
+    int accounted = 0;
+    for (final _PlaceClusterSummary cluster in clusters) {
+      final String countryKey;
+      final String? labelCountry = cluster.label?.country;
+      if (labelCountry == null || labelCountry.trim().isEmpty) {
+        countryKey = "_unknown";
+      } else {
+        countryKey = labelCountry;
+      }
+      histogram[countryKey] = (histogram[countryKey] ?? 0) + cluster.totalCount;
+      accounted += cluster.totalCount;
+    }
+    final int uncovered = math.max(totalCount - accounted, 0);
+    if (uncovered > 0) {
+      histogram["_unknown"] = (histogram["_unknown"] ?? 0) + uncovered;
+    }
+    return histogram.values.isEmpty
+        ? totalCount
+        : histogram.values.reduce(math.max);
+  }
 
   final int totalCount;
   final int uniqueCities;
   final int uniqueCountries;
   final List<int> heroMedia;
+  final int primaryCountryCount;
+  final int outsidePrimaryCountryCount;
 }
 
 class _PetDetectionResult {
