@@ -151,7 +151,7 @@ No. Storage from different accounts does not stack.
 
 When you create a family and add members, everyone in the family shares the storage of the admin's subscription.
 
-(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant—they will use the shared family storage instead.)
+(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant— they will use the shared family storage instead.)
 
 Family plans are designed to allow multiple people to use a single subscription, not to combine multiple plans into a larger pool.
 
