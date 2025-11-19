@@ -13,6 +13,7 @@ import "package:logging/logging.dart";
 import "package:mesh_gradient/mesh_gradient.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_media_preloader.dart";
@@ -22,6 +23,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/file/zoomable_image.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -1403,53 +1405,37 @@ class _MediaPreviewOverlay extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onDismiss;
 
+  bool get _supportsZoom {
+    final FileType? type = file?.fileType;
+    return type == FileType.image || type == FileType.livePhoto;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Widget child = _buildContent(context);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onDismiss,
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.82),
-        child: Center(child: child),
-      ),
+    final Color backdropColor = Colors.black.withValues(alpha: 0.82);
+    final EdgeInsets padding = MediaQuery.paddingOf(context);
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onDismiss,
+            child: Container(color: backdropColor),
+          ),
+        ),
+        Center(child: _buildContent(context)),
+        Positioned(
+          top: padding.top + 16,
+          right: 16,
+          child: _PreviewCloseButton(onPressed: onDismiss),
+        ),
+      ],
     );
   }
 
   Widget _buildContent(BuildContext context) {
-    if (file != null) {
-      final Size size = MediaQuery.sizeOf(context);
-      final double maxWidth = size.width * 0.9;
-      final double maxHeight = size.height * 0.9;
-      final double aspectRatio = _aspectRatioFor(file!);
-      double width = maxWidth;
-      double height = width / aspectRatio;
-      if (height > maxHeight) {
-        height = maxHeight;
-        width = height * aspectRatio;
-      }
-      return SizedBox(
-        width: width,
-        height: height,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: ColoredBox(
-            color: Colors.black,
-            child: ThumbnailWidget(
-              file!,
-              fit: BoxFit.contain,
-              rawThumbnail: true,
-              shouldShowSyncStatus: false,
-              shouldShowArchiveStatus: false,
-              shouldShowPinIcon: false,
-              shouldShowOwnerAvatar: false,
-              shouldShowFavoriteIcon: false,
-              shouldShowVideoDuration: false,
-              shouldShowVideoOverlayIcon: false,
-            ),
-          ),
-        ),
-      );
+    if (file != null && _supportsZoom) {
+      return _buildZoomableContent(context, file!);
     }
     if (isLoading) {
       final EnteColorScheme colorScheme = getEnteColorScheme(context);
@@ -1458,12 +1444,15 @@ class _MediaPreviewOverlay extends StatelessWidget {
         height: 70,
         child: CircularProgressIndicator(
           strokeWidth: 3,
-          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary400),
+          color: colorScheme.primary400,
         ),
       );
     }
-    final EnteColorScheme colorScheme = getEnteColorScheme(context);
     final EnteTextTheme textTheme = getEnteTextTheme(context);
+    final EnteColorScheme colorScheme = getEnteColorScheme(context);
+    final String message = file == null
+        ? "Preparing preview…"
+        : "Full preview isn't available for this media yet";
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
@@ -1471,19 +1460,57 @@ class _MediaPreviewOverlay extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
       ),
       child: Text(
-        "Preview unavailable",
+        message,
         style: textTheme.smallMuted,
         textAlign: TextAlign.center,
       ),
     );
   }
 
-  double _aspectRatioFor(EnteFile file) {
-    final int width = file.width;
-    final int height = file.height;
-    if (width > 0 && height > 0) {
-      return width / height;
-    }
-    return 3 / 4;
+  Widget _buildZoomableContent(BuildContext context, EnteFile file) {
+    final Size size = MediaQuery.sizeOf(context);
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: size.width * 0.95,
+        maxHeight: size.height * 0.95,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(32),
+        child: ZoomableImage(
+          file,
+          tagPrefix: "rewind_preview_",
+          shouldCover: false,
+          isGuestView: true,
+          backgroundDecoration: const BoxDecoration(
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PreviewCloseButton extends StatelessWidget {
+  const _PreviewCloseButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.close,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }
