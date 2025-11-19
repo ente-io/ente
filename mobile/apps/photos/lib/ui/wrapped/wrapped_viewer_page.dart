@@ -579,169 +579,187 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       data: darkThemeData,
       child: Builder(
         builder: (BuildContext context) {
-          final enteColorScheme = getEnteColorScheme(context);
-          final textTheme = getEnteTextTheme(context);
-          final MediaQueryData mediaQuery = MediaQuery.of(context);
-          final double bottomPadding = mediaQuery.padding.bottom;
-          final Color controlIconColor =
-              enteColorScheme.textMuted.withValues(alpha: 0.62);
-          final Color controlBackdropColor =
-              enteColorScheme.textMuted.withValues(alpha: 0.14);
+          final MediaQueryData baseMediaQuery = MediaQuery.of(context);
+          final MediaQueryData clampedMediaQuery = baseMediaQuery.copyWith(
+            textScaler: const TextScaler.linear(1.0),
+          );
+          return MediaQuery(
+            data: clampedMediaQuery,
+            child: Builder(
+              builder: (BuildContext context) {
+                final enteColorScheme = getEnteColorScheme(context);
+                final textTheme = getEnteTextTheme(context);
+                final MediaQueryData mediaQuery = MediaQuery.of(context);
+                final double bottomPadding = mediaQuery.padding.bottom;
+                final Color controlIconColor =
+                    enteColorScheme.textMuted.withValues(alpha: 0.62);
+                final Color controlBackdropColor =
+                    enteColorScheme.textMuted.withValues(alpha: 0.14);
 
-          return PopScope(
-            canPop: true,
-            onPopInvokedWithResult: (bool didPop, Object? result) {
-              if (!didPop) {
-                _isClosing = false;
-                return;
-              }
-              wrappedService.updateResumeIndex(_currentIndex);
-            },
-            child: Scaffold(
-              backgroundColor: Colors.black,
-              appBar: AppBar(
-                leading: BackButton(
-                  onPressed: () => unawaited(_closeViewer()),
-                ),
-                title: Text(
-                  "Ente Rewind",
-                  style: textTheme.largeBold,
-                ),
-                backgroundColor: Colors.black,
-                foregroundColor: enteColorScheme.textBase,
-                elevation: 0,
-              ),
-              body: Stack(
-                children: [
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        child: IgnorePointer(
-                          child: AnimatedBuilder(
-                            animation: _progressController,
-                            builder: (BuildContext context, _) {
-                              final List<double> segments =
-                                  List<double>.generate(cardCount, (int index) {
-                                if (index < _currentIndex) {
-                                  return 1.0;
-                                }
-                                if (index > _currentIndex) {
-                                  return 0.0;
-                                }
-                                return _progressController.value
-                                    .clamp(0.0, 1.0);
-                              });
-                              return _StoryProgressBar(
-                                progressValues: segments,
-                                colorScheme: enteColorScheme,
-                              );
-                            },
-                          ),
-                        ),
+                return PopScope(
+                  canPop: true,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (!didPop) {
+                      _isClosing = false;
+                      return;
+                    }
+                    wrappedService.updateResumeIndex(_currentIndex);
+                  },
+                  child: Scaffold(
+                    backgroundColor: Colors.black,
+                    appBar: AppBar(
+                      leading: BackButton(
+                        onPressed: () => unawaited(_closeViewer()),
                       ),
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (
-                            BuildContext context,
-                            BoxConstraints constraints,
-                          ) {
-                            return GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTapUp: (TapUpDetails details) =>
-                                  _handleTapUp(details, constraints),
-                              onTapCancel: () {
-                                _suppressNextTapUp = false;
-                              },
-                              onLongPressStart: _handleLongPressStart,
-                              onLongPressEnd: _handleLongPressEnd,
-                              onLongPressCancel: _handleLongPressCancel,
-                              onVerticalDragStart: _handleVerticalDragStart,
-                              onVerticalDragUpdate: _handleVerticalDragUpdate,
-                              onVerticalDragEnd: _handleVerticalDragEnd,
-                              onVerticalDragCancel: _handleVerticalDragCancel,
-                              child: RepaintBoundary(
-                                key: _cardBoundaryKey,
-                                child: PageView.builder(
-                                  physics: const PageScrollPhysics(),
-                                  controller: _pageController,
-                                  onPageChanged: _handlePageChanged,
-                                  itemCount: cardCount,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    final WrappedCard card = _cards[index];
-                                    return _StoryCard(
-                                      card: card,
+                      title: Text(
+                        "Ente Rewind",
+                        style: textTheme.largeBold,
+                      ),
+                      backgroundColor: Colors.black,
+                      foregroundColor: enteColorScheme.textBase,
+                      elevation: 0,
+                    ),
+                    body: Stack(
+                      children: [
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: IgnorePointer(
+                                child: AnimatedBuilder(
+                                  animation: _progressController,
+                                  builder: (BuildContext context, _) {
+                                    final List<double> segments =
+                                        List<double>.generate(
+                                      cardCount,
+                                      (int index) {
+                                        if (index < _currentIndex) {
+                                          return 1.0;
+                                        }
+                                        if (index > _currentIndex) {
+                                          return 0.0;
+                                        }
+                                        return _progressController.value
+                                            .clamp(0.0, 1.0);
+                                      },
+                                    );
+                                    return _StoryProgressBar(
+                                      progressValues: segments,
                                       colorScheme: enteColorScheme,
-                                      textTheme: textTheme,
-                                      isActive: index == _currentIndex,
-                                      gradientVariantIndex: index,
                                     );
                                   },
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                            Expanded(
+                              child: LayoutBuilder(
+                                builder: (
+                                  BuildContext context,
+                                  BoxConstraints constraints,
+                                ) {
+                                  return GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTapUp: (TapUpDetails details) =>
+                                        _handleTapUp(details, constraints),
+                                    onTapCancel: () {
+                                      _suppressNextTapUp = false;
+                                    },
+                                    onLongPressStart: _handleLongPressStart,
+                                    onLongPressEnd: _handleLongPressEnd,
+                                    onLongPressCancel: _handleLongPressCancel,
+                                    onVerticalDragStart:
+                                        _handleVerticalDragStart,
+                                    onVerticalDragUpdate:
+                                        _handleVerticalDragUpdate,
+                                    onVerticalDragEnd: _handleVerticalDragEnd,
+                                    onVerticalDragCancel:
+                                        _handleVerticalDragCancel,
+                                    child: RepaintBoundary(
+                                      key: _cardBoundaryKey,
+                                      child: PageView.builder(
+                                        physics: const PageScrollPhysics(),
+                                        controller: _pageController,
+                                        onPageChanged: _handlePageChanged,
+                                        itemCount: cardCount,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          final WrappedCard card =
+                                              _cards[index];
+                                          return _StoryCard(
+                                            card: card,
+                                            colorScheme: enteColorScheme,
+                                            textTheme: textTheme,
+                                            isActive: index == _currentIndex,
+                                            gradientVariantIndex: index,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        if (!isCurrentCardBadge) ...[
+                          Positioned(
+                            right: _kStoryControlHorizontalMarginFromEdge,
+                            bottom: bottomPadding +
+                                _kStoryControlBottomMarginFromEdge,
+                            child: GestureDetector(
+                              key: _shareButtonKey,
+                              behavior: HitTestBehavior.translucent,
+                              onTap: _handleShare,
+                              child: Container(
+                                width: _kStoryControlSize,
+                                height: _kStoryControlSize,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: controlBackdropColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.share,
+                                  size: _kStoryControlIconSize,
+                                  color: controlIconColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: _kStoryControlHorizontalMarginFromEdge,
+                            bottom: bottomPadding +
+                                _kStoryControlBottomMarginFromEdge,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () => unawaited(_handleMusicToggle()),
+                              child: Container(
+                                width: _kStoryControlSize,
+                                height: _kStoryControlSize,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: controlBackdropColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  (_isMusicMuted || !_isMusicPlaying)
+                                      ? Icons.volume_off
+                                      : Icons.volume_up,
+                                  size: _kStoryControlIconSize,
+                                  color: controlIconColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  if (!isCurrentCardBadge) ...[
-                    Positioned(
-                      right: _kStoryControlHorizontalMarginFromEdge,
-                      bottom:
-                          bottomPadding + _kStoryControlBottomMarginFromEdge,
-                      child: GestureDetector(
-                        key: _shareButtonKey,
-                        behavior: HitTestBehavior.translucent,
-                        onTap: _handleShare,
-                        child: Container(
-                          width: _kStoryControlSize,
-                          height: _kStoryControlSize,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: controlBackdropColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.share,
-                            size: _kStoryControlIconSize,
-                            color: controlIconColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: _kStoryControlHorizontalMarginFromEdge,
-                      bottom:
-                          bottomPadding + _kStoryControlBottomMarginFromEdge,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () => unawaited(_handleMusicToggle()),
-                        child: Container(
-                          width: _kStoryControlSize,
-                          height: _kStoryControlSize,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: controlBackdropColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            (_isMusicMuted || !_isMusicPlaying)
-                                ? Icons.volume_off
-                                : Icons.volume_up,
-                            size: _kStoryControlIconSize,
-                            color: controlIconColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                );
+              },
             ),
           );
         },
