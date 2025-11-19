@@ -72,7 +72,7 @@ class WrappedService {
     if (flagService.internalUser && now.isBefore(_kAvailabilityEndExclusive)) {
       return true;
     }
-    if (flagService.enteWrapped && _isWithinAvailabilityWindow(now)) {
+    if (_isWithinAvailabilityWindow(now)) {
       return true;
     }
     return false;

@@ -59,8 +59,6 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
-  bool get enteWrapped => false; // TODO: lau: set to true before December release
-
   bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
