@@ -78,6 +78,7 @@ dependencies:
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3
   flutter_lints: ^4.0.0
+  flutter_native_splash: ^2.2.13
   flutter_test:
     sdk: flutter
 
@@ -112,3 +113,19 @@ flutter_launcher_icons:
   adaptive_icon_foreground_inset: 0
   image_path_ios_dark_transparent: "assets/launcher-icons/icon-ios-dark.png"
   image_path_ios_tinted_grayscale: "assets/launcher-icons/icon-ios-tinted.png"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#000000"
+  image: "assets/launcher-icons/icon-foreground.png"
+  android_gravity: center
+  ios_content_mode: center
+  android: true
+  ios: true
+  web: false
+  android_12:
+    image: "assets/launcher-icons/icon-foreground.png"
+    color: "#FFFFFF"
+    icon_background_color: "#FFFFFF"
+    color_dark: "#000000"
+    icon_background_color_dark: "#000000"
