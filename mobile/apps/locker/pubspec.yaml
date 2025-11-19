@@ -110,8 +110,8 @@ flutter_launcher_icons:
   adaptive_icon_background: "#1071FF"
   adaptive_icon_foreground: "assets/launcher-icons/icon-foreground.png"
   adaptive_icon_monochrome: "assets/launcher-icons/icon-monochrome-foreground.png"
-  adaptive_icon_foreground_inset: 0
-  image_path_ios_dark_transparent: "assets/launcher-icons/icon-ios-dark.png"
+  adaptive_icon_foreground_inset: 4
+  image_path_ios_dark_transparent: "assets/launcher-icons/icon-ios-foreground.png"
   image_path_ios_tinted_grayscale: "assets/launcher-icons/icon-ios-tinted.png"
 
 flutter_native_splash:
