@@ -13,7 +13,6 @@ import "package:logging/logging.dart";
 import "package:mesh_gradient/mesh_gradient.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/file/file_type.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_media_preloader.dart";
@@ -1405,11 +1404,6 @@ class _MediaPreviewOverlay extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onDismiss;
 
-  bool get _supportsZoom {
-    final FileType? type = file?.fileType;
-    return type == FileType.image || type == FileType.livePhoto;
-  }
-
   @override
   Widget build(BuildContext context) {
     final Color backdropColor = Colors.black.withValues(alpha: 0.45);
@@ -1428,7 +1422,7 @@ class _MediaPreviewOverlay extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    if (file != null && _supportsZoom) {
+    if (file != null) {
       return _buildZoomableContent(context, file!);
     }
     if (isLoading) {
