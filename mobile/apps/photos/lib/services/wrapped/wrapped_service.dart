@@ -84,12 +84,7 @@ class WrappedService {
       isEnabled && state.hasResult && !state.isComplete;
 
   bool get shouldShowDiscoveryEntry =>
-      isEnabled &&
-      state.hasResult &&
-      state.isComplete &&
-      DateTime.now().millisecondsSinceEpoch <
-          DateTime(state.result!.year + 1, 01, 15, 23, 59, 59)
-              .millisecondsSinceEpoch;
+      isEnabled && state.hasResult && state.isComplete;
 
   void scheduleInitialLoad() {
     if (!isEnabled) {
