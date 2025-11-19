@@ -43,7 +43,7 @@ jobs:
 
             - name: Build PlayStore AAB
               run: |
-                  flutter build appbundle --release --flavor playstore
+                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_locker_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}
