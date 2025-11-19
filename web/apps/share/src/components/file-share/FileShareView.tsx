@@ -1,44 +1,16 @@
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import { Notification } from "ente-new/photos/components/Notification";
 import Head from "next/head";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useFileShare } from "../../hooks/useFileShare";
 import { formatFileSize } from "../../services/file-share";
 import { getLockerFileIcon } from "../../utils/file-type";
 import { LockerTypeDisplay } from "./LockerTypeDisplay";
 
 export const FileShareView: React.FC = () => {
-    const [isDarkMode, setIsDarkMode] = useState(false);
-
-    useEffect(() => {
-        // Check system preference
-        const darkModeMediaQuery = window.matchMedia(
-            "(prefers-color-scheme: dark)",
-        );
-        setIsDarkMode(darkModeMediaQuery.matches);
-
-        // Listen for changes with fallback for legacy browsers (Safari < 14)
-        const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
-            setIsDarkMode(e.matches);
-        };
-
-        // Feature-detect addEventListener vs deprecated addListener
-        if (typeof darkModeMediaQuery.addEventListener === "function") {
-            darkModeMediaQuery.addEventListener("change", handleChange);
-        } else {
-            // eslint-disable-next-line @typescript-eslint/no-deprecated
-            darkModeMediaQuery.addListener(handleChange);
-        }
-
-        return () => {
-            if (typeof darkModeMediaQuery.removeEventListener === "function") {
-                darkModeMediaQuery.removeEventListener("change", handleChange);
-            } else {
-                // eslint-disable-next-line @typescript-eslint/no-deprecated
-                darkModeMediaQuery.removeListener(handleChange);
-            }
-        };
-    }, []);
+    const { mode } = useColorScheme();
+    const isDarkMode = mode === "dark";
 
     const {
         loading,

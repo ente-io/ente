@@ -9,11 +9,8 @@ const getTheme = (appName: AppName): Theme => {
     // Cast app should always be shown in dark.
     const colorSchemes =
         appName == "cast" ? { ...cs, light: cs.dark } : { ...cs };
-    // Share app uses media query to automatically match system preference.
-    // Other apps use class selector for manual control.
-    const colorSchemeSelector = appName == "share" ? "media" : "class";
     return createTheme({
-        cssVariables: { colorSchemeSelector },
+        cssVariables: { colorSchemeSelector: "class" },
         colorSchemes,
         typography,
         components,

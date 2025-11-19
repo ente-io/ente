@@ -1,5 +1,6 @@
 import "@fontsource-variable/inter";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, useMediaQuery } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
 import { useSetupLogs } from "ente-base/components/utils/hooks-app";
@@ -10,10 +11,12 @@ import React from "react";
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs({ disableDiskLogs: true });
 
-    // We don't provide BaseContext. Nothing in the cast app needs it yet.
+    // Detect system color scheme preference and set as default mode
+    const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+    const defaultMode = prefersDarkMode ? "dark" : "light";
 
     return (
-        <ThemeProvider theme={shareTheme}>
+        <ThemeProvider theme={shareTheme} defaultMode={defaultMode}>
             <CustomHead title={staticAppTitle} />
             <CssBaseline enableColorScheme />
             <Component {...pageProps} />
