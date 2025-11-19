@@ -67,15 +67,18 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       selectionTarget: 6,
     );
 
-    final List<int> heroCandidates = limitSelectorCandidates(heroIds);
+    final List<int> heroCandidates = limitSelectorCandidates(context, heroIds);
+    const int heroMediaCount = 3;
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: heroCandidates,
-      maxCount: 3,
+      maxCount: heroMediaCount,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 45),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(heroCandidates, heroMediaCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": snapshot.year,
@@ -102,10 +105,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -221,15 +221,20 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
     final DateTime day = snapshot.busiestDay!;
 
-    final List<int> candidateIds =
-        limitSelectorCandidates(snapshot.busiestDayMediaUploadedIDs);
+    final List<int> candidateIds = limitSelectorCandidates(
+      context,
+      snapshot.busiestDayMediaUploadedIDs,
+    );
+    const int busiestDayMaxCount = 6;
 
     final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 6,
+      maxCount: busiestDayMaxCount,
       preferNamedPeople: true,
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, busiestDayMaxCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "date": day.toIso8601String(),
@@ -239,10 +244,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
         "${numberFormat.format(snapshot.busiestDayCount)} photos",
         (weekdayFormat.format(day)),
       ]),
-      if (mediaRefs.isNotEmpty)
-        "uploadedFileIDs": mediaRefs
-            .map((MediaRef ref) => ref.uploadedFileID)
-            .toList(growable: false),
+      if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
     };
 
     return WrappedCard(

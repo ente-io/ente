@@ -504,6 +504,9 @@ WrappedCard _finalizeCardMedia({
     if (id <= 0) {
       return;
     }
+    if (!context.isSelectableUploadedFileID(id)) {
+      return;
+    }
     if (usedMediaUploadedFileIDs.contains(id)) {
       return;
     }
@@ -526,6 +529,9 @@ WrappedCard _finalizeCardMedia({
       if (id <= 0 || seenInCard.contains(id)) {
         continue;
       }
+      if (!context.isSelectableUploadedFileID(id)) {
+        continue;
+      }
       if (usedMediaUploadedFileIDs.contains(id)) {
         continue;
       }
@@ -543,6 +549,7 @@ WrappedCard _finalizeCardMedia({
           .where(
             (int id) =>
                 id > 0 &&
+                context.isSelectableUploadedFileID(id) &&
                 !usedMediaUploadedFileIDs.contains(id) &&
                 !seenInCard.contains(id),
           )
