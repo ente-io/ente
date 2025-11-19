@@ -103,11 +103,6 @@ class WrappedBadgeSelector {
     }).toList(growable: false)
           ..sort(
             (Map<String, Object?> a, Map<String, Object?> b) {
-              final int tierA = a["tier"] as int? ?? 1;
-              final int tierB = b["tier"] as int? ?? 1;
-              if (tierA != tierB) {
-                return tierA.compareTo(tierB);
-              }
               final double scoreA = (a["score"] as num?)?.toDouble() ?? 0;
               final double scoreB = (b["score"] as num?)?.toDouble() ?? 0;
               final int scoreCompare = scoreB.compareTo(scoreA);
@@ -138,9 +133,6 @@ class WrappedBadgeSelector {
   }
 
   static int _badgeComparator(_BadgeCandidate a, _BadgeCandidate b) {
-    if (a.tier != b.tier) {
-      return a.tier.compareTo(b.tier);
-    }
     final int scoreCompare = b.score.compareTo(a.score);
     if (scoreCompare != 0) {
       return scoreCompare;
@@ -196,7 +188,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: metrics.daysWithCaptures,
-      tier: 0,
       debugWhy:
           "Streak ${metrics.longestStreakDays}d, active ratio ${metrics.daysWithCaptures}/${metrics.elapsedDays}",
       extras: <String, Object?>{
@@ -247,7 +238,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: soloMoments,
-      tier: 0,
       debugWhy: "Solo share $soloPercent% ($soloMoments/$totalFaceMoments)",
       extras: <String, Object?>{
         "soloMoments": soloMoments,
@@ -299,7 +289,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: totalFaceMoments,
-      tier: 0,
       debugWhy:
           "People coverage $percent% ($totalFaceMoments/${metrics.totalCount})",
       extras: <String, Object?>{
@@ -354,7 +343,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: geoCount,
-      tier: 0,
       debugWhy:
           "$uniqueCities cities, $uniqueCountries countries, share $geoSharePercent%",
       extras: <String, Object?>{
@@ -398,7 +386,6 @@ class WrappedBadgeSelector {
         score: score,
         eligible: false,
         sampleSize: petMatches,
-        tier: 0,
         debugWhy: "Pet share $percent% ($petMatches/${metrics.totalCount})",
         extras: <String, Object?>{
           "petMatches": petMatches,
@@ -427,7 +414,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: petMatches,
-      tier: 0,
       debugWhy: "Pet share $percent% ($petMatches/${metrics.totalCount})",
       extras: <String, Object?>{
         "petMatches": petMatches,
@@ -471,7 +457,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: metrics.totalCount,
-      tier: 0,
       debugWhy:
           "Total ${metrics.totalCount}, active days ${metrics.daysWithCaptures}",
       extras: <String, Object?>{
@@ -516,7 +501,6 @@ class _BadgeCandidate {
     required this.score,
     required this.eligible,
     required this.sampleSize,
-    required this.tier,
     required this.debugWhy,
     Map<String, Object?>? extras,
   })  : meta = <String, Object?>{
@@ -524,7 +508,6 @@ class _BadgeCandidate {
           "gradient": <String>[gradientStart, gradientEnd],
           "detailChips": detailChips,
           "score": score,
-          "tier": tier,
           "uploadedFileIDs": mediaRefs
               .map((MediaRef ref) => ref.uploadedFileID)
               .where((int id) => id > 0)
@@ -545,7 +528,6 @@ class _BadgeCandidate {
   final double score;
   final bool eligible;
   final int sampleSize;
-  final int tier;
   final String debugWhy;
   final Map<String, Object?> meta;
   final int deterministicTieBreaker;
@@ -556,7 +538,6 @@ class _BadgeCandidate {
       "name": name,
       "score": score,
       "eligible": eligible,
-      "tier": tier,
       "sampleSize": sampleSize,
       "debugWhy": debugWhy,
       "emoji": emoji,
