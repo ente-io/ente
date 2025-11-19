@@ -150,7 +150,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       if (busiestMonthName != null && snapshot.busiestMonthCount > 0)
         "$busiestMonthName: ${numberFormat.format(snapshot.busiestMonthCount)}",
       if (snapshot.longestGapDays >= 2)
-        "Longest breather: ${numberFormat.format(snapshot.longestGapDays)} days",
+        "Longest pause: ${numberFormat.format(snapshot.longestGapDays)} days",
       if (topFormatLabel != null)
         "$topFormatLabel: ${numberFormat.format(topFormatCount)}",
     ]);
