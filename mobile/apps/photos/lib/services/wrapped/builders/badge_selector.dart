@@ -246,7 +246,7 @@ class WrappedBadgeSelector {
     final int percent = _percentOf(share);
 
     final bool eligible = metrics.totalCount >= 80 &&
-        totalNamedMoments >= 16 && score >= 0.45;
+        totalNamedMoments >= 16 && score >= 0.30;
 
     final List<String> chips = <String>[
       "Moments with people: $totalNamedMoments",
@@ -304,7 +304,7 @@ class WrappedBadgeSelector {
     final double score = _clamp01(outsideShare);
     final bool eligible = geoCount >= 40 &&
         (uniqueCities >= 3 || uniqueCountries >= 2) &&
-        score >= 0.45;
+        score >= 0.25;
 
     final int geoSharePercent =
         metrics.totalCount == 0 ? 0 : _percentOf(geoCount / metrics.totalCount);
@@ -345,9 +345,7 @@ class WrappedBadgeSelector {
   static _BadgeCandidate _buildMinimalist(
     _BadgeComputationContext metrics,
   ) {
-    final bool eligible = metrics.totalCount > 0 &&
-        metrics.totalCount <= 150 &&
-        metrics.daysWithCaptures >= 12;
+    final bool eligible = metrics.totalCount > 0;
 
     final double volumeScore =
         metrics.totalCount <= 0 ? 0 : 150 / metrics.totalCount;
