@@ -1,3 +1,4 @@
+- Laurens: Minor tweaks to Ente Rewind
 - Laurens: (i) People Memory Lane feature
 - Laurens: Fix OCR for HEIC files on Android
 - Laurens: Improve UI for merging cluster with person
