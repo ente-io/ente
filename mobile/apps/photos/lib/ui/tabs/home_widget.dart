@@ -399,57 +399,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                     await routeToPage(
                       context,
                       SharedPublicCollectionPage(
-                        files: sharedFiles,
                         CollectionWithThumbnail(
                           collection,
                           null,
                         ),
+                        files: sharedFiles,
+                        shouldShowJoinDialog: shouldShowJoinDialog,
                       ),
                     );
-
-                    // Show join dialog if action=join parameter was present
-                    if (shouldShowJoinDialog) {
-                      _logger.info(
-                        "Join dialog requested via action=join parameter",
-                      );
-                      final joinConfirmed = await showChoiceDialog(
-                        context,
-                        title: context.l10n.joinAlbum,
-                        body: context.l10n.joinAlbumConfirmationDialogBody,
-                        firstButtonLabel: context.l10n.join,
-                      );
-
-                      if (joinConfirmed?.action == ButtonAction.first) {
-                        final progressDialog = createProgressDialog(
-                          context,
-                          AppLocalizations.of(context).pleaseWait,
-                          isDismissible: true,
-                        );
-                        await progressDialog.show();
-                        try {
-                          await RemoteSyncService.instance
-                              .joinAndSyncCollection(context, collection.id);
-                          final c = CollectionsService.instance
-                              .getCollectionByID(collection.id);
-                          await progressDialog.hide();
-
-                          // Navigate to the user's collection page after joining
-                          await routeToPage(
-                            context,
-                            CollectionPage(
-                              CollectionWithThumbnail(c!, null),
-                            ),
-                          );
-                        } catch (e, s) {
-                          _logger.severe("Failed to join public album", e, s);
-                          await progressDialog.hide();
-                          await showGenericErrorDialog(
-                            context: context,
-                            error: e,
-                          );
-                        }
-                      }
-                    }
                   }
                 }),
               );
@@ -473,52 +430,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         await routeToPage(
           context,
           SharedPublicCollectionPage(
-            files: sharedFiles,
             CollectionWithThumbnail(
               collection,
               null,
             ),
+            files: sharedFiles,
+            shouldShowJoinDialog: shouldShowJoinDialog,
           ),
         );
-
-        // Show join dialog if action=join parameter was present
-        if (shouldShowJoinDialog) {
-          _logger.info("Join dialog requested via action=join parameter");
-          final joinConfirmed = await showChoiceDialog(
-            context,
-            title: context.l10n.joinAlbum,
-            body: context.l10n.joinAlbumConfirmationDialogBody,
-            firstButtonLabel: context.l10n.join,
-          );
-
-          if (joinConfirmed?.action == ButtonAction.first) {
-            final progressDialog = createProgressDialog(
-              context,
-              AppLocalizations.of(context).pleaseWait,
-              isDismissible: true,
-            );
-            await progressDialog.show();
-            try {
-              await RemoteSyncService.instance
-                  .joinAndSyncCollection(context, collection.id);
-              final c =
-                  CollectionsService.instance.getCollectionByID(collection.id);
-              await progressDialog.hide();
-
-              // Navigate to the user's collection page after joining
-              await routeToPage(
-                context,
-                CollectionPage(
-                  CollectionWithThumbnail(c!, null),
-                ),
-              );
-            } catch (e, s) {
-              _logger.severe("Failed to join public album", e, s);
-              await progressDialog.hide();
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          }
-        }
         if (sharedFiles.length == 1) {
           await routeToPage(
             context,
