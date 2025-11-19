@@ -62,32 +62,22 @@ class _AddTagSheetState extends State<AddTagSheet> {
   }
 
   Future<void> _onDonePressed() async {
-    // Calculate which intersection tags were removed (unselected)
-    final removedIntersectionTags = _initialIntersectionTags
-        .where((tag) => !_selectedTagsInSheet.contains(tag))
-        .toSet();
+    final removedTags =
+        _initialIntersectionTags.difference(_selectedTagsInSheet);
+    final addedTags = _selectedTagsInSheet.difference(_initialIntersectionTags);
 
-    // Calculate which non-intersection tags were added (selected)
-    final addedNonIntersectionTags = _selectedTagsInSheet
-        .where((tag) => !_initialIntersectionTags.contains(tag))
-        .toSet();
+    final updateFutures = widget.selectedCodes.map((code) {
+      final updatedTags = Set<String>.from(code.display.tags)
+        ..removeAll(removedTags)
+        ..addAll(addedTags);
 
-    final List<Future> updateFutures = [];
-    for (final code in widget.selectedCodes) {
-      // Start with the original tags of this code
-      final updatedTags = Set<String>.from(code.display.tags);
-
-      // Remove tags that were in intersection but are now unselected
-      updatedTags.removeAll(removedIntersectionTags);
-
-      // Add tags that are now selected but weren't in the intersection
-      updatedTags.addAll(addedNonIntersectionTags);
-
-      final updatedCode = code.copyWith(
-        display: code.display.copyWith(tags: updatedTags.toList()),
+      return CodeStore.instance.addCode(
+        code.copyWith(
+          display: code.display.copyWith(tags: updatedTags.toList()),
+        ),
       );
-      updateFutures.add(CodeStore.instance.addCode(updatedCode));
-    }
+    });
+
     await Future.wait(updateFutures);
     if (mounted) {
       Navigator.of(context).pop();
@@ -270,7 +260,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 foregroundColor: colorScheme.backgroundBase,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: _onDonePressed,
               child: Text(context.l10n.done),
