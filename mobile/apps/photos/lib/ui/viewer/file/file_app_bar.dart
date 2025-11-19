@@ -422,7 +422,9 @@ class FileAppBarState extends State<FileAppBar> {
       isArchived ? visibleVisibility : archiveVisibility,
     );
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _reloadActions = true;
+      });
     }
   }
 
