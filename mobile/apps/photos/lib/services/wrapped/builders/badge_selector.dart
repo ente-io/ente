@@ -379,7 +379,7 @@ class WrappedBadgeSelector {
         name: "Pet Parent",
         title: "Pet Parent",
         subtitle:
-            "You're a pet parent—$percent% of your shots celebrate your pet.",
+            "You're a pet parent—$percent% of your shots celebrate pets",
         emoji: "🐾",
         gradientStart: "#FAD961",
         gradientEnd: "#F76B1C",
