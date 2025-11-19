@@ -89,7 +89,7 @@ func (c *CollectionController) RestoreFiles(ctx *gin.Context, userID int64, cID 
 // single user
 func (c *CollectionController) MoveFiles(ctx *gin.Context, req ente.MoveFilesRequest) error {
 	userID := auth.GetUserID(ctx.Request.Header)
-	_, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+	r1, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID:   req.FromCollectionID,
 		ActorUserID:    userID,
 		IncludeDeleted: false,
@@ -99,14 +99,18 @@ func (c *CollectionController) MoveFiles(ctx *gin.Context, req ente.MoveFilesReq
 		return stacktrace.Propagate(err, "failed to verify if actor owns fromCollection")
 	}
 
-	_, err = c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+	r2, err2 := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID:   req.ToCollectionID,
 		ActorUserID:    userID,
 		IncludeDeleted: false,
 		VerifyOwner:    true,
 	})
-	if err != nil {
-		return stacktrace.Propagate(err, "failed to verify if actor owns toCollection")
+	if err2 != nil {
+		return stacktrace.Propagate(err2, "failed to verify if actor owns toCollection")
+	}
+
+	if r2.Collection.App != r1.Collection.App {
+		return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("move across app not supported %s to %s", r1.Collection.App, r2.Collection.App))
 	}
 
 	// Verify that the user owns each file
