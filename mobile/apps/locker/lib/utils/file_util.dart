@@ -1,10 +1,10 @@
-import "dart:convert";
 import "dart:io";
 import "dart:typed_data";
 
 import "package:ente_ui/components/progress_dialog.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
+import "package:file_saver/file_saver.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
@@ -21,7 +21,6 @@ import "package:locker/ui/pages/physical_records_page.dart";
 import "package:logging/logging.dart";
 import "package:open_file/open_file.dart";
 import "package:path/path.dart" as p;
-import "package:photo_manager/photo_manager.dart";
 
 class FileUtil {
   static final Logger _logger = Logger("FileUtil");
@@ -94,19 +93,25 @@ class FileUtil {
     }
   }
 
-  static Future<bool> downloadFilesToDownloads(
+  static Future<bool> downloadFile(
+    BuildContext context,
+    EnteFile file,
+  ) {
+    return _downloadFiles(context, [file]);
+  }
+
+  static Future<bool> downloadFiles(
+    BuildContext context,
+    List<EnteFile> files,
+  ) {
+    return _downloadFiles(context, files);
+  }
+
+  static Future<bool> _downloadFiles(
     BuildContext context,
     List<EnteFile> files,
   ) async {
     if (files.isEmpty) {
-      return false;
-    }
-
-    if (!(Platform.isAndroid || Platform.isIOS)) {
-      showToast(
-        context,
-        'Downloads are only supported on Android and iOS',
-      );
       return false;
     }
 
@@ -122,6 +127,7 @@ class FileUtil {
     var index = 0;
     final savedNames = <String>[];
     final savedPaths = <String>[];
+    var hasShownInfoSkipToast = false;
 
     try {
       for (final file in files) {
@@ -131,44 +137,34 @@ class FileUtil {
               '${context.l10n.downloading} ${file.displayName} ($index/$total)',
         );
 
-        final sanitizedName = _sanitizeFileName(file.displayName);
-        final baseName = _baseNameWithoutExtension(sanitizedName);
-
-        final extension = _extensionWithoutDot(sanitizedName);
+        // Skip info items for now; they are meant to be viewed in-app.
         if (InfoFileService.instance.isInfoFile(file)) {
-          final infoFileName =
-              baseName.endsWith('.json') ? baseName : "$baseName.json";
-          final savedPath = await _saveInfoFile(
-            file: file,
-            fileName: infoFileName,
-            context: context,
-            progressDialog: dialog,
-            currentIndex: index,
-            totalCount: total,
-          );
-          savedNames.add(file.displayName);
-          if (savedPath != null) {
-            savedPaths.add(savedPath);
+          _logger.fine('Skipping info file download for ${file.displayName}');
+          if (!hasShownInfoSkipToast) {
+            hasShownInfoSkipToast = true;
+            showToast(
+              context,
+              'Some items were skipped as they cannot be downloaded yet',
+            );
           }
           continue;
         }
 
-        if (!_isSupportedExtension(extension)) {
-          throw UnsupportedError('Unsupported file type for download');
-        }
+        final sanitizedName = _sanitizeFileName(file.displayName);
+        final baseName = _baseNameWithoutExtension(sanitizedName);
+        final fileExtension = _extensionWithoutDot(file.displayName);
 
-        final targetFileName =
-            extension.isEmpty ? baseName : "$baseName.$extension";
-
-        final savedPath = await _saveRegularFile(
+        final String? savedPath = await _saveRegularFile(
           file: file,
-          targetFileName: targetFileName,
+          targetFileName:
+              fileExtension.isEmpty ? baseName : "$baseName.$fileExtension",
           context: context,
           progressDialog: dialog,
           currentIndex: index,
           totalCount: total,
-          extension: extension,
+          fileExtension: fileExtension,
         );
+
         savedNames.add(file.displayName);
         if (savedPath != null) {
           savedPaths.add(savedPath);
@@ -177,15 +173,15 @@ class FileUtil {
 
       if (savedNames.isNotEmpty) {
         final message = savedNames.length == 1
-            ? '${savedNames.first} saved to Downloads'
-            : '${savedNames.length} files saved to Downloads';
+            ? '${savedNames.first} saved'
+            : '${savedNames.length} files saved';
         _logger.info('Files saved: $savedPaths');
         showToast(context, message);
       }
 
       return true;
     } catch (e, s) {
-      _logger.severe('Failed to save files to Downloads', e, s);
+      _logger.severe('Failed to save files', e, s);
       if (e is UnsupportedError) {
         showToast(
           context,
@@ -203,60 +199,6 @@ class FileUtil {
     }
   }
 
-  static Future<String?> _saveInfoFile({
-    required EnteFile file,
-    required String fileName,
-    required BuildContext context,
-    required ProgressDialog progressDialog,
-    required int currentIndex,
-    required int totalCount,
-  }) async {
-    final infoItem = InfoFileService.instance.extractInfoFromFile(file);
-    if (infoItem == null) {
-      throw Exception('Unable to extract information from ${file.displayName}');
-    }
-
-    final payload = <String, dynamic>{
-      'title': file.displayName,
-      'type': infoItem.type.name,
-      'data': infoItem.data.toJson(),
-    };
-
-    if (file.creationTime != null) {
-      payload['createdAt'] =
-          DateTime.fromMillisecondsSinceEpoch(file.creationTime!)
-              .toUtc()
-              .toIso8601String();
-    }
-    if (file.modificationTime != null) {
-      payload['updatedAt'] =
-          DateTime.fromMillisecondsSinceEpoch(file.modificationTime!)
-              .toUtc()
-              .toIso8601String();
-    }
-
-    const encoder = JsonEncoder.withIndent('  ');
-    final bytes = Uint8List.fromList(utf8.encode(encoder.convert(payload)));
-
-    // Save JSON file to Downloads directory
-    final String? savedPath = await _saveFileToDownloads(
-      bytes: bytes,
-      fileName: fileName,
-      extension: 'json',
-    );
-
-    if (savedPath == null) {
-      throw Exception('Unable to save ${file.displayName}');
-    }
-
-    progressDialog.update(
-      message:
-          '${context.l10n.downloadingProgress(100)} ($currentIndex/$totalCount)',
-    );
-
-    return savedPath;
-  }
-
   static Future<String?> _saveRegularFile({
     required EnteFile file,
     required String targetFileName,
@@ -264,7 +206,7 @@ class FileUtil {
     required ProgressDialog progressDialog,
     required int currentIndex,
     required int totalCount,
-    required String extension,
+    required String fileExtension,
   }) async {
     final fileKey = await CollectionService.instance.getFileKey(file);
 
@@ -288,28 +230,18 @@ class FileUtil {
     }
 
     try {
-      // Determine file type and use appropriate save method
-      final isImage = _isImageExtension(extension);
-      String? savedPath;
+      // Use system file picker on both Android and iOS to let user
+      // choose where to save the file.
+      final fileBytes = await decryptedFile.readAsBytes();
+      final baseName = _baseNameWithoutExtension(targetFileName);
+      final savedPath = await _saveFile(
+        bytes: fileBytes,
+        fileName: baseName,
+        fileExtension: fileExtension,
+      );
 
-      if (isImage) {
-        // Save images to gallery using PhotoManager
-        final assetEntity = await PhotoManager.editor.saveImageWithPath(
-          decryptedFile.path,
-          title: targetFileName,
-        );
-        savedPath = assetEntity.relativePath;
-      } else {
-        // For PDFs, text files, and other non-image files
-        final fileBytes = await decryptedFile.readAsBytes();
-        savedPath = await _saveFileToDownloads(
-          bytes: fileBytes,
-          fileName: targetFileName,
-          extension: extension,
-        );
-        if (savedPath == null) {
-          throw Exception('Failed to save file to Downloads');
-        }
+      if (savedPath == null) {
+        throw Exception('Failed to save file');
       }
 
       progressDialog.update(
@@ -328,54 +260,33 @@ class FileUtil {
     }
   }
 
-  static bool _isImageExtension(String extension) {
-    const imageExtensions = <String>{
-      'png',
-      'jpg',
-      'jpeg',
-      'gif',
-      'heic',
-      'heif',
-      'webp',
-      'svg',
-    };
-    return imageExtensions.contains(extension.toLowerCase());
-  }
-
-  /// Saves non-image files (PDF, TXT, JSON) to Downloads folder
-  /// Returns the path where the file was saved, or null if it failed
-  static Future<String?> _saveFileToDownloads({
+  /// Saves files using the platform's system file picker.
+  /// On Android and iOS this shows a system sheet allowing the user
+  /// to choose where to save the file.
+  static Future<String?> _saveFile({
     required Uint8List bytes,
     required String fileName,
-    required String extension,
+    required String fileExtension,
   }) async {
     if (!Platform.isAndroid && !Platform.isIOS) {
-      _logger.warning('Downloads folder only supported on Android and iOS');
+      _logger.warning('File saving only supported on Android and iOS');
       return null;
     }
 
-    if (Platform.isAndroid) {
-      // For Android, use direct file write to Downloads
-      // This works for Android 10 and below with WRITE_EXTERNAL_STORAGE permission
-      // For Android 11+, we rely on the app having MANAGE_EXTERNAL_STORAGE or use SAF
-      try {
-        const downloadsPath = '/storage/emulated/0/Download';
-        final sanitizedName = _sanitizeFileName(fileName);
-        final fullFileName =
-            extension.isEmpty ? sanitizedName : '$sanitizedName.$extension';
-        final targetFile = File('$downloadsPath/$fullFileName');
+    try {
+      final baseName = _baseNameWithoutExtension(fileName);
 
-        await targetFile.writeAsBytes(bytes);
-        _logger.info('File saved to: ${targetFile.path}');
-        return targetFile.path;
-      } catch (e, s) {
-        _logger.severe('Failed to save file to Downloads on Android', e, s);
-        return null;
-      }
-    } else {
-      // iOS doesn't have a public Downloads folder accessible to apps
-      // Files must be saved to app-specific directories
-      _logger.warning('iOS does not support saving to public Downloads folder');
+      final savedPath = await FileSaver.instance.saveAs(
+        name: baseName,
+        bytes: bytes,
+        fileExtension: fileExtension,
+        mimeType: MimeType.other,
+      );
+
+      _logger.info('File saved: $savedPath');
+      return savedPath;
+    } catch (e, s) {
+      _logger.severe('Failed to save file', e, s);
       return null;
     }
   }
@@ -464,21 +375,5 @@ class FileUtil {
         context.l10n.couldNotOpenFile(e.toString()),
       );
     }
-  }
-
-  static bool _isSupportedExtension(String extension) {
-    const supported = <String>{
-      'png',
-      'jpg',
-      'jpeg',
-      'gif',
-      'heic',
-      'heif',
-      'webp',
-      'svg',
-      'pdf',
-      'txt',
-    };
-    return supported.contains(extension.toLowerCase());
   }
 }

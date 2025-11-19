@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/gradient_button.dart";
+import "package:share_plus/share_plus.dart";
 
 class RecoveryKeyDialogLocker extends StatefulWidget {
   final String recoveryKey;
@@ -123,7 +124,7 @@ class _RecoveryKeyDialogLockerState extends State<RecoveryKeyDialogLocker> {
                     child: SelectableText(
                       recoveryKeyMnemonic,
                       style: textTheme.body.copyWith(
-                        color: colorScheme.backgroundBase,
+                        color: Colors.white,
                         fontFamily: 'monospace',
                         letterSpacing: 0.5,
                         height: 1.5,
@@ -181,19 +182,19 @@ class _RecoveryKeyDialogLockerState extends State<RecoveryKeyDialogLocker> {
 
   Future<void> _shareRecoveryKey(String recoveryKey) async {
     try {
-      // For now, just copy to clipboard and show toast
-      // In the future, we can add proper file sharing
-      await Clipboard.setData(ClipboardData(text: recoveryKey));
-
-      if (mounted) {
-        showToast(
-          context,
-          'Recovery key copied to clipboard. Please save it in a safe place.',
-        );
+      if (_recoveryKeyFile.existsSync()) {
+        await _recoveryKeyFile.delete();
       }
+      _recoveryKeyFile.writeAsStringSync(recoveryKey);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(_recoveryKeyFile.path)],
+        ),
+      );
     } catch (e) {
       if (mounted) {
-        showShortToast(context, 'Failed to copy recovery key');
+        showShortToast(context, 'Failed to share recovery key');
       }
     }
   }

@@ -7,6 +7,10 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Securely backup your 2FA codes",
+  "featureBackupCodes": "End to end encrypted\nbackup and sync",
+  "featureSearchEtc": "Search, Tags, Share,\nNext code and a lot more",
+  "featureOpenSource": "Open source and\naudited by security experts",
+  "signUp": "Sign up",
   "onBoardingGetStarted": "Get Started",
   "setupFirstAccount": "Setup your first account",
   "allTabEmptyHint": "Nothing here yet. Tap + to add a code or open Trash to recover one.",

@@ -42,7 +42,14 @@ class FlagService {
 
   bool get disableCFWorker => flags.disableCFWorker;
 
-  bool get internalUser => flags.internalUser || kDebugMode;
+  /// Returns true if the user is an internal user, respecting the debug toggle.
+  bool get internalUser {
+    final isDisabled = _prefs.getBool("ls.internal_user_disabled") ?? false;
+    return (flags.internalUser || kDebugMode) && !isDisabled;
+  }
+
+  bool get enableAdminRole => internalUser;
+  bool get surfacePublicLink => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -51,8 +58,6 @@ class FlagService {
   bool get enableStripe => Platform.isIOS ? false : flags.enableStripe;
 
   bool get mapEnabled => flags.mapEnabled;
-
-  bool get enteWrapped => false; // TODO: lau: set to true before December release
 
   bool get isBetaUser => internalUser || flags.betaUser;
 
@@ -80,6 +85,8 @@ class FlagService {
   bool get useNativeVideoEditor => true;
 
   bool get useWidgetV2 => internalUser;
+
+  bool get facesTimeline => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

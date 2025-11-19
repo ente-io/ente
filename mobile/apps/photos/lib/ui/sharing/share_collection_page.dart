@@ -1,11 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import "package:photos/extensions/user_extension.dart";
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/api/collection/user.dart";
+import 'package:photos/core/configuration.dart';
+import 'package:photos/extensions/user_extension.dart';
+import 'package:photos/generated/l10n.dart';
+import 'package:photos/models/api/collection/user.dart';
 import 'package:photos/models/collection/collection.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -14,16 +15,14 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
-import 'package:photos/ui/notification/toast.dart';
-import "package:photos/ui/sharing/add_participant_page.dart";
+import 'package:photos/ui/sharing/add_participant_page.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
-import "package:photos/ui/sharing/album_share_info_widget.dart";
-import "package:photos/ui/sharing/manage_album_participant.dart";
+import 'package:photos/ui/sharing/album_share_info_widget.dart';
+import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
-import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
+import 'package:photos/ui/sharing/public_link_enabled_actions_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/share_util.dart';
 
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
@@ -39,6 +38,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   final CollectionActions collectionActions =
       CollectionActions(CollectionsService.instance);
   final GlobalKey sendLinkButtonKey = GlobalKey();
+  bool _redirectedToParticipants = false;
 
   Future<void> _navigateToManageUser() async {
     if (_sharees.length == 1) {
@@ -62,8 +62,31 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final int userID = Configuration.instance.getUserID() ?? -1;
+
+    if (!_redirectedToParticipants) {
+      final bool isOwner = widget.collection.owner.id == userID;
+      if (!isOwner) {
+        _redirectedToParticipants = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          replacePage(
+            context,
+            AlbumParticipantsPage(widget.collection),
+          );
+        });
+      } else {
+        _redirectedToParticipants = true;
+      }
+    }
+
     _sharees = widget.collection.sharees;
     final bool hasUrl = widget.collection.hasLink;
+    final bool isOwner = widget.collection.owner.id == userID;
+    final bool adminRoleEnabled = flagService.enableAdminRole;
+    final bool canManageParticipants = isOwner;
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
@@ -80,258 +103,215 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       ),
     );
 
-    children.add(
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).addViewer,
-          makeTextBold: true,
-        ),
-        leadingIcon: Icons.add,
-        menuItemColor: getEnteColorScheme(context).fillFaint,
-        isTopBorderRadiusRemoved: _sharees.isNotEmpty,
-        isBottomBorderRadiusRemoved: true,
-        onTap: () async {
-          // ignore: unawaited_futures
-          routeToPage(
-            context,
-            AddParticipantPage(
-              [widget.collection],
-              const [ActionTypesToShow.addViewer],
-            ),
-          ).then(
-            (value) => {
-              if (mounted) {setState(() => {})},
-            },
-          );
-        },
-      ),
-    );
-    children.add(
-      DividerWidget(
-        dividerType: DividerType.menu,
-        bgColor: getEnteColorScheme(context).fillFaint,
-      ),
-    );
-    children.add(
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: AppLocalizations.of(context).addCollaborator,
-          makeTextBold: true,
-        ),
-        leadingIcon: Icons.add,
-        menuItemColor: getEnteColorScheme(context).fillFaint,
-        isTopBorderRadiusRemoved: true,
-        onTap: () async {
-          // ignore: unawaited_futures
-          routeToPage(
-            context,
-            AddParticipantPage(
-              [widget.collection],
-              const [ActionTypesToShow.addCollaborator],
-            ),
-          ).then(
-            (value) => {
-              if (mounted) {setState(() => {})},
-            },
-          );
-        },
-      ),
-    );
-    if (_sharees.isEmpty && !hasUrl) {
-      children.add(
-        MenuSectionDescriptionWidget(
-          content: AppLocalizations.of(context).sharedAlbumSectionDescription,
-        ),
-      );
-    }
-
-    final bool hasExpired =
-        widget.collection.publicURLs.firstOrNull?.isExpired ?? false;
-    children.addAll([
-      const SizedBox(
-        height: 24,
-      ),
-      MenuSectionTitle(
-        title: hasUrl
-            ? AppLocalizations.of(context).publicLinkEnabled
-            : AppLocalizations.of(context).shareALink,
-        iconData: Icons.public,
-      ),
-    ]);
-    if (hasUrl) {
-      if (hasExpired) {
+    if (canManageParticipants) {
+      if (adminRoleEnabled) {
         children.add(
           MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: AppLocalizations.of(context).linkHasExpired,
-              textColor: getEnteColorScheme(context).warning500,
+            captionedTextWidget: const CaptionedTextWidget(
+              title: 'Add admin',
+              makeTextBold: true,
             ),
-            leadingIcon: Icons.error_outline,
-            leadingIconColor: getEnteColorScheme(context).warning500,
+            leadingIcon: Icons.add,
             menuItemColor: getEnteColorScheme(context).fillFaint,
-            isBottomBorderRadiusRemoved: true,
+            isTopBorderRadiusRemoved: _sharees.isNotEmpty,
+            onTap: () async {
+              await routeToPage(
+                context,
+                AddParticipantPage(
+                  [widget.collection],
+                  const [ActionTypesToShow.addAdmin],
+                ),
+              );
+              if (mounted) {
+                setState(() => {});
+              }
+            },
           ),
         );
-      } else {
-        final String url =
-            CollectionsService.instance.getPublicUrl(widget.collection);
-        children.addAll(
-          [
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).copyLink,
-                makeTextBold: true,
-              ),
-              leadingIcon: Icons.copy,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              showOnlyLoadingState: true,
-              onTap: () async {
-                await Clipboard.setData(ClipboardData(text: url));
-                showShortToast(
-                  context,
-                  AppLocalizations.of(context).linkCopiedToClipboard,
-                );
-              },
-              isBottomBorderRadiusRemoved: true,
-            ),
-            DividerWidget(
-              dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).fillFaint,
-            ),
-            MenuItemWidget(
-              key: sendLinkButtonKey,
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).sendLink,
-                makeTextBold: true,
-              ),
-              leadingIcon: Icons.adaptive.share,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              onTap: () async {
-                // ignore: unawaited_futures
-                await shareAlbumLinkWithPlaceholder(
-                  context,
-                  widget.collection,
-                  url,
-                  sendLinkButtonKey,
-                );
-              },
-              isTopBorderRadiusRemoved: true,
-              isBottomBorderRadiusRemoved: true,
-            ),
-            DividerWidget(
-              dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).fillFaint,
-            ),
-            MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: AppLocalizations.of(context).sendQrCode,
-                makeTextBold: true,
-              ),
-              leadingIcon: Icons.qr_code_outlined,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
-              onTap: () async {
-                await showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return QrCodeDialogWidget(
-                      collection: widget.collection,
-                    );
-                  },
-                );
-              },
-              isTopBorderRadiusRemoved: true,
-              isBottomBorderRadiusRemoved: true,
-            ),
-          ],
-        );
-      }
-
-      children.addAll(
-        [
+        children.add(
           DividerWidget(
             dividerType: DividerType.menu,
             bgColor: getEnteColorScheme(context).fillFaint,
           ),
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: AppLocalizations.of(context).manageLink,
-              makeTextBold: true,
-            ),
-            leadingIcon: Icons.link,
-            trailingIcon: Icons.navigate_next,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
-            trailingIconIsMuted: true,
-            onTap: () async {
-              // ignore: unawaited_futures
-              routeToPage(
-                context,
-                ManageSharedLinkWidget(collection: widget.collection),
-              ).then(
-                (value) => {
-                  if (mounted) {setState(() => {})},
-                },
-              );
-            },
-            isTopBorderRadiusRemoved: true,
-          ),
-        ],
-      );
-    } else {
-      children.addAll([
+        );
+      }
+      children.add(
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: AppLocalizations.of(context).createPublicLink,
+            title: AppLocalizations.of(context).addCollaborator,
             makeTextBold: true,
           ),
-          leadingIcon: Icons.link,
+          leadingIcon: Icons.add,
           menuItemColor: getEnteColorScheme(context).fillFaint,
-          showOnlyLoadingState: true,
+          isTopBorderRadiusRemoved:
+              adminRoleEnabled ? true : _sharees.isNotEmpty,
+          isBottomBorderRadiusRemoved: false,
           onTap: () async {
-            final bool result =
-                await collectionActions.enableUrl(context, widget.collection);
-            if (result && mounted) {
+            // ignore: unawaited_futures
+            routeToPage(
+              context,
+              AddParticipantPage(
+                [widget.collection],
+                const [ActionTypesToShow.addCollaborator],
+              ),
+            ).then(
+              (value) => {
+                if (mounted) {setState(() => {})},
+              },
+            );
+          },
+        ),
+      );
+      children.add(
+        DividerWidget(
+          dividerType: DividerType.menu,
+          bgColor: getEnteColorScheme(context).fillFaint,
+        ),
+      );
+      children.add(
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: AppLocalizations.of(context).addViewer,
+            makeTextBold: true,
+          ),
+          leadingIcon: Icons.add,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          isTopBorderRadiusRemoved: true,
+          isBottomBorderRadiusRemoved: true,
+          onTap: () async {
+            await routeToPage(
+              context,
+              AddParticipantPage(
+                [widget.collection],
+                const [ActionTypesToShow.addViewer],
+              ),
+            );
+            if (mounted) {
               setState(() => {});
             }
           },
         ),
-        _sharees.isEmpty
-            ? MenuSectionDescriptionWidget(
-                content: AppLocalizations.of(context).shareWithNonenteUsers,
-              )
-            : const SizedBox.shrink(),
+      );
+      if (_sharees.isEmpty && !hasUrl) {
+        children.add(
+          MenuSectionDescriptionWidget(
+            content: AppLocalizations.of(context).sharedAlbumSectionDescription,
+          ),
+        );
+      }
+    }
+
+    if (isOwner) {
+      children.addAll([
         const SizedBox(
           height: 24,
         ),
         MenuSectionTitle(
-          title: AppLocalizations.of(context).collectPhotos,
+          title: hasUrl
+              ? AppLocalizations.of(context).publicLinkEnabled
+              : AppLocalizations.of(context).shareALink,
           iconData: Icons.public,
         ),
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: AppLocalizations.of(context).createCollaborativeLink,
-            makeTextBold: true,
-          ),
-          leadingIcon: Icons.people_alt_outlined,
-          menuItemColor: getEnteColorScheme(context).fillFaint,
-          showOnlyLoadingState: true,
-          onTap: () async {
-            final bool result = await collectionActions.enableUrl(
-              context,
-              widget.collection,
-              enableCollect: true,
-            );
-            if (result && mounted) {
-              setState(() => {});
-            }
-          },
-        ),
-        _sharees.isEmpty
-            ? MenuSectionDescriptionWidget(
-                content:
-                    AppLocalizations.of(context).collabLinkSectionDescription,
-              )
-            : const SizedBox.shrink(),
       ]);
+      if (hasUrl) {
+        children.add(
+          PublicLinkEnabledActionsWidget(
+            collection: widget.collection,
+            sendLinkButtonKey: sendLinkButtonKey,
+          ),
+        );
+
+        children.addAll(
+          [
+            DividerWidget(
+              dividerType: DividerType.menu,
+              bgColor: getEnteColorScheme(context).fillFaint,
+            ),
+            MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: AppLocalizations.of(context).manageLink,
+                makeTextBold: true,
+              ),
+              leadingIcon: Icons.link,
+              trailingIcon: Icons.navigate_next,
+              menuItemColor: getEnteColorScheme(context).fillFaint,
+              trailingIconIsMuted: true,
+              onTap: () async {
+                // ignore: unawaited_futures
+                routeToPage(
+                  context,
+                  ManageSharedLinkWidget(collection: widget.collection),
+                ).then(
+                  (value) => {
+                    if (mounted) {setState(() => {})},
+                  },
+                );
+              },
+              isTopBorderRadiusRemoved: true,
+            ),
+          ],
+        );
+      } else {
+        children.add(
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: AppLocalizations.of(context).createPublicLink,
+              makeTextBold: true,
+            ),
+            leadingIcon: Icons.link,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            showOnlyLoadingState: true,
+            onTap: () async {
+              final bool result =
+                  await collectionActions.enableUrl(context, widget.collection);
+              if (result && mounted) {
+                setState(() => {});
+              }
+            },
+          ),
+        );
+        if (_sharees.isEmpty) {
+          children.add(
+            MenuSectionDescriptionWidget(
+              content: AppLocalizations.of(context).shareWithNonenteUsers,
+            ),
+          );
+        }
+        children.addAll([
+          const SizedBox(
+            height: 24,
+          ),
+          MenuSectionTitle(
+            title: AppLocalizations.of(context).collectPhotos,
+            iconData: Icons.public,
+          ),
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: AppLocalizations.of(context).createCollaborativeLink,
+              makeTextBold: true,
+            ),
+            leadingIcon: Icons.people_alt_outlined,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            showOnlyLoadingState: true,
+            onTap: () async {
+              final bool result = await collectionActions.enableUrl(
+                context,
+                widget.collection,
+                enableCollect: true,
+              );
+              if (result && mounted) {
+                setState(() => {});
+              }
+            },
+          ),
+          _sharees.isEmpty
+              ? MenuSectionDescriptionWidget(
+                  content:
+                      AppLocalizations.of(context).collabLinkSectionDescription,
+                )
+              : const SizedBox.shrink(),
+        ]);
+      }
     }
 
     return Scaffold(

@@ -34,6 +34,8 @@ class PeopleAppBar extends StatefulWidget {
   final String? title;
   final SelectedFiles selectedFiles;
   final PersonEntity person;
+  final bool facesTimelineReady;
+  final Future<void> Function()? onFacesTimelineTap;
 
   bool get isIgnored => person.data.isIgnored;
 
@@ -42,6 +44,8 @@ class PeopleAppBar extends StatefulWidget {
     this.title,
     this.selectedFiles,
     this.person, {
+    this.facesTimelineReady = false,
+    this.onFacesTimelineTap,
     super.key,
   });
 
@@ -56,6 +60,7 @@ enum PeoplePopupAction {
   reviewSuggestions,
   unignore,
   reassignMe,
+  memoryLane,
 }
 
 class _AppBarWidgetState extends State<PeopleAppBar> {
@@ -214,6 +219,27 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     }
 
     final List<PopupMenuItem<PeoplePopupAction>> items = [];
+    final bool showTimelineAction =
+        widget.facesTimelineReady && widget.onFacesTimelineTap != null;
+    if (showTimelineAction) {
+      items.add(
+        PopupMenuItem(
+          value: PeoplePopupAction.memoryLane,
+          child: Row(
+            children: [
+              const Icon(Icons.auto_awesome_outlined),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                context.l10n.facesTimelineAppBarTitle,
+                style: textTheme.bodyBold,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     if (!widget.isIgnored) {
       items.addAll(
@@ -332,6 +358,11 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   ),
                 ),
               );
+            } else if (value == PeoplePopupAction.memoryLane) {
+              final callback = widget.onFacesTimelineTap;
+              if (callback != null) {
+                unawaited(callback());
+              }
             } else if (value == PeoplePopupAction.rename) {
               await _editPerson(context);
             } else if (value == PeoplePopupAction.setCover) {

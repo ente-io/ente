@@ -39,3 +39,32 @@ func ConvertStringToCollectionParticipantRole(value string) CollectionParticipan
 		return UNKNOWN
 	}
 }
+
+func (c *CollectionParticipantRole) IsValidShareRole() bool {
+	if c == nil {
+		return false
+	}
+	return *c == VIEWER || *c == COLLABORATOR || *c == ADMIN || *c == OWNER
+}
+
+func (c CollectionParticipantRole) roleRank() int {
+	switch c {
+	case VIEWER:
+		return 1
+	case COLLABORATOR:
+		return 2
+	case ADMIN:
+		return 3
+	case OWNER:
+		return 4
+	default:
+		return 0
+	}
+}
+
+func (c CollectionParticipantRole) Satisfies(min *CollectionParticipantRole) bool {
+	if min == nil {
+		return true
+	}
+	return c.roleRank() >= (*min).roleRank()
+}

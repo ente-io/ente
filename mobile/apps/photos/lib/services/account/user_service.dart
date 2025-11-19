@@ -1385,9 +1385,11 @@ class UserService {
           if (u.id != null &&
               u.email.isNotEmpty &&
               u.email == ownerEmail &&
-              (u.isCollaborator || u.isViewer)) {
+              (u.isAdmin || u.isCollaborator || u.isViewer)) {
             for (final User u in c.sharees) {
-              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
+              if (u.id != null &&
+                  u.email.isNotEmpty &&
+                  (u.isCollaborator || u.isAdmin)) {
                 if (!existingEmails.contains(u.email)) {
                   relevantUsers.add(u);
                   existingEmails.add(u.email);
@@ -1460,9 +1462,11 @@ class UserService {
           if (u.id != null &&
               u.email.isNotEmpty &&
               u.email == ownerEmail &&
-              (u.isCollaborator || u.isViewer)) {
+              (u.isAdmin || u.isCollaborator || u.isViewer)) {
             for (final User u in c.sharees) {
-              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
+              if (u.id != null &&
+                  u.email.isNotEmpty &&
+                  (u.isCollaborator || u.isAdmin)) {
                 if (!emailIDs.contains(u.email)) {
                   emailIDs.add(u.email);
                 }

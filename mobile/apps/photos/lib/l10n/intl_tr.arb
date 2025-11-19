@@ -11,6 +11,7 @@
   "invalidEmailAddress": "Geçersiz e-posta adresi",
   "enterValidEmail": "Lütfen geçerli bir e-posta adresi girin.",
   "deleteAccount": "Hesabı sil",
+  "deleteAccountWarning": "Bu, Ente Auth, Ente Photos ve Ente Locker hesabınızı silecektir.",
   "askDeleteReason": "Hesabınızı silme sebebiniz nedir?",
   "deleteAccountFeedbackPrompt": "Gittiğini gördüğümüze üzüldük. Lütfen gelişmemize yardımcı olmak için neden ayrıldığınızı açıklayın.",
   "feedback": "Geri Bildirim",
@@ -34,7 +35,16 @@
   "password": "Şifre",
   "confirmPassword": "Şifrenizi onaylayın",
   "activeSessions": "Aktif oturumlar",
+  "ocrProcessingOverlayMessage": "Metin algılanıyor...",
+  "ocrLoadingIndicatorLabel": "Metin Algılanıyor",
+  "ocrSelectionHint": "İhtiyacınız olanı seçmek için kaydırın veya iki kez dokunun",
+  "ocrNoTextDetected": "Yazı algılanmadı",
   "ocrRetryButtonLabel": "Tekrar dene",
+  "ocrModelsNetworkRequiredError": "OCR modellerini ilk kez kullanmak için ağ bağlantısı gereklidir",
+  "ocrModelsPrepareFailed": "OCR modelleri hazırlanamadı",
+  "ocrImageNotFoundError": "Görsel dosyası bulunamadı",
+  "ocrImageDecodeFailedError": "Görsel okunamadı",
+  "ocrGenericDetectError": "Görselde yazı algılanmadı",
   "oops": "Hay aksi",
   "somethingWentWrongPleaseTryAgain": "Bir şeyler ters gitti, lütfen tekrar deneyin",
   "thisWillLogYouOutOfThisDevice": "Bu cihazdaki oturumunuz kapatılacak!",
@@ -108,6 +118,10 @@
   "enterYourPassword": "Lütfen şifrenizi giriniz",
   "welcomeBack": "Tekrardan hoşgeldin!",
   "contactSupport": "Destek ile iletişim",
+  "locationPickerTip": "Fotoğrafın bilgi ekranından fotoğrafın ana yerine konum ekleyebilirsiniz",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Yanlış şifre",
   "pleaseTryAgain": "Lütfen tekrar deneyiniz",
   "recreatePasswordTitle": "Şifrenizi tekrardan oluşturun",
@@ -187,6 +201,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Albüme katılmaya izin ver",
   "allowAddPhotosDescription": "Bağlantıya sahip olan kişilerin paylaşılan albüme fotoğraf eklemelerine izin ver.",
   "passwordLock": "Şifre kilidi",
   "canNotOpenTitle": "Albüm açılamadı",
@@ -199,7 +214,10 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Albüm düzeni",
+  "layoutGrouped": "Gruplandırıldı",
   "layoutContinuous": "Sürekli",
+  "layoutTrip": "Seyahat",
   "preview": "Önceki",
   "linkExpiry": "Bağlantı geçerliliği",
   "linkExpired": "Süresi dolmuş",
@@ -242,6 +260,7 @@
   "sendLink": "Bağlantıyı gönder",
   "sendQrCode": "QR kod gönder",
   "copyLink": "Bağlantıyı kopyala",
+  "copyEmbedHtml": "Kopyalanmış Html ekle",
   "linkHasExpired": "Bağlantının süresi dolmuş",
   "publicLinkEnabled": "Herkese açık bağlantı aktive edildi",
   "shareALink": "Bir bağlantı paylaş",
@@ -1173,6 +1192,7 @@
     "description": "Label for the map view"
   },
   "maps": "Haritalar",
+  "mapsPrivacyNotice": "Yaklaşık yer blgileri haritayı ve konumu göstermek için OpenStreetMap gibi gizlilik bilincine sahip üçüncü taraflara gönderilecektir.",
   "enableMaps": "Haritaları Etkinleştir",
   "quickLinks": "Hızlı Erişim",
   "selectItemsToAdd": "Eklenecek eşyaları seçin",
@@ -1783,6 +1803,11 @@
   "lastWeek": "Geçen hafta",
   "thisMonth": "Bu ay",
   "thisYear": "Bu yıl",
+  "groupBy": "Gruplama",
+  "faceThumbnailGenerationFailed": "Küçük yüz resimleri oluşturulamıyor",
+  "fileAnalysisFailed": "Dosya gözlemlenemiyor",
+  "editAutoAddPeople": "Otomatik olarak kişi eklemeyi düzenle",
+  "analysis": "Analiz",
   "layout": "Görünüm",
   "day": "Gün",
   "undo": "Geri al",
@@ -1790,9 +1815,20 @@
   "filter": "Filtre",
   "adjust": "Ayarla",
   "draw": "Çiz",
+  "sticker": "Çıkartma",
   "brushColor": "Fırça rengi",
   "font": "Yazı tipi",
   "background": "Arka plan",
+  "addedToAlbums": "{count, plural, =1{Başarıyla albüm 1'e eklendi} other{Başarıyla {count} tane şey albümlere eklendi }}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "videosProcessed": "",
   "totalVideos": "Toplam videolar",
   "addedToQueue": "Sıraya ekle",
   "clearSelection": "Seçimi temizle",
