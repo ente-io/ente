@@ -1412,8 +1412,7 @@ class _MediaPreviewOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color backdropColor = Colors.black.withValues(alpha: 0.82);
-    final EdgeInsets padding = MediaQuery.paddingOf(context);
+    final Color backdropColor = Colors.black.withValues(alpha: 0.45);
     return Stack(
       children: [
         Positioned.fill(
@@ -1424,11 +1423,6 @@ class _MediaPreviewOverlay extends StatelessWidget {
           ),
         ),
         Center(child: _buildContent(context)),
-        Positioned(
-          top: padding.top + 16,
-          right: 16,
-          child: _PreviewCloseButton(onPressed: onDismiss),
-        ),
       ],
     );
   }
@@ -1469,47 +1463,48 @@ class _MediaPreviewOverlay extends StatelessWidget {
 
   Widget _buildZoomableContent(BuildContext context, EnteFile file) {
     final Size size = MediaQuery.sizeOf(context);
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: size.width * 0.95,
-        maxHeight: size.height * 0.95,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: ZoomableImage(
-          file,
-          tagPrefix: "rewind_preview_",
-          shouldCover: false,
-          isGuestView: true,
-          backgroundDecoration: const BoxDecoration(
-            color: Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PreviewCloseButton extends StatelessWidget {
-  const _PreviewCloseButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.close,
-          color: Colors.white,
-        ),
+    final double maxWidth = size.width * 0.88;
+    final double maxHeight = size.height * 0.88;
+    return SizedBox(
+      width: maxWidth,
+      height: maxHeight,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double boxWidth = constraints.maxWidth;
+          final double boxHeight = constraints.maxHeight;
+          final double imageAspect =
+              file.width > 0 && file.height > 0 ? file.width / file.height : 3 / 4;
+          double width = boxWidth;
+          double height = width / imageAspect;
+          if (height > boxHeight) {
+            height = boxHeight;
+            width = height * imageAspect;
+          }
+          return Center(
+            child: SizedBox(
+              width: width,
+              height: height,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                  ),
+                  child: ZoomableImage(
+                    file,
+                    tagPrefix: "rewind_preview_",
+                    shouldCover: false,
+                    isGuestView: true,
+                    backgroundDecoration: const BoxDecoration(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
