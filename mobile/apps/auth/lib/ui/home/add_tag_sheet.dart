@@ -38,18 +38,13 @@ class _AddTagSheetState extends State<AddTagSheet> {
 
   Future<void> _loadInitialState() async {
     final allTagsFromServer = await CodeDisplayStore.instance.getAllTags();
-    final initialTagsForSelection = <String>{};
 
-    // Calculate intersection of tags from all selected codes
-    if (widget.selectedCodes.isNotEmpty) {
-      // Start with tags from the first code
-      initialTagsForSelection.addAll(widget.selectedCodes.first.display.tags);
-
-      // Keep only tags that exist in ALL selected codes
-      for (final code in widget.selectedCodes.skip(1)) {
-        initialTagsForSelection.retainAll(code.display.tags);
-      }
-    }
+    // Calculate intersection: tags that exist in ALL selected codes
+    final initialTagsForSelection = widget.selectedCodes.isEmpty
+        ? <String>{}
+        : widget.selectedCodes
+            .map((code) => code.display.tags.toSet())
+            .reduce((a, b) => a.intersection(b));
 
     if (mounted) {
       setState(() {
