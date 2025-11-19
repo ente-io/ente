@@ -344,23 +344,28 @@ class WrappedResult {
   WrappedResult({
     required List<WrappedCard> cards,
     required this.year,
+    required DateTime generatedAt,
     this.badgeKey,
-  }) : cards = List<WrappedCard>.unmodifiable(cards);
+  })  : cards = List<WrappedCard>.unmodifiable(cards),
+        generatedAt = generatedAt.toUtc();
 
   final List<WrappedCard> cards;
   final int year;
+  final DateTime generatedAt;
   final String? badgeKey;
 
   Map<String, Object?> toJson() {
     return <String, Object?>{
       "year": year,
       "badgeKey": badgeKey,
+      "generatedAt": generatedAt.toIso8601String(),
       "cards": cards.map((WrappedCard card) => card.toJson()).toList(),
     };
   }
 
   static WrappedResult fromJson(Map<String, Object?> json) {
     final List<dynamic> rawCards = json["cards"] as List<dynamic>? ?? const [];
+    final DateTime generatedAt = _parseGeneratedAt(json);
     return WrappedResult(
       cards: rawCards
           .map(
@@ -369,6 +374,7 @@ class WrappedResult {
           )
           .toList(growable: false),
       year: json["year"] as int? ?? DateTime.now().year,
+      generatedAt: generatedAt,
       badgeKey: json["badgeKey"] as String?,
     );
   }
@@ -387,6 +393,22 @@ class WrappedResult {
 
   String encode() {
     return jsonEncode(toJson());
+  }
+
+  static DateTime _parseGeneratedAt(Map<String, Object?> json) {
+    final String? rawIso = json["generatedAt"] as String?;
+    if (rawIso != null && rawIso.isNotEmpty) {
+      final DateTime? parsed = DateTime.tryParse(rawIso);
+      if (parsed != null) {
+        return parsed.toUtc();
+      }
+    }
+    final int micros =
+        (json["generatedAtMicros"] as num?)?.toInt() ?? 0; // legacy fallback
+    if (micros > 0) {
+      return DateTime.fromMicrosecondsSinceEpoch(micros, isUtc: true);
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
   }
 }
 
