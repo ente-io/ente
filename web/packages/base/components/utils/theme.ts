@@ -135,18 +135,8 @@ const getColors = (appName: AppName) => ({
                   ? _colors.accentShare
                   : _colors.accentPhotos,
     },
-    ...{
-        light:
-            appName == "share"
-                ? _colors.lightShare
-                : _colors.light,
-    },
-    ...{
-        dark:
-            appName == "share"
-                ? _colors.darkShare
-                : _colors.dark,
-    },
+    ...{ light: appName == "share" ? _colors.lightShare : _colors.light },
+    ...{ dark: appName == "share" ? _colors.darkShare : _colors.dark },
 });
 
 /**

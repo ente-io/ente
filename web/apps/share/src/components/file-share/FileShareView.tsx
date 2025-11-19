@@ -17,14 +17,26 @@ export const FileShareView: React.FC = () => {
         );
         setIsDarkMode(darkModeMediaQuery.matches);
 
-        // Listen for changes
-        const handleChange = (e: MediaQueryListEvent) => {
+        // Listen for changes with fallback for legacy browsers (Safari < 14)
+        const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
             setIsDarkMode(e.matches);
         };
-        darkModeMediaQuery.addEventListener("change", handleChange);
+
+        // Feature-detect addEventListener vs deprecated addListener
+        if (typeof darkModeMediaQuery.addEventListener === "function") {
+            darkModeMediaQuery.addEventListener("change", handleChange);
+        } else {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
+            darkModeMediaQuery.addListener(handleChange);
+        }
 
         return () => {
-            darkModeMediaQuery.removeEventListener("change", handleChange);
+            if (typeof darkModeMediaQuery.removeEventListener === "function") {
+                darkModeMediaQuery.removeEventListener("change", handleChange);
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-deprecated
+                darkModeMediaQuery.removeListener(handleChange);
+            }
         };
     }, []);
 
