@@ -12,14 +12,18 @@ import (
 
 // AddFiles adds files to a collection
 func (c *CollectionController) AddFiles(ctx *gin.Context, userID int64, files []ente.CollectionFileItem, cID int64) error {
-
 	resp, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
 		CollectionID:   cID,
 		ActorUserID:    userID,
 		IncludeDeleted: false,
 	})
+
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to verify collection access")
+	}
+	app := auth.GetApp(ctx)
+	if resp.Collection.App != string(app) {
+		return stacktrace.Propagate(ente.ErrInvalidApp, fmt.Sprintf("app mismatch collection: %s  request ctx app %s", resp.Collection.App, app))
 	}
 	if !resp.Role.CanAdd() {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, fmt.Sprintf("user %d with role %s can not add files", userID, *resp.Role))
