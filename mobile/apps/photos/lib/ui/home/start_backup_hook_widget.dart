@@ -4,7 +4,7 @@ import 'package:photos/generated/l10n.dart';
 import 'package:photos/l10n/l10n.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
+import 'package:photos/ui/home/loading_photos_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -19,11 +19,11 @@ class StartBackupHookWidget extends StatelessWidget {
         state == PermissionState.limited) {
       await permissionService.onUpdatePermission(state);
       if (context.mounted) {
+        // Always show LoadingPhotosWidget for first backup
+        // which will wait for sync and then navigate to BackupFolderSelectionPage
         await routeToPage(
           context,
-          const BackupFolderSelectionPage(
-            isFirstBackup: true,
-          ),
+          const LoadingPhotosWidget(),
         );
       }
     } else {
