@@ -236,7 +236,7 @@ class StatsCandidateBuilder extends WrappedCandidateBuilder {
       "weekday": weekdayFormat.format(day),
       "count": snapshot.busiestDayCount,
       "detailChips": _cleanChips(<String>[
-        "Captures: ${numberFormat.format(snapshot.busiestDayCount)}",
+        "${numberFormat.format(snapshot.busiestDayCount)} photos",
         (weekdayFormat.format(day)),
       ]),
       if (mediaRefs.isNotEmpty)
