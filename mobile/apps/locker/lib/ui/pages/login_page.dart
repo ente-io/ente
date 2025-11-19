@@ -150,6 +150,13 @@ class _LoginPageState extends State<LoginPage> {
             context.l10n.oops,
             context.l10n.unlockLockerPaidPlanBody,
           );
+        } else if (enteErrCode != null &&
+            enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+          await showErrorDialog(
+            context,
+            "We're out of beta seats for now",
+            "This preview access has reached capacity. We'll be opening it to more users soon.",
+          );
         } else {
           await showErrorDialog(
             context,
