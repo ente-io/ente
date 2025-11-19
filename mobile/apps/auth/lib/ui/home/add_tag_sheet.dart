@@ -12,8 +12,6 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:flutter/material.dart';
 
-
-
 class AddTagSheet extends StatefulWidget {
   final List<Code> selectedCodes;
 
@@ -29,6 +27,7 @@ class AddTagSheet extends StatefulWidget {
 class _AddTagSheetState extends State<AddTagSheet> {
   List<String> _allTags = [];
   final Set<String> _selectedTagsInSheet = {};
+  final Set<String> _initialIntersectionTags = {};
   bool _isLoading = true;
 
   @override
@@ -41,24 +40,51 @@ class _AddTagSheetState extends State<AddTagSheet> {
     final allTagsFromServer = await CodeDisplayStore.instance.getAllTags();
     final initialTagsForSelection = <String>{};
 
-    for (final code in widget.selectedCodes) {
-      initialTagsForSelection.addAll(code.display.tags);
+    // Calculate intersection of tags from all selected codes
+    if (widget.selectedCodes.isNotEmpty) {
+      // Start with tags from the first code
+      initialTagsForSelection.addAll(widget.selectedCodes.first.display.tags);
+
+      // Keep only tags that exist in ALL selected codes
+      for (final code in widget.selectedCodes.skip(1)) {
+        initialTagsForSelection.retainAll(code.display.tags);
+      }
     }
 
     if (mounted) {
       setState(() {
         _allTags = allTagsFromServer;
         _selectedTagsInSheet.addAll(initialTagsForSelection);
+        _initialIntersectionTags.addAll(initialTagsForSelection);
         _isLoading = false;
       });
     }
   }
 
   Future<void> _onDonePressed() async {
+    // Calculate which intersection tags were removed (unselected)
+    final removedIntersectionTags = _initialIntersectionTags
+        .where((tag) => !_selectedTagsInSheet.contains(tag))
+        .toSet();
+
+    // Calculate which non-intersection tags were added (selected)
+    final addedNonIntersectionTags = _selectedTagsInSheet
+        .where((tag) => !_initialIntersectionTags.contains(tag))
+        .toSet();
+
     final List<Future> updateFutures = [];
     for (final code in widget.selectedCodes) {
+      // Start with the original tags of this code
+      final updatedTags = Set<String>.from(code.display.tags);
+
+      // Remove tags that were in intersection but are now unselected
+      updatedTags.removeAll(removedIntersectionTags);
+
+      // Add tags that are now selected but weren't in the intersection
+      updatedTags.addAll(addedNonIntersectionTags);
+
       final updatedCode = code.copyWith(
-        display: code.display.copyWith(tags: _selectedTagsInSheet.toList()),
+        display: code.display.copyWith(tags: updatedTags.toList()),
       );
       updateFutures.add(CodeStore.instance.addCode(updatedCode));
     }
@@ -98,7 +124,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
                         buttonType: ButtonType.primary,
                         labelText: context.l10n.create,
                         isDisabled: textController.text.trim().isEmpty,
-                        onTap: () async => Navigator.of(context).pop(textController.text.trim()),
+                        onTap: () async => Navigator.of(context)
+                            .pop(textController.text.trim()),
                       ),
                     ),
                   ],
@@ -144,7 +171,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
                 style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.fillFaint.withValues(alpha: 0.025),
+                  backgroundColor:
+                      colorScheme.fillFaint.withValues(alpha: 0.025),
                 ),
               ),
             ],
@@ -158,34 +186,38 @@ class _AddTagSheetState extends State<AddTagSheet> {
               separatorBuilder: (_, __) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
                 final code = widget.selectedCodes[index];
-                final iconData =
-                    code.display.isCustomIcon ? code.display.iconID : code.issuer;
-                
+                final iconData = code.display.isCustomIcon
+                    ? code.display.iconID
+                    : code.issuer;
+
                 return SizedBox(
-  width: 60,
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Container(
-        width: 50,   
-        height: 50,   
-        decoration: BoxDecoration(
-          color: colorScheme.fillFaint.withValues(alpha: 0.02),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(  
-          child: IconUtils.instance.getIcon(context, iconData.trim(), width: 28),
-        ),
-    ),
-      const SizedBox(height: 8),
-      Text(
-        code.issuer,
-        overflow: TextOverflow.ellipsis,
-        style: textTheme.mini.copyWith(color: colorScheme.textMuted,),
-      ),
-    ],
-  ),
-);
+                  width: 60,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: colorScheme.fillFaint.withValues(alpha: 0.02),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: IconUtils.instance
+                              .getIcon(context, iconData.trim(), width: 28),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        code.issuer,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.mini.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),
@@ -197,39 +229,38 @@ class _AddTagSheetState extends State<AddTagSheet> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Wrap(
-                spacing: 8.0,
-                runSpacing: 4.0,
-                children: [
-                  ..._allTags.map((tag) {
-                    final isSelected = _selectedTagsInSheet.contains(tag);
-                    return TagChip(
-                      label: tag,
-                      action: TagChipAction.check,
-                      state: isSelected
-                          ? TagChipState.selected
-                          : TagChipState.unselected,
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            _selectedTagsInSheet.remove(tag);
-                          } else {
-                            _selectedTagsInSheet.add(tag);
-                          }
-                        });
-                      },
-                    );
-                  }),
-                  TagChip(
-                    label: context.l10n.addNew,
-                    iconData: Icons.add,
-                    state: TagChipState.unselected,
-                    onTap: _showCreateTagDialog,
-                  ),
-                ],
-              ),
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: [
+                        ..._allTags.map((tag) {
+                          final isSelected = _selectedTagsInSheet.contains(tag);
+                          return TagChip(
+                            label: tag,
+                            action: TagChipAction.check,
+                            state: isSelected
+                                ? TagChipState.selected
+                                : TagChipState.unselected,
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedTagsInSheet.remove(tag);
+                                } else {
+                                  _selectedTagsInSheet.add(tag);
+                                }
+                              });
+                            },
+                          );
+                        }),
+                        TagChip(
+                          label: context.l10n.addNew,
+                          iconData: Icons.add,
+                          state: TagChipState.unselected,
+                          onTap: _showCreateTagDialog,
+                        ),
+                      ],
+                    ),
             ),
           ),
-          
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -238,7 +269,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 backgroundColor: colorScheme.fillBase,
                 foregroundColor: colorScheme.backgroundBase,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),),
               ),
               onPressed: _onDonePressed,
               child: Text(context.l10n.done),
