@@ -506,7 +506,36 @@ class _MediaTile extends StatelessWidget {
         child: content,
       );
     }
-    return content;
+    return _MediaPreviewGesture(
+      mediaRef: mediaRef,
+      child: content,
+    );
+  }
+}
+
+class _MediaPreviewGesture extends StatelessWidget {
+  const _MediaPreviewGesture({
+    required this.mediaRef,
+    required this.child,
+  });
+
+  final MediaRef mediaRef;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final _MediaPreviewController? controller =
+        _MediaPreviewController.maybeOf(context);
+    if (controller == null) {
+      return child;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => controller.onPreviewTapDown(),
+      onTap: () => controller.onPreviewStart(mediaRef),
+      onTapCancel: controller.onPreviewTapCancel,
+      child: child,
+    );
   }
 }
 

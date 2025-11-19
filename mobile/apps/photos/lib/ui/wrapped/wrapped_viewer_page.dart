@@ -104,6 +104,12 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   ModalRoute<dynamic>? _registeredRoute;
   bool _didRegisterWillPop = false;
   static bool _audioSessionConfigured = false;
+  EnteFile? _previewFile;
+  bool _isPreviewVisible = false;
+  bool _isPreviewLoading = false;
+  bool _wasPausedBeforePreview = false;
+  int _previewRequestID = 0;
+  int? _previewUploadedFileID;
 
   static const double _kShareBrandingHeight = 42;
   static const double _kShareBrandingLogoWidth = 58;
@@ -488,6 +494,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _closeViewer() async {
+    if (_isPreviewVisible) {
+      _hideMediaPreview();
+      return;
+    }
     if (_isClosing || !mounted) {
       return;
     }
@@ -502,6 +512,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<bool> _handleWillPop() async {
+    if (_isPreviewVisible) {
+      _hideMediaPreview();
+      return false;
+    }
     if (!_isClosing) {
       _isClosing = true;
     }
@@ -545,6 +559,78 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     _wasPausedBeforeLongPress = false;
     _scheduleTapUpReset();
     setState(() {});
+  }
+
+  void _showMediaPreview(MediaRef ref) {
+    if (_isPreviewVisible &&
+        _previewUploadedFileID == ref.uploadedFileID &&
+        _previewFile != null) {
+      return;
+    }
+    final int requestID = ++_previewRequestID;
+    final bool wasPaused = _isPaused;
+    if (!wasPaused) {
+      _pauseAutoplay();
+    }
+    final EnteFile? cached =
+        WrappedMediaPreloader.instance.getCachedFile(ref.uploadedFileID);
+    setState(() {
+      _previewUploadedFileID = ref.uploadedFileID;
+      _previewFile = cached;
+      _isPreviewVisible = true;
+      _isPreviewLoading = cached == null;
+      _wasPausedBeforePreview = wasPaused;
+    });
+    if (cached != null) {
+      return;
+    }
+    WrappedMediaPreloader.instance.ensureFile(ref.uploadedFileID).then(
+      (EnteFile? file) {
+        if (!mounted || requestID != _previewRequestID) {
+          return;
+        }
+        setState(() {
+          _previewFile = file;
+          _isPreviewLoading = false;
+        });
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (!mounted || requestID != _previewRequestID) {
+          return;
+        }
+        _logger.warning("Unable to load preview media", error, stackTrace);
+        setState(() {
+          _previewFile = null;
+          _isPreviewLoading = false;
+        });
+      },
+    );
+  }
+
+  void _hideMediaPreview() {
+    if (!_isPreviewVisible) {
+      return;
+    }
+    _previewRequestID++;
+    final bool shouldResume = !_wasPausedBeforePreview;
+    _wasPausedBeforePreview = false;
+    setState(() {
+      _previewFile = null;
+      _isPreviewVisible = false;
+      _isPreviewLoading = false;
+      _previewUploadedFileID = null;
+    });
+    if (shouldResume) {
+      _resumeAutoplay();
+    }
+  }
+
+  void _handlePreviewTapDown() {
+    _suppressNextTapUp = true;
+  }
+
+  void _handlePreviewTapCancel() {
+    _suppressNextTapUp = false;
   }
 
   void _scheduleTapUpReset() {
@@ -679,23 +765,30 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                                         _handleVerticalDragCancel,
                                     child: RepaintBoundary(
                                       key: _cardBoundaryKey,
-                                      child: PageView.builder(
-                                        physics: const PageScrollPhysics(),
-                                        controller: _pageController,
-                                        onPageChanged: _handlePageChanged,
-                                        itemCount: cardCount,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          final WrappedCard card =
-                                              _cards[index];
-                                          return _StoryCard(
-                                            card: card,
-                                            colorScheme: enteColorScheme,
-                                            textTheme: textTheme,
-                                            isActive: index == _currentIndex,
-                                            gradientVariantIndex: index,
-                                          );
-                                        },
+                                      child: _MediaPreviewController(
+                                        onPreviewStart: _showMediaPreview,
+                                        onPreviewTapDown:
+                                            _handlePreviewTapDown,
+                                        onPreviewTapCancel:
+                                            _handlePreviewTapCancel,
+                                        child: PageView.builder(
+                                          physics: const PageScrollPhysics(),
+                                          controller: _pageController,
+                                          onPageChanged: _handlePageChanged,
+                                          itemCount: cardCount,
+                                          itemBuilder:
+                                              (BuildContext context, int index) {
+                                            final WrappedCard card =
+                                                _cards[index];
+                                            return _StoryCard(
+                                              card: card,
+                                              colorScheme: enteColorScheme,
+                                              textTheme: textTheme,
+                                              isActive: index == _currentIndex,
+                                              gradientVariantIndex: index,
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ),
                                   );
@@ -755,6 +848,14 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                             ),
                           ),
                         ],
+                        if (_isPreviewVisible)
+                          Positioned.fill(
+                            child: _MediaPreviewOverlay(
+                              file: _previewFile,
+                              isLoading: _isPreviewLoading,
+                              onDismiss: _hideMediaPreview,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -1263,5 +1364,126 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         stackTrace,
       );
     }
+  }
+}
+
+class _MediaPreviewController extends InheritedWidget {
+  const _MediaPreviewController({
+    required super.child,
+    required this.onPreviewStart,
+    required this.onPreviewTapDown,
+    required this.onPreviewTapCancel,
+  });
+
+  final void Function(MediaRef ref) onPreviewStart;
+  final VoidCallback onPreviewTapDown;
+  final VoidCallback onPreviewTapCancel;
+
+  static _MediaPreviewController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<
+        _MediaPreviewController>();
+  }
+
+  @override
+  bool updateShouldNotify(covariant _MediaPreviewController oldWidget) {
+    return oldWidget.onPreviewStart != onPreviewStart ||
+        oldWidget.onPreviewTapDown != onPreviewTapDown ||
+        oldWidget.onPreviewTapCancel != onPreviewTapCancel;
+  }
+}
+
+class _MediaPreviewOverlay extends StatelessWidget {
+  const _MediaPreviewOverlay({
+    required this.file,
+    required this.isLoading,
+    required this.onDismiss,
+  });
+
+  final EnteFile? file;
+  final bool isLoading;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget child = _buildContent(context);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onDismiss,
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.82),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (file != null) {
+      final Size size = MediaQuery.sizeOf(context);
+      final double maxWidth = size.width * 0.9;
+      final double maxHeight = size.height * 0.9;
+      final double aspectRatio = _aspectRatioFor(file!);
+      double width = maxWidth;
+      double height = width / aspectRatio;
+      if (height > maxHeight) {
+        height = maxHeight;
+        width = height * aspectRatio;
+      }
+      return SizedBox(
+        width: width,
+        height: height,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: ColoredBox(
+            color: Colors.black,
+            child: ThumbnailWidget(
+              file!,
+              fit: BoxFit.contain,
+              rawThumbnail: true,
+              shouldShowSyncStatus: false,
+              shouldShowArchiveStatus: false,
+              shouldShowPinIcon: false,
+              shouldShowOwnerAvatar: false,
+              shouldShowFavoriteIcon: false,
+              shouldShowVideoDuration: false,
+              shouldShowVideoOverlayIcon: false,
+            ),
+          ),
+        ),
+      );
+    }
+    if (isLoading) {
+      final EnteColorScheme colorScheme = getEnteColorScheme(context);
+      return SizedBox(
+        width: 70,
+        height: 70,
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary400),
+        ),
+      );
+    }
+    final EnteColorScheme colorScheme = getEnteColorScheme(context);
+    final EnteTextTheme textTheme = getEnteTextTheme(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: colorScheme.fillFaint.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Text(
+        "Preview unavailable",
+        style: textTheme.smallMuted,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  double _aspectRatioFor(EnteFile file) {
+    final int width = file.width;
+    final int height = file.height;
+    if (width > 0 && height > 0) {
+      return width / height;
+    }
+    return 3 / 4;
   }
 }
