@@ -462,6 +462,7 @@ Future<WrappedResult> _wrappedComputeIsolate(
   return WrappedResult(
     cards: finalCards,
     year: year,
+    generatedAt: now,
     badgeKey: badgeSelection.badgeKey,
   );
 }
