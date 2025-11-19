@@ -225,6 +225,9 @@ class BackupSettingsScreen extends StatelessWidget {
                 await SyncService.instance.sync();
               });
             }
+            if (localSettings.hasOnboardingPermissionSkipped) {
+              await localSettings.setOnboardingPermissionSkipped(false);
+            }
           },
         ),
         singleBorderRadius: 8,

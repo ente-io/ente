@@ -237,6 +237,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
       await localSettings.setHasManualFolderSelection(true);
+      if (localSettings.hasOnboardingPermissionSkipped) {
+        await localSettings.setOnboardingPermissionSkipped(false);
+      }
       if (context.mounted) {
         Navigator.of(context).pop(true);
       }

@@ -17,11 +17,24 @@ class BackupPreferenceService {
         settings.hasSelectedAnyBackupFolder) {
       return;
     }
-    await settings.setHasManualFolderSelection(true);
-    await _setAllFoldersShouldBackup(true);
-    await settings.setSelectAllFoldersForBackup(true);
-    await settings.setHasSelectedAnyBackupFolder(true);
-    _logger.info('Auto-selected all folders for backup');
+    try {
+      await _setAllFoldersShouldBackup(true);
+      await settings.setSelectAllFoldersForBackup(true);
+      await settings.setHasSelectedAnyBackupFolder(true);
+      await settings.setHasManualFolderSelection(true);
+      if (settings.hasOnboardingPermissionSkipped) {
+        await settings.setOnboardingPermissionSkipped(false);
+      }
+      _logger.info('Auto-selected all folders for backup');
+    } catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to auto-select all folders for backup',
+        error,
+        stackTrace,
+      );
+      await settings.setHasManualFolderSelection(false);
+      rethrow;
+    }
   }
 
   Future<void> _setAllFoldersShouldBackup(bool shouldBackup) async {
