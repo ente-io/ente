@@ -66,13 +66,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Column(
                       children: [
                         const Padding(padding: EdgeInsets.all(12)),
-                        Text(
-                          l10n.locker,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Image.asset(
+                          'assets/locker-logo.png',
+                          height: 28,
                         ),
                         const Padding(padding: EdgeInsets.all(28)),
                         _getFeatureSlider(context),
