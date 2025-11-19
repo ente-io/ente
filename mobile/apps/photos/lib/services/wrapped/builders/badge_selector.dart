@@ -436,15 +436,16 @@ class WrappedBadgeSelector {
 
     final double volumeScore =
         metrics.totalCount <= 0 ? 0 : 150 / metrics.totalCount;
-    final double activeRatio = metrics.elapsedDays <= 0
+    final double calmDaysRatio = metrics.elapsedDays <= 0
         ? 0
-        : metrics.daysWithCaptures / metrics.elapsedDays;
+        : (metrics.elapsedDays - metrics.daysWithCaptures) /
+            metrics.elapsedDays;
     final double score = _clamp01(
-      0.6 * _clamp01(volumeScore) + 0.4 * _clamp01(activeRatio / 0.5),
+      0.5 * _clamp01(volumeScore) + 0.5 * _clamp01(calmDaysRatio),
     );
 
     final String subtitle =
-        "You're a minimalist shooter—${metrics.totalCount} thoughtful frames over fluff.";
+        "You're a minimalist shooter— ${metrics.daysWithCaptures} intentful days behind the lens.";
     final List<String> chips = <String>[
       "Active days: ${metrics.daysWithCaptures}",
     ];
