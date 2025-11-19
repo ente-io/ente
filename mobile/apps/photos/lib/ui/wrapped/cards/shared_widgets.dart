@@ -92,26 +92,31 @@ class _DetailChips extends StatelessWidget {
     if (chips.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Wrap(
-      spacing: 10,
-      runSpacing: 8,
-      children: chips
-          .map(
-            (String chip) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                chip,
-                style: textTheme.smallMuted.copyWith(
-                  color: textTheme.smallMuted.color ?? colorScheme.fillMuted,
+    return SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        runAlignment: WrapAlignment.center,
+        spacing: 10,
+        runSpacing: 8,
+        children: chips
+            .map(
+              (String chip) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: colorScheme.fillFaint,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  chip,
+                  style: textTheme.smallMuted.copyWith(
+                    color: textTheme.smallMuted.color ?? colorScheme.fillMuted,
+                  ),
                 ),
               ),
-            ),
-          )
-          .toList(growable: false),
+            )
+            .toList(growable: false),
+      ),
     );
   }
 }
