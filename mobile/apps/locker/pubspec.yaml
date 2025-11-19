@@ -101,9 +101,14 @@ flutter:
       fonts:
         - asset: assets/fonts/Montserrat-Bold.ttf
 
-flutter_icons:
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/launcher-icons/icon-ios-default.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#1071FF"
   adaptive_icon_foreground: "assets/launcher-icons/icon-foreground.png"
-  adaptive_icon_background: "#1071ff"
-  android: "icon_blue"
-  ios: "IconBlue"
-  image_path: "assets/launcher-icons/icon-blue.png"
+  adaptive_icon_monochrome: "assets/launcher-icons/icon-monochrome-foreground.png"
+  adaptive_icon_foreground_inset: 0
+  image_path_ios_dark_transparent: "assets/launcher-icons/icon-ios-dark.png"
+  image_path_ios_tinted_grayscale: "assets/launcher-icons/icon-ios-tinted.png"
