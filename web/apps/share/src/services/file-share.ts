@@ -157,7 +157,6 @@ const extractFileInfo = (
     file: FileLinkInfo["file"],
     infoObject: LockerInfo | undefined,
 ): { fileName: string; fileSize: number; uploadedTime: number } => {
-    console.log(pubMagicMetadata?.info);
     const fileName =
         pubMagicMetadata?.editedName ||
         metadata.fileName ||
