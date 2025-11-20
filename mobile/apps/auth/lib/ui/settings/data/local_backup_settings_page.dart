@@ -4,6 +4,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/data/local_backup/local_backup_experience.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 const _autoBackupToggleCopy =
@@ -55,7 +56,7 @@ class LocalBackupAppLockVariantPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
                   child: Text(
-                    _autoBackupToggleCopy,
+                    '$_autoBackupToggleCopy\n\nBackups are retained up to 5 files.',
                     style: textTheme.miniFaint,
                   ),
                 ),
@@ -148,9 +149,58 @@ class LocalBackupAppLockVariantPage extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            if (kDebugMode) ...[
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: TextButton(
+                                  onPressed: () async {
+                                    await controller.runManualBackup();
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: colorScheme.textBase,
+                                    backgroundColor: colorScheme.fillFaint,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  child: Text(
+                                    'Backup now',
+                                    style: textTheme.bodyBold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         )
-                      : const SizedBox.shrink(),
+                      : (kDebugMode
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: TextButton(
+                                  onPressed: () async {
+                                    await controller.resetBackupLocation();
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: colorScheme.textBase,
+                                    backgroundColor: colorScheme.fillFaint,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 12),
+                                  ),
+                                  child: Text(
+                                    'Reset backup folder',
+                                    style: textTheme.bodyBold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink()),
                 ),
               ],
             ),
@@ -225,30 +275,20 @@ class _LocationPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final path = controller.backupPath;
+    final treeUri = controller.backupTreeUri;
     final muted = textTheme.miniFaint.copyWith(color: Colors.grey);
 
     if (path != null) {
       return Text(controller.simplifyPath(path), style: textTheme.miniFaint);
     }
+    if (treeUri != null) {
+      return Text(
+        controller.simplifyPath(treeUri),
+        style: textTheme.miniFaint,
+      );
+    }
 
-    return FutureBuilder<String>(
-      future: controller.resolveDefaultPath(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Text(context.l10n.loadDefaultLocation, style: muted);
-        }
-        if (snapshot.hasError) {
-          return Text(
-            context.l10n.couldNotDetermineLocation,
-            style: muted.copyWith(color: Colors.redAccent),
-          );
-        }
-        return Text(
-          controller.simplifyPath(snapshot.data ?? ''),
-          style: textTheme.miniFaint,
-        );
-      },
-    );
+    return Text('Select a backup folder', style: muted);
   }
 }
 

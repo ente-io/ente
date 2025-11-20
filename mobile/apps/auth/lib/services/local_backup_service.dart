@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:intl/intl.dart';  //for time based file naming
+import 'package:intl/intl.dart'; // for time based file naming
 import 'package:logging/logging.dart';
+import 'package:saf_stream/saf_stream.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //we gonn change
 
@@ -15,7 +18,7 @@ class LocalBackupService {
       LocalBackupService._privateConstructor();
   LocalBackupService._privateConstructor();
 
-  static const int _maxBackups = 2;
+  static const int _maxBackups = 5;
 
   // to create an encrypted backup file if the toggle is on
   Future<void> triggerAutomaticBackup() async {
@@ -28,8 +31,15 @@ class LocalBackupService {
       }
 
       final backupPath = prefs.getString('autoBackupPath');
-      if (backupPath == null) {
+      final backupTreeUri = prefs.getString('autoBackupTreeUri');
+      if (backupPath == null && (backupTreeUri == null || backupTreeUri.isEmpty)) {
         return;
+      }
+
+      Directory? backupDirectory;
+      if (backupPath != null && backupPath.isNotEmpty) {
+        backupDirectory = Directory(backupPath);
+        await backupDirectory.create(recursive: true);
       }
       
       const storage = FlutterSecureStorage();
@@ -100,15 +110,45 @@ class LocalBackupService {
       final formattedDate = formatter.format(now);
       final fileName = 'ente-auth-auto-backup-$formattedDate.json';
 
-      final filePath = '$backupPath/$fileName';
-      final backupFile = File(filePath);
-      
-      await backupFile.writeAsString(encryptedJson);
-      await _manageOldBackups(backupPath);
-
-      _logger.info('Automatic encrypted backup successful! Saved to: $filePath');
+      if (backupTreeUri != null && backupTreeUri.isNotEmpty) {
+        await _writeBackupWithSaf(
+          backupTreeUri,
+          fileName,
+          encryptedJson,
+        );
+      } else if (backupDirectory != null) {
+        final filePath = '${backupDirectory.path}/$fileName';
+        final backupFile = File(filePath);
+        await backupFile.create(recursive: true);
+        await backupFile.writeAsString(encryptedJson);
+        await _manageOldBackups(backupDirectory.path);
+        _logger.info(
+          'Automatic encrypted backup successful! Saved to: $filePath',
+        );
+      }
     } catch (e, s) {
       _logger.severe('Silent error during automatic backup', e, s);
+    }
+  }
+
+  Future<void> _writeBackupWithSaf(
+    String treeUri,
+    String fileName,
+    String content,
+  ) async {
+    try {
+      final safStream = SafStream();
+      await safStream.writeFileBytes(
+        treeUri,
+        fileName,
+        'application/json',
+        Uint8List.fromList(utf8.encode(content)),
+        overwrite: true,
+      );
+      _logger.info('Automatic encrypted backup saved via SAF: $fileName');
+    } catch (e, s) {
+      _logger.severe('Failed to write backup via SAF', e, s);
+      rethrow;
     }
   }
 

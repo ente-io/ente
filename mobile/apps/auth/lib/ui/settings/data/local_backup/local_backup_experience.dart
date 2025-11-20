@@ -5,13 +5,13 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
-import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:saf_util/saf_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _passwordDialogHint = 'Your backup will be encrypted with this password.';
@@ -40,6 +40,7 @@ class LocalBackupExperienceController {
   bool get shouldShowBusyOverlay => _state._shouldShowBusyOverlay;
   bool get isBackupEnabled => _state._isBackupEnabled;
   String? get backupPath => _state._backupPath;
+  String? get backupTreeUri => _state._backupTreeUri;
 
   Future<void> toggleBackup(bool shouldEnable) =>
       _state._handleToggle(shouldEnable);
@@ -49,6 +50,8 @@ class LocalBackupExperienceController {
 
   Future<bool> openLocationSetup() => _state._handleLocationSetup();
 
+  Future<bool> resetBackupLocation() => _state._resetBackupLocation();
+
   Future<void> runManualBackup({bool showSnackBar = true}) =>
       _state._runManualBackup(showSnackBar: showSnackBar);
 
@@ -56,8 +59,6 @@ class LocalBackupExperienceController {
       _state._updatePassword(context);
 
   Future<bool> hasPasswordConfigured() => _state._hasStoredPassword();
-
-  Future<String> resolveDefaultPath() => _state._getDefaultBackupPath();
 
   String simplifyPath(String fullPath) => _state._simplifyPath(fullPath);
 
@@ -69,14 +70,14 @@ class LocalBackupExperienceController {
 class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   static const _passwordKey = 'autoBackupPassword';
   static const _locationConfiguredKey = 'hasConfiguredBackupLocation';
+  static const _treeUriKey = 'autoBackupTreeUri';
 
   bool _isBackupEnabled = false;
   String? _backupPath;
-  bool _hasConfiguredLocation = false;
+  String? _backupTreeUri;
   bool _isBusy = false;
   bool _shouldShowBusyOverlay = true;
   bool _hasLoaded = false;
-  Future<String>? _defaultPathFuture;
 
   late final LocalBackupExperienceController _controller;
 
@@ -95,13 +96,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final storedPath = prefs.getString('autoBackupPath');
-    final locationConfigured =
-        prefs.getBool(_locationConfiguredKey) ?? storedPath != null;
+    final storedTreeUri = prefs.getString(_treeUriKey);
     if (!mounted) return;
     setState(() {
       _isBackupEnabled = prefs.getBool('isAutoBackupEnabled') ?? false;
       _backupPath = storedPath;
-      _hasConfiguredLocation = locationConfigured;
+      _backupTreeUri = storedTreeUri;
       _hasLoaded = true;
     });
   }
@@ -140,11 +140,15 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
-    bool locationReady = _hasConfiguredLocation;
-    if (!locationReady) {
-      locationReady = await _handleLocationSetup();
+    final selected = await _handleLocationSetup();
+    if (!selected) {
+      _showSnackBar('Select a folder to continue');
+      return false;
     }
-    if (!locationReady) {
+    if (Platform.isAndroid &&
+        (_backupTreeUri == null || _backupTreeUri!.isEmpty) &&
+        (_backupPath == null || _backupPath!.isEmpty)) {
+      _showSnackBar(context.l10n.noDefaultBackupFolder);
       return false;
     }
 
@@ -161,6 +165,40 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<void> _runManualBackup({bool showSnackBar = true}) async {
     await _withBusyGuard(() async {
+      var hasPassword = await _hasStoredPassword();
+      if (!hasPassword) {
+        hasPassword = await _promptPassword(
+          forcePrompt: true,
+          disableOnCancel: false,
+          isUpdateFlow: false,
+        );
+      }
+      if (!hasPassword) {
+        return;
+      }
+
+      if (Platform.isAndroid) {
+        if ((_backupTreeUri == null || _backupTreeUri!.isEmpty) &&
+            (_backupPath == null || _backupPath!.isEmpty)) {
+          final saved = await _pickAndSaveBackupLocation();
+          if (!saved) {
+            return;
+          }
+        }
+      } else {
+        var resolvedPath = _backupPath;
+        if (resolvedPath == null || resolvedPath.isEmpty) {
+          final saved = await _pickAndSaveBackupLocation();
+          if (!saved) {
+            return;
+          }
+          resolvedPath = _backupPath;
+        }
+        if (resolvedPath != null && resolvedPath.isNotEmpty) {
+          await Directory(resolvedPath).create(recursive: true);
+        }
+      }
+
       await LocalBackupService.instance.triggerAutomaticBackup();
       if (showSnackBar) {
         _showSnackBar(context.l10n.initialBackupCreated);
@@ -251,6 +289,22 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     } catch (_) {
       return null;
     }
+  }
+
+  Future<bool> _resetBackupLocation() async {
+    if (_isBackupEnabled) {
+      return false;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('autoBackupPath');
+    await prefs.remove(_treeUriKey);
+    await prefs.remove(_locationConfiguredKey);
+    if (!mounted) return false;
+    setState(() {
+      _backupPath = null;
+      _backupTreeUri = null;
+    });
+    return true;
   }
 
   Future<String?> _showCustomPasswordDialog({
@@ -363,78 +417,72 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     );
   }
 
-  Future<ButtonResult?> _showLocationChoiceDialog({
-    required String displayPath,
-  }) async {
-    final l10n = context.l10n;
-
-    final dialogBody =
-        '${l10n.backupLocationChoiceDescription}\n\nCurrent backup folder:\n${_simplifyPath(displayPath)}';
-
-    final result = await showDialogWidget(
-      title: l10n.chooseBackupLocation,
-      context: context,
-      body: dialogBody,
-      buttons: [
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          labelText: l10n.changeLocation,
-          isInAlert: true,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-        ),
-        ButtonWidget(
-          buttonType: ButtonType.secondary,
-          labelText: l10n.continueLabel,
-          isInAlert: true,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.first,
-        ),
-      ],
-    );
-
-    return result;
-  }
-
   Future<bool> _handleLocationSetup() async {
-    String currentPath = _backupPath ?? await _getDefaultBackupPath();
-
-    while (true) {
-      final result = await _showLocationChoiceDialog(displayPath: currentPath);
-
-      if (result?.action == ButtonAction.first) {
-        return _persistLocation(
-          currentPath,
-          successMessage: context.l10n.initialBackupCreated,
-        );
-      } else if (result?.action == ButtonAction.second) {
-        final newPath = await FilePicker.platform.getDirectoryPath();
-        if (newPath != null) {
-          currentPath = newPath;
-        }
-      } else {
-        return false;
-      }
-    }
-  }
-
-  Future<String> _getDefaultBackupPath() {
-    _defaultPathFuture ??= _computeDefaultBackupPath();
-    return _defaultPathFuture!;
-  }
-
-  Future<String> _computeDefaultBackupPath() async {
     if (Platform.isAndroid) {
-      Directory? externalDir = await getExternalStorageDirectory();
-      if (externalDir != null) {
-        String storagePath = externalDir.path.split('/Android')[0];
-        return '$storagePath/Download/EnteAuthBackups';
-      }
+      return _pickAndPersistAndroidLocation();
     }
 
-    Directory? dir = await getDownloadsDirectory();
-    dir ??= await getApplicationDocumentsDirectory();
-    return '${dir.path}/EnteAuthBackups';
+    if (Platform.isIOS) {
+      final l10n = context.l10n;
+      final dialogBody = StringBuffer()
+        ..writeln(l10n.backupLocationChoiceDescription)
+        ..writeln()
+        ..writeln(
+          'To enable backups on iOS, choose a folder in Files (for example “On My iPhone”).',
+        )
+        ..writeln()
+        ..writeAll(
+          _backupPath != null && _backupPath!.isNotEmpty
+              ? [
+                  'Current backup folder:',
+                  _simplifyPath(_backupPath!),
+                ]
+              : const [],
+          '\n',
+        );
+
+      final result = await showDialogWidget(
+        title: l10n.chooseBackupLocation,
+        context: context,
+        body: dialogBody.toString(),
+        buttons: const [
+          ButtonWidget(
+            buttonType: ButtonType.primary,
+            labelText: 'Select folder',
+            isInAlert: true,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.second,
+          ),
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: 'Cancel',
+            isInAlert: true,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.first,
+          ),
+        ],
+      );
+
+      if (result?.action == ButtonAction.second) {
+        final pickedPath = await FilePicker.platform.getDirectoryPath();
+        if (pickedPath != null) {
+          return _persistLocation(
+            pickedPath,
+            successMessage: context.l10n.initialBackupCreated,
+          );
+        }
+      }
+      return false;
+    }
+
+    final pickedPath = await FilePicker.platform.getDirectoryPath();
+    if (pickedPath != null) {
+      return _persistLocation(
+        pickedPath,
+        successMessage: context.l10n.initialBackupCreated,
+      );
+    }
+    return false;
   }
 
   String _simplifyPath(String fullPath) {
@@ -443,6 +491,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
 
     if (Platform.isAndroid) {
+      if (fullPath.startsWith('content://')) {
+        final decoded = Uri.decodeComponent(fullPath.split('/').last);
+        return decoded.replaceFirst('primary:', '');
+      }
+
       const rootsToRemove = <String>[
         '/storage/emulated/0/',
         '/storage/self/primary/',
@@ -517,21 +570,37 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     return fullPath;
   }
 
-  Future<bool> _pickAndSaveBackupLocation({String? successMessage}) async {
-    String? directoryPath = await FilePicker.platform.getDirectoryPath();
-
-    if (directoryPath != null) {
-      final saved = await _persistLocation(
-        directoryPath,
-        successMessage:
-            successMessage ?? context.l10n.locationUpdatedAndBackupCreated,
-      );
+  Future<bool> _pickAndSaveBackupLocation({
+    String? successMessage,
+    bool requireSelection = false,
+  }) async {
+    if (Platform.isAndroid) {
+      final saved = await _pickAndPersistAndroidLocation();
       if (saved) {
         await LocalBackupService.instance.triggerAutomaticBackup();
+      } else if (requireSelection) {
+        _showSnackBar('Select a folder to continue');
       }
       return saved;
+    } else {
+      String? directoryPath = await FilePicker.platform.getDirectoryPath();
+
+      if (directoryPath != null) {
+        final saved = await _persistLocation(
+          directoryPath,
+          successMessage:
+              successMessage ?? context.l10n.locationUpdatedAndBackupCreated,
+        );
+        if (saved) {
+          await LocalBackupService.instance.triggerAutomaticBackup();
+        }
+        return saved;
+      }
+      if (requireSelection) {
+        _showSnackBar('Select a folder to continue');
+      }
+      return false;
     }
-    return false;
   }
 
   Future<bool> _persistLocation(
@@ -539,23 +608,90 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     String? successMessage,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+    Future<bool> savePath(String target) async {
+      try {
+        await Directory(target).create(recursive: true);
+        await prefs.setString('autoBackupPath', target);
+        await prefs.remove(_treeUriKey);
+        await prefs.setBool(_locationConfiguredKey, true);
+        if (!mounted) return false;
+        setState(() {
+          _backupPath = target;
+          _backupTreeUri = null;
+        });
+        if (successMessage != null) {
+          _showSnackBar(successMessage);
+        }
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    if (await savePath(path)) {
+      return true;
+    }
+
+    if (Platform.isAndroid) {
+      final fallbackPath = await _androidPrivateBackupPath();
+      if (fallbackPath != null && fallbackPath != path) {
+        final savedFallback = await savePath(fallbackPath);
+        if (savedFallback) {
+          return true;
+        }
+      }
+    }
+
+    _showSnackBar(context.l10n.noDefaultBackupFolder);
+    return false;
+  }
+
+  Future<String?> _androidPrivateBackupPath() async {
+    final androidBasePath = await _androidBackupBasePath();
+    return androidBasePath != null ? '$androidBasePath/EnteAuthBackups' : null;
+  }
+
+  Future<bool> _pickAndPersistAndroidLocation() async {
+    final saf = SafUtil();
+    final picked = await saf.pickDirectory();
+    final treeUri = picked?.uri;
+    if (treeUri == null || treeUri.isEmpty) {
+      return false;
+    }
+
+    return _persistAndroidLocation(treeUri);
+  }
+
+  Future<bool> _persistAndroidLocation(String treeUri) async {
+    final prefs = await SharedPreferences.getInstance();
     try {
-      await Directory(path).create(recursive: true);
-      await prefs.setString('autoBackupPath', path);
+      await prefs.setString(_treeUriKey, treeUri);
       await prefs.setBool(_locationConfiguredKey, true);
       if (!mounted) return false;
       setState(() {
-        _backupPath = path;
-        _hasConfiguredLocation = true;
+        _backupTreeUri = treeUri;
+        _backupPath = null;
       });
-      if (successMessage != null) {
-        _showSnackBar(successMessage);
-      }
+      _showSnackBar(context.l10n.locationUpdatedAndBackupCreated);
       return true;
     } catch (_) {
       _showSnackBar(context.l10n.noDefaultBackupFolder);
       return false;
     }
+  }
+
+  Future<String?> _androidBackupBasePath() async {
+    Directory directory = Directory('/storage/emulated/0/Download');
+    if (await directory.exists()) {
+      return directory.path;
+    }
+
+    final externalDir = await getExternalStorageDirectory();
+    if (externalDir != null) {
+      return externalDir.path;
+    }
+
+    return null;
   }
 
   void _showSnackBar(String message) {
