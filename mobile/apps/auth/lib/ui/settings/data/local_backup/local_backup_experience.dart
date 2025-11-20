@@ -128,15 +128,9 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _startEnableFlow() async {
-    bool passwordConfigured = await _hasStoredPassword();
-    if (!passwordConfigured) {
-      passwordConfigured = await _promptPassword(
-        forcePrompt: true,
-        disableOnCancel: true,
-        isUpdateFlow: false,
-      );
-    }
-    if (!passwordConfigured) {
+    final hasPassword =
+        await _ensurePasswordConfigured(disableOnCancel: true);
+    if (!hasPassword) {
       return false;
     }
 
@@ -164,45 +158,58 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<void> _runManualBackup({bool showSnackBar = true}) async {
     await _withBusyGuard(() async {
-      var hasPassword = await _hasStoredPassword();
-      if (!hasPassword) {
-        hasPassword = await _promptPassword(
-          forcePrompt: true,
-          disableOnCancel: false,
-          isUpdateFlow: false,
-        );
-      }
-      if (!hasPassword) {
-        return;
-      }
+      final hasPassword =
+          await _ensurePasswordConfigured(disableOnCancel: false);
+      if (!hasPassword) return;
 
-      if (Platform.isAndroid) {
-        if ((_backupTreeUri == null || _backupTreeUri!.isEmpty) &&
-            (_backupPath == null || _backupPath!.isEmpty)) {
-          final saved = await _pickAndSaveBackupLocation();
-          if (!saved) {
-            return;
-          }
-        }
-      } else {
-        var resolvedPath = _backupPath;
-        if (resolvedPath == null || resolvedPath.isEmpty) {
-          final saved = await _pickAndSaveBackupLocation();
-          if (!saved) {
-            return;
-          }
-          resolvedPath = _backupPath;
-        }
-        if (resolvedPath != null && resolvedPath.isNotEmpty) {
-          await Directory(resolvedPath).create(recursive: true);
-        }
-      }
+      final hasLocation = await _ensureBackupLocationSelected();
+      if (!hasLocation) return;
 
       await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
       if (showSnackBar) {
         _showSnackBar(context.l10n.initialBackupCreated);
       }
     });
+  }
+
+  Future<bool> _ensurePasswordConfigured({required bool disableOnCancel}) async {
+    if (await _hasStoredPassword()) {
+      return true;
+    }
+    return _promptPassword(
+      forcePrompt: true,
+      disableOnCancel: disableOnCancel,
+      isUpdateFlow: false,
+    );
+  }
+
+  Future<bool> _ensureBackupLocationSelected() async {
+    if (Platform.isAndroid) {
+      if ((_backupTreeUri == null || _backupTreeUri!.isEmpty) &&
+          (_backupPath == null || _backupPath!.isEmpty)) {
+        return _pickAndSaveBackupLocation(
+          requireSelection: true,
+          shouldTriggerBackup: false,
+        );
+      }
+      return true;
+    }
+
+    var resolvedPath = _backupPath;
+    if (resolvedPath == null || resolvedPath.isEmpty) {
+      final saved = await _pickAndSaveBackupLocation(
+        requireSelection: true,
+        shouldTriggerBackup: false,
+      );
+      if (!saved) {
+        return false;
+      }
+      resolvedPath = _backupPath;
+    }
+    if (resolvedPath != null && resolvedPath.isNotEmpty) {
+      await Directory(resolvedPath).create(recursive: true);
+    }
+    return true;
   }
 
   Future<void> _withBusyGuard(
@@ -572,11 +579,16 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   Future<bool> _pickAndSaveBackupLocation({
     String? successMessage,
     bool requireSelection = false,
+    bool shouldTriggerBackup = true,
   }) async {
     if (Platform.isAndroid) {
       final saved = await _pickAndPersistAndroidLocation();
       if (saved) {
-        await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
+        if (shouldTriggerBackup) {
+          await LocalBackupService.instance.triggerAutomaticBackup(
+            isManual: true,
+          );
+        }
       } else if (requireSelection) {
         _showSnackBar('Select a folder to continue');
       }
@@ -591,9 +603,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
               successMessage ?? context.l10n.locationUpdatedAndBackupCreated,
         );
         if (saved) {
-          await LocalBackupService.instance.triggerAutomaticBackup(
-            isManual: true,
-          );
+          if (shouldTriggerBackup) {
+            await LocalBackupService.instance.triggerAutomaticBackup(
+              isManual: true,
+            );
+          }
         }
         return saved;
       }
