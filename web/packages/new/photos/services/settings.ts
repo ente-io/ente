@@ -217,9 +217,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     if (flags?.customDomain) settings.customDomain = flags.customDomain;
     if (flags?.customDomainCNAME)
         settings.customDomainCNAME = flags.customDomainCNAME;
-    updateChecksumProtectedUploadsEnabled(
-        isDevBuild || settings.isInternalUser,
-    );
+    updateChecksumProtectedUploadsEnabled(true);
     setSettingsSnapshot(settings);
 };
 
