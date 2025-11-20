@@ -58,17 +58,6 @@ func (c *UsageController) checkAndUpdateCache(ctx context.Context, userID int64,
 }
 
 func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
-	// If app is Locker, limit to MaxLockerFiles files
-	if app == ente.Locker {
-		fileCount, err := c.UserCacheCtrl.GetUserFileCountWithCache(userID, app)
-		if err != nil {
-			return stacktrace.Propagate(err, "failed to fetch locker file count")
-		}
-		if fileCount >= MaxLockerFiles {
-			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
-		}
-	}
-
 	familyAdminID, err := c.UserRepo.GetFamilyAdminID(userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
