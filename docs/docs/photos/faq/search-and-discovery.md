@@ -386,3 +386,9 @@ If face recognition or magic search isn't available:
 - Restart the app
 
 Note: Machine learning features only work on mobile and desktop apps, not on web.ente.io.
+
+### After reinstalling Ente, why are my trained faces missing and how do I restore them? {#restore-faces-after-reinstall}
+
+Go to **Settings → General → Advanced → Machine Learning** and check whether ML indexing has reached **100%**. If indexing is still in progress, your face data may still be syncing.
+
+All trained faces and person groupings are stored securely on our servers, so once ML indexing completes, they will automatically reappear.
