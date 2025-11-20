@@ -734,6 +734,13 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
+    if (flagService.enableOnlyBackupFuturePhotos &&
+        localSettings.hasOnboardingPermissionSkipped &&
+        !permissionService.hasGrantedPermissions()) {
+      return const StartBackupHookWidget(
+        headerWidget: HeaderWidget(),
+      );
+    }
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
       _ensureCollectionsSync();
