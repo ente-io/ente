@@ -7,9 +7,19 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "2要素認証コードを安全にバックアップ",
+  "featureBackupCodes": "エンドツーエンドの暗号化された\nバックアップと同期",
+  "featureSearchEtc": "検索、タグ、共有、\n次のコードとその他",
+  "featureOpenSource": "オープンソースと\nセキュリティ専門家による監査",
+  "signUp": "登録",
   "onBoardingGetStarted": "さあ、はじめよう",
   "setupFirstAccount": "最初のアカウントを設定しましょう",
+  "allTabEmptyHint": "まだ何もありません。+ をタップしてコードを追加するか、ゴミ箱を開いて復元してください。",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "QR コードを読み取り",
+  "qrCode": "QRコード",
+  "qr": "QR",
   "importEnterSetupKey": "手動で入力",
   "importAccountPageTitle": "アカウントの詳細を入力",
   "secretCanNotBeEmpty": "秘密鍵は空欄にできません",
@@ -138,6 +148,7 @@
   "existingUser": "既存のユーザー",
   "newUser": "Enteを初めて使用",
   "delete": "削除",
+  "addTag": "タグの追加",
   "enterYourPasswordHint": "パスワードを入力してください",
   "forgotPassword": "パスワードを忘れた場合",
   "oops": "おっと",
@@ -300,6 +311,7 @@
   "checking": "確認中…",
   "youAreOnTheLatestVersion": "あなたは最新バージョンを使用しています",
   "warning": "警告",
+  "note": "メモ",
   "exportWarningDesc": "エクスポートされたファイルには機密情報が含まれています。安全に保管してください。",
   "iUnderStand": "理解しました",
   "@iUnderStand": {
@@ -368,6 +380,7 @@
   "useOffline": "バックアップなしで使用する",
   "signInToBackup": "コードをバックアップするためにサインインする",
   "singIn": "サインイン",
+  "sigInBackupReminder": "サインイン後、Enteは自動的にコードをバックアップします。\n\nコードを追加のバックアップとしてエクスポートすることをお勧めします。",
   "offlineModeWarning": "あなたはバックアップなしに続行することを選択しました。コードを安全に保つために手動でのバックアップを行ってください。",
   "showLargeIcons": "大きなアイコンを表示",
   "compactMode": "コンパクトモード",
@@ -544,5 +557,20 @@
   "couldNotDetermineLocation": "場所を特定できませんでした...",
   "saveBackup": "バックアップを保存",
   "changeLocation": "場所の変更",
-  "changeCurrentLocation": "現在の場所を変更"
+  "changeCurrentLocation": "現在の場所を変更",
+  "done": "完了",
+  "addNew": "新規追加",
+  "selected": "選択済み",
+  "moveMultipleToTrashMessage": "{count} アイテムをゴミ箱に移動してもよろしいですか？",
+  "nSelected": "{count, plural, =1{1 つが} other{{count} が選択されました}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  }
 }

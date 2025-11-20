@@ -28,7 +28,8 @@ import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
-import "package:rive/rive.dart" as rive;
+import 'package:rive/rive.dart' as rive;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 enum SimilarImagesPageState {
   setup,
@@ -79,7 +80,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
-  late ScrollController _scrollController;
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
   late AnimationController deleteAnimationController;
 
   List<SimilarFiles> get _filteredGroups {
@@ -115,7 +118,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     super.initState();
     _selectedFiles = SelectedFiles();
     _deleteProgress = ValueNotifier("");
-    _scrollController = ScrollController();
     deleteAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -131,7 +133,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     _isDisposed = true;
     _selectedFiles.dispose();
     _deleteProgress.dispose();
-    _scrollController.dispose();
     deleteAnimationController.dispose();
     super.dispose();
   }
@@ -402,20 +403,20 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                     ),
                   ),
                 )
-              : ListView.builder(
-                  controller: _scrollController,
-                  cacheExtent: 400,
+              : ScrollablePositionedList.builder(
+                  itemScrollController: _itemScrollController,
+                  itemPositionsListener: _itemPositionsListener,
                   itemCount: _filteredGroups.length,
                   itemBuilder: (context, index) {
                     if (index >= _filteredGroups.length) {
                       return const SizedBox.shrink();
                     }
-                    final similarFiles = _filteredGroups[index];
+                    final group = _filteredGroups[index];
                     return Column(
                       children: [
                         if (index == 0) const SizedBox(height: 16),
                         RepaintBoundary(
-                          child: _buildSimilarFilesGroup(similarFiles),
+                          child: _buildSimilarFilesGroup(group),
                         ),
                       ],
                     );
@@ -583,7 +584,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                                     selectedFilteredFiles,
                                     showDialog: true,
                                     showUIFeedback: true,
-                                    scrollToTop: true,
                                   );
                                 },
                               ),
@@ -630,6 +630,40 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     } else {
       _selectedFiles.selectAll(autoSelectFiles);
     }
+  }
+
+  int? _getTopMostVisibleIndex() {
+    final positions = _itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty) return null;
+    int? topIndex;
+    double? bestLeading;
+    for (final p in positions) {
+      final leading = p.itemLeadingEdge;
+      final trailing = p.itemTrailingEdge;
+      final visible = trailing > 0.0 && leading < 1.0;
+      if (!visible) continue;
+      if (bestLeading == null || leading < bestLeading) {
+        bestLeading = leading;
+        topIndex = p.index;
+      }
+    }
+    return topIndex;
+  }
+
+  bool _groupSurvivesAfterDeletion(
+    SimilarFiles group,
+    Set<EnteFile> filesToDelete,
+  ) {
+    var remaining = 0;
+    for (final file in group.files) {
+      if (!filesToDelete.contains(file)) {
+        remaining++;
+        if (remaining > 1) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   Future<void> _findSimilarImages() async {
@@ -905,6 +939,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           files,
           showDialog: showDialog,
           showUIFeedback: false,
+          maintainScrollAnchor: false,
         );
       },
       child: Container(
@@ -938,7 +973,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     Set<EnteFile> filesToDelete, {
     bool showDialog = true,
     bool showUIFeedback = true,
-    bool scrollToTop = false,
+    bool maintainScrollAnchor = true,
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
@@ -954,7 +989,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
               filesToDelete,
               true,
               showUIFeedback: showUIFeedback,
-              scrollToTop: scrollToTop,
+              maintainScrollAnchor: maintainScrollAnchor,
             );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
@@ -969,7 +1004,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         filesToDelete,
         true,
         showUIFeedback: showUIFeedback,
-        scrollToTop: scrollToTop,
+        maintainScrollAnchor: maintainScrollAnchor,
       );
     }
   }
@@ -978,10 +1013,64 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
     Set<EnteFile> filesToDelete,
     bool createSymlink, {
     bool showUIFeedback = true,
-    bool scrollToTop = false,
+    bool maintainScrollAnchor = true,
   }) async {
     if (filesToDelete.isEmpty) {
       return;
+    }
+    SimilarFiles? anchorGroup;
+    if (maintainScrollAnchor) {
+      final beforeFiltered = _filteredGroups;
+      final plannedDeletes = Set<EnteFile>.from(filesToDelete);
+      final topIndex = _getTopMostVisibleIndex();
+
+      bool groupAtIndexSurvives(int? index) {
+        if (index == null) return false;
+        if (index < 0 || index >= beforeFiltered.length) return false;
+        return _groupSurvivesAfterDeletion(
+          beforeFiltered[index],
+          plannedDeletes,
+        );
+      }
+
+      if (groupAtIndexSurvives(topIndex)) {
+        anchorGroup = beforeFiltered[topIndex!];
+      } else {
+        final visiblePositions = _itemPositionsListener
+            .itemPositions.value
+            .where(
+              (p) => p.index >= 0 && p.index < beforeFiltered.length,
+            )
+            .toList()
+          ..sort(
+            (a, b) => a.itemLeadingEdge.compareTo(b.itemLeadingEdge),
+          );
+        int? lastVisibleIndex;
+        for (final position in visiblePositions) {
+          final idx = position.index;
+          if (lastVisibleIndex == null || idx > lastVisibleIndex) {
+            lastVisibleIndex = idx;
+          }
+          if (topIndex != null && idx == topIndex) {
+            continue;
+          }
+          final candidate = beforeFiltered[idx];
+          if (_groupSurvivesAfterDeletion(candidate, plannedDeletes)) {
+            anchorGroup = candidate;
+            break;
+          }
+        }
+        if (anchorGroup == null) {
+          final startIndex = (lastVisibleIndex ?? topIndex ?? -1) + 1;
+          for (int i = startIndex; i < beforeFiltered.length; i++) {
+            final candidate = beforeFiltered[i];
+            if (_groupSurvivesAfterDeletion(candidate, plannedDeletes)) {
+              anchorGroup = candidate;
+              break;
+            }
+          }
+        }
+      }
     }
     final Map<int, Set<EnteFile>> collectionToFilesToAddMap = {};
     final allDeleteFiles = <EnteFile>{};
@@ -1059,16 +1148,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
 
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
-    await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
-
-    // Scroll to top if requested
-    if (scrollToTop && mounted) {
-      await _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCubic,
-      );
+    if (maintainScrollAnchor &&
+        anchorGroup != null &&
+        _itemScrollController.isAttached) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final afterFiltered = _filteredGroups;
+        final newIndex =
+            afterFiltered.indexWhere((g) => identical(g, anchorGroup));
+        if (newIndex != -1 && _itemScrollController.isAttached) {
+          _itemScrollController.jumpTo(index: newIndex, alignment: 0.0);
+        }
+      });
     }
+    await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
 
     // Show congratulations popup
     if (allDeleteFiles.length > 100 && mounted && showUIFeedback) {

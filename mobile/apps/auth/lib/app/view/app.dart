@@ -7,7 +7,7 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
-import "package:ente_auth/onboarding/view/onboarding_page.dart";
+import 'package:ente_auth/onboarding/view/onboarding_page.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
@@ -17,9 +17,10 @@ import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:ente_events/models/signed_out_event.dart';
+import 'package:ente_logging/logging.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:flutter/foundation.dart';
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:win32/win32.dart';
@@ -40,6 +41,7 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App>
     with WindowListener, TrayListener, WidgetsBindingObserver {
+  static final Logger _renderErrorLogger = Logger('RenderError');
   late StreamSubscription<SignedOutEvent> _signedOutEvent;
   late StreamSubscription<SignedInEvent> _signedInEvent;
   Locale? locale;
@@ -140,6 +142,7 @@ class _AppState extends State<App>
             GlobalWidgetsLocalizations.delegate,
           ],
           routes: _getRoutes,
+          builder: _materialAppBuilder,
         ),
       );
     } else {
@@ -160,6 +163,7 @@ class _AppState extends State<App>
           GlobalWidgetsLocalizations.delegate,
         ],
         routes: _getRoutes,
+        builder: _materialAppBuilder,
       );
     }
   }
@@ -238,5 +242,30 @@ class _AppState extends State<App>
         windowManager.destroy();
       }
     }
+  }
+
+  Widget _materialAppBuilder(BuildContext context, Widget? widget) {
+    if (!kDebugMode) {
+      Widget errorWidget = Center(
+        child: Text(context.l10n.somethingWentWrongMessage),
+      );
+      if (widget is Scaffold || widget is Navigator) {
+        errorWidget = Scaffold(body: Center(child: errorWidget));
+      }
+
+      ErrorWidget.builder = (FlutterErrorDetails details) {
+        _renderErrorLogger.severe(
+          'Unhandled rendering error',
+          details.exception,
+          details.stack,
+        );
+        return errorWidget;
+      };
+    }
+
+    if (widget != null) {
+      return widget;
+    }
+    throw StateError('widget is null');
   }
 }

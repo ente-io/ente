@@ -2,6 +2,7 @@
 
 ## v1.7.16 (unreleased)
 
+- Support Greek translations.
 - .
 
 ## v1.7.15

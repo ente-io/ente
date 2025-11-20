@@ -36,6 +36,27 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Disable internal user features",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.isInternalUserDisabled,
+            onChanged: () async {
+              final newValue = !localSettings.isInternalUserDisabled;
+              await localSettings.setInternalUserDisabled(newValue);
+              setState(() {});
+              showShortToast(
+                context,
+                newValue
+                    ? "Internal user disabled. Restart app."
+                    : "Internal user enabled. Restart app.",
+              );
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Enable database logging",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,

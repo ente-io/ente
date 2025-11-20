@@ -132,26 +132,7 @@ class IconUtils {
       }
     }
     if (providerTitle.isNotEmpty) {
-      bool showLargeIcon = width > 24;
-      return CircleAvatar(
-        radius: width / 2,
-        backgroundColor: getEnteColorScheme(context).avatarColors[
-            providerTitle.hashCode %
-                getEnteColorScheme(context).avatarColors.length],
-        child: Text(
-          providerTitle.toUpperCase()[0],
-          // fixed color
-          style: showLargeIcon
-              ? getEnteTextTheme(context).h3Bold.copyWith(
-                    color: Colors.white,
-                    fontSize: width * 0.6,
-                  )
-              : getEnteTextTheme(context).body.copyWith(
-                    color: Colors.white,
-                    fontSize: width * 0.6,
-                  ),
-        ),
-      );
+      return _fallbackAvatar(provider, width, context);
     } else {
       return const SizedBox.shrink();
     }
@@ -175,6 +156,31 @@ class IconUtils {
               BlendMode.srcIn,
             )
           : null,
+      errorBuilder: (context, error, stackTrace) {
+        Logger("IconUtils")
+            .warning("Failed to load icon $path", error, stackTrace);
+        return _fallbackAvatar(title, width, context);
+      },
+    );
+  }
+
+  Widget _fallbackAvatar(String provider, double width, BuildContext context) {
+    final providerTitle = _getProviderTitle(provider);
+    if (providerTitle.isEmpty) return const SizedBox.shrink();
+    final bool showLargeIcon = width > 24;
+    return CircleAvatar(
+      radius: width / 2,
+      backgroundColor: getEnteColorScheme(context).avatarColors[
+          providerTitle.hashCode %
+              getEnteColorScheme(context).avatarColors.length],
+      child: Text(
+        providerTitle.toUpperCase()[0],
+        style: showLargeIcon
+            ? getEnteTextTheme(context).h3Bold
+                .copyWith(color: Colors.white, fontSize: width * 0.6)
+            : getEnteTextTheme(context).body
+                .copyWith(color: Colors.white, fontSize: width * 0.6),
+      ),
     );
   }
 

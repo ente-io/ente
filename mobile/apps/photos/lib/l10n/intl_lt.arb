@@ -11,6 +11,7 @@
   "invalidEmailAddress": "Netinkamas el. pašto adresas",
   "enterValidEmail": "Įveskite tinkamą el. pašto adresą.",
   "deleteAccount": "Ištrinti paskyrą",
+  "deleteAccountWarning": "Tai ištrins jūsų „Ente Auth“, „Ente“ nuotraukos ir „Ente“ sandėlio paskyras.",
   "askDeleteReason": "Kokia yra pagrindinė priežastis, dėl kurios ištrinate savo paskyrą?",
   "deleteAccountFeedbackPrompt": "Apgailestaujame, kad išeinate. Pasidalykite savo atsiliepimais, kad padėtumėte mums tobulėti.",
   "feedback": "Atsiliepimai",
@@ -34,6 +35,16 @@
   "password": "Slaptažodis",
   "confirmPassword": "Patvirtinkite slaptažodį",
   "activeSessions": "Aktyvūs seansai",
+  "ocrProcessingOverlayMessage": "Aptikiamas tekstas...",
+  "ocrLoadingIndicatorLabel": "Aptikiamas tekstas",
+  "ocrSelectionHint": "Perbraukite arba dukart palieskite, kad pasirinktumėte, ko jums reikia.",
+  "ocrNoTextDetected": "Tekstas neaptiktas",
+  "ocrRetryButtonLabel": "Kartoti",
+  "ocrModelsNetworkRequiredError": "Tinklo ryšys privalomas norint atsisiųsti OCR modelius pirmojo naudojimo metu.",
+  "ocrModelsPrepareFailed": "Nepavyko parengti OCR modelių.",
+  "ocrImageNotFoundError": "Vaizdo failas nerastas.",
+  "ocrImageDecodeFailedError": "Nepavyko perskaityti vaizdo failo.",
+  "ocrGenericDetectError": "Nepavyko aptikti teksto vaizde.",
   "oops": "Ups",
   "somethingWentWrongPleaseTryAgain": "Kažkas nutiko ne taip. Bandykite dar kartą.",
   "thisWillLogYouOutOfThisDevice": "Tai jus atjungs nuo šio įrenginio.",
@@ -107,6 +118,10 @@
   "enterYourPassword": "Įveskite savo slaptažodį",
   "welcomeBack": "Sveiki sugrįžę!",
   "contactSupport": "Susisiekti su palaikymo komanda",
+  "locationPickerTip": "Taip pat galite pridėti vietą, centruotą ant nuotraukos, iš nuotraukos informacijos ekrano.",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Neteisingas slaptažodis",
   "pleaseTryAgain": "Bandykite dar kartą.",
   "recreatePasswordTitle": "Iš naujo sukurti slaptažodį",
@@ -186,6 +201,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Leisti jungtis prie albumo",
   "allowAddPhotosDescription": "Leiskite nuorodą turintiems asmenims taip pat pridėti nuotraukų į bendrinamą albumą.",
   "passwordLock": "Slaptažodžio užraktas",
   "canNotOpenTitle": "Negalima atverti šio albumo",
@@ -198,6 +214,8 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Albumo išdėstymas",
+  "layoutGrouped": "Sugrupuoti",
   "linkExpiry": "Nuorodos galiojimo laikas",
   "linkExpired": "Nebegalioja",
   "linkEnabled": "Įjungta",
@@ -1852,5 +1870,9 @@
   "related": "Susiję",
   "hoorayyyy": "Puiiiiku!",
   "nothingToTidyUpHere": "Čia nėra ko tvarkyti.",
-  "deletingDash": "Ištrinama - "
+  "deletingDash": "Ištrinama - ",
+  "closeBy": "Arti",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

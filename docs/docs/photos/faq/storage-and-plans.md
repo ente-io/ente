@@ -145,6 +145,16 @@ Learn more in the [Family plans guide](/photos/features/account/family-plans).
 
 You can invite up to 5 family members to your plan. Including yourself, a total of 6 people can share a single subscription while paying only once.
 
+### Do family plan storage amounts stack across members? {#family-storage-stacking}
+
+No. Storage from different accounts does not stack.
+
+When you create a family and add members, everyone in the family shares the storage of the admin's subscription.
+
+(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant— they will use the shared family storage instead.)
+
+Family plans are designed to allow multiple people to use a single subscription, not to combine multiple plans into a larger pool.
+
 ### Can family members see each other's photos? {#family-privacy}
 
 No. Each family member gets their own private space, and members cannot see each other's files unless they are explicitly shared using Ente's sharing features. Family plans are only for sharing storage space, not for sharing photos automatically.

@@ -24,7 +24,8 @@ var itemDeletionDelayInMinMap = map[string]int64{
 	DeleteObjectQueue:         45 * 24 * 60, // 45 days in minutes
 	DeleteEmbeddingsQueue:     -1 * 24 * 60, // -ve value to ensure embeddings are immediately removed
 	TrashCollectionQueueV3:    -1 * 24 * 60, // -ve value to ensure collections are immediately marked as trashed
-	TrashEmptyQueue:           -1 * 24 * 60, // -ve value to ensure empty trash request are processed in next cron run
+    TrashEmptyQueue:           -1 * 24 * 60, // -ve value to ensure empty trash request are processed in next cron run
+    TrashEmptyLockerQueue:     -1 * 24 * 60, // -ve value to ensure empty trash request for locker are processed in next cron run
 	RemoveComplianceHoldQueue: -1 * 24 * 60, // -ve value to ensure compliance hold is removed in next cron run
 }
 
@@ -36,7 +37,8 @@ const (
 	// Deprecated: Keeping it till we clean up items from the queue DB.
 	TrashCollectionQueue      string = "trashCollection"
 	TrashCollectionQueueV3    string = "trashCollectionV3"
-	TrashEmptyQueue           string = "trashEmpty"
+    TrashEmptyQueue           string = "trashEmpty"
+    TrashEmptyLockerQueue     string = "trashEmptyLocker"
 	RemoveComplianceHoldQueue string = "removeComplianceHold"
 	BatchSize                 int    = 30000
 )

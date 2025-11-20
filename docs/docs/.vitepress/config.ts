@@ -12,7 +12,24 @@ export default defineConfig({
     cleanUrls: true,
     ignoreDeadLinks: "localhostLinks",
     sitemap: {
-        hostname: "https://ente.io/help",
+        hostname: "https://ente.io/help/",
+        transformItems: (items) => {
+            // Remove trailing slashes for consistency (cleanUrls is enabled)
+            // and deduplicate URLs
+            const seen = new Set();
+            return items
+                .map((item) => ({
+                    ...item,
+                    url: item.url.replace(/\/$/, ''),
+                }))
+                .filter((item) => {
+                    if (seen.has(item.url)) {
+                        return false;
+                    }
+                    seen.add(item.url);
+                    return true;
+                });
+        },
     },
     transformPageData(pageData) {
         // Add canonical URL to all pages

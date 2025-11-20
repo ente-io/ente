@@ -69,6 +69,7 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: widget.isCompactMode ? 1 : 3,
+      width: double.infinity,
       child: ValueListenableBuilder<double>(
         valueListenable: _progress,
         builder: (context, progress, _) {
@@ -80,7 +81,6 @@ class _CodeTimerProgressState extends State<CodeTimerProgress> {
                   ? getEnteColorScheme(context).primary700
                   : Colors.orange,
             ),
-            size: const Size.fromHeight(double.infinity),
           );
         },
       ),

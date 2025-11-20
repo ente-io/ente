@@ -9,6 +9,10 @@
   "onBoardingBody": "Храните ваши коды двухфакторной аутентификации в безопасности",
   "onBoardingGetStarted": "Начать",
   "setupFirstAccount": "Настройте свой первый аккаунт",
+  "allTabEmptyHint": "Ничего не найдено. Нажмите +, чтобы добавить код, или откройте Корзину, чтобы восстановить его.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "Сканировать QR-код",
   "qrCode": "QR-код",
   "qr": "QR",
@@ -140,6 +144,7 @@
   "existingUser": "Существующий пользователь",
   "newUser": "Впервые в Ente",
   "delete": "Удалить",
+  "addTag": "Добавить тег",
   "enterYourPasswordHint": "Введите пароль",
   "forgotPassword": "Забыл пароль",
   "oops": "Ой",
@@ -551,5 +556,39 @@
   "changeCurrentLocation": "Изменить текущую локацию",
   "done": "Готово",
   "addNew": "",
-  "selected": "выбрано"
+  "selected": "выбрано",
+  "moveMultipleToTrashMessage": "Вы уверены, что хотите переместить {count} элемент(ы) в корзину?",
+  "nSelected": "{count, plural, =1{1 выбран} other{{count} выбрано}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1{Закреплён 1 элемент} other{Закреплёно {count} элементов}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{Откреплён 1 элемент} other{Откреплёно {count} элементов}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

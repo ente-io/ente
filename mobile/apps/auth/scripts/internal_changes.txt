@@ -1,3 +1,4 @@
+- Prateek: Add new onboarding, update button radius, update tags style
 - ExtendedGuru4883: Quick Settings tile for android
 - Prateek: Add fdroid icon
 - Prateek: Fix "X" icon not looking good in light/dark theme

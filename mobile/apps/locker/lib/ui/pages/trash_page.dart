@@ -79,8 +79,7 @@ class _TrashPageState extends State<TrashPage> {
     final availableCollections = uniqueCollectionsById(
       collections
           .where(
-            (c) =>
-                !c.isDeleted && c.type != CollectionType.uncategorized,
+            (c) => !c.isDeleted && c.type != CollectionType.uncategorized,
           )
           .toList(),
     );

@@ -6,6 +6,7 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
+import "package:ente_ui/theme/theme_config.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
@@ -45,7 +46,10 @@ class LockScreenSettings {
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
 
-  Future<void> init(BaseConfiguration config) async {
+  Future<void> init(
+    BaseConfiguration config, {
+    bool hasOptedForOfflineMode = false,
+  }) async {
     _config = config;
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
@@ -57,7 +61,7 @@ class LockScreenSettings {
     /// already been done by checking a stored boolean value.
     await runLockScreenChangesMigration();
 
-    await _clearLsDataInKeychainIfFreshInstall();
+    await _clearLsDataInKeychainIfFreshInstall(hasOptedForOfflineMode);
 
     Bus.instance.on<SignedOutEvent>().listen((event) {
       removePinAndPassword();
@@ -96,6 +100,11 @@ class LockScreenSettings {
 
   Future<void> setHideAppContent(bool hideContent) async {
     if (PlatformUtil.isDesktop()) return;
+    if (AppThemeConfig.currentApp == EnteApp.locker) {
+      await PrivacyScreen.instance.disable();
+      await _preferences.setBool(keyHideAppContent, false);
+      return;
+    }
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
@@ -112,6 +121,9 @@ class LockScreenSettings {
   }
 
   bool getShouldHideAppContent() {
+    if (AppThemeConfig.currentApp == EnteApp.locker) {
+      return false;
+    }
     return _preferences.getBool(keyHideAppContent) ?? true;
   }
 
@@ -240,8 +252,12 @@ class LockScreenSettings {
   // If the app was uninstalled (without logging out if it was used with
   // backups), keychain items of the app persist in the keychain. To avoid using
   // old keychain items, we delete them on reinstall.
-  Future<void> _clearLsDataInKeychainIfFreshInstall() async {
-    if ((Platform.isIOS || Platform.isMacOS) && !_config.isLoggedIn()) {
+  Future<void> _clearLsDataInKeychainIfFreshInstall(
+    bool hasOptedForOfflineMode,
+  ) async {
+    if ((Platform.isIOS || Platform.isMacOS) &&
+        !_config.isLoggedIn() &&
+        !hasOptedForOfflineMode) {
       await _secureStorage.delete(key: password);
       await _secureStorage.delete(key: pin);
       await _secureStorage.delete(key: saltKey);
