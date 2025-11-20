@@ -52,6 +52,7 @@ class PersonData {
   /// Used to mark a person to not show in the people section.
   /// WARNING: When checking whether to show a person, use [isIgnored] instead, as it also checks legacy hidden names.
   final bool isHidden;
+  final bool isPinned;
 
   String? avatarFaceID;
   List<ClusterInfo> assigned = List<ClusterInfo>.empty();
@@ -78,6 +79,7 @@ class PersonData {
     this.rejectedFaceIDs = const <String>[],
     this.avatarFaceID,
     this.isHidden = false,
+    this.isPinned = false,
     this.birthDate,
     this.email,
     this.userID,
@@ -88,6 +90,7 @@ class PersonData {
     List<ClusterInfo>? assigned,
     String? avatarFaceId,
     bool? isHidden,
+    bool? isPinned,
     int? version,
     String? birthDate,
     String? email,
@@ -99,6 +102,7 @@ class PersonData {
       assigned: assigned ?? this.assigned,
       avatarFaceID: avatarFaceId ?? avatarFaceID,
       isHidden: isHidden ?? this.isHidden,
+      isPinned: isPinned ?? this.isPinned,
       birthDate: birthDate ?? this.birthDate,
       email: email ?? this.email,
       userID: userID ?? this.userID,
@@ -131,6 +135,7 @@ class PersonData {
         'rejectedFaceIDs': rejectedFaceIDs,
         'avatarFaceID': avatarFaceID,
         'isHidden': isHidden,
+        'isPinned': isPinned,
         'birthDate': birthDate,
         'email': email,
         'userID': userID,
@@ -160,6 +165,7 @@ class PersonData {
       rejectedFaceIDs: rejectedFaceIDs,
       avatarFaceID: json['avatarFaceID'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
+      isPinned: json['isPinned'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
       userID: json['userID'] as int?,
       email: json['email'] as String?,
