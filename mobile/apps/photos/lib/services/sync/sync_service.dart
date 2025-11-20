@@ -199,8 +199,12 @@ class SyncService {
 
     final bool hasCompletedFirstImport =
         _localSyncService.hasCompletedFirstImport();
+    final bool allowRemoteSyncEarly =
+        flagService.enableOnlyBackupFuturePhotos &&
+            (localSettings.hasOnboardingPermissionSkipped ||
+                localSettings.isOnlyNewBackupEnabled);
 
-    if (hasCompletedFirstImport) {
+    if (hasCompletedFirstImport || allowRemoteSyncEarly) {
       _logger.info("[SYNC] Starting remote sync");
       await _remoteSyncService.sync();
 
