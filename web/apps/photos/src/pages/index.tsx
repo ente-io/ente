@@ -56,47 +56,6 @@ const Page: React.FC = () => {
                     const jwtFromURL = currentURL.searchParams.get("jwt");
 
                     if (accessToken && collectionKeyHash) {
-                        // Check if context already exists (might have JWT token from password-protected album)
-                        const existingContextStr = localStorage.getItem(
-                            "ente_join_album_context",
-                        );
-                        let existingContext: JoinAlbumContext | null = null;
-                        let shouldUpdateContext = false;
-
-                        if (existingContextStr) {
-                            try {
-                                existingContext = JSON.parse(
-                                    existingContextStr,
-                                ) as JoinAlbumContext;
-
-                                // Don't modify existing context if it has the same access token and a JWT
-                                if (
-                                    existingContext.accessToken ===
-                                        accessToken &&
-                                    existingContext.accessTokenJWT
-                                ) {
-                                    return; // Preserve JWT from password-protected albums
-                                }
-
-                                // Only update if it's a different access token
-                                if (
-                                    existingContext.accessToken !== accessToken
-                                ) {
-                                    shouldUpdateContext = true;
-                                } else {
-                                    // Same access token - NEVER overwrite if existing has JWT
-                                    // This preserves the JWT from password-protected albums
-                                    shouldUpdateContext = false;
-                                }
-                            } catch {
-                                // Parse error, will create new context
-                                shouldUpdateContext = true;
-                            }
-                        } else {
-                            // No existing context, create new
-                            shouldUpdateContext = true;
-                        }
-
                         // Import the necessary functions to convert the collection key
                         const { extractCollectionKeyFromShareURL } =
                             await import("ente-gallery/services/share");
@@ -107,28 +66,19 @@ const Page: React.FC = () => {
                         const collectionKey =
                             await extractCollectionKeyFromShareURL(tempURL);
 
-                        if (shouldUpdateContext) {
-                            // Get JWT from URL parameter (passed for password-protected albums)
-                            // This survives cross-origin redirects (e.g., localhost:3002 → localhost:3000)
-                            const accessTokenJWT =
-                                jwtFromURL || existingContext?.accessTokenJWT;
+                        // Create context from URL parameters
+                        const context: JoinAlbumContext = {
+                            accessToken,
+                            collectionKey,
+                            collectionKeyHash,
+                            collectionID: 0,
+                            ...(jwtFromURL && { accessTokenJWT: jwtFromURL }),
+                        };
 
-                            // Create new context or update if different access token
-                            const context: JoinAlbumContext = {
-                                accessToken,
-                                collectionKey, // Base64 for API calls
-                                collectionKeyHash, // Original hash from URL
-                                collectionID:
-                                    existingContext?.collectionID ?? 0, // Preserve collection ID if exists
-                                // Include JWT token if found
-                                ...(accessTokenJWT && { accessTokenJWT }),
-                            };
-
-                            localStorage.setItem(
-                                "ente_join_album_context",
-                                JSON.stringify(context),
-                            );
-                        }
+                        localStorage.setItem(
+                            "ente_join_album_context",
+                            JSON.stringify(context),
+                        );
                     }
                 } catch (error) {
                     log.error(
