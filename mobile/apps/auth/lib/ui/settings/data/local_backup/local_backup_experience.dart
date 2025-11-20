@@ -110,6 +110,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     await _withBusyGuard(
       () async {
         if (shouldEnable) {
+          final authenticated = await _authenticateForBackupAction(
+            'Authenticate to enable backups',
+          );
+          if (!authenticated) {
+            return;
+          }
           final success = await _startEnableFlow();
           if (!success) {
             return;
@@ -210,6 +216,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       await Directory(resolvedPath).create(recursive: true);
     }
     return true;
+  }
+
+  Future<bool> _authenticateForBackupAction(String reason) async {
+    return LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      reason,
+    );
   }
 
   Future<void> _withBusyGuard(
