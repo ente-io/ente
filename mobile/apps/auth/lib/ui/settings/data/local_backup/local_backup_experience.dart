@@ -158,8 +158,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     setState(() {
       _isBackupEnabled = true;
     });
-    await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
-    _showSnackBar(context.l10n.initialBackupCreated);
+    await LocalBackupService.instance.triggerAutomaticBackup(isManual: false);
     return true;
   }
 
