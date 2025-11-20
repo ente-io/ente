@@ -89,7 +89,8 @@ class _PeopleSelectionActionWidgetState
         final anythingSelected =
             selectedPersonIds.isNotEmpty || selectedClusterIds.isNotEmpty;
         final bool showPinAction = onlyPersonSelected &&
-            selectedPersonIds.any(
+            selectedPersonIds.isNotEmpty &&
+            selectedPersonIds.every(
               (id) => !(personMap[id]?.data.isPinned ?? false),
             );
         final bool showUnpinAction = onlyPersonSelected &&
