@@ -3,15 +3,15 @@ import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { EnteLogo } from "ente-base/components/EnteLogo";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import type { Collection } from "ente-media/collection";
 import { Notification } from "ente-new/photos/components/Notification";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
-import { getSignUpOrInstallURL } from "utils/public-album";
 import { t } from "i18next";
 import { useState } from "react";
+import { getSignUpOrInstallURL } from "utils/public-album";
 
 interface MobileNavBarProps {
     onAddPhotos?: () => void;
@@ -68,7 +68,11 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
     const handleSignUpOrInstall = () => {
         if (typeof window !== "undefined") {
-            window.open(getSignUpOrInstallURL(isTouchscreen), "_blank", "noopener");
+            window.open(
+                getSignUpOrInstallURL(isTouchscreen),
+                "_blank",
+                "noopener",
+            );
         }
     };
 

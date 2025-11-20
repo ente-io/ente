@@ -19,7 +19,10 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
-import type { JoinAlbumContext } from "ente-new/albums/services/join-album";
+import {
+    JOIN_ALBUM_CONTEXT_KEY,
+    type JoinAlbumContext,
+} from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -76,7 +79,7 @@ const Page: React.FC = () => {
                         };
 
                         localStorage.setItem(
-                            "ente_join_album_context",
+                            JOIN_ALBUM_CONTEXT_KEY,
                             JSON.stringify(context),
                         );
                     }

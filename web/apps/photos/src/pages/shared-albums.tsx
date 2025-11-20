@@ -562,10 +562,7 @@ export default function PublicCollectionGallery() {
                     collection={publicCollection}
                     onAddPhotos={onAddPhotos}
                     enableDownload={downloadEnabled}
-                    accessToken={
-                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                        credentials.current?.accessToken
-                    }
+                    accessToken={credentials.current.accessToken}
                     collectionKey={collectionKey.current}
                     credentials={credentials}
                 />
@@ -598,15 +595,14 @@ export default function PublicCollectionGallery() {
                                     {!onAddPhotos ||
                                     publicCollection?.publicURLs[0]
                                         ?.enableJoin ? (
-                                        <GoToEnte
+                                        <PrimaryActionButton
                                             enableJoin={
                                                 publicCollection?.publicURLs[0]
                                                     ?.enableJoin
                                             }
                                             publicCollection={publicCollection}
                                             accessToken={
-                                                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                                                credentials.current?.accessToken
+                                                credentials.current.accessToken
                                             }
                                             collectionKey={
                                                 collectionKey.current
@@ -710,7 +706,7 @@ const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     );
 };
 
-interface GoToEnteProps {
+interface PrimaryActionButtonProps {
     /** If true, shows "Join Album" button instead of "Sign Up" */
     enableJoin?: boolean;
     /** Collection to join (required if enableJoin is true) */
@@ -723,7 +719,7 @@ interface GoToEnteProps {
     credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
-const GoToEnte: React.FC<GoToEnteProps> = ({
+const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
     enableJoin,
     publicCollection,
     accessToken,

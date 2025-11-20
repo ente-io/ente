@@ -151,7 +151,5 @@ export const useJoinAlbum = ({
         }
     };
 
-    return {
-        handleJoinAlbum,
-    };
+    return { handleJoinAlbum };
 };

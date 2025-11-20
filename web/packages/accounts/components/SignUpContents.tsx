@@ -35,6 +35,7 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
+import { JOIN_ALBUM_CONTEXT_KEY } from "ente-new/albums/services/join-album";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
@@ -71,9 +72,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
 
     useEffect(() => {
         // Check if we're in a join album context
-        const joinAlbumContext = localStorage.getItem(
-            "ente_join_album_context",
-        );
+        const joinAlbumContext = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
         setIsJoinAlbumContext(!!joinAlbumContext);
     }, []);
 

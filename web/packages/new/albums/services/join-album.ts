@@ -3,7 +3,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
 import log from "ente-base/log";
-import { albumsAppOrigin, apiURL } from "ente-base/origins";
+import { apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 
 /**
@@ -14,7 +14,7 @@ import type { Collection } from "ente-media/collection";
  * - Cleaning up stored context
  */
 
-const JOIN_ALBUM_CONTEXT_KEY = "ente_join_album_context";
+export const JOIN_ALBUM_CONTEXT_KEY = "ente_join_album_context";
 
 export interface JoinAlbumContext {
     accessToken: string;
@@ -167,7 +167,7 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
             // Update the context with the actual collection ID
             const updatedContext = { ...context, collectionID };
             localStorage.setItem(
-                "ente_join_album_context",
+                JOIN_ALBUM_CONTEXT_KEY,
                 JSON.stringify(updatedContext),
             );
         } else {
@@ -221,32 +221,4 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         });
         throw error;
     }
-};
-
-/**
- * Get the redirect URL for authentication with join album context.
- * This preserves the intent to join an album across the auth flow.
- *
- * Uses albums.ente.io with action=join parameter, which triggers App Links/Universal Links
- * on mobile to automatically open the app if installed. If opened in browser (desktop or
- * app not installed), the web page detects action=join and redirects to web.ente.io for auth.
- */
-export const getAuthRedirectURL = (): string => {
-    const context = getJoinAlbumContext();
-    if (!context) {
-        return "/";
-    }
-
-    // Use the configured albums app origin (respects NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT)
-    const albumsAppURL = albumsAppOrigin();
-
-    // Use action=join to indicate this is a join flow
-    // For password-protected albums, include JWT as a query parameter
-    // The collectionKeyHash is the original hash value from the URL (base58 or hex)
-    const jwtParam = context.accessTokenJWT
-        ? `&jwt=${encodeURIComponent(context.accessTokenJWT)}`
-        : "";
-    const redirectURL = `${albumsAppURL}/?action=join&t=${context.accessToken}${jwtParam}#${context.collectionKeyHash}`;
-
-    return redirectURL;
 };

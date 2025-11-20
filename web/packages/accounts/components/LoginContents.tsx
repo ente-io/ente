@@ -10,6 +10,7 @@ import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
+import { JOIN_ALBUM_CONTEXT_KEY } from "ente-new/albums/services/join-album";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -43,9 +44,7 @@ export const LoginContents: React.FC<LoginContentsProps> = ({
 
     useEffect(() => {
         // Check if we're in a join album context
-        const joinAlbumContext = localStorage.getItem(
-            "ente_join_album_context",
-        );
+        const joinAlbumContext = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
         setIsJoinAlbumContext(!!joinAlbumContext);
     }, []);
 
