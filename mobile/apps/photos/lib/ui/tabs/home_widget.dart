@@ -733,16 +733,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (flagService.enableOnlyBackupFuturePhotos && !_personSyncTriggered) {
-      _personSyncTriggered = true;
-      entityService.syncEntities().then((_) {
-        PersonService.instance.refreshPersonCache();
-      });
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      _ensurePersonSync();
     }
     if (_shouldShowPermissionWidget()) {
-      entityService.syncEntities().then((_) {
-        PersonService.instance.refreshPersonCache();
-      });
+      _ensurePersonSync();
       return const GrantPermissionsWidget();
     }
     if (_shouldShowLoadingWidget()) {
@@ -1021,5 +1016,15 @@ class _HomeWidgetState extends State<HomeWidget> {
         CollectionsService.instance.getActiveCollections().isNotEmpty;
 
     return !hasActiveCollections && noFoldersSelected && !hasLimitedPermission;
+  }
+
+  void _ensurePersonSync() {
+    if (_personSyncTriggered) {
+      return;
+    }
+    _personSyncTriggered = true;
+    entityService.syncEntities().then((_) {
+      PersonService.instance.refreshPersonCache();
+    });
   }
 }
