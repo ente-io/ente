@@ -235,11 +235,10 @@ export const removePublicCollectionLastSyncTime = async (
  */
 export const savedPublicCollectionAccessTokenJWT = async (
     accessToken: string,
-) => {
-    const key = `public-${accessToken}-passkey`;
-    const value = await localForage.getItem(key);
-    return LocalString.parse(value);
-};
+) =>
+    LocalString.parse(
+        await localForage.getItem(`public-${accessToken}-passkey`),
+    );
 
 /**
  * Update the access token JWT in our local database for the given public
@@ -252,8 +251,7 @@ export const savePublicCollectionAccessTokenJWT = async (
     accessToken: string,
     passwordJWT: string,
 ) => {
-    const key = `public-${accessToken}-passkey`;
-    await localForage.setItem(key, passwordJWT);
+    await localForage.setItem(`public-${accessToken}-passkey`, passwordJWT);
 };
 
 /**
