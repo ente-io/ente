@@ -587,6 +587,8 @@
     "oldest_first": "Mais antigo primeiro",
     "pin_album": "Fixar álbum",
     "unpin_album": "Desafixar álbum",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Este arquivo não pôde ser visualizado",
     "download_complete": "Download concluído",
     "downloading_album": "Fazer download de {{name}}",
