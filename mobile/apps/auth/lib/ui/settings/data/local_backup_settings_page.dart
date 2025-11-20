@@ -4,6 +4,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/data/local_backup/local_backup_experience.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class LocalBackupSettingsPage extends StatelessWidget {
