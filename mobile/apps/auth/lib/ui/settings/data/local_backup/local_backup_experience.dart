@@ -438,20 +438,47 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   String _simplifyPath(String fullPath) {
+    if (fullPath.isEmpty) {
+      return fullPath;
+    }
+
     if (Platform.isAndroid) {
-      const rootToRemove = '/storage/emulated/0/';
-      if (fullPath.startsWith(rootToRemove)) {
-        return fullPath.substring(rootToRemove.length);
+      const rootsToRemove = <String>[
+        '/storage/emulated/0/',
+        '/storage/self/primary/',
+      ];
+
+      for (final root in rootsToRemove) {
+        if (fullPath.startsWith(root)) {
+          return fullPath.substring(root.length);
+        }
       }
       return fullPath;
     }
 
     if (Platform.isIOS) {
       var simplified = fullPath;
+      const fileScheme = 'file://';
+      if (simplified.startsWith(fileScheme)) {
+        simplified = simplified.substring(fileScheme.length);
+      }
       // iOS often prepends /private when surfacing sandboxed locations.
       const privatePrefix = '/private';
       if (simplified.startsWith(privatePrefix)) {
         simplified = simplified.substring(privatePrefix.length);
+      }
+
+      const icloudMarker = '/Mobile Documents/';
+      if (simplified.contains(icloudMarker)) {
+        final afterMarker = simplified.split(icloudMarker).last;
+        const cloudDocsPrefix = 'com~apple~CloudDocs/';
+        if (afterMarker.startsWith(cloudDocsPrefix)) {
+          final remaining = afterMarker.substring(cloudDocsPrefix.length);
+          return remaining.isNotEmpty ? 'iCloud Drive/$remaining' : 'iCloud Drive';
+        }
+        if (afterMarker.isNotEmpty) {
+          return afterMarker;
+        }
       }
 
       const markers = <String>[
