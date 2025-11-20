@@ -50,38 +50,12 @@ const Page: React.FC = () => {
             const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
             if (joinAlbumParam && joinAlbumParam !== "true") {
                 try {
-                    // New simplified format: joinAlbum?=accessToken&jwt=<jwtToken>#collectionKeyHash
+                    // Format: joinAlbum?=accessToken&jwt=<jwtToken>#collectionKeyHash
                     const accessToken = joinAlbumParam;
-                    const collectionKeyHash = currentURL.hash.slice(1); // Remove the # character
-                    const jwtFromURL = currentURL.searchParams.get("jwt"); // JWT for password-protected albums
+                    const collectionKeyHash = currentURL.hash.slice(1);
+                    const jwtFromURL = currentURL.searchParams.get("jwt");
 
                     if (accessToken && collectionKeyHash) {
-                        const existingCheck = localStorage.getItem(
-                            "ente_join_album_context",
-                        );
-
-                        if (existingCheck) {
-                            const existing = JSON.parse(
-                                existingCheck,
-                            ) as JoinAlbumContext;
-                            if (
-                                existing.accessToken === accessToken &&
-                                existing.accessTokenJWT
-                            ) {
-                                return; // Don't modify existing context with JWT
-                            }
-                        }
-
-                        // Import the necessary functions to convert the collection key
-                        const { extractCollectionKeyFromShareURL } =
-                            await import("ente-gallery/services/share");
-
-                        // Convert the hash to base64 for API calls
-                        const tempURL = new URL(window.location.href);
-                        tempURL.hash = collectionKeyHash;
-                        const collectionKey =
-                            await extractCollectionKeyFromShareURL(tempURL);
-
                         // Check if context already exists (might have JWT token from password-protected album)
                         const existingContextStr = localStorage.getItem(
                             "ente_join_album_context",
@@ -94,6 +68,15 @@ const Page: React.FC = () => {
                                 existingContext = JSON.parse(
                                     existingContextStr,
                                 ) as JoinAlbumContext;
+
+                                // Don't modify existing context if it has the same access token and a JWT
+                                if (
+                                    existingContext.accessToken ===
+                                        accessToken &&
+                                    existingContext.accessTokenJWT
+                                ) {
+                                    return; // Preserve JWT from password-protected albums
+                                }
 
                                 // Only update if it's a different access token
                                 if (
@@ -113,6 +96,16 @@ const Page: React.FC = () => {
                             // No existing context, create new
                             shouldUpdateContext = true;
                         }
+
+                        // Import the necessary functions to convert the collection key
+                        const { extractCollectionKeyFromShareURL } =
+                            await import("ente-gallery/services/share");
+
+                        // Convert the hash to base64 for API calls
+                        const tempURL = new URL(window.location.href);
+                        tempURL.hash = collectionKeyHash;
+                        const collectionKey =
+                            await extractCollectionKeyFromShareURL(tempURL);
 
                         if (shouldUpdateContext) {
                             // Get JWT from URL parameter (passed for password-protected albums)
@@ -172,7 +165,6 @@ const Page: React.FC = () => {
                     (await masterKeyFromSession()) &&
                     (await savedAuthToken())
                 ) {
-                    // Context is now stored in localStorage, so we can just redirect to gallery
                     await router.push("/gallery");
                 } else if (savedPartialLocalUser()?.email) {
                     await router.push("/verify");
