@@ -269,11 +269,9 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
-        title: Text(
-          l10n.locker,
-          style: textTheme.h3Bold.copyWith(
-            color: colorScheme.primary700,
-          ),
+        title: Image.asset(
+          'assets/locker-logo-blue.png',
+          height: 28,
         ),
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,

@@ -22,6 +22,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/file/zoomable_image.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -100,15 +101,21 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   OverlayEntry? _sharePillOverlayEntry;
   ui.Image? _sharePillOverlaySnapshot;
   StreamSubscription<PlayerState>? _playerStateSubscription;
+  Future<void>? _musicInitializationFuture;
   ModalRoute<dynamic>? _registeredRoute;
   bool _didRegisterWillPop = false;
   static bool _audioSessionConfigured = false;
+  EnteFile? _previewFile;
+  bool _isPreviewVisible = false;
+  bool _isPreviewLoading = false;
+  bool _wasPausedBeforePreview = false;
+  int _previewRequestID = 0;
+  int? _previewUploadedFileID;
 
   static const double _kShareBrandingHeight = 42;
   static const double _kShareBrandingLogoWidth = 58;
   static const double _kShareBrandingLogoHeight = 11;
   static const double _kShareBrandingLogoVerticalNudge = -8;
-  static const Duration _kMusicLoopTrim = Duration(milliseconds: 40);
 
   @override
   void initState() {
@@ -488,6 +495,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _closeViewer() async {
+    if (_isPreviewVisible) {
+      _hideMediaPreview();
+      return;
+    }
     if (_isClosing || !mounted) {
       return;
     }
@@ -502,6 +513,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<bool> _handleWillPop() async {
+    if (_isPreviewVisible) {
+      _hideMediaPreview();
+      return false;
+    }
     if (!_isClosing) {
       _isClosing = true;
     }
@@ -547,6 +562,78 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     setState(() {});
   }
 
+  void _showMediaPreview(MediaRef ref) {
+    if (_isPreviewVisible &&
+        _previewUploadedFileID == ref.uploadedFileID &&
+        _previewFile != null) {
+      return;
+    }
+    final int requestID = ++_previewRequestID;
+    final bool wasPaused = _isPaused;
+    if (!wasPaused) {
+      _pauseAutoplay();
+    }
+    final EnteFile? cached =
+        WrappedMediaPreloader.instance.getCachedFile(ref.uploadedFileID);
+    setState(() {
+      _previewUploadedFileID = ref.uploadedFileID;
+      _previewFile = cached;
+      _isPreviewVisible = true;
+      _isPreviewLoading = cached == null;
+      _wasPausedBeforePreview = wasPaused;
+    });
+    if (cached != null) {
+      return;
+    }
+    WrappedMediaPreloader.instance.ensureFile(ref.uploadedFileID).then(
+      (EnteFile? file) {
+        if (!mounted || requestID != _previewRequestID) {
+          return;
+        }
+        setState(() {
+          _previewFile = file;
+          _isPreviewLoading = false;
+        });
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (!mounted || requestID != _previewRequestID) {
+          return;
+        }
+        _logger.warning("Unable to load preview media", error, stackTrace);
+        setState(() {
+          _previewFile = null;
+          _isPreviewLoading = false;
+        });
+      },
+    );
+  }
+
+  void _hideMediaPreview() {
+    if (!_isPreviewVisible) {
+      return;
+    }
+    _previewRequestID++;
+    final bool shouldResume = !_wasPausedBeforePreview;
+    _wasPausedBeforePreview = false;
+    setState(() {
+      _previewFile = null;
+      _isPreviewVisible = false;
+      _isPreviewLoading = false;
+      _previewUploadedFileID = null;
+    });
+    if (shouldResume) {
+      _resumeAutoplay();
+    }
+  }
+
+  void _handlePreviewTapDown() {
+    _suppressNextTapUp = true;
+  }
+
+  void _handlePreviewTapCancel() {
+    _suppressNextTapUp = false;
+  }
+
   void _scheduleTapUpReset() {
     scheduleMicrotask(() {
       _suppressNextTapUp = false;
@@ -579,169 +666,202 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       data: darkThemeData,
       child: Builder(
         builder: (BuildContext context) {
-          final enteColorScheme = getEnteColorScheme(context);
-          final textTheme = getEnteTextTheme(context);
-          final MediaQueryData mediaQuery = MediaQuery.of(context);
-          final double bottomPadding = mediaQuery.padding.bottom;
-          final Color controlIconColor =
-              enteColorScheme.textMuted.withValues(alpha: 0.62);
-          final Color controlBackdropColor =
-              enteColorScheme.textMuted.withValues(alpha: 0.14);
+          final MediaQueryData baseMediaQuery = MediaQuery.of(context);
+          final MediaQueryData clampedMediaQuery = baseMediaQuery.copyWith(
+            textScaler: const TextScaler.linear(1.0),
+          );
+          return MediaQuery(
+            data: clampedMediaQuery,
+            child: Builder(
+              builder: (BuildContext context) {
+                final enteColorScheme = getEnteColorScheme(context);
+                final textTheme = getEnteTextTheme(context);
+                final MediaQueryData mediaQuery = MediaQuery.of(context);
+                final double bottomPadding = mediaQuery.padding.bottom;
+                final Color controlIconColor =
+                    enteColorScheme.textMuted.withValues(alpha: 0.62);
+                final Color controlBackdropColor =
+                    enteColorScheme.textMuted.withValues(alpha: 0.14);
 
-          return PopScope(
-            canPop: true,
-            onPopInvokedWithResult: (bool didPop, Object? result) {
-              if (!didPop) {
-                _isClosing = false;
-                return;
-              }
-              wrappedService.updateResumeIndex(_currentIndex);
-            },
-            child: Scaffold(
-              backgroundColor: Colors.black,
-              appBar: AppBar(
-                leading: BackButton(
-                  onPressed: () => unawaited(_closeViewer()),
-                ),
-                title: Text(
-                  "Ente Rewind",
-                  style: textTheme.largeBold,
-                ),
-                backgroundColor: Colors.black,
-                foregroundColor: enteColorScheme.textBase,
-                elevation: 0,
-              ),
-              body: Stack(
-                children: [
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        child: IgnorePointer(
-                          child: AnimatedBuilder(
-                            animation: _progressController,
-                            builder: (BuildContext context, _) {
-                              final List<double> segments =
-                                  List<double>.generate(cardCount, (int index) {
-                                if (index < _currentIndex) {
-                                  return 1.0;
-                                }
-                                if (index > _currentIndex) {
-                                  return 0.0;
-                                }
-                                return _progressController.value
-                                    .clamp(0.0, 1.0);
-                              });
-                              return _StoryProgressBar(
-                                progressValues: segments,
-                                colorScheme: enteColorScheme,
-                              );
-                            },
-                          ),
-                        ),
+                return PopScope(
+                  canPop: true,
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (!didPop) {
+                      _isClosing = false;
+                      return;
+                    }
+                    wrappedService.updateResumeIndex(_currentIndex);
+                  },
+                  child: Scaffold(
+                    backgroundColor: Colors.black,
+                    appBar: AppBar(
+                      leading: BackButton(
+                        onPressed: () => unawaited(_closeViewer()),
                       ),
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (
-                            BuildContext context,
-                            BoxConstraints constraints,
-                          ) {
-                            return GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTapUp: (TapUpDetails details) =>
-                                  _handleTapUp(details, constraints),
-                              onTapCancel: () {
-                                _suppressNextTapUp = false;
-                              },
-                              onLongPressStart: _handleLongPressStart,
-                              onLongPressEnd: _handleLongPressEnd,
-                              onLongPressCancel: _handleLongPressCancel,
-                              onVerticalDragStart: _handleVerticalDragStart,
-                              onVerticalDragUpdate: _handleVerticalDragUpdate,
-                              onVerticalDragEnd: _handleVerticalDragEnd,
-                              onVerticalDragCancel: _handleVerticalDragCancel,
-                              child: RepaintBoundary(
-                                key: _cardBoundaryKey,
-                                child: PageView.builder(
-                                  physics: const PageScrollPhysics(),
-                                  controller: _pageController,
-                                  onPageChanged: _handlePageChanged,
-                                  itemCount: cardCount,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    final WrappedCard card = _cards[index];
-                                    return _StoryCard(
-                                      card: card,
+                      title: Text(
+                        "Ente Rewind",
+                        style: textTheme.largeBold,
+                      ),
+                      backgroundColor: Colors.black,
+                      foregroundColor: enteColorScheme.textBase,
+                      elevation: 0,
+                    ),
+                    body: Stack(
+                      children: [
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: IgnorePointer(
+                                child: AnimatedBuilder(
+                                  animation: _progressController,
+                                  builder: (BuildContext context, _) {
+                                    final List<double> segments =
+                                        List<double>.generate(
+                                      cardCount,
+                                      (int index) {
+                                        if (index < _currentIndex) {
+                                          return 1.0;
+                                        }
+                                        if (index > _currentIndex) {
+                                          return 0.0;
+                                        }
+                                        return _progressController.value
+                                            .clamp(0.0, 1.0);
+                                      },
+                                    );
+                                    return _StoryProgressBar(
+                                      progressValues: segments,
                                       colorScheme: enteColorScheme,
-                                      textTheme: textTheme,
-                                      isActive: index == _currentIndex,
-                                      gradientVariantIndex: index,
                                     );
                                   },
                                 ),
                               ),
-                            );
-                          },
+                            ),
+                            Expanded(
+                              child: LayoutBuilder(
+                                builder: (
+                                  BuildContext context,
+                                  BoxConstraints constraints,
+                                ) {
+                                  return GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTapUp: (TapUpDetails details) =>
+                                        _handleTapUp(details, constraints),
+                                    onTapCancel: () {
+                                      _suppressNextTapUp = false;
+                                    },
+                                    onLongPressStart: _handleLongPressStart,
+                                    onLongPressEnd: _handleLongPressEnd,
+                                    onLongPressCancel: _handleLongPressCancel,
+                                    onVerticalDragStart:
+                                        _handleVerticalDragStart,
+                                    onVerticalDragUpdate:
+                                        _handleVerticalDragUpdate,
+                                    onVerticalDragEnd: _handleVerticalDragEnd,
+                                    onVerticalDragCancel:
+                                        _handleVerticalDragCancel,
+                                    child: RepaintBoundary(
+                                      key: _cardBoundaryKey,
+                                      child: _MediaPreviewController(
+                                        onPreviewStart: _showMediaPreview,
+                                        onPreviewTapDown:
+                                            _handlePreviewTapDown,
+                                        onPreviewTapCancel:
+                                            _handlePreviewTapCancel,
+                                        child: PageView.builder(
+                                          physics: const PageScrollPhysics(),
+                                          controller: _pageController,
+                                          onPageChanged: _handlePageChanged,
+                                          itemCount: cardCount,
+                                          itemBuilder:
+                                              (BuildContext context, int index) {
+                                            final WrappedCard card =
+                                                _cards[index];
+                                            return _StoryCard(
+                                              card: card,
+                                              colorScheme: enteColorScheme,
+                                              textTheme: textTheme,
+                                              isActive: index == _currentIndex,
+                                              gradientVariantIndex: index,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
+                        if (!isCurrentCardBadge) ...[
+                          Positioned(
+                            right: _kStoryControlHorizontalMarginFromEdge,
+                            bottom: bottomPadding +
+                                _kStoryControlBottomMarginFromEdge,
+                            child: GestureDetector(
+                              key: _shareButtonKey,
+                              behavior: HitTestBehavior.translucent,
+                              onTap: _handleShare,
+                              child: Container(
+                                width: _kStoryControlSize,
+                                height: _kStoryControlSize,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: controlBackdropColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.share,
+                                  size: _kStoryControlIconSize,
+                                  color: controlIconColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: _kStoryControlHorizontalMarginFromEdge,
+                            bottom: bottomPadding +
+                                _kStoryControlBottomMarginFromEdge,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () => unawaited(_handleMusicToggle()),
+                              child: Container(
+                                width: _kStoryControlSize,
+                                height: _kStoryControlSize,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: controlBackdropColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  (_isMusicMuted || !_isMusicPlaying)
+                                      ? Icons.volume_off
+                                      : Icons.volume_up,
+                                  size: _kStoryControlIconSize,
+                                  color: controlIconColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (_isPreviewVisible)
+                          Positioned.fill(
+                            child: _MediaPreviewOverlay(
+                              file: _previewFile,
+                              isLoading: _isPreviewLoading,
+                              onDismiss: _hideMediaPreview,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  if (!isCurrentCardBadge) ...[
-                    Positioned(
-                      right: _kStoryControlHorizontalMarginFromEdge,
-                      bottom:
-                          bottomPadding + _kStoryControlBottomMarginFromEdge,
-                      child: GestureDetector(
-                        key: _shareButtonKey,
-                        behavior: HitTestBehavior.translucent,
-                        onTap: _handleShare,
-                        child: Container(
-                          width: _kStoryControlSize,
-                          height: _kStoryControlSize,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: controlBackdropColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.share,
-                            size: _kStoryControlIconSize,
-                            color: controlIconColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: _kStoryControlHorizontalMarginFromEdge,
-                      bottom:
-                          bottomPadding + _kStoryControlBottomMarginFromEdge,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () => unawaited(_handleMusicToggle()),
-                        child: Container(
-                          width: _kStoryControlSize,
-                          height: _kStoryControlSize,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: controlBackdropColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            (_isMusicMuted || !_isMusicPlaying)
-                                ? Icons.volume_off
-                                : Icons.volume_up,
-                            size: _kStoryControlIconSize,
-                            color: controlIconColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+                );
+              },
             ),
           );
         },
@@ -988,23 +1108,30 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _initBackgroundMusic() async {
+    if (_musicInitializationFuture != null) {
+      return _musicInitializationFuture!;
+    }
+    final Future<void> initFuture = _performBackgroundMusicInit();
+    _musicInitializationFuture = initFuture;
+    try {
+      await initFuture;
+    } finally {
+      if (identical(_musicInitializationFuture, initFuture)) {
+        _musicInitializationFuture = null;
+      }
+    }
+  }
+
+  Future<void> _performBackgroundMusicInit() async {
     _musicLoadFailed = false;
     try {
       await _ensureAudioSessionConfigured();
       const String assetPath = "assets/ente_rewind_2025_music.mp3";
-      final Duration? trackDuration = await _audioPlayer.setAsset(
+      await _audioPlayer.setAsset(
         assetPath,
         preload: true,
       );
-      final playlist = _buildLoopingMusicSource(
-        assetPath: assetPath,
-        trackDuration: trackDuration,
-      );
-      await _audioPlayer.setAudioSources(
-        playlist,
-        preload: true,
-      );
-      await _audioPlayer.setLoopMode(LoopMode.all);
+      await _audioPlayer.setLoopMode(LoopMode.one);
       await _audioPlayer.setShuffleModeEnabled(false);
       await _audioPlayer.setVolume(1.0);
       await _audioPlayer.seek(Duration.zero);
@@ -1022,8 +1149,13 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         error,
         stackTrace,
       );
+      _updateMusicPlaying(false);
       if (mounted) {
-        setState(() {});
+        setState(() {
+          _isMusicReady = false;
+        });
+      } else {
+        _isMusicReady = false;
       }
     }
   }
@@ -1170,7 +1302,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
 
   Future<void> _handleMusicToggle() async {
     if (_musicLoadFailed) {
-      showShortToast(context, "Music unavailable");
+      final bool retrySucceeded = await _retryMusicInitialization();
+      if (!retrySucceeded && mounted) {
+        showShortToast(context, "Music unavailable");
+      }
       return;
     }
     if (!_isMusicReady) {
@@ -1188,6 +1323,18 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       });
       await _pauseMusic();
     }
+  }
+
+  Future<bool> _retryMusicInitialization() async {
+    if (mounted) {
+      setState(() {
+        _isMusicMuted = false;
+      });
+    } else {
+      _isMusicMuted = false;
+    }
+    await _initBackgroundMusic();
+    return !_musicLoadFailed && _isMusicReady;
   }
 
   void _updateMusicPlaying(bool value) {
@@ -1219,38 +1366,140 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       );
     }
   }
+}
 
-  List<AudioSource> _buildLoopingMusicSource({
-    required String assetPath,
-    required Duration? trackDuration,
-  }) {
-    final Duration? clipEnd = _calculateLoopEnd(trackDuration);
-    AudioSource buildChild() {
-      final UriAudioSource base = AudioSource.asset(assetPath);
-      if (clipEnd == null) {
-        return base;
-      }
-      return ClippingAudioSource(
-        start: Duration.zero,
-        end: clipEnd,
-        child: base,
-      );
-    }
+class _MediaPreviewController extends InheritedWidget {
+  const _MediaPreviewController({
+    required super.child,
+    required this.onPreviewStart,
+    required this.onPreviewTapDown,
+    required this.onPreviewTapCancel,
+  });
 
-    return <AudioSource>[
-      buildChild(),
-      buildChild(),
-    ];
+  final void Function(MediaRef ref) onPreviewStart;
+  final VoidCallback onPreviewTapDown;
+  final VoidCallback onPreviewTapCancel;
+
+  static _MediaPreviewController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<
+        _MediaPreviewController>();
   }
 
-  Duration? _calculateLoopEnd(Duration? trackDuration) {
-    if (trackDuration == null) {
-      return null;
+  @override
+  bool updateShouldNotify(covariant _MediaPreviewController oldWidget) {
+    return oldWidget.onPreviewStart != onPreviewStart ||
+        oldWidget.onPreviewTapDown != onPreviewTapDown ||
+        oldWidget.onPreviewTapCancel != onPreviewTapCancel;
+  }
+}
+
+class _MediaPreviewOverlay extends StatelessWidget {
+  const _MediaPreviewOverlay({
+    required this.file,
+    required this.isLoading,
+    required this.onDismiss,
+  });
+
+  final EnteFile? file;
+  final bool isLoading;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color backdropColor = Colors.black.withValues(alpha: 0.45);
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onDismiss,
+            child: Container(color: backdropColor),
+          ),
+        ),
+        Center(child: _buildContent(context)),
+      ],
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (file != null) {
+      return _buildZoomableContent(context, file!);
     }
-    final Duration clipEnd = trackDuration - _kMusicLoopTrim;
-    if (clipEnd <= Duration.zero) {
-      return null;
+    if (isLoading) {
+      final EnteColorScheme colorScheme = getEnteColorScheme(context);
+      return SizedBox(
+        width: 70,
+        height: 70,
+        child: CircularProgressIndicator(
+          strokeWidth: 3,
+          color: colorScheme.primary400,
+        ),
+      );
     }
-    return clipEnd;
+    final EnteTextTheme textTheme = getEnteTextTheme(context);
+    final EnteColorScheme colorScheme = getEnteColorScheme(context);
+    final String message = file == null
+        ? "Preparing preview…"
+        : "Full preview isn't available for this media yet";
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: BoxDecoration(
+        color: colorScheme.fillFaint.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Text(
+        message,
+        style: textTheme.smallMuted,
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildZoomableContent(BuildContext context, EnteFile file) {
+    final Size size = MediaQuery.sizeOf(context);
+    final double maxWidth = size.width * 0.88;
+    final double maxHeight = size.height * 0.88;
+    return SizedBox(
+      width: maxWidth,
+      height: maxHeight,
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double boxWidth = constraints.maxWidth;
+          final double boxHeight = constraints.maxHeight;
+          final double imageAspect =
+              file.width > 0 && file.height > 0 ? file.width / file.height : 3 / 4;
+          double width = boxWidth;
+          double height = width / imageAspect;
+          if (height > boxHeight) {
+            height = boxHeight;
+            width = height * imageAspect;
+          }
+          return Center(
+            child: SizedBox(
+              width: width,
+              height: height,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                clipBehavior: Clip.antiAlias,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                  ),
+                  child: ZoomableImage(
+                    file,
+                    tagPrefix: "rewind_preview_",
+                    shouldCover: false,
+                    isGuestView: true,
+                    backgroundDecoration: const BoxDecoration(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 }

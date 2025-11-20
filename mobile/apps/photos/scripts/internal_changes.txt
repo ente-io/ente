@@ -1,3 +1,9 @@
+- Prateek: Move Add button to top in Albums, Contacts, and Location Tags screens for easier access
+- Prateek: Enable select all functionality in shared album date headers
+- Prateek: Fix "Send Link" feature to share only link text instead of image
+- Prateek: Fix continuous loading in map view when no images have location data
+- Prateek: Changelog dialog layout and scrolling improvements
+- Laurens: Minor tweaks to Ente Rewind
 - Laurens: (i) People Memory Lane feature
 - Laurens: Fix OCR for HEIC files on Android
 - Laurens: Improve UI for merging cluster with person

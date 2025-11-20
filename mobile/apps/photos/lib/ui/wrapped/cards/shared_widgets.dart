@@ -92,26 +92,31 @@ class _DetailChips extends StatelessWidget {
     if (chips.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Wrap(
-      spacing: 10,
-      runSpacing: 8,
-      children: chips
-          .map(
-            (String chip) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: colorScheme.fillFaint,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                chip,
-                style: textTheme.smallMuted.copyWith(
-                  color: textTheme.smallMuted.color ?? colorScheme.fillMuted,
+    return SizedBox(
+      width: double.infinity,
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        runAlignment: WrapAlignment.center,
+        spacing: 10,
+        runSpacing: 8,
+        children: chips
+            .map(
+              (String chip) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: colorScheme.fillFaint,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  chip,
+                  style: textTheme.smallMuted.copyWith(
+                    color: textTheme.smallMuted.color ?? colorScheme.fillMuted,
+                  ),
                 ),
               ),
-            ),
-          )
-          .toList(growable: false),
+            )
+            .toList(growable: false),
+      ),
     );
   }
 }
@@ -501,7 +506,36 @@ class _MediaTile extends StatelessWidget {
         child: content,
       );
     }
-    return content;
+    return _MediaPreviewGesture(
+      mediaRef: mediaRef,
+      child: content,
+    );
+  }
+}
+
+class _MediaPreviewGesture extends StatelessWidget {
+  const _MediaPreviewGesture({
+    required this.mediaRef,
+    required this.child,
+  });
+
+  final MediaRef mediaRef;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final _MediaPreviewController? controller =
+        _MediaPreviewController.maybeOf(context);
+    if (controller == null) {
+      return child;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => controller.onPreviewTapDown(),
+      onTap: () => controller.onPreviewStart(mediaRef),
+      onTapCancel: controller.onPreviewTapCancel,
+      child: child,
+    );
   }
 }
 

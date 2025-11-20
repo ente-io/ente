@@ -126,22 +126,25 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
     }
 
     final List<int> candidateIds = limitSelectorCandidates(
+      context,
       candidates.map((candidate) => candidate.uploadedFileID),
     );
     if (candidateIds.length < _kMinBlurryFiles) {
       return null;
     }
 
+    final Set<int> candidateSet = candidateIds.toSet();
     final Map<int, double> scoreHints = <int, double>{
       for (final _BlurryCandidate candidate in candidates)
-        if (candidateIds.contains(candidate.uploadedFileID))
+        if (candidateSet.contains(candidate.uploadedFileID))
           candidate.uploadedFileID: candidate.faceScore,
     };
+    final int maxMediaCount = math.min(_kMaxMediaPerCard, candidateIds.length);
 
     final List<MediaRef> mediaRefs = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: math.min(_kMaxMediaPerCard, candidateIds.length),
+      maxCount: maxMediaCount,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
@@ -188,6 +191,9 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       "averageFaceScore": averageScore,
     };
 
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, maxMediaCount * 2);
+
     return WrappedCard(
       type: WrappedCardType.blurryFaces,
       title: "Perfectly imperfect moments",
@@ -196,9 +202,7 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            "uploadedFileIDs": mediaRefs
-                .map((MediaRef ref) => ref.uploadedFileID)
-                .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -242,18 +246,24 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final List<int> candidateIds = prioritizedMatches
-        .map((match) => match.uploadedFileID)
-        .toList(growable: false);
+    final List<int> candidateIds = limitSelectorCandidates(
+      context,
+      prioritizedMatches.map((match) => match.uploadedFileID),
+    );
+    if (candidateIds.length < _kMaxMediaPerCard) {
+      return null;
+    }
+    final Set<int> candidateSet = candidateIds.toSet();
     final Map<int, double> scoreHints = <int, double>{
       for (final _ClipMatch match in prioritizedMatches)
-        match.uploadedFileID: math.max(
-          0.0,
-          (match.score - _kCountThreshold) * _kColorScoreBoostMultiplier,
-        ),
+        if (candidateSet.contains(match.uploadedFileID))
+          match.uploadedFileID: math.max(
+            0.0,
+            (match.score - _kCountThreshold) * _kColorScoreBoostMultiplier,
+          ),
     };
 
-    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+    final List<MediaRef> selection = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
       maxCount: _kMaxMediaPerCard,
@@ -261,24 +271,31 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       minimumSpacing: const Duration(days: 1),
       enforceDistinctness: false,
     );
+    List<MediaRef> media = selection;
 
     if (media.length < _kMaxMediaPerCard) {
       final Set<int> seen = media.map((ref) => ref.uploadedFileID).toSet();
+      final List<MediaRef> expanded =
+          List<MediaRef>.from(media, growable: true);
       for (final int id in candidateIds) {
         if (seen.add(id)) {
-          media.add(MediaRef(id));
+          expanded.add(MediaRef(id));
         }
-        if (media.length >= _kMaxMediaPerCard) {
+        if (expanded.length >= _kMaxMediaPerCard) {
           break;
         }
       }
-      if (media.length < _kMaxMediaPerCard) {
+      if (expanded.length < _kMaxMediaPerCard) {
         return null;
       }
+      media = expanded;
     }
 
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, _kMaxMediaPerCard * 2);
     final Map<String, Object?> meta = <String, Object?>{
       "dominantColor": chosenBucket.spec.displayName,
+      if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
     };
 
     final String subtitle =
@@ -314,13 +331,19 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final List<int> candidateIds = prioritizedMatches
-        .map((match) => match.uploadedFileID)
-        .toList(growable: false);
+    final List<int> candidateIds = limitSelectorCandidates(
+      context,
+      prioritizedMatches.map((match) => match.uploadedFileID),
+    );
+    if (candidateIds.length < _kMaxMediaPerCard) {
+      return null;
+    }
 
+    final Set<int> candidateSet = candidateIds.toSet();
     final Map<int, double> scoreHints = <int, double>{
       for (final _ClipMatch match in prioritizedMatches)
-        match.uploadedFileID: match.score,
+        if (candidateSet.contains(match.uploadedFileID))
+          match.uploadedFileID: match.score,
     };
 
     final List<MediaRef> primarySelection =
@@ -353,12 +376,12 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, _kMaxMediaPerCard * 2);
     final Map<String, Object?> meta = <String, Object?>{
       "matchCount": matches.length,
       "detailChips": const <String>[],
-      "uploadedFileIDs": media
-          .map((MediaRef ref) => ref.uploadedFileID)
-          .toList(growable: false),
+      if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
     };
 
     return WrappedCard(
@@ -419,17 +442,23 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       return null;
     }
 
-    final List<int> candidateIds = limitedCandidates
-        .map((match) => match.uploadedFileID)
-        .toList(growable: false);
+    final List<int> candidateIds = limitSelectorCandidates(
+      context,
+      limitedCandidates.map((match) => match.uploadedFileID),
+    );
+    if (candidateIds.length < desiredCount) {
+      return null;
+    }
+    final Set<int> candidateSet = candidateIds.toSet();
 
     final Map<int, double> scoreHints = <int, double>{
       for (final _ClipMatch match in limitedCandidates)
-        match.uploadedFileID: match.score *
-            (intersectionIds.contains(match.uploadedFileID) ? 1.5 : 1.0),
+        if (candidateSet.contains(match.uploadedFileID))
+          match.uploadedFileID: match.score *
+              (intersectionIds.contains(match.uploadedFileID) ? 1.5 : 1.0),
     };
 
-    final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
+    final List<MediaRef> selection = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
       maxCount: desiredCount,
@@ -437,28 +466,32 @@ class AestheticsCandidateBuilder extends WrappedCandidateBuilder {
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
     );
+    List<MediaRef> media = selection;
 
     if (media.length < desiredCount) {
       final Set<int> seen = media.map((ref) => ref.uploadedFileID).toSet();
+      final List<MediaRef> expanded =
+          List<MediaRef>.from(media, growable: true);
       for (final int id in candidateIds) {
         if (seen.add(id)) {
-          media.add(MediaRef(id));
+          expanded.add(MediaRef(id));
         }
-        if (media.length >= desiredCount) {
+        if (expanded.length >= desiredCount) {
           break;
         }
       }
-      if (media.length < desiredCount) {
+      if (expanded.length < desiredCount) {
         return null;
       }
+      media = expanded;
     }
 
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, desiredCount * 2);
     final Map<String, Object?> meta = <String, Object?>{
       "queries": AestheticsCandidateBuilder._kWowQueries,
       "detailChips": const <String>[],
-      "uploadedFileIDs": media
-          .map((MediaRef ref) => ref.uploadedFileID)
-          .toList(growable: false),
+      if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
     };
 
     return WrappedCard(
