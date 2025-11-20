@@ -32,6 +32,76 @@ export interface UseJoinAlbumReturn {
 }
 
 /**
+ * Build the web app redirect URL for joining an album.
+ */
+const buildWebRedirectURL = (
+    accessToken: string,
+    currentHash: string,
+    jwtToken?: string,
+): string => {
+    const webAppURL = photosAppOrigin();
+    const jwtParam = jwtToken ? `&jwt=${encodeURIComponent(jwtToken)}` : "";
+    return `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
+};
+
+/**
+ * Handle the fallback flow when the native app doesn't open.
+ * Saves JWT if needed, stores album context, and redirects to web auth.
+ */
+const handleWebFallback = async (
+    accessToken: string,
+    collectionKey: string,
+    currentHash: string,
+    publicCollection: Collection,
+    jwtToken?: string,
+): Promise<void> => {
+    // If this is a password-protected album and we have the JWT, ensure it's saved
+    if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
+        await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
+    }
+
+    // Store the album context before redirecting to auth
+    await storeJoinAlbumContext(
+        accessToken,
+        collectionKey,
+        currentHash,
+        publicCollection,
+    );
+
+    // Redirect to web app with joinAlbum parameter
+    const redirectURL = buildWebRedirectURL(accessToken, currentHash, jwtToken);
+    window.location.href = redirectURL;
+};
+
+/**
+ * Attempt to open the native app via deep link, with fallback to web.
+ * Returns a cleanup function to clear the timeout if needed.
+ */
+const tryDeepLinkWithFallback = (
+    deepLinkURL: string,
+    fallbackFn: () => Promise<void>,
+    options: {
+        /** Check this condition before executing fallback (always true for iOS) */
+        shouldFallback?: () => boolean;
+    } = {},
+): (() => void) => {
+    const { shouldFallback = () => true } = options;
+
+    // Try to open the app using the deep link
+    window.location.href = deepLinkURL;
+
+    // Set a timeout to check if the app opened
+    const timeoutId = setTimeout(async () => {
+        if (shouldFallback()) {
+            await fallbackFn();
+        }
+    }, 2500);
+
+    // Return cleanup function
+    return () => clearTimeout(timeoutId);
+};
+
+/**
  * Custom hook that provides join album logic and handlers.
  * Components can use this hook and apply their own button styling.
  */
@@ -51,6 +121,18 @@ export const useJoinAlbum = ({
 
         // Get the original hash directly from the current URL
         const currentHash = window.location.hash.slice(1);
+        const jwtToken = credentials?.current?.accessTokenJWT;
+
+        // Create fallback function for mobile deep linking
+        const fallbackToWeb = async () => {
+            await handleWebFallback(
+                accessToken,
+                collectionKey,
+                currentHash,
+                publicCollection,
+                jwtToken,
+            );
+        };
 
         // Check if on mobile and try deep link first
         if (isTouchscreen) {
@@ -61,157 +143,38 @@ export const useJoinAlbum = ({
                 userAgent.includes("iPod");
             const isAndroid = userAgent.includes("Android");
 
-            // Build the deep link URL
-            // Format: ente://shared-album?accessToken={token}#{hash}
-            const deepLinkURL = `ente://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
-
             if (isIOS) {
-                // For iOS, try universal link first, then custom scheme
-                // Universal links work better for app detection
+                // For iOS, use universal link (better for app detection)
                 const universalLink = `${photosAppOrigin()}/shared-albums?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-                // Try to open the app using the universal link
-                window.location.href = universalLink;
-
-                // Set a timeout to check if we're still on the page
-                // If we are, the app didn't open, so proceed with web flow
-                setTimeout(async () => {
-                    // If this is a password-protected album and we have the JWT, ensure it's saved
-                    const jwtToken = credentials?.current?.accessTokenJWT;
-                    if (
-                        publicCollection.publicURLs[0]?.passwordEnabled &&
-                        jwtToken
-                    ) {
-                        await savePublicCollectionAccessTokenJWT(
-                            accessToken,
-                            jwtToken,
-                        );
-                    }
-
-                    // Store the album context before redirecting to auth
-                    await storeJoinAlbumContext(
-                        accessToken,
-                        collectionKey,
-                        currentHash,
-                        publicCollection,
-                    );
-
-                    // Redirect directly to web app with joinAlbum parameter
-                    const webAppURL = photosAppOrigin();
-
-                    const jwtParam = jwtToken
-                        ? `&jwt=${encodeURIComponent(jwtToken)}`
-                        : "";
-                    const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
-
-                    window.location.href = redirectURL;
-                }, 2500);
+                tryDeepLinkWithFallback(universalLink, fallbackToWeb);
             } else if (isAndroid) {
-                // For Android, use intent URL with fallback
-                // This provides a smoother experience with automatic fallback
+                // For Android, use intent URL with automatic fallback
                 const intentURL = `intent://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=ente;package=io.ente.photos;end`;
 
-                // Try to open the app using the intent
-                window.location.href = intentURL;
-
-                // Set a timeout as fallback in case intent doesn't work
-                setTimeout(async () => {
-                    // Check if we're still on the page (app didn't open)
-                    if (document.visibilityState === "visible") {
-                        // If this is a password-protected album and we have the JWT, ensure it's saved
-                        const jwtToken = credentials?.current?.accessTokenJWT;
-                        if (
-                            publicCollection.publicURLs[0]?.passwordEnabled &&
-                            jwtToken
-                        ) {
-                            await savePublicCollectionAccessTokenJWT(
-                                accessToken,
-                                jwtToken,
-                            );
-                        }
-
-                        // Store the album context before redirecting to auth
-                        await storeJoinAlbumContext(
-                            accessToken,
-                            collectionKey,
-                            currentHash,
-                            publicCollection,
-                        );
-
-                        // Redirect directly to web app with joinAlbum parameter
-                        const webAppURL = photosAppOrigin();
-
-                        const jwtParam = jwtToken
-                            ? `&jwt=${encodeURIComponent(jwtToken)}`
-                            : "";
-                        const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
-
-                        window.location.href = redirectURL;
-                    }
-                }, 2500);
+                tryDeepLinkWithFallback(intentURL, fallbackToWeb, {
+                    // Only fallback if page is still visible (app didn't open)
+                    shouldFallback: () =>
+                        document.visibilityState === "visible",
+                });
             } else {
-                // For other mobile devices, try the custom scheme with fallback
-                window.location.href = deepLinkURL;
+                // For other mobile devices, use custom scheme
+                const deepLinkURL = `ente://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-                setTimeout(async () => {
-                    if (document.visibilityState === "visible") {
-                        // If this is a password-protected album and we have the JWT, ensure it's saved
-                        const jwtToken = credentials?.current?.accessTokenJWT;
-                        if (
-                            publicCollection.publicURLs[0]?.passwordEnabled &&
-                            jwtToken
-                        ) {
-                            await savePublicCollectionAccessTokenJWT(
-                                accessToken,
-                                jwtToken,
-                            );
-                        }
-
-                        // Store the album context before redirecting to auth
-                        await storeJoinAlbumContext(
-                            accessToken,
-                            collectionKey,
-                            currentHash,
-                            publicCollection,
-                        );
-
-                        // Redirect directly to web app with joinAlbum parameter
-                        const webAppURL = photosAppOrigin();
-
-                        const jwtParam = jwtToken
-                            ? `&jwt=${encodeURIComponent(jwtToken)}`
-                            : "";
-                        const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
-
-                        window.location.href = redirectURL;
-                    }
-                }, 2500);
+                tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
+                    shouldFallback: () =>
+                        document.visibilityState === "visible",
+                });
             }
         } else {
-            // Desktop or non-mobile: use the standard web flow
-            // If this is a password-protected album and we have the JWT, ensure it's saved
-            const jwtToken = credentials?.current?.accessTokenJWT;
-            if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
-                await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
-            }
-
-            // Store the album context before redirecting to auth
-            await storeJoinAlbumContext(
+            // Desktop: use the standard web flow directly
+            await handleWebFallback(
                 accessToken,
                 collectionKey,
                 currentHash,
                 publicCollection,
+                jwtToken,
             );
-
-            // Redirect directly to web app with joinAlbum parameter
-            const webAppURL = photosAppOrigin();
-
-            const jwtParam = jwtToken
-                ? `&jwt=${encodeURIComponent(jwtToken)}`
-                : "";
-            const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
-
-            window.location.href = redirectURL;
         }
     };
 
