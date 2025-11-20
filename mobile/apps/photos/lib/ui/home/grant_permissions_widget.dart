@@ -118,7 +118,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
               padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
               child: OutlinedButton(
                 key: const ValueKey("grantPermissionButton"),
-                onPressed: _onTapLegacyContinue,
+                onPressed: _onTapSelectFolders,
                 child: Text(AppLocalizations.of(context).continueLabel),
               ),
             ),
@@ -176,25 +176,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       setState(() {});
     }
     Bus.instance.fire(PermissionGrantedEvent());
-  }
-
-  Future<void> _onTapLegacyContinue() async {
-    try {
-      final state = await permissionService.requestPhotoMangerPermissions();
-      _logger.info("Permission state: $state");
-      if (state == PermissionState.authorized ||
-          state == PermissionState.limited) {
-        await onPermissionGranted(state);
-      } else {
-        await _showPermissionDeniedDialog();
-      }
-    } catch (e) {
-      _logger.severe(
-        "Failed to request permission: ${e.toString()}",
-        e,
-      );
-      showGenericErrorDialog(context: context, error: e).ignore();
-    }
   }
 
   Future<void> _showPermissionDeniedDialog() async {

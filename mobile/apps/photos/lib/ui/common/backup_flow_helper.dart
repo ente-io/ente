@@ -1,8 +1,11 @@
 import "package:flutter/material.dart";
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/permission_granted_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/sync/local_sync_service.dart";
+import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -20,6 +23,8 @@ Future<void> handleBackupEntryFlow(
   if (state == PermissionState.authorized ||
       state == PermissionState.limited) {
     await permissionService.onUpdatePermission(state);
+    SyncService.instance.onPermissionGranted().ignore();
+    Bus.instance.fire(PermissionGrantedEvent());
     if (context.mounted) {
       final Widget Function() targetBuilder =
           onFirstImportComplete ??

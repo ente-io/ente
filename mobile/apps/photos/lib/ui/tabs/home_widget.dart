@@ -108,6 +108,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
+  bool _personSyncTriggered = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
@@ -732,6 +733,12 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
+    if (flagService.enableOnlyBackupFuturePhotos && !_personSyncTriggered) {
+      _personSyncTriggered = true;
+      entityService.syncEntities().then((_) {
+        PersonService.instance.refreshPersonCache();
+      });
+    }
     if (_shouldShowPermissionWidget()) {
       entityService.syncEntities().then((_) {
         PersonService.instance.refreshPersonCache();
@@ -974,13 +981,17 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldEnableDrawer() {
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      return LocalSyncService.instance.hasCompletedFirstImport() ||
-          localSettings.hasOnboardingPermissionSkipped ||
-          localSettings.isOnlyNewBackupEnabled;
-    } else {
-      return LocalSyncService.instance.hasCompletedFirstImport();
+    final isFirstImportCompleted =
+        LocalSyncService.instance.hasCompletedFirstImport();
+    if (isFirstImportCompleted) {
+      return true;
     }
+    if (flagService.enableOnlyBackupFuturePhotos &&
+        (localSettings.hasOnboardingPermissionSkipped ||
+            localSettings.isOnlyNewBackupEnabled)) {
+      return true;
+    }
+    return false;
   }
 
   bool _shouldShowPermissionWidget() {

@@ -478,14 +478,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/workmanager_apple/ios"
 
 SPEC CHECKSUMS:
-  app_links: f3e17e4ee5e357b39d8b95290a9b2c299fca71c6
-  audio_session: 19e9480dbdd4e5f6c4543826b2e8b0e4ab6145fe
-  battery_info: b6c551049266af31556b93c9d9b9452cfec0219f
-  connectivity_plus: 2a701ffec2c0ae28a48cf7540e279787e77c447d
-  cupertino_http: 947a233f40cfea55167a49f2facc18434ea117ba
-  dart_ui_isolate: d5bcda83ca4b04f129d70eb90110b7a567aece14
-  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
-  emoji_picker_flutter: fe2e6151c5b548e975d546e6eeb567daf0962a58
+  app_links: 76b66b60cc809390ca1ad69bfd66b998d2387ac7
+  audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
+  battery_info: 83f3aae7be2fccefab1d2bf06b8aa96f11c8bcdd
+  connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
+  cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
+  dart_ui_isolate: 46f6714abe6891313267153ef6f9748d8ecfcab1
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  emoji_picker_flutter: ed468d9746c21711e66b2788880519a9de5de211
   ffmpeg_kit_custom: 682b4f2f1ff1f8abae5a92f6c3540f2441d5be99
   ffmpeg_kit_flutter: 915b345acc97d4142e8a9a8549d177ff10f043f5
   file_saver: 6cdbcddd690cb02b0c1a0c225b37cd805c2bf8b6
