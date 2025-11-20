@@ -13,3 +13,4 @@
 - Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
 - Neeraj: (i) Safeguards for Bitflip errors (md5, immedidate decryption)
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking
+- Prateek: (i) Run collection and person sync on skip/only-new backup flow to ensure remote albums appear after granting permissions
