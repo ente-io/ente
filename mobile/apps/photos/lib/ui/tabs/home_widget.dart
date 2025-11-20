@@ -332,7 +332,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       }
 
       // Check for action=join parameter to show join dialog
-      final shouldShowJoinDialog = uri.queryParameters['action'] == 'join';
+      final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
+          Configuration.instance.isLoggedIn();
 
       // Check for trip layout and show in webview
       if (collection.pubMagicMetadata.layout == "trip") {
