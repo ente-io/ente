@@ -15,6 +15,18 @@ type UsageRepository struct {
 	UserRepo *UserRepository
 }
 
+type LockerUsage struct {
+	TotalFileCount int64
+	TotalUsage     int64
+	Users          []UserLockerUsage
+}
+
+type UserLockerUsage struct {
+	UserID    int64
+	FileCount int64
+	Usage     int64
+}
+
 // GetUsage  gets the Storage usage of a user
 func (repo *UsageRepository) GetUsage(userID int64) (int64, error) {
 	row := repo.DB.QueryRow(`SELECT storage_consumed FROM usage WHERE user_id = $1`,
@@ -46,6 +58,58 @@ func (repo *UsageRepository) GetCombinedUsage(ctx context.Context, userIDs []int
 		return 0, nil
 	}
 	return totalUsage, stacktrace.Propagate(err, "")
+}
+
+func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64) (*LockerUsage, error) {
+	usage := &LockerUsage{}
+	if len(userIDs) == 0 {
+		return usage, nil
+	}
+
+	query := `
+		WITH locker_files AS (
+			SELECT DISTINCT c.owner_id, cf.file_id
+			FROM collection_files cf
+			JOIN collections c ON c.collection_id = cf.collection_id
+			WHERE c.app = 'locker'
+				AND c.owner_id = ANY($1)
+				AND cf.f_owner_id = c.owner_id
+				AND cf.is_deleted = false
+		)
+		SELECT
+			owner_id,
+			COUNT(DISTINCT lf.file_id) AS file_count,
+			COALESCE(SUM(ok.size), 0) AS total_size
+		FROM locker_files lf
+		LEFT JOIN object_keys ok ON ok.file_id = lf.file_id AND ok.is_deleted = false
+		GROUP BY owner_id;
+	`
+
+	rows, err := repo.DB.QueryContext(ctx, query, pq.Array(userIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ownerID, fileCount, totalSize int64
+		if scanErr := rows.Scan(&ownerID, &fileCount, &totalSize); scanErr != nil {
+			return nil, stacktrace.Propagate(scanErr, "")
+		}
+		usage.Users = append(usage.Users, UserLockerUsage{
+			UserID:    ownerID,
+			FileCount: fileCount,
+			Usage:     totalSize,
+		})
+		usage.TotalFileCount += fileCount
+		usage.TotalUsage += totalSize
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+
+	return usage, nil
 }
 
 // StorageForFamilyAdmin calculates the total storage consumed by the family for a given adminID
