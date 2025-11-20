@@ -219,7 +219,7 @@ Live Photos behave differently depending on how you share them:
 
 ### Does Ente backup Burst photos? {#burst-photos-backup}
 
-Ente backs up a single primary full-resolution image from the Burst. Additional frames from the Burst sequence are not backed up unless each photo is selected and uploaded.
+Ente backs up a single primary full-resolution image from the Burst. Additional frames from the Burst sequence are not backed up unless each frame is selected and uploaded.
 
 ## Background Sync
 
