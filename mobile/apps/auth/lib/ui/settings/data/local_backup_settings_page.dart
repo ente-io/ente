@@ -4,11 +4,7 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/data/local_backup/local_backup_experience.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-const _autoBackupToggleCopy =
-    'Creates one local backup per day when you open the app. Use "Backup now" to run an extra manual backup at any time. Backups are retained up to 5 files.';
 
 class LocalBackupSettingsPage extends StatelessWidget {
   const LocalBackupSettingsPage({super.key});
@@ -47,7 +43,7 @@ class LocalBackupSettingsPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
                   child: Text(
-                    _autoBackupToggleCopy,
+                    l10n.localBackupDailyManualCopy,
                     style: textTheme.miniFaint,
                   ),
                 ),
