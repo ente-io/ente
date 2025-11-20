@@ -15,15 +15,6 @@ class LocalBackupSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const LocalBackupAppLockVariantPage();
-  }
-}
-
-class LocalBackupAppLockVariantPage extends StatelessWidget {
-  const LocalBackupAppLockVariantPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
     return LocalBackupExperience(
       builder: (context, controller) {
         final l10n = context.l10n;

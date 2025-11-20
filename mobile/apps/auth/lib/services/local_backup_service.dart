@@ -163,7 +163,7 @@ class LocalBackupService {
       await safStream.writeFileBytes(
         treeUri,
         fileName,
-        'application/json',
+        'application/octet-stream',
         Uint8List.fromList(utf8.encode(content)),
         overwrite: true,
       );

@@ -32,7 +32,7 @@ class DataSectionWidget extends StatelessWidget {
   }
 
   Future<void> _handleLocalBackupClick(BuildContext context) async {
-    await routeToPage(context, const LocalBackupAppLockVariantPage());
+    await routeToPage(context, const LocalBackupSettingsPage());
   }
 
   Column _getSectionOptions(BuildContext context) {
