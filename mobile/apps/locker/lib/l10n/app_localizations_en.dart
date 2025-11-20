@@ -1133,7 +1133,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uploadStorageLimitErrorBody =>
-      'You\'ve run out of storage space. Please remove items or upgrade your plan to continue uploading.';
+      'You\'ve run out of storage space. Free up space to continue uploading.';
 
   @override
   String get uploadFileTooLargeErrorTitle => 'File too large';

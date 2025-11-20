@@ -2023,7 +2023,7 @@ abstract class AppLocalizations {
   /// Body shown when uploads fail due to running out of storage
   ///
   /// In en, this message translates to:
-  /// **'You\'ve run out of storage space. Please remove items or upgrade your plan to continue uploading.'**
+  /// **'You\'ve run out of storage space. Free up space to continue uploading.'**
   String get uploadStorageLimitErrorBody;
 
   /// Title shown when uploads fail because the file exceeds the supported size
