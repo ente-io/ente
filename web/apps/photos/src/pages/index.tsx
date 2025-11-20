@@ -138,7 +138,10 @@ const Page: React.FC = () => {
                         }
                     }
                 } catch (error) {
-                    log.error("Failed to store join album context from URL", error);
+                    log.error(
+                        "Failed to store join album context from URL",
+                        error,
+                    );
                     showMiniDialog({
                         title: t("error"),
                         message: t("generic_error_retry"),
