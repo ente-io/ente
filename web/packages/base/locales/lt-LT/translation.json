@@ -587,6 +587,8 @@
     "oldest_first": "Seniausią pirmiausiai",
     "pin_album": "Prisegti albumą",
     "unpin_album": "Atsegti albumą",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Šio failo nepavyko peržiūrėti.",
     "download_complete": "Atsisiuntimas baigtas",
     "downloading_album": "Atsisiunčiama {{name}}",
