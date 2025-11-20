@@ -5,13 +5,13 @@ import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -47,6 +47,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         .then((files) async {
       _pathIDToItemCount =
           await FilesDB.instance.getDevicePathIDToImportedFileCount();
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _deviceCollections = files;
         _deviceCollections!.sort((first, second) {
@@ -189,7 +192,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           key: const ValueKey("skipBackupButton"),
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(false);
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 8),
@@ -225,15 +228,21 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       for (String pathID in _allDevicePathIDs) {
         syncStatus[pathID] = _selectedDevicePathIDs.contains(pathID);
       }
-      await Configuration.instance.setHasSelectedAnyBackupFolder(
+      await localSettings.setHasSelectedAnyBackupFolder(
         _selectedDevicePathIDs.isNotEmpty,
       );
-      await Configuration.instance.setSelectAllFoldersForBackup(
+      await localSettings.setSelectAllFoldersForBackup(
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
-      Navigator.of(context).pop();
+      await localSettings.setHasManualFolderSelection(true);
+      if (localSettings.hasOnboardingPermissionSkipped) {
+        await localSettings.setOnboardingPermissionSkipped(false);
+      }
+      if (context.mounted) {
+        Navigator.of(context).pop(true);
+      }
     } catch (e, s) {
       _logger.severe("Failed to updated backup folder", e, s);
       await dialog.hide();
