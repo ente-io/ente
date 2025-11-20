@@ -1,10 +1,9 @@
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
-import { photosAppOrigin } from "ente-base/origins";
+import { albumsAppOrigin, photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
 import { savePublicCollectionAccessTokenJWT } from "ente-new/albums/services/public-albums-fdb";
-import { t } from "i18next";
 
 export interface UseJoinAlbumProps {
     /** If true, enables "Join Album" functionality */
@@ -23,12 +22,6 @@ export interface UseJoinAlbumProps {
 export interface UseJoinAlbumReturn {
     /** Handler for join album action */
     handleJoinAlbum: () => Promise<void>;
-    /** Handler for sign up/install action */
-    handleSignUpOrInstall: () => void;
-    /** Text to display on the button */
-    buttonText: string;
-    /** Whether join album is enabled */
-    isJoinEnabled: boolean;
 }
 
 /**
@@ -143,14 +136,20 @@ export const useJoinAlbum = ({
                 userAgent.includes("iPod");
             const isAndroid = userAgent.includes("Android");
 
-            if (isIOS) {
-                // For iOS, use universal link (better for app detection)
-                const universalLink = `${photosAppOrigin()}/shared-albums?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
+            // Extract hostname from albumsAppOrigin for deep linking
+            const albumsHost = new URL(albumsAppOrigin()).host;
 
-                tryDeepLinkWithFallback(universalLink, fallbackToWeb);
+            if (isIOS) {
+                // For iOS, use custom scheme with action=join parameter
+                // Format: ente://HOST/?action=join&t=TOKEN#HASH
+                const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
+
+                tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
             } else if (isAndroid) {
                 // For Android, use intent URL with automatic fallback
-                const intentURL = `intent://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=ente;package=io.ente.photos;end`;
+                // Hash must be in query params since intent URLs only support one fragment (#Intent)
+                // Format: intent://HOST/?action=join&t=TOKEN&hash=HASH#Intent;scheme=https;package=io.ente.photos;end
+                const intentURL = `intent://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}&hash=${encodeURIComponent(currentHash)}#Intent;scheme=https;package=io.ente.photos;end`;
 
                 tryDeepLinkWithFallback(intentURL, fallbackToWeb, {
                     // Only fallback if page is still visible (app didn't open)
@@ -158,8 +157,9 @@ export const useJoinAlbum = ({
                         document.visibilityState === "visible",
                 });
             } else {
-                // For other mobile devices, use custom scheme
-                const deepLinkURL = `ente://shared-album?accessToken=${encodeURIComponent(accessToken)}#${currentHash}`;
+                // For other mobile devices, use custom scheme with action=join parameter
+                // Format: ente://HOST/?action=join&t=TOKEN#HASH
+                const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
                 tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
                     shouldFallback: () =>
@@ -178,50 +178,7 @@ export const useJoinAlbum = ({
         }
     };
 
-    const handleSignUpOrInstall = () => {
-        if (typeof window === "undefined") return;
-
-        if (isTouchscreen) {
-            // For mobile devices, redirect to app stores
-            const userAgent = navigator.userAgent || "";
-            const isIOS =
-                userAgent.includes("iPad") ||
-                userAgent.includes("iPhone") ||
-                userAgent.includes("iPod");
-            const isAndroid = userAgent.includes("Android");
-
-            if (isIOS) {
-                window.open(
-                    "https://apps.apple.com/app/id1542026904",
-                    "_blank",
-                    "noopener",
-                );
-            } else if (isAndroid) {
-                window.open(
-                    "https://play.google.com/store/apps/details?id=io.ente.photos",
-                    "_blank",
-                    "noopener",
-                );
-            } else {
-                // For other touchscreen devices, fall back to web
-                window.open(photosAppOrigin(), "_blank", "noopener");
-            }
-        } else {
-            // For desktop or other platforms, redirect to photos app
-            window.open(photosAppOrigin(), "_blank", "noopener");
-        }
-    };
-
-    const buttonText = enableJoin
-        ? t("join_album")
-        : isTouchscreen
-          ? t("install")
-          : t("sign_up");
-
     return {
         handleJoinAlbum,
-        handleSignUpOrInstall,
-        buttonText,
-        isJoinEnabled: !!enableJoin,
     };
 };

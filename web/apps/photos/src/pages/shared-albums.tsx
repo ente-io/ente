@@ -78,7 +78,6 @@ import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
@@ -100,6 +99,8 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
+import { getSignUpOrInstallURL } from "utils/public-album";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -730,76 +731,14 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
     collectionKey,
     credentials,
 }) => {
-    // Touchscreen devices are overwhemingly likely to be Android or iOS.
     const isTouchscreen = useIsTouchscreen();
-
-    const handleJoinAlbum = async () => {
-        if (!publicCollection || !accessToken || !collectionKey) {
-            return;
-        }
-
-        // Get the original hash directly from the current URL
-        const currentHash = window.location.hash.slice(1);
-
-        // If this is a password-protected album and we have the JWT, ensure it's saved
-        const jwtToken = credentials?.current?.accessTokenJWT;
-        if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
-            await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
-        }
-
-        // Store the album context before redirecting to auth
-        await storeJoinAlbumContext(
-            accessToken,
-            collectionKey,
-            currentHash,
-            publicCollection,
-        );
-
-        // On mobile: Use platform-specific deep linking
-        if (isTouchscreen) {
-            const userAgent = navigator.userAgent || "";
-            const isAndroid = userAgent.includes("Android");
-
-            let deepLinkURL: string;
-
-            if (isAndroid) {
-                // Android: Use Intent URL format which preserves the HTTPS URL structure
-                // Include action=join so the app knows to auto-join the album
-                // Format: intent://albums.ente.io/?action=join&t=TOKEN#HASH#Intent;scheme=https;package=io.ente.photos;end
-                deepLinkURL = `intent://albums.ente.io/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}#Intent;scheme=https;package=io.ente.photos;end`;
-            } else {
-                // iOS: Use custom scheme with action=join parameter
-                // Format: ente://albums.ente.io/?action=join&t=TOKEN#HASH
-                deepLinkURL = `ente://albums.ente.io/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
-            }
-
-            window.location.href = deepLinkURL;
-
-            // Fallback to web auth if app doesn't open
-            setTimeout(() => {
-                if (document.visibilityState === "visible") {
-                    const webAppURL = photosAppOrigin();
-
-                    const jwtParam = jwtToken
-                        ? `&jwt=${encodeURIComponent(jwtToken)}`
-                        : "";
-                    const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
-
-                    window.location.href = redirectURL;
-                }
-            }, 2000);
-        } else {
-            // Desktop: Redirect directly to web app with joinAlbum parameter
-            const webAppURL = photosAppOrigin();
-
-            const jwtParam = jwtToken
-                ? `&jwt=${encodeURIComponent(jwtToken)}`
-                : "";
-            const redirectURL = `${webAppURL}/?joinAlbum=${accessToken}${jwtParam}#${currentHash}`;
-
-            window.location.href = redirectURL;
-        }
-    };
+    const { handleJoinAlbum } = useJoinAlbum({
+        enableJoin,
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
 
     if (enableJoin) {
         return (
@@ -809,30 +748,8 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
         );
     }
 
-    // Get the appropriate URL for signup/install
-    const getActionURL = () => {
-        if (isTouchscreen) {
-            // For mobile devices, redirect to app stores
-            const userAgent = navigator.userAgent || "";
-            const isIOS =
-                userAgent.includes("iPad") ||
-                userAgent.includes("iPhone") ||
-                userAgent.includes("iPod");
-            const isAndroid = userAgent.includes("Android");
-
-            if (isIOS) {
-                return "https://apps.apple.com/app/id1542026904";
-            } else if (isAndroid) {
-                return "https://play.google.com/store/apps/details?id=io.ente.photos";
-            }
-            // For other touchscreen devices, fall back to web
-        }
-        // For desktop or other platforms, redirect to photos app
-        return photosAppOrigin();
-    };
-
     return (
-        <Button color="accent" href={getActionURL()}>
+        <Button color="accent" href={getSignUpOrInstallURL(isTouchscreen)}>
             {isTouchscreen ? t("install") : t("sign_up")}
         </Button>
     );
