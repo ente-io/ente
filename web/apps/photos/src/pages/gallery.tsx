@@ -278,7 +278,7 @@ const Page: React.FC = () => {
         [],
     );
 
-    // Local aliases - provide defaults when state is not yet initialized
+    // Local aliases.
     const {
         user,
         favoriteFileIDs,
@@ -312,8 +312,12 @@ const Page: React.FC = () => {
         () =>
             barMode == "hidden-albums"
                 ? state.hiddenCollectionSummaries
-                : normalCollectionSummaries,
-        [barMode, state.hiddenCollectionSummaries, normalCollectionSummaries],
+                : state.normalCollectionSummaries,
+        [
+            barMode,
+            state.hiddenCollectionSummaries,
+            state.normalCollectionSummaries,
+        ],
     );
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
@@ -349,6 +353,9 @@ const Page: React.FC = () => {
             initSettings();
             setupSelectAllKeyBoardShortcutHandler();
 
+            // Show the initial state while the rest of the sequence proceeds.
+            dispatch({ type: "showAll" });
+
             // If this is the user's first login on this client, then show them
             // a message informing the that the initial load might take time.
             setIsFirstLoad(getAndClearIsFirstLogin());
@@ -359,7 +366,7 @@ const Page: React.FC = () => {
                 showPlanSelector();
             }
 
-            // Initialize the reducer FIRST before any dispatches
+            // Initialize the reducer.
             const user = ensureLocalUser();
             const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
@@ -370,9 +377,6 @@ const Page: React.FC = () => {
                 collectionFiles: await savedCollectionFiles(),
                 trashItems: await savedTrashItems(),
             });
-
-            // Show the initial state while data loads
-            dispatch({ type: "showAll" });
 
             // Check for pending album join BEFORE fetching data
             let joinedAlbumId: number | null = null;
