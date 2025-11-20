@@ -569,6 +569,8 @@ const PersonPinnedIcon = styled(Overlay)`
     display: flex;
     justify-content: flex-start;
     align-items: flex-end;
+    color: white;
+    z-index: 1;
     & > .MuiSvgIcon-root {
         font-size: 20px;
     }
@@ -601,12 +603,14 @@ const PersonCard: React.FC<PersonCardProps> = ({
             coverFaceID={person.displayFaceID}
             onClick={() => onSelectPerson(person.id)}
         >
+            {person.name && <CardText>{person.name}</CardText>}
             {person.isPinned && (
                 <PersonPinnedIcon>
-                    <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
+                    <PushPinIcon
+                        sx={{ "&&": { fontSize: "18px", color: "white" } }}
+                    />
                 </PersonPinnedIcon>
             )}
-            {person.name && <CardText>{person.name}</CardText>}
         </ItemCard>
         {activePerson?.id === person.id && <ActiveIndicator />}
     </div>
