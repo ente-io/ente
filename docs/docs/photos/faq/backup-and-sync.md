@@ -184,6 +184,12 @@ Open `Settings > Backup > Backup status` to see:
 - Check the sync status indicator in the bottom right corner
 - Click to expand and see detailed progress
 
+### How does Ente handle media when Optimize iPhone Storage is enabled? {#optimize-iphone-storage}
+
+When Optimize iPhone Storage is enabled, iOS keeps lower-resolution previews on your device. Ente displays those previews during on-device viewing.
+
+However, for backup, Ente always retrieves the original, full-resolution photo or video directly from iCloud. The same full-resolution files will be available when you download them from Ente.
+
 ### Does Ente backup Live Photos from iPhone? {#live-photos-backup}
 
 Yes! Ente fully supports Live Photos from iPhone.
