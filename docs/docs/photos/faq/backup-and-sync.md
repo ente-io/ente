@@ -223,6 +223,10 @@ Live Photos behave differently depending on how you share them:
 - **Using "Download"**: Downloads the complete Live Photo (image + video)
 - **Using "Share" button to save/download**: Only saves the still image
 
+### Does Ente backup Burst photos? {#burst-photos-backup}
+
+Ente backs up a single primary full-resolution image from the Burst. Additional frames from the Burst sequence are not backed up unless each frame is selected and uploaded.
+
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}
