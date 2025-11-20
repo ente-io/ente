@@ -80,111 +80,28 @@ class LocalBackupSettingsPage extends StatelessWidget {
                               },
                             ),
                             const SizedBox(height: 20),
-                            Material(
-                              color: colorScheme.fillFaint,
-                              borderRadius: BorderRadius.circular(12),
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () async {
-                                  await controller.changeLocation();
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Backup location',
-                                              style: textTheme.body,
-                                            ),
-                                            const SizedBox(height: 6),
-                                            _LocationPreview(
-                                              controller: controller,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () async {
-                                          await controller.changeLocation();
-                                        },
-                                        style: TextButton.styleFrom(
-                                          backgroundColor:
-                                              colorScheme.fillMuted,
-                                          shape: const StadiumBorder(),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 18,
-                                            vertical: 12,
-                                          ),
-                                          minimumSize: const Size(0, 44),
-                                        ),
-                                        child: Text(
-                                          'Change folder',
-                                          style: textTheme.smallBold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            _BackupLocationCard(
+                              controller: controller,
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
                             ),
                             const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: TextButton(
-                                onPressed: () async {
-                                  await controller.runManualBackup();
-                                },
-                                style: TextButton.styleFrom(
-                                  foregroundColor: colorScheme.textBase,
-                                  backgroundColor: colorScheme.fillFaint,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                ),
-                                child: Text(
-                                  'Backup now (manual)',
-                                  style: textTheme.bodyBold,
-                                ),
-                              ),
+                            _BackupButton(
+                              onPressed: controller.runManualBackup,
+                              label: 'Backup now (manual)',
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
                             ),
                           ],
                         )
                       : (kDebugMode
                           ? Padding(
                               padding: const EdgeInsets.only(top: 12),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: TextButton(
-                                  onPressed: () async {
-                                    await controller.resetBackupLocation();
-                                  },
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colorScheme.textBase,
-                                    backgroundColor: colorScheme.fillFaint,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 12),
-                                  ),
-                                  child: Text(
-                                    'Reset backup folder',
-                                    style: textTheme.bodyBold,
-                                  ),
-                                ),
+                              child: _BackupButton(
+                                onPressed: controller.resetBackupLocation,
+                                label: 'Reset backup folder',
+                                colorScheme: colorScheme,
+                                textTheme: textTheme,
                               ),
                             )
                           : const SizedBox.shrink()),
@@ -276,6 +193,110 @@ class _LocationPreview extends StatelessWidget {
     }
 
     return Text('Select a backup folder', style: muted);
+  }
+}
+
+class _BackupLocationCard extends StatelessWidget {
+  const _BackupLocationCard({
+    required this.controller,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final LocalBackupExperienceController controller;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: colorScheme.fillFaint,
+      borderRadius: BorderRadius.circular(12),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () async {
+          await controller.changeLocation();
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Backup location',
+                      style: textTheme.body,
+                    ),
+                    const SizedBox(height: 6),
+                    _LocationPreview(controller: controller),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await controller.changeLocation();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: colorScheme.fillMuted,
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 12,
+                  ),
+                  minimumSize: const Size(0, 44),
+                ),
+                child: Text(
+                  'Change folder',
+                  style: textTheme.smallBold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BackupButton extends StatelessWidget {
+  const _BackupButton({
+    required this.onPressed,
+    required this.label,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final Future<void> Function() onPressed;
+  final String label;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          foregroundColor: colorScheme.textBase,
+          backgroundColor: colorScheme.fillFaint,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: Text(
+          label,
+          style: textTheme.bodyBold,
+        ),
+      ),
+    );
   }
 }
 
