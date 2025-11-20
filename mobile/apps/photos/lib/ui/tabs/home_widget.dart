@@ -734,9 +734,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    _ensureCollectionsSync();
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
+      _ensureCollectionsSync();
     }
     if (_shouldShowPermissionWidget()) {
       _ensurePersonSync();
@@ -1035,6 +1035,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     _collectionsSyncTriggered = true;
-    CollectionsService.instance.sync().ignore();
+    if (localSettings.hasOnboardingPermissionSkipped ||
+        localSettings.isOnlyNewBackupEnabled) {
+      CollectionsService.instance.sync().ignore();
+    }
   }
 }
