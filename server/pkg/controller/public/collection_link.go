@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -44,7 +45,7 @@ type CollectionLinkController struct {
 func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	app := auth.GetApp(ctx)
 	for attempt := 0; attempt < 5; attempt++ {
-		accessToken := shortuuid.New()[0:AccessTokenLength]
+		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		err := c.CollectionLinkRepo.
 			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
 		if errors.Is(err, ente.ErrAccessTokenInUse) {
