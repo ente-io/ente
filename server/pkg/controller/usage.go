@@ -29,6 +29,7 @@ type UsageController struct {
 
 const MaxLockerFiles = 1000
 const hundredMBInBytes = 100 * 1024 * 1024
+const lockerFamilyStorageLimit = 10 * 1024 * 1024 * 1024 // 10 GiB
 
 // CanUploadFile returns error if the file of given size (with StorageOverflowAboveSubscriptionLimit buffer) can be
 // uploaded or not. If size is not passed, it validates if current usage is less than subscription storage.
@@ -93,6 +94,24 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 	} else {
 		subscriptionAdminID = userID
 		subscriptionUserIDs = []int64{userID}
+	}
+
+	if app == ente.Locker {
+		lockerUsage, lUsageErr := c.UsageRepo.GetLockerUsage(ctx, subscriptionUserIDs)
+		if lUsageErr != nil {
+			return stacktrace.Propagate(lUsageErr, "failed to fetch locker usage")
+		}
+		projectedLockerUsage := lockerUsage.TotalUsage
+		if size != nil {
+			projectedLockerUsage += *size
+		}
+		if lockerUsage.TotalFileCount >= MaxLockerFiles {
+			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
+		}
+		if projectedLockerUsage >= lockerFamilyStorageLimit {
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
+				fmt.Sprintf("locker family storage limit exceeded (limit %d, usage %d)", lockerFamilyStorageLimit, projectedLockerUsage))
+		}
 	}
 
 	var subStorage int64
