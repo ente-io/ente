@@ -587,8 +587,6 @@
     "oldest_first": "最旧在前",
     "pin_album": "置顶相册",
     "unpin_album": "取消置顶相册",
-    "pin_person": "",
-    "unpin_person": "",
     "unpreviewable_file_message": "无法预览此文件",
     "download_complete": "下载完成",
     "downloading_album": "正在下载 {{name}}",

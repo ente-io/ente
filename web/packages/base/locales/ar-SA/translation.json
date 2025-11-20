@@ -587,8 +587,6 @@
     "oldest_first": "الأقدم أولاً",
     "pin_album": "تثبيت الألبوم",
     "unpin_album": "إلغاء تثبيت الألبوم",
-    "pin_person": "",
-    "unpin_person": "",
     "unpreviewable_file_message": "تعذرت معاينة هذا الملف",
     "download_complete": "اكتمل التنزيل",
     "downloading_album": "جاري تنزيل {{name}}",
