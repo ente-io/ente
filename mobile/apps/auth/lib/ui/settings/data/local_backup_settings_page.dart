@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 const _autoBackupToggleCopy =
-    'Backs up your 2FA codes locally. The backup updates automatically whenever you add, edit, or delete a code.';
+    'Creates one local backup per day when you open the app. Use "Backup now" to run an extra manual backup at any time. Backups are retained up to 5 files.';
 
 class LocalBackupSettingsPage extends StatelessWidget {
   const LocalBackupSettingsPage({super.key});
@@ -56,7 +56,7 @@ class LocalBackupAppLockVariantPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
                   child: Text(
-                    '$_autoBackupToggleCopy\n\nBackups are retained up to 5 files.',
+                    _autoBackupToggleCopy,
                     style: textTheme.miniFaint,
                   ),
                 ),
@@ -149,30 +149,29 @@ class LocalBackupAppLockVariantPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            if (kDebugMode) ...[
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: double.infinity,
-                                child: TextButton(
-                                  onPressed: () async {
-                                    await controller.runManualBackup();
-                                  },
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: colorScheme.textBase,
-                                    backgroundColor: colorScheme.fillFaint,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 12),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: TextButton(
+                                onPressed: () async {
+                                  await controller.runManualBackup();
+                                },
+                                style: TextButton.styleFrom(
+                                  foregroundColor: colorScheme.textBase,
+                                  backgroundColor: colorScheme.fillFaint,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: Text(
-                                    'Backup now',
-                                    style: textTheme.bodyBold,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
                                   ),
                                 ),
+                                child: Text(
+                                  'Backup now (manual)',
+                                  style: textTheme.bodyBold,
+                                ),
                               ),
-                            ],
+                            ),
                           ],
                         )
                       : (kDebugMode

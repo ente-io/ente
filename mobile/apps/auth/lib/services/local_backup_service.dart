@@ -19,21 +19,27 @@ class LocalBackupService {
   LocalBackupService._privateConstructor();
 
   static const int _maxBackups = 5;
+  static const _lastBackupDayKey = 'lastBackupDay';
 
   // to create an encrypted backup file if the toggle is on
-  Future<void> triggerAutomaticBackup() async {
+  Future<bool> triggerAutomaticBackup({bool isManual = false}) async {
+    bool success = false;
     try {
       final prefs = await SharedPreferences.getInstance();
 
       final isEnabled = prefs.getBool('isAutoBackupEnabled') ?? false;
       if (!isEnabled) {
-        return;
+        return false;
       }
 
       final backupPath = prefs.getString('autoBackupPath');
       final backupTreeUri = prefs.getString('autoBackupTreeUri');
       if (backupPath == null && (backupTreeUri == null || backupTreeUri.isEmpty)) {
-        return;
+        return false;
+      }
+
+      if (!isManual && _hasBackedUpToday(prefs)) {
+        return false;
       }
 
       Directory? backupDirectory;
@@ -46,7 +52,7 @@ class LocalBackupService {
       final password = await storage.read(key: 'autoBackupPassword');
       if (password == null || password.isEmpty) {
         _logger.warning("Automatic backup skipped: password not set.");
-        return;
+        return false;
       }
 
       _logger.info("Change detected, triggering automatic encrypted backup...");
@@ -75,7 +81,7 @@ class LocalBackupService {
       final plainTextContent = cleanedLines.join('\n');
 
       if (plainTextContent.trim().isEmpty) {
-        return;
+        return false;
       }
 
       final kekSalt = CryptoUtil.getSaltToDeriveKey();
@@ -108,7 +114,9 @@ class LocalBackupService {
       final now = DateTime.now();
       final formatter = DateFormat('yyyy-MM-dd_HH-mm-ss');
       final formattedDate = formatter.format(now);
-      final fileName = 'ente-auth-auto-backup-$formattedDate.json';
+      final fileName = isManual
+          ? 'ente-auth-manual-backup-$formattedDate.json'
+          : 'ente-auth-daily-backup-$formattedDate.json';
 
       if (backupTreeUri != null && backupTreeUri.isNotEmpty) {
         await _writeBackupWithSaf(
@@ -116,6 +124,7 @@ class LocalBackupService {
           fileName,
           encryptedJson,
         );
+        success = true;
       } else if (backupDirectory != null) {
         final filePath = '${backupDirectory.path}/$fileName';
         final backupFile = File(filePath);
@@ -125,10 +134,23 @@ class LocalBackupService {
         _logger.info(
           'Automatic encrypted backup successful! Saved to: $filePath',
         );
+        success = true;
+      }
+      if (success && !isManual) {
+        await _recordBackupDay(prefs, now);
       }
     } catch (e, s) {
       _logger.severe('Silent error during automatic backup', e, s);
     }
+    return success;
+  }
+
+  Future<bool> triggerDailyBackupIfNeeded() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_hasBackedUpToday(prefs)) {
+      return false;
+    }
+    return triggerAutomaticBackup();
   }
 
   Future<void> _writeBackupWithSaf(
@@ -161,12 +183,14 @@ class LocalBackupService {
       final files = directory.listSync()
           .where((entity) =>
               entity is File &&
-              entity.path.split('/').last.startsWith('ente-auth-auto-backup-'),)
+              _isBackupFile(entity.path.split('/').last),)
           .map((entity) => entity as File)
           .toList();
 
-      // sort the fetched files in asc order (oldest first because the name is a timestamp)
-      files.sort((a, b) => a.path.compareTo(b.path));
+      // sort by last modified (oldest first)
+      files.sort(
+        (a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()),
+      );
 
       // if we have more files than our limit, delete the oldest ones (current limit=_maxBackups)
       while (files.length > _maxBackups) {
@@ -195,7 +219,7 @@ _logger.info('Backup count is now ${files.length}. Cleanup complete.');
       final files = directory.listSync()
           .where((entity) =>
               entity is File &&
-              entity.path.split('/').last.startsWith('ente-auth-auto-backup-'),)
+              _isBackupFile(entity.path.split('/').last),)
           .map((entity) => entity as File)
           .toList();
 
@@ -213,5 +237,22 @@ _logger.info('Backup count is now ${files.length}. Cleanup complete.');
     } catch (e, s) {
       _logger.severe('Error during full backup cleanup of old directory', e, s);
     }
+  }
+
+  bool _hasBackedUpToday(SharedPreferences prefs) {
+    final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final last = prefs.getString(_lastBackupDayKey);
+    return last == todayKey;
+  }
+
+  Future<void> _recordBackupDay(SharedPreferences prefs, DateTime now) async {
+    final dayKey = DateFormat('yyyy-MM-dd').format(now);
+    await prefs.setString(_lastBackupDayKey, dayKey);
+  }
+
+  bool _isBackupFile(String fileName) {
+    return fileName.startsWith('ente-auth-daily-backup-') ||
+        fileName.startsWith('ente-auth-manual-backup-') ||
+        fileName.startsWith('ente-auth-auto-backup-');
   }
 }

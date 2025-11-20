@@ -158,7 +158,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     setState(() {
       _isBackupEnabled = true;
     });
-    await LocalBackupService.instance.triggerAutomaticBackup();
+    await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
     _showSnackBar(context.l10n.initialBackupCreated);
     return true;
   }
@@ -199,7 +199,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         }
       }
 
-      await LocalBackupService.instance.triggerAutomaticBackup();
+      await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
       if (showSnackBar) {
         _showSnackBar(context.l10n.initialBackupCreated);
       }
@@ -577,7 +577,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     if (Platform.isAndroid) {
       final saved = await _pickAndPersistAndroidLocation();
       if (saved) {
-        await LocalBackupService.instance.triggerAutomaticBackup();
+        await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
       } else if (requireSelection) {
         _showSnackBar('Select a folder to continue');
       }
@@ -592,7 +592,9 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
               successMessage ?? context.l10n.locationUpdatedAndBackupCreated,
         );
         if (saved) {
-          await LocalBackupService.instance.triggerAutomaticBackup();
+          await LocalBackupService.instance.triggerAutomaticBackup(
+            isManual: true,
+          );
         }
         return saved;
       }
