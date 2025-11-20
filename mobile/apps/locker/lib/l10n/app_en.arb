@@ -598,7 +598,7 @@
   "@uploadStorageLimitErrorTitle": {
     "description": "Title shown when uploads fail due to running out of storage"
   },
-  "uploadStorageLimitErrorBody": "You've run out of storage space. Please remove items or upgrade your plan to continue uploading.",
+  "uploadStorageLimitErrorBody": "You've run out of storage space. Free up space to continue uploading.",
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
