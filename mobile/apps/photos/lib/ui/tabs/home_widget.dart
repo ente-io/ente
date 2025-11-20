@@ -109,6 +109,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
   bool _personSyncTriggered = false;
+  bool _collectionsSyncTriggered = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
@@ -733,6 +734,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
+    _ensureCollectionsSync();
     if (flagService.enableOnlyBackupFuturePhotos) {
       _ensurePersonSync();
     }
@@ -1026,5 +1028,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     entityService.syncEntities().then((_) {
       PersonService.instance.refreshPersonCache();
     });
+  }
+
+  void _ensureCollectionsSync() {
+    if (_collectionsSyncTriggered) {
+      return;
+    }
+    _collectionsSyncTriggered = true;
+    CollectionsService.instance.sync().ignore();
   }
 }
