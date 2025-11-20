@@ -241,6 +241,7 @@ class PersonService {
     required String clusterID,
     bool isHidden = false,
     bool isPinned = false,
+    bool hideFromMemories = false,
     String? birthdate,
     String? email,
   }) async {
@@ -255,6 +256,7 @@ class PersonService {
       ],
       isHidden: isHidden,
       isPinned: isPinned,
+      hideFromMemories: hideFromMemories,
       birthDate: birthdate,
       email: email,
     );
@@ -533,6 +535,7 @@ class PersonService {
     String? avatarFaceId,
     bool? isHidden,
     bool? isPinned,
+    bool? hideFromMemories,
     int? version,
     String? birthDate,
     String? email,
@@ -544,6 +547,7 @@ class PersonService {
         avatarFaceId: avatarFaceId,
         isHidden: isHidden,
         isPinned: isPinned,
+        hideFromMemories: hideFromMemories,
         version: version,
         birthDate: birthDate,
         email: email,
@@ -551,6 +555,10 @@ class PersonService {
     );
     await updatePerson(updatedPerson);
     await refreshPersonCache();
+    if (hideFromMemories != null &&
+        hideFromMemories != person.data.hideFromMemories) {
+      memoriesCacheService.queueUpdateCache();
+    }
     return updatedPerson;
   }
 

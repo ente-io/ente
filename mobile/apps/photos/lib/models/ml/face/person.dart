@@ -53,6 +53,7 @@ class PersonData {
   /// WARNING: When checking whether to show a person, use [isIgnored] instead, as it also checks legacy hidden names.
   final bool isHidden;
   final bool isPinned;
+  final bool hideFromMemories;
 
   String? avatarFaceID;
   List<ClusterInfo> assigned = List<ClusterInfo>.empty();
@@ -80,6 +81,7 @@ class PersonData {
     this.avatarFaceID,
     this.isHidden = false,
     this.isPinned = false,
+    this.hideFromMemories = false,
     this.birthDate,
     this.email,
     this.userID,
@@ -91,6 +93,7 @@ class PersonData {
     String? avatarFaceId,
     bool? isHidden,
     bool? isPinned,
+    bool? hideFromMemories,
     int? version,
     String? birthDate,
     String? email,
@@ -103,6 +106,7 @@ class PersonData {
       avatarFaceID: avatarFaceId ?? avatarFaceID,
       isHidden: isHidden ?? this.isHidden,
       isPinned: isPinned ?? this.isPinned,
+      hideFromMemories: hideFromMemories ?? this.hideFromMemories,
       birthDate: birthDate ?? this.birthDate,
       email: email ?? this.email,
       userID: userID ?? this.userID,
@@ -136,6 +140,7 @@ class PersonData {
         'avatarFaceID': avatarFaceID,
         'isHidden': isHidden,
         'isPinned': isPinned,
+        'hideFromMemories': hideFromMemories,
         'birthDate': birthDate,
         'email': email,
         'userID': userID,
@@ -166,6 +171,7 @@ class PersonData {
       avatarFaceID: json['avatarFaceID'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       isPinned: json['isPinned'] as bool? ?? false,
+      hideFromMemories: json['hideFromMemories'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
       userID: json['userID'] as int?,
       email: json['email'] as String?,

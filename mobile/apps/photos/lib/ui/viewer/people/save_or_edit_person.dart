@@ -14,6 +14,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -69,6 +70,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   String? _selectedDate;
   String? _email;
   bool _isPinned = false;
+  bool _hideFromMemories = false;
   bool userAlreadyAssigned = false;
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
@@ -84,6 +86,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     _email = widget.person?.data.email;
     person = widget.person;
     _isPinned = widget.person?.data.isPinned ?? false;
+    _hideFromMemories = widget.person?.data.hideFromMemories ?? false;
   }
 
   @override
@@ -384,6 +387,24 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             singleBorderRadius: 8,
             isGestureDetectorDisabled: true,
           ),
+          const SizedBox(height: 12),
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: context.l10n.hideFromMemories,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () => _hideFromMemories,
+              onChanged: () async {
+                if (!mounted) return;
+                setState(() {
+                  _hideFromMemories = !_hideFromMemories;
+                });
+                memoriesCacheService.queueUpdateCache();
+              },
+            ),
+            singleBorderRadius: 8,
+            isGestureDetectorDisabled: true,
+          ),
         ],
       ),
     );
@@ -606,6 +627,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         name: text,
         clusterID: clusterID,
         isPinned: _isPinned,
+        hideFromMemories: _hideFromMemories,
         birthdate: birthdate,
         email: email,
       );
@@ -637,7 +659,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       ? (_inputName.trim() != person!.data.name ||
           _selectedDate != person!.data.birthDate ||
           _email != person!.data.email ||
-          _isPinned != person!.data.isPinned)
+          _isPinned != person!.data.isPinned ||
+          _hideFromMemories != person!.data.hideFromMemories)
       : _inputName.trim().isNotEmpty;
 
   Future<PersonEntity?> updatePerson(BuildContext context) async {
@@ -656,6 +679,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         name: name,
         birthDate: birthDate,
         isPinned: _isPinned,
+        hideFromMemories: _hideFromMemories,
         email: _email,
       );
 
