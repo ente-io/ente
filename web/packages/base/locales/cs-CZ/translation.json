@@ -587,6 +587,8 @@
     "oldest_first": "Od nejstaršího",
     "pin_album": "Připnout album",
     "unpin_album": "Odepnout album",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Tento soubor nelze zobrazit",
     "download_complete": "Stahování dokončeno",
     "downloading_album": "Stahuji {{name}}",

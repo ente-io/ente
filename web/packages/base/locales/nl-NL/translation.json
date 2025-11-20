@@ -587,6 +587,8 @@
     "oldest_first": "Oudste eerst",
     "pin_album": "Album bovenaan vastzetten",
     "unpin_album": "Album losmaken",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Dit bestand kan niet worden bekeken in de app",
     "download_complete": "Download compleet",
     "downloading_album": "{{name}} downloaden",
