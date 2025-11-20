@@ -204,8 +204,8 @@ class _BackupLocationCard extends StatelessWidget {
   });
 
   final LocalBackupExperienceController controller;
-  final EnteColorScheme colorScheme;
-  final EnteTextTheme textTheme;
+  final dynamic colorScheme;
+  final dynamic textTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -274,8 +274,8 @@ class _BackupButton extends StatelessWidget {
 
   final Future<void> Function() onPressed;
   final String label;
-  final EnteColorScheme colorScheme;
-  final EnteTextTheme textTheme;
+  final dynamic colorScheme;
+  final dynamic textTheme;
 
   @override
   Widget build(BuildContext context) {
