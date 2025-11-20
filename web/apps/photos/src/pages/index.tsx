@@ -7,6 +7,7 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import {
     albumsAppOrigin,
     customAPIHost,
@@ -136,8 +137,12 @@ const Page: React.FC = () => {
                             );
                         }
                     }
-                } catch {
-                    // Join errors are already handled with user-facing messages in gallery.tsx
+                } catch (error) {
+                    log.error("Failed to store join album context from URL", error);
+                    showMiniDialog({
+                        title: t("error"),
+                        message: t("generic_error_retry"),
+                    });
                 }
             }
 

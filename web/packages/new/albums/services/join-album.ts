@@ -2,6 +2,7 @@ import { savedKeyAttributes } from "ente-accounts/services/accounts-db";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { boxSeal } from "ente-base/crypto";
 import { authenticatedRequestHeaders } from "ente-base/http";
+import log from "ente-base/log";
 import { albumsAppOrigin, apiURL } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
 
@@ -118,6 +119,10 @@ export const joinPublicAlbum = async (
     });
 
     if (!response.ok) {
+        log.error("Album join API failed", {
+            collectionID,
+            status: response.status,
+        });
         let errorMessage = `Failed to join album (status: ${response.status})`;
         try {
             const errorData = (await response.json()) as {
@@ -145,69 +150,77 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
         return null;
     }
 
-    // If collectionID is 0 (placeholder), we need to fetch the actual collection first
-    let collectionID = context.collectionID;
-    let collection: Collection | undefined;
-    if (collectionID === 0) {
-        // Import the pullCollection function dynamically from the correct module
-        const { pullCollection } = await import("./public-collection");
-        const result = await pullCollection(
-            context.accessToken,
-            context.collectionKey,
-        );
-        collection = result.collection;
-        collectionID = collection.id;
+    try {
+        // If collectionID is 0 (placeholder), we need to fetch the actual collection first
+        let collectionID = context.collectionID;
+        let collection: Collection | undefined;
+        if (collectionID === 0) {
+            // Import the pullCollection function dynamically from the correct module
+            const { pullCollection } = await import("./public-collection");
+            const result = await pullCollection(
+                context.accessToken,
+                context.collectionKey,
+            );
+            collection = result.collection;
+            collectionID = collection.id;
 
-        // Update the context with the actual collection ID
-        const updatedContext = { ...context, collectionID };
-        localStorage.setItem(
-            "ente_join_album_context",
-            JSON.stringify(updatedContext),
-        );
-    } else {
-        // Fetch the collection to check ownership
-        const { pullCollection } = await import("./public-collection");
-        const result = await pullCollection(
-            context.accessToken,
-            context.collectionKey,
-        );
-        collection = result.collection;
-    }
+            // Update the context with the actual collection ID
+            const updatedContext = { ...context, collectionID };
+            localStorage.setItem(
+                "ente_join_album_context",
+                JSON.stringify(updatedContext),
+            );
+        } else {
+            // Fetch the collection to check ownership
+            const { pullCollection } = await import("./public-collection");
+            const result = await pullCollection(
+                context.accessToken,
+                context.collectionKey,
+            );
+            collection = result.collection;
+        }
 
-    // Check if the user is the owner of the album
-    const currentUser = ensureLocalUser();
-    if (collection.owner.id === currentUser.id) {
+        // Check if the user is the owner of the album
+        const currentUser = ensureLocalUser();
+        if (collection.owner.id === currentUser.id) {
+            clearJoinAlbumContext();
+            return null;
+        }
+
+        // Get user's key attributes from local storage
+        const keyAttributes = savedKeyAttributes();
+        if (!keyAttributes) {
+            throw new Error(
+                "Key attributes not found. Please try logging in again.",
+            );
+        }
+
+        const publicKey = keyAttributes.publicKey;
+
+        // Encrypt the collection key with user's public key
+        // The collection key is already base64 encoded, and boxSeal expects base64
+        const encryptedKey = await boxSeal(context.collectionKey, publicKey);
+
+        // Join the album (include JWT token if present for password-protected albums)
+        await joinPublicAlbum(
+            context.accessToken,
+            collectionID,
+            encryptedKey,
+            context.accessTokenJWT,
+        );
+
+        // Clear the context after successful join
+        // Note: If any error occurs above, this won't execute and context will be preserved for retry
         clearJoinAlbumContext();
-        return null;
+
+        return collectionID;
+    } catch (error) {
+        log.error("Failed to process pending album join", {
+            collectionID: context.collectionID,
+            error,
+        });
+        throw error;
     }
-
-    // Get user's key attributes from local storage
-    const keyAttributes = savedKeyAttributes();
-    if (!keyAttributes) {
-        throw new Error(
-            "Key attributes not found. Please try logging in again.",
-        );
-    }
-
-    const publicKey = keyAttributes.publicKey;
-
-    // Encrypt the collection key with user's public key
-    // The collection key is already base64 encoded, and boxSeal expects base64
-    const encryptedKey = await boxSeal(context.collectionKey, publicKey);
-
-    // Join the album (include JWT token if present for password-protected albums)
-    await joinPublicAlbum(
-        context.accessToken,
-        collectionID,
-        encryptedKey,
-        context.accessTokenJWT,
-    );
-
-    // Clear the context after successful join
-    // Note: If any error occurs above, this won't execute and context will be preserved for retry
-    clearJoinAlbumContext();
-
-    return collectionID;
 };
 
 /**
