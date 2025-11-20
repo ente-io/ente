@@ -144,7 +144,11 @@ export const useJoinAlbum = ({
                 // Format: ente://HOST/?action=join&t=TOKEN#HASH
                 const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-                tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
+                tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
+                    // Only fallback if page is still visible (app didn't open)
+                    shouldFallback: () =>
+                        document.visibilityState === "visible",
+                });
             } else if (isAndroid) {
                 // For Android, use intent URL with automatic fallback
                 // Hash must be in query params since intent URLs only support one fragment (#Intent)
