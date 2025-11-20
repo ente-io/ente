@@ -306,7 +306,7 @@
   "share": "Share",
   "shareLink": "Share link",
   "creatingShareLink": "Creating link...",
-  "shareThisLink": "Anyone with this link can access your item.",
+  "shareThisLink": "This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.",
   "copyLink": "Copy link",
   "deleteLink": "Delete link",
   "close": "Close",
