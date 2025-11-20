@@ -51,6 +51,10 @@ class LocalBackupService {
       }
       return writeSuccess;
     } catch (e, s) {
+      if (isManual) {
+        _logger.severe('Manual backup failed', e, s);
+        rethrow;
+      }
       _logger.severe('Silent error during automatic backup', e, s);
       return false;
     }
@@ -117,9 +121,14 @@ class LocalBackupService {
           .map((entity) => entity as File)
           .toList();
 
-      files.sort(
-        (a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()),
-      );
+      files.sort((a, b) {
+        final mtimeCompare =
+            a.lastModifiedSync().compareTo(b.lastModifiedSync());
+        if (mtimeCompare != 0) {
+          return mtimeCompare;
+        }
+        return a.path.compareTo(b.path);
+      });
 
       while (files.length > _maxBackups) {
         final fileToDelete = files.removeAt(0);

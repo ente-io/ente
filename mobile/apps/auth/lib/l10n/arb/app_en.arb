@@ -110,6 +110,7 @@
   "importTypeEnteEncrypted": "Ente Encrypted export",
   "passwordForDecryptingExport": "Password to decrypt export",
   "passwordEmptyError": "Password can not be empty",
+  "passwordTooShort": "Password must be at least 8 characters",
   "importFromApp": "Import codes from {appName}",
   "importGoogleAuthGuide": "Export your accounts from Google Authenticator to a QR code using the \"Transfer Accounts\" option. Then using another device, scan the QR code.\n\nTip: You can use your laptop's webcam to take a picture of the QR code.",
   "importSelectJsonFile": "Select JSON file",

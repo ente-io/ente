@@ -171,7 +171,18 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       final hasLocation = await _ensureBackupLocationSelected();
       if (!hasLocation) return;
 
-      await LocalBackupService.instance.triggerAutomaticBackup(isManual: true);
+      try {
+        final success = await LocalBackupService.instance
+            .triggerAutomaticBackup(isManual: true);
+        if (!success && showSnackBar) {
+          _showSnackBar(context.l10n.somethingWentWrongPleaseTryAgain);
+        }
+      } catch (_) {
+        if (showSnackBar) {
+          _showSnackBar(context.l10n.somethingWentWrongPleaseTryAgain);
+        }
+        return;
+      }
       if (showSnackBar) {
         _showSnackBar(context.l10n.initialBackupCreated);
       }
@@ -354,34 +365,33 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
                     style: getEnteTextTheme(context).smallFaint,
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: textController,
-                    autofocus: true,
-                    obscureText: isPasswordHidden,
-                    decoration: InputDecoration(
-                      hintText: l10n.enterPassword,
-                      hintStyle: getEnteTextTheme(context).mini,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordHidden
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordHidden = !isPasswordHidden;
-                          });
-                        },
-                      ),
+              TextField(
+                controller: textController,
+                autofocus: true,
+                obscureText: isPasswordHidden,
+                decoration: InputDecoration(
+                  hintText: l10n.enterPassword,
+                  hintStyle: getEnteTextTheme(context).mini,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      isPasswordHidden
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                     ),
-                    onChanged: (text) {
+                    onPressed: () {
                       setState(() {
-                        if (errorText != null && text.length >= 8) {
-                          errorText = null;
-                        }
+                        isPasswordHidden = !isPasswordHidden;
                       });
                     },
                   ),
+                  errorText: errorText,
+                ),
+                onChanged: (text) {
+                  setState(() {
+                    if (text.length >= 8 && errorText != null) errorText = null;
+                  });
+                },
+              ),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: errorText == null
@@ -525,14 +535,18 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
           return fullPath.substring(root.length);
         }
       }
-      return fullPath;
+      return fullPath.split('/').last;
     }
 
-    if (Platform.isIOS) {
+    if (Platform.isIOS || Platform.isMacOS) {
       var simplified = fullPath;
       const fileScheme = 'file://';
       if (simplified.startsWith(fileScheme)) {
         simplified = simplified.substring(fileScheme.length);
+      }
+      final homePath = Platform.environment['HOME'];
+      if (homePath != null && simplified.startsWith(homePath)) {
+        simplified = simplified.replaceFirst(homePath, '~');
       }
       // iOS often prepends /private when surfacing sandboxed locations.
       const privatePrefix = '/private';
