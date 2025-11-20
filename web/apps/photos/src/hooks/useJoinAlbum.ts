@@ -6,9 +6,7 @@ import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
 import { savePublicCollectionAccessTokenJWT } from "ente-new/albums/services/public-albums-fdb";
 
 export interface UseJoinAlbumProps {
-    /** If true, enables "Join Album" functionality */
-    enableJoin?: boolean;
-    /** Collection to join (required if enableJoin is true) */
+    /** Collection to join */
     publicCollection?: Collection;
     /** Access token for the public link */
     accessToken?: string;
@@ -98,7 +96,6 @@ const tryDeepLinkWithFallback = (
  * Components can use this hook and apply their own button styling.
  */
 export const useJoinAlbum = ({
-    enableJoin,
     publicCollection,
     accessToken,
     collectionKey,

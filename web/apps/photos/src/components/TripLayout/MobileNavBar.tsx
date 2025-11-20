@@ -39,7 +39,6 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
     const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
     const { handleJoinAlbum } = useJoinAlbum({
-        enableJoin,
         publicCollection,
         accessToken,
         collectionKey,

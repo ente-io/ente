@@ -36,7 +36,6 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
 
     const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
     const { handleJoinAlbum } = useJoinAlbum({
-        enableJoin,
         publicCollection,
         accessToken,
         collectionKey,

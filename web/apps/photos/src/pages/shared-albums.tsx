@@ -100,7 +100,6 @@ import {
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { useJoinAlbum } from "hooks/useJoinAlbum";
-import { getSignUpOrInstallURL } from "utils/public-album";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -108,6 +107,7 @@ import { type FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
+import { getSignUpOrInstallURL } from "utils/public-album";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -732,7 +732,6 @@ const GoToEnte: React.FC<GoToEnteProps> = ({
 }) => {
     const isTouchscreen = useIsTouchscreen();
     const { handleJoinAlbum } = useJoinAlbum({
-        enableJoin,
         publicCollection,
         accessToken,
         collectionKey,
