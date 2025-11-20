@@ -1035,6 +1035,10 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     _collectionsSyncTriggered = true;
-    CollectionsService.instance.sync().ignore();
+    CollectionsService.instance.sync().then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 }

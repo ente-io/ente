@@ -172,6 +172,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   Future<void> _onTapSkip() async {
     await _localSettings.setOnboardingPermissionSkipped(true);
+    SyncService.instance.sync().ignore();
     if (mounted) {
       setState(() {});
     }
