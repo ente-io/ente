@@ -43,8 +43,7 @@ interface TripLayoutProps {
     // Join album props
     accessToken?: string;
     collectionKey?: string;
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    credentials?: React.MutableRefObject<PublicAlbumsCredentials | undefined>;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
 export const TripLayout: React.FC<TripLayoutProps> = ({

@@ -19,8 +19,7 @@ interface TopNavButtonsProps {
     publicCollection?: Collection;
     accessToken?: string;
     collectionKey?: string;
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    credentials?: React.MutableRefObject<PublicAlbumsCredentials | undefined>;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
 export const TopNavButtons: React.FC<TopNavButtonsProps> = ({

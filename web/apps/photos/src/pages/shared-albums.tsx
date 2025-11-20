@@ -720,8 +720,7 @@ interface GoToEnteProps {
     /** Collection key from URL (base64 encoded) */
     collectionKey?: string;
     /** Credentials ref for JWT token access */
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    credentials?: React.MutableRefObject<PublicAlbumsCredentials | undefined>;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
 const GoToEnte: React.FC<GoToEnteProps> = ({
