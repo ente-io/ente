@@ -9,8 +9,8 @@ import { getLockerFileIcon } from "../../utils/file-type";
 import { LockerTypeDisplay } from "./LockerTypeDisplay";
 
 export const FileShareView: React.FC = () => {
-    const { mode } = useColorScheme();
-    const isDarkMode = mode === "dark";
+    const { systemMode } = useColorScheme();
+    const isDarkMode = systemMode === "dark";
 
     const {
         loading,
