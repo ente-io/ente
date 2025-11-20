@@ -2,8 +2,6 @@ import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { albumsAppOrigin, photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
-import { storeJoinAlbumContext } from "ente-new/albums/services/join-album";
-import { savePublicCollectionAccessTokenJWT } from "ente-new/albums/services/public-albums-fdb";
 
 export interface UseJoinAlbumProps {
     /** Collection to join */
@@ -18,7 +16,7 @@ export interface UseJoinAlbumProps {
 
 export interface UseJoinAlbumReturn {
     /** Handler for join album action */
-    handleJoinAlbum: () => Promise<void>;
+    handleJoinAlbum: () => void;
 }
 
 /**
@@ -36,29 +34,16 @@ const buildWebRedirectURL = (
 
 /**
  * Handle the fallback flow when the native app doesn't open.
- * Saves JWT if needed, stores album context, and redirects to web auth.
+ * Redirects to web app with all join context in the URL.
  */
-const handleWebFallback = async (
+const handleWebFallback = (
     accessToken: string,
-    collectionKey: string,
     currentHash: string,
-    publicCollection: Collection,
     jwtToken?: string,
-): Promise<void> => {
-    // If this is a password-protected album and we have the JWT, ensure it's saved
-    if (publicCollection.publicURLs[0]?.passwordEnabled && jwtToken) {
-        await savePublicCollectionAccessTokenJWT(accessToken, jwtToken);
-    }
-
-    // Store the album context before redirecting to auth
-    await storeJoinAlbumContext(
-        accessToken,
-        collectionKey,
-        currentHash,
-        publicCollection,
-    );
-
+): void => {
     // Redirect to web app with joinAlbum parameter
+    // The URL contains all necessary context (token, JWT, hash) which will be
+    // stored on web.ente.io after the domain transition
     const redirectURL = buildWebRedirectURL(accessToken, currentHash, jwtToken);
     window.location.href = redirectURL;
 };
@@ -69,7 +54,7 @@ const handleWebFallback = async (
  */
 const tryDeepLinkWithFallback = (
     deepLinkURL: string,
-    fallbackFn: () => Promise<void>,
+    fallbackFn: () => void | Promise<void>,
     options: {
         /** Check this condition before executing fallback (always true for iOS) */
         shouldFallback?: () => boolean;
@@ -81,9 +66,9 @@ const tryDeepLinkWithFallback = (
     window.location.href = deepLinkURL;
 
     // Set a timeout to check if the app opened
-    const timeoutId = setTimeout(async () => {
+    const timeoutId = setTimeout(() => {
         if (shouldFallback()) {
-            await fallbackFn();
+            void fallbackFn();
         }
     }, 2500);
 
@@ -103,7 +88,7 @@ export const useJoinAlbum = ({
 }: UseJoinAlbumProps): UseJoinAlbumReturn => {
     const isTouchscreen = useIsTouchscreen();
 
-    const handleJoinAlbum = async () => {
+    const handleJoinAlbum = () => {
         if (!publicCollection || !accessToken || !collectionKey) {
             return;
         }
@@ -113,14 +98,8 @@ export const useJoinAlbum = ({
         const jwtToken = credentials?.current?.accessTokenJWT;
 
         // Create fallback function for mobile deep linking
-        const fallbackToWeb = async () => {
-            await handleWebFallback(
-                accessToken,
-                collectionKey,
-                currentHash,
-                publicCollection,
-                jwtToken,
-            );
+        const fallbackToWeb = () => {
+            handleWebFallback(accessToken, currentHash, jwtToken);
         };
 
         // Check if on mobile and try deep link first
@@ -168,13 +147,7 @@ export const useJoinAlbum = ({
             }
         } else {
             // Desktop: use the standard web flow directly
-            await handleWebFallback(
-                accessToken,
-                collectionKey,
-                currentHash,
-                publicCollection,
-                jwtToken,
-            );
+            handleWebFallback(accessToken, currentHash, jwtToken);
         }
     };
 
