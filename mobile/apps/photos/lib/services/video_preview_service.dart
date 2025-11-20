@@ -36,6 +36,7 @@ import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
+import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:photos/utils/network_util.dart";
@@ -280,6 +281,16 @@ class VideoPreviewService {
     // not used currently
     bool forceUpload = false,
   }) async {
+    // Check if file upload is happening before processing video for streaming
+    if (FileUploader.instance.isUploading) {
+      _logger.info(
+        "Pausing video streaming because file upload is in progress",
+      );
+      computeController.releaseCompute(stream: true);
+      clearQueue();
+      return;
+    }
+
     final bool isManual =
         await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
     final canStream = _isPermissionGranted();
@@ -454,8 +465,9 @@ class VideoPreviewService {
       final command =
           // scaling, fps, tonemapping
           '$filters'
-          // video encoding
-          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
+          // video encoding with maxrate cap at 2000kbps to preserve smaller bitrates
+          // while preventing CRF from exceeding the max bitrate
+          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium -maxrate 2000k -bufsize 4000k ' : '-c:v copy '}'
           // audio encoding
           '-c:a aac -b:a 128k '
           // hls options

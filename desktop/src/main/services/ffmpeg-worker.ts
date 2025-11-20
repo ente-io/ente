@@ -497,11 +497,14 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
               //
               // - `-c:v libx264` converts the video stream to the H.264 codec.
               //
-              // - We don't supply a bitrate, instead it uses the default CRF
-              //   ("23") as recommended in the ffmpeg trac.
+              // - We use CRF 23 (default) for quality, but cap the bitrate at
+              //   2000 kbps using `-maxrate` to ensure smaller bitrates are
+              //   preserved while preventing CRF from exceeding 2000 kbps.
+              //
+              // - `-bufsize` is set to 2x maxrate for smooth rate control.
               //
               // - We don't supply a preset, it'll use the default ("medium").
-              ["-c:v", "libx264"]
+              ["-c:v", "libx264", "-maxrate", "2000k", "-bufsize", "4000k"]
             : // Keep the video stream unchanged
               ["-c:v", "copy"],
         // Audio codec AAC
