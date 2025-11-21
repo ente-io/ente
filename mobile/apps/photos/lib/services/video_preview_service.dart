@@ -1251,6 +1251,12 @@ class VideoPreviewService {
     Future.delayed(duration, () async {
       if (_hasQueuedFile && !forceProcess) return;
 
+      // Don't start streaming if file uploads are in progress
+      if (FileUploader.instance.isUploading) {
+        _logger.info("Skipping stream queue - file upload in progress");
+        return;
+      }
+
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
 
