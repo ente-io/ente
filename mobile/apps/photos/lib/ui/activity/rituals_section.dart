@@ -481,7 +481,7 @@ String _weekLabel(int index) {
 Future<Collection?> _pickAlbum(BuildContext context) async {
   final service = CollectionsService.instance;
   final albums =
-      List<Collection>.from(await service.getCollectionForWidgetSelection());
+      List<Collection>.from(await CollectionsService.instance.getCollectionsForRituals());
   Collection? selected;
   await showModalBottomSheet(
     context: context,
@@ -493,6 +493,16 @@ Future<Collection?> _pickAlbum(BuildContext context) async {
       final controller = TextEditingController();
       return StatefulBuilder(
         builder: (context, setState) {
+          final bool canCreateAlbum = controller.text.trim().isNotEmpty;
+          Future<void> createAlbum() async {
+            final trimmed = controller.text.trim();
+            if (trimmed.isEmpty) return;
+            final created = await service.createAlbum(trimmed);
+            if (!context.mounted) return;
+            selected = created;
+            Navigator.of(context).pop();
+          }
+
           return SafeArea(
             child: Padding(
               padding: EdgeInsets.only(
@@ -534,35 +544,61 @@ Future<Collection?> _pickAlbum(BuildContext context) async {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                      child: TextField(
-                        controller: controller,
-                        textInputAction: TextInputAction.done,
-                        decoration: InputDecoration(
-                          hintText: "Create new album",
-                          prefixIcon: const Icon(Icons.add_rounded),
-                          filled: true,
-                          fillColor: colorScheme.fillFaint,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: controller,
+                              textInputAction: TextInputAction.done,
+                              decoration: InputDecoration(
+                                hintText: "Create new album",
+                                prefixIcon: const Icon(Icons.add_rounded),
+                                filled: true,
+                                fillColor: colorScheme.fillFaint,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                    color: colorScheme.strokeFaint,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                    color: colorScheme.strokeFaint,
+                                  ),
+                                ),
+                              ),
+                              onChanged: (_) => setState(() {}),
+                              onSubmitted: (_) async => createAlbum(),
                             ),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: canCreateAlbum
+                                  ? colorScheme.primary500
+                                  : colorScheme.fillMuted,
+                              foregroundColor: colorScheme.backgroundBase,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 14,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                            onPressed: canCreateAlbum ? createAlbum : null,
+                            child: Text(
+                              "Create",
+                              style: textTheme.bodyBold.copyWith(
+                                color: canCreateAlbum
+                                    ? Colors.white
+                                    : colorScheme.textMuted,
+                              ),
                             ),
                           ),
-                        ),
-                        onSubmitted: (value) async {
-                          final trimmed = value.trim();
-                          if (trimmed.isEmpty) return;
-                          final created = await service.createAlbum(trimmed);
-                          controller.clear();
-                          albums.insert(0, created);
-                          setState(() {});
-                        },
+                        ],
                       ),
                     ),
                     Flexible(
