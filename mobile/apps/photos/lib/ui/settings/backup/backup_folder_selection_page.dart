@@ -39,9 +39,12 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<DeviceCollection>? _deviceCollections;
   Map<String, int>? _pathIDToItemCount;
+  late final bool _treatAsOnboarding;
 
   @override
   void initState() {
+    _treatAsOnboarding =
+        widget.isOnboarding || localSettings.hasOnboardingPermissionSkipped;
     FilesDB.instance
         .getDeviceCollections(includeCoverThumbnail: true)
         .then((files) async {
@@ -61,7 +64,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             _selectedDevicePathIDs.add(file.id);
           }
         }
-        if (widget.isOnboarding) {
+        if (_treatAsOnboarding) {
           _selectedDevicePathIDs.addAll(_allDevicePathIDs);
         }
         _selectedDevicePathIDs
@@ -74,7 +77,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.isOnboarding
+      appBar: _treatAsOnboarding
           ? null
           : AppBar(
               elevation: 0,
@@ -172,7 +175,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     padding: const EdgeInsets.only(left: 20, right: 20),
                     child: OutlinedButton(
                       onPressed:
-                          widget.isOnboarding && _selectedDevicePathIDs.isEmpty
+                          _treatAsOnboarding && _selectedDevicePathIDs.isEmpty
                               ? null
                               : () async {
                                   await updateFolderSettings();
@@ -184,10 +187,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       ),
                     ),
                   ),
-                  widget.isOnboarding
+                  _treatAsOnboarding
                       ? const SizedBox(height: 20)
                       : const SizedBox.shrink(),
-                  widget.isOnboarding
+                  _treatAsOnboarding
                       ? GestureDetector(
                           key: const ValueKey("skipBackupButton"),
                           behavior: HitTestBehavior.opaque,
