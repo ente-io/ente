@@ -31,20 +31,20 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   }) {
     final appColors = switch (app) {
       EnteApp.auth => (
-          primary700: const Color.fromARGB(255, 164, 0, 182),
-          primary500: const Color.fromARGB(255, 204, 10, 101),
-          primary400: const Color.fromARGB(255, 122, 41, 193),
-          primary300: const Color.fromARGB(255, 152, 77, 244),
+          primary700: const Color(0xFFA75CFF),
+          primary500: const Color(0xFFA75CFF),
+          primary400: const Color(0xFFA75CFF),
+          primary300: const Color(0xFFA75CFF),
           gradientButtonBgColor: const Color(0xFF531DAB),
           gradientButtonBgColors: const [
-            Color.fromARGB(255, 122, 41, 193),
-            Color.fromARGB(255, 122, 41, 193),
+            Color(0xFFB37FEB),
+            Color(0xFF22075E),
           ],
         ),
       EnteApp.locker => (
           primary700: const Color.fromRGBO(16, 113, 255, 1),
-          primary400: const Color.fromARGB(255, 52, 152, 255),
           primary500: const Color.fromARGB(255, 102, 178, 255),
+          primary400: const Color.fromARGB(255, 52, 152, 255),
           primary300: const Color.fromARGB(255, 236, 242, 250),
           gradientButtonBgColor: const Color.fromRGBO(0, 122, 255, 1),
           gradientButtonBgColors: const [
