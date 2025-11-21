@@ -3,22 +3,44 @@ import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
+import type { PublicAlbumsCredentials } from "ente-base/http";
+import type { Collection } from "ente-media/collection";
 import { Notification } from "ente-new/photos/components/Notification";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useState } from "react";
+import { getSignUpOrInstallURL } from "utils/public-album";
 
 interface TopNavButtonsProps {
     onAddPhotos?: () => void;
     downloadAllFiles: () => void;
     enableDownload?: boolean;
+    publicCollection?: Collection;
+    accessToken?: string;
+    collectionKey?: string;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
 export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
     onAddPhotos,
     downloadAllFiles,
     enableDownload,
+    publicCollection,
+    accessToken,
+    collectionKey,
+    credentials,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+    const isTouchscreen = useIsTouchscreen();
+
+    const enableJoin = publicCollection?.publicURLs[0]?.enableJoin;
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
 
     const handleShare = () => {
         if (typeof window !== "undefined") {
@@ -28,11 +50,21 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
         }
     };
 
-    const handleSignUp = () => {
+    const handleSignUpOrInstall = () => {
         if (typeof window !== "undefined") {
-            window.open("https://ente.io", "_blank", "noopener");
+            window.open(
+                getSignUpOrInstallURL(isTouchscreen),
+                "_blank",
+                "noopener",
+            );
         }
     };
+
+    const buttonText = enableJoin
+        ? t("join_album")
+        : isTouchscreen
+          ? t("install")
+          : t("sign_up");
 
     return (
         <>
@@ -55,9 +87,15 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                     </NavButton>
                 )}
 
-                <SignUpButton onClick={handleSignUp}>
-                    {t("sign_up")}
-                </SignUpButton>
+                {(!onAddPhotos || enableJoin) && (
+                    <SignUpButton
+                        onClick={
+                            enableJoin ? handleJoinAlbum : handleSignUpOrInstall
+                        }
+                    >
+                        {buttonText}
+                    </SignUpButton>
+                )}
             </ButtonContainer>
 
             <Notification

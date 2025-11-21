@@ -60,6 +60,7 @@ import log from "ente-base/log";
 import {
     albumsAppOrigin,
     isCustomAlbumsAppOrigin,
+    photosAppOrigin,
     shouldOnlyServeAlbumsApp,
 } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
@@ -98,6 +99,7 @@ import {
 } from "ente-new/photos/components/gallery/ListHeader";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
+import { useJoinAlbum } from "hooks/useJoinAlbum";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -105,6 +107,7 @@ import { type FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
 import { uploadManager } from "services/upload-manager";
 import { getSelectedFiles, type SelectedState } from "utils/file";
+import { getSignUpOrInstallURL } from "utils/public-album";
 
 export default function PublicCollectionGallery() {
     const { showMiniDialog, onGenericError } = useBaseContext();
@@ -142,6 +145,32 @@ export default function PublicCollectionGallery() {
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
     const router = useRouter();
+
+    // Handle action=join parameter: redirect to web.ente.io for authentication
+    // This MUST run before any other logic to ensure proper redirect on desktop/mobile-without-app
+    // On mobile with app installed, App Links/Universal Links will open the app before this code runs
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get("action");
+
+        if (action === "join") {
+            const t = params.get("t");
+            const jwt = params.get("jwt");
+            const hash = window.location.hash;
+
+            if (!t) {
+                return;
+            }
+
+            // Build the web app URL for authentication
+            const webAppURL = photosAppOrigin();
+
+            const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
+            const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
+
+            window.location.href = redirectURL;
+        }
+    }, []);
 
     const showPublicLinkExpiredMessage = () =>
         showMiniDialog({
@@ -533,6 +562,9 @@ export default function PublicCollectionGallery() {
                     collection={publicCollection}
                     onAddPhotos={onAddPhotos}
                     enableDownload={downloadEnabled}
+                    accessToken={credentials.current.accessToken}
+                    collectionKey={collectionKey.current}
+                    credentials={credentials}
                 />
             ) : (
                 <>
@@ -554,11 +586,31 @@ export default function PublicCollectionGallery() {
                                 <EnteLogoLink href="https://ente.io">
                                     <EnteLogo height={15} />
                                 </EnteLogoLink>
-                                {onAddPhotos ? (
-                                    <AddPhotosButton onClick={onAddPhotos} />
-                                ) : (
-                                    <GoToEnte />
-                                )}
+                                <Stack direction="row" spacing={2}>
+                                    {onAddPhotos && (
+                                        <AddPhotosButton
+                                            onClick={onAddPhotos}
+                                        />
+                                    )}
+                                    {!onAddPhotos ||
+                                    publicCollection?.publicURLs[0]
+                                        ?.enableJoin ? (
+                                        <PrimaryActionButton
+                                            enableJoin={
+                                                publicCollection?.publicURLs[0]
+                                                    ?.enableJoin
+                                            }
+                                            publicCollection={publicCollection}
+                                            accessToken={
+                                                credentials.current.accessToken
+                                            }
+                                            collectionKey={
+                                                collectionKey.current
+                                            }
+                                            credentials={credentials}
+                                        />
+                                    ) : null}
+                                </Stack>
                             </SpacedRow>
                         )}
                     </NavbarBase>
@@ -654,12 +706,44 @@ const AddMorePhotosButton: React.FC<ButtonishProps> = ({ onClick }) => {
     );
 };
 
-const GoToEnte: React.FC = () => {
-    // Touchscreen devices are overwhemingly likely to be Android or iOS.
+interface PrimaryActionButtonProps {
+    /** If true, shows "Join Album" button instead of "Sign Up" */
+    enableJoin?: boolean;
+    /** Collection to join (required if enableJoin is true) */
+    publicCollection?: Collection;
+    /** Access token for the public link */
+    accessToken?: string;
+    /** Collection key from URL (base64 encoded) */
+    collectionKey?: string;
+    /** Credentials ref for JWT token access */
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
+}
+
+const PrimaryActionButton: React.FC<PrimaryActionButtonProps> = ({
+    enableJoin,
+    publicCollection,
+    accessToken,
+    collectionKey,
+    credentials,
+}) => {
     const isTouchscreen = useIsTouchscreen();
+    const { handleJoinAlbum } = useJoinAlbum({
+        publicCollection,
+        accessToken,
+        collectionKey,
+        credentials,
+    });
+
+    if (enableJoin) {
+        return (
+            <Button color="accent" onClick={handleJoinAlbum}>
+                {t("join_album")}
+            </Button>
+        );
+    }
 
     return (
-        <Button color="accent" href="https://ente.io">
+        <Button color="accent" href={getSignUpOrInstallURL(isTouchscreen)}>
             {isTouchscreen ? t("install") : t("sign_up")}
         </Button>
     );

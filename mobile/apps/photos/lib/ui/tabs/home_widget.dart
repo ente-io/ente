@@ -331,6 +331,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         return;
       }
 
+      // Check for action=join parameter to show join dialog
+      final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
+          Configuration.instance.isLoggedIn();
+
       // Check for trip layout and show in webview
       if (collection.pubMagicMetadata.layout == "trip") {
         await routeToPage(
@@ -396,11 +400,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                     await routeToPage(
                       context,
                       SharedPublicCollectionPage(
-                        files: sharedFiles,
                         CollectionWithThumbnail(
                           collection,
                           null,
                         ),
+                        files: sharedFiles,
+                        shouldShowJoinDialog: shouldShowJoinDialog,
                       ),
                     );
                   }
@@ -423,16 +428,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         await dialog.hide();
 
-        routeToPage(
+        await routeToPage(
           context,
           SharedPublicCollectionPage(
-            files: sharedFiles,
             CollectionWithThumbnail(
               collection,
               null,
             ),
+            files: sharedFiles,
+            shouldShowJoinDialog: shouldShowJoinDialog,
           ),
-        ).ignore();
+        );
         if (sharedFiles.length == 1) {
           await routeToPage(
             context,

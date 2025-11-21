@@ -1,5 +1,6 @@
 import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
+import type { PublicAlbumsCredentials } from "ente-base/http";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
@@ -39,6 +40,10 @@ interface TripLayoutProps {
     onSetOpenFileViewer?: (open: boolean) => void;
     onRemotePull?: () => Promise<void>;
     onAddPhotos?: () => void; // Callback for add photos button
+    // Join album props
+    accessToken?: string;
+    collectionKey?: string;
+    credentials?: React.RefObject<PublicAlbumsCredentials | undefined>;
 }
 
 export const TripLayout: React.FC<TripLayoutProps> = ({
@@ -50,6 +55,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     onSetOpenFileViewer,
     onRemotePull,
     onAddPhotos,
+    accessToken,
+    collectionKey,
+    credentials,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
@@ -265,12 +273,20 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
                         collectionTitle={collectionTitle}
+                        publicCollection={collection}
+                        accessToken={accessToken}
+                        collectionKey={collectionKey}
+                        credentials={credentials}
                     />
                 ) : (
                     <TopNavButtons
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
+                        publicCollection={collection}
+                        accessToken={accessToken}
+                        collectionKey={collectionKey}
+                        credentials={credentials}
                     />
                 ))}
             {/* Mobile Layout */}
