@@ -47,7 +47,7 @@ class ActivityService {
   void _scheduleRefresh({bool initial = false}) {
     _debounce?.cancel();
     _debounce = Timer(
-      initial ? const Duration(seconds: 4) : const Duration(seconds: 1),
+      initial ? const Duration(seconds: 8) : const Duration(seconds: 1),
       refresh,
     );
   }
