@@ -45,7 +45,6 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             onFirstImportComplete: () => const BackupFolderSelectionPage(
               isFirstBackup: false,
             ),
-            postSelectionDestination: () => const BackupSettingsScreen(),
           );
         },
       ),
