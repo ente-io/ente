@@ -69,6 +69,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                   )
                 : CupertinoSwitch(
                     value: toggleValue ?? false,
+                    activeTrackColor: enteColorScheme.primary500,
                     onChanged: _onChanged,
                   ),
           ),
