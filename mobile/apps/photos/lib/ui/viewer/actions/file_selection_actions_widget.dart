@@ -35,7 +35,6 @@ import "package:photos/ui/components/bottom_action_bar/selection_action_button_w
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
-import "package:photos/ui/sharing/show_images_prevew.dart";
 import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -47,7 +46,6 @@ import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
 import "package:photos/utils/standalone/simple_task_queue.dart";
-import "package:screenshot/screenshot.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
   final GalleryType type;
@@ -79,8 +77,6 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-  final ScreenshotController screenshotController = ScreenshotController();
-  late Uint8List placeholderBytes;
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
   // few files. This link is reset on any selection changed;
@@ -703,22 +699,6 @@ class _FileSelectionActionsWidgetState
     widget.selectedFiles.clearAll();
   }
 
-  Future<Uint8List> _createPlaceholder(
-    List<EnteFile> ownedSelectedFiles,
-  ) async {
-    final Widget imageWidget = LinkPlaceholder(
-      files: ownedSelectedFiles,
-    );
-    final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final bytesOfImageToWidget = await screenshotController.captureFromWidget(
-      imageWidget,
-      pixelRatio: pixelRatio,
-      targetSize: MediaQuery.sizeOf(context),
-      delay: const Duration(milliseconds: 300),
-    );
-    return bytesOfImageToWidget;
-  }
-
   Future<void> _onSendLinkTapped() async {
     if (split.ownedByCurrentUser.isEmpty) {
       showShortToast(
@@ -740,8 +720,6 @@ class _FileSelectionActionsWidgetState
       await dialog.hide();
       return;
     }
-    final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
-    placeholderBytes = await _createPlaceholder(ownedSelectedFiles);
     await dialog.hide();
     await _sendLink();
     widget.selectedFiles.clearAll();
@@ -859,8 +837,7 @@ class _FileSelectionActionsWidgetState
         _cachedCollectionForSharedLink!,
       );
       unawaited(Clipboard.setData(ClipboardData(text: url)));
-      await shareImageAndUrl(
-        placeholderBytes,
+      await shareText(
         url,
         context: context,
         key: sendLinkButtonKey,
