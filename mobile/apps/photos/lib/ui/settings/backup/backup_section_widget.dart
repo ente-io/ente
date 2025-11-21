@@ -45,6 +45,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             onFirstImportComplete: () => const BackupFolderSelectionPage(
               isFirstBackup: false,
             ),
+            postSelectionDestination: () => const BackupSettingsScreen(),
           );
         },
       ),
@@ -75,6 +76,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           await handleBackupEntryFlow(
             context,
             onFirstImportComplete: () => const BackupSettingsScreen(),
+            postSelectionDestination: () => const BackupSettingsScreen(),
           );
         },
       ),

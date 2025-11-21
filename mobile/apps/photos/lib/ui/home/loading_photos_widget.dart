@@ -18,10 +18,12 @@ import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
   final bool isOnboardingFlow;
+  final Widget Function()? onFolderSelectionComplete;
 
   const LoadingPhotosWidget({
     super.key,
     this.isOnboardingFlow = true,
+    this.onFolderSelectionComplete,
   });
 
   @override
@@ -54,24 +56,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         if (permissionService.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
-          if (widget.isOnboardingFlow) {
-            // ignore: unawaited_futures
-            routeToPage(
-              context,
-              const BackupFolderSelectionPage(
-                isOnboarding: true,
-                isFirstBackup: true,
-              ),
-            );
-          } else {
-            replacePage(
-              context,
-              const BackupFolderSelectionPage(
-                isOnboarding: false,
-                isFirstBackup: false,
-              ),
-            );
-          }
+          await _goToFolderSelection();
         }
       }
     });
@@ -93,6 +78,42 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         curve: Curves.easeIn,
       );
     });
+  }
+
+  Future<void> _goToFolderSelection() async {
+    if (widget.isOnboardingFlow) {
+      // ignore: unawaited_futures
+      routeToPage(
+        context,
+        const BackupFolderSelectionPage(
+          isOnboarding: true,
+          isFirstBackup: true,
+        ),
+      );
+      return;
+    }
+
+    final selectionResult = await routeToPage<bool>(
+      context,
+      const BackupFolderSelectionPage(
+        isOnboarding: false,
+        isFirstBackup: false,
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (widget.onFolderSelectionComplete != null) {
+      replacePage(
+        context,
+        widget.onFolderSelectionComplete!(),
+        result: selectionResult,
+      );
+    } else {
+      Navigator.of(context).pop(selectionResult);
+    }
   }
 
   @override
