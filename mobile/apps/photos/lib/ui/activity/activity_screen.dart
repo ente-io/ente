@@ -3,6 +3,7 @@ import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/notification/toast.dart";
 
 class ActivityScreen extends StatelessWidget {
@@ -12,7 +13,7 @@ class ActivityScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Photos taken"),
+        title: const Text("Activity"),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share),
@@ -102,8 +103,8 @@ class _Heatmap extends StatelessWidget {
 
     final normalizedDayMap = <int, ActivityDay>{
       for (final d in days)
-        DateTime(d.date.year, d.date.month, d.date.day)
-            .millisecondsSinceEpoch: d,
+        DateTime(d.date.year, d.date.month, d.date.day).millisecondsSinceEpoch:
+            d,
     };
 
     // Always start on the Sunday before/including the first day to render
@@ -119,8 +120,8 @@ class _Heatmap extends StatelessWidget {
       final date = gridStart.add(Duration(days: index));
       // Leading days before the 365-day window can still be active if present
       // in the extended map (we fetched extra days), otherwise remain empty.
-      final key = DateTime(date.year, date.month, date.day)
-          .millisecondsSinceEpoch;
+      final key =
+          DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
       final activity = normalizedDayMap[key];
       if (date.isBefore(firstDay)) {
         return activity ??
@@ -269,8 +270,7 @@ class _Heatmap extends StatelessWidget {
                                       borderRadius: pillRadius,
                                     ),
                                   ),
-                                  if (!isLastCell)
-                                    const SizedBox(width: gapX),
+                                  if (!isLastCell) const SizedBox(width: gapX),
                                 ],
                               );
                             }).toList(),
@@ -417,7 +417,7 @@ class _RitualsSection extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Activity",
+                "Rituals",
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const Spacer(),
@@ -475,12 +475,15 @@ class _RitualCard extends StatelessWidget {
           ),
         ),
         title: Text(ritual.title.isEmpty ? "Untitled ritual" : ritual.title),
-        subtitle: Text(
-          [
-            _daysLabel(ritual.daysOfWeek),
-            if (ritual.albumName != null) ritual.albumName!,
-          ].join(" • "),
-        ),
+        subtitle: ritual.albumName == null || ritual.albumName!.isEmpty
+            ? Text(
+                "Album not set",
+                style: getEnteTextTheme(context).smallMuted,
+              )
+            : Text(
+                ritual.albumName!,
+                style: getEnteTextTheme(context).smallMuted,
+              ),
         trailing: PopupMenuButton<String>(
           elevation: 0,
           color: Colors.white,
@@ -551,16 +554,6 @@ class _RitualCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _daysLabel(List<bool> days) {
-    const labels = ["S", "M", "T", "W", "T", "F", "S"];
-    final selected = <String>[];
-    for (int i = 0; i < days.length; i++) {
-      if (days[i]) selected.add(labels[i]);
-    }
-    if (selected.length == 7) return "Every day";
-    return selected.join(" ");
   }
 }
 
