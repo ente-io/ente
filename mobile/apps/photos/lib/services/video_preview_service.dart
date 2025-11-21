@@ -466,8 +466,7 @@ class VideoPreviewService {
           // scaling, fps, tonemapping
           '$filters'
           // video encoding with maxrate cap at 2000kbps to preserve smaller bitrates
-          // while preventing CRF from exceeding the max bitrate
-          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium -maxrate 2000k -bufsize 4000k ' : '-c:v copy '}'
+          '${reencodeVideo ? '-c:v libx264 -maxrate 2000k -bufsize 4000k ' : '-c:v copy '}'
           // audio encoding
           '-c:a aac -b:a 128k '
           // hls options
