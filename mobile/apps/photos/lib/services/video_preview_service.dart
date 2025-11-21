@@ -287,7 +287,7 @@ class VideoPreviewService {
         "Pausing video streaming because file upload is in progress",
       );
       computeController.releaseCompute(stream: true);
-      clearQueue();
+      // Don't clear queue - items should remain pending to be processed after uploads complete
       return;
     }
 
