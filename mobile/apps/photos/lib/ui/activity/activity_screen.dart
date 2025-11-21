@@ -17,7 +17,7 @@ class ActivityScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Photos taken"),
+        title: const Text("Activity"),
         actions: [
           IconButton(
             icon: const Icon(Icons.ios_share),
