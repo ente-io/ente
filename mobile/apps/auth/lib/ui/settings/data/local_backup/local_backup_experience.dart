@@ -112,12 +112,6 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     await _withBusyGuard(
       () async {
         if (shouldEnable) {
-          final authenticated = await _authenticateForBackupAction(
-            'Authenticate to enable backups',
-          );
-          if (!authenticated) {
-            return;
-          }
           final success = await _startEnableFlow();
           if (!success) {
             return;

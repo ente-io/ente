@@ -76,20 +76,39 @@ class LocalBackupSettingsPage extends StatelessWidget {
                                   onTap: () async {
                                     await controller.updatePassword(context);
                                   },
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            _BackupLocationCard(
-                              controller: controller,
-                              colorScheme: colorScheme,
-                              textTheme: textTheme,
-                            ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _BackupLocationCard(
+                          controller: controller,
+                          colorScheme: colorScheme,
+                          textTheme: textTheme,
+                        ),
                             const SizedBox(height: 12),
-                            _BackupActionCard(
-                              controller: controller,
-                              colorScheme: colorScheme,
-                              textTheme: textTheme,
+                            MenuItemWidget(
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: 'Create backup now',
+                              ),
+                              alignCaptionedTextToLeft: true,
+                              singleBorderRadius: 12,
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: controller.isBusy
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.chevron_right_outlined,
+                                      color: Colors.grey,
+                                    ),
+                              onTap: () async {
+                                if (controller.isBusy) return;
+                                await controller.runManualBackup();
+                              },
                             ),
                           ],
                         )
@@ -148,24 +167,7 @@ class _LocalBackupVariantShell extends StatelessWidget {
                 ? SafeArea(bottom: false, child: body)
                 : const _LocalBackupLoading(),
           ),
-          if (controller.isBusy && controller.shouldShowBusyOverlay)
-            const _LocalBackupBusyOverlay(),
         ],
-      ),
-    );
-  }
-}
-
-class _LocalBackupBusyOverlay extends StatelessWidget {
-  const _LocalBackupBusyOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: Container(
-        color: _scaleAlpha(Colors.black, 0.05),
-        alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
       ),
     );
   }
@@ -308,69 +310,4 @@ class _BackupButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _BackupActionCard extends StatelessWidget {
-  const _BackupActionCard({
-    required this.controller,
-    required this.colorScheme,
-    required this.textTheme,
-  });
-
-  final LocalBackupExperienceController controller;
-  final dynamic colorScheme;
-  final dynamic textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: colorScheme.fillFaint,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Manual backup',
-                    style: textTheme.bodyBold,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Create an on-demand encrypted backup to your selected folder.',
-                    style: textTheme.miniFaint,
-                  ),
-                ],
-              ),
-            ),
-            TextButton(
-              onPressed: controller.runManualBackup,
-              style: TextButton.styleFrom(
-                backgroundColor: colorScheme.fillMuted,
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 10,
-                ),
-                minimumSize: const Size(0, 40),
-              ),
-              child: Text(
-                'Backup now',
-                style: textTheme.smallBold,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Color _scaleAlpha(Color color, double factor) {
-  final normalized = (color.a * factor).clamp(0.0, 1.0);
-  return color.withValues(alpha: normalized);
 }
