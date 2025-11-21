@@ -55,7 +55,6 @@ class _ActivityHeatmapCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final last365 = summary?.last365Days ??
         List.generate(
           365,
@@ -68,36 +67,14 @@ class _ActivityHeatmapCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: const Color(0xFFF5F5F5), width: 2),
         ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Past year",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                if (summary != null)
-                  Text(
-                    "${summary!.currentStreak}d streak",
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelMedium
-                        ?.copyWith(color: colorScheme.primary),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _Heatmap(days: last365),
-          ],
-        ),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        child: _Heatmap(days: last365),
       ),
     );
   }
@@ -110,106 +87,186 @@ class _Heatmap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dayHeader = ["S", "M", "T", "W", "T", "F", "S"];
-    final weeks = <List<ActivityDay>>[];
-    for (int i = 0; i < days.length; i += 7) {
-      weeks.add(days.skip(i).take(7).toList());
+    final dayHeader = ["S", "M", "T", "W", "Th", "F", "Sa"];
+    final today = DateTime.now();
+    final todayMidnight = DateTime(today.year, today.month, today.day);
+    final firstDay = todayMidnight.subtract(const Duration(days: 364));
+
+    final normalizedDayMap = <int, ActivityDay>{
+      for (final d in days)
+        DateTime(d.date.year, d.date.month, d.date.day)
+            .millisecondsSinceEpoch: d,
+    };
+
+    final int startOffset = firstDay.weekday % 7; // days since previous Sunday
+    final DateTime gridStart =
+        firstDay.subtract(Duration(days: startOffset)); // Sunday-aligned
+    final int totalDays =
+        todayMidnight.difference(gridStart).inDays + 1; // inclusive of today
+
+    final List<ActivityDay?> gridDays = List.generate(totalDays, (index) {
+      final date = gridStart.add(Duration(days: index));
+      if (date.isBefore(firstDay)) {
+        return null; // top padding
+      }
+      final key = DateTime(date.year, date.month, date.day)
+          .millisecondsSinceEpoch;
+      return normalizedDayMap[key] ??
+          ActivityDay(
+            date: date,
+            hasActivity: false,
+          );
+    });
+
+    final weeks = <List<ActivityDay?>>[];
+    for (int i = 0; i < gridDays.length; i += 7) {
+      final slice = gridDays.skip(i).take(7).toList();
+      while (slice.length < 7) {
+        slice.add(null); // pad last row to full width
+      }
+      weeks.add(slice);
     }
 
     final monthLabels = <int, String>{};
-    for (final day in days) {
-      if (day.date.day == 1) {
-        monthLabels[weeks.indexWhere(
-          (week) => week.any(
-            (d) =>
-                d.date.year == day.date.year &&
-                d.date.month == day.date.month &&
-                d.date.day == day.date.day,
-          ),
-        )] = _monthLabel(day.date.month);
-      }
+    final seenMonths = <String>{};
+
+    for (final day in gridDays.whereType<ActivityDay>()) {
+      if (day.date.day != 1) continue;
+      final daysSinceStart = day.date.difference(gridStart).inDays;
+      final rowIndex = daysSinceStart ~/ 7;
+      final key = _monthKey(day.date);
+      if (seenMonths.contains(key)) continue;
+      monthLabels[rowIndex] = _monthLabel(day.date.month);
+      seenMonths.add(key);
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Column(
-            children: [
-              const SizedBox(height: 16),
-              ...weeks.asMap().entries.map(
-                    (entry) => SizedBox(
-                      height: 16,
-                      width: 28,
-                      child: Center(
-                        child: Text(
-                          monthLabels[entry.key] ?? "",
-                          style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: Colors.black
-                                        .withAlpha((0.25 * 255).round()),
-                                    fontSize: 10,
-                                  ),
-                        ),
-                      ),
-                    ),
-                  ),
-            ],
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: dayHeader
-                    .map(
-                      (d) => SizedBox(
-                        width: 18,
-                        child: Center(
-                          child: Text(
-                            d,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: Colors.black
-                                      .withAlpha((0.25 * 255).round()),
-                                  fontSize: 10,
-                                ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-              const SizedBox(height: 4),
-              ...weeks.map(
-                (week) => Row(
-                  children: week
-                      .map(
-                        (day) => Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 1,
-                          ),
-                          width: 18,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: day.hasActivity
-                                ? const Color(0xFF1DB954)
-                                : const Color(0xFFDFF3E4),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      )
-                      .toList(),
+    if (monthLabels.isEmpty) {
+      final rowIndex = firstDay.difference(gridStart).inDays ~/ 7;
+      monthLabels[rowIndex] = _monthLabel(firstDay.month);
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double monthLabelWidth = 32;
+        const double gapX = 4;
+        const double gapY = 3;
+        const double cellWidth = 38.31;
+        const double cellHeight = 9.82;
+        final double totalCellsWidth =
+            (dayHeader.length * cellWidth) + ((dayHeader.length - 1) * gapX);
+        final double totalWidth = monthLabelWidth + gapX + totalCellsWidth;
+        final BorderRadius pillRadius = BorderRadius.circular(cellHeight);
+        const TextStyle headerStyle = TextStyle(
+          color: Color(0x36000000),
+          fontSize: 6.834,
+          fontWeight: FontWeight.w600,
+          height: 2.45,
+          fontFamily: "Inter",
+          decoration: TextDecoration.none,
+        );
+
+        final List<Widget> dayHeaderRow = [];
+        for (int i = 0; i < dayHeader.length; i++) {
+          dayHeaderRow.add(
+            SizedBox(
+              width: cellWidth,
+              height: 16,
+              child: Center(
+                child: Text(
+                  dayHeader[i],
+                  style: headerStyle,
+                  textAlign: TextAlign.center,
                 ),
               ),
-            ],
+            ),
+          );
+          if (i != dayHeader.length - 1) {
+            dayHeaderRow.add(const SizedBox(width: gapX));
+          }
+        }
+
+        return Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: totalWidth,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    ...weeks.asMap().entries.map(
+                      (entry) {
+                        final isLast = entry.key == weeks.length - 1;
+                        return SizedBox(
+                          height: cellHeight + (isLast ? 0 : gapY),
+                          width: monthLabelWidth,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              monthLabels[entry.key] ?? "",
+                              style: headerStyle.copyWith(
+                                fontSize: 8.542,
+                                height: 1.8,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(width: gapX),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: dayHeaderRow),
+                    const SizedBox(height: 4),
+                    ...weeks.asMap().entries.map(
+                      (entry) {
+                        final isLast = entry.key == weeks.length - 1;
+                        final week = entry.value;
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: isLast ? 0 : gapY),
+                          child: Row(
+                            children: week.asMap().entries.map((cell) {
+                              final isLastCell =
+                                  cell.key == dayHeader.length - 1;
+                              final color = cell.value == null
+                                  ? Colors.transparent
+                                  : cell.value!.hasActivity
+                                      ? const Color(0xFF1DB954)
+                                      : const Color(0xFF1DB954).withOpacity(
+                                          0.25,
+                                        );
+                              return Row(
+                                children: [
+                                  Container(
+                                    width: cellWidth,
+                                    height: cellHeight,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      borderRadius: pillRadius,
+                                    ),
+                                  ),
+                                  if (!isLastCell)
+                                    const SizedBox(width: gapX),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -230,6 +287,8 @@ class _Heatmap extends StatelessWidget {
     ];
     return labels[month - 1];
   }
+
+  String _monthKey(DateTime date) => "${date.year}-${date.month}";
 }
 
 class _AchievementsRow extends StatelessWidget {
