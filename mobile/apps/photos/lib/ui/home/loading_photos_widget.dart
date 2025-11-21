@@ -49,11 +49,10 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         if (permissionService.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
-          // ignore: unawaited_futures
-          routeToPage(
+          replacePage(
             context,
             const BackupFolderSelectionPage(
-              isOnboarding: true,
+              isOnboarding: false,
               isFirstBackup: true,
             ),
           );
