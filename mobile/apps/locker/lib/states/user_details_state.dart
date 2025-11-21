@@ -4,7 +4,7 @@ import "package:ente_accounts/models/user_details.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_events/event_bus.dart";
 import "package:flutter/material.dart";
-import "package:locker/events/opened_settings_event.dart";
+import "package:locker/events/user_details_refresh_event.dart";
 
 class UserDetailsStateWidget extends StatefulWidget {
   final Widget child;
@@ -20,14 +20,15 @@ class UserDetailsStateWidget extends StatefulWidget {
 
 class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
   late UserDetails? _userDetails;
-  late StreamSubscription<OpenedSettingsEvent> _openedSettingsEventSubscription;
+  late StreamSubscription<UserDetailsRefreshEvent>
+      _userDetailsRefreshEventSubscription;
   bool _isCached = true;
 
   @override
   void initState() {
     _userDetails = UserService.instance.getCachedUserDetails();
-    _openedSettingsEventSubscription =
-        Bus.instance.on<OpenedSettingsEvent>().listen((event) {
+    _userDetailsRefreshEventSubscription =
+        Bus.instance.on<UserDetailsRefreshEvent>().listen((event) {
       _fetchUserDetails();
     });
     super.initState();
@@ -35,7 +36,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
 
   @override
   void dispose() {
-    _openedSettingsEventSubscription.cancel();
+    _userDetailsRefreshEventSubscription.cancel();
     super.dispose();
   }
 
