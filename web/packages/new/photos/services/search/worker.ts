@@ -398,13 +398,16 @@ const locationSuggestions = (
 const filterSearchableFiles = (
     { files, collectionFiles }: SearchCollectionsAndFiles,
     suggestion: SearchSuggestion,
-) =>
-    sortMatchesIfNeeded(
+) => {
+    if (suggestion.type == "sidebarAction") return [];
+
+    return sortMatchesIfNeeded(
         (suggestion.type == "collection" ? collectionFiles : files).filter(
             (f) => isMatchingFile(f, suggestion),
         ),
         suggestion,
     );
+};
 
 /**
  * Return true if file satisfies the given {@link query}.
@@ -448,6 +451,9 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
 
         case "person":
             return suggestion.person.fileIDs.includes(file.id);
+
+        case "sidebarAction":
+            return false;
     }
 };
 
