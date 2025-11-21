@@ -207,6 +207,8 @@ type PreferencesAction = Extract<
     | "preferences.theme"
     | "preferences.customDomains"
     | "preferences.map"
+    | "preferences.fasterUpload"
+    | "preferences.openOnStartup"
     | "preferences.advanced"
     | "preferences.mlSearch"
     | "preferences.streamableVideos"
