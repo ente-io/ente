@@ -7,7 +7,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/column_item.dart";
-import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 
 class ActivityScreen extends StatelessWidget {
@@ -586,6 +585,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
       final textTheme = getEnteTextTheme(context);
       return StatefulBuilder(
         builder: (context, setState) {
+          final bool canSave =
+              controller.text.trim().isNotEmpty && selectedAlbumId != null;
           return SafeArea(
             child: Padding(
               padding: EdgeInsets.only(
@@ -685,6 +686,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                               child: TextFormField(
                                 controller: controller,
                                 autofocus: true,
+                                onChanged: (_) => setState(() {}),
                                 decoration: InputDecoration(
                                   hintText: "Enter your ritual",
                                   filled: true,
@@ -826,11 +828,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                               ),
                             ),
                             onPressed: () async {
-                              if (!formKey.currentState!.validate()) return;
-                              if (selectedAlbumId == null) {
-                                showToast(context, "Please select an album");
-                                return;
-                              }
+                              if (!canSave) return;
                               final updated = (ritual ??
                                       activityService.createEmptyRitual())
                                   .copyWith(
