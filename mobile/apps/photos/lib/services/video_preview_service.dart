@@ -36,6 +36,7 @@ import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
+import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:photos/utils/network_util.dart";
@@ -103,10 +104,12 @@ class VideoPreviewService {
     }
   }
 
-  void clearQueue() {
+  void clearQueue({bool fireUploadedStatus = true}) {
     // Fire events for all items being cleared
-    for (final entry in _items.entries) {
-      _fireVideoPreviewStateChange(entry.key, PreviewItemStatus.uploaded);
+    if (fireUploadedStatus) {
+      for (final entry in _items.entries) {
+        _fireVideoPreviewStateChange(entry.key, PreviewItemStatus.uploaded);
+      }
     }
     fileQueue.clear();
     _items.clear();
@@ -280,6 +283,16 @@ class VideoPreviewService {
     // not used currently
     bool forceUpload = false,
   }) async {
+    // Check if file upload is happening before processing video for streaming
+    if (FileUploader.instance.isUploading) {
+      _logger.info(
+        "Pausing video streaming because file upload is in progress",
+      );
+      computeController.releaseCompute(stream: true);
+      // Don't clear queue - items should remain pending to be processed after uploads complete
+      return;
+    }
+
     final bool isManual =
         await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
     final canStream = _isPermissionGranted();
@@ -288,8 +301,13 @@ class VideoPreviewService {
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
       computeController.releaseCompute(stream: true);
-      if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
-      clearQueue();
+      // Only clear queue if user explicitly disabled streaming (permanent condition)
+      // Don't clear for temporary conditions like compute unavailable or device unhealthy
+      if (!isVideoStreamingEnabled) {
+        clearQueue();
+      } else {
+        _logger.info("No permission to run compute - queue preserved");
+      }
       return;
     }
 
@@ -454,8 +472,8 @@ class VideoPreviewService {
       final command =
           // scaling, fps, tonemapping
           '$filters'
-          // video encoding
-          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
+          // video encoding with maxrate cap at 2000kbps to preserve smaller bitrates
+          '${reencodeVideo ? '-c:v libx264 -maxrate 2000k -bufsize 4000k ' : '-c:v copy '}'
           // audio encoding
           '-c:a aac -b:a 128k '
           // hls options
@@ -1239,6 +1257,12 @@ class VideoPreviewService {
   }) {
     Future.delayed(duration, () async {
       if (_hasQueuedFile && !forceProcess) return;
+
+      // Don't start streaming if file uploads are in progress
+      if (FileUploader.instance.isUploading) {
+        _logger.info("Skipping stream queue - file upload in progress");
+        return;
+      }
 
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
