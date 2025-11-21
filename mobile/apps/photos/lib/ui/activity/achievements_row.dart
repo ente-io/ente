@@ -6,44 +6,40 @@ class AchievementsRow extends StatelessWidget {
 
   final ActivitySummary? summary;
 
+  static const Map<int, String> _badgeAssets = {
+    7: "assets/rituals/7_badge.png",
+    13: "assets/rituals/13_badge.png",
+    30: "assets/rituals/30_badge.png",
+  };
+
   @override
   Widget build(BuildContext context) {
-    final badges = summary?.badgesUnlocked ??
-        {
-          7: false,
-          14: false,
-          30: false,
-          90: false,
-          180: false,
-          365: false,
-        };
+    final badges = summary?.badgesUnlocked ?? const <int, bool>{};
+    final unlocked = badges.entries
+        .where((entry) => entry.value && _badgeAssets.containsKey(entry.key))
+        .map((entry) => entry.key)
+        .toList();
+
+    if (unlocked.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "Achievements",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Spacer(),
-              const Icon(Icons.chevron_right_rounded),
-            ],
+          Text(
+            "Achievements",
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: badges.entries
-                  .map(
-                    (entry) => _BadgePill(
-                      label: "${entry.key}d",
-                      unlocked: entry.value,
-                    ),
-                  )
-                  .toList(),
+              children: unlocked
+                  .map((days) => _BadgeTile(days: days))
+                  .toList(growable: false),
             ),
           ),
         ],
@@ -52,39 +48,24 @@ class AchievementsRow extends StatelessWidget {
   }
 }
 
-class _BadgePill extends StatelessWidget {
-  const _BadgePill({required this.label, required this.unlocked});
+class _BadgeTile extends StatelessWidget {
+  const _BadgeTile({required this.days});
 
-  final String label;
-  final bool unlocked;
+  final int days;
 
   @override
   Widget build(BuildContext context) {
-    final color = unlocked ? const Color(0xFF1DB954) : Colors.grey.shade300;
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withAlpha((0.2 * 255).round()),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 14,
-            backgroundColor: color,
-            child: const Text("🏅", style: TextStyle(fontSize: 14)),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: unlocked ? Colors.black : Colors.black54,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ],
+    final asset = AchievementsRow._badgeAssets[days];
+    if (asset == null) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Image.asset(
+        asset,
+        width: 58,
+        height: 58,
+        fit: BoxFit.cover,
       ),
     );
   }
