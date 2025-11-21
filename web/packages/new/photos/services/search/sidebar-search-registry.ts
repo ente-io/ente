@@ -24,6 +24,7 @@ export interface SidebarActionContext {
     showPreferences: () => void;
     showHelp: () => void;
     onShowExport: () => void;
+    onShowPlanSelector: () => void;
     onLogout: () => void;
     onRouteToDeduplicate: () => Promise<unknown>;
     onShowWatchFolder: () => void;
@@ -49,6 +50,12 @@ const sidebarActions = (): SidebarAction[] => {
     const helpCategory = t("help");
 
     return [
+        {
+            id: "account.subscription",
+            label: t("subscription"),
+            path: [accountCategory, t("subscription")],
+            keywords: ["subscription", "plan", "upgrade", "billing"],
+        },
         {
             id: "shortcuts.uncategorized",
             label: t("section_uncategorized"),
@@ -183,6 +190,23 @@ const sidebarActions = (): SidebarAction[] => {
             keywords: ["advanced", "proxy", "upload"],
         },
         {
+            id: "preferences.fasterUpload",
+            label: t("faster_upload"),
+            path: [preferencesCategory, t("advanced"), t("faster_upload")],
+            keywords: ["faster", "upload", "proxy"],
+        },
+        {
+            id: "preferences.openOnStartup",
+            label: t("open_ente_on_startup"),
+            path: [
+                preferencesCategory,
+                t("advanced"),
+                t("open_ente_on_startup"),
+            ],
+            keywords: ["open", "startup", "launch", "auto launch"],
+            available: () => isDesktop,
+        },
+        {
             id: "preferences.mlSearch",
             label: t("ml_search"),
             path: [preferencesCategory, t("ml_search")],
@@ -313,12 +337,18 @@ export const performSidebarAction = async (
             ctx.setPendingAccountAction(actionID);
             ctx.showAccount();
             return Promise.resolve();
+        case "account.subscription":
+            ctx.onClose();
+            ctx.onShowPlanSelector();
+            return Promise.resolve();
 
         case "preferences.language":
         case "preferences.theme":
         case "preferences.customDomains":
         case "preferences.map":
         case "preferences.advanced":
+        case "preferences.fasterUpload":
+        case "preferences.openOnStartup":
         case "preferences.mlSearch":
         case "preferences.streamableVideos":
             ctx.setPendingPreferencesAction(actionID);

@@ -289,6 +289,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             performSidebarRegistryAction(actionID, {
                 onClose,
                 onShowCollectionSummary: showCollectionSummaryWithWorkarounds,
+                onShowPlanSelector,
                 showAccount,
                 showPreferences,
                 showHelp,
@@ -316,6 +317,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             handleOpenWatchFolder,
             onClose,
             showCollectionSummaryWithWorkarounds,
+            onShowPlanSelector,
             onShowExport,
             router,
             showAccount,
@@ -1045,6 +1047,8 @@ const Preferences: React.FC<PreferencesProps> = ({
                 showMapSettings();
                 break;
             case "preferences.advanced":
+            case "preferences.fasterUpload":
+            case "preferences.openOnStartup":
                 showAdvancedSettings();
                 break;
             case "preferences.mlSearch":

@@ -4,9 +4,7 @@ This page documents the items rendered by `web/apps/photos/src/components/Sideba
 
 ## User details and subscription
 
-- [ ] **Email + subscription card**: always visible; clicking opens the plan selector unless the user is a non-admin family member (then opens Manage member subscription). If the subscription is Stripe + past due, clicking redirects to the customer portal.
-- [ ] **Subscription status message**: shown only when (a) the user is not a non-admin family member and (b) the subscription is not both active and uncancelled. Messages include free plan, cancelled renewal (with expiry date), expired (CTA to plan selector/portal), and storage quota exceeded.
-- [ ] **Manage member subscription dialog**: appears only for family members who are not admins and shows the family admin email plus a Leave family plan action.
+- [X][x] **Subscription**: always availble, open up the plan selector.
 
 ## Shortcuts
 
@@ -45,8 +43,8 @@ This page documents the items rendered by `web/apps/photos/src/components/Sideba
 
 ## Advanced settings
 
-- [ ] **Faster upload**: always shown; toggles the Cloudflare upload proxy (`cfUploadProxyDisabled` inverted).
-- [ ] **Open Ente on startup**: only shown when running in the Electron shell (`globalThis.electron` exists); toggles auto-launch and refreshes the current state from `electron.isAutoLaunchEnabled()`.
+- [X][x] **Faster upload**: always shown; toggles the Cloudflare upload proxy (`cfUploadProxyDisabled` inverted).
+- [ ][x] **Open Ente on startup**: only shown when running in the Electron shell (`globalThis.electron` exists); toggles auto-launch and refreshes the current state from `electron.isAutoLaunchEnabled()`.
 
 ## Help drawer
 
