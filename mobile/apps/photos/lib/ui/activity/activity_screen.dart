@@ -57,9 +57,9 @@ class _ActivityHeatmapCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final last365 = summary?.last365Days ??
         List.generate(
-          365,
+          372,
           (i) => ActivityDay(
-            date: DateTime.now().subtract(Duration(days: 364 - i)),
+            date: DateTime.now().subtract(Duration(days: 371 - i)),
             hasActivity: false,
           ),
         );
@@ -87,10 +87,18 @@ class _Heatmap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final renderDays =
+        days.length > 365 ? days.sublist(days.length - 365) : days;
     final dayHeader = ["S", "M", "T", "W", "Th", "F", "Sa"];
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
-    final firstDay = todayMidnight.subtract(const Duration(days: 364));
+    final DateTime firstDay = renderDays.isNotEmpty
+        ? DateTime(
+            renderDays.first.date.year,
+            renderDays.first.date.month,
+            renderDays.first.date.day,
+          )
+        : todayMidnight.subtract(const Duration(days: 364));
 
     final normalizedDayMap = <int, ActivityDay>{
       for (final d in days)
@@ -98,20 +106,30 @@ class _Heatmap extends StatelessWidget {
             .millisecondsSinceEpoch: d,
     };
 
-    final int startOffset = firstDay.weekday % 7; // days since previous Sunday
+    // Always start on the Sunday before/including the first day to render
+    final int startOffset = firstDay.weekday % 7;
     final DateTime gridStart =
         firstDay.subtract(Duration(days: startOffset)); // Sunday-aligned
+    // End exactly on today; last row can be partial
+    final DateTime gridEnd = todayMidnight;
     final int totalDays =
-        todayMidnight.difference(gridStart).inDays + 1; // inclusive of today
+        gridEnd.difference(gridStart).inDays + 1; // inclusive of gridEnd
 
     final List<ActivityDay?> gridDays = List.generate(totalDays, (index) {
       final date = gridStart.add(Duration(days: index));
-      if (date.isBefore(firstDay)) {
-        return null; // top padding
-      }
+      // Leading days before the 365-day window can still be active if present
+      // in the extended map (we fetched extra days), otherwise remain empty.
       final key = DateTime(date.year, date.month, date.day)
           .millisecondsSinceEpoch;
-      return normalizedDayMap[key] ??
+      final activity = normalizedDayMap[key];
+      if (date.isBefore(firstDay)) {
+        return activity ??
+            ActivityDay(
+              date: date,
+              hasActivity: false,
+            );
+      }
+      return activity ??
           ActivityDay(
             date: date,
             hasActivity: false,
@@ -195,27 +213,27 @@ class _Heatmap extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
-                    ...weeks.asMap().entries.map(
-                      (entry) {
-                        final isLast = entry.key == weeks.length - 1;
-                        return SizedBox(
-                          height: cellHeight + (isLast ? 0 : gapY),
-                          width: monthLabelWidth,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
+                    const SizedBox(height: 8),
+                    ...weeks.asMap().entries.map((entry) {
+                      final isLast = entry.key == weeks.length - 1;
+                      return SizedBox(
+                        height: cellHeight + (isLast ? 0 : gapY),
+                        width: monthLabelWidth,
+                        child: Center(
+                          child: Transform.translate(
+                            offset: const Offset(0, -1),
                             child: Text(
                               monthLabels[entry.key] ?? "",
                               style: headerStyle.copyWith(
                                 fontSize: 8.542,
-                                height: 1.8,
+                                height: 1.4,
                               ),
                               textAlign: TextAlign.center,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    }),
                   ],
                 ),
                 const SizedBox(width: gapX),
@@ -238,8 +256,8 @@ class _Heatmap extends StatelessWidget {
                                   ? Colors.transparent
                                   : cell.value!.hasActivity
                                       ? const Color(0xFF1DB954)
-                                      : const Color(0xFF1DB954).withOpacity(
-                                          0.25,
+                                      : const Color(0xFF1DB954).withValues(
+                                          alpha: 0.25,
                                         );
                               return Row(
                                 children: [

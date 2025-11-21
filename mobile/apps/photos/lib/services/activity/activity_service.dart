@@ -83,7 +83,7 @@ class ActivityService {
     if (userId == null) {
       return ActivitySummary(
         last365Days: _emptyDays(),
-        last7Days: _emptyDays().sublist(358),
+        last7Days: _emptyDays().sublist(_emptyDays().length - 7),
         currentStreak: 0,
         longestStreak: 0,
         badgesUnlocked: _badgeStates(0),
@@ -93,7 +93,7 @@ class ActivityService {
     }
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
-    final cutoffDate = todayMidnight.subtract(const Duration(days: 364));
+    final cutoffDate = todayMidnight.subtract(const Duration(days: 371));
     final endOfToday = todayMidnight.add(
       const Duration(
         hours: 23,
@@ -140,7 +140,7 @@ class ActivityService {
       }
     }
 
-    final List<ActivityDay> last365Days = List.generate(365, (index) {
+    final List<ActivityDay> last365Days = List.generate(372, (index) {
       final day = cutoffDate.add(Duration(days: index));
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       return ActivityDay(date: day, hasActivity: dayKeys.contains(key));
@@ -193,9 +193,9 @@ class ActivityService {
   List<ActivityDay> _emptyDays() {
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
-    final cutoffDate = todayMidnight.subtract(const Duration(days: 364));
+    final cutoffDate = todayMidnight.subtract(const Duration(days: 371));
     return List.generate(
-      365,
+      372,
       (index) => ActivityDay(
         date: cutoffDate.add(Duration(days: index)),
         hasActivity: false,
