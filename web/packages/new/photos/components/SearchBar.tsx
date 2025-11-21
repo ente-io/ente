@@ -373,13 +373,13 @@ const createSelectStyles = (
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
     // The shortcut UI element will be shown once the search bar supports searching the settings as well.
-    // const isMac =
-    //     typeof navigator !== "undefined" &&
-    //     navigator.userAgent.toUpperCase().includes("MAC");
-    // const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+    const isMac =
+        typeof navigator !== "undefined" &&
+        navigator.userAgent.toUpperCase().includes("MAC");
+    const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
 
-    // const hasValue =
-    //     props.getValue().length > 0 || props.selectProps.inputValue;
+    const hasValue =
+        props.getValue().length > 0 || props.selectProps.inputValue;
 
     return (
         <SelectComponents.Control {...props}>
@@ -403,7 +403,7 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
                     {iconForOption(props.getValue()[0])}
                 </Box>
                 {children}
-                {/* {!hasValue && (
+                {!hasValue && (
                     <Box
                         sx={{
                             display: ["none", "none", "inline-flex"],
@@ -422,7 +422,7 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
                     >
                         {shortcutKey}
                     </Box>
-                )} */}
+                )}
             </Stack>
         </SelectComponents.Control>
     );
