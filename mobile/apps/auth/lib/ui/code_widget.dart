@@ -964,7 +964,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       firstButtonOnTap: () async {
         try {
           await CodeStore.instance.removeCode(widget.code);
-          LocalBackupService.instance.triggerAutomaticBackup().ignore();
+          LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
         } catch (e, s) {
           logger.severe('Failed to delete code', e, s);
           showGenericErrorDialog(context: context, error: e).ignore();

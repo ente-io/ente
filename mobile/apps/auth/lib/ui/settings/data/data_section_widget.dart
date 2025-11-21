@@ -92,7 +92,8 @@ class DataSectionWidget extends StatelessWidget {
           );
         },
       ),
-      if (FeatureFlagService.isInternalUserOrDebugBuild())
+      if (FeatureFlagService.isInternalUserOrDebugBuild()) ...[
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: "${l10n.localBackupSidebarTitle}(i)",
@@ -104,7 +105,7 @@ class DataSectionWidget extends StatelessWidget {
             await _handleLocalBackupClick(context);
           },
         ),
-      if (FeatureFlagService.isInternalUserOrDebugBuild()) sectionOptionSpacing,
+      ],
     ]);
     return Column(
       children: children,
