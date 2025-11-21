@@ -602,6 +602,14 @@
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
+  "uploadFileCountLimitErrorTitle": "File limit reached",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
+  "uploadFileCountLimitErrorBody": "Your individual or family account has hit the 1000-file limit.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
   "uploadFileTooLargeErrorTitle": "File too large",
   "@uploadFileTooLargeErrorTitle": {
     "description": "Title shown when uploads fail because the file exceeds the supported size"

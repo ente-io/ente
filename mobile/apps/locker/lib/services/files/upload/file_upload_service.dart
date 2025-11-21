@@ -621,7 +621,9 @@ class FileUploader {
       return file;
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;
-      if (statusCode == 413) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      } else if (statusCode == 413) {
         throw FileTooLargeForPlanError();
       } else if (statusCode == 426) {
         _onStorageLimitExceeded();
@@ -686,6 +688,19 @@ class FileUploader {
       }
       rethrow;
     }
+  }
+
+  bool _isFileLimitReachedResponse(Response? response) {
+    if (response?.statusCode == 403) {
+      final dynamic data = response?.data;
+      if (data is Map) {
+        final code = data['code'];
+        if (code is String) {
+          return code.toUpperCase() == 'FILE_LIMIT_REACHED';
+        }
+      }
+    }
+    return false;
   }
 
   void _onStorageLimitExceeded() {

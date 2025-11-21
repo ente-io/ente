@@ -703,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareThisLink.
   ///
   /// In en, this message translates to:
-  /// **'Anyone with this link can access your item.'**
+  /// **'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.'**
   String get shareThisLink;
 
   /// No description provided for @copyLink.
@@ -2025,6 +2025,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'ve run out of storage space. Free up space to continue uploading.'**
   String get uploadStorageLimitErrorBody;
+
+  /// Title shown when uploads fail because the locker already has the maximum file count
+  ///
+  /// In en, this message translates to:
+  /// **'File limit reached'**
+  String get uploadFileCountLimitErrorTitle;
+
+  /// Body shown when uploads fail because the locker already has the maximum file count
+  ///
+  /// In en, this message translates to:
+  /// **'Your individual or family account has hit the 1000-file limit.'**
+  String get uploadFileCountLimitErrorBody;
 
   /// Title shown when uploads fail because the file exceeds the supported size
   ///
