@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:ente_base/typedefs.dart';
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/debouncer.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 typedef OnChangedCallBack = void Function(bool);
@@ -51,53 +54,23 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
           height: 31,
           child: FittedBox(
             fit: BoxFit.contain,
-            child: Switch.adaptive(
-              activeColor: enteColorScheme.primary400,
-              activeTrackColor: enteColorScheme.primary300,
-              inactiveTrackColor: enteColorScheme.fillMuted,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: toggleValue ?? false,
-              onChanged: (negationOfToggleValue) async {
-                setState(() {
-                  toggleValue = negationOfToggleValue;
-                  //start showing inProgress statu icons if toggle takes more than debounce time
-                  _debouncer.run(
-                    () => Future(
-                      () {
-                        setState(() {
-                          executionState = ExecutionState.inProgress;
-                        });
-                      },
+            child: Platform.isAndroid
+                ? Switch(
+                    inactiveTrackColor: Colors.transparent,
+                    activeTrackColor: enteColorScheme.primary500,
+                    activeColor: Colors.white,
+                    inactiveThumbColor: enteColorScheme.primary500,
+                    trackOutlineColor: WidgetStateColor.resolveWith(
+                      (states) => enteColorScheme.primary500,
                     ),
-                  );
-                });
-                final Stopwatch stopwatch = Stopwatch()..start();
-                await widget.onChanged.call().onError(
-                      (error, stackTrace) => _debouncer.cancelDebounce(),
-                    );
-                //for toggle feedback on short unsuccessful onChanged
-                await _feedbackOnUnsuccessfulToggle(stopwatch);
-                //debouncer gets canceled if onChanged takes less than debounce time
-                _debouncer.cancelDebounce();
-
-                final newValue = widget.value.call();
-                setState(() {
-                  if (toggleValue == newValue) {
-                    if (executionState == ExecutionState.inProgress) {
-                      executionState = ExecutionState.successful;
-                      Future.delayed(const Duration(seconds: 2), () {
-                        setState(() {
-                          executionState = ExecutionState.idle;
-                        });
-                      });
-                    }
-                  } else {
-                    toggleValue = !toggleValue!;
-                    executionState = ExecutionState.idle;
-                  }
-                });
-              },
-            ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    value: toggleValue ?? false,
+                    onChanged: _onChanged,
+                  )
+                : CupertinoSwitch(
+                    value: toggleValue ?? false,
+                    onChanged: _onChanged,
+                  ),
           ),
         ),
       ],
@@ -123,6 +96,51 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     } else {
       return const SizedBox(width: 24);
     }
+  }
+
+  Future<void> _onChanged(bool negationOfToggleValue) async {
+    if (!mounted) return;
+    setState(() {
+      toggleValue = negationOfToggleValue;
+      //start showing inProgress statu icons if toggle takes more than debounce time
+      _debouncer.run(
+        () => Future(
+          () {
+            if (!mounted) return;
+            setState(() {
+              executionState = ExecutionState.inProgress;
+            });
+          },
+        ),
+      );
+    });
+    final Stopwatch stopwatch = Stopwatch()..start();
+    await widget.onChanged.call().onError(
+          (error, stackTrace) => _debouncer.cancelDebounce(),
+        );
+    //for toggle feedback on short unsuccessful onChanged
+    await _feedbackOnUnsuccessfulToggle(stopwatch);
+    //debouncer gets canceled if onChanged takes less than debounce time
+    _debouncer.cancelDebounce();
+
+    final newValue = widget.value.call();
+    if (!mounted) return;
+    setState(() {
+      if (toggleValue == newValue) {
+        if (executionState == ExecutionState.inProgress) {
+          executionState = ExecutionState.successful;
+          Future.delayed(const Duration(seconds: 2), () {
+            if (!mounted) return;
+            setState(() {
+              executionState = ExecutionState.idle;
+            });
+          });
+        }
+      } else {
+        toggleValue = !toggleValue!;
+        executionState = ExecutionState.idle;
+      }
+    });
   }
 
   Future<void> _feedbackOnUnsuccessfulToggle(Stopwatch stopwatch) async {
