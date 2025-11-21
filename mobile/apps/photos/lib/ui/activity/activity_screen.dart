@@ -694,16 +694,16 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     vertical: 14,
                                   ),
                                   border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: colorScheme.strokeFaint,
-                                    ),
+                                    borderRadius: BorderRadius.circular(18),
+                                    borderSide: BorderSide.none,
                                   ),
                                   enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: colorScheme.strokeFaint,
-                                    ),
+                                    borderRadius: BorderRadius.circular(18),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                    borderSide: BorderSide.none,
                                   ),
                                 ),
                                 validator: (value) {
@@ -768,9 +768,6 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                             decoration: BoxDecoration(
                               color: colorScheme.fillFaint,
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: colorScheme.strokeFaint,
-                              ),
                             ),
                             child: Row(
                               children: [
@@ -1022,7 +1019,6 @@ class _AlbumPreviewTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.fillFaint,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: colorScheme.strokeFaint),
       ),
       child: Row(
         children: [
@@ -1127,15 +1123,6 @@ class _DayCircle extends StatelessWidget {
           color:
               selected ? colorScheme.primary500 : colorScheme.fillFaintPressed,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.primary500.withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ]
-              : [],
         ),
         child: Center(
           child: Text(
