@@ -12,6 +12,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
+import "package:photos/ui/activity/activity_banner.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
@@ -114,27 +115,29 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
-                  itemCount: searchTypes.length,
-                  // ignore: body_might_complete_normally_nullable
+                  itemCount: searchTypes.length + 1,
                   itemBuilder: (context, index) {
-                    switch (searchTypes[index]) {
+                    if (index == 0) {
+                      return const ActivityBanner();
+                    }
+                    final sectionIndex = index - 1;
+                    switch (searchTypes[sectionIndex]) {
                       case SectionType.face:
                         if (!flagService.hasGrantedMLConsent) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
-                          examples: snapshot.data!.elementAt(index)
+                          examples: snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
                         return AlbumsSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.wrapped:
                         return ValueListenableBuilder<WrappedEntryState>(
-                          valueListenable:
-                              wrappedService.stateListenable,
+                          valueListenable: wrappedService.stateListenable,
                           builder: (
                             BuildContext context,
                             WrappedEntryState state,
@@ -148,19 +151,19 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         );
                       case SectionType.location:
                         return LocationsSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.contacts:
                         return const SizedBox.shrink();
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.magic:
                         return MagicSection(
-                          snapshot.data!.elementAt(index)
+                          snapshot.data!.elementAt(sectionIndex)
                               as List<GenericSearchResult>,
                         );
                     }

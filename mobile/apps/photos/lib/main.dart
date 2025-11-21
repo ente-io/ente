@@ -300,6 +300,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
+    _logger.info("ActivityService init $tlog");
+    await activityService.init();
+    _logger.info("ActivityService init done $tlog");
+
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
     }
