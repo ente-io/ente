@@ -26,7 +26,6 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:local_auth/local_auth.dart';
 

@@ -86,9 +86,8 @@ class LocalBackupSettingsPage extends StatelessWidget {
                               textTheme: textTheme,
                             ),
                             const SizedBox(height: 12),
-                            _BackupButton(
-                              onPressed: controller.runManualBackup,
-                              label: 'Backup now (manual)',
+                            _BackupActionCard(
+                              controller: controller,
                               colorScheme: colorScheme,
                               textTheme: textTheme,
                             ),
@@ -97,11 +96,22 @@ class LocalBackupSettingsPage extends StatelessWidget {
                       : (kDebugMode
                           ? Padding(
                               padding: const EdgeInsets.only(top: 12),
-                              child: _BackupButton(
-                                onPressed: controller.resetBackupLocation,
-                                label: 'Reset backup folder',
-                                colorScheme: colorScheme,
-                                textTheme: textTheme,
+                              child: Column(
+                                children: [
+                                  _BackupButton(
+                                    onPressed: controller.resetBackupLocation,
+                                    label: 'Clear backup folder',
+                                    colorScheme: colorScheme,
+                                    textTheme: textTheme,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  _BackupButton(
+                                    onPressed: controller.clearBackupPassword,
+                                    label: 'Clear backup password',
+                                    colorScheme: colorScheme,
+                                    textTheme: textTheme,
+                                  ),
+                                ],
                               ),
                             )
                           : const SizedBox.shrink()),
@@ -294,6 +304,66 @@ class _BackupButton extends StatelessWidget {
         child: Text(
           label,
           style: textTheme.bodyBold,
+        ),
+      ),
+    );
+  }
+}
+
+class _BackupActionCard extends StatelessWidget {
+  const _BackupActionCard({
+    required this.controller,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final LocalBackupExperienceController controller;
+  final dynamic colorScheme;
+  final dynamic textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: colorScheme.fillFaint,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Manual backup',
+                    style: textTheme.bodyBold,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Create an on-demand encrypted backup to your selected folder.',
+                    style: textTheme.miniFaint,
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: controller.runManualBackup,
+              style: TextButton.styleFrom(
+                backgroundColor: colorScheme.fillMuted,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+                minimumSize: const Size(0, 40),
+              ),
+              child: Text(
+                'Backup now',
+                style: textTheme.smallBold,
+              ),
+            ),
+          ],
         ),
       ),
     );

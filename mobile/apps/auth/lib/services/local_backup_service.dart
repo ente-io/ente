@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:saf_stream/saf_stream.dart';
+import 'package:saf_util/saf_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalBackupService {
@@ -74,6 +75,7 @@ class LocalBackupService {
     try {
       if (target.treeUri != null) {
         await _writeBackupWithSaf(target.treeUri!, fileName, content);
+        await _pruneSafBackups(target.treeUri!, limit: _maxBackups);
         return true;
       }
 
@@ -106,6 +108,30 @@ class LocalBackupService {
       overwrite: true,
     );
     _logger.info('Automatic encrypted backup saved via SAF: $fileName');
+  }
+
+  Future<void> _pruneSafBackups(String treeUri, {required int limit}) async {
+    try {
+      final safUtil = SafUtil();
+      final entries = await safUtil.list(treeUri);
+      final backupFiles = entries
+          .where((file) => !file.isDir && _isBackupFile(file.name))
+          .toList();
+
+      backupFiles.sort((a, b) {
+        final timeCompare = a.lastModified.compareTo(b.lastModified);
+        if (timeCompare != 0) return timeCompare;
+        return a.name.compareTo(b.name);
+      });
+
+      while (backupFiles.length > limit) {
+        final file = backupFiles.removeAt(0);
+        await safUtil.delete(file.uri, file.isDir);
+        _logger.info('Deleted old backup via SAF: ${file.name}');
+      }
+    } catch (e, s) {
+      _logger.severe('Error pruning SAF backups', e, s);
+    }
   }
 
   Future<void> _manageOldBackups(String backupPath) async {

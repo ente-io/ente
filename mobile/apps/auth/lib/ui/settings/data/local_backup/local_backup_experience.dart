@@ -60,6 +60,8 @@ class LocalBackupExperienceController {
 
   Future<bool> hasPasswordConfigured() => _state._hasStoredPassword();
 
+  Future<bool> clearBackupPassword() => _state._clearBackupPassword();
+
   String simplifyPath(String fullPath) => _state._simplifyPath(fullPath);
 
   void showSnackBar(String message) => _state._showSnackBar(message);
@@ -140,9 +142,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
-    final selected = await _handleLocationSetup();
-    if (!selected) {
-      _showSnackBar('Select a folder to continue');
+    final hasLocation = await _ensureBackupLocationSelected();
+    if (!hasLocation) {
       return false;
     }
     if (Platform.isAndroid &&
@@ -229,7 +230,14 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     return true;
   }
 
-  Future<bool> _authenticateForBackupAction(String reason) async {
+  Future<bool> _authenticateForBackupAction(
+    String reason, {
+    bool forceAuthPrompt = false,
+  }) async {
+    if (forceAuthPrompt) {
+      // Reset cached auth window to force a fresh prompt for sensitive flows.
+      LocalAuthenticationService.instance.lastAuthTime = 0;
+    }
     return LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
       reason,
@@ -259,30 +267,33 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
   }
 
-  Future<bool> _updatePassword(BuildContext context) async {
-    // Request app lock authentication first
-    final hasAuthenticated =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      'Authenticate to update backup password',
-    );
-
-    if (!hasAuthenticated) {
-      return false;
-    }
-
-    return _promptPassword(
-      forcePrompt: true,
-      disableOnCancel: false,
-      isUpdateFlow: true,
-    );
-  }
+  Future<bool> _updatePassword(BuildContext context) async =>
+      _promptPassword(
+        forcePrompt: true,
+        disableOnCancel: false,
+        isUpdateFlow: true,
+      );
 
   Future<bool> _promptPassword({
     required bool forcePrompt,
     bool disableOnCancel = false,
     bool isUpdateFlow = false,
   }) async {
+    final hasAuthenticated = await _authenticateForBackupAction(
+      isUpdateFlow
+          ? 'Authenticate to update backup password'
+          : 'Authenticate to set backup password',
+      forceAuthPrompt: true,
+    );
+    if (!hasAuthenticated) {
+      if (disableOnCancel && mounted) {
+        setState(() {
+          _isBackupEnabled = false;
+        });
+      }
+      return false;
+    }
+
     if (!forcePrompt) {
       final stored = await _readStoredPassword();
       if (stored != null && stored.isNotEmpty) {
@@ -310,6 +321,16 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   Future<bool> _hasStoredPassword() async {
     final stored = await _readStoredPassword();
     return stored != null && stored.isNotEmpty;
+  }
+
+  Future<bool> _clearBackupPassword() async {
+    if (_isBackupEnabled) {
+      return false;
+    }
+    const storage = FlutterSecureStorage();
+    await storage.delete(key: _passwordKey);
+    _showSnackBar('Backup password cleared');
+    return true;
   }
 
   Future<String?> _readStoredPassword() async {
@@ -359,39 +380,41 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _passwordDialogHint,
-                    style: getEnteTextTheme(context).smallFaint,
-                  ),
-                  const SizedBox(height: 12),
-              TextField(
-                controller: textController,
-                autofocus: true,
-                obscureText: isPasswordHidden,
-                decoration: InputDecoration(
-                  hintText: l10n.enterPassword,
-                  hintStyle: getEnteTextTheme(context).mini,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      isPasswordHidden
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+              children: [
+                Text(
+                  _passwordDialogHint,
+                  style: getEnteTextTheme(context).smallFaint,
+                ),
+                const SizedBox(height: 12),
+                  TextField(
+                    controller: textController,
+                    autofocus: true,
+                    obscureText: isPasswordHidden,
+                    decoration: InputDecoration(
+                      hintText: l10n.enterPassword,
+                      hintStyle: getEnteTextTheme(context).mini,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isPasswordHidden
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordHidden = !isPasswordHidden;
+                          });
+                        },
+                      ),
+                      errorText: errorText,
                     ),
-                    onPressed: () {
+                    onChanged: (text) {
                       setState(() {
-                        isPasswordHidden = !isPasswordHidden;
+                        if (text.length >= 8 && errorText != null) {
+                          errorText = null;
+                        }
                       });
                     },
                   ),
-                  errorText: errorText,
-                ),
-                onChanged: (text) {
-                  setState(() {
-                    if (text.length >= 8 && errorText != null) errorText = null;
-                  });
-                },
-              ),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: errorText == null
