@@ -55,10 +55,6 @@ Future<void> handleBackupEntryFlow(
           await PhotoManager.openSetting();
         },
       );
-      // Re-check permissions after dialog is dismissed
-      if (context.mounted) {
-        await handleBackupEntryFlow(context);
-      }
     }
   }
 }
