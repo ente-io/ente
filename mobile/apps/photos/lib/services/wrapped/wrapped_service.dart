@@ -56,6 +56,8 @@ class WrappedService {
   static final DateTime _kAvailabilityStart = DateTime(_kWrappedYear, 12, 6);
   static final DateTime _kAvailabilityEndExclusive =
       DateTime(_kWrappedYear + 1, 1, 7);
+  static final DateTime _kFinalComputeCutoff =
+      DateTime(_kWrappedYear + 1, 1, 1);
 
   final Logger _logger;
   final WrappedCacheService _cacheService;
@@ -72,7 +74,7 @@ class WrappedService {
     if (flagService.internalUser && now.isBefore(_kAvailabilityEndExclusive)) {
       return true;
     }
-    if (flagService.enteWrapped && _isWithinAvailabilityWindow(now)) {
+    if (_isWithinAvailabilityWindow(now)) {
       return true;
     }
     return false;
@@ -82,12 +84,7 @@ class WrappedService {
       isEnabled && state.hasResult && !state.isComplete;
 
   bool get shouldShowDiscoveryEntry =>
-      isEnabled &&
-      state.hasResult &&
-      state.isComplete &&
-      DateTime.now().millisecondsSinceEpoch <
-          DateTime(state.result!.year + 1, 01, 15, 23, 59, 59)
-              .millisecondsSinceEpoch;
+      isEnabled && state.hasResult && state.isComplete;
 
   void scheduleInitialLoad() {
     if (!isEnabled) {
@@ -112,6 +109,13 @@ class WrappedService {
           "${cached.cards.length} cards",
         );
         updateResult(cached);
+        if (_shouldScheduleDailyRecompute(cached)) {
+          _logger
+              .info("Scheduling daily Wrapped recompute for $_kWrappedYear");
+          unawaited(
+            _runCompute(reason: "daily", bypassFlag: false),
+          );
+        }
         return;
       }
     } catch (error, stackTrace) {
@@ -249,5 +253,28 @@ class WrappedService {
   static bool _isWithinAvailabilityWindow(DateTime now) {
     return !now.isBefore(_kAvailabilityStart) &&
         now.isBefore(_kAvailabilityEndExclusive);
+  }
+
+  bool _shouldScheduleDailyRecompute(WrappedResult result) {
+    if (!isEnabled) {
+      return false;
+    }
+    final DateTime now = DateTime.now();
+    if (_dateOnly(now).isBefore(_dateOnly(_kAvailabilityStart))) {
+      return false;
+    }
+    final DateTime generatedDate = _dateOnly(result.generatedAt.toLocal());
+    final DateTime today = _dateOnly(now);
+    if (!generatedDate.isBefore(today)) {
+      return false;
+    }
+    if (!generatedDate.isBefore(_kFinalComputeCutoff)) {
+      return false;
+    }
+    return true;
+  }
+
+  static DateTime _dateOnly(DateTime source) {
+    return DateTime(source.year, source.month, source.day);
   }
 }

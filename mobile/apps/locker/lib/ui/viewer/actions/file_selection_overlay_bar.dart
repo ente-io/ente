@@ -408,7 +408,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     List<EnteFile> files,
   ) async {
     try {
-      final success = await FileUtil.downloadFilesToDownloads(context, files);
+      final success = await FileUtil.downloadFiles(context, files);
       if (success) {
         widget.selectedFiles.clearAll();
       }
@@ -629,7 +629,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {
     try {
-      final success = await FileUtil.downloadFilesToDownloads(context, [file]);
+      final success = await FileUtil.downloadFile(context, file);
       if (success) {
         widget.selectedFiles.clearAll();
       }

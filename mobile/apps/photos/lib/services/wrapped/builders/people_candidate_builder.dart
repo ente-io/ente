@@ -84,9 +84,11 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
         : "Someone special was the star of your year!";
 
     final List<int> candidateIds = limitSelectorCandidates(
+      context,
       topPerson.topMediaFileIDs(kWrappedSelectorCandidateCap),
     );
     final Set<int> candidateSet = candidateIds.toSet();
+    const int maxMediaCount = 5;
     final Map<int, double> scoreHints = <int, double>{
       for (final MapEntry<int, double> entry
           in topPerson.mediaScoreHints().entries)
@@ -95,11 +97,13 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 5,
+      maxCount: maxMediaCount,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, maxMediaCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "personId": topPerson.personEntry.personID,
@@ -119,10 +123,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -150,6 +151,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     );
 
     final List<int> candidateIds = limitSelectorCandidates(
+      context,
       topThree
           .map(
             (_PersonStats stats) =>
@@ -158,6 +160,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
           .expand((List<int> ids) => ids),
     );
     final Set<int> candidateSet = candidateIds.toSet();
+    const int maxMediaCount = 4;
 
     final Map<int, double> scoreHints = <int, double>{};
     for (final _PersonStats stats in topThree) {
@@ -177,11 +180,13 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 4,
+      maxCount: maxMediaCount,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 21),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, maxMediaCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "personIds": topThree
@@ -200,10 +205,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -263,19 +265,23 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     ]);
 
     final List<int> candidateIds = limitSelectorCandidates(
+      context,
       <int>[
         ...dataset.groupSampleFileIDs(kWrappedSelectorCandidateCap),
         ...dataset.soloSampleFileIDs(kWrappedSelectorCandidateCap),
       ],
     );
+    const int maxMediaCount = 5;
 
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 5,
+      maxCount: maxMediaCount,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 45),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, maxMediaCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "groupShots": dataset.groupMoments,
@@ -297,10 +303,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -357,6 +360,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     ]);
 
     final List<int> candidateIds = limitSelectorCandidates(
+      context,
       highlights
           .map(
             (_PersonStats stats) =>
@@ -365,6 +369,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
           .expand((List<int> ids) => ids),
     );
     final Set<int> candidateSet = candidateIds.toSet();
+    const int maxMediaCount = 5;
 
     final Map<int, double> scoreHints = <int, double>{};
     for (final _PersonStats stats in highlights) {
@@ -384,11 +389,13 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
     final List<MediaRef> media = WrappedMediaSelector.selectMediaRefs(
       context: context,
       candidateUploadedFileIDs: candidateIds,
-      maxCount: 5,
+      maxCount: maxMediaCount,
       scoreHints: scoreHints,
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(candidateIds, maxMediaCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "newPersonCount": count,
@@ -409,10 +416,7 @@ class PeopleCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -427,6 +431,7 @@ class _PeopleDataset {
     required this.selfPersonID,
     required this.totalNamedFaceCount,
     required this.totalFaceMoments,
+    required this.totalNamedFaceMoments,
     required this.groupMoments,
     required this.soloMoments,
     required this.duoMoments,
@@ -443,6 +448,7 @@ class _PeopleDataset {
   final String? selfPersonID;
   final int totalNamedFaceCount;
   final int totalFaceMoments;
+  final int totalNamedFaceMoments;
   final int groupMoments;
   final int soloMoments;
   final int duoMoments;
@@ -495,6 +501,7 @@ class _PeopleDataset {
 
     int totalNamedFaceCount = 0;
     int totalFaceMoments = 0;
+    int totalNamedFaceMoments = 0;
     int groupMoments = 0;
     int soloMoments = 0;
     int duoMoments = 0;
@@ -512,12 +519,28 @@ class _PeopleDataset {
           faces.any(
             (WrappedFaceRef face) => face.personID == selfPersonID,
           );
+      final bool hasNamedPerson = faces.any(
+        (WrappedFaceRef face) {
+          final String? personID = face.personID;
+          if (personID == null) {
+            return false;
+          }
+          final WrappedPersonEntry? entry = context.persons[personID];
+          if (entry == null || entry.isHidden || entry.isMe) {
+            return false;
+          }
+          return entry.displayName.trim().isNotEmpty;
+        },
+      );
       final int highQualityCount =
           faces.where((WrappedFaceRef face) => face.isHighQuality).length;
       final int effectiveCount =
           highQualityCount > 0 ? highQualityCount : faces.length;
       if (effectiveCount > 0) {
         totalFaceMoments += 1;
+        if (hasNamedPerson) {
+          totalNamedFaceMoments += 1;
+        }
       }
       if (effectiveCount >= 3) {
         groupMoments += 1;
@@ -609,6 +632,7 @@ class _PeopleDataset {
       selfPersonID: selfPersonID,
       totalNamedFaceCount: totalNamedFaceCount,
       totalFaceMoments: totalFaceMoments,
+      totalNamedFaceMoments: totalNamedFaceMoments,
       groupMoments: groupMoments,
       soloMoments: soloMoments,
       duoMoments: duoMoments,
@@ -625,6 +649,7 @@ class _PeopleDataset {
       selfPersonID: null,
       totalNamedFaceCount: 0,
       totalFaceMoments: 0,
+      totalNamedFaceMoments: 0,
       groupMoments: 0,
       soloMoments: 0,
       duoMoments: 0,

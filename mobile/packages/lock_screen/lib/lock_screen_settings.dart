@@ -6,6 +6,7 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
 import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_out_event.dart";
+import "package:ente_ui/theme/theme_config.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
@@ -99,6 +100,11 @@ class LockScreenSettings {
 
   Future<void> setHideAppContent(bool hideContent) async {
     if (PlatformUtil.isDesktop()) return;
+    if (AppThemeConfig.currentApp == EnteApp.locker) {
+      await PrivacyScreen.instance.disable();
+      await _preferences.setBool(keyHideAppContent, false);
+      return;
+    }
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
@@ -115,6 +121,9 @@ class LockScreenSettings {
   }
 
   bool getShouldHideAppContent() {
+    if (AppThemeConfig.currentApp == EnteApp.locker) {
+      return false;
+    }
     return _preferences.getBool(keyHideAppContent) ?? true;
   }
 

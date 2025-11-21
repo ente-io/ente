@@ -1,1 +1,1 @@
-ente is an end-to-end encrypted photo storage app
+το ente είναι μία εφαρμογή αποθήκευσης φωτογραφιών με κρυπτογράφηση από άκρο σε άκρο

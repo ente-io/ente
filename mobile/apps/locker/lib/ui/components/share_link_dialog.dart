@@ -4,6 +4,7 @@ import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/delete_share_link_dialog.dart";
@@ -56,7 +57,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
 
     return Dialog(
       backgroundColor: colorScheme.backgroundElevated2,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
       ),
@@ -100,7 +101,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
             const SizedBox(height: 24),
             Container(
               decoration: BoxDecoration(
-                color: colorScheme.primary700,
+                color: colorScheme.backgroundElevated,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Stack(
@@ -116,7 +117,7 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
                           child: SelectableText(
                             widget.url,
                             style: textTheme.small.copyWith(
-                              color: Colors.white,
+                              color: colorScheme.textBase,
                               fontFamily: 'monospace',
                             ),
                           ),
@@ -131,10 +132,10 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
                       child: IconButton(
                         onPressed: () => _copyToClipboard(),
                         visualDensity: VisualDensity.compact,
-                        icon: const Icon(
-                          Icons.copy_rounded,
+                        icon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedCopy01,
+                          color: colorScheme.textBase,
                           size: 18,
-                          color: Colors.white,
                         ),
                         tooltip: 'Copy link',
                       ),
@@ -160,28 +161,16 @@ class _ShareLinkDialogState extends State<ShareLinkDialog> {
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.warning500,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation: 0,
-                ),
-                onPressed: () async {
+              child: GradientButton(
+                onTap: () async {
                   Navigator.of(context).pop();
                   await deleteShareLink(
                     widget.rootContext,
                     widget.file.uploadedFileID!,
                   );
                 },
-                child: Text(
-                  l10n.deleteLink,
-                  style: textTheme.largeBold.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
+                backgroundColor: colorScheme.warning400,
+                text: l10n.deleteLink,
               ),
             ),
           ],

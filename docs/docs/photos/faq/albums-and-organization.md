@@ -56,6 +56,23 @@ This is because iOS doesn't notify apps when photos are moved between albums - a
 
 When you select multiple albums for backup, Ente prioritizes uploading each photo to the album with the fewest photos. This means a photo will only be uploaded once, even if it exists in multiple albums on your device. If you create new albums on your device after the initial backup, those photos may not appear in the corresponding Ente album if they were already uploaded to a different album.
 
+### What is the best way to migrate Google Photos shared albums to Ente? {#google-photos-shared-albums}
+
+Google Takeout does not reliably export shared albums:
+
+- Shared albums you own may appear in Takeout and may export as a folder, but not consistently. Some photos may be missing, folders may be split, or the album might not be recreated at all.
+- Shared albums you joined (someone else owns) do not export unless you manually added each photo to your own library.
+- Shared-album names or structure are not preserved in the metadata, hence the shared album cannot be automatically reconstructed.
+
+The best way to export shared albums is to manually download each shared album:
+
+1. Open the album in Google Photos
+2. Menu (⁝) → Download all
+3. Extract the ZIP → you get a clean folder
+4. Import that folder into Ente → the album is preserved correctly
+
+This will reliably preserve the shared album name and contents.
+
 ## Uncategorized
 
 ### What is the Uncategorized album? {#what-is-uncategorized}

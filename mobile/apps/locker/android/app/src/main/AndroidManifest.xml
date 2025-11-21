@@ -4,7 +4,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Storage permissions for saving files -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -19,7 +18,7 @@
     <application
         android:label="Ente Locker"
         android:name="${applicationName}"
-        android:icon="@mipmap/icon_blue"
+        android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config">
         <activity
@@ -72,6 +71,11 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Allow flutter_email_sender to discover installed mail clients on Android 11+ -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
         </intent>
     </queries>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>

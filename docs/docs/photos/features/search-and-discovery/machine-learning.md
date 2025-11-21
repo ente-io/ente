@@ -80,6 +80,8 @@ While indexing is in progress:
 > [!TIP]
 >
 > If you have a large library on Ente, we recommend enabling machine learning on the desktop app first. Desktop computers can index your existing photos faster than mobile devices. Once your existing photos have been indexed, the indexes sync to your mobile devices, and your mobile app can then quickly index new photos as they're backed up.
+>
+> Indexing can run on multiple clients/devices in parallel (each client checks whether a file has already been indexed to avoid duplication or conflicts) However, this does **not** speed up the overall process, so desktop indexing is still recommended.
 
 ### Enable before importing
 

@@ -187,7 +187,7 @@ flutter_launcher_icons:
 
   ios: true
   remove_alpha_ios: true
-  image_path_ios_dark_transparent: "assets/generation-icons/icon-dark.png"
+  image_path_ios_dark_transparent: "assets/generation-icons/icon-ios-foreground.png"
   image_path_ios_tinted_grayscale: "assets/generation-icons/icon-tinted.png"
 
   macos:
