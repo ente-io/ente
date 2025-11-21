@@ -40,15 +40,6 @@ Create albums to organize your photos and videos into collections.
 
 You can also create albums by uploading photos from your device, manually adding photos to new albums, or automatically through features like [watch folders](/photos/features/backup-and-sync/watch-folders) on desktop.
 
-## Add a photo to an album
-
-### On web / desktop or mobile
-
-- Open the photo (tap or click the thumbnail)
-- Open the menu in the top-right corner
-- Select **Add To Album**
-- Choose the album you want or create a new one
-
 ## Rename album
 
 Personalize your albums by giving them a meaningful name.
