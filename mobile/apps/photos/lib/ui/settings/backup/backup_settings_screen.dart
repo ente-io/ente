@@ -2,8 +2,12 @@ import "dart:io";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/generated/l10n.dart';
+import 'package:photos/l10n/l10n.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/backup_preference_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -17,6 +21,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
@@ -205,12 +210,16 @@ class BackupSettingsScreen extends StatelessWidget {
       ),
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          title: "Back up only new photos",
+          title: "Backup only new photos",
         ),
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: ToggleSwitchWidget(
           value: () => localSettings.isOnlyNewBackupEnabled,
           onChanged: () async {
+            final hasPermission = await _ensurePhotoPermissions(context);
+            if (!hasPermission) {
+              return;
+            }
             final isEnabled = localSettings.isOnlyNewBackupEnabled;
             if (!isEnabled) {
               await _setOnlyNewSinceNow();
@@ -236,6 +245,31 @@ class BackupSettingsScreen extends StatelessWidget {
         isGestureDetectorDisabled: true,
       ),
     ];
+  }
+
+  Future<bool> _ensurePhotoPermissions(BuildContext context) async {
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      SyncService.instance.onPermissionGranted().ignore();
+      Bus.instance.fire(PermissionGrantedEvent());
+      return true;
+    }
+    if (!context.mounted) {
+      return false;
+    }
+    await showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      secondButtonLabel: context.l10n.cancel,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+    );
+    return false;
   }
 
   Future<void> _setOnlyNewSinceNow() async {

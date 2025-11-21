@@ -366,8 +366,9 @@ class RemoteSyncService {
         await _db.getDevicePathIDToLocalIDMap();
     bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
-      final Set<String> localIDsToSync =
-          pathIdToLocalIDs[deviceCollection.id] ?? {};
+      Set<String> localIDsToSync = {
+        ...(pathIdToLocalIDs[deviceCollection.id] ?? {}),
+      };
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -379,6 +380,10 @@ class RemoteSyncService {
             _logger.severe("removeQueuedLocalFiles failed", e, s);
           }
         }
+      }
+
+      if (flagService.enableOnlyBackupFuturePhotos) {
+        localIDsToSync = await _filterLocalIDsBasedOnOnlyNew(localIDsToSync);
       }
 
       if (localIDsToSync.isEmpty) {
@@ -614,6 +619,18 @@ class RemoteSyncService {
       }
       return creationTime >= onlyNewSince;
     }).toList();
+  }
+
+  Future<Set<String>> _filterLocalIDsBasedOnOnlyNew(
+    Set<String> localIDs,
+  ) async {
+    final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
+    if (!flagService.enableOnlyBackupFuturePhotos ||
+        onlyNewSince == null ||
+        localIDs.isEmpty) {
+      return localIDs;
+    }
+    return _db.getLocalIDsNewerThan(localIDs, onlyNewSince);
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {

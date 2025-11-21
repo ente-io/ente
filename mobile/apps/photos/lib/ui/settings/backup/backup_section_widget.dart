@@ -72,10 +72,9 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          await handleBackupEntryFlow(
+          await routeToPage(
             context,
-            onFirstImportComplete: () => const BackupSettingsScreen(),
-            postSelectionDestination: () => const BackupSettingsScreen(),
+            const BackupSettingsScreen(),
           );
         },
       ),
