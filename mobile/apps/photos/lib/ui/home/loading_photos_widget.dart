@@ -17,7 +17,12 @@ import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
-  const LoadingPhotosWidget({super.key});
+  final bool isOnboardingFlow;
+
+  const LoadingPhotosWidget({
+    super.key,
+    this.isOnboardingFlow = true,
+  });
 
   @override
   State<LoadingPhotosWidget> createState() => _LoadingPhotosWidgetState();
@@ -49,13 +54,24 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         if (permissionService.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
-          replacePage(
-            context,
-            const BackupFolderSelectionPage(
-              isOnboarding: false,
-              isFirstBackup: true,
-            ),
-          );
+          if (widget.isOnboardingFlow) {
+            // ignore: unawaited_futures
+            routeToPage(
+              context,
+              const BackupFolderSelectionPage(
+                isOnboarding: true,
+                isFirstBackup: true,
+              ),
+            );
+          } else {
+            replacePage(
+              context,
+              const BackupFolderSelectionPage(
+                isOnboarding: false,
+                isFirstBackup: false,
+              ),
+            );
+          }
         }
       }
     });

@@ -42,6 +42,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         onTap: () async {
           await handleBackupEntryFlow(
             context,
+            isOnboardingFlow: false,
             onFirstImportComplete: () => const BackupFolderSelectionPage(
               isFirstBackup: false,
             ),
