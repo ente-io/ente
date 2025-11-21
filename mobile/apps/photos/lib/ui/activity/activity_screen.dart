@@ -423,9 +423,6 @@ class _RitualsSection extends StatelessWidget {
                   .map(
                     (ritual) => _RitualCard(
                       ritual: ritual,
-                      completedToday:
-                          progress[ritual.id]?.hasCompleted(DateTime.now()) ??
-                              false,
                     ),
                   )
                   .toList(),
@@ -439,11 +436,9 @@ class _RitualsSection extends StatelessWidget {
 class _RitualCard extends StatelessWidget {
   const _RitualCard({
     required this.ritual,
-    required this.completedToday,
   });
 
   final Ritual ritual;
-  final bool completedToday;
 
   @override
   Widget build(BuildContext context) {
@@ -468,35 +463,71 @@ class _RitualCard extends StatelessWidget {
             if (ritual.albumName != null) ritual.albumName!,
           ].join(" • "),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (completedToday)
-              const Icon(
-                Icons.check_circle,
-                color: Color(0xFF1DB954),
-              ),
-            PopupMenuButton<String>(
-              onSelected: (value) async {
-                switch (value) {
-                  case "edit":
-                    await _showRitualEditor(context, ritual: ritual);
-                    break;
-                  case "delete":
-                    await activityService.deleteRitual(ritual.id);
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(value: "edit", child: Text("Edit")),
-                const PopupMenuItem(
-                  value: "delete",
-                  child: Text(
-                    "Delete",
-                    style: TextStyle(color: Colors.red),
+        trailing: PopupMenuButton<String>(
+          elevation: 0,
+          color: Colors.white,
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(
+              color: Color.fromRGBO(0, 0, 0, 0.09),
+              width: 0.5,
+            ),
+          ),
+          onSelected: (value) async {
+            switch (value) {
+              case "edit":
+                await _showRitualEditor(context, ritual: ritual);
+                break;
+              case "delete":
+                await activityService.deleteRitual(ritual.id);
+                break;
+            }
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: "edit",
+              padding: EdgeInsets.zero,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, color: Color(0xFF0F172A)),
+                        SizedBox(width: 10),
+                        Text("Edit"),
+                      ],
+                    ),
                   ),
+                  Divider(
+                    height: 0.5,
+                    thickness: 0.5,
+                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                    indent: 0,
+                    endIndent: 0,
+                  ),
+                ],
+              ),
+            ),
+            const PopupMenuItem(
+              value: "delete",
+              padding: EdgeInsets.zero,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.red),
+                    SizedBox(width: 10),
+                    Text(
+                      "Delete",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ],
         ),
