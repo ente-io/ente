@@ -2038,6 +2038,18 @@ abstract class AppLocalizations {
   /// **'Your individual or family account has hit the 1000-file limit.'**
   String get uploadFileCountLimitErrorBody;
 
+  /// Toast shown when info items fail to save due to hitting the file count limit
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed. Your individual or family account has hit the 1000-file limit.'**
+  String get uploadFileCountLimitErrorToast;
+
+  /// Message shown when uploads fail because the user does not have an active subscription
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription required to save info items.'**
+  String get uploadSubscriptionRequiredErrorBody;
+
   /// Title shown when uploads fail because the file exceeds the supported size
   ///
   /// In en, this message translates to:

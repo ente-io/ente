@@ -792,6 +792,18 @@ class FileUploader {
       file.keyDecryptionNonce = keyDecryptionNonce;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
+    } on DioException catch (e, s) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      }
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 402) {
+        throw NoActiveSubscriptionError();
+      } else if (statusCode == 426) {
+        throw StorageLimitExceededError();
+      }
+      _logger.severe("Info file upload failed", e, s);
+      rethrow;
     } catch (e, s) {
       _logger.severe("Info file upload failed", e, s);
       rethrow;
