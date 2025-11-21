@@ -4,6 +4,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:locker/core/errors.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -268,6 +269,20 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             context.l10n.recordSavedSuccessfully,
           );
         }
+      }
+    } on StorageLimitExceededError {
+      if (mounted) {
+        showToast(
+          context,
+          context.l10n.uploadStorageLimitErrorBody,
+        );
+      }
+    } on FileLimitReachedError {
+      if (mounted) {
+        showToast(
+          context,
+          context.l10n.uploadFileCountLimitErrorToast,
+        );
       }
     } catch (e) {
       if (mounted) {

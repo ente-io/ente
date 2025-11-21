@@ -346,4 +346,11 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
       _searchFocusNode.requestFocus();
     });
   }
+
+  /// Programmatically dismiss the search UI and reset state
+  void dismissSearch() {
+    if (_isSearchActive) {
+      _deactivateSearch();
+    }
+  }
 }
