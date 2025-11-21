@@ -673,6 +673,9 @@ class FileUploader {
         (response.data as Map).cast<String, dynamic>(),
       );
     } on DioException catch (e, s) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      }
       if (e.response != null) {
         if (e.response!.statusCode == 402) {
           final error = NoActiveSubscriptionError();
@@ -691,16 +694,15 @@ class FileUploader {
   }
 
   bool _isFileLimitReachedResponse(Response? response) {
-    if (response?.statusCode == 403) {
-      final dynamic data = response?.data;
-      if (data is Map) {
-        final code = data['code'];
-        if (code is String) {
-          return code.toUpperCase() == 'FILE_LIMIT_REACHED';
-        }
-      }
+    if (response?.statusCode != 403) {
+      return false;
     }
-    return false;
+    final dynamic data = response?.data;
+    if (data is! Map) {
+      return false;
+    }
+    final code = data['code'];
+    return code is String && code == 'FILE_LIMIT_REACHED';
   }
 
   void _onStorageLimitExceeded() {
