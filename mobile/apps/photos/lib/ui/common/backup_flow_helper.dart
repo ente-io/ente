@@ -18,7 +18,6 @@ import "package:photos/utils/navigation_util.dart";
 Future<void> handleBackupEntryFlow(
   BuildContext context, {
   Widget Function()? onFirstImportComplete,
-  bool isOnboardingFlow = true,
 }) async {
   final state = await permissionService.requestPhotoMangerPermissions();
   if (state == PermissionState.authorized || state == PermissionState.limited) {
@@ -34,8 +33,8 @@ Future<void> handleBackupEntryFlow(
         // Wait for initial sync, then proceed to folder selection
         await routeToPage(
           context,
-          LoadingPhotosWidget(
-            isOnboardingFlow: isOnboardingFlow,
+          const LoadingPhotosWidget(
+            isOnboardingFlow: false,
           ),
         );
       } else {
