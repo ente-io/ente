@@ -18,13 +18,14 @@ import "package:photos/utils/navigation_util.dart";
 Future<void> handleBackupEntryFlow(
   BuildContext context, {
   Widget Function()? onFirstImportComplete,
-  Widget Function()? postSelectionDestination,
 }) async {
   final state = await permissionService.requestPhotoMangerPermissions();
   if (state == PermissionState.authorized || state == PermissionState.limited) {
     await permissionService.onUpdatePermission(state);
     SyncService.instance.onPermissionGranted().ignore();
-    Bus.instance.fire(PermissionGrantedEvent());
+    // Note: Don't fire PermissionGrantedEvent before navigation - it causes
+    // home_widget to show its own LoadingPhotosWidget while we navigate to ours,
+    // resulting in duplicate BackupFolderSelectionPage navigations.
     if (context.mounted) {
       final Widget Function() targetBuilder = onFirstImportComplete ??
           () => const BackupFolderSelectionPage(
@@ -36,10 +37,7 @@ Future<void> handleBackupEntryFlow(
         // Wait for initial sync, then proceed to folder selection
         await routeToPage(
           context,
-          LoadingPhotosWidget(
-            isOnboardingFlow: false,
-            onFolderSelectionComplete: postSelectionDestination,
-          ),
+          const LoadingPhotosWidget(isOnboardingFlow: false),
         );
       } else {
         await routeToPage(
@@ -47,6 +45,8 @@ Future<void> handleBackupEntryFlow(
           targetBuilder(),
         );
       }
+      // Fire event after backup flow completes to refresh home_widget
+      Bus.instance.fire(PermissionGrantedEvent());
     }
   } else {
     if (context.mounted) {
