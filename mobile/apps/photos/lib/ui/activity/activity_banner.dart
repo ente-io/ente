@@ -9,7 +9,6 @@ class ActivityBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return ValueListenableBuilder<ActivityState>(
       valueListenable: activityService.stateNotifier,
       builder: (context, state, _) {
@@ -39,11 +38,13 @@ class ActivityBanner extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor:
-                          colorScheme.primary.withAlpha((0.12 * 255).round()),
-                      child: const Text("📸", style: TextStyle(fontSize: 20)),
+                    SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Image.asset(
+                        "assets/rituals/take_a_photo.png",
+                        fit: BoxFit.contain,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

@@ -343,6 +343,7 @@ flutter_native_splash:
 flutter:
   assets:
     - assets/
+    - assets/rituals/
     - assets/rewind_badges/
     - assets/video-editor/
     - assets/image-editor/
