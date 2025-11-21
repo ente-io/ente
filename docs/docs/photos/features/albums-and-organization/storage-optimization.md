@@ -53,6 +53,8 @@ When you free up space, photos are removed from your device but stay in Ente. To
 - It will be downloaded automatically when you view it
 - Downloaded photos use your device storage again
 
+If you're downloading an entire album and a file fails to download, the app shows a toast with a **Try** button so you can retry immediately without restarting the album download.
+
 ## Remove exact duplicates
 
 If you have an existing library with duplicate photos across different albums, you can use the manual deduplication tool to keep only one copy while maintaining your album structure.
