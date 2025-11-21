@@ -493,7 +493,17 @@ Future<Collection?> _pickAlbum(BuildContext context) async {
       final controller = TextEditingController();
       return StatefulBuilder(
         builder: (context, setState) {
-          final bool canCreateAlbum = controller.text.trim().isNotEmpty;
+          final trimmedQuery = controller.text.trim();
+          final bool canCreateAlbum = trimmedQuery.isNotEmpty;
+          final queryLower = trimmedQuery.toLowerCase();
+          final filteredAlbums = queryLower.isEmpty
+              ? albums
+              : albums
+                  .where(
+                    (album) =>
+                        album.displayName.toLowerCase().contains(queryLower),
+                  )
+                  .toList();
           Future<void> createAlbum() async {
             final trimmed = controller.text.trim();
             if (trimmed.isEmpty) return;
@@ -544,70 +554,40 @@ Future<Collection?> _pickAlbum(BuildContext context) async {
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: controller,
-                              textInputAction: TextInputAction.done,
-                              decoration: InputDecoration(
-                                hintText: "Create new album",
-                                prefixIcon: const Icon(Icons.add_rounded),
-                                filled: true,
-                                fillColor: colorScheme.fillFaint,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  borderSide: BorderSide(
-                                    color: colorScheme.strokeFaint,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                  borderSide: BorderSide(
-                                    color: colorScheme.strokeFaint,
-                                  ),
-                                ),
-                              ),
-                              onChanged: (_) => setState(() {}),
-                              onSubmitted: (_) async => createAlbum(),
+                      child: TextField(
+                        controller: controller,
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          hintText: "Search or create new",
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          filled: true,
+                          fillColor: colorScheme.fillFaint,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: colorScheme.strokeFaint,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: canCreateAlbum
-                                  ? colorScheme.primary500
-                                  : colorScheme.fillMuted,
-                              foregroundColor: colorScheme.backgroundBase,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            onPressed: canCreateAlbum ? createAlbum : null,
-                            child: Text(
-                              "Create",
-                              style: textTheme.bodyBold.copyWith(
-                                color: canCreateAlbum
-                                    ? Colors.white
-                                    : colorScheme.textMuted,
-                              ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: BorderSide(
+                              color: colorScheme.strokeFaint,
                             ),
                           ),
-                        ],
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) async => createAlbum(),
                       ),
                     ),
                     Flexible(
                       child: SizedBox(
                         height: 360,
-                        child: albums.isEmpty
+                        child: filteredAlbums.isEmpty
                             ? Center(
                                 child: Text(
-                                  "No albums yet",
+                                  albums.isEmpty
+                                      ? "No albums yet"
+                                      : "No matching albums",
                                   style: textTheme.small
                                       .copyWith(color: colorScheme.textMuted),
                                 ),
@@ -616,7 +596,7 @@ Future<Collection?> _pickAlbum(BuildContext context) async {
                                 padding:
                                     const EdgeInsets.fromLTRB(16, 0, 16, 16),
                                 itemBuilder: (context, index) {
-                                  final album = albums[index];
+                                  final album = filteredAlbums[index];
                                   return GestureDetector(
                                     behavior: HitTestBehavior.opaque,
                                     onTap: () {
@@ -633,8 +613,41 @@ Future<Collection?> _pickAlbum(BuildContext context) async {
                                 },
                                 separatorBuilder: (_, __) =>
                                     const SizedBox(height: 10),
-                                itemCount: albums.length,
+                                itemCount: filteredAlbums.length,
                               ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: canCreateAlbum
+                                ? colorScheme.primary500
+                                : colorScheme.fillMuted,
+                            foregroundColor: colorScheme.backgroundBase,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          onPressed: canCreateAlbum ? createAlbum : null,
+                          child: Text(
+                            canCreateAlbum
+                                ? 'Create "${trimmedQuery.trim()}"'
+                                : "Create new",
+                            style: textTheme.bodyBold.copyWith(
+                              color: canCreateAlbum
+                                  ? Colors.white
+                                  : colorScheme.textMuted,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
