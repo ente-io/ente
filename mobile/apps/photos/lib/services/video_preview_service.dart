@@ -299,8 +299,13 @@ class VideoPreviewService {
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
       computeController.releaseCompute(stream: true);
-      if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
-      clearQueue();
+      // Only clear queue if user explicitly disabled streaming (permanent condition)
+      // Don't clear for temporary conditions like compute unavailable or device unhealthy
+      if (!isVideoStreamingEnabled) {
+        clearQueue();
+      } else {
+        _logger.info("No permission to run compute - queue preserved");
+      }
       return;
     }
 
