@@ -3,7 +3,6 @@ import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/ui/activity/activity_banner.dart";
 import "package:photos/ui/notification/toast.dart";
 
 class ActivityScreen extends StatelessWidget {
@@ -33,7 +32,6 @@ class ActivityScreen extends StatelessWidget {
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.only(bottom: 48),
                 children: [
-                  const ActivityBanner(),
                   _ActivityHeatmapCard(summary: summary),
                   _AchievementsRow(summary: summary),
                   _RitualsSection(
