@@ -1171,7 +1171,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
     "🧘",
     "📚",
     "🎧",
-    "🍳",
+    "💅",
     "🎨",
     "🥾",
     "🌙",
@@ -1182,7 +1182,10 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
     "🧩",
   ];
   String? selected;
+  String customEmoji = current;
+  final customEmojiController = TextEditingController(text: current);
   final colorScheme = getEnteColorScheme(context);
+  final textTheme = getEnteTextTheme(context);
   await showModalBottomSheet(
     context: context,
     backgroundColor: colorScheme.backgroundElevated,
@@ -1197,9 +1200,18 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Pick an emoji",
-                style: getEnteTextTheme(context).bodyBold,
+              Row(
+                children: [
+                  Text(
+                    "Pick an emoji",
+                    style: textTheme.bodyBold,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               GridView.count(
@@ -1209,7 +1221,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
                 children: emojiOptions.map((emoji) {
-                  final isActive = emoji == current;
+                  final isActive = emoji == customEmoji;
                   return InkWell(
                     borderRadius: BorderRadius.circular(12),
                     onTap: () {
@@ -1238,12 +1250,77 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Use keyboard emoji"),
+              const SizedBox(height: 12),
+              Text(
+                "Custom (keyboard)",
+                style: textTheme.miniMuted,
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: customEmojiController,
+                      textInputAction: TextInputAction.done,
+                      onChanged: (value) {
+                        final trimmed = value.trim();
+                        final firstGrapheme = trimmed.isEmpty
+                            ? ""
+                            : trimmed.characters.take(1).toString();
+                        customEmojiController.value = TextEditingValue(
+                          text: firstGrapheme,
+                          selection: TextSelection.collapsed(
+                            offset: firstGrapheme.length,
+                          ),
+                        );
+                        customEmoji = firstGrapheme;
+                      },
+                      onSubmitted: (value) {
+                        final trimmed = value.trim();
+                        if (trimmed.isEmpty) return;
+                        selected = trimmed.characters.take(1).toString();
+                        Navigator.of(context).pop();
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Press to open emoji keyboard",
+                        filled: true,
+                        fillColor: colorScheme.fillFaint,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colorScheme.strokeFaint,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: colorScheme.strokeFaint,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary500,
+                      minimumSize: const Size(64, 48),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: customEmoji.isEmpty
+                        ? null
+                        : () {
+                            selected = customEmoji;
+                            Navigator.of(context).pop();
+                          },
+                    child: Text(
+                      "Use",
+                      style: textTheme.bodyBold.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
