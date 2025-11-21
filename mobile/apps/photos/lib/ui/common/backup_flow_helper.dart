@@ -30,7 +30,9 @@ Future<void> handleBackupEntryFlow(
           () => const BackupFolderSelectionPage(
                 isFirstBackup: false,
               );
-      if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+      final shouldWaitForFirstImport =
+          !LocalSyncService.instance.hasCompletedFirstImport();
+      if (shouldWaitForFirstImport) {
         // Wait for initial sync, then proceed to folder selection
         await routeToPage(
           context,

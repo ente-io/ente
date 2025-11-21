@@ -135,7 +135,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     super.initState();
 
-    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
     }
     _tabChangedEventSubscription =
@@ -979,16 +979,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   bool _shouldEnableDrawer() {
     final isFirstImportCompleted =
-        LocalSyncService.instance.hasCompletedFirstImport();
-    if (isFirstImportCompleted) {
-      return true;
-    }
-    if (flagService.enableOnlyBackupFuturePhotos &&
-        (localSettings.hasOnboardingPermissionSkipped ||
-            localSettings.isOnlyNewBackupEnabled)) {
-      return true;
-    }
-    return false;
+        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    return isFirstImportCompleted;
   }
 
   bool _shouldShowPermissionWidget() {

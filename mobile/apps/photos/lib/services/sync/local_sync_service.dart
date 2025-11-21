@@ -253,6 +253,19 @@ class LocalSyncService {
     return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
   }
 
+  /// Treat the first import as "done" when flag-driven flows intentionally
+  /// bypass it (e.g., onboarding skipped or only-new backup). Falls back to the
+  /// stored completion value otherwise.
+  bool hasCompletedFirstImportOrBypassed() {
+    final hasCompleted = hasCompletedFirstImport();
+    if (!flagService.enableOnlyBackupFuturePhotos) {
+      return hasCompleted;
+    }
+    return hasCompleted ||
+        localSettings.hasOnboardingPermissionSkipped ||
+        localSettings.isOnlyNewBackupEnabled;
+  }
+
   // Warning: resetLocalSync should only be used for testing imported related
   // changes
   Future<void> resetLocalSync() async {
