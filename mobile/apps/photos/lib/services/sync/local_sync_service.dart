@@ -250,10 +250,6 @@ class LocalSyncService {
   }
 
   bool hasCompletedFirstImport() {
-    if (!permissionService.hasGrantedPermissions() ||
-        localSettings.hasOnboardingPermissionSkipped) {
-      return true;
-    }
     return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
   }
 
