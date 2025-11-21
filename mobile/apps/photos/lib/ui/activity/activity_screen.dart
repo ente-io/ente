@@ -818,7 +818,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: colorScheme.primary500,
+                              backgroundColor: canSave
+                                  ? colorScheme.primary500
+                                  : colorScheme.fillMuted,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 14,
