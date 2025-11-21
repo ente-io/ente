@@ -504,8 +504,8 @@ This deletes temporary files such as thumbnails and preloaded images that can be
 
 **Automatic cache cleanup:**
 
-- Ente clears upload-related temporary files every 6 hours.
-- If the cache still hasn't cleared after 6 hours, force-close (kill) and reopen Ente Photos to trigger the manual cleanup.
+- Ente clears upload-related temporary files and pending syncs every 6 hours.
+- If the cache or sync state still hasn't cleared after 6 hours, force-close (kill) and reopen Ente Photos to trigger the manual cleanup.
 
 ## Getting Help
 

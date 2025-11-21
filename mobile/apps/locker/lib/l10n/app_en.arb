@@ -306,7 +306,7 @@
   "share": "Share",
   "shareLink": "Share link",
   "creatingShareLink": "Creating link...",
-  "shareThisLink": "Anyone with this link can access your item.",
+  "shareThisLink": "This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.",
   "copyLink": "Copy link",
   "deleteLink": "Delete link",
   "close": "Close",
@@ -594,6 +594,22 @@
   "legacy": "Legacy",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "uploadError": "Upload error",
+  "uploadStorageLimitErrorTitle": "Storage limit reached",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
+  "uploadStorageLimitErrorBody": "You've run out of storage space. Free up space to continue uploading.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
+  "uploadFileTooLargeErrorTitle": "File too large",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
+  "uploadFileTooLargeErrorBody": "This file is larger than the maximum supported upload size of 10GB.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Try adjusting your search query",
   "noFilesFoundForQuery": "No items found for \"{query}\"",
   "@noFilesFoundForQuery": {

@@ -1,3 +1,10 @@
+- Laurens: Add ability to pin Persons or hide them from home gallery memories
+- Prateek: Move Add button to top in Albums, Contacts, and Location Tags screens for easier access
+- Prateek: Enable select all functionality in shared album date headers
+- Neeraj: Safeguards for Bitflip errors (md5, immedidate decryption)
+- Prateek: Fix "Send Link" feature to share only link text instead of image
+- Prateek: Fix continuous loading in map view when no images have location data
+- Prateek: Changelog dialog layout and scrolling improvements
 - Laurens: Minor tweaks to Ente Rewind
 - Laurens: (i) People Memory Lane feature
 - Laurens: Fix OCR for HEIC files on Android
@@ -6,5 +13,4 @@
 - Neeraj: (i) Show public link to album participants
 - Neeraj: (i) Admin role, only enables participant management. Photos management WIP.
 - Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
-- Neeraj: (i) Safeguards for Bitflip errors (md5, immedidate decryption)
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking

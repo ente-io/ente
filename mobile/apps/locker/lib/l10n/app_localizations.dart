@@ -2014,6 +2014,30 @@ abstract class AppLocalizations {
   /// **'Upload error'**
   String get uploadError;
 
+  /// Title shown when uploads fail due to running out of storage
+  ///
+  /// In en, this message translates to:
+  /// **'Storage limit reached'**
+  String get uploadStorageLimitErrorTitle;
+
+  /// Body shown when uploads fail due to running out of storage
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve run out of storage space. Free up space to continue uploading.'**
+  String get uploadStorageLimitErrorBody;
+
+  /// Title shown when uploads fail because the file exceeds the supported size
+  ///
+  /// In en, this message translates to:
+  /// **'File too large'**
+  String get uploadFileTooLargeErrorTitle;
+
+  /// Body shown when uploads fail because the file exceeds the supported size
+  ///
+  /// In en, this message translates to:
+  /// **'This file is larger than the maximum supported upload size of 10GB.'**
+  String get uploadFileTooLargeErrorBody;
+
   /// No description provided for @tryAdjustingYourSearchQuery.
   ///
   /// In en, this message translates to:
@@ -2233,13 +2257,13 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerPaidPlanTitle.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon!'**
+  /// **'Unlock Locker with a paid plan.'**
   String get unlockLockerPaidPlanTitle;
 
   /// No description provided for @unlockLockerPaidPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is currently available only to paid customers of Ente Photos.'**
+  /// **'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker'**
   String get unlockLockerPaidPlanBody;
 
   /// No description provided for @checkoutEntePhotos.

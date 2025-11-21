@@ -1129,6 +1129,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadError => 'Upload error';
 
   @override
+  String get uploadStorageLimitErrorTitle => 'Storage limit reached';
+
+  @override
+  String get uploadStorageLimitErrorBody =>
+      'You\'ve run out of storage space. Free up space to continue uploading.';
+
+  @override
+  String get uploadFileTooLargeErrorTitle => 'File too large';
+
+  @override
+  String get uploadFileTooLargeErrorBody =>
+      'This file is larger than the maximum supported upload size of 10GB.';
+
+  @override
   String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';
 
   @override
@@ -1273,11 +1287,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Coming soon!';
+  String get unlockLockerPaidPlanTitle => 'Unlock Locker with a paid plan.';
 
   @override
   String get unlockLockerPaidPlanBody =>
-      'Locker is currently available only to paid customers of Ente Photos.';
+      'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';

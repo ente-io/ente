@@ -14,6 +14,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -23,7 +24,11 @@ import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/expandable_menu_item_widget.dart";
+import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
@@ -64,6 +69,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   String _inputName = "";
   String? _selectedDate;
   String? _email;
+  bool _isPinned = false;
+  bool _hideFromMemories = false;
   bool userAlreadyAssigned = false;
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
@@ -78,6 +85,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     _selectedDate = widget.person?.data.birthDate;
     _email = widget.person?.data.email;
     person = widget.person;
+    _isPinned = widget.person?.data.isPinned ?? false;
+    _hideFromMemories = widget.person?.data.hideFromMemories ?? false;
   }
 
   @override
@@ -297,7 +306,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           curve: Curves.easeInOutQuad,
                           child: _EmailSection(_email, person?.remoteID),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
+                        _buildVisibilitySection(context),
+                        const SizedBox(height: 24),
                         ButtonWidget(
                           buttonType: ButtonType.primary,
                           labelText: context.l10n.save,
@@ -350,6 +361,51 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildVisibilitySection(BuildContext context) {
+    return ExpandableMenuItemWidget(
+      title: context.l10n.visibility,
+      leadingIcon: Icons.visibility_outlined,
+      selectionOptionsWidget: Column(
+        children: [
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: context.l10n.pinToTop,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () => _isPinned,
+              onChanged: () async {
+                if (!mounted) return;
+                setState(() {
+                  _isPinned = !_isPinned;
+                });
+              },
+            ),
+            singleBorderRadius: 8,
+            isGestureDetectorDisabled: true,
+          ),
+          const SizedBox(height: 12),
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: context.l10n.hideFromMemories,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () => _hideFromMemories,
+              onChanged: () async {
+                if (!mounted) return;
+                setState(() {
+                  _hideFromMemories = !_hideFromMemories;
+                });
+                memoriesCacheService.queueUpdateCache();
+              },
+            ),
+            singleBorderRadius: 8,
+            isGestureDetectorDisabled: true,
+          ),
+        ],
       ),
     );
   }
@@ -570,6 +626,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       final personEntity = await PersonService.instance.addPerson(
         name: text,
         clusterID: clusterID,
+        isPinned: _isPinned,
+        hideFromMemories: _hideFromMemories,
         birthdate: birthdate,
         email: email,
       );
@@ -599,8 +657,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   bool get changed => widget.isEditing
       ? (_inputName.trim() != person!.data.name ||
-              _selectedDate != person!.data.birthDate) ||
-          _email != person!.data.email
+          _selectedDate != person!.data.birthDate ||
+          _email != person!.data.email ||
+          _isPinned != person!.data.isPinned ||
+          _hideFromMemories != person!.data.hideFromMemories)
       : _inputName.trim().isNotEmpty;
 
   Future<PersonEntity?> updatePerson(BuildContext context) async {
@@ -618,6 +678,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         person!.remoteID,
         name: name,
         birthDate: birthDate,
+        isPinned: _isPinned,
+        hideFromMemories: _hideFromMemories,
         email: _email,
       );
 

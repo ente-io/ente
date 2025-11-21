@@ -96,6 +96,17 @@ export interface CGroupUserEntityData {
      * Also, see: [Note: Mark optional for Zod/exactOptionalPropertyTypes]
      */
     avatarFaceID?: string | undefined;
+    /**
+     * True if this cluster group has been pinned by the user.
+     */
+    isPinned?: boolean | undefined;
+    /**
+     * True if this cluster group should not be surfaced in memories.
+     *
+     * Desktop does not currently surface memories, but we still need to
+     * preserve this flag so that it continues to sync correctly with mobile.
+     */
+    hideFromMemories?: boolean | undefined;
 }
 
 /**
@@ -135,6 +146,14 @@ export type Person = (
      * IDs of the (unique) files in which this face occurs.
      */
     fileIDs: number[];
+    /**
+     * True if the person has been pinned by the user.
+     */
+    isPinned: boolean;
+    /**
+     * True if the person should be hidden from memories.
+     */
+    hideFromMemories: boolean;
     /**
      * The face that should be used as the "cover" face to represent this
      * {@link Person} in the UI.
@@ -306,6 +325,9 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             displayFaceFile = mostRecentFace.file;
         }
 
+        const isPinned = data.isPinned ?? false;
+        const hideFromMemories = data.hideFromMemories ?? false;
+
         return {
             type: "cgroup",
             cgroup,
@@ -315,6 +337,8 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             displayFaceID,
             displayFaceFile,
             isHidden,
+            isPinned,
+            hideFromMemories,
         };
     });
 
@@ -335,13 +359,21 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
             displayFaceID: mostRecentFace.faceID,
             displayFaceFile: mostRecentFace.file,
+            isPinned: false,
+            hideFromMemories: false,
         };
     });
 
     const sorted = (ps: Interim) =>
         ps
-            .filter((c) => !!c)
-            .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+            .filter((c): c is Person => !!c)
+            .sort((a, b) =>
+                a.isPinned == b.isPinned
+                    ? b.fileIDs.length - a.fileIDs.length
+                    : a.isPinned
+                      ? -1
+                      : 1,
+            );
 
     const people = sorted(cgroupPeople).concat(sorted(clusterPeople));
 

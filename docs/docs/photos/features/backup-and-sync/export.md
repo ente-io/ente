@@ -95,6 +95,10 @@ If a photo exists in multiple albums:
 
 This is why your export size may be larger than your Ente storage usage.
 
+### Shared albums on export
+
+All shared albums, including albums shared with you as well as albums shared by you, are exported.
+
 ## Export limitations
 
 ### Two-way sync not supported

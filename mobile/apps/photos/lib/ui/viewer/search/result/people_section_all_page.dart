@@ -23,6 +23,7 @@ import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
+import "package:photos/ui/viewer/people/pinned_person_badge.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -146,6 +147,8 @@ class SelectablePersonSearchExample extends StatelessWidget {
     final borderRadius = 82 * (size / 102);
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
+    final bool isPinnedPerson =
+        !isCluster && (searchResult.params[kPersonPinned] as bool? ?? false);
 
     return ListenableBuilder(
       listenable: selectedPeople,
@@ -247,6 +250,12 @@ class SelectablePersonSearchExample extends StatelessWidget {
                           : null,
                     ),
                   ),
+                  if (isPinnedPerson)
+                    const Positioned(
+                      left: -6,
+                      top: -6,
+                      child: PinnedPersonBadge(),
+                    ),
                 ],
               ),
               isCluster
@@ -425,6 +434,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
               false;
           if (aIndex && !bIndex) return -1;
           if (!aIndex && bIndex) return 1;
+          final bool aPinned = a.params[kPersonPinned] as bool? ?? false;
+          final bool bPinned = b.params[kPersonPinned] as bool? ?? false;
+          if (aPinned && !bPinned) return -1;
+          if (!aPinned && bPinned) return 1;
           return a.name().compareTo(b.name());
         });
       }
