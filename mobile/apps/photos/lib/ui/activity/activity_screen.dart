@@ -686,7 +686,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                 controller: controller,
                                 autofocus: true,
                                 decoration: InputDecoration(
-                                  hintText: "Enter your task",
+                                  hintText: "Enter your ritual",
                                   filled: true,
                                   fillColor: colorScheme.fillFaint,
                                   contentPadding: const EdgeInsets.symmetric(
