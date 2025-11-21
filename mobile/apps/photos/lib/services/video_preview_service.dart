@@ -104,10 +104,12 @@ class VideoPreviewService {
     }
   }
 
-  void clearQueue() {
+  void clearQueue({bool fireUploadedStatus = true}) {
     // Fire events for all items being cleared
-    for (final entry in _items.entries) {
-      _fireVideoPreviewStateChange(entry.key, PreviewItemStatus.uploaded);
+    if (fireUploadedStatus) {
+      for (final entry in _items.entries) {
+        _fireVideoPreviewStateChange(entry.key, PreviewItemStatus.uploaded);
+      }
     }
     fileQueue.clear();
     _items.clear();
