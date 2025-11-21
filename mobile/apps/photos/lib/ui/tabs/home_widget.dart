@@ -1002,8 +1002,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   bool _shouldShowLoadingWidget() {
     if (flagService.enableOnlyBackupFuturePhotos) {
+      if (!permissionService.hasGrantedPermissions()) {
+        return false;
+      }
       return !localSettings.isOnlyNewBackupEnabled &&
-          !localSettings.hasOnboardingPermissionSkipped &&
           !LocalSyncService.instance.hasCompletedFirstImport();
     } else {
       return !LocalSyncService.instance.hasCompletedFirstImport();
