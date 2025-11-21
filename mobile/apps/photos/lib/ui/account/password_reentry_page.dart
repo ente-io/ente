@@ -9,6 +9,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_page.dart';
@@ -153,6 +154,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     }
     await dialog.hide();
     Configuration.instance.resetVolatilePassword();
+    await _refreshRemoteFlagsBlocking();
     Bus.instance.fire(SubscriptionPurchasedEvent());
     unawaited(
       Navigator.of(context).pushAndRemoveUntil(
@@ -183,6 +185,14 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       } catch (e, s) {
         _logger.severe("error while setting up srp for existing users", e, s);
       }
+    }
+  }
+
+  Future<void> _refreshRemoteFlagsBlocking() async {
+    try {
+      await flagService.refreshFlags();
+    } catch (e, s) {
+      _logger.warning("Failed to refresh remote feature flags", e, s);
     }
   }
 

@@ -1,10 +1,17 @@
 import "dart:io";
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
+import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
-import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/wake_lock_service.dart";
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/permission_granted_event.dart';
+import 'package:photos/generated/l10n.dart';
+import 'package:photos/l10n/l10n.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/backup_preference_service.dart';
+import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -14,9 +21,16 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
+  static final Logger _logger = Logger('BackupSettingsScreen');
+  static final Debouncer _onlyNewToggleDebouncer = Debouncer(
+    const Duration(milliseconds: 500),
+    leading: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +111,14 @@ class BackupSettingsScreen extends StatelessWidget {
                               isTopBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
                               isBottomBorderRadiusRemoved:
-                                  flagService.enableMobMultiPart,
+                                  flagService.enableMobMultiPart ||
+                                      _shouldShowOnlyNewToggle(),
                             ),
+                            if (_shouldShowOnlyNewToggle())
+                              ..._buildOnlyNewToggleSection(
+                                context,
+                                colorScheme,
+                              ),
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,
@@ -173,5 +193,92 @@ class BackupSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _shouldShowOnlyNewToggle() {
+    return flagService.enableOnlyBackupFuturePhotos;
+  }
+
+  List<Widget> _buildOnlyNewToggleSection(
+    BuildContext context,
+    dynamic colorScheme,
+  ) {
+    return [
+      DividerWidget(
+        dividerType: DividerType.menuNoIcon,
+        bgColor: colorScheme.fillFaint,
+      ),
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Backup only new photos",
+        ),
+        menuItemColor: colorScheme.fillFaint,
+        trailingWidget: ToggleSwitchWidget(
+          value: () => localSettings.isOnlyNewBackupEnabled,
+          onChanged: () async {
+            final hasPermission = await _ensurePhotoPermissions(context);
+            if (!hasPermission) {
+              return;
+            }
+            final isEnabled = localSettings.isOnlyNewBackupEnabled;
+            if (!isEnabled) {
+              await _setOnlyNewSinceNow();
+              await BackupPreferenceService.instance
+                  .autoSelectAllFoldersIfEligible();
+              _onlyNewToggleDebouncer.run(() async {
+                await SyncService.instance.sync();
+              });
+            } else {
+              await localSettings.clearOnlyNewSinceEpoch();
+              _onlyNewToggleDebouncer.run(() async {
+                await SyncService.instance.sync();
+              });
+            }
+            if (localSettings.hasOnboardingPermissionSkipped) {
+              await localSettings.setOnboardingPermissionSkipped(false);
+            }
+          },
+        ),
+        singleBorderRadius: 8,
+        alignCaptionedTextToLeft: true,
+        isTopBorderRadiusRemoved: true,
+        isGestureDetectorDisabled: true,
+      ),
+    ];
+  }
+
+  Future<bool> _ensurePhotoPermissions(BuildContext context) async {
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      SyncService.instance.onPermissionGranted().ignore();
+      Bus.instance.fire(PermissionGrantedEvent());
+      return true;
+    }
+    if (!context.mounted) {
+      return false;
+    }
+    await showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      secondButtonLabel: context.l10n.cancel,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+    );
+    return false;
+  }
+
+  Future<void> _setOnlyNewSinceNow() async {
+    final now = DateTime.now().microsecondsSinceEpoch;
+    if (now <= 0) {
+      _logger.severe("Invalid timestamp for only-new backup: $now");
+      return;
+    }
+    _logger.info("Setting only-new backup threshold to $now");
+    await localSettings.setOnlyNewSinceEpoch(now);
   }
 }

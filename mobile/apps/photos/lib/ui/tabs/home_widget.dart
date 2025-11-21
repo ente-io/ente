@@ -108,6 +108,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
+  bool _personSyncTriggered = false;
+  bool _collectionsSyncTriggered = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
@@ -133,7 +135,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _logger.info("Building initstate");
     super.initState();
 
-    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
     }
     _tabChangedEventSubscription =
@@ -659,7 +661,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
+    final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: PopScope(
@@ -732,13 +734,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!permissionService.hasGrantedPermissions()) {
-      entityService.syncEntities().then((_) {
-        PersonService.instance.refreshPersonCache();
-      });
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      _ensurePersonSync();
+      _ensureCollectionsSync();
+    }
+    if (_shouldShowPermissionWidget()) {
+      _ensurePersonSync();
       return const GrantPermissionsWidget();
     }
-    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (_shouldShowLoadingWidget()) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&
@@ -758,10 +762,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    _showShowBackupHook =
-        !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !permissionService.hasGrantedLimitedPermissions() &&
-            CollectionsService.instance.getActiveCollections().isEmpty;
+    _showShowBackupHook = _shouldShowBackupHook();
 
     return Stack(
       children: [
@@ -974,5 +975,68 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       }
     }
+  }
+
+  bool _shouldEnableDrawer() {
+    final isFirstImportCompleted =
+        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    return isFirstImportCompleted;
+  }
+
+  bool _shouldShowPermissionWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return !permissionService.hasGrantedPermissions() &&
+          !localSettings.hasOnboardingPermissionSkipped;
+    } else {
+      return !permissionService.hasGrantedPermissions();
+    }
+  }
+
+  bool _shouldShowLoadingWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      if (!permissionService.hasGrantedPermissions()) {
+        return false;
+      }
+      return !localSettings.isOnlyNewBackupEnabled &&
+          !LocalSyncService.instance.hasCompletedFirstImport();
+    } else {
+      return !LocalSyncService.instance.hasCompletedFirstImport();
+    }
+  }
+
+  bool _shouldShowBackupHook() {
+    final bool noFoldersSelected = !localSettings.hasSelectedAnyBackupFolder;
+    final bool hasLimitedPermission =
+        permissionService.hasGrantedLimitedPermissions();
+    final bool hasActiveCollections =
+        CollectionsService.instance.getActiveCollections().isNotEmpty;
+
+    return !hasActiveCollections && noFoldersSelected && !hasLimitedPermission;
+  }
+
+  void _ensurePersonSync() {
+    if (_personSyncTriggered) {
+      return;
+    }
+    _personSyncTriggered = true;
+    entityService.syncEntities().then((_) {
+      PersonService.instance.refreshPersonCache();
+    });
+  }
+
+  void _ensureCollectionsSync() {
+    if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (!(localSettings.hasOnboardingPermissionSkipped ||
+        localSettings.isOnlyNewBackupEnabled)) {
+      return;
+    }
+    _collectionsSyncTriggered = true;
+    CollectionsService.instance.sync().then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 }

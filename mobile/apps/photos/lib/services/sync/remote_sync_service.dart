@@ -366,8 +366,9 @@ class RemoteSyncService {
         await _db.getDevicePathIDToLocalIDMap();
     bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
-      final Set<String> localIDsToSync =
-          pathIdToLocalIDs[deviceCollection.id] ?? {};
+      Set<String> localIDsToSync = {
+        ...(pathIdToLocalIDs[deviceCollection.id] ?? {}),
+      };
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -381,7 +382,19 @@ class RemoteSyncService {
         }
       }
 
+      if (flagService.enableOnlyBackupFuturePhotos) {
+        localIDsToSync = await _filterLocalIDsBasedOnOnlyNew(localIDsToSync);
+      }
+
       if (localIDsToSync.isEmpty) {
+        continue;
+      }
+      if (_shouldGuardCollectionCreationForOnlyNewAutoSelect &&
+          !await _hasUploadableOnlyNewFiles(deviceCollection)) {
+        _logger.info(
+          "Skipping collection creation for ${deviceCollection.name} as there "
+          "are no uploadable files for only-new backup",
+        );
         continue;
       }
       final collectionID = await _getCollectionID(deviceCollection);
@@ -443,7 +456,8 @@ class RemoteSyncService {
         }
       }
     }
-    if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
+    if (moreFilesMarkedForBackup &&
+        !localSettings.hasSelectedAllFoldersForBackup) {
       // "force reload due to display new files"
       Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
@@ -463,7 +477,7 @@ class RemoteSyncService {
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
-      Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
+      localSettings.setSelectAllFoldersForBackup(false).ignore();
     }
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),
@@ -552,7 +566,13 @@ class RemoteSyncService {
   }
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
-    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
+    List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      originalFiles = filterFilesBasedOnOnlyNew(
+        originalFiles,
+        localSettings.onlyNewSinceEpoch,
+      );
+    }
     if (originalFiles.isEmpty) {
       return originalFiles;
     }
@@ -589,6 +609,69 @@ class RemoteSyncService {
     _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
+  }
+
+  @visibleForTesting
+  List<EnteFile> filterFilesBasedOnOnlyNew(
+    List<EnteFile> files,
+    int? onlyNewSince,
+  ) {
+    if (onlyNewSince == null) {
+      return files;
+    }
+    return files.where((file) {
+      final creationTime = file.creationTime;
+      if (creationTime == null || creationTime == 0) {
+        // Missing creation time - assume old file, exclude from only-new backups
+        return false;
+      }
+      return creationTime >= onlyNewSince;
+    }).toList();
+  }
+
+  Future<Set<String>> _filterLocalIDsBasedOnOnlyNew(
+    Set<String> localIDs,
+  ) async {
+    final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
+    if (!flagService.enableOnlyBackupFuturePhotos ||
+        onlyNewSince == null ||
+        localIDs.isEmpty) {
+      return localIDs;
+    }
+    return _db.getLocalIDsNewerThan(localIDs, onlyNewSince);
+  }
+
+  bool get _shouldGuardCollectionCreationForOnlyNewAutoSelect =>
+      flagService.enableOnlyBackupFuturePhotos &&
+      localSettings.isOnlyNewBackupEnabled &&
+      localSettings.hasSelectedAllFoldersForBackup;
+
+  Future<bool> _hasUploadableOnlyNewFiles(
+    DeviceCollection deviceCollection,
+  ) async {
+    final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
+    if (onlyNewSince == null) {
+      return true;
+    }
+    try {
+      final filesInRange = await _db.getFilesInDeviceCollection(
+        deviceCollection,
+        _config.getUserID(),
+        onlyNewSince,
+        DateTime.now().microsecondsSinceEpoch,
+        limit: 1,
+      );
+      return filesInRange.files.any(
+        (file) => file.uploadedFileID == null || file.uploadedFileID == -1,
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to check uploadable only-new files for ${deviceCollection.id}",
+        e,
+        s,
+      );
+      return true;
+    }
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {

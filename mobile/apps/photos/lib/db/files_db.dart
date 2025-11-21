@@ -1331,6 +1331,38 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  Future<Set<String>> getLocalIDsNewerThan(
+    Set<String> localIDs,
+    int creationTimeThreshold,
+  ) async {
+    if (localIDs.isEmpty) {
+      return {};
+    }
+    final db = await instance.sqliteAsyncDB;
+    final result = <String>{};
+    const batchSize = 800;
+    final idsList = localIDs.toList();
+    for (int start = 0; start < idsList.length; start += batchSize) {
+      final end = start + batchSize > idsList.length
+          ? idsList.length
+          : start + batchSize;
+      final batch = idsList.sublist(start, end);
+      final placeholders = List.filled(batch.length, '?').join(',');
+      final rows = await db.getAll(
+        '''
+        SELECT DISTINCT $columnLocalID
+        FROM $filesTable
+        WHERE $columnLocalID IN ($placeholders) AND $columnCreationTime >= ?
+      ''',
+        [...batch, creationTimeThreshold],
+      );
+      for (final row in rows) {
+        result.add(row[columnLocalID] as String);
+      }
+    }
+    return result;
+  }
+
   Future<void> deleteUnSyncedLocalFiles(List<String> localIDs) async {
     final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;

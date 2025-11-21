@@ -37,6 +37,7 @@ lib/generated_plugin_registrant.dart
 android/key.properties
 android/app/.settings/*
 android/.settings/
+android/.kotlin/
 .env
 
 fastlane/report.xml
