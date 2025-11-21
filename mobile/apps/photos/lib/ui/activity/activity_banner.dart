@@ -25,7 +25,7 @@ class ActivityBanner extends StatelessWidget {
         final hasFire = summary?.hasSevenDayFire ?? false;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Material(
             color: const Color(0xFFFAFAFA),
             borderRadius: BorderRadius.circular(20),
