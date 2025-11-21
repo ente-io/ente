@@ -29,7 +29,7 @@ class RitualsSection extends StatelessWidget {
           Row(
             children: [
               Text(
-                "Activity",
+                "Rituals",
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const Spacer(),
