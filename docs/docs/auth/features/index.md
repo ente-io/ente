@@ -34,7 +34,8 @@ Organize and filter your codes with ease using tags.
 
 Highlight your frequently used services by pinning them to the top of your code
 list. To pin a code, long-press (mobile) or right-click (desktop) the code and
-select "Pin".
+select "Pin". Pinned entries show a pin indicator in the list so you can quickly
+spot them.
 
 ### Multi-select
 
