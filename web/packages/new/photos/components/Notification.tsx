@@ -65,6 +65,13 @@ export interface NotificationAttributes {
      * button in this position).
      */
     endIcon?: React.ReactNode;
+    /**
+     * Optional handler when {@link endIcon} is clicked.
+     *
+     * If not provided, clicks on the end icon behave the same as clicking the
+     * notification body.
+     */
+    onEndIconClick?: () => void;
 }
 
 type NotificationProps = ModalVisibilityProps & {
@@ -120,8 +127,16 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
     if (!attributes) return <></>;
 
-    const { captionFirst, color, startIcon, title, caption, endIcon, onClick } =
-        attributes;
+    const {
+        captionFirst,
+        color,
+        startIcon,
+        title,
+        caption,
+        endIcon,
+        onClick,
+        onEndIconClick,
+    } = attributes;
 
     const handleClose: React.MouseEventHandler = (event) => {
         onClose();
@@ -131,6 +146,15 @@ export const Notification: React.FC<NotificationProps> = ({
     const handleClick = () => {
         onClick?.();
         if (!keepOpenOnClick) onClose();
+    };
+
+    const handleEndIconClick: React.MouseEventHandler = (event) => {
+        event.stopPropagation();
+        if (onEndIconClick) {
+            onEndIconClick();
+        } else {
+            handleClick();
+        }
     };
 
     return (
@@ -214,6 +238,7 @@ export const Notification: React.FC<NotificationProps> = ({
                     {endIcon ? (
                         <IconButton
                             component="div"
+                            onClick={handleEndIconClick}
                             sx={{ fontSize: "36px", bgcolor: "fill.faint" }}
                         >
                             {endIcon}
