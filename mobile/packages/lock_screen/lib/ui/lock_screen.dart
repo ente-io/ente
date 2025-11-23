@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_lock_screen/auth_util.dart';
+import 'package:ente_lock_screen/lock_screen_config.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_strings/ente_strings.dart';
@@ -86,8 +87,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           decoration: BoxDecoration(
             image: DecorationImage(
               opacity: _platformBrightness == Brightness.light ? 0.08 : 0.12,
-              image: const ExactAssetImage(
-                'assets/loading_photos_background.png',
+              image: ExactAssetImage(
+                LockScreenConfig.current.backgroundImagePath,
               ),
               fit: BoxFit.cover,
             ),
