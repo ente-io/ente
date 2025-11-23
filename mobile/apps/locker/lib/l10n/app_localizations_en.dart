@@ -372,7 +372,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingShareLink => 'Creating link...';
 
   @override
-  String get shareThisLink => 'Anyone with this link can access your item.';
+  String get shareThisLink =>
+      'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.';
 
   @override
   String get copyLink => 'Copy link';

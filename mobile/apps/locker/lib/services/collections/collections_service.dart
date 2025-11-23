@@ -422,7 +422,7 @@ class CollectionService {
 
       // Add to target collection
       await _db.addFilesToCollection(to, files);
-      
+
       // Let sync update the local state to ensure consistency
       if (runSync) {
         await sync();

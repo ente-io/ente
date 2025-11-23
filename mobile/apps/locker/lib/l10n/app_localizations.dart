@@ -703,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareThisLink.
   ///
   /// In en, this message translates to:
-  /// **'Anyone with this link can access your item.'**
+  /// **'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.'**
   String get shareThisLink;
 
   /// No description provided for @copyLink.
