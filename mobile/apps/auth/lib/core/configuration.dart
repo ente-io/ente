@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:ente_base/models/database.dart';
 import 'package:ente_configuration/base_configuration.dart';
+import 'package:ente_configuration/secure_storage.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -19,17 +19,13 @@ class Configuration extends BaseConfiguration {
   late SharedPreferences _preferences;
   String? _authSecretKey;
   String? _offlineAuthKey;
-  late FlutterSecureStorage _secureStorage;
+  late SecureStorage _secureStorage;
 
   @override
   Future<void> init(List<EnteBaseDatabase> dbs) async {
     await super.init(dbs);
     _preferences = await SharedPreferences.getInstance();
-    _secureStorage = const FlutterSecureStorage(
-      iOptions: IOSOptions(
-        accessibility: KeychainAccessibility.first_unlock_this_device,
-      ),
-    );
+    _secureStorage = createSecureStorage();
     sqfliteFfiInit();
     await _initOfflineAccount();
     await _initOnlineAccount();
