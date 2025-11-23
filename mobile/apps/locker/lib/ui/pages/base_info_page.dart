@@ -8,11 +8,13 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
+import 'package:logging/logging.dart';
 
 enum InfoPageMode { view, edit }
 
@@ -31,6 +33,7 @@ abstract class BaseInfoPage<T extends InfoData> extends StatefulWidget {
 
 abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     extends State<W> {
+  final _logger = Logger('BaseInfoPageState');
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
@@ -309,6 +312,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       throw Exception('Failed to update file metadata');
     }
 
+    // Handle collection membership changes
+    await _updateCollectionMembership();
+
     // Update the local data to reflect the changes in the UI
     // The metadata updater service already updated the file object locally
     // Now extract the updated info data and refresh the UI
@@ -325,6 +331,108 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     }
 
     // The info file service already performs a sync, so we don't need to sync again
+  }
+
+  Future<void> _updateCollectionMembership() async {
+    if (widget.existingFile == null) return;
+
+    // Get current collections for the file
+    final currentCollections =
+        await CollectionService.instance.getCollectionsForFile(
+      widget.existingFile!,
+    );
+
+    // Fetch all collections to ensure we have the latest state
+    final allCollections = await CollectionService.instance.getCollections();
+
+    // Get the favorites/important collection for special handling
+    final favoriteCollection =
+        await CollectionService.instance.getOrCreateImportantCollection();
+
+    final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
+
+    // Check if favorites status changed
+    final wasFavorite = currentCollectionIds.contains(favoriteCollection.id);
+    final isFavoriteNow =
+        _selectedCollectionIds.contains(favoriteCollection.id);
+
+    if (wasFavorite && !isFavoriteNow) {
+      await FavoritesService.instance.removeFromFavorites(
+        context,
+        widget.existingFile!,
+      );
+    } else if (!wasFavorite && isFavoriteNow) {
+      await FavoritesService.instance.addToFavorites(
+        context,
+        widget.existingFile!,
+      );
+    }
+
+    // Get regular (non-favorites, non-uncategorized) collection IDs
+    final regularCurrentIds =
+        currentCollectionIds.where((id) => id != favoriteCollection.id).toSet();
+    final regularSelectedIds = _selectedCollectionIds
+        .where((id) => id != favoriteCollection.id)
+        .toSet();
+
+    final collectionsToAdd = regularSelectedIds.difference(regularCurrentIds);
+    final collectionsToRemove =
+        regularCurrentIds.difference(regularSelectedIds);
+
+    // If all regular collections are deselected, move to uncategorized
+    if (regularSelectedIds.isEmpty && collectionsToRemove.isNotEmpty) {
+      for (final collectionId in collectionsToRemove) {
+        try {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance.moveFilesFromCurrentCollection(
+            context,
+            collection,
+            [widget.existingFile!],
+          );
+        } catch (e) {
+          _logger.severe(
+            'Failed to remove file from collection $collectionId: $e',
+          );
+        }
+      }
+    } else {
+      // Add to new collections
+      for (final collectionId in collectionsToAdd) {
+        try {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance.addToCollection(
+            collection,
+            widget.existingFile!,
+            runSync: false,
+          );
+        } catch (e) {
+          _logger.severe(
+            'Failed to add file to collection $collectionId: $e',
+          );
+        }
+      }
+
+      // Remove from deselected collections
+      for (final collectionId in collectionsToRemove) {
+        try {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance.moveFilesFromCurrentCollection(
+            context,
+            collection,
+            [widget.existingFile!],
+          );
+        } catch (e) {
+          _logger.severe(
+            'Failed to remove file from collection $collectionId: $e',
+          );
+        }
+      }
+    }
+
+    await CollectionService.instance.sync();
   }
 
   Future<void> _createNewFile(InfoItem infoItem) async {
