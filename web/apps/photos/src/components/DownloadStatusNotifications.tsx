@@ -90,6 +90,7 @@ export const DownloadStatusNotifications: React.FC<
     return saveGroups.map((group, index) => {
         const hasErrors = isSaveCompleteWithErrors(group);
         const canRetry = hasErrors && !!group.retry;
+        const failedTitle = `${t("download_failed")} (${group.failed}/${group.total})`;
 
         return (
             <Notification
@@ -102,7 +103,7 @@ export const DownloadStatusNotifications: React.FC<
                 attributes={{
                     color: hasErrors ? "critical" : "secondary",
                     title: hasErrors
-                        ? t("download_failed")
+                        ? failedTitle
                         : isSaveComplete(group)
                           ? t("download_complete")
                           : t("downloading_album", { name: group.title }),
