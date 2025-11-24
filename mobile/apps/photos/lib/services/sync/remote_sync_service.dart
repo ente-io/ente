@@ -389,14 +389,6 @@ class RemoteSyncService {
       if (localIDsToSync.isEmpty) {
         continue;
       }
-      if (_shouldGuardCollectionCreationForOnlyNewAutoSelect &&
-          !await _hasUploadableOnlyNewFiles(deviceCollection)) {
-        _logger.info(
-          "Skipping collection creation for ${deviceCollection.name} as there "
-          "are no uploadable files for only-new backup",
-        );
-        continue;
-      }
       final collectionID = await _getCollectionID(deviceCollection);
       if (collectionID == null) {
         _logger.warning('DeviceCollection was either deleted or missing');
@@ -639,39 +631,6 @@ class RemoteSyncService {
       return localIDs;
     }
     return _db.getLocalIDsNewerThan(localIDs, onlyNewSince);
-  }
-
-  bool get _shouldGuardCollectionCreationForOnlyNewAutoSelect =>
-      flagService.enableOnlyBackupFuturePhotos &&
-      localSettings.isOnlyNewBackupEnabled &&
-      localSettings.hasSelectedAllFoldersForBackup;
-
-  Future<bool> _hasUploadableOnlyNewFiles(
-    DeviceCollection deviceCollection,
-  ) async {
-    final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
-    if (onlyNewSince == null) {
-      return true;
-    }
-    try {
-      final filesInRange = await _db.getFilesInDeviceCollection(
-        deviceCollection,
-        _config.getUserID(),
-        onlyNewSince,
-        DateTime.now().microsecondsSinceEpoch,
-        limit: 1,
-      );
-      return filesInRange.files.any(
-        (file) => file.uploadedFileID == null || file.uploadedFileID == -1,
-      );
-    } catch (e, s) {
-      _logger.warning(
-        "Failed to check uploadable only-new files for ${deviceCollection.id}",
-        e,
-        s,
-      );
-      return true;
-    }
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
