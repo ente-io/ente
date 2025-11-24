@@ -8,7 +8,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/backup_preference_service.dart';
-import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -138,7 +137,6 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           state,
           shouldMarkLimitedFolders: false,
         );
-        unawaited(LocalSyncService.instance.sync());
       } else {
         await _showPermissionDeniedDialog();
       }
