@@ -35,6 +35,7 @@ class LocalBackupExperienceController {
 
   bool get hasLoaded => _state._hasLoaded;
   bool get isBusy => _state._isBusy;
+  bool get isManualBackupRunning => _state._isManualBackupRunning;
   bool get shouldShowBusyOverlay => _state._shouldShowBusyOverlay;
   bool get isBackupEnabled => _state._isBackupEnabled;
   String? get backupPath => _state._backupPath;
@@ -76,6 +77,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   String? _backupPath;
   String? _backupTreeUri;
   bool _isBusy = false;
+  bool _isManualBackupRunning = false;
   bool _shouldShowBusyOverlay = true;
   bool _hasLoaded = false;
 
@@ -155,7 +157,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<void> _runManualBackup({bool showSnackBar = true}) async {
-    await _withBusyGuard(() async {
+    if (_isManualBackupRunning) return;
+
+    setState(() {
+      _isManualBackupRunning = true;
+    });
+
+    try {
       final hasPassword =
           await _ensurePasswordConfigured(disableOnCancel: false);
       if (!hasPassword) return;
@@ -176,9 +184,15 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         return;
       }
       if (showSnackBar) {
-        _showSnackBar(context.l10n.initialBackupCreated);
+        _showSnackBar(context.l10n.backupCreated);
       }
-    });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isManualBackupRunning = false;
+        });
+      }
+    }
   }
 
   Future<bool> _ensurePasswordConfigured({
@@ -714,12 +728,14 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<bool> _pickAndPersistAndroidLocation() async {
     final saf = SafUtil();
-    final picked = await saf.pickDirectory();
+    final picked = await saf.pickDirectory(
+      writePermission: true,
+      persistablePermission: true,
+    );
     final treeUri = picked?.uri;
     if (treeUri == null || treeUri.isEmpty) {
       return false;
     }
-
     return _persistAndroidLocation(treeUri);
   }
 
