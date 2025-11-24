@@ -56,7 +56,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
           const SizedBox(height: 10),
           DropdownButtonHideUnderline(
             child: DropdownButton2(
-              hint: const Text('Select an option'),
+              hint: Text(context.l10n.selectAnOption),
               items: _durationInMins
                   .map(
                     (item) => DropdownMenuItem<int>(
