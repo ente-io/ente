@@ -264,7 +264,7 @@ class _BackupLocationCard extends StatelessWidget {
                   minimumSize: const Size(0, 44),
                 ),
                 child: Text(
-                  context.l10n.changeFolder,
+                  context.l10n.setBackupFolder,
                   style: textTheme.smallBold,
                 ),
               ),
