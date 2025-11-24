@@ -12,7 +12,10 @@ import 'package:logging/logging.dart';
 
 class SessionsPage extends StatefulWidget {
   final BaseConfiguration config;
-  const SessionsPage(this.config, {super.key});
+  const SessionsPage(
+    this.config, {
+    super.key,
+  });
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();
@@ -33,7 +36,10 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(elevation: 0, title: Text(context.strings.activeSessions)),
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(context.strings.activeSessions),
+      ),
       body: CenteredConstrainedWidget(
         child: _getBody(),
       ),
@@ -49,13 +55,16 @@ class _SessionsPageState extends State<SessionsPage> {
     for (final session in _sessions!.sessions) {
       rows.add(_getSessionWidget(session));
     }
-    return SingleChildScrollView(child: Column(children: rows));
+    return SingleChildScrollView(
+      child: Column(
+        children: rows,
+      ),
+    );
   }
 
   Widget _getSessionWidget(Session session) {
-    final lastUsedTime = DateTime.fromMicrosecondsSinceEpoch(
-      session.lastUsedTime,
-    );
+    final lastUsedTime =
+        DateTime.fromMicrosecondsSinceEpoch(session.lastUsedTime);
     return Column(
       children: [
         InkWell(
@@ -76,9 +85,10 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         session.ip,
                         style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -88,9 +98,10 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         getFormattedTime(lastUsedTime),
                         style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.8),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.8),
                           fontSize: 12,
                         ),
                       ),
@@ -145,14 +156,21 @@ class _SessionsPageState extends State<SessionsPage> {
         session.token == widget.config.getToken();
     Widget text;
     if (isLoggingOutFromThisDevice) {
-      text = Text(context.strings.thisWillLogYouOutOfThisDevice);
+      text = Text(
+        context.strings.thisWillLogYouOutOfThisDevice,
+      );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
-            Text(context.strings.thisWillLogYouOutOfTheFollowingDevice),
+            Text(
+              context.strings.thisWillLogYouOutOfTheFollowingDevice,
+            ),
             const Padding(padding: EdgeInsets.all(8)),
-            Text(session.ua, style: Theme.of(context).textTheme.bodySmall),
+            Text(
+              session.ua,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ),
       );
@@ -164,7 +182,9 @@ class _SessionsPageState extends State<SessionsPage> {
         TextButton(
           child: Text(
             context.strings.terminate,
-            style: const TextStyle(color: Colors.red),
+            style: const TextStyle(
+              color: Colors.red,
+            ),
           ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
