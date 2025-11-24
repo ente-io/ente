@@ -1204,6 +1204,11 @@
   "noImagesWithLocation": "No hay imágenes con ubicación",
   "unpinAlbum": "Dejar de fijar álbum",
   "pinAlbum": "Fijar álbum",
+  "pin": "Anclar",
+  "pinToTop": "Anclar al principio",
+  "unpin": "Desanclar",
+  "visibility": "Visibilidad",
+  "hideFromMemories": "Ocultar de los recuerdos",
   "create": "Crear",
   "viewAll": "Ver todo",
   "nothingSharedWithYouYet": "Aún no hay nada compartido contigo",
@@ -1389,8 +1394,8 @@
   "appLockDescriptions": "Escoge entre la pantalla de bloqueo por defecto de tu dispositivo y una pantalla de bloqueo personalizada con un PIN o contraseña.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para habilitar el bloqueo de la aplicación, por favor configura el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes del sistema.",
   "authToViewPasskey": "Por favor, autentícate para ver tu clave de acceso",
-  "loopVideoOn": "Vídeo en bucle activado",
-  "loopVideoOff": "Vídeo en bucle desactivado",
+  "loopVideoOn": "Desactivar bucle",
+  "loopVideoOff": "Activar bucle",
   "localSyncErrorMessage": "Parece que algo salió mal ya que la sincronización de fotos locales está tomando más tiempo del esperado. Por favor contacta con nuestro equipo de soporte",
   "showPerson": "Mostrar persona",
   "sort": "Ordenar",
@@ -2008,6 +2013,72 @@
   "artisticPortraits": "Retratos artísticos",
   "streetFood": "Antojos callejeros",
   "riverCruises": "Vistas de crusero fluvial",
+  "facesTimelineBannerTitle": "Jardín de recuerdos",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Ver fotos de {name} a lo largo de los años",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Jardín de recuerdos",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} tenía {count, plural, one {{count} año de edad} other {{count} años de edad}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {Hace # año} other {Hace # años}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Compartir vídeos próximamente",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Anterior",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Siguiente",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Reproducir",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pausar",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Se está preparando la línea de tiempo de caras...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Niños jugando",
   "coastalCliffs": "Acantilados marinos"
 }
