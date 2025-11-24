@@ -613,5 +613,15 @@
         "example": "2"
       }
     }
-  }
+  },
+  "enterPasswordToAegisVault": "Enter password to aegis vault",
+  "submit": "Submit",
+  "failedToDecryptAegisVault": "Failed to decrypt aegis vault",
+  "pleaseCheckPasswordAndTryAgain": "Please check your password and try again.",
+  "enterPasswordToDecrypt2FASBackup": "Enter password to decrypt 2FAS backup",
+  "failedToDecrypt2FASExport": "Failed to decrypt 2Fas export",
+  "chooseIcon": "Choose icon",
+  "customOrder": "Custom order",
+  "selectAnOption": "Select an option",
+  "todaysLogs": "Today's logs"
 }
