@@ -117,6 +117,10 @@ export const sidebar = [
                                 link: "/photos/features/albums-and-organization/albums",
                             },
                             {
+                                text: "Auto-add people",
+                                link: "/photos/features/albums-and-organization/auto-add-people",
+                            },
+                            {
                                 text: "Archiving",
                                 link: "/photos/features/albums-and-organization/archive",
                             },
