@@ -1,3 +1,5 @@
+import "dart:math";
+
 import "package:flutter/material.dart";
 import "package:photos/models/activity/activity_models.dart";
 
@@ -42,7 +44,7 @@ class _Heatmap extends StatelessWidget {
   Widget build(BuildContext context) {
     final renderDays =
         days.length > 365 ? days.sublist(days.length - 365) : days;
-    final dayHeader = ["S", "M", "T", "W", "Th", "F", "Sa"];
+    final dayHeader = ["", "M", "", "W", "", "F", ""];
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
     final DateTime firstDay = renderDays.isNotEmpty
@@ -117,15 +119,22 @@ class _Heatmap extends StatelessWidget {
     }
 
     return LayoutBuilder(
-      builder: (context, _) {
+      builder: (context, constraints) {
+        // Keep a minimum gutter width in case the container gets very narrow.
         const double monthLabelWidth = 32;
         const double gapX = 4;
         const double gapY = 3;
         const double cellWidth = 38.31;
         const double cellHeight = 9.82;
-        final double totalCellsWidth =
+        const double headerRowHeight = 16;
+        const double headerToGridGap = 4;
+        final double gridWidth =
             (dayHeader.length * cellWidth) + ((dayHeader.length - 1) * gapX);
-        final double totalWidth = monthLabelWidth + gapX + totalCellsWidth;
+        final double remainingWidth =
+            max(0.0, constraints.maxWidth - gridWidth - gapX);
+        // Aim for ~70% of previous right padding by biasing space to the left gutter.
+        final double gutterWidth =
+            max(monthLabelWidth, remainingWidth * 0.65);
         final BorderRadius pillRadius = BorderRadius.circular(cellHeight);
         const TextStyle headerStyle = TextStyle(
           color: Color(0x36000000),
@@ -156,22 +165,23 @@ class _Heatmap extends StatelessWidget {
           }
         }
 
-        return Align(
-          alignment: Alignment.topCenter,
-          child: SizedBox(
-            width: totalWidth,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    ...weeks.asMap().entries.map((entry) {
+        return SizedBox(
+          width: constraints.maxWidth,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: gutterWidth,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: headerRowHeight + headerToGridGap + 8,
+                  ),
+                  child: Column(
+                    children: weeks.asMap().entries.map((entry) {
                       final isLast = entry.key == weeks.length - 1;
                       return SizedBox(
                         height: cellHeight + (isLast ? 0 : gapY),
-                        width: monthLabelWidth,
+                        width: gutterWidth,
                         child: Center(
                           child: Transform.translate(
                             offset: const Offset(0, -1),
@@ -186,15 +196,19 @@ class _Heatmap extends StatelessWidget {
                           ),
                         ),
                       );
-                    }),
-                  ],
+                    }).toList(),
+                  ),
                 ),
-                const SizedBox(width: gapX),
-                Column(
+              ),
+              const SizedBox(width: gapX),
+              SizedBox(
+                width: gridWidth,
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: 8),
                     Row(children: dayHeaderRow),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: headerToGridGap),
                     ...weeks.asMap().entries.map(
                       (entry) {
                         final isLast = entry.key == weeks.length - 1;
@@ -232,8 +246,9 @@ class _Heatmap extends StatelessWidget {
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const Spacer(),
+            ],
           ),
         );
       },
