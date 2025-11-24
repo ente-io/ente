@@ -646,7 +646,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       if (saved) {
         if (shouldTriggerBackup) {
           await LocalBackupService.instance.triggerAutomaticBackup(
-            isManual: false,
+            isManual: true,
           );
         }
       } else if (requireSelection) {
@@ -665,7 +665,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         if (saved) {
           if (shouldTriggerBackup) {
             await LocalBackupService.instance.triggerAutomaticBackup(
-              isManual: false,
+              isManual: true,
             );
           }
         }
