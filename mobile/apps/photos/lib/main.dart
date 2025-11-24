@@ -325,6 +325,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
+    await localSettings.initSwipeToSelectDefault();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -345,6 +346,7 @@ void logLocalSettings() {
     'Gallery grid size': localSettings.getPhotoGridSize(),
     'Video streaming enabled':
         VideoPreviewService.instance.isVideoStreamingEnabled,
+    'Swipe to select enabled': localSettings.isSwipeToSelectEnabled,
   };
 
   final formattedSettings =

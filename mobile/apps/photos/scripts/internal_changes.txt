@@ -1,3 +1,4 @@
+- Ashil: Add option to enable/disable swipe-to-select in Settings > General > Gallery, defaults to disabled for Samsung S-series devices (2018+) due to gesture conflicts
 - Laurens: Add ability to pin Persons or hide them from home gallery memories
 - Prateek: Move Add button to top in Albums, Contacts, and Location Tags screens for easier access
 - Prateek: Enable select all functionality in shared album date headers

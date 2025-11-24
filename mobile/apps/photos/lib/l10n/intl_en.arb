@@ -1617,6 +1617,7 @@
   "legacyInvite": "{email} has invited you to be a trusted contact",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "swipeToSelect": "Swipe to select",
   "gallery": "Gallery",
   "joinAlbum": "Join album",
   "joinAlbumSubtext": "to view and add your photos",
