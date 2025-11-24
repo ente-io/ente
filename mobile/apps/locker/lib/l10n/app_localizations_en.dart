@@ -538,6 +538,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportBug => 'Report bug';
 
   @override
+  String get logsDialogBodyLocker =>
+      'This will send logs to help us debug your issue.';
+
+  @override
   String get social => 'Social';
 
   @override
@@ -1155,10 +1159,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String uploadedFilesProgressWithError(
-    int completed,
-    int total,
-    String error,
-  ) {
+      int completed, int total, String error) {
     return 'Uploaded $completed/$total items... ($error)';
   }
 

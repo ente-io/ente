@@ -359,6 +359,10 @@
   "suggestFeatures": "Suggest features",
   "reportABug": "Report a bug",
   "reportBug": "Report bug",
+  "logsDialogBodyLocker": "This will send logs to help us debug your issue.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Social",
   "rateUsOnStore": "Rate us on {storeName}",
   "blog": "Blog",
