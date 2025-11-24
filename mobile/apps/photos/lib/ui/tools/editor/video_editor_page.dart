@@ -96,26 +96,23 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         ),
       );
 
-      _controller!
-          .initialize()
-          .then((_) {
-            // Apply metadata rotation to the video player
-            if (_quarterTurnsForRotationCorrection != null &&
-                _quarterTurnsForRotationCorrection! != 0) {
-              final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
-              _controller!.video.value = _controller!.video.value.copyWith(
-                rotationCorrection: rotationDegrees,
-              );
-            }
-            setState(() {});
-          })
-          .catchError(
-            (error) {
-              // handle minimum duration bigger than video duration error
-              Navigator.pop(context);
-            },
-            test: (e) => e is VideoMinDurationError,
+      _controller!.initialize().then((_) {
+        // Apply metadata rotation to the video player
+        if (_quarterTurnsForRotationCorrection != null &&
+            _quarterTurnsForRotationCorrection! != 0) {
+          final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
+          _controller!.video.value = _controller!.video.value.copyWith(
+            rotationCorrection: rotationDegrees,
           );
+        }
+        setState(() {});
+      }).catchError(
+        (error) {
+          // handle minimum duration bigger than video duration error
+          Navigator.pop(context);
+        },
+        test: (e) => e is VideoMinDurationError,
+      );
     });
   }
 
@@ -142,8 +139,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       child: ValueListenableBuilder<bool>(
         valueListenable: _isExporting,
         builder: (context, isExporting, _) {
-          final isReady =
-              _controller != null &&
+          final isReady = _controller != null &&
               _controller!.initialized &&
               _quarterTurnsForRotationCorrection != null;
 
@@ -210,7 +206,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 children: [
                                   Text(
                                     "Native (i)",
-                                    style: getEnteTextTheme(context).mini
+                                    style: getEnteTextTheme(context)
+                                        .mini
                                         .copyWith(color: colorScheme.textMuted),
                                   ),
                                   const SizedBox(width: 4),
@@ -430,7 +427,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     }
 
     if (lastError != null) {
-      Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
+      Error.throwWithStackTrace(
+        lastError,
+        lastStackTrace ?? StackTrace.current,
+      );
     }
     throw Exception("Unknown native export failure");
   }
@@ -496,7 +496,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     }
 
     if (lastError != null) {
-      Error.throwWithStackTrace(lastError, lastStackTrace ?? StackTrace.current);
+      Error.throwWithStackTrace(
+        lastError,
+        lastStackTrace ?? StackTrace.current,
+      );
     }
     throw Exception("Unknown FFmpeg export failure");
   }
@@ -542,8 +545,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         return;
       }
 
-      final fileName =
-          path.basenameWithoutExtension(widget.file.title!) +
+      final fileName = path.basenameWithoutExtension(widget.file.title!) +
           "_edited_" +
           DateTime.now().microsecondsSinceEpoch.toString() +
           ".mp4";
@@ -695,22 +697,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
 class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
   _VideoEditorSubPageRoute(this.child)
-    : super(
-        fullscreenDialog: true,
-        transitionDuration: const Duration(milliseconds: 220),
-        reverseTransitionDuration: const Duration(milliseconds: 180),
-        pageBuilder: (_, __, ___) => child,
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            ),
-            child: child,
-          );
-        },
-      );
+      : super(
+          fullscreenDialog: true,
+          transitionDuration: const Duration(milliseconds: 220),
+          reverseTransitionDuration: const Duration(milliseconds: 180),
+          pageBuilder: (_, __, ___) => child,
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              ),
+              child: child,
+            );
+          },
+        );
 
   final Widget child;
 }

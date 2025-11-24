@@ -768,8 +768,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                                       key: _cardBoundaryKey,
                                       child: _MediaPreviewController(
                                         onPreviewStart: _showMediaPreview,
-                                        onPreviewTapDown:
-                                            _handlePreviewTapDown,
+                                        onPreviewTapDown: _handlePreviewTapDown,
                                         onPreviewTapCancel:
                                             _handlePreviewTapCancel,
                                         child: PageView.builder(
@@ -777,8 +776,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                                           controller: _pageController,
                                           onPageChanged: _handlePageChanged,
                                           itemCount: cardCount,
-                                          itemBuilder:
-                                              (BuildContext context, int index) {
+                                          itemBuilder: (
+                                            BuildContext context,
+                                            int index,
+                                          ) {
                                             final WrappedCard card =
                                                 _cards[index];
                                             return _StoryCard(
@@ -1381,8 +1382,8 @@ class _MediaPreviewController extends InheritedWidget {
   final VoidCallback onPreviewTapCancel;
 
   static _MediaPreviewController? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<
-        _MediaPreviewController>();
+    return context
+        .dependOnInheritedWidgetOfExactType<_MediaPreviewController>();
   }
 
   @override
@@ -1466,8 +1467,9 @@ class _MediaPreviewOverlay extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           final double boxWidth = constraints.maxWidth;
           final double boxHeight = constraints.maxHeight;
-          final double imageAspect =
-              file.width > 0 && file.height > 0 ? file.width / file.height : 3 / 4;
+          final double imageAspect = file.width > 0 && file.height > 0
+              ? file.width / file.height
+              : 3 / 4;
           double width = boxWidth;
           double height = width / imageAspect;
           if (height > boxHeight) {

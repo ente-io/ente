@@ -41,6 +41,7 @@ class LocalSettings {
       "has_configured_links_in_app_permission";
   static const _hideSharedItemsFromHomeGalleryTag =
       "hide_shared_items_from_home_gallery";
+  static const _kSwipeToSelectEnabled = "ls.swipe_to_select_enabled";
   static const kCollectionViewType = "collection_view_type";
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
@@ -243,6 +244,13 @@ class LocalSettings {
 
   bool get hideSharedItemsFromHomeGallery =>
       _prefs.getBool(_hideSharedItemsFromHomeGalleryTag) ?? false;
+
+  Future<void> setSwipeToSelectEnabled(bool value) async {
+    await _prefs.setBool(_kSwipeToSelectEnabled, value);
+  }
+
+  bool get isSwipeToSelectEnabled =>
+      _prefs.getBool(_kSwipeToSelectEnabled) ?? true;
 
   bool get showLocalIDOverThumbnails =>
       _prefs.getBool(kShowLocalIDOverThumbnails) ?? false;
