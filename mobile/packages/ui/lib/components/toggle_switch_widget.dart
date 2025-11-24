@@ -38,6 +38,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final Widget stateIcon = _stateIcon(enteColorScheme);
+    final isDarwin = Platform.isIOS || Platform.isMacOS;
 
     return Row(
       children: [
@@ -54,7 +55,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
           height: 31,
           child: FittedBox(
             fit: BoxFit.contain,
-            child: Platform.isAndroid
+            child: !isDarwin
                 ? Switch(
                     inactiveTrackColor: enteColorScheme.fillMuted,
                     activeTrackColor: enteColorScheme.primary500,
@@ -68,6 +69,9 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     onChanged: _handleToggleChange,
                   )
                 : CupertinoSwitch(
+                    activeColor: enteColorScheme.primary500,
+                    trackColor: enteColorScheme.fillMuted,
+                    thumbColor: Colors.white,
                     value: toggleValue ?? false,
                     onChanged: _handleToggleChange,
                   ),
