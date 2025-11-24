@@ -728,12 +728,14 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<bool> _pickAndPersistAndroidLocation() async {
     final saf = SafUtil();
-    final picked = await saf.pickDirectory();
+    final picked = await saf.pickDirectory(
+      writePermission: true,
+      persistablePermission: true,
+    );
     final treeUri = picked?.uri;
     if (treeUri == null || treeUri.isEmpty) {
       return false;
     }
-
     return _persistAndroidLocation(treeUri);
   }
 
