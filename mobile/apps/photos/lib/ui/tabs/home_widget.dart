@@ -244,7 +244,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
 
     // Initialize deep link subscription for public albums on both iOS and Android
-    _initDeepLinkSubscriptionForPublicAlbums();
+    // Defer until after first frame to ensure context is ready for navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initDeepLinkSubscriptionForPublicAlbums();
+    });
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
@@ -620,41 +623,48 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
-    try {
-      final initialUri = await appLinks.getInitialLink();
-      if (initialUri != null) {
-        if (initialUri.toString().contains("albums.ente.io")) {
-          await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
-        } else {
-          _logger.info(
-            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
-          );
+
+    // On Android, check if MediaExtension already consumed the VIEW intent
+    bool handledByMediaExtension = false;
+    if (Platform.isAndroid) {
+      final mediaAction = AppLifecycleService.instance.mediaExtensionAction;
+      if (mediaAction.action == IntentAction.view &&
+          mediaAction.data != null &&
+          mediaAction.data!.startsWith("ente://")) {
+        try {
+          final uri = Uri.parse(mediaAction.data!);
+          // Check if this is a public album link by looking for access token parameter
+          if (uri.queryParameters.containsKey('t')) {
+            await _handlePublicAlbumLink(uri, "MediaExtension.getIntentAction");
+            handledByMediaExtension = true;
+          }
+        } catch (e) {
+          // Silently ignore parsing errors
         }
-      } else {
-        _logger.info(
-          "No initial link received in public album link subscription.",
-        );
       }
-    } catch (e) {
-      _logger.severe("Error while getting initial public album deep link: $e");
+    }
+
+    // For iOS or if MediaExtension didn't have the link, use AppLinks
+    if (!handledByMediaExtension) {
+      try {
+        final initialUri = await appLinks.getInitialLink();
+        if (initialUri != null &&
+            initialUri.scheme == "ente" &&
+            initialUri.queryParameters.containsKey('t')) {
+          await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
+        }
+      } catch (e) {
+        // Silently ignore errors
+      }
     }
 
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
-        if (uri != null) {
-          if (uri.toString().contains("albums.ente.io")) {
-            _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
-          } else {
-            _logger.info(
-              "uri doesn't contain 'albums.ente.io' in public album link subscription",
-            );
-          }
-        } else {
-          _logger.info("No link received in public album link subscription.");
+        if (uri != null &&
+            uri.scheme == "ente" &&
+            uri.queryParameters.containsKey('t')) {
+          _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
         }
-      },
-      onError: (err) {
-        _logger.severe("Error while getting public album deep link: $err");
       },
     );
   }

@@ -55,25 +55,45 @@ const handleWebFallback = (
 const tryDeepLinkWithFallback = (
     deepLinkURL: string,
     fallbackFn: () => void | Promise<void>,
-    options: {
-        /** Check this condition before executing fallback (always true for iOS) */
-        shouldFallback?: () => boolean;
-    } = {},
+    timeoutMs = 4000,
 ): (() => void) => {
-    const { shouldFallback = () => true } = options;
+    let appOpened = false;
+
+    // Track visibility changes - app opening will hide the page
+    const onVisibilityChange = () => {
+        if (document.visibilityState === "hidden") {
+            appOpened = true;
+        }
+    };
+
+    // Track page hide - more reliable on some Android browsers
+    const onPageHide = () => {
+        appOpened = true;
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", onPageHide);
 
     // Try to open the app using the deep link
-    window.location.href = deepLinkURL;
+    // Use assign() instead of href for better compatibility with iOS Safari/PWAs
+    window.location.assign(deepLinkURL);
 
     // Set a timeout to check if the app opened
     const timeoutId = setTimeout(() => {
-        if (shouldFallback()) {
+        if (!appOpened) {
             void fallbackFn();
         }
-    }, 2500);
+        cleanup();
+    }, timeoutMs);
+
+    const cleanup = () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        window.removeEventListener("pagehide", onPageHide);
+    };
 
     // Return cleanup function
-    return () => clearTimeout(timeoutId);
+    return cleanup;
 };
 
 /**
@@ -111,11 +131,7 @@ export const useJoinAlbum = ({
             // Format: ente://HOST/?action=join&t=TOKEN#HASH
             const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-            tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
-                // Only fallback if page is still visible (app didn't open)
-                shouldFallback: () =>
-                    document.visibilityState === "visible",
-            });
+            tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
         } else {
             // Desktop: use the standard web flow directly
             handleWebFallback(accessToken, currentHash, jwtToken);

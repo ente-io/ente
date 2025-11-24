@@ -22,7 +22,6 @@ class AppLifecycleService {
   }
 
   void setMediaExtensionAction(MediaExtentionAction mediaExtensionAction) {
-    _logger.info("App invoked via ${mediaExtensionAction.action}");
     this.mediaExtensionAction = mediaExtensionAction;
   }
 
