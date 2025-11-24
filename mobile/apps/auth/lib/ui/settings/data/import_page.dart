@@ -1,6 +1,7 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
+import 'package:ente_auth/ui/components/constrained_custom_scroll_view.dart';
 import 'package:ente_auth/ui/components/divider_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
@@ -63,20 +64,15 @@ class ImportCodePage extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Scaffold(
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: CustomScrollView(
-              primary: false,
-              slivers: <Widget>[
-                TitleBarWidget(
-                  flexibleSpaceTitle: TitleBarTitleWidget(
-                    title: context.l10n.importCodes,
-                  ),
-                  flexibleSpaceCaption: "Import source",
-                  actionIcons: const [],
-                ),
+        body: ConstrainedCustomScrollView(
+          slivers: <Widget>[
+            TitleBarWidget(
+              flexibleSpaceTitle: TitleBarTitleWidget(
+                title: context.l10n.importCodes,
+              ),
+              flexibleSpaceCaption: "Import source",
+              actionIcons: const [],
+            ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (delegateBuildContext, index) {
@@ -121,9 +117,7 @@ class ImportCodePage extends StatelessWidget {
                     childCount: importOptions.length,
                   ),
                 ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
