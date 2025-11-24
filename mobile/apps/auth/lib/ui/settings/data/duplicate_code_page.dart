@@ -39,7 +39,13 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
         title: Text(context.l10n.deduplicateCodes),
         elevation: 0,
       ),
-      body: _getBody(),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: _getBody(),
+        ),
+      ),
     );
   }
 

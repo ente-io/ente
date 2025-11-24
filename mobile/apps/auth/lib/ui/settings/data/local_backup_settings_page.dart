@@ -159,15 +159,21 @@ class _LocalBackupVariantShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: Stack(
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: controller.hasLoaded
-                ? SafeArea(bottom: false, child: body)
-                : const _LocalBackupLoading(),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: Stack(
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: controller.hasLoaded
+                    ? SafeArea(bottom: false, child: body)
+                    : const _LocalBackupLoading(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

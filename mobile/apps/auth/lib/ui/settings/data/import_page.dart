@@ -63,58 +63,67 @@ class ImportCodePage extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Scaffold(
-        body: CustomScrollView(
-          primary: false,
-          slivers: <Widget>[
-            TitleBarWidget(
-              flexibleSpaceTitle: TitleBarTitleWidget(
-                title: context.l10n.importCodes,
-              ),
-              flexibleSpaceCaption: "Import source",
-              actionIcons: const [],
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (delegateBuildContext, index) {
-                  final type = importOptions[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        if (index == 0)
-                          const SizedBox(
-                            height: 24,
-                          ),
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: getTitle(context, type),
-                          ),
-                          alignCaptionedTextToLeft: true,
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: Icons.chevron_right_outlined,
-                          isBottomBorderRadiusRemoved:
-                              index != importOptions.length - 1,
-                          isTopBorderRadiusRemoved: index != 0,
-                          onTap: () async {
-                            await ImportService().initiateImport(context, type);
-                            // routeToPage(context, ImportCodePage());
-                            // _showImportInstructionDialog(context);
-                          },
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: CustomScrollView(
+              primary: false,
+              slivers: <Widget>[
+                TitleBarWidget(
+                  flexibleSpaceTitle: TitleBarTitleWidget(
+                    title: context.l10n.importCodes,
+                  ),
+                  flexibleSpaceCaption: "Import source",
+                  actionIcons: const [],
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (delegateBuildContext, index) {
+                      final type = importOptions[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          children: [
+                            if (index == 0)
+                              const SizedBox(
+                                height: 24,
+                              ),
+                            MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: getTitle(context, type),
+                              ),
+                              alignCaptionedTextToLeft: true,
+                              menuItemColor:
+                                  getEnteColorScheme(context).fillFaint,
+                              pressedColor:
+                                  getEnteColorScheme(context).fillFaint,
+                              trailingIcon: Icons.chevron_right_outlined,
+                              isBottomBorderRadiusRemoved:
+                                  index != importOptions.length - 1,
+                              isTopBorderRadiusRemoved: index != 0,
+                              onTap: () async {
+                                await ImportService()
+                                    .initiateImport(context, type);
+                                // routeToPage(context, ImportCodePage());
+                                // _showImportInstructionDialog(context);
+                              },
+                            ),
+                            if (index != importOptions.length - 1)
+                              DividerWidget(
+                                dividerType: DividerType.menu,
+                                bgColor: getEnteColorScheme(context).fillFaint,
+                              ),
+                          ],
                         ),
-                        if (index != importOptions.length - 1)
-                          DividerWidget(
-                            dividerType: DividerType.menu,
-                            bgColor: getEnteColorScheme(context).fillFaint,
-                          ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: importOptions.length,
-              ),
+                      );
+                    },
+                    childCount: importOptions.length,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
