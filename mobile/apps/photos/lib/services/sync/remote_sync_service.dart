@@ -394,7 +394,14 @@ class RemoteSyncService {
       }
 
       // Filter by only-new using pre-fetched set
-      if (newerLocalIDs != null) {
+      if (flagService.enableOnlyBackupFuturePhotos) {
+        if (newerLocalIDs == null) {
+          // Only-new is enabled but timestamp not set yet, skip collection
+          _logger.info(
+            "Skipping collection ${deviceCollection.name} as only-new is enabled but timestamp not set",
+          );
+          continue;
+        }
         localIDsToSync.retainAll(newerLocalIDs);
       }
 
