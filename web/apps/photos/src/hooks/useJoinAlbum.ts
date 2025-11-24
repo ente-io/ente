@@ -104,47 +104,18 @@ export const useJoinAlbum = ({
 
         // Check if on mobile and try deep link first
         if (isTouchscreen) {
-            const userAgent = navigator.userAgent || "";
-            const isIOS =
-                userAgent.includes("iPad") ||
-                userAgent.includes("iPhone") ||
-                userAgent.includes("iPod");
-            const isAndroid = userAgent.includes("Android");
-
             // Extract hostname from albumsAppOrigin for deep linking
             const albumsHost = new URL(albumsAppOrigin()).host;
 
-            if (isIOS) {
-                // For iOS, use custom scheme with action=join parameter
-                // Format: ente://HOST/?action=join&t=TOKEN#HASH
-                const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
+            // For all mobile devices, use custom scheme with action=join parameter
+            // Format: ente://HOST/?action=join&t=TOKEN#HASH
+            const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
-                tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
-                    // Only fallback if page is still visible (app didn't open)
-                    shouldFallback: () =>
-                        document.visibilityState === "visible",
-                });
-            } else if (isAndroid) {
-                // For Android, use intent URL with automatic fallback
-                // Hash must be in query params since intent URLs only support one fragment (#Intent)
-                // Format: intent://HOST/?action=join&t=TOKEN&hash=HASH#Intent;scheme=https;package=io.ente.photos;end
-                const intentURL = `intent://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}&hash=${encodeURIComponent(currentHash)}#Intent;scheme=https;package=io.ente.photos;end`;
-
-                tryDeepLinkWithFallback(intentURL, fallbackToWeb, {
-                    // Only fallback if page is still visible (app didn't open)
-                    shouldFallback: () =>
-                        document.visibilityState === "visible",
-                });
-            } else {
-                // For other mobile devices, use custom scheme with action=join parameter
-                // Format: ente://HOST/?action=join&t=TOKEN#HASH
-                const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
-
-                tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
-                    shouldFallback: () =>
-                        document.visibilityState === "visible",
-                });
-            }
+            tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb, {
+                // Only fallback if page is still visible (app didn't open)
+                shouldFallback: () =>
+                    document.visibilityState === "visible",
+            });
         } else {
             // Desktop: use the standard web flow directly
             handleWebFallback(accessToken, currentHash, jwtToken);
