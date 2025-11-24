@@ -1,4 +1,5 @@
 - Prateek: Automatic local backup feature - creates one backup per day when app is opened, retains up to 5 backups, UI improvements (fixed spinner during toggle, updated layout and spacing, renamed "Change folder" to "Set backup folder", restricted max width for settings pages, fixed backup type when changing folder)
+- Prateek: Fix toggle color/styling in local backup settings
 - Prateek: Add new onboarding, update button radius, update tags style
 - ExtendedGuru4883: Quick Settings tile for android
 - Prateek: Add fdroid icon
