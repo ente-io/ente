@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -664,41 +666,49 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           ],
         ),
         backgroundColor: colorScheme.backgroundBase,
-        body: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (isViewMode) {
-                        return buildViewModeContent(context, constraints);
-                      }
-                      return buildEditModeContent(context, constraints);
-                    },
-                  ),
-                ),
-
-                // Save button only in edit mode
-                if (isEditMode) ...[
-                  const SizedBox(height: 8),
-                  SafeArea(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: GradientButton(
-                        onTap: isSaveEnabled ? _saveRecord : null,
-                        text: _isLoading
-                            ? context.l10n.pleaseWait
-                            : submitButtonText,
-                      ),
+        body: GestureDetector(
+          onTap: Platform.isIOS
+              ? () {
+                  FocusScope.of(context).unfocus();
+                }
+              : null,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (isViewMode) {
+                          return buildViewModeContent(context, constraints);
+                        }
+                        return buildEditModeContent(context, constraints);
+                      },
                     ),
                   ),
-                  const SizedBox(height: 8),
+
+                  // Save button only in edit mode
+                  if (isEditMode) ...[
+                    const SizedBox(height: 8),
+                    SafeArea(
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: GradientButton(
+                          onTap: isSaveEnabled ? _saveRecord : null,
+                          text: _isLoading
+                              ? context.l10n.pleaseWait
+                              : submitButtonText,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
