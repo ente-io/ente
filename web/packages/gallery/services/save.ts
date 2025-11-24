@@ -15,7 +15,10 @@ import {
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
-import type { AddSaveGroup } from "../components/utils/save-groups";
+import type {
+    AddSaveGroup,
+    UpdateSaveGroup,
+} from "../components/utils/save-groups";
 
 /**
  * Save the given {@link files} to the user's device.
@@ -111,30 +114,64 @@ const downloadAndSave = async (
     }
 
     const canceller = new AbortController();
+    const failedFiles: EnteFile[] = [];
+    let isDownloading = false;
+    let updateSaveGroup: UpdateSaveGroup = () => undefined;
 
-    const updateSaveGroup = onAddSaveGroup({
+    const downloadFiles = async (
+        filesToDownload: EnteFile[],
+        resetFailedCount = false,
+    ) => {
+        if (!filesToDownload.length || isDownloading) return;
+
+        isDownloading = true;
+        if (resetFailedCount) {
+            updateSaveGroup((g) => ({ ...g, failed: 0 }));
+        }
+        failedFiles.length = 0;
+
+        try {
+            for (const file of filesToDownload) {
+                if (canceller.signal.aborted) break;
+                try {
+                    if (electron && downloadDirPath) {
+                        await saveFileDesktop(electron, file, downloadDirPath);
+                    } else {
+                        await saveAsFile(file);
+                    }
+                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
+                } catch (e) {
+                    log.error("File download failed", e);
+                    failedFiles.push(file);
+                    updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
+                }
+            }
+
+            if (!failedFiles.length) {
+                updateSaveGroup((g) => ({ ...g, retry: undefined }));
+            }
+        } finally {
+            isDownloading = false;
+        }
+    };
+
+    const retry = () => {
+        if (!failedFiles.length || isDownloading || canceller.signal.aborted)
+            return;
+        void downloadFiles([...failedFiles], true);
+    };
+
+    updateSaveGroup = onAddSaveGroup({
         title,
         collectionSummaryID,
         isHiddenCollectionSummary,
         downloadDirPath,
         total,
         canceller,
+        retry,
     });
 
-    for (const file of files) {
-        if (canceller.signal.aborted) break;
-        try {
-            if (electron && downloadDirPath) {
-                await saveFileDesktop(electron, file, downloadDirPath);
-            } else {
-                await saveAsFile(file);
-            }
-            updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
-        } catch (e) {
-            log.error("File download failed", e);
-            updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
-        }
-    }
+    await downloadFiles(files);
 };
 
 /**
