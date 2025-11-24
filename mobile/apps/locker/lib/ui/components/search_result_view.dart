@@ -38,6 +38,7 @@ class SearchResultView extends StatelessWidget {
             collections: displayCollections,
             emptyStateWidget: searchQuery.isNotEmpty
                 ? FileListViewHelpers.createSearchEmptyState(
+                    context: context,
                     searchQuery: searchQuery,
                   )
                 : null,
@@ -46,9 +47,9 @@ class SearchResultView extends StatelessWidget {
               onSearchEverywhere != null &&
               searchQuery.isNotEmpty)
             FileListViewHelpers.createSearchEverywhereFooter(
+              context: context,
               searchQuery: searchQuery,
               onTap: onSearchEverywhere!,
-              context: context,
             ),
         ],
       ),

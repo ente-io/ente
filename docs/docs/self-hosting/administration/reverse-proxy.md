@@ -87,6 +87,11 @@ cast.ente.yourdomain.tld {
 share.ente.yourdomain.tld {
     reverse_proxy http://localhost:3005
 }
+
+# For Ente Embed web app
+embed.ente.yourdomain.tld {
+    reverse_proxy http://localhost:3006
+}
 ```
 
 ## Step 3: Reload reverse proxy

@@ -50,7 +50,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                         child: OutlinedButton(
                           onPressed: onScanTap,
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            padding: const EdgeInsets.symmetric(vertical: 0),
                           ),
                           child: Text(
                             l10n.importScanQrCode,
@@ -64,7 +64,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: onManuallySetupTap,
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 0),
                         ),
                         child: Text(
                           l10n.importEnterSetupKey,

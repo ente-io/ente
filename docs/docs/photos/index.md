@@ -28,3 +28,7 @@ If you need assistance with Ente Photos, multiple support channels are available
 4. **GitHub**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
 
 For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.
+
+## Changelog
+
+For a list of recent changes, see the [Changelog](/photos/changelog).

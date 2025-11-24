@@ -11,6 +11,7 @@
   "invalidEmailAddress": "E-mail inválido",
   "enterValidEmail": "Insira um e-mail válido.",
   "deleteAccount": "Excluir conta",
+  "deleteAccountWarning": "Isto irá excluir sua conta de Ente Auth, Ente Photos e Ente Locker.",
   "askDeleteReason": "Por que você quer excluir sua conta?",
   "deleteAccountFeedbackPrompt": "Lamentamos você ir. Compartilhe seu feedback para ajudar-nos a melhorar.",
   "feedback": "Feedback",
@@ -34,6 +35,16 @@
   "password": "Senha",
   "confirmPassword": "Confirmar senha",
   "activeSessions": "Sessões ativas",
+  "ocrProcessingOverlayMessage": "Detectando texto...",
+  "ocrLoadingIndicatorLabel": "Detectando texto",
+  "ocrSelectionHint": "Deslize ou toque duas vezes para selecionar apenas o que você precisa",
+  "ocrNoTextDetected": "Nenhum texto detectado",
+  "ocrRetryButtonLabel": "Tentar novamente",
+  "ocrModelsNetworkRequiredError": "Conexão de rede necessária para baixar modelos OCR no primeiro uso",
+  "ocrModelsPrepareFailed": "Não foi possível preparar modelos OCR",
+  "ocrImageNotFoundError": "Arquivo de imagem não encontrado",
+  "ocrImageDecodeFailedError": "Não foi possível ler o arquivo de imagem",
+  "ocrGenericDetectError": "Não foi possível detectar o texto na imagem",
   "oops": "Ops",
   "somethingWentWrongPleaseTryAgain": "Algo deu errado. Tente outra vez",
   "thisWillLogYouOutOfThisDevice": "Isso fará você sair deste dispositivo!",
@@ -186,6 +197,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Permitir entrada de álbum",
   "allowAddPhotosDescription": "Permitir que as pessoas com link também adicionem fotos ao álbum compartilhado.",
   "passwordLock": "Bloqueio por senha",
   "canNotOpenTitle": "Não pôde abrir este álbum",
@@ -198,6 +210,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Layout do álbum",
+  "layoutGrouped": "Agrupados",
+  "layoutContinuous": "Contínuo",
+  "layoutTrip": "Viagem",
+  "preview": "Pré-visualizar",
   "linkExpiry": "Expiração do link",
   "linkExpired": "Expirado",
   "linkEnabled": "Ativado",
@@ -237,7 +254,9 @@
   "shareWithNonenteUsers": "Compartilhar com usuários não ente",
   "createPublicLink": "Criar link público",
   "sendLink": "Enviar link",
+  "sendQrCode": "Escanear QR code",
   "copyLink": "Copiar link",
+  "copyEmbedHtml": "Copiar HTML incorporado",
   "linkHasExpired": "O link expirou",
   "publicLinkEnabled": "Link público ativo",
   "shareALink": "Compartilhar link",
@@ -1169,6 +1188,7 @@
     "description": "Label for the map view"
   },
   "maps": "Mapas",
+  "mapsPrivacyNotice": "Coordenadas aproximadas serão enviadas a terceiros conscientes da privacidade, como o OpenStreetMap para mostrar o mapa e a localização.",
   "enableMaps": "Ativar mapas",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
@@ -1817,12 +1837,157 @@
       }
     }
   },
-  "cLTitle1": "Pular para a data",
-  "cLDesc1": "Veja as fotos ao redor de qualquer imagem selecionando a opção Pular para a data no painel de informações do arquivo.",
-  "cLTitle2": "Editor de vídeo mais rápido",
-  "cLDesc2": "Reformulamos o editor de vídeo para acelerar bastante a edição de vídeos maiores e melhorar a experiência de uso.",
+  "videosProcessed": "Vídeos processados",
+  "totalVideos": "Total de vídeos",
+  "skippedVideos": "Vídeos ignorados",
+  "videoStreamingDescriptionLine1": "Reproduzir vídeos instantaneamente em qualquer dispositivo.",
+  "videoStreamingDescriptionLine2": "Ative para processar fluxos de vídeo neste dispositivo.",
+  "videoStreamingNote": "Apenas vídeos dos últimos 60 dias e menos de 1 minuto são processados neste dispositivo. Para vídeos mais antigos/mais longos, habilite a transmissão no aplicativo da área de trabalho.",
+  "createStream": "Criar fluxo",
+  "recreateStream": "Criar fluxo",
+  "addedToStreamCreationQueue": "Adicionado à fila de criação do stream",
+  "addedToStreamRecreationQueue": "Adicionado à fila de recriação do stream",
+  "videoPreviewAlreadyExists": "Pré-visualização de vídeo já existe",
+  "videoAlreadyInQueue": "Arquivo de vídeo já presente na fila",
+  "addedToQueue": "Adicionado à fila:",
+  "creatingStream": "Criando fluxo",
+  "similarImages": "Imagens similares",
+  "findSimilarImages": "Encontrar imagens semelhantes",
+  "noSimilarImagesFound": "Nenhuma imagem semelhante encontrada",
+  "yourPhotosLookUnique": "Suas fotos parecem únicas",
+  "similarGroupsFound": "{count, plural, =1{{count} resultado encontrado} other{{count} resultados encontrados}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Revisar e remover imagens semelhantes",
+  "deletePhotosWithSize": "Excluir {count} fotos ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Opções de seleção",
+  "selectExactWithCount": "Exatamente semelhante ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Selecione exato",
+  "selectSimilarWithCount": "Quase semelhante ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Selecionar similares",
+  "selectAllWithCount": "Todas as semelhanças ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Selecione imagens similares",
+  "chooseSimilarImagesToSelect": "Selecionar imagens baseadas em sua semelhança visual",
+  "clearSelection": "Limpar seleção",
+  "similarImagesCount": "{count} imagens semelhantes",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Excluir ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Excluir arquivos",
+  "areYouSureDeleteFiles": "Você tem certeza que deseja excluir estes arquivos?",
+  "greatJob": "Bom trabalho!",
+  "cleanedUpSimilarImages": "Você liberou {size} de espaço",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Tamanho",
+  "similarity": "Similaridade",
+  "analyzingPhotosLocally": "Analisando suas fotos localmente...",
+  "lookingForVisualSimilarities": "Procurando por semelhanças visuais...",
+  "comparingImageDetails": "Comparando detalhes da imagem...",
+  "findingSimilarImages": "Encontrando imagens semelhantes...",
+  "almostDone": "Quase lá...",
+  "processingLocally": "Processando localmente",
+  "useMLToFindSimilarImages": "Revise e remova imagens que pareçam semelhantes entre si.",
+  "all": "Todos",
+  "similar": "Parecido",
+  "identical": "Idêntico",
+  "nothingHereTryAnotherFilter": "Nada aqui, tente outro filtro! 👀",
+  "related": "Relacionado",
+  "hoorayyyy": "Uuhuuuulll!",
+  "nothingToTidyUpHere": "Nada para arrumar aqui",
+  "deletingDash": "Apagando - ",
+  "cLTitle3": "Novas recordações",
+  "cLDesc3": "“Crianças brincalhonas”, “Aventuras de inverno”, “Noites neon” e muito mais.",
+  "cLTitle4": "Galeria de paisagens e muito mais",
+  "cLDesc4": "Suporte para layout paisagem na galeria principal do aplicativo. Mostrar pessoas sem fotos associadas em vez de filtrá-las. Melhorar a detecção do aspecto do vídeo quando compartilhado a partir de aplicativos externos.",
   "closeBy": "Parecida",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "peopleAutoAddDesc": "Adicionar automaticamente fotos das pessoas selecionadas a este álbum",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
+  },
+  "festivities": "Alegria festiva",
+  "snowAdventures": "Aventuras de inverno",
+  "waterfalls": "Em busca de cachoeiras",
+  "wildlife": "Na natureza",
+  "flowers": "Belezas em flor",
+  "nightLights": "Noites de néon",
+  "architecture": "Ícones do design",
+  "autumnColors": "Esplendor do outono",
+  "desertDreams": "Sonhos do deserto",
+  "stargazing": "Sob as estrelas",
+  "lakeside": "Calma à beira do lago",
+  "rainyDays": "Sensação de dia chuvoso",
+  "sportsAction": "Começa o jogo",
+  "streetArt": "Histórias da arte de rua",
+  "familyMoments": "Tempo com a família",
+  "fireworks": "Fim com fogos de artifício",
+  "historicSites": "Ecos da história",
+  "tropicalParadise": "Escapadas tropicais",
+  "forestTrails": "Passeios pela floresta",
+  "citySunsets": "Brilho do pôr do sol na cidade",
+  "colorfulMarkets": "Mercados vibrantes",
+  "cozyCafes": "Cantinhos aconchegantes em cafés",
+  "vintageVibes": "Vibrações vintage",
+  "aerialViews": "Perspectivas aéreas",
+  "artisticPortraits": "Retratos artísticos",
+  "streetFood": "Petiscos de rua",
+  "riverCruises": "Vistas do cruzeiro fluvial",
+  "playfulKids": "Crianças brincalhonas",
+  "coastalCliffs": "Penhascos à beira-mar"
 }

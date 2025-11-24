@@ -286,12 +286,11 @@ packages:
   chewie:
     dependency: "direct main"
     description:
-      path: "."
-      ref: mybranched
-      resolved-ref: "539079ac2758086ef4dfb602a5f8785bf5295fb3"
-      url: "https://github.com/ente-io/chewie.git"
-    source: git
-    version: "1.10.0"
+      name: chewie
+      sha256: "44bcfc5f0dfd1de290c87c9d86a61308b3282a70b63435d5557cfd60f54a69ca"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.13.0"
   cli_config:
     dependency: transitive
     description:
@@ -1624,9 +1623,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: f03711af19f72d993daf538ba203163cc63482aa
-      resolved-ref: f03711af19f72d993daf538ba203163cc63482aa
-      url: "https://github.com/laurenspriem/mobile_ocr"
+      ref: "8dba33ad89eea99683780469bc4d0ec4993d61c3"
+      resolved-ref: "8dba33ad89eea99683780469bc4d0ec4993d61c3"
+      url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"
   mockito:

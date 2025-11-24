@@ -29,15 +29,13 @@ class MetadataUpdaterService {
     }
   }
 
-  Future<bool> editFileNameAndCaption(
+  Future<bool> editFileName(
     EnteFile file,
     String name,
-    String caption,
   ) async {
     try {
       final Map<String, dynamic> updates = {
         editNameKey: name,
-        captionKey: caption,
       };
       await _updatePublicMetadataBulk([file], updates);
       await CollectionService.instance.sync();

@@ -140,7 +140,7 @@ export const TripMap: React.FC<TripMapProps> = ({
 
                         const icon = createIcon(
                             firstPhoto.image,
-                            isMobileOrTablet ? 40 : 55,
+                            isMobileOrTablet ? 30 : 55,
                             "#ffffff",
                             cluster.length,
                             isActive,

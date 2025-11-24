@@ -10,7 +10,6 @@
   "onBoardingGetStarted": "شروع کنید",
   "setupFirstAccount": "اولین حساب خود را راه‌اندازی کنید",
   "importScanQrCode": "اسکن کردن کد QR",
-  "qrCode": "بارکد",
   "importEnterSetupKey": "وارد کردن کلید تنظیم",
   "importAccountPageTitle": "ورود اطلاعات حساب",
   "secretCanNotBeEmpty": "رمز محرمانه نمیتواند خالی باشد",

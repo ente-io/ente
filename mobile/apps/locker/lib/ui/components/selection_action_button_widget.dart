@@ -2,41 +2,55 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
 class SelectionActionButton extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final Widget? hugeIcon;
   final String label;
   final VoidCallback onTap;
   final bool isDestructive;
 
   const SelectionActionButton({
     super.key,
-    required this.icon,
+    this.icon,
+    this.hugeIcon,
     required this.label,
     required this.onTap,
     this.isDestructive = false,
-  });
+  }) : assert(
+          icon != null || hugeIcon != null,
+          'Either icon or hugeIcon must be provided',
+        );
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final color = isDestructive ? Colors.red : colorScheme.textBase;
+    final color = isDestructive ? colorScheme.warning500 : colorScheme.textBase;
 
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(24.0),
+        ),
+        padding: const EdgeInsets.symmetric(
+          vertical: 18.0,
+          horizontal: 12.0,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 22,
-            ),
-            const SizedBox(height: 6),
+            hugeIcon ??
+                Icon(
+                  icon!,
+                  color: color,
+                  size: 24,
+                ),
+            const SizedBox(height: 8),
             Text(
               label,
-              style: textTheme.small.copyWith(
+              style: textTheme.body.copyWith(
                 color: color,
               ),
               textAlign: TextAlign.center,

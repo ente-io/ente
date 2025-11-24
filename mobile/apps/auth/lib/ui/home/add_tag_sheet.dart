@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/onboarding/model/tag_enums.dart';
+import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -9,8 +11,6 @@ import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:flutter/material.dart';
-
-
 
 class AddTagSheet extends StatefulWidget {
   final List<Code> selectedCodes;
@@ -27,6 +27,7 @@ class AddTagSheet extends StatefulWidget {
 class _AddTagSheetState extends State<AddTagSheet> {
   List<String> _allTags = [];
   final Set<String> _selectedTagsInSheet = {};
+  final Set<String> _initialIntersectionTags = {};
   bool _isLoading = true;
 
   @override
@@ -37,29 +38,41 @@ class _AddTagSheetState extends State<AddTagSheet> {
 
   Future<void> _loadInitialState() async {
     final allTagsFromServer = await CodeDisplayStore.instance.getAllTags();
-    final initialTagsForSelection = <String>{};
 
-    for (final code in widget.selectedCodes) {
-      initialTagsForSelection.addAll(code.display.tags);
-    }
+    // Calculate intersection: tags that exist in ALL selected codes
+    final initialTagsForSelection = widget.selectedCodes.isEmpty
+        ? <String>{}
+        : widget.selectedCodes
+            .map((code) => code.display.tags.toSet())
+            .reduce((a, b) => a.intersection(b));
 
     if (mounted) {
       setState(() {
         _allTags = allTagsFromServer;
         _selectedTagsInSheet.addAll(initialTagsForSelection);
+        _initialIntersectionTags.addAll(initialTagsForSelection);
         _isLoading = false;
       });
     }
   }
 
   Future<void> _onDonePressed() async {
-    final List<Future> updateFutures = [];
-    for (final code in widget.selectedCodes) {
-      final updatedCode = code.copyWith(
-        display: code.display.copyWith(tags: _selectedTagsInSheet.toList()),
+    final removedTags =
+        _initialIntersectionTags.difference(_selectedTagsInSheet);
+    final addedTags = _selectedTagsInSheet.difference(_initialIntersectionTags);
+
+    final updateFutures = widget.selectedCodes.map((code) {
+      final updatedTags = Set<String>.from(code.display.tags)
+        ..removeAll(removedTags)
+        ..addAll(addedTags);
+
+      return CodeStore.instance.addCode(
+        code.copyWith(
+          display: code.display.copyWith(tags: updatedTags.toList()),
+        ),
       );
-      updateFutures.add(CodeStore.instance.addCode(updatedCode));
-    }
+    });
+
     await Future.wait(updateFutures);
     if (mounted) {
       Navigator.of(context).pop();
@@ -96,7 +109,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
                         buttonType: ButtonType.primary,
                         labelText: context.l10n.create,
                         isDisabled: textController.text.trim().isEmpty,
-                        onTap: () async => Navigator.of(context).pop(textController.text.trim()),
+                        onTap: () async => Navigator.of(context)
+                            .pop(textController.text.trim()),
                       ),
                     ),
                   ],
@@ -142,7 +156,8 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
                 style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.fillFaint.withValues(alpha: 0.025),
+                  backgroundColor:
+                      colorScheme.fillFaint.withValues(alpha: 0.025),
                 ),
               ),
             ],
@@ -156,34 +171,38 @@ class _AddTagSheetState extends State<AddTagSheet> {
               separatorBuilder: (_, __) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
                 final code = widget.selectedCodes[index];
-                final iconData =
-                    code.display.isCustomIcon ? code.display.iconID : code.issuer;
-                
+                final iconData = code.display.isCustomIcon
+                    ? code.display.iconID
+                    : code.issuer;
+
                 return SizedBox(
-  width: 60,
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      Container(
-        width: 50,   
-        height: 50,   
-        decoration: BoxDecoration(
-          color: colorScheme.fillFaint.withValues(alpha: 0.02),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(  
-          child: IconUtils.instance.getIcon(context, iconData.trim(), width: 28),
-        ),
-    ),
-      const SizedBox(height: 8),
-      Text(
-        code.issuer,
-        overflow: TextOverflow.ellipsis,
-        style: textTheme.mini.copyWith(color: colorScheme.textMuted,),
-      ),
-    ],
-  ),
-);
+                  width: 60,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: colorScheme.fillFaint.withValues(alpha: 0.02),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: IconUtils.instance
+                              .getIcon(context, iconData.trim(), width: 28),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        code.issuer,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.mini.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),
@@ -195,56 +214,38 @@ class _AddTagSheetState extends State<AddTagSheet> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : Wrap(
-                spacing: 8.0,
-                runSpacing: 4.0,
-                children: [
-                  ..._allTags.map((tag) {
-                    final isSelected = _selectedTagsInSheet.contains(tag);
-                    return ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(tag),
-                            if (isSelected) ...[
-                            const SizedBox(width: 6),
-                            const Icon(Icons.check, size: 16, color: Colors.white,),
-                          ],
-                        ],
-                      ),
-                      selected: isSelected,
-                      showCheckmark: false, 
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTagsInSheet.add(tag);
-                          } 
-                          else {
-                            _selectedTagsInSheet.remove(tag);
-                          }
-                        });
-                      },
-                      selectedColor: colorScheme.primary400,
-                      backgroundColor: colorScheme.fillFaint,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : colorScheme.textBase,
-                      ),
-                      side: BorderSide.none,
-                      shape: const StadiumBorder(),
-                    );
-                  }),
-                  ActionChip(
-                    avatar: const Icon(Icons.add, size: 18),
-                    label: Text(context.l10n.addNew),
-                    onPressed: _showCreateTagDialog,
-                    side: BorderSide.none,
-                    shape: const StadiumBorder(),
-                    backgroundColor: colorScheme.fillFaint,
-                  ),
-                ],
-              ),
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: [
+                        ..._allTags.map((tag) {
+                          final isSelected = _selectedTagsInSheet.contains(tag);
+                          return TagChip(
+                            label: tag,
+                            action: TagChipAction.check,
+                            state: isSelected
+                                ? TagChipState.selected
+                                : TagChipState.unselected,
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedTagsInSheet.remove(tag);
+                                } else {
+                                  _selectedTagsInSheet.add(tag);
+                                }
+                              });
+                            },
+                          );
+                        }),
+                        TagChip(
+                          label: context.l10n.addNew,
+                          iconData: Icons.add,
+                          state: TagChipState.unselected,
+                          onTap: _showCreateTagDialog,
+                        ),
+                      ],
+                    ),
             ),
           ),
-          
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -253,7 +254,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
                 backgroundColor: colorScheme.fillBase,
                 foregroundColor: colorScheme.backgroundBase,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: _onDonePressed,
               child: Text(context.l10n.done),

@@ -36,6 +36,27 @@ Highlight your frequently used services by pinning them to the top of your code
 list. To pin a code, long-press (mobile) or right-click (desktop) the code and
 select "Pin".
 
+### Multi-select
+
+Select multiple codes to perform bulk operations and access additional options.
+
+**On mobile:**
+
+- Tap and hold on a code to enter multi-select mode
+- Tap additional codes to add them to your selection
+- Use the toolbar that appears at the bottom to perform actions on all selected
+  codes
+
+**On desktop:**
+
+- Long-press on a code to enter multi-select mode
+- Click additional codes to add them to your selection
+- Use the toolbar that appears at the bottom to perform actions on all selected
+  codes
+
+Available actions in multi-select mode include sharing, tagging, pinning,
+copying, and trashing multiple codes at once.
+
 ### Notes
 
 Add additional information to your codes using notes. Notes can be added during
@@ -129,8 +150,19 @@ at any time.
 
 Easily add or share entries using QR codes:
 
-- **Add by scanning (mobile):** On mobile, you can add a new entry by scanning
-  the QR code provided by the service. This quickly adds the entry to Ente Auth.
+- **Add by scanning (mobile):** On mobile (Android and iOS), you can add a new
+  entry by scanning the QR code provided by the service. Access the QR scanner
+  from the SpeedDial button (FAB) in the bottom-right corner.
+
+  This quickly adds the entry to Ente Auth. You can also import QR codes from
+  images saved on your device by using the "Import from Gallery" button
+  available in the QR scanner page itself.
+
+  > **Note**: The "Import from Gallery" feature is particularly useful when you
+  > have a screenshot or photo of a QR code. Simply save the QR code image to
+  > your device and use this feature to import it without needing to display it
+  > on another screen.
+
 - **Show entry as QR code:** On all apps, you can long-press (mobile) or
   right-click (desktop) a code and select "QR". This allows you to easily share
   the complete entry (including the secret) with others by letting them scan the

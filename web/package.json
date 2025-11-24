@@ -14,7 +14,7 @@
         "build:embed": "yarn workspace embed next build",
         "build:payments": "yarn workspace payments build",
         "build:photos": "yarn workspace photos next build",
-        "build:share": "yarn workspace share next build",
+        "build:share": "yarn workspace share next build && yarn workspace share build:post",
         "dev": "yarn dev:photos",
         "dev:accounts": "yarn workspace accounts next dev -p 3001",
         "dev:albums": "yarn workspace photos next dev -p 3002",

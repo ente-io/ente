@@ -96,7 +96,7 @@ class CollectionPage extends StatelessWidget {
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       addHeaderOrFooterEmptyState: false,
-      showSelectAll: galleryType != GalleryType.sharedCollection,
+      showSelectAll: true,
       emptyState: galleryType == GalleryType.ownedCollection
           ? EmptyAlbumState(
               c.collection,

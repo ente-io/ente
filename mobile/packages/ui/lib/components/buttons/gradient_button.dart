@@ -73,7 +73,7 @@ class GradientButton extends StatelessWidget {
                       getEnteColorScheme(context).fillMuted,
                       getEnteColorScheme(context).fillMuted,
                     ],
-            ), 
+            ),
           ),
           child: Center(child: buttonContent),
         ),

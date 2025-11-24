@@ -386,6 +386,7 @@ class CollectionsService {
     }
     if (includedShared || includeCollab) {
       allowedRoles.add(CollectionParticipantRole.collaborator);
+      allowedRoles.add(CollectionParticipantRole.admin);
     }
     final int userID = _config.getUserID()!;
     return _collectionIDToCollections.values
@@ -828,9 +829,13 @@ class CollectionsService {
     final PublicURL url = c.publicURLs.firstOrNull!;
     Uri publicUrl = Uri.parse(url.url);
 
-    // Replace with custom domain if configured
+    final int? currentUserID = Configuration.instance.getUserID();
+    final bool isOwner = currentUserID != null && currentUserID == c.owner.id;
     final String customDomain = flagService.customDomain;
-    if (customDomain.isNotEmpty) {
+    final bool applyCustomDomain = isOwner && customDomain.isNotEmpty;
+
+    // Replace with custom domain if configured for the owner
+    if (applyCustomDomain) {
       publicUrl = publicUrl.replace(
         host: customDomain,
         scheme: "https",
@@ -848,7 +853,7 @@ class CollectionsService {
 
     // Handle IDN domains - if the host was percent-encoded by Uri.replace,
     // decode it for user-friendly display
-    if (customDomain.isNotEmpty && publicUrl.host.contains('%')) {
+    if (applyCustomDomain && publicUrl.host.contains('%')) {
       final decodedHost = Uri.decodeComponent(publicUrl.host);
       finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
     }

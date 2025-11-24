@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.8+449
+version: 4.4.11+477
 publish_to: none
 
 environment:
@@ -20,6 +20,7 @@ dependencies:
   convert: ^3.1.1
   device_info_plus: ^9.1.1
   dio: ^5.8.0+1
+  dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
@@ -186,7 +187,7 @@ flutter_launcher_icons:
 
   ios: true
   remove_alpha_ios: true
-  image_path_ios_dark_transparent: "assets/generation-icons/icon-dark.png"
+  image_path_ios_dark_transparent: "assets/generation-icons/icon-ios-foreground.png"
   image_path_ios_tinted_grayscale: "assets/generation-icons/icon-tinted.png"
 
   macos:

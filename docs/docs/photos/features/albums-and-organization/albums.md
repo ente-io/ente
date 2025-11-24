@@ -111,6 +111,31 @@ Keep your favorite albums at the top by pinning them for quick access.
 - Tap the overflow menu (three dots) in the top right corner
 - Tap **Pin album** or **Unpin album**
 
+## Empty albums
+
+Empty albums are albums that contain no photos or videos. They can occur in two ways:
+
+**During import:**
+
+Albums are automatically created whenever Ente detects any file that belongs to an album, even if that file is unsupported (for example, a text file). This can sometimes result in empty albums if there are no valid photo or video files inside.
+
+**Manual creation:**
+
+When you create an album but don't add any photos to it, the album remains empty.
+
+### Delete empty albums
+
+If you have multiple empty albums cluttering your album list, you can bulk delete them all at once.
+
+**On mobile:**
+
+1. Open the **Albums** tab
+2. If you have more than 2 empty albums, you'll see a "Delete empty albums" button
+3. Tap the button
+4. Confirm the deletion
+
+This will delete all empty albums from your library. The feature only appears after your initial sync is complete and when you have more than 2 empty albums.
+
 ## Uploading nested folders from desktop {#preserving-folder-structure}
 
 When you upload photos and videos from your computer using the desktop app - whether by dragging and dropping a folder or zip file, or by setting up [watch folders](/photos/features/backup-and-sync/watch-folders) - you can choose how to handle nested folder structures.

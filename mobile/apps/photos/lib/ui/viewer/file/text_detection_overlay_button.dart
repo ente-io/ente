@@ -266,7 +266,10 @@ class _TextDetectionOverlayButtonState
       }
       await routeToPage(
         context,
-        TextDetectionPage(imagePath: path),
+        TextDetectionPage(
+          file: widget.file,
+          imagePath: path,
+        ),
       );
     } catch (error, stackTrace) {
       _logger.severe("Failed to start text detection", error, stackTrace);

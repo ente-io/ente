@@ -1,16 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:computer/computer.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart' as paint;
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart' as hw;
-import 'package:home_widget/home_widget.dart';
+import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
@@ -36,28 +38,11 @@ enum WidgetStatus {
   syncedAll,
 }
 
-// Top-level function for isolate to read and validate image file
-// Uses the same pattern as exif_util.dart for Computer.shared usage
-Future<Uint8List> _readAndValidateImageInIsolate(
-  Map<String, dynamic> params,
-) async {
-  final filePath = params['filePath'] as String;
-  final file = File(filePath);
-  final Uint8List imageBytes = await file.readAsBytes();
-
-  // Decode to validate the image can be decoded
-  // Same approach as utils/image_ml_util.dart which uses this in isolates
-  final ui.Image decodedImage = await paint.decodeImageFromList(imageBytes);
-  decodedImage.dispose();
-
-  // Return bytes for use with MemoryImage
-  return imageBytes;
-}
-
 /// Service to manage home screen widgets across the application
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {
   // Constants
+  static const int _widgetV2Size = 1024;
   static const double THUMBNAIL_SIZE = 512.0;
   static const double THUMBNAIL_SIZE_V2 = 1024.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
@@ -82,6 +67,7 @@ class HomeWidgetService {
   HomeWidgetService._privateConstructor();
 
   final Logger _logger = Logger((HomeWidgetService).toString());
+  final Computer _computer = Computer.shared();
   final computeLock = Lock();
   bool _isAppGroupSet = false;
 
@@ -136,22 +122,21 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    // Use V2 (1024x1024 rendering) only in debug mode for now
+    // Use V2 (1024x1024 rendering) with isolate-based image processing
     final bool useV2 = flagService.useWidgetV2;
 
     if (useV2) {
-      // Try V2 first, fallback to V1 if it fails (e.g., for videos, live photos)
-      final result = await _captureFileV2(file, key, title, mainKey);
-      if (result) {
-        return const Size(THUMBNAIL_SIZE_V2, THUMBNAIL_SIZE_V2);
+      final Size? v2Size = await _captureFileV2(file, key, title, mainKey);
+      if (v2Size != null) {
+        return v2Size;
       }
       _logger.info(
-        "V2 capture failed for ${file.displayName}, falling back to V1",
+        "V2 capture failed for ${file.displayName}, falling back to legacy",
       );
     }
 
-    // Use V1 (either useV2 is false, or V2 failed)
-    final result = await _captureFile(file, key, title, mainKey);
+    // Use legacy capture (either useV2 is false, or V2 failed)
+    final result = await _captureFileLegacy(file, key, title, mainKey);
     if (!result) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
@@ -176,11 +161,220 @@ class HomeWidgetService {
     return relevantWidgets.length;
   }
 
-  Future<List<HomeWidgetInfo>> getInstalledWidgets() async {
+  Future<List<hw.HomeWidgetInfo>> getInstalledWidgets() async {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
-  Future<bool> _captureFile(
+  Future<Size?> _captureFileV2(
+    EnteFile file,
+    String key,
+    String title,
+    String? mainKey,
+  ) async {
+    if (file.fileType == FileType.video) {
+      return null;
+    }
+
+    final _WidgetSourceBytes? source = await _resolveWidgetSourceBytes(file);
+    if (source == null) {
+      return null;
+    }
+
+    try {
+      String decodeStrategy = 'package:image';
+      _WidgetImageProcessResult? processed =
+          await _computeWidgetImageResult(source.bytes);
+
+      if (processed == null) {
+        final Uint8List? pngBytes = await _decodeWithUiFallback(source.bytes);
+        if (pngBytes != null) {
+          decodeStrategy = 'ui-codec';
+          processed = await _computeWidgetImageResult(pngBytes);
+        }
+      }
+
+      if (processed == null) {
+        _logger.warning(
+          "[widget_capture_v2] Failed to decode image for ${file.displayName} using ${source.sourceLabel}",
+        );
+        return null;
+      }
+
+      final String widgetDirectory = await _getWidgetStorageDirectory();
+      final String imagePath = '$widgetDirectory/$WIDGET_DIRECTORY/$key.png';
+      final File outputFile = File(imagePath);
+      if (!await outputFile.exists()) {
+        await outputFile.create(recursive: true);
+      }
+      await outputFile.writeAsBytes(processed.pngBytes);
+      await setData(key, imagePath);
+
+      final subText = await SmartMemoriesService.getDateFormattedLocale(
+        creationTime: file.creationTime!,
+      );
+      // TODO: Remove dimension display after confirmation that widget v2 works correctly
+      final bool showDimensions = kDebugMode || flagService.internalUser;
+      final String resolvedSubText = showDimensions
+          ? '$subText · ${processed.finalWidth}x${processed.finalHeight} · ${source.sourceLabel}'
+          : subText;
+      final Map<String, dynamic> metadata = {
+        "title": title,
+        "subText": resolvedSubText,
+        "generatedId": file.generatedID!,
+        if (mainKey != null) "mainKey": mainKey,
+      };
+      await _saveWidgetMetadata(key, metadata);
+
+      _logger.info(
+        "[widget_capture_v2] key=$key source=${source.sourceLabel} original=${processed.originalWidth}x${processed.originalHeight} "
+        "final=${processed.finalWidth}x${processed.finalHeight} cropped=${processed.croppedToSquare} downscaled=${processed.downscaled} strategy=$decodeStrategy",
+      );
+
+      return Size(
+        processed.finalWidth.toDouble(),
+        processed.finalHeight.toDouble(),
+      );
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "[widget_capture_v2] Failed to capture widget for ${file.displayName}",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<Uint8List?> _decodeWithUiFallback(Uint8List bytes) async {
+    try {
+      final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      final ui.Image image = frame.image;
+      final ByteData? data =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      codec.dispose();
+      return data?.buffer.asUint8List();
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "[widget_capture_v2] ui codec decode failed",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<_WidgetImageProcessResult?> _computeWidgetImageResult(
+    Uint8List bytes,
+  ) async {
+    try {
+      final Map<String, dynamic>? result = await _computer.compute(
+        _processWidgetImage,
+        param: {
+          'bytes': bytes,
+          'targetSize': _widgetV2Size,
+        },
+      );
+      if (result == null) {
+        return null;
+      }
+      return _WidgetImageProcessResult.fromMap(result);
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "[widget_capture_v2] isolate processing failed",
+        error,
+        stackTrace,
+      );
+      return null;
+    }
+  }
+
+  Future<_WidgetSourceBytes?> _resolveWidgetSourceBytes(EnteFile file) async {
+    if (!file.isRemoteFile) {
+      try {
+        final AssetEntity? asset = await file.getAsset;
+        if (asset != null) {
+          final Uint8List? assetBytes = await asset.thumbnailDataWithSize(
+            const ThumbnailSize.square(_widgetV2Size),
+            quality: 90,
+          );
+          if (assetBytes != null && assetBytes.isNotEmpty) {
+            return _WidgetSourceBytes(
+              bytes: assetBytes,
+              sourceLabel: 'asset.thumbnail',
+            );
+          }
+
+          final File? originFile = await asset.originFile;
+          if (originFile != null && await originFile.exists()) {
+            final Uint8List originBytes = await originFile.readAsBytes();
+            if (originBytes.isNotEmpty) {
+              return _WidgetSourceBytes(
+                bytes: originBytes,
+                sourceLabel: 'asset.origin',
+              );
+            }
+          }
+        }
+      } catch (error, stackTrace) {
+        _logger.fine(
+          "[widget_capture_v2] Failed to resolve local asset for ${file.displayName}",
+          error,
+          stackTrace,
+        );
+      }
+    }
+
+    if (file.uploadedFileID != null &&
+        (file.isRemoteFile ||
+            file.fileType == FileType.image ||
+            file.fileType == FileType.livePhoto)) {
+      // Check file size before downloading (skip very large files)
+      const int maxFileSizeForWidget = 50 * 1024 * 1024; // 50MB
+      if (file.fileSize != null && file.fileSize! > maxFileSizeForWidget) {
+        _logger.info(
+          "[widget_capture_v2] Skipping large file (${file.fileSize} bytes) for ${file.displayName}",
+        );
+        // Fall through to thumbnail fallback
+      } else {
+        // Use getFileFromServer to maintain caching behavior
+        // This caches downloaded files so subsequent widget syncs can reuse them
+        try {
+          final File? cachedFile = await getFileFromServer(file);
+          if (cachedFile != null && await cachedFile.exists()) {
+            final Uint8List fileBytes = await cachedFile.readAsBytes();
+            if (fileBytes.isNotEmpty) {
+              final String sourceLabel = file.fileType == FileType.livePhoto
+                  ? 'cached-live-image'
+                  : 'cached-full';
+              return _WidgetSourceBytes(
+                bytes: fileBytes,
+                sourceLabel: sourceLabel,
+              );
+            }
+          }
+        } catch (error, stackTrace) {
+          _logger.warning(
+            "[widget_capture_v2] Download failed for ${file.displayName}",
+            error,
+            stackTrace,
+          );
+        }
+      }
+    }
+
+    final Uint8List? fallbackThumbnail = await getThumbnail(file);
+    if (fallbackThumbnail != null && fallbackThumbnail.isNotEmpty) {
+      return _WidgetSourceBytes(
+        bytes: fallbackThumbnail,
+        sourceLabel: 'legacy-thumbnail',
+      );
+    }
+
+    return null;
+  }
+
+  Future<bool> _captureFileLegacy(
     EnteFile file,
     String key,
     String title,
@@ -228,107 +422,6 @@ class HomeWidgetService {
       return true;
     } catch (error, stackTrace) {
       _logger.severe("Failed to save the thumbnail", error, stackTrace);
-      return false;
-    }
-  }
-
-  Future<bool> _captureFileV2(
-    EnteFile file,
-    String key,
-    String title,
-    String? mainKey,
-  ) async {
-    try {
-      late final ImageProvider imageProvider;
-      const double size = THUMBNAIL_SIZE_V2;
-
-      // For local files (images, videos, live photos), use PhotoManager's high-res thumbnails
-      if (!file.isRemoteFile) {
-        // Request 1024px thumbnail from PhotoManager (efficient for all file types)
-        final Uint8List? thumbnail = await getThumbnailFromLocal(
-          file,
-          size: THUMBNAIL_SIZE_V2.toInt(),
-        );
-
-        if (thumbnail == null) {
-          _logger.warning(
-            "Failed to get high-res thumbnail for V2 widget ${file.displayName}",
-          );
-          return false;
-        }
-
-        // PhotoManager returns thumbnails at requested size
-        imageProvider = MemoryImage(thumbnail);
-      }
-      // For remote images, download full file for best quality
-      else if (file.fileType == FileType.image) {
-        final File? imageFile = await getFileFromServer(file);
-
-        if (imageFile == null) {
-          _logger
-              .warning("Failed to get file for V2 widget ${file.displayName}");
-          return false;
-        }
-
-        // Read and validate in isolate to avoid blocking main thread
-        final Uint8List imageBytes = await Computer.shared().compute(
-          _readAndValidateImageInIsolate,
-          param: {'filePath': imageFile.path},
-          taskName: 'readAndValidateImage',
-        );
-
-        imageProvider = MemoryImage(imageBytes);
-      }
-      // Remote videos/live photos fall back to V1 (avoid large downloads)
-      else {
-        _logger.info(
-          "Skipping V2 for remote ${file.fileType} file: ${file.displayName}",
-        );
-        return false;
-      }
-
-      // Create widget with image
-      final widget = ClipRRect(
-        borderRadius: BorderRadius.circular(32),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      );
-
-      // Render widget using home_widget package
-      await hw.HomeWidget.renderFlutterWidget(
-        widget,
-        logicalSize: const Size(size, size),
-        key: key,
-      );
-
-      // Format date for display
-      final subText = await SmartMemoriesService.getDateFormattedLocale(
-        creationTime: file.creationTime!,
-      );
-
-      // Create metadata
-      final Map<String, dynamic> metadata = {
-        "title": title,
-        "subText": subText,
-        "generatedId": file.generatedID!,
-        if (mainKey != null) "mainKey": mainKey,
-      };
-
-      // Save metadata in platform-specific format
-      await _saveWidgetMetadata(key, metadata);
-
-      return true;
-    } catch (error, stackTrace) {
-      _logger.severe("Failed to save V2 widget", error, stackTrace);
       return false;
     }
   }
@@ -447,4 +540,114 @@ class HomeWidgetService {
         break;
     }
   }
+}
+
+class _WidgetImageProcessResult {
+  const _WidgetImageProcessResult({
+    required this.pngBytes,
+    required this.originalWidth,
+    required this.originalHeight,
+    required this.finalWidth,
+    required this.finalHeight,
+    required this.croppedToSquare,
+    required this.downscaled,
+  });
+
+  factory _WidgetImageProcessResult.fromMap(Map<String, dynamic> map) {
+    return _WidgetImageProcessResult(
+      pngBytes: map['pngBytes'] as Uint8List,
+      originalWidth: map['originalWidth'] as int,
+      originalHeight: map['originalHeight'] as int,
+      finalWidth: map['finalWidth'] as int,
+      finalHeight: map['finalHeight'] as int,
+      croppedToSquare: map['croppedToSquare'] as bool,
+      downscaled: map['downscaled'] as bool,
+    );
+  }
+
+  final Uint8List pngBytes;
+  final int originalWidth;
+  final int originalHeight;
+  final int finalWidth;
+  final int finalHeight;
+  final bool croppedToSquare;
+  final bool downscaled;
+}
+
+Future<Map<String, dynamic>?> _processWidgetImage(
+  Map<String, dynamic> param,
+) async {
+  try {
+    final Uint8List bytes = param['bytes'] as Uint8List;
+    final int targetSize = param['targetSize'] as int;
+
+    final img.Image? decoded = img.decodeImage(bytes);
+    if (decoded == null) {
+      return null;
+    }
+
+    // Apply EXIF orientation before cropping to prevent portrait photos from being rotated incorrectly
+    final img.Image oriented = img.bakeOrientation(decoded);
+
+    final int originalWidth = oriented.width;
+    final int originalHeight = oriented.height;
+    final int minSide = math.min(originalWidth, originalHeight);
+    if (minSide <= 0) {
+      return null;
+    }
+
+    img.Image working = oriented;
+    bool croppedToSquare = false;
+    if (originalWidth != originalHeight) {
+      final int cropSize = minSide;
+      final int left = ((originalWidth - cropSize) / 2).round();
+      final int top = ((originalHeight - cropSize) / 2).round();
+      working = img.copyCrop(
+        oriented,
+        x: math.max(0, left),
+        y: math.max(0, top),
+        width: cropSize,
+        height: cropSize,
+      );
+      croppedToSquare = true;
+    }
+
+    img.Image finalImage = working;
+    bool downscaled = false;
+    if (working.width > targetSize) {
+      finalImage = img.copyResize(
+        working,
+        width: targetSize,
+        height: targetSize,
+        interpolation: img.Interpolation.linear,
+      );
+      downscaled = true;
+    }
+
+    final Uint8List pngBytes =
+        Uint8List.fromList(img.encodePng(finalImage, level: 0));
+
+    return <String, dynamic>{
+      'pngBytes': pngBytes,
+      'originalWidth': originalWidth,
+      'originalHeight': originalHeight,
+      'finalWidth': finalImage.width,
+      'finalHeight': finalImage.height,
+      'croppedToSquare': croppedToSquare,
+      'downscaled': downscaled,
+    };
+  } catch (e) {
+    // Catch errors from copyCrop, copyResize, encodePng (malformed images, OOM, etc.)
+    return null;
+  }
+}
+
+class _WidgetSourceBytes {
+  const _WidgetSourceBytes({
+    required this.bytes,
+    required this.sourceLabel,
+  });
+
+  final Uint8List bytes;
+  final String sourceLabel;
 }

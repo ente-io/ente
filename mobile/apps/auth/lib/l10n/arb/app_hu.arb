@@ -11,6 +11,7 @@
   "setupFirstAccount": "Állítsd be az első fiókodat",
   "importScanQrCode": "QR kód beolvasása",
   "qrCode": "QR kód",
+  "qr": "QR",
   "importEnterSetupKey": "Adj meg egy beállítási kulcsot",
   "importAccountPageTitle": "Add meg a fiók adatait",
   "secretCanNotBeEmpty": "A titkos kulcs nem lehet üres",
@@ -139,6 +140,7 @@
   "existingUser": "Létező felhasználó",
   "newUser": "Új Ente felhasználó",
   "delete": "Törlés",
+  "addTag": "Címke hozzáadása",
   "enterYourPasswordHint": "Add meg a jelszavad",
   "forgotPassword": "Elfelejtett jelszó",
   "oops": "Hoppá",
@@ -301,6 +303,7 @@
   "checking": "Ellenőrzés...",
   "youAreOnTheLatestVersion": "A legújabb verziót használod",
   "warning": "Figyelmeztetés",
+  "note": "Jegyzet",
   "exportWarningDesc": "Az exportált fájl bizalmas információkat tartalmaz. Kérjük, tárolod ezt biztonságosan.",
   "iUnderStand": "Megértettem",
   "@iUnderStand": {
@@ -369,7 +372,7 @@
   "useOffline": "Használd biztonsági mentés nélkül",
   "signInToBackup": "Jelentkezz be a kódok biztonsági mentéséhez",
   "singIn": "Bejelentkezés",
-  "sigInBackupReminder": "Kérjük, exportáld a kódjaid, hogy biztosan rendelkezz biztonsági másolattal, amelyből visszaállíthatod.",
+  "sigInBackupReminder": "Az Ente automatikusan biztonsági mentést készít a kódokról bejelentkezés után.\n\nTovábbra is javasoljuk, hogy exportáld a kódokat további biztonsági mentésként.",
   "offlineModeWarning": "Úgy döntöttél, hogy biztonsági mentés nélkül folytatod. Kérjük, készíts manuális biztonsági másolatot a kódok biztonsága érdekében.",
   "showLargeIcons": "Nagy ikonok megjelenítése",
   "compactMode": "Kompakt mód",
@@ -546,5 +549,42 @@
   "couldNotDetermineLocation": "Nem sikerült meghatározni a helyet...",
   "saveBackup": "Biztonsági mentés készítése",
   "changeLocation": "Hely módosítása",
-  "changeCurrentLocation": "Jelenlegi hely módosítása"
+  "changeCurrentLocation": "Jelenlegi hely módosítása",
+  "done": "Kész",
+  "addNew": "Új hozzáadása",
+  "selected": "kiválasztva",
+  "moveMultipleToTrashMessage": "Biztosan a kukába szeretnéd helyezni a(z) {count} elemet?",
+  "nSelected": "{count, plural, =1{1 kiválasztva} other{{count} kiválasztva}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1{1 elem rögzítve} other{{count} elem rögzítve}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{1 elem feloldva} other{{count} elem feloldva}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

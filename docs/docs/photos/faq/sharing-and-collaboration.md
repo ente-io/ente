@@ -363,15 +363,16 @@ You can also view all sharing activity in the Sharing tab/section.
 
 ### Who can create collaborative albums or public links? {#who-can-share}
 
-**Collaborative albums and public links are only available to paid customers.** This limitation helps safeguard against potential platform abuse.
+Direct (peer-to-peer) album sharing is now available on every plan, including the free tier. Public links are only available to paid customers. This limitation helps safeguard against potential platform abuse.
 
-However, receiving shared albums is available to everyone:
+Free users can:
 
-- Free users can receive and view albums shared with them
-- Free users can view public links shared with them
-- Anyone (with or without Ente account) can add photos to collect links
+- Share albums directly with other Ente users
+- Receive and view albums shared with them
+- View public links shared with them
+- Add photos to collect links that allow uploads
 
-To create shares or collaborative albums, you'll need a paid subscription.
+To create public links, you'll need a paid subscription.
 
 ### Can I change permissions for collaborators after sharing? {#change-permissions}
 

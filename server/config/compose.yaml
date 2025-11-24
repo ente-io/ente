@@ -70,6 +70,7 @@ services:
       - 3003:3003
       - 3004:3004
       - 3005:3005
+      - 3006:3006
     environment:
       - NODE_ENV=development
     env_file:

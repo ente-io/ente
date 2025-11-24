@@ -40,16 +40,13 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    final backgroundColor =
-        MediaQuery.of(context).platformBrightness == Brightness.light
-            ? enteColorScheme.backgroundElevated2
-            : enteColorScheme.backgroundElevated;
+
     return AnimatedContainer(
       curve: Curves.ease,
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: expandableController.value ? backgroundColor : null,
-        borderRadius: BorderRadius.circular(4),
+        color: enteColorScheme.backdropBase,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: ExpandableNotifier(
         controller: expandableController,
@@ -62,8 +59,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
               ),
               isExpandable: true,
               leadingIcon: widget.leadingIcon,
-              trailingIcon: Icons.expand_more,
-              menuItemColor: enteColorScheme.fillFaint,
+              menuItemColor: enteColorScheme.backdropBase,
               expandableController: expandableController,
             ),
             collapsed: const SizedBox.shrink(),
