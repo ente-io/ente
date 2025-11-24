@@ -2233,13 +2233,13 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerPaidPlanTitle.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon!'**
+  /// **'Unlock Locker with a paid plan.'**
   String get unlockLockerPaidPlanTitle;
 
   /// No description provided for @unlockLockerPaidPlanBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is currently available only to paid customers of Ente Photos.'**
+  /// **'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker'**
   String get unlockLockerPaidPlanBody;
 
   /// No description provided for @checkoutEntePhotos.
@@ -2496,8 +2496,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

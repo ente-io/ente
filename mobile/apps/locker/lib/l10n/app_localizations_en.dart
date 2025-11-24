@@ -1155,7 +1155,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String uploadedFilesProgressWithError(
-      int completed, int total, String error) {
+    int completed,
+    int total,
+    String error,
+  ) {
     return 'Uploaded $completed/$total items... ($error)';
   }
 
@@ -1273,11 +1276,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Coming soon!';
+  String get unlockLockerPaidPlanTitle => 'Unlock Locker with a paid plan.';
 
   @override
   String get unlockLockerPaidPlanBody =>
-      'Locker is currently available only to paid customers of Ente Photos.';
+      'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';
