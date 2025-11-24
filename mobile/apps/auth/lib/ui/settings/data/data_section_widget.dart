@@ -105,6 +105,7 @@ class DataSectionWidget extends StatelessWidget {
             await _handleLocalBackupClick(context);
           },
         ),
+        sectionOptionSpacing,
       ],
     ]);
     return Column(
