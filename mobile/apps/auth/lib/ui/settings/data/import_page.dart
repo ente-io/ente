@@ -1,12 +1,12 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
-import 'package:ente_auth/ui/components/constrained_custom_scroll_view.dart';
 import 'package:ente_auth/ui/components/divider_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_widget.dart';
 import 'package:ente_auth/ui/settings/data/import/import_service.dart';
+import 'package:ente_ui/components/constrained_custom_scroll_view.dart';
 import 'package:flutter/material.dart';
 
 enum ImportType {
@@ -73,50 +73,47 @@ class ImportCodePage extends StatelessWidget {
               flexibleSpaceCaption: "Import source",
               actionIcons: const [],
             ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (delegateBuildContext, index) {
-                      final type = importOptions[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          children: [
-                            if (index == 0)
-                              const SizedBox(
-                                height: 24,
-                              ),
-                            MenuItemWidget(
-                              captionedTextWidget: CaptionedTextWidget(
-                                title: getTitle(context, type),
-                              ),
-                              alignCaptionedTextToLeft: true,
-                              menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              pressedColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              trailingIcon: Icons.chevron_right_outlined,
-                              isBottomBorderRadiusRemoved:
-                                  index != importOptions.length - 1,
-                              isTopBorderRadiusRemoved: index != 0,
-                              onTap: () async {
-                                await ImportService()
-                                    .initiateImport(context, type);
-                                // routeToPage(context, ImportCodePage());
-                                // _showImportInstructionDialog(context);
-                              },
-                            ),
-                            if (index != importOptions.length - 1)
-                              DividerWidget(
-                                dividerType: DividerType.menu,
-                                bgColor: getEnteColorScheme(context).fillFaint,
-                              ),
-                          ],
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (delegateBuildContext, index) {
+                  final type = importOptions[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      children: [
+                        if (index == 0)
+                          const SizedBox(
+                            height: 24,
+                          ),
+                        MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: getTitle(context, type),
+                          ),
+                          alignCaptionedTextToLeft: true,
+                          menuItemColor: getEnteColorScheme(context).fillFaint,
+                          pressedColor: getEnteColorScheme(context).fillFaint,
+                          trailingIcon: Icons.chevron_right_outlined,
+                          isBottomBorderRadiusRemoved:
+                              index != importOptions.length - 1,
+                          isTopBorderRadiusRemoved: index != 0,
+                          onTap: () async {
+                            await ImportService().initiateImport(context, type);
+                            // routeToPage(context, ImportCodePage());
+                            // _showImportInstructionDialog(context);
+                          },
                         ),
-                      );
-                    },
-                    childCount: importOptions.length,
-                  ),
-                ),
+                        if (index != importOptions.length - 1)
+                          DividerWidget(
+                            dividerType: DividerType.menu,
+                            bgColor: getEnteColorScheme(context).fillFaint,
+                          ),
+                      ],
+                    ),
+                  );
+                },
+                childCount: importOptions.length,
+              ),
+            ),
           ],
         ),
       ),

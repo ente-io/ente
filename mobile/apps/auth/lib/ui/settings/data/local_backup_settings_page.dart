@@ -6,6 +6,7 @@ import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
 import 'package:ente_auth/ui/components/title_bar_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/data/local_backup/local_backup_experience.dart';
+import 'package:ente_ui/components/constrained_custom_scroll_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -186,39 +187,32 @@ class _LocalBackupVariantShell extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: Scaffold(
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 700),
-            child: Stack(
-              children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: controller.hasLoaded
-                      ? CustomScrollView(
-                          primary: false,
-                          slivers: <Widget>[
-                            TitleBarWidget(
-                              flexibleSpaceTitle: TitleBarTitleWidget(
-                                title: title,
-                              ),
-                              actionIcons: const [],
-                            ),
-                            SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  return SafeArea(bottom: false, child: body);
-                                },
-                                childCount: 1,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const _LocalBackupLoading(),
-                ),
-              ],
+        body: Stack(
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: controller.hasLoaded
+                  ? ConstrainedCustomScrollView(
+                      slivers: <Widget>[
+                        TitleBarWidget(
+                          flexibleSpaceTitle: TitleBarTitleWidget(
+                            title: title,
+                          ),
+                          actionIcons: const [],
+                        ),
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              return SafeArea(bottom: false, child: body);
+                            },
+                            childCount: 1,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const _LocalBackupLoading(),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
+import 'package:ente_ui/components/centered_constrained_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
@@ -39,12 +40,8 @@ class _DuplicateCodePageState extends State<DuplicateCodePage> {
         title: Text(context.l10n.deduplicateCodes),
         elevation: 0,
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 700),
-          child: _getBody(),
-        ),
+      body: CenteredConstrainedWidget(
+        child: _getBody(),
       ),
     );
   }
