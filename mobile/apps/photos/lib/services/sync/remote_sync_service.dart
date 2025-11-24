@@ -367,13 +367,12 @@ class RemoteSyncService {
 
     // Fetch all newer local IDs once if only-new backup is enabled
     Set<String>? newerLocalIDs;
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
-      if (onlyNewSince != null) {
-        // Single DB query for all newer files
-        newerLocalIDs = await _db.getAllLocalIDsNewerThan(onlyNewSince);
-        _logger.info("Found ${newerLocalIDs.length} newer files");
-      }
+    if (flagService.enableOnlyBackupFuturePhotos &&
+        localSettings.isOnlyNewBackupEnabled) {
+      final int onlyNewSince = localSettings.onlyNewSinceEpoch!;
+      // Single DB query for all newer files
+      newerLocalIDs = await _db.getAllLocalIDsNewerThan(onlyNewSince);
+      _logger.info("Found ${newerLocalIDs.length} newer files");
     }
 
     bool moreFilesMarkedForBackup = false;
@@ -394,14 +393,7 @@ class RemoteSyncService {
       }
 
       // Filter by only-new using pre-fetched set
-      if (flagService.enableOnlyBackupFuturePhotos) {
-        if (newerLocalIDs == null) {
-          // Only-new is enabled but timestamp not set yet, skip collection
-          _logger.info(
-            "Skipping collection ${deviceCollection.name} as only-new is enabled but timestamp not set",
-          );
-          continue;
-        }
+      if (newerLocalIDs != null) {
         localIDsToSync.retainAll(newerLocalIDs);
       }
 
