@@ -1,3 +1,4 @@
+- Prateek: Automatic local backup feature - creates one backup per day when app is opened, retains up to 5 backups, UI improvements (fixed spinner during toggle, updated layout and spacing, renamed "Change folder" to "Set backup folder", restricted max width for settings pages, fixed backup type when changing folder)
 - Prateek: Add new onboarding, update button radius, update tags style
 - ExtendedGuru4883: Quick Settings tile for android
 - Prateek: Add fdroid icon
@@ -17,5 +18,5 @@
 - Prateek: Fix Parallels icon hex color format in custom-icons.json
 
 **Icons**
-- Added: uscis.gov, mintmobile.com, Borrowell, Ecobee, IDrive, Questrade, Via Rail
+- Added: uscis.gov, mintmobile.com, Borrowell, Ecobee, IDrive, Questrade, Via Rail, Chexy
 - Updated: Binghamton University, Peking University (optimized SVG file size)
