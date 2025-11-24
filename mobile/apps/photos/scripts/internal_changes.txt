@@ -1,3 +1,4 @@
+- ashil: Add option to enable/disable swipe-to-select in Settings > General > Gallery, defaults to disabled for Samsung S-series devices (2018+) due to gesture conflicts
 - Laurens: Minor tweaks to Ente Rewind
 - Laurens: (i) People Memory Lane feature
 - Laurens: Fix OCR for HEIC files on Android
