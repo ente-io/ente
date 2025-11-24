@@ -364,11 +364,22 @@ class RemoteSyncService {
     deviceCollections.sort((a, b) => a.count.compareTo(b.count));
     final Map<String, Set<String>> pathIdToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
+
+    // Fetch all newer local IDs once if only-new backup is enabled
+    Set<String>? newerLocalIDs;
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
+      if (onlyNewSince != null) {
+        // Single DB query for all newer files
+        newerLocalIDs = await _db.getAllLocalIDsNewerThan(onlyNewSince);
+        _logger.info("Found ${newerLocalIDs.length} newer files");
+      }
+    }
+
     bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
-      Set<String> localIDsToSync = {
-        ...(pathIdToLocalIDs[deviceCollection.id] ?? {}),
-      };
+      final Set<String> localIDsToSync =
+          pathIdToLocalIDs[deviceCollection.id]?.toSet() ?? {};
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -382,8 +393,9 @@ class RemoteSyncService {
         }
       }
 
-      if (flagService.enableOnlyBackupFuturePhotos) {
-        localIDsToSync = await _filterLocalIDsBasedOnOnlyNew(localIDsToSync);
+      // Filter by only-new using pre-fetched set
+      if (newerLocalIDs != null) {
+        localIDsToSync.retainAll(newerLocalIDs);
       }
 
       if (localIDsToSync.isEmpty) {
@@ -619,18 +631,6 @@ class RemoteSyncService {
       }
       return creationTime >= onlyNewSince;
     }).toList();
-  }
-
-  Future<Set<String>> _filterLocalIDsBasedOnOnlyNew(
-    Set<String> localIDs,
-  ) async {
-    final int? onlyNewSince = localSettings.onlyNewSinceEpoch;
-    if (!flagService.enableOnlyBackupFuturePhotos ||
-        onlyNewSince == null ||
-        localIDs.isEmpty) {
-      return localIDs;
-    }
-    return _db.getLocalIDsNewerThan(localIDs, onlyNewSince);
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
