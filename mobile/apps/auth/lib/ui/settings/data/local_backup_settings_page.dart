@@ -93,7 +93,7 @@ class LocalBackupSettingsPage extends StatelessWidget {
                               alignCaptionedTextToLeft: true,
                               singleBorderRadius: 12,
                               menuItemColor: colorScheme.fillFaint,
-                              trailingWidget: controller.isBusy
+                              trailingWidget: controller.isManualBackupRunning
                                   ? const SizedBox(
                                       width: 20,
                                       height: 20,
@@ -106,7 +106,7 @@ class LocalBackupSettingsPage extends StatelessWidget {
                                       color: Colors.grey,
                                     ),
                               onTap: () async {
-                                if (controller.isBusy) return;
+                                if (controller.isManualBackupRunning) return;
                                 await controller.runManualBackup();
                               },
                             ),
