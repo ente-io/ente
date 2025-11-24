@@ -243,10 +243,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
-    // MediaExtension plugin handles the deeplink for android
-    // [todo 4/Feb/2025]We need to validate if calling this method doesn't break
-    // android deep linking
-    Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
+    // Initialize deep link subscription for public albums on both iOS and Android
+    _initDeepLinkSubscriptionForPublicAlbums();
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
