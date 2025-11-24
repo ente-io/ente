@@ -141,6 +141,7 @@ We use a Cloudflare proxy to speed up uploads ([blog post](https://ente.io/blog/
 Open `Settings > Preferences > Advanced` (desktop/web), disable the "Faster uploads" option, and try uploading again.
 
 If uploads still fail after disabling this option, check your network connectivity and firewall settings.
+
 ### How do I retry failed file downloads? {#retry-failed-downloads}
 
 If some files fail to download from your Ente library on web or desktop, you can easily retry them:
