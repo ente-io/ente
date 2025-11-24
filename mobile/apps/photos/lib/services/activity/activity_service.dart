@@ -28,7 +28,7 @@ class ActivityService {
   StreamSubscription<FilesUpdatedEvent>? _filesUpdatedSubscription;
 
   static const _ritualsPrefsKey = "activity_rituals_v1";
-  static const _badgeThresholds = [7, 13, 30];
+  static const _badgeThresholds = [7, 14, 30];
 
   Future<void> init() async {
     _preferences = ServiceLocator.instance.prefs;

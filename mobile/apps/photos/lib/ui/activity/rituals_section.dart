@@ -6,18 +6,22 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/activity/activity_screen.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class RitualsSection extends StatelessWidget {
   const RitualsSection({
     required this.rituals,
     required this.progress,
+    this.showHeader = true,
     super.key,
   });
 
   final List<Ritual> rituals;
   final Map<String, RitualProgress> progress;
+  final bool showHeader;
 
   @override
   Widget build(BuildContext context) {
@@ -26,22 +30,25 @@ class RitualsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "Rituals",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () async {
-                  await _showRitualEditor(context, ritual: null);
-                },
-                icon: const Icon(Icons.add_rounded),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
+          if (showHeader) ...[
+            Row(
+              children: [
+                Text(
+                  "Rituals",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () async {
+                    await _showRitualEditor(context, ritual: null);
+                  },
+                  icon: const Icon(Icons.add_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ] else
+            const SizedBox(height: 4),
           if (rituals.isEmpty)
             Text(
               "Create a ritual to get daily reminders.",
@@ -79,6 +86,12 @@ class _RitualCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListTile(
+        onTap: () {
+          routeToPage(
+            context,
+            ActivityScreen(ritual: ritual),
+          );
+        },
         leading: CircleAvatar(
           backgroundColor: Colors.grey.shade200,
           child: Text(
@@ -167,6 +180,10 @@ class _RitualCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> showRitualEditor(BuildContext context, {Ritual? ritual}) async {
+  await _showRitualEditor(context, ritual: ritual);
 }
 
 Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {

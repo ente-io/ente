@@ -8,7 +8,7 @@ class AchievementsRow extends StatelessWidget {
 
   static const Map<int, String> _badgeAssets = {
     7: "assets/rituals/7_badge.png",
-    13: "assets/rituals/13_badge.png",
+    14: "assets/rituals/14_badge.png",
     30: "assets/rituals/30_badge.png",
   };
 
