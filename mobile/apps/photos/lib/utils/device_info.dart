@@ -67,7 +67,7 @@ Future<bool> isSamsungSSeries() async {
     // Check if device model starts with any of the S-series prefixes
     return sSeriesPrefixes.any((prefix) => model.startsWith(prefix));
   } catch (e) {
-    Logger("device_info").severe("isSamsungSSeries check failed", e);
+    Logger("device_info").warning("isSamsungSSeries check failed", e);
     return false;
   }
 }
