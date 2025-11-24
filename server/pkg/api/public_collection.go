@@ -108,10 +108,8 @@ func (h *PublicCollectionHandler) GetCollection(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	referralCode, _ := h.StorageBonusController.GetOrCreateReferralCode(c, collection.Owner.ID)
 	c.JSON(http.StatusOK, gin.H{
-		"collection":   collection,
-		"referralCode": referralCode,
+		"collection": collection,
 	})
 }
 
