@@ -120,6 +120,8 @@ dependencies:
       url: https://github.com/juliuscanute/qr_code_scanner
       ref: a2d31633d4744f72ada87cfa85d221358ab082af
   qr_flutter: ^4.1.0
+  saf_stream: any
+  saf_util: any
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2
   share_plus: ^11.0.0

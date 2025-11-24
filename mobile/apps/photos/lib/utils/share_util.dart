@@ -1,6 +1,5 @@
 import 'dart:async';
 import "dart:io";
-import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -240,28 +239,6 @@ void shareSelected(
     context,
     selectedFiles.toList(),
     shareButtonKey: shareButtonKey,
-  );
-}
-
-Future<void> shareImageAndUrl(
-  Uint8List imageBytes,
-  String url, {
-  BuildContext? context,
-  GlobalKey? key,
-}) async {
-  final sharePosOrigin = _sharePosOrigin(context, key);
-  await SharePlus.instance.share(
-    ShareParams(
-      files: [
-        XFile.fromData(
-          imageBytes,
-          name: 'placeholder_image.png',
-          mimeType: 'image/png',
-        ),
-      ],
-      text: url,
-      sharePositionOrigin: sharePosOrigin,
-    ),
   );
 }
 

@@ -1204,6 +1204,11 @@
   "noImagesWithLocation": "没有带有位置的图像",
   "unpinAlbum": "取消置顶相册",
   "pinAlbum": "置顶相册",
+  "pin": "置顶",
+  "pinToTop": "置顶到最上",
+  "unpin": "取消置顶",
+  "visibility": "可见范围",
+  "hideFromMemories": "从回忆中隐藏",
   "create": "创建",
   "viewAll": "查看全部",
   "nothingSharedWithYouYet": "尚未与您共享任何内容",
@@ -1389,8 +1394,6 @@
   "appLockDescriptions": "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁。",
   "authToViewPasskey": "请验证身份以查看您的通行密钥",
-  "loopVideoOn": "循环播放视频开启",
-  "loopVideoOff": "循环播放视频关闭",
   "localSyncErrorMessage": "似乎出了点问题，因为本地照片同步耗时比预期的要长。请联系我们的支持团队",
   "showPerson": "显示人员",
   "sort": "排序",
@@ -2008,6 +2011,72 @@
   "artisticPortraits": "艺术人像",
   "streetFood": "街头美食一口咬",
   "riverCruises": "河上游览美景",
+  "facesTimelineBannerTitle": "和 TA 的回忆",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "一起看看 {name} 这些年的样子",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "和 TA 的回忆",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} 已经 {count, plural, other {{count} 岁啦}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, other {# 年前}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "视频共享即将到来",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "上一张",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "下一张",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "播放",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "暂停",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "和 TA 们的回忆正在准备中……",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "童趣时光",
   "coastalCliffs": "海边峭壁"
 }

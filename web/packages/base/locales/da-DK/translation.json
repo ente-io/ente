@@ -587,6 +587,8 @@
     "oldest_first": "",
     "pin_album": "",
     "unpin_album": "",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "",
     "download_complete": "",
     "downloading_album": "",

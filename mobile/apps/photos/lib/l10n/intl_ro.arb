@@ -1321,8 +1321,6 @@
   "appLockDescriptions": "Alegeți între ecranul de blocare implicit al dispozitivului dvs. și un ecran de blocare personalizat cu PIN sau parolă.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pentru a activa blocarea aplicației, vă rugăm să configurați codul de acces al dispozitivului sau blocarea ecranului în setările sistemului.",
   "authToViewPasskey": "Vă rugăm să vă autentificați pentru a vizualiza cheia de acces",
-  "loopVideoOn": "Repetare video activată",
-  "loopVideoOff": "Repetare video dezactivată",
   "localSyncErrorMessage": "Se pare că ceva nu a mers bine, deoarece sincronizarea fotografiilor locale durează mai mult decât ne așteptam. Vă rugăm să contactați echipa noastră de asistență",
   "showPerson": "Afișare persoană",
   "sort": "Sortare",

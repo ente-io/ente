@@ -8,7 +8,6 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -495,17 +494,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   void _handleClearSearch() {
-    // Clear text and unfocus to properly dismiss search
+    // Clear text and unfocus before dismissing search
     searchController.clear();
     _searchFocusNode.unfocus();
-    // Simulate ESC key to deactivate search state
-    // ignore: prefer_const_constructors
-    final escapeEvent = KeyDownEvent(
-      physicalKey: PhysicalKeyboardKey.escape,
-      logicalKey: LogicalKeyboardKey.escape,
-      timeStamp: const Duration(seconds: 0),
-    );
-    handleKeyEvent(escapeEvent);
+
+    dismissSearch();
   }
 
   @override

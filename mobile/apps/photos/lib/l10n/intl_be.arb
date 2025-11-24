@@ -118,6 +118,10 @@
   "enterYourPassword": "Увядзіце свой пароль",
   "welcomeBack": "З вяртаннем!",
   "contactSupport": "Звярніцеся ў службу падтрымкі",
+  "locationPickerTip": "Вы таксама можаце дадаць месцазнаходжанне ў цэнтры фатаграфіі з экрана інфармацыі пра фота",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Няправільны пароль",
   "pleaseTryAgain": "Паспрабуйце яшчэ раз",
   "recreatePasswordTitle": "Стварыць пароль паўторна",
@@ -1200,6 +1204,11 @@
   "noImagesWithLocation": "Відарысы з месцазнаходжаннем адсутнічаюць",
   "unpinAlbum": "Адмацаваць альбом",
   "pinAlbum": "Замацаваць альбом",
+  "pin": "Замацаваць",
+  "pinToTop": "Замацаваць уверсе",
+  "unpin": "Адмацаваць",
+  "visibility": "Бачнасць",
+  "hideFromMemories": "Схаваць ад успамінаў",
   "create": "Стварыць",
   "viewAll": "Паглядзець усе",
   "nothingSharedWithYouYet": "Пакуль з вамі нічога не абагулена",
@@ -1385,8 +1394,6 @@
   "appLockDescriptions": "Выберыце паміж прадвызначаным экранам блакіравання сваёй прылады і карыстальніцкім экранам блакіравання з PIN-кодам або паролем.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Наладзьце код доступу да прылады або блакіроўку экрана ў наладах вашай сістэме, каб уключыць блакіроўку праграмы.",
   "authToViewPasskey": "Прайдзіце аўтэнтыфікацыю, каб паглядзець свой код доступу",
-  "loopVideoOn": "Уключыць зацыкліванне відэа",
-  "loopVideoOff": "Адключыць зацыкліванне відэа",
   "localSyncErrorMessage": "Здаецца, што нешта пайшло не так. Паколькі лакальная сінхранізацыя фатаграфій займае больш часу, чым чакалася. Звяжыцеся з нашай службай падтрымкі",
   "showPerson": "Паказаць асобу",
   "sort": "Сартаваць",
@@ -1849,6 +1856,18 @@
   "addedToStreamRecreationQueue": "Дададзена ў чаргу паўторнай рэгенерацыі плыні",
   "videoPreviewAlreadyExists": "Прадпрагляд відэа ўжо існуе",
   "videoAlreadyInQueue": "Файл відэа ўжо знаходзіцца ў чарзе",
+  "videoExportFailed": "Не атрымалася стварыць відэа. Паўтарыце спробу.",
+  "videoExportSuccess": "Відэа паспяхова створана на {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Дададзена ў чаргу",
   "creatingStream": "Стварэнне плыні",
   "similarImages": "Падобныя відарысы",
@@ -1992,6 +2011,72 @@
   "artisticPortraits": "Майстэрскі партрэт",
   "streetFood": "Вулічна ежа",
   "riverCruises": "Від на раку",
+  "facesTimelineBannerTitle": "Алея ўспамінаў",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Глядзіце фатаграфіі карыстальніка {name} за розныя гады",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Алея ўспамінаў",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} быў {count, plural, one {{count} год} other {{count} год}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {# гадоў таму} other {# гадоў таму}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Абмен відэа хутка будзе",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Папярэдняе",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Наступнае",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Прайграць",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Прыпыніць",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Храналогія твараў рыхтуецца...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Гарэзлівыя дзеці",
   "coastalCliffs": "Скалы ля мора"
 }
