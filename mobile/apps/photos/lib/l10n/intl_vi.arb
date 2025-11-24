@@ -1204,6 +1204,11 @@
   "noImagesWithLocation": "Không có ảnh với vị trí",
   "unpinAlbum": "Bỏ ghim album",
   "pinAlbum": "Ghim album",
+  "pin": "Ghim",
+  "pinToTop": "Ghim lên đầu",
+  "unpin": "Bỏ ghim",
+  "visibility": "Hiển thị",
+  "hideFromMemories": "Ẩn khỏi kỷ niệm",
   "create": "Tạo",
   "viewAll": "Xem tất cả",
   "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
@@ -1389,8 +1394,8 @@
   "appLockDescriptions": "Chọn giữa màn hình khóa mặc định của thiết bị và màn hình khóa tùy chỉnh với PIN hoặc mật khẩu.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Để bật khóa ứng dụng, vui lòng thiết lập mã khóa thiết bị hoặc khóa màn hình trong cài đặt hệ thống của bạn.",
   "authToViewPasskey": "Vui lòng xác thực để xem khóa truy cập",
-  "loopVideoOn": "Phát video lặp lại",
-  "loopVideoOff": "Dừng phát video lặp lại",
+  "loopVideoOn": "Tắt lặp",
+  "loopVideoOff": "Bật lặp",
   "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
   "showPerson": "Hiện người",
   "sort": "Sắp xếp",
@@ -2008,6 +2013,72 @@
   "artisticPortraits": "Chân dung nghệ thuật",
   "streetFood": "Món ngon đường phố",
   "riverCruises": "Cảnh quan trên sông",
+  "facesTimelineBannerTitle": "Hồi Ức",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Xem ảnh của {name} qua từng năm",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Hồi ức",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} vừa tròn {count, plural, other {{count} tuổi}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, other {# năm trước}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Chia sẻ video sẽ sớm ra mắt",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Trước",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Kế tiếp",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Phát",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Dừng",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Đang chuẩn bị dòng thời gian...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Trẻ em vui chơi",
   "coastalCliffs": "Vách đá bên bờ biển"
 }
