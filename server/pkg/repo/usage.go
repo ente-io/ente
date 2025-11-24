@@ -66,6 +66,16 @@ func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64
 		return usage, nil
 	}
 
+	// Initialize map with all requested users
+	userMap := make(map[int64]*UserLockerUsage)
+	for _, userID := range userIDs {
+		userMap[userID] = &UserLockerUsage{
+			UserID:    userID,
+			FileCount: 0,
+			Usage:     0,
+		}
+	}
+
 	// Query 1: Get file counts (non-deleted only)
 	countQuery := `
       SELECT 
@@ -96,8 +106,6 @@ func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64
       LEFT JOIN object_keys ok ON ok.file_id = unique_files.file_id AND ok.is_deleted = false
       GROUP BY unique_files.owner_id;
    `
-	// Execute both queries
-	userMap := make(map[int64]*UserLockerUsage)
 
 	// Get counts
 	rows, err := repo.DB.QueryContext(ctx, countQuery, pq.Array(userIDs))
@@ -111,10 +119,8 @@ func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64
 		if scanErr := rows.Scan(&ownerID, &fileCount); scanErr != nil {
 			return nil, stacktrace.Propagate(scanErr, "")
 		}
-		userMap[ownerID] = &UserLockerUsage{
-			UserID:    ownerID,
-			FileCount: fileCount,
-			Usage:     0,
+		if user, exists := userMap[ownerID]; exists {
+			user.FileCount = fileCount
 		}
 	}
 	rows.Close()
@@ -133,17 +139,12 @@ func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64
 		}
 		if user, exists := userMap[ownerID]; exists {
 			user.Usage = totalSize
-		} else {
-			// User has files but none are non-deleted
-			userMap[ownerID] = &UserLockerUsage{
-				UserID:    ownerID,
-				FileCount: 0,
-				Usage:     totalSize,
-			}
 		}
 	}
-	// Build result
-	for _, user := range userMap {
+
+	// Build result - now includes ALL requested users
+	for _, userID := range userIDs {
+		user := userMap[userID]
 		usage.Users = append(usage.Users, *user)
 		usage.TotalFileCount += user.FileCount
 		usage.TotalUsage += user.Usage
