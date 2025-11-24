@@ -587,6 +587,8 @@
     "oldest_first": "Eskiden yeniye",
     "pin_album": "Albümü sabitle",
     "unpin_album": "Albümün sabitlemesini kaldır",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Bu dosya önizlenemedi",
     "download_complete": "İndirme tamamlandı",
     "downloading_album": "{{name}} İndiriliyor",

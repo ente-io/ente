@@ -587,6 +587,8 @@
     "oldest_first": "Спочатку найстаріші",
     "pin_album": "Закріпити альбом",
     "unpin_album": "Відкріпити альбом",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Цей файл не можливо переглянути",
     "download_complete": "Завантаження завершено",
     "downloading_album": "Завантаження {{name}}",
