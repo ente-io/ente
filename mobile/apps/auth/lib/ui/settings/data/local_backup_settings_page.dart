@@ -203,7 +203,7 @@ class _LocalBackupVariantShell extends StatelessWidget {
                         SliverList(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
-                              return SafeArea(bottom: false, child: body);
+                              return body;
                             },
                             childCount: 1,
                           ),
