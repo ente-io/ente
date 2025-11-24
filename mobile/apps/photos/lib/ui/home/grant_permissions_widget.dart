@@ -134,11 +134,11 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           state == PermissionState.limited) {
         await _setOnlyNewSinceNow();
         await BackupPreferenceService.instance.autoSelectAllFoldersIfEligible();
-        unawaited(LocalSyncService.instance.sync());
         await onPermissionGranted(
           state,
           shouldMarkLimitedFolders: false,
         );
+        unawaited(LocalSyncService.instance.sync());
       } else {
         await _showPermissionDeniedDialog();
       }
