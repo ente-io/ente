@@ -24,7 +24,6 @@ import 'package:locker/services/files/upload/models/upload_url.dart';
 import "package:locker/utils/crypto_helper.dart";
 import 'package:locker/utils/data_util.dart';
 import 'package:logging/logging.dart';
-import "package:path/path.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:uuid/uuid.dart";
 
@@ -101,7 +100,7 @@ class FileUploader {
     Collection collection,
   ) async {
     try {
-      _logger.info('Starting upload of info file: ${infoFile.title}');
+      _logger.info('Starting upload of info file');
 
       // Generate a file key for encryption
       final fileKey = CryptoUtil.generateKey();
@@ -147,10 +146,11 @@ class FileUploader {
         pubMetadataRequest,
       );
 
-      _logger.info('Successfully uploaded info file: ${uploadedFile.title}');
+      _logger.info(
+          'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',);
       return uploadedFile;
     } catch (e, s) {
-      _logger.severe('Failed to upload info file: ${infoFile.title}', e, s);
+      _logger.severe('Failed to upload info file', e, s);
       rethrow;
     }
   }
@@ -239,7 +239,7 @@ class FileUploader {
           await _tryToUpload(file, collection, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
-          final message = "Upload timed out for file ${basename(file.path)}";
+          final message = "Upload timed out for file";
           _logger.warning(message);
           throw TimeoutException(message);
         },
@@ -316,10 +316,7 @@ class FileUploader {
     // or not.
     var uploadHardFailure = false;
     try {
-      _logger.info(
-        'starting ${forcedUpload ? 'forced' : ''} '
-        'upload of ${basename(file.path)}',
-      );
+      _logger.info('starting ${forcedUpload ? 'forced' : ''} upload');
 
       Uint8List? key;
       final encryptedFileExists = File(encryptedFilePath).existsSync();
@@ -332,7 +329,7 @@ class FileUploader {
       // Validate source file before encryption
       final sourceFileSize = await file.length();
       if (sourceFileSize == 0) {
-        throw Exception('Source file is empty (0 bytes): ${file.path}');
+        throw Exception('Source file is empty (0 bytes)');
       }
       _logger.info('Source file size: $sourceFileSize bytes');
 
@@ -454,7 +451,7 @@ class FileUploader {
         metadataDecryptionHeader,
         pubMetadata: pubMetadataRequest,
       );
-      _logger.info("File upload complete for $remoteFile");
+      _logger.info("File upload complete for ID: ${remoteFile.uploadedFileID}");
       uploadCompleted = true;
       return remoteFile;
     } catch (e, s) {
@@ -464,10 +461,10 @@ class FileUploader {
           e is SilentlyCancelUploadsError ||
           e is InvalidFileError ||
           e is FileTooLargeForPlanError)) {
-        _logger.severe("File upload failed for ${basename(file.path)}", e, s);
+        _logger.severe("File upload failed", e, s);
       }
       if (e is InvalidFileError) {
-        _logger.severe("File upload ignored for ${basename(file.path)}", e);
+        _logger.severe("File upload ignored", e);
       }
       if ((e is StorageLimitExceededError ||
           e is FileTooLargeForPlanError ||
@@ -629,9 +626,7 @@ class FileUploader {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts && statusCode == -1) {
         // retry when DioException contains no response/status code
-        _logger.info(
-          "Upload file (${file.displayName}) failed, will retry in 3 seconds",
-        );
+        _logger.info("Upload failed, will retry in 3 seconds");
         await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
@@ -650,7 +645,7 @@ class FileUploader {
           pubMetadata: pubMetadata,
         );
       } else {
-        _logger.severe("Failed to upload file ${file.displayName}", e);
+        _logger.severe("Failed to upload file", e);
       }
       rethrow;
     }
@@ -718,7 +713,6 @@ class FileUploader {
     int attempt = 1,
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
-    final fileName = basename(file.path);
     try {
       await _dio.put(
         uploadURL.url,
@@ -731,7 +725,7 @@ class FileUploader {
         ),
       );
       _logger.info(
-        "Uploaded object $fileName of size: ${formatBytes(fileSize)} at speed: ${(fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toStringAsFixed(2)} KB/s",
+        "Uploaded object of size: ${formatBytes(fileSize)} at speed: ${(fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toStringAsFixed(2)} KB/s",
       );
 
       return uploadURL.objectKey;
@@ -739,7 +733,7 @@ class FileUploader {
       if (e.message?.startsWith("HttpException: Content size") ?? false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Upload failed for $fileName, retrying");
+        _logger.info("Upload failed, retrying");
         final newUploadURL = await _getUploadURL(
           contentLength: fileSize,
           md5: md5,
@@ -752,10 +746,7 @@ class FileUploader {
           attempt: attempt + 1,
         );
       } else {
-        _logger.info(
-          "Failed to upload file ${basename(file.path)} after $attempt attempts",
-          e,
-        );
+        _logger.info("Failed to upload file after $attempt attempts", e);
         rethrow;
       }
     }

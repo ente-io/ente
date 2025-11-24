@@ -261,7 +261,8 @@ class CollectionService {
   }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
-      _logger.info("Added file ${file.title} to collection ${collection.id}");
+      _logger.info(
+          "Added file (ID: ${file.uploadedFileID}) to collection ${collection.id}",);
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -307,7 +308,7 @@ class CollectionService {
         collection,
         newName,
       );
-      _logger.info("Renamed collection ${collection.id} to $newName");
+      _logger.info("Renamed collection ${collection.id}");
       // Let sync update the local state
       await sync();
     } catch (e, s) {
@@ -422,7 +423,7 @@ class CollectionService {
 
       // Add to target collection
       await _db.addFilesToCollection(to, files);
-      
+
       // Let sync update the local state to ensure consistency
       if (runSync) {
         await sync();
@@ -739,7 +740,7 @@ class CollectionService {
 
       final random = Random();
       final randomName = availableNames[random.nextInt(availableNames.length)];
-      _logger.info("Selected random unused collection name: $randomName");
+      _logger.info("Selected random unused collection name");
       return randomName;
     } catch (e) {
       _logger.severe("Failed to get random unused collection name: $e");
@@ -773,7 +774,8 @@ class CollectionService {
         collectionKey,
       );
 
-      _logger.info("Successfully decrypted file key for file ${file.title}");
+      _logger.info(
+          "Successfully decrypted file key for file (ID: ${file.uploadedFileID})",);
       return fileKey;
     } catch (e) {
       _logger.severe("Failed to get file key: $e");

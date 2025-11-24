@@ -317,7 +317,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _logger
               .info('Received shared media files via stream: ${value.length}');
           for (var file in value) {
-            _logger.info('Shared file: ${file.path}, type: ${file.type}');
+            _logger.info('Shared file received, type: ${file.type}');
           }
           if (value.isNotEmpty) {
             _handleSharedFiles(value);
@@ -348,7 +348,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _logger
             .info('Found initial shared media files: ${initialMedia.length}');
         for (var file in initialMedia) {
-          _logger.info('Initial shared file: ${file.path}, type: ${file.type}');
+          _logger.info('Initial shared file, type: ${file.type}');
         }
         await _handleSharedFiles(initialMedia);
       } else {
@@ -369,14 +369,14 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     try {
       for (final sharedFile in sharedFiles) {
-        _logger.info('Processing shared file: ${sharedFile.path}');
+        _logger.info('Processing shared file');
         if (sharedFile.path.isNotEmpty) {
           final file = File(sharedFile.path);
           if (await file.exists()) {
-            _logger.info('File exists, uploading: ${sharedFile.path}');
+            _logger.info('File exists, uploading');
             await uploadFiles([file]);
           } else {
-            _logger.warning('Shared file does not exist: ${sharedFile.path}');
+            _logger.warning('Shared file does not exist');
           }
         } else {
           _logger.warning('Shared file has empty path');

@@ -539,6 +539,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportBug => 'Report bug';
 
   @override
+  String get logsDialogBodyLocker =>
+      'This will send logs to help us debug your issue.';
+
+  @override
   String get social => 'Social';
 
   @override

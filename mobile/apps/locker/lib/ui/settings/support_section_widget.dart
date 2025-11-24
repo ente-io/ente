@@ -69,7 +69,11 @@ class SupportSectionWidget extends StatelessWidget {
           ),
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
-            await sendLogs(context, "support@ente.io");
+            await sendLogs(
+              context,
+              "support@ente.io",
+              dialogBody: context.l10n.logsDialogBodyLocker,
+            );
           },
           onLongPress: () async {
             final zipFilePath = await getZippedLogsFile();
