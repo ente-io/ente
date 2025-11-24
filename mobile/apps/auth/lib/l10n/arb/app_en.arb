@@ -567,6 +567,7 @@
   "clearBackupPassword": "Clear backup password",
   "selectBackupFolder": "Select a backup folder",
   "setBackupFolder": "Set backup folder",
+  "backupFolderLabel": "Backup folder:",
   "backupPasswordHint": "Your backup will be encrypted with this password.",
   "authToUpdateBackupPassword": "Authenticate to update backup password",
   "authToSetBackupPassword": "Authenticate to set backup password",

@@ -2,6 +2,8 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/components/title_bar_title_widget.dart';
+import 'package:ente_auth/ui/components/title_bar_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/data/local_backup/local_backup_experience.dart';
 import 'package:flutter/foundation.dart';
@@ -20,11 +22,12 @@ class LocalBackupSettingsPage extends StatelessWidget {
         return _LocalBackupVariantShell(
           controller: controller,
           title: l10n.localBackupSettingsTitle,
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 24),
                 MenuItemWidget(
                   captionedTextWidget: CaptionedTextWidget(
                     title: l10n.enableAutomaticBackups,
@@ -80,10 +83,33 @@ class LocalBackupSettingsPage extends StatelessWidget {
                               },
                             ),
                             const SizedBox(height: 16),
-                            _BackupLocationCard(
-                              controller: controller,
-                              colorScheme: colorScheme,
-                              textTheme: textTheme,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                MenuItemWidget(
+                                  captionedTextWidget: CaptionedTextWidget(
+                                    title: l10n.setBackupFolder,
+                                  ),
+                                  alignCaptionedTextToLeft: true,
+                                  singleBorderRadius: 12,
+                                  menuItemColor: colorScheme.fillFaint,
+                                  trailingIcon: Icons.chevron_right_outlined,
+                                  trailingIconIsMuted: true,
+                                  onTap: () async {
+                                    await controller.changeLocation();
+                                  },
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 12,
+                                    left: 12,
+                                    right: 12,
+                                  ),
+                                  child: _LocationPreview(
+                                    controller: controller,
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 12),
                             MenuItemWidget(
@@ -157,21 +183,41 @@ class _LocalBackupVariantShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 700),
-          child: Stack(
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: controller.hasLoaded
-                    ? SafeArea(bottom: false, child: body)
-                    : const _LocalBackupLoading(),
-              ),
-            ],
+    return Material(
+      color: Colors.transparent,
+      child: Scaffold(
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
+            child: Stack(
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: controller.hasLoaded
+                      ? CustomScrollView(
+                          primary: false,
+                          slivers: <Widget>[
+                            TitleBarWidget(
+                              flexibleSpaceTitle: TitleBarTitleWidget(
+                                title: title,
+                              ),
+                              actionIcons: const [],
+                            ),
+                            SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  return SafeArea(bottom: false, child: body);
+                                },
+                                childCount: 1,
+                              ),
+                            ),
+                          ],
+                        )
+                      : const _LocalBackupLoading(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -196,67 +242,25 @@ class _LocationPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final l10n = context.l10n;
     final path = controller.backupPath;
     final treeUri = controller.backupTreeUri;
     final muted = textTheme.miniFaint.copyWith(color: Colors.grey);
 
     if (path != null) {
-      return Text(controller.simplifyPath(path), style: textTheme.miniFaint);
+      return Text(
+        '${l10n.backupFolderLabel} ${controller.simplifyPath(path)}',
+        style: textTheme.miniFaint,
+      );
     }
     if (treeUri != null) {
       return Text(
-        controller.simplifyPath(treeUri),
+        '${l10n.backupFolderLabel} ${controller.simplifyPath(treeUri)}',
         style: textTheme.miniFaint,
       );
     }
 
-    return Text(context.l10n.selectBackupFolder, style: muted);
-  }
-}
-
-class _BackupLocationCard extends StatelessWidget {
-  const _BackupLocationCard({
-    required this.controller,
-    required this.colorScheme,
-    required this.textTheme,
-  });
-
-  final LocalBackupExperienceController controller;
-  final dynamic colorScheme;
-  final dynamic textTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: colorScheme.fillFaint,
-      borderRadius: BorderRadius.circular(12),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () async {
-          await controller.changeLocation();
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.setBackupFolder,
-                  style: textTheme.body,
-                ),
-                const SizedBox(height: 6),
-                _LocationPreview(controller: controller),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    return Text(l10n.selectBackupFolder, style: muted);
   }
 }
 
