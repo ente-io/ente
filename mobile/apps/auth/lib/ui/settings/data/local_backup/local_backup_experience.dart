@@ -182,7 +182,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _ensurePasswordConfigured(
-      {required bool disableOnCancel}) async {
+      {required bool disableOnCancel,}) async {
     if (await _hasStoredPassword()) {
       return true;
     }
