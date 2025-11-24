@@ -14,8 +14,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const _passwordDialogHint = 'Your backup will be encrypted with this password.';
-
 typedef LocalBackupVariantBuilder = Widget Function(
   BuildContext context,
   LocalBackupExperienceController controller,
@@ -130,8 +128,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _startEnableFlow() async {
-    final hasPassword =
-        await _ensurePasswordConfigured(disableOnCancel: true);
+    final hasPassword = await _ensurePasswordConfigured(disableOnCancel: true);
     if (!hasPassword) {
       return false;
     }
@@ -184,7 +181,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     });
   }
 
-  Future<bool> _ensurePasswordConfigured({required bool disableOnCancel}) async {
+  Future<bool> _ensurePasswordConfigured(
+      {required bool disableOnCancel}) async {
     if (await _hasStoredPassword()) {
       return true;
     }
@@ -261,8 +259,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
   }
 
-  Future<bool> _updatePassword(BuildContext context) async =>
-      _promptPassword(
+  Future<bool> _updatePassword(BuildContext context) async => _promptPassword(
         forcePrompt: true,
         disableOnCancel: false,
         isUpdateFlow: true,
@@ -275,8 +272,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }) async {
     final hasAuthenticated = await _authenticateForBackupAction(
       isUpdateFlow
-          ? 'Authenticate to update backup password'
-          : 'Authenticate to set backup password',
+          ? context.l10n.authToUpdateBackupPassword
+          : context.l10n.authToSetBackupPassword,
       forceAuthPrompt: true,
     );
     if (!hasAuthenticated) {
@@ -323,7 +320,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
     const storage = FlutterSecureStorage();
     await storage.delete(key: _passwordKey);
-    _showSnackBar('Backup password cleared');
+    _showSnackBar(context.l10n.backupPasswordCleared);
     return true;
   }
 
@@ -368,18 +365,20 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text(
-                isUpdateFlow ? 'Update backup password' : 'Set backup password',
+                isUpdateFlow
+                    ? l10n.updateBackupPassword
+                    : l10n.setBackupPassword,
                 style: getEnteTextTheme(context).largeBold,
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _passwordDialogHint,
-                  style: getEnteTextTheme(context).smallFaint,
-                ),
-                const SizedBox(height: 12),
+                children: [
+                  Text(
+                    l10n.backupPasswordHint,
+                    style: getEnteTextTheme(context).smallFaint,
+                  ),
+                  const SizedBox(height: 12),
                   TextField(
                     controller: textController,
                     autofocus: true,
@@ -474,13 +473,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         ..writeln(l10n.backupLocationChoiceDescription)
         ..writeln()
         ..writeln(
-          'To enable backups on iOS, choose a folder in Files (for example “On My iPhone”).',
+          l10n.enableBackupsIosInstruction,
         )
         ..writeln()
         ..writeAll(
           _backupPath != null && _backupPath!.isNotEmpty
               ? [
-                  'Current backup folder:',
+                  l10n.currentBackupFolder,
                   _simplifyPath(_backupPath!),
                 ]
               : const [],
@@ -491,17 +490,17 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         title: l10n.chooseBackupLocation,
         context: context,
         body: dialogBody.toString(),
-        buttons: const [
+        buttons: [
           ButtonWidget(
             buttonType: ButtonType.primary,
-            labelText: 'Select folder',
+            labelText: l10n.selectFolder,
             isInAlert: true,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.second,
           ),
           ButtonWidget(
             buttonType: ButtonType.secondary,
-            labelText: 'Cancel',
+            labelText: l10n.cancel,
             isInAlert: true,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.first,
@@ -577,7 +576,9 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         const cloudDocsPrefix = 'com~apple~CloudDocs/';
         if (afterMarker.startsWith(cloudDocsPrefix)) {
           final remaining = afterMarker.substring(cloudDocsPrefix.length);
-          return remaining.isNotEmpty ? 'iCloud Drive/$remaining' : 'iCloud Drive';
+          return remaining.isNotEmpty
+              ? 'iCloud Drive/$remaining'
+              : 'iCloud Drive';
         }
         if (afterMarker.isNotEmpty) {
           return afterMarker;
@@ -634,7 +635,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
           );
         }
       } else if (requireSelection) {
-        _showSnackBar('Select a folder to continue');
+        _showSnackBar(context.l10n.selectFolderToContinue);
       }
       return saved;
     } else {
@@ -656,7 +657,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         return saved;
       }
       if (requireSelection) {
-        _showSnackBar('Select a folder to continue');
+        _showSnackBar(context.l10n.selectFolderToContinue);
       }
       return false;
     }

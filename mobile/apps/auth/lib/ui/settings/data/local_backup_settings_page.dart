@@ -62,8 +62,8 @@ class LocalBackupSettingsPage extends StatelessWidget {
                               builder: (context, snapshot) {
                                 final hasPassword = snapshot.data ?? false;
                                 final tileTitle = hasPassword
-                                    ? 'Update backup password'
-                                    : 'Set backup password';
+                                    ? l10n.updateBackupPassword
+                                    : l10n.setBackupPassword;
                                 return MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
                                     title: tileTitle,
@@ -76,19 +76,19 @@ class LocalBackupSettingsPage extends StatelessWidget {
                                   onTap: () async {
                                     await controller.updatePassword(context);
                                   },
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _BackupLocationCard(
-                          controller: controller,
-                          colorScheme: colorScheme,
-                          textTheme: textTheme,
-                        ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            _BackupLocationCard(
+                              controller: controller,
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
+                            ),
                             const SizedBox(height: 12),
                             MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: 'Create backup now',
+                              captionedTextWidget: CaptionedTextWidget(
+                                title: l10n.createBackupNow,
                               ),
                               alignCaptionedTextToLeft: true,
                               singleBorderRadius: 12,
@@ -119,14 +119,14 @@ class LocalBackupSettingsPage extends StatelessWidget {
                                 children: [
                                   _BackupButton(
                                     onPressed: controller.resetBackupLocation,
-                                    label: 'Clear backup folder',
+                                    label: l10n.clearBackupFolder,
                                     colorScheme: colorScheme,
                                     textTheme: textTheme,
                                   ),
                                   const SizedBox(height: 10),
                                   _BackupButton(
                                     onPressed: controller.clearBackupPassword,
-                                    label: 'Clear backup password',
+                                    label: l10n.clearBackupPassword,
                                     colorScheme: colorScheme,
                                     textTheme: textTheme,
                                   ),
@@ -204,7 +204,7 @@ class _LocationPreview extends StatelessWidget {
       );
     }
 
-    return Text('Select a backup folder', style: muted);
+    return Text(context.l10n.selectBackupFolder, style: muted);
   }
 }
 
@@ -242,7 +242,7 @@ class _BackupLocationCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Backup location',
+                      context.l10n.backupLocation,
                       style: textTheme.body,
                     ),
                     const SizedBox(height: 6),
@@ -264,7 +264,7 @@ class _BackupLocationCard extends StatelessWidget {
                   minimumSize: const Size(0, 44),
                 ),
                 child: Text(
-                  'Change folder',
+                  context.l10n.changeFolder,
                   style: textTheme.smallBold,
                 ),
               ),
