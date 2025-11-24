@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import "package:logging/logging.dart";
 
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
+import 'package:photos/utils/device_info.dart';
 import "package:photos/utils/ram_check_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -194,8 +196,9 @@ class LocalSettings {
   }
 
   Future<void> markFacesTimelineSeen(String personId) async {
-    final List<String> seenIds =
-        List<String>.from(_prefs.getStringList(_facesTimelineSeenKey) ?? []);
+    final List<String> seenIds = List<String>.from(
+      _prefs.getStringList(_facesTimelineSeenKey) ?? [],
+    );
     if (seenIds.contains(personId)) {
       return;
     }
@@ -247,6 +250,31 @@ class LocalSettings {
 
   Future<void> setSwipeToSelectEnabled(bool value) async {
     await _prefs.setBool(_kSwipeToSelectEnabled, value);
+  }
+
+  /// Initialize swipe-to-select default based on device type.
+  /// Sets default to disabled for Samsung S-series devices (2018+) due to
+  /// reported gesture conflicts. Only sets default if user hasn't explicitly
+  /// configured this setting.
+  Future<void> initSwipeToSelectDefault() async {
+    final logger = Logger("LocalSettings");
+    // Only set default if user hasn't explicitly configured this setting
+    if (_prefs.containsKey(_kSwipeToSelectEnabled)) {
+      logger.info(
+        "---------- Swipe-to-select setting already configured by user; not setting default.",
+      );
+      return;
+    }
+
+    logger.info("---------- Configuring default for swipe-to-select setting.");
+    // Check if device is Samsung S-series
+    final isSamsungS = await isSamsungSSeries();
+
+    logger
+        .info("---------- Device identified as Samsung S-series: $isSamsungS");
+
+    // Set default: disabled for Samsung S-series, enabled for all others
+    await _prefs.setBool(_kSwipeToSelectEnabled, !isSamsungS);
   }
 
   bool get isSwipeToSelectEnabled =>
