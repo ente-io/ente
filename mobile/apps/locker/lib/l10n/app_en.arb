@@ -602,6 +602,22 @@
   "@uploadStorageLimitErrorBody": {
     "description": "Body shown when uploads fail due to running out of storage"
   },
+  "uploadFileCountLimitErrorTitle": "File limit reached",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
+  "uploadFileCountLimitErrorBody": "Your individual or family account has hit the 1000-file limit.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
+  "uploadFileCountLimitErrorToast": "Action failed. Your individual or family account has hit the 1000-file limit.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
+  "uploadSubscriptionRequiredErrorBody": "Subscription required to save info items.",
+  "@uploadSubscriptionRequiredErrorBody": {
+    "description": "Message shown when uploads fail because the user does not have an active subscription"
+  },
   "uploadFileTooLargeErrorTitle": "File too large",
   "@uploadFileTooLargeErrorTitle": {
     "description": "Title shown when uploads fail because the file exceeds the supported size"
