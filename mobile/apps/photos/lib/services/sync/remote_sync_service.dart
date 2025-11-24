@@ -394,6 +394,7 @@ class RemoteSyncService {
 
       // Filter by only-new using pre-fetched set
       if (newerLocalIDs != null) {
+        // Keep only files that are in newerLocalIDs (removes old files)
         localIDsToSync.retainAll(newerLocalIDs);
       }
 
