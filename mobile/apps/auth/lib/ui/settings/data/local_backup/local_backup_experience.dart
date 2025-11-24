@@ -184,7 +184,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         return;
       }
       if (showSnackBar) {
-        _showSnackBar(context.l10n.initialBackupCreated);
+        _showSnackBar(context.l10n.backupCreated);
       }
     } finally {
       if (mounted) {

@@ -240,41 +240,19 @@ class _BackupLocationCard extends StatelessWidget {
             horizontal: 16,
             vertical: 12,
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.backupLocation,
-                      style: textTheme.body,
-                    ),
-                    const SizedBox(height: 6),
-                    _LocationPreview(controller: controller),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await controller.changeLocation();
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: colorScheme.fillMuted,
-                  shape: const StadiumBorder(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
-                  ),
-                  minimumSize: const Size(0, 44),
-                ),
-                child: Text(
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
                   context.l10n.setBackupFolder,
-                  style: textTheme.smallBold,
+                  style: textTheme.body,
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                _LocationPreview(controller: controller),
+              ],
+            ),
           ),
         ),
       ),
