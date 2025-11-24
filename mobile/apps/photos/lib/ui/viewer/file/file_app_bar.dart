@@ -317,8 +317,7 @@ class FileAppBarState extends State<FileAppBar> {
                 color: Theme.of(context).iconTheme.color,
               ),
               shouldLoopVideo
-                  ? const SizedBox.shrink()
-                  : Transform.rotate(
+                  ? Transform.rotate(
                       angle: 3.14 / 4,
                       child: Container(
                         width: 2,
@@ -328,7 +327,8 @@ class FileAppBarState extends State<FileAppBar> {
                           borderRadius: BorderRadius.circular(1),
                         ),
                       ),
-                    ),
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
         ),
@@ -422,7 +422,9 @@ class FileAppBarState extends State<FileAppBar> {
       isArchived ? visibleVisibility : archiveVisibility,
     );
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _reloadActions = true;
+      });
     }
   }
 

@@ -33,7 +33,7 @@ class FileUploader {
   static const kMaximumConcurrentVideoUploads = 2;
   static const kMaximumThumbnailCompressionAttempts = 2;
   static const kMaximumUploadAttempts = 4;
-  static const kMaxFileSize5Gib = 5368709120;
+  static const kMaxFileSize10Gib = 10737418240;
   static const kBlockedUploadsPollFrequency = Duration(seconds: 2);
   static const kFileUploadTimeout = Duration(minutes: 50);
   static const k20MBStorageBuffer = 20 * 1024 * 1024;
@@ -552,10 +552,10 @@ class FileUploader {
             'freeStorage $freeStorage');
         throw StorageLimitExceededError();
       }
-      if (fileSize > kMaxFileSize5Gib) {
-        _logger.warning('File size exceeds 5GiB fileSize $fileSize');
+      if (fileSize > kMaxFileSize10Gib) {
+        _logger.warning('File size exceeds 10GiB fileSize $fileSize');
         throw InvalidFileError(
-          'file size above 5GiB',
+          'file size above 10GiB',
           InvalidReason.tooLargeFile,
         );
       }
@@ -621,7 +621,9 @@ class FileUploader {
       return file;
     } on DioException catch (e) {
       final int statusCode = e.response?.statusCode ?? -1;
-      if (statusCode == 413) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      } else if (statusCode == 413) {
         throw FileTooLargeForPlanError();
       } else if (statusCode == 426) {
         _onStorageLimitExceeded();
@@ -671,6 +673,9 @@ class FileUploader {
         (response.data as Map).cast<String, dynamic>(),
       );
     } on DioException catch (e, s) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      }
       if (e.response != null) {
         if (e.response!.statusCode == 402) {
           final error = NoActiveSubscriptionError();
@@ -686,6 +691,18 @@ class FileUploader {
       }
       rethrow;
     }
+  }
+
+  bool _isFileLimitReachedResponse(Response? response) {
+    if (response?.statusCode != 403) {
+      return false;
+    }
+    final dynamic data = response?.data;
+    if (data is! Map) {
+      return false;
+    }
+    final code = data['code'];
+    return code is String && code == 'FILE_LIMIT_REACHED';
   }
 
   void _onStorageLimitExceeded() {
@@ -775,6 +792,18 @@ class FileUploader {
       file.keyDecryptionNonce = keyDecryptionNonce;
       file.metadataDecryptionHeader = metadataDecryptionHeader;
       return file;
+    } on DioException catch (e, s) {
+      if (_isFileLimitReachedResponse(e.response)) {
+        throw FileLimitReachedError();
+      }
+      final statusCode = e.response?.statusCode;
+      if (statusCode == 402) {
+        throw NoActiveSubscriptionError();
+      } else if (statusCode == 426) {
+        throw StorageLimitExceededError();
+      }
+      _logger.severe("Info file upload failed", e, s);
+      rethrow;
     } catch (e, s) {
       _logger.severe("Info file upload failed", e, s);
       rethrow;

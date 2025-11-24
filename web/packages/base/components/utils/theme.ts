@@ -132,6 +132,8 @@ const getColors = (appName: AppName) => ({
                   ? _colors.accentShare
                   : _colors.accentPhotos,
     },
+    ...{ light: appName == "share" ? _colors.lightShare : _colors.light },
+    ...{ dark: appName == "share" ? _colors.darkShare : _colors.dark },
 });
 
 /**
@@ -144,7 +146,7 @@ const getColors = (appName: AppName) => ({
 const _colors = {
     accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
     accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
-    accentShare: { dark: "#615bff", main: "#5ba8ff", light: "#5bf9ff" },
+    accentShare: { dark: "#0056CC", main: "#1071FF", light: "#1071FF" },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -152,6 +154,80 @@ const _colors = {
         golden: "#ffc107",
         danger: { dark: "#f53434", main: "#ea3f3f", light: "#ff6565" },
         switchOn: "#2eca45",
+    },
+    lightShare: {
+        background: {
+            default: "#FAFAFA",
+            paper: "#fff",
+            paper2: "#fbfbfb",
+            searchInput: "#f3f3f3",
+        },
+        backdrop: {
+            base: "rgba(255 255 255 / 0.92)",
+            muted: "rgba(255 255 255 / 0.75)",
+            faint: "rgba(255 255 255 / 0.30)",
+        },
+        text: {
+            base: "#000",
+            muted: "rgba(0 0 0 / 0.60)",
+            faint: "rgba(0 0 0 / 0.50)",
+        },
+        fill: {
+            base: "#000",
+            muted: "rgba(0 0 0 / 0.12)",
+            faint: "rgba(0 0 0 / 0.04)",
+            faintHover: "rgba(0 0 0 / 0.08)",
+            fainter: "rgba(0 0 0 / 0.02)",
+        },
+        secondary: { main: "#f5f5f5", hover: "#e9e9e9" },
+        stroke: {
+            base: "#000",
+            muted: "rgba(0 0 0 / 0.24)",
+            faint: "rgba(0 0 0 / 0.12)",
+            fainter: "rgba(0 0 0 / 0.06)",
+        },
+        boxShadow: {
+            paper: "0px 0px 10px rgba(0 0 0 / 0.25)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.16), 0px 3px 6px rgba(0 0 0 / 0.12)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.25)",
+        },
+    },
+    darkShare: {
+        background: {
+            default: "#161616",
+            paper: "#212121",
+            paper2: "#252525",
+            searchInput: "#212121",
+        },
+        backdrop: {
+            base: "rgba(0 0 0 / 0.90)",
+            muted: "rgba(0 0 0 / 0.65)",
+            faint: "rgba(0 0 0 / 0.20)",
+        },
+        text: {
+            base: "#fff",
+            muted: "rgba(255 255 255 / 0.70)",
+            faint: "rgba(255 255 255 / 0.50)",
+        },
+        fill: {
+            base: "#fff",
+            muted: "rgba(255 255 255 / 0.16)",
+            faint: "rgba(255 255 255 / 0.12)",
+            faintHover: "rgba(255 255 255 / 0.16)",
+            fainter: "rgba(255 255 255 / 0.05)",
+        },
+        secondary: { main: "#2b2b2b", hover: "#373737" },
+        stroke: {
+            base: "#fff",
+            muted: "rgba(255 255 255 / 0.24)",
+            faint: "rgba(255 255 255 / 0.16)",
+            fainter: "rgba(255 255 255 / 0.12)",
+        },
+        boxShadow: {
+            paper: "0px 2px 12px rgba(0 0 0 / 0.75)",
+            menu: "0px 0px 6px rgba(0 0 0 / 0.50), 0px 3px 6px rgba(0 0 0 / 0.25)",
+            button: "0px 4px 4px rgba(0 0 0 / 0.75)",
+        },
     },
     light: {
         // Keep these solid.

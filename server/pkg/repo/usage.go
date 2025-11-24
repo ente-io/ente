@@ -15,6 +15,18 @@ type UsageRepository struct {
 	UserRepo *UserRepository
 }
 
+type LockerUsage struct {
+	TotalFileCount int64
+	TotalUsage     int64
+	Users          []UserLockerUsage
+}
+
+type UserLockerUsage struct {
+	UserID    int64
+	FileCount int64
+	Usage     int64
+}
+
 // GetUsage  gets the Storage usage of a user
 func (repo *UsageRepository) GetUsage(userID int64) (int64, error) {
 	row := repo.DB.QueryRow(`SELECT storage_consumed FROM usage WHERE user_id = $1`,
@@ -46,6 +58,103 @@ func (repo *UsageRepository) GetCombinedUsage(ctx context.Context, userIDs []int
 		return 0, nil
 	}
 	return totalUsage, stacktrace.Propagate(err, "")
+}
+
+func (repo *UsageRepository) GetLockerUsage(ctx context.Context, userIDs []int64) (*LockerUsage, error) {
+	usage := &LockerUsage{}
+	if len(userIDs) == 0 {
+		return usage, nil
+	}
+
+	// Initialize map with all requested users
+	userMap := make(map[int64]*UserLockerUsage)
+	for _, userID := range userIDs {
+		userMap[userID] = &UserLockerUsage{
+			UserID:    userID,
+			FileCount: 0,
+			Usage:     0,
+		}
+	}
+
+	// Query 1: Get file counts (non-deleted only)
+	countQuery := `
+      SELECT 
+         c.owner_id,
+         COUNT(DISTINCT cf.file_id) AS file_count
+      FROM collections c
+      JOIN collection_files cf ON c.collection_id = cf.collection_id
+      WHERE c.app = 'locker'
+         AND c.owner_id = ANY($1)
+         AND cf.f_owner_id = c.owner_id
+         AND cf.is_deleted = false
+      GROUP BY c.owner_id;
+   `
+
+	// Query 2: Get total sizes (all files)
+	sizeQuery := `
+      SELECT 
+         unique_files.owner_id,
+         COALESCE(SUM(ok.size), 0) AS total_size
+      FROM (
+         SELECT DISTINCT c.owner_id, cf.file_id
+         FROM collections c
+         JOIN collection_files cf ON c.collection_id = cf.collection_id
+         WHERE c.app = 'locker'
+            AND c.owner_id = ANY($1)
+            AND cf.f_owner_id = c.owner_id
+      ) AS unique_files
+      LEFT JOIN object_keys ok ON ok.file_id = unique_files.file_id AND ok.is_deleted = false
+      GROUP BY unique_files.owner_id;
+   `
+
+	// Get counts
+	rows, err := repo.DB.QueryContext(ctx, countQuery, pq.Array(userIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ownerID, fileCount int64
+		if scanErr := rows.Scan(&ownerID, &fileCount); scanErr != nil {
+			return nil, stacktrace.Propagate(scanErr, "")
+		}
+		if user, exists := userMap[ownerID]; exists {
+			user.FileCount = fileCount
+		}
+	}
+	rows.Close()
+
+	// Get sizes
+	rows, err = repo.DB.QueryContext(ctx, sizeQuery, pq.Array(userIDs))
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ownerID, totalSize int64
+		if scanErr := rows.Scan(&ownerID, &totalSize); scanErr != nil {
+			return nil, stacktrace.Propagate(scanErr, "")
+		}
+		if user, exists := userMap[ownerID]; exists {
+			user.Usage = totalSize
+		}
+	}
+
+	// Build result - now includes ALL requested users
+	for _, userID := range userIDs {
+		user := userMap[userID]
+		usage.Users = append(usage.Users, *user)
+		usage.TotalFileCount += user.FileCount
+		usage.TotalUsage += user.Usage
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+
+	return usage, nil
 }
 
 // StorageForFamilyAdmin calculates the total storage consumed by the family for a given adminID

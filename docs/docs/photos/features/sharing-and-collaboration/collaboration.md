@@ -28,6 +28,8 @@ Collaborative albums allow multiple Ente users to contribute photos to the same 
 
 Recipients receive a notification and can access the shared album from their Ente app.
 
+Multiple albums can be selected (long press to select), and choosing Share > Add Collaborator will apply collaboration to all selected albums at once.
+
 ### Permissions explained
 
 **Viewers can:**

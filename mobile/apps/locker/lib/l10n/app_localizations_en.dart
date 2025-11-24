@@ -372,7 +372,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingShareLink => 'Creating link...';
 
   @override
-  String get shareThisLink => 'Anyone with this link can access your item.';
+  String get shareThisLink =>
+      'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.';
 
   @override
   String get copyLink => 'Copy link';
@@ -1129,6 +1130,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadError => 'Upload error';
 
   @override
+  String get uploadStorageLimitErrorTitle => 'Storage limit reached';
+
+  @override
+  String get uploadStorageLimitErrorBody =>
+      'You\'ve run out of storage space. Free up space to continue uploading.';
+
+  @override
+  String get uploadFileCountLimitErrorTitle => 'File limit reached';
+
+  @override
+  String get uploadFileCountLimitErrorBody =>
+      'Your individual or family account has hit the 1000-file limit.';
+
+  @override
+  String get uploadFileCountLimitErrorToast =>
+      'Action failed. Your individual or family account has hit the 1000-file limit.';
+
+  @override
+  String get uploadSubscriptionRequiredErrorBody =>
+      'Subscription required to save info items.';
+
+  @override
+  String get uploadFileTooLargeErrorTitle => 'File too large';
+
+  @override
+  String get uploadFileTooLargeErrorBody =>
+      'This file is larger than the maximum supported upload size of 10GB.';
+
+  @override
   String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';
 
   @override
@@ -1273,11 +1303,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Coming soon!';
+  String get unlockLockerPaidPlanTitle => 'Unlock Locker with a paid plan.';
 
   @override
   String get unlockLockerPaidPlanBody =>
-      'Locker is currently available only to paid customers of Ente Photos.';
+      'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';

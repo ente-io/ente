@@ -2,6 +2,7 @@ package public
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -35,7 +36,7 @@ func (c *FileLinkController) CreateLink(ctx *gin.Context, req ente.CreateFileUrl
 		return nil, stacktrace.Propagate(ente.NewPermissionDeniedError("not file owner"), "")
 	}
 	for attempt := 0; attempt < 5; attempt++ {
-		accessToken := shortuuid.New()[0:AccessTokenLength]
+		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		_, err = c.FileLinkRepo.Insert(ctx, req, actorUserID, accessToken)
 		if errors.Is(err, ente.ErrAccessTokenInUse) {
 			continue

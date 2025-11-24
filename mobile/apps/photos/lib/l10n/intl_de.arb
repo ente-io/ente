@@ -1204,6 +1204,11 @@
   "noImagesWithLocation": "Keine Bilder mit Standort",
   "unpinAlbum": "Album lösen",
   "pinAlbum": "Album anheften",
+  "pin": "Anheften",
+  "pinToTop": "Oben anheften",
+  "unpin": "Lösen",
+  "visibility": "Sichtbarkeit",
+  "hideFromMemories": "Aus Erinnerungen ausblenden",
   "create": "Erstellen",
   "viewAll": "Alle anzeigen",
   "nothingSharedWithYouYet": "Noch nichts mit Dir geteilt",
@@ -1389,8 +1394,8 @@
   "appLockDescriptions": "Wähle zwischen dem Standard-Sperrbildschirm deines Gerätes und einem eigenen Sperrbildschirm mit PIN oder Passwort.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfiguriere bitte den Gerätepasscode oder die Bildschirmsperre in den Systemeinstellungen.",
   "authToViewPasskey": "Bitte authentifizieren, um deinen Passkey zu sehen",
-  "loopVideoOn": "Videoschleife an",
-  "loopVideoOff": "Videoschleife aus",
+  "loopVideoOn": "Endlosschleife ausschalten",
+  "loopVideoOff": "Endlosschleife einschalten",
   "localSyncErrorMessage": "Es sieht so aus, als ob etwas schiefgelaufen ist, da die lokale Foto-Synchronisierung länger dauert als erwartet. Bitte kontaktiere unser Support-Team",
   "showPerson": "Person anzeigen",
   "sort": "Sortierung",
@@ -2008,6 +2013,72 @@
   "artisticPortraits": "Kunstvolle Porträts",
   "streetFood": "Streetfood-Happen",
   "riverCruises": "Flusskreuzfahrt-Ausblicke",
+  "facesTimelineBannerTitle": "Erinnerungen",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Sieh dir Fotos von {name} über die Jahre an",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Erinnerungen",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} war {count, plural, one {ein Jahr alt} other {{count} Jahre alt}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "vor {count, plural, one {einem Jahr} other {# Jahren}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Das Teilen von Videos kommt bald",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Vorheriges",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Nächstes",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Wiedergabe",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pause",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Zeitleiste der Gesichter wird vorbereitet...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Verspielte Kinder",
   "coastalCliffs": "Klippen am Meer"
 }

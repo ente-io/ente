@@ -777,7 +777,13 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const id = await addUserEntity(
         "cgroup",
-        { name, assigned: [cluster], isHidden: false },
+        {
+            name,
+            assigned: [cluster],
+            isHidden: false,
+            isPinned: false,
+            hideFromMemories: false,
+        },
         await ensureMasterKeyFromSession(),
     );
     await mlSync();
@@ -842,6 +848,24 @@ export const deleteCGroup = async ({ id }: CGroup) => {
 };
 
 /**
+ * Change the pinned state of a person.
+ */
+export const setCGroupPinned = async (cgroup: CGroup, isPinned: boolean) => {
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [{ ...cgroup, data: { ...cgroup.data, isPinned } }],
+        await ensureMasterKeyFromSession(),
+    );
+    return mlSync();
+};
+
+export const pinCGroup = async (cgroup: CGroup) =>
+    setCGroupPinned(cgroup, true);
+
+export const unpinCGroup = async (cgroup: CGroup) =>
+    setCGroupPinned(cgroup, false);
+
+/**
  * Return suggestions for the given {@link person}.
  *
  * The suggestion computation happens in a web worker.
@@ -877,7 +901,13 @@ export const applyPersonSuggestionUpdates = async (
 export const ignoreCluster = async (cluster: FaceCluster) => {
     await addUserEntity(
         "cgroup",
-        { name: "", assigned: [cluster], isHidden: true },
+        {
+            name: "",
+            assigned: [cluster],
+            isHidden: true,
+            isPinned: false,
+            hideFromMemories: false,
+        },
         await ensureMasterKeyFromSession(),
     );
     return mlSync();

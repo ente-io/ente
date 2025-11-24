@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
+import 'package:locker/ui/components/gradient_button.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
@@ -487,20 +488,83 @@ class _PersonalNotePageState
   Future<bool> _showDiscardChangesDialog() async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(context.l10n.unsavedNoteChangesTitle),
-          content: Text(context.l10n.unsavedNoteChangesDescription),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(context.l10n.keepEditing),
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final colorScheme = getEnteColorScheme(dialogContext);
+        final textTheme = getEnteTextTheme(dialogContext);
+
+        return Dialog(
+          backgroundColor: colorScheme.backgroundElevated2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevated2,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 24,
+                  offset: const Offset(0, 12),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(context.l10n.discardChanges),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.l10n.unsavedNoteChangesTitle,
+                        style: textTheme.h3Bold,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () => Navigator.of(dialogContext).pop(false),
+                      child: Container(
+                        height: 36,
+                        width: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: colorScheme.backgroundElevated,
+                        ),
+                        child: const Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  context.l10n.unsavedNoteChangesDescription,
+                  style: textTheme.body.copyWith(
+                    color: colorScheme.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  child: GradientButton(
+                    text: context.l10n.discardChanges,
+                    backgroundColor: colorScheme.warning400,
+                    onTap: () => Navigator.of(dialogContext).pop(true),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
