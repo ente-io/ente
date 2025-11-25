@@ -336,16 +336,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         showMapDialog();
     }, [mapEnabled, onGenericError, showMapDialog]);
 
-    const mapMenuOption = shouldShowMapOption(collectionSummary) ? (
-        <OverflowMenuOption
-            key="map"
-            onClick={handleShowMap}
-            startIcon={<MapOutlinedIcon />}
-        >
-            {t("map")}
-        </OverflowMenuOption>
-    ) : null;
-
     let menuOptions: React.ReactNode[] = [];
     // MUI doesn't let us use fragments to pass multiple menu items, so we need
     // to instead put them in an array. This also necessitates giving each a
@@ -462,6 +452,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("sort_by")}
                 </OverflowMenuOption>,
+                shouldShowMapOption(collectionSummary) && (
+                    <OverflowMenuOption
+                        key="map"
+                        onClick={handleShowMap}
+                        startIcon={<MapOutlinedIcon />}
+                    >
+                        {t("map")}
+                    </OverflowMenuOption>
+                ),
                 collectionSummary.attributes.has("pinned") ? (
                     <OverflowMenuOption
                         key="unpin"
@@ -540,10 +539,6 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 </OverflowMenuOption>,
             ];
             break;
-    }
-
-    if (mapMenuOption) {
-        menuOptions.unshift(mapMenuOption);
     }
 
     const validMenuOptions = menuOptions.filter((o) => !!o);

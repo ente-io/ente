@@ -68,18 +68,23 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
     const [mapComponents, setMapComponents] = useState<MapComponents | null>(
         null,
-    );
-    const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
-    const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
-    const [selectedClusterIndex, setSelectedClusterIndex] = useState(0);
+    ); // for storing the leaflet elements
+
+    const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]); //image data for rendering in map(clustered by proximity)
+    const [mapCenter, setMapCenter] = useState<[number, number] | null>(null); //stores the center fo the map for rendering
+
+    const [selectedClusterIndex, setSelectedClusterIndex] = useState(0); //the current image group in selection
+
     const [filesByID, setFilesByID] = useState<Map<number, EnteFile>>(
         new Map(),
-    );
-    const [mapPhotos, setMapPhotos] = useState<JourneyPoint[]>([]);
+    ); //maintains a map for the files in view for the thumbnail population
+
+    const [mapPhotos, setMapPhotos] = useState<JourneyPoint[]>([]); //flat list of all geotagged photos, powers the left
     const [thumbByFileID, setThumbByFileID] = useState<Map<number, string>>(
         new Map(),
-    );
-    const [expanded, setExpanded] = useState(false);
+    ); // map storing the file thumbnails against the fileID for showing the file thumbnails in the left sidebar
+    const [expanded, setExpanded] = useState(false); //keep track whether the sidebar is expanded or not
+
     const formatDateLabel = (timestamp: string) =>
         new Date(timestamp).toLocaleDateString(undefined, {
             weekday: "long",
@@ -163,6 +168,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         setError(null);
         try {
             const files = await filesForCollection();
+
             const locationPoints: JourneyPoint[] = [];
             files.forEach((file) => {
                 const loc = fileLocation(file);
@@ -203,8 +209,12 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 const thumb = thumbnailUpdates.get(point.fileId);
                 return thumb ? { ...point, image: thumb } : point;
             });
-            const clustersWithThumbs =
-                clusterPhotosByProximity(pointsWithThumbs);
+            const clustersWithThumbs = clusters.map((cluster) =>
+                cluster.map((point) => {
+                    const thumb = thumbnailUpdates.get(point.fileId);
+                    return thumb ? { ...point, image: thumb } : point;
+                }),
+            );
 
             setPhotoClusters(clustersWithThumbs);
             setFilesByID(new Map(files.map((file) => [file.id, file])));
@@ -284,7 +294,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         }
         if (!photoClusters.length || !mapCenter) {
             return (
-                <CenteredBox>
+                <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
                         {t("view_on_map")}
                     </Typography>
@@ -448,17 +458,17 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                             maxZoom={19}
                             updateWhenZooming
                         />
-                    {clusterMeta.map((cluster, index) => {
-                        const icon = createIcon(
-                            cluster.thumbnail ?? "",
-                            index === selectedClusterIndex ? 76 : 68,
-                            "#f6f6f6",
-                            cluster.count,
-                            index === selectedClusterIndex,
-                        );
-                        return (
-                            <Marker
-                                key={`${cluster.lat}-${cluster.lng}-${index}`}
+                        {clusterMeta.map((cluster, index) => {
+                            const icon = createIcon(
+                                cluster.thumbnail ?? "",
+                                index === selectedClusterIndex ? 76 : 68,
+                                "#f6f6f6",
+                                cluster.count,
+                                index === selectedClusterIndex,
+                            );
+                            return (
+                                <Marker
+                                    key={`${cluster.lat}-${cluster.lng}-${index}`}
                                     position={[cluster.lat, cluster.lng]}
                                     icon={icon ?? undefined}
                                     eventHandlers={{
@@ -507,12 +517,22 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     );
 };
 
-const CenteredBox: React.FC<React.PropsWithChildren> = ({ children }) => (
+interface CenteredBoxProps extends React.PropsWithChildren {
+    onClose?: () => void;
+    closeLabel?: string;
+}
+
+const CenteredBox: React.FC<CenteredBoxProps> = ({
+    children,
+    onClose,
+    closeLabel,
+}) => (
     <Box
         sx={{
             width: "100%",
             height: "100%",
             minHeight: "420px",
+            position: "relative",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -521,6 +541,21 @@ const CenteredBox: React.FC<React.PropsWithChildren> = ({ children }) => (
             textAlign: "center",
         }}
     >
+        {onClose ? (
+            <IconButton
+                aria-label={closeLabel ?? "Close"}
+                onClick={onClose}
+                sx={{
+                    position: "absolute",
+                    top: 16,
+                    right: 16,
+                    bgcolor: (theme) => theme.vars.palette.background.paper,
+                    boxShadow: (theme) => theme.shadows[2],
+                }}
+            >
+                <CloseIcon />
+            </IconButton>
+        ) : null}
         {children}
     </Box>
 );
