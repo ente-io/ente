@@ -1,9 +1,19 @@
+import "dart:io";
+import "dart:math" as math;
+import "dart:typed_data";
+import "dart:ui" as ui;
+
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
 import "package:photos/ui/activity/rituals_section.dart";
+import "package:photos/utils/share_util.dart";
+import "package:share_plus/share_plus.dart";
 
 class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key, this.ritual});
@@ -16,6 +26,7 @@ class ActivityScreen extends StatefulWidget {
 
 class _ActivityScreenState extends State<ActivityScreen> {
   Ritual? _selectedRitual;
+  final GlobalKey _shareButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -57,12 +68,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
             final displaySummary = summary != null && selectedRitual != null
                 ? _summaryForRitual(summary, selectedRitual)
                 : summary;
+            final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
             final String sectionTitle = selectedRitual == null
                 ? "Take a photo every day"
                 : (selectedRitual.title.isEmpty
                     ? "Untitled ritual"
                     : selectedRitual.title);
+            final bool shareEnabled = summaryToShare != null;
             return RefreshIndicator(
               onRefresh: activityService.refresh,
               child: ListView(
@@ -92,8 +105,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           ),
                           const Spacer(),
                           InkWell(
+                            key: _shareButtonKey,
                             customBorder: const CircleBorder(),
-                            onTap: () {},
+                            onTap: summaryToShare != null
+                                ? () => _shareActivity(
+                                      summaryToShare,
+                                      sectionTitle,
+                                    )
+                                : null,
                             child: SizedBox(
                               width: 44,
                               height: 44,
@@ -102,7 +121,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 child: Icon(
                                   Icons.share_outlined,
                                   size: 22,
-                                  color: iconColor,
+                                  color: shareEnabled
+                                      ? iconColor
+                                      : Theme.of(context)
+                                          .disabledColor
+                                          .withValues(alpha: 0.7),
                                 ),
                               ),
                             ),
@@ -120,6 +143,96 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _shareActivity(
+    ActivitySummary summary,
+    String title,
+  ) async {
+    OverlayEntry? entry;
+    final prevPaintSize = debugPaintSizeEnabled;
+    final prevPaintBaselines = debugPaintBaselinesEnabled;
+    final prevPaintPointers = debugPaintPointersEnabled;
+    final prevRepaintRainbow = debugRepaintRainbowEnabled;
+    try {
+      debugPaintSizeEnabled = false;
+      debugPaintBaselinesEnabled = false;
+      debugPaintPointersEnabled = false;
+      debugRepaintRainbowEnabled = false;
+
+      final overlay = Overlay.maybeOf(context, rootOverlay: true);
+      if (overlay == null) {
+        throw StateError("Overlay not available for sharing");
+      }
+      final key = GlobalKey();
+      entry = OverlayEntry(
+        builder: (context) {
+          return Center(
+            child: Material(
+              type: MaterialType.transparency,
+              child: RepaintBoundary(
+                key: key,
+                child: _ActivityShareCard(
+                  summary: summary,
+                  title: title,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+      overlay.insert(entry);
+      await WidgetsBinding.instance.endOfFrame;
+      await Future.delayed(const Duration(milliseconds: 40));
+      final boundary =
+          key.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw StateError("Render boundary unavailable");
+      }
+      if (boundary.size.isEmpty) {
+        throw StateError("Render boundary has zero size");
+      }
+      if (boundary.debugNeedsPaint) {
+        await WidgetsBinding.instance.endOfFrame;
+        await Future.delayed(const Duration(milliseconds: 24));
+      }
+      if (boundary.debugNeedsPaint) {
+        throw StateError("Render boundary not ready to paint");
+      }
+      final double pixelRatio =
+          (MediaQuery.of(context).devicePixelRatio * 1.6).clamp(2.0, 3.5);
+      final ui.Image image =
+          await boundary.toImage(pixelRatio: pixelRatio.toDouble());
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      final data = byteData?.buffer.asUint8List();
+      if (data == null) return;
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        "${dir.path}/activity_share_${DateTime.now().millisecondsSinceEpoch}.png",
+      );
+      await file.writeAsBytes(data, flush: true);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          sharePositionOrigin: shareButtonRect(context, _shareButtonKey),
+        ),
+      );
+    } catch (e, s) {
+      debugPrint("Failed to share activity: $e\n$s");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Unable to share right now. Please try again."),
+        ),
+      );
+    } finally {
+      debugPaintSizeEnabled = prevPaintSize;
+      debugPaintBaselinesEnabled = prevPaintBaselines;
+      debugPaintPointersEnabled = prevPaintPointers;
+      debugRepaintRainbowEnabled = prevRepaintRainbow;
+      entry?.remove();
+    }
   }
 
   ActivitySummary _summaryForRitual(
@@ -189,6 +302,92 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       },
       generatedAt: summary.generatedAt,
+    );
+  }
+}
+
+class _ActivityShareCard extends StatelessWidget {
+  const _ActivityShareCard({
+    required this.summary,
+    required this.title,
+  });
+
+  final ActivitySummary summary;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final double maxWidth = math
+        .min(
+          math.max(MediaQuery.of(context).size.width - 32, 360),
+          440,
+        )
+        .toDouble();
+    return Container(
+      color: colorScheme.backgroundBase,
+      padding: const EdgeInsets.all(12),
+      child: Center(
+        child: SizedBox(
+          width: maxWidth,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Container(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colorScheme.backgroundElevated2
+                  : Colors.white,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyBold.copyWith(
+                        fontSize: 20,
+                        height: 1.2,
+                        decoration: TextDecoration.none,
+                        decorationColor: Colors.transparent,
+                        decorationThickness: 0,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: ActivityHeatmapCard(
+                      summary: summary,
+                      compact: true,
+                      allowHorizontalScroll: false,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    color: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        "assets/ente_io_green.png",
+                        width: 116,
+                        height: 27,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

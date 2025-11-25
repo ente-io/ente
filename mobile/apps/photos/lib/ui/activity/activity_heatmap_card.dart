@@ -6,9 +6,16 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class ActivityHeatmapCard extends StatelessWidget {
-  const ActivityHeatmapCard({required this.summary, super.key});
+  const ActivityHeatmapCard({
+    required this.summary,
+    this.compact = false,
+    this.allowHorizontalScroll = false,
+    super.key,
+  });
 
   final ActivitySummary? summary;
+  final bool compact;
+  final bool allowHorizontalScroll;
 
   @override
   Widget build(BuildContext context) {
@@ -36,16 +43,33 @@ class ActivityHeatmapCard extends StatelessWidget {
           ),
         ),
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        child: _Heatmap(days: last365),
+        child: allowHorizontalScroll
+            ? SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
+                clipBehavior: Clip.none,
+                child: _Heatmap(
+                  days: last365,
+                  compact: compact,
+                ),
+              )
+            : _Heatmap(
+                days: last365,
+                compact: compact,
+              ),
       ),
     );
   }
 }
 
 class _Heatmap extends StatelessWidget {
-  const _Heatmap({required this.days});
+  const _Heatmap({
+    required this.days,
+    required this.compact,
+  });
 
   final List<ActivityDay> days;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -128,13 +152,13 @@ class _Heatmap extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Keep a minimum gutter width in case the container gets very narrow.
-        const double monthLabelWidth = 32;
-        const double gapX = 4;
-        const double gapY = 3;
-        const double cellWidth = 38.31;
-        const double cellHeight = 9.82;
-        const double headerRowHeight = 16;
-        const double headerToGridGap = 4;
+        final double monthLabelWidth = compact ? 28 : 32;
+        final double gapX = compact ? 2.5 : 4;
+        final double gapY = compact ? 2 : 3;
+        final double cellWidth = compact ? 30 : 38.31;
+        final double cellHeight = compact ? 8.5 : 9.82;
+        final double headerRowHeight = compact ? 13 : 16;
+        final double headerToGridGap = compact ? 3 : 4;
         final double gridWidth =
             (dayHeader.length * cellWidth) + ((dayHeader.length - 1) * gapX);
         final double remainingWidth =
@@ -145,9 +169,9 @@ class _Heatmap extends StatelessWidget {
         final BorderRadius pillRadius = BorderRadius.circular(cellHeight);
         final TextStyle headerStyle = TextStyle(
           color: colorScheme.textMuted.withValues(alpha: 0.45),
-          fontSize: 6.834,
+          fontSize: compact ? 6.2 : 6.834,
           fontWeight: FontWeight.w600,
-          height: 2.45,
+          height: compact ? 2.2 : 2.45,
           fontFamily: "Inter",
           decoration: TextDecoration.none,
         );
@@ -168,7 +192,7 @@ class _Heatmap extends StatelessWidget {
             ),
           );
           if (i != dayHeader.length - 1) {
-            dayHeaderRow.add(const SizedBox(width: gapX));
+            dayHeaderRow.add(SizedBox(width: gapX));
           }
         }
 
@@ -180,7 +204,7 @@ class _Heatmap extends StatelessWidget {
               SizedBox(
                 width: gutterWidth,
                 child: Padding(
-                  padding: const EdgeInsets.only(
+                  padding: EdgeInsets.only(
                     top: headerRowHeight + headerToGridGap + 8,
                   ),
                   child: Column(
@@ -207,7 +231,7 @@ class _Heatmap extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: gapX),
+              SizedBox(width: gapX),
               SizedBox(
                 width: gridWidth,
                 child: Column(
@@ -215,7 +239,7 @@ class _Heatmap extends StatelessWidget {
                   children: [
                     const SizedBox(height: 8),
                     Row(children: dayHeaderRow),
-                    const SizedBox(height: headerToGridGap),
+                    SizedBox(height: headerToGridGap),
                     ...weeks.asMap().entries.map(
                       (entry) {
                         final isLast = entry.key == weeks.length - 1;
@@ -244,7 +268,7 @@ class _Heatmap extends StatelessWidget {
                                       borderRadius: pillRadius,
                                     ),
                                   ),
-                                  if (!isLastCell) const SizedBox(width: gapX),
+                                  if (!isLastCell) SizedBox(width: gapX),
                                 ],
                               );
                             }).toList(),
@@ -255,7 +279,7 @@ class _Heatmap extends StatelessWidget {
                   ],
                 ),
               ),
-              const Spacer(),
+              const SizedBox.shrink(),
             ],
           ),
         );
