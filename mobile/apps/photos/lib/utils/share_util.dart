@@ -49,13 +49,25 @@ Future<void> share(
     await dialog.hide();
     final resolvedPaths = <String>[];
     for (var i = 0; i < paths.length; i++) {
-      final path = paths[i];
+      String? path = paths[i];
       if (path == null) {
         _logger.warning(
           "share missing local path for file $i/${files.length} "
           "(remote: ${files[i].isRemoteFile})",
         );
-        continue;
+        final enteFile = files[i];
+        final localID = enteFile.localID;
+        _logger.warning(
+          "path was null for $enteFile with localID: $localID. Getting file from server now",
+        );
+        if (enteFile.isRemoteFile && enteFile.isUploaded) {
+          final file = await getFileFromServer(enteFile);
+          path = file?.path;
+        }
+        if (path == null) {
+          _logger.warning("file from server is still null");
+          continue;
+        }
       }
       resolvedPaths.add(path);
     }
