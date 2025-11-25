@@ -9,6 +9,7 @@ class SearchableAppBar extends StatefulWidget {
   final VoidCallback? onSearchClosed;
   final String heroTag;
   final bool autoActivateSearch;
+  final Color? backgroundColor;
 
   const SearchableAppBar({
     super.key,
@@ -18,6 +19,7 @@ class SearchableAppBar extends StatefulWidget {
     this.onSearchClosed,
     this.heroTag = "",
     this.autoActivateSearch = false,
+    this.backgroundColor,
   });
 
   @override
@@ -83,6 +85,9 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return SliverAppBar(
       floating: true,
+      backgroundColor:
+          widget.backgroundColor ?? Theme.of(context).colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: !_isSearchActive,
       title: AnimatedSwitcher(
@@ -97,11 +102,13 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
         },
         child: _isSearchActive
             ? _buildSearchField()
-            : Hero(
-                key: const ValueKey('titleBar'),
-                tag: widget.heroTag,
-                child: widget.title,
-              ),
+            : widget.heroTag.isNotEmpty
+                ? Hero(
+                    key: const ValueKey('titleBar'),
+                    tag: widget.heroTag,
+                    child: widget.title,
+                  )
+                : widget.title,
       ),
       actions: _isSearchActive
           ? null

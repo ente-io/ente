@@ -156,10 +156,34 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                     title: AppLocalizations.of(context).onDevice,
                   ),
                 ),
-                trailingWidget: IconButtonWidget(
-                  icon: Icons.chevron_right,
-                  iconButtonType: IconButtonType.secondary,
-                  iconColor: colorScheme.blurStrokePressed,
+                trailingWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButtonWidget(
+                      icon: Icons.search,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokePressed,
+                      onTap: () {
+                        unawaited(
+                          routeToPage(
+                            context,
+                            DeviceFolderVerticalGridView(
+                              appTitle: SectionTitle(
+                                title: AppLocalizations.of(context).onDevice,
+                              ),
+                              tag: "OnDeviceAppTitle",
+                              startInSearchMode: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButtonWidget(
+                      icon: Icons.chevron_right,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokePressed,
+                    ),
+                  ],
                 ),
               ),
             ),
