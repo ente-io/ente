@@ -530,7 +530,9 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (value.isEmpty) {
           return;
         }
-        if (value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link (ente:// scheme or albums.ente.io)
+        if (value[0].path.startsWith("ente://") ||
+            value[0].path.contains("albums.ente.io")) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
@@ -597,7 +599,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link (ente:// scheme or albums.ente.io)
+        if (value.isNotEmpty &&
+            (value[0].path.startsWith("ente://") ||
+                value[0].path.contains("albums.ente.io"))) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
