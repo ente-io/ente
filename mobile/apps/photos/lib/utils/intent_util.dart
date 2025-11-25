@@ -7,7 +7,7 @@ Future<MediaExtentionAction> initIntentAction() async {
   MediaExtentionAction mediaExtensionAction;
   try {
     mediaExtensionAction = await mediaExtensionPlugin.getIntentAction();
-  } on PlatformException catch (e) {
+  } on PlatformException {
     mediaExtensionAction = MediaExtentionAction(action: IntentAction.main);
   } catch (error) {
     mediaExtensionAction = MediaExtentionAction(action: IntentAction.main);

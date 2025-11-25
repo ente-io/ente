@@ -4,6 +4,7 @@ import "dart:io";
 
 import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -637,9 +638,13 @@ class _HomeWidgetState extends State<HomeWidget> {
           if (_isPublicAlbumHost(mediaAction.data!)) {
             await _handlePublicAlbumLink(uri, "MediaExtension.getIntentAction");
             handledByMediaExtension = true;
+          } else {
+            _logger.info(
+              "uri doesn't contain 'albums.ente.io' in MediaExtension deep link",
+            );
           }
         } catch (e) {
-          // Silently ignore parsing errors
+          _logger.severe("Error parsing MediaExtension deep link: $e");
         }
       }
     }
@@ -648,29 +653,50 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!handledByMediaExtension) {
       try {
         final initialUri = await appLinks.getInitialLink();
-        if (initialUri != null &&
-            initialUri.scheme == "ente" &&
-            _isPublicAlbumHost(initialUri.toString())) {
-          await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
+        if (initialUri != null) {
+          if (initialUri.scheme == "ente" &&
+              _isPublicAlbumHost(initialUri.toString())) {
+            await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
+          } else {
+            _logger.info(
+              "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+            );
+          }
+        } else {
+          _logger.info(
+            "No initial link received in public album link subscription.",
+          );
         }
       } catch (e) {
-        // Silently ignore errors
+        _logger
+            .severe("Error while getting initial public album deep link: $e");
       }
     }
 
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
-        if (uri != null &&
-            uri.scheme == "ente" &&
-            _isPublicAlbumHost(uri.toString())) {
-          _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
+        if (uri != null) {
+          if (uri.scheme == "ente" && _isPublicAlbumHost(uri.toString())) {
+            _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
+          } else {
+            _logger.info(
+              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+            );
+          }
+        } else {
+          _logger.info("No link received in public album link subscription.");
         }
+      },
+      onError: (err) {
+        _logger.severe("Error while getting public album deep link: $err");
       },
     );
   }
 
   bool _isPublicAlbumHost(String url) {
-    return url.contains("albums.ente.io") || url.contains("192.168.0.61:3002");
+    if (url.contains("albums.ente.io")) return true;
+    if (kDebugMode && url.contains("192.168.0.61:3002")) return true;
+    return false;
   }
 
   @override
