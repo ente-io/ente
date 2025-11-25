@@ -20,6 +20,8 @@ class ActivityService {
 
   ActivityService._privateConstructor();
 
+  static const _notificationLookaheadDays = 60;
+  static const _maxScheduledNotificationsPerRitual = 30;
   final Logger _logger = Logger("ActivityService");
   final ValueNotifier<ActivityState> stateNotifier =
       ValueNotifier<ActivityState>(ActivityState.loading());
@@ -274,7 +276,10 @@ class ActivityService {
     final today = DateTime(now.year, now.month, now.day);
     final baseId = ritual.id.hashCode & 0x7fffffff;
     int scheduled = 0;
-    for (int offset = 0; offset < 14; offset++) {
+    for (int offset = 0;
+        offset < _notificationLookaheadDays &&
+            scheduled < _maxScheduledNotificationsPerRitual;
+        offset++) {
       final targetDate = today.add(Duration(days: offset));
       final dayIndex = targetDate.weekday % 7; // Sunday -> 0
       if (!ritual.daysOfWeek[dayIndex]) continue;
@@ -299,7 +304,6 @@ class ActivityService {
         dateTime: scheduledDate,
       );
       scheduled += 1;
-      if (scheduled >= 7) break;
     }
   }
 
