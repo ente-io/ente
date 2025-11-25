@@ -6,7 +6,10 @@ import 'package:dir_utils/dir_utils.dart';
 import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_events/event_bus.dart';
+import 'package:ente_events/models/signed_out_event.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +23,35 @@ class LocalBackupService {
   static const int _maxBackups = 5;
   static const _lastBackupDayKey = 'lastBackupDay';
   static const _iosBookmarkKey = 'autoBackupIosBookmark';
+
+  Future<void> init(
+    BaseConfiguration config, {
+    bool hasOptedForOfflineMode = false,
+  }) async {
+    await _clearBackupPasswordIfFreshInstall(config, hasOptedForOfflineMode);
+
+    Bus.instance.on<SignedOutEvent>().listen((event) {
+      _clearBackupPassword();
+    });
+  }
+
+  /// Clear backup password on fresh install (like lock screen does).
+  /// Only clears if not logged in and not in offline mode.
+  Future<void> _clearBackupPasswordIfFreshInstall(
+    BaseConfiguration config,
+    bool hasOptedForOfflineMode,
+  ) async {
+    if ((Platform.isIOS || Platform.isMacOS) &&
+        !config.isLoggedIn() &&
+        !hasOptedForOfflineMode) {
+      await _clearBackupPassword();
+    }
+  }
+
+  Future<void> _clearBackupPassword() async {
+    await SecureStorageService.instance
+        .delete(SecureStorageService.autoBackupPasswordKey);
+  }
 
   Future<bool> triggerAutomaticBackup({bool isManual = false}) async {
     try {
@@ -128,13 +160,16 @@ class LocalBackupService {
           bookmark: target.iosBookmark,
         );
         final result = await dirUtils.withAccess(dir, (path) async {
+          // Use EnteAuthBackups subdirectory
+          final backupPath = '$path/EnteAuthBackups';
+          await Directory(backupPath).create(recursive: true);
           final success = await dirUtils.writeFile(
-            PickedDirectory(path: path),
+            PickedDirectory(path: backupPath),
             fileName,
             contentBytes,
           );
           if (success) {
-            await _manageOldBackups(path);
+            await _manageOldBackups(backupPath);
           }
           return success;
         });
@@ -210,7 +245,8 @@ class LocalBackupService {
   Future<void> deleteAllBackupsIn(String path, {String? iosBookmark}) async {
     try {
       final dirUtils = DirUtils.instance;
-      final backupPath = path;
+      // On iOS, backups are in EnteAuthBackups subdirectory
+      final backupPath = Platform.isIOS ? '$path/EnteAuthBackups' : path;
 
       Future<void> doDelete() async {
         final backupDir = Directory(backupPath);

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_base/models/database.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
@@ -24,8 +23,8 @@ class Configuration extends BaseConfiguration {
 
   @override
   Future<void> init(List<EnteBaseDatabase> dbs) async {
-    _preferences = await SharedPreferences.getInstance();
     await super.init(dbs);
+    _preferences = await SharedPreferences.getInstance();
     _secureStorage = const FlutterSecureStorage(
       iOptions: IOSOptions(
         accessibility: KeychainAccessibility.first_unlock_this_device,
@@ -52,19 +51,11 @@ class Configuration extends BaseConfiguration {
 
   @override
   // This includes both base keys (key, secretKey) and auth-specific keys.
-  List<String> get secureStorageKeys {
-    final keys = [
-      BaseConfiguration.keyKey,
-      BaseConfiguration.secretKeyKey,
-      authSecretKeyKey,
-    ];
-    if (!_shouldPreserveLocalBackupPassword()) {
-      keys.add(SecureStorageService.autoBackupPasswordKey);
-    }
-    // Note: offlineAuthSecretKey is intentionally not included here
-    // as it persists across logouts
-    return keys;
-  }
+  List<String> get secureStorageKeys => [
+        BaseConfiguration.keyKey,
+        BaseConfiguration.secretKeyKey,
+        authSecretKeyKey,
+      ];
 
   @override
   Future<void> logout({bool autoLogout = false}) async {
@@ -111,9 +102,5 @@ class Configuration extends BaseConfiguration {
       );
     }
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
-  }
-
-  bool _shouldPreserveLocalBackupPassword() {
-    return hasOptedForOfflineMode() && !hasConfiguredAccount();
   }
 }

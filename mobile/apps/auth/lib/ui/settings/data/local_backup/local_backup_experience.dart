@@ -692,13 +692,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     bool shouldTriggerBackup = true,
   }) async {
     if (Platform.isAndroid) {
-      final saved = await _pickAndPersistAndroidLocation();
+      final saved = await _pickAndPersistAndroidLocation(
+        successMessage: successMessage,
+        shouldTriggerBackup: shouldTriggerBackup,
+      );
       if (saved) {
-        if (shouldTriggerBackup) {
-          await LocalBackupService.instance.triggerAutomaticBackup(
-            isManual: true,
-          );
-        }
       } else if (requireSelection) {
         _showSnackBar(context.l10n.selectFolderToContinue);
       }
@@ -763,10 +761,15 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
 
       try {
-        await LocalBackupService.instance.writeBackupToDirectory(path);
+        // Create EnteAuthBackups subdirectory inside the selected path
+        final backupDir = Directory('$path/EnteAuthBackups');
+        await backupDir.create(recursive: true);
+        await LocalBackupService.instance
+            .writeBackupToDirectory(backupDir.path);
       } finally {
         await SecurityBookmarkService.instance.stopAccessingBookmark(bookmark);
       }
+      // Store the parent path (with bookmark) - backups go to EnteAuthBackups subdir
       await prefs.setString('autoBackupPath', path);
       await prefs.setString(_iosBookmarkKey, bookmark);
       await prefs.remove(_treeUriKey);
@@ -850,16 +853,27 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     return androidBasePath != null ? '$androidBasePath/EnteAuthBackups' : null;
   }
 
-  Future<bool> _pickAndPersistAndroidLocation() async {
+  Future<bool> _pickAndPersistAndroidLocation({
+    String? successMessage,
+    bool shouldTriggerBackup = true,
+  }) async {
     final picked = await DirUtils.instance.pickDirectory();
     final treeUri = picked?.treeUri;
     if (treeUri == null || treeUri.isEmpty) {
       return false;
     }
-    return _persistAndroidLocation(treeUri);
+    return _persistAndroidLocation(
+      treeUri,
+      successMessage: successMessage,
+      shouldTriggerBackup: shouldTriggerBackup,
+    );
   }
 
-  Future<bool> _persistAndroidLocation(String treeUri) async {
+  Future<bool> _persistAndroidLocation(
+    String treeUri, {
+    String? successMessage,
+    bool shouldTriggerBackup = true,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     try {
       await prefs.setString(_treeUriKey, treeUri);
@@ -869,7 +883,19 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         _backupTreeUri = treeUri;
         _backupPath = null;
       });
-      _showSnackBar(context.l10n.locationUpdatedAndBackupCreated);
+      if (shouldTriggerBackup) {
+        final backupSuccess = await LocalBackupService.instance
+            .triggerAutomaticBackup(isManual: true);
+        _showSnackBar(
+          backupSuccess
+              ? (successMessage ?? context.l10n.locationUpdatedAndBackupCreated)
+              : context.l10n.somethingWentWrongPleaseTryAgain,
+        );
+        return backupSuccess;
+      }
+      if (successMessage != null) {
+        _showSnackBar(successMessage);
+      }
       return true;
     } catch (_) {
       _showSnackBar(context.l10n.noDefaultBackupFolder);
