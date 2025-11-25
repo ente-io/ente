@@ -44,6 +44,25 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ritualsEnabled = flagService.ritualsFlag;
+    if (!ritualsEnabled) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Rituals"),
+          centerTitle: false,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Text(
+              "Rituals are currently limited to internal users.",
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Rituals"),

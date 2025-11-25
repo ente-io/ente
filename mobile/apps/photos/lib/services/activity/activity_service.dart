@@ -34,6 +34,15 @@ class ActivityService {
 
   Future<void> init() async {
     _preferences = ServiceLocator.instance.prefs;
+    if (!flagService.ritualsFlag) {
+      stateNotifier.value = const ActivityState(
+        loading: false,
+        summary: null,
+        rituals: [],
+        error: null,
+      );
+      return;
+    }
     _filesUpdatedSubscription =
         Bus.instance.on<FilesUpdatedEvent>().listen((event) {
       _scheduleRefresh();
@@ -55,6 +64,15 @@ class ActivityService {
   }
 
   Future<void> refresh() async {
+    if (!flagService.ritualsFlag) {
+      stateNotifier.value = const ActivityState(
+        loading: false,
+        summary: null,
+        rituals: [],
+        error: null,
+      );
+      return;
+    }
     try {
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: true,

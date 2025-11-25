@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/activity/activity_screen.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -18,6 +19,19 @@ class RitualCameraPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!flagService.ritualsFlag) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text("Ritual capture"),
+        ),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: Text("Rituals are currently limited to internal users."),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text("Ritual capture"),

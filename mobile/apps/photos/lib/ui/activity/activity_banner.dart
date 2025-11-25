@@ -10,6 +10,9 @@ class ActivityBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!flagService.ritualsFlag) {
+      return const SizedBox.shrink();
+    }
     return ValueListenableBuilder<ActivityState>(
       valueListenable: activityService.stateNotifier,
       builder: (context, state, _) {
