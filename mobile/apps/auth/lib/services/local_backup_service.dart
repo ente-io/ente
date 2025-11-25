@@ -2,16 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dir_utils/dir_utils.dart';
 import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/services/secure_storage_service.dart';
-import 'package:ente_auth/services/security_bookmark_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:saf_stream/saf_stream.dart';
-import 'package:saf_util/saf_util.dart';
-import 'package:security_scoped_resource/security_scoped_resource.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalBackupService {
@@ -113,117 +110,64 @@ class LocalBackupService {
     required String content,
   }) async {
     try {
+      final dirUtils = DirUtils.instance;
+      final contentBytes = Uint8List.fromList(utf8.encode(content));
+
+      // Android SAF
       if (target.treeUri != null) {
-        await _writeBackupWithSaf(target.treeUri!, fileName, content);
-        await _pruneSafBackups(target.treeUri!, limit: _maxBackups);
-        return true;
+        final dir = PickedDirectory(path: '', treeUri: target.treeUri);
+        final success = await dirUtils.writeFile(dir, fileName, contentBytes);
+        if (success) {
+          await _pruneBackups(dir, limit: _maxBackups);
+        }
+        return success;
       }
 
-      final scopedDir = Directory(target.path!);
-      // On iOS, saved path is the parent; we write to EnteAuthBackups subdirectory
-      final backupDir = Platform.isIOS
-          ? Directory('${scopedDir.path}/EnteAuthBackups')
-          : scopedDir;
+      // iOS with bookmark or other platforms
+      final subPath = Platform.isIOS ? 'EnteAuthBackups' : null;
+      final dir = PickedDirectory(
+        path: target.path!,
+        bookmark: target.iosBookmark,
+      );
 
-      Future<bool> doWrite() async {
-        _logger.info('Creating backup directory: ${backupDir.path}');
-        await backupDir.create(recursive: true);
-        _logger.info('Backup directory created/exists');
-
-        final filePath = '${backupDir.path}/$fileName';
-
-        _logger.info('Writing backup file: $filePath');
-        final backupFile = File(filePath);
-        await backupFile.writeAsString(content);
-        _logger.info('Backup file written successfully');
-
-        await _manageOldBackups(backupDir.path);
-        _logger
-            .info('Automatic encrypted backup successful! Saved to: $filePath');
-        return true;
-      }
-
-      // On iOS, we need to use security-scoped access
-      if (Platform.isIOS) {
-        final bookmark = target.iosBookmark;
-        bool hasAccess = false;
-        bool usingBookmark = false;
-
-        // Try bookmark-based access first
-        if (bookmark != null && bookmark.isNotEmpty) {
-          _logger.info('iOS: Starting access via bookmark');
-          final accessResult = await SecurityBookmarkService.instance
-              .startAccessingBookmark(bookmark);
-          if (accessResult != null && accessResult.success) {
-            hasAccess = true;
-            usingBookmark = true;
-            if (accessResult.isStale) {
-              _logger.warning(
-                'iOS: Bookmark is stale, user may need to re-select directory',
-              );
-            }
-            _logger.info('iOS: Scoped access granted via bookmark');
-          } else {
-            _logger.warning('iOS: Bookmark access failed, trying path-based');
+      // On iOS, use withAccess for scoped access
+      if (Platform.isIOS && target.iosBookmark != null) {
+        final result = await dirUtils.withAccess(dir, (path) async {
+          final fullPath = subPath != null ? '$path/$subPath' : path;
+          await dirUtils.createDirectory(dir, subPath!);
+          final success = await dirUtils.writeFile(
+            PickedDirectory(path: fullPath),
+            fileName,
+            contentBytes,
+          );
+          if (success) {
+            await _manageOldBackups(fullPath);
           }
-        }
-
-        // Fallback to path-based access
-        if (!hasAccess) {
-          _logger.info('iOS: Trying path-based access for: ${scopedDir.path}');
-          hasAccess = await SecurityScopedResource.instance
-              .startAccessingSecurityScopedResource(scopedDir);
-          _logger.info('iOS: Path-based access result: $hasAccess');
-        }
-
-        if (!hasAccess) {
-          _logger
-              .severe('iOS: All access methods failed for: ${scopedDir.path}');
-          return false;
-        }
-
-        try {
-          return await doWrite();
-        } finally {
-          if (usingBookmark && bookmark != null) {
-            await SecurityBookmarkService.instance
-                .stopAccessingBookmark(bookmark);
-          } else {
-            await SecurityScopedResource.instance
-                .stopAccessingSecurityScopedResource(scopedDir);
-          }
-        }
+          return success;
+        });
+        return result ?? false;
       }
 
-      return await doWrite();
+      // Non-iOS: direct file write
+      final basePath = subPath != null ? '${target.path}/$subPath' : target.path!;
+      await Directory(basePath).create(recursive: true);
+      final filePath = '$basePath/$fileName';
+      await File(filePath).writeAsBytes(contentBytes);
+      await _manageOldBackups(basePath);
+      _logger.info('Backup written to: $filePath');
+      return true;
     } catch (e, s) {
       _logger.severe('Failed to write backup: $e', e, s);
       return false;
     }
   }
 
-  Future<void> _writeBackupWithSaf(
-    String treeUri,
-    String fileName,
-    String content,
-  ) async {
-    final safStream = SafStream();
-    await safStream.writeFileBytes(
-      treeUri,
-      fileName,
-      'application/octet-stream',
-      Uint8List.fromList(utf8.encode(content)),
-      overwrite: true,
-    );
-    _logger.info('Automatic encrypted backup saved via SAF: $fileName');
-  }
-
-  Future<void> _pruneSafBackups(String treeUri, {required int limit}) async {
+  Future<void> _pruneBackups(PickedDirectory dir, {required int limit}) async {
     try {
-      final safUtil = SafUtil();
-      final entries = await safUtil.list(treeUri);
-      final backupFiles = entries
-          .where((file) => !file.isDir && _isBackupFile(file.name))
+      final dirUtils = DirUtils.instance;
+      final files = await dirUtils.listFiles(dir);
+      final backupFiles = files
+          .where((file) => !file.isDirectory && _isBackupFile(file.name))
           .toList();
 
       backupFiles.sort((a, b) {
@@ -234,11 +178,11 @@ class LocalBackupService {
 
       while (backupFiles.length > limit) {
         final file = backupFiles.removeAt(0);
-        await safUtil.delete(file.uri, file.isDir);
-        _logger.info('Deleted old backup via SAF: ${file.name}');
+        await dirUtils.deleteFile(dir, file);
+        _logger.info('Deleted old backup: ${file.name}');
       }
     } catch (e, s) {
-      _logger.severe('Error pruning SAF backups', e, s);
+      _logger.severe('Error pruning backups', e, s);
     }
   }
 
@@ -276,12 +220,12 @@ class LocalBackupService {
 
   Future<void> deleteAllBackupsIn(String path, {String? iosBookmark}) async {
     try {
-      final scopedDir = Directory(path);
-      // On iOS, saved path is the parent; backups are in EnteAuthBackups subdirectory
-      final backupDir =
-          Platform.isIOS ? Directory('$path/EnteAuthBackups') : scopedDir;
+      final dirUtils = DirUtils.instance;
+      final subPath = Platform.isIOS ? 'EnteAuthBackups' : null;
+      final backupPath = subPath != null ? '$path/$subPath' : path;
 
       Future<void> doDelete() async {
+        final backupDir = Directory(backupPath);
         if (!await backupDir.exists()) {
           _logger.warning('Old backup directory not found. Nothing to delete.');
           return;
@@ -308,50 +252,13 @@ class LocalBackupService {
         _logger.info('Successfully cleaned up old backup location.');
       }
 
-      // On iOS, we need to use security-scoped access
-      if (Platform.isIOS) {
-        bool hasAccess = false;
-        bool usingBookmark = false;
-
-        // Try bookmark-based access first
-        if (iosBookmark != null && iosBookmark.isNotEmpty) {
-          _logger.info('iOS: Starting access via bookmark for deletion');
-          final accessResult = await SecurityBookmarkService.instance
-              .startAccessingBookmark(iosBookmark);
-          if (accessResult != null && accessResult.success) {
-            hasAccess = true;
-            usingBookmark = true;
-            _logger.info('iOS: Scoped access granted via bookmark');
-          } else {
-            _logger.warning('iOS: Bookmark access failed, trying path-based');
-          }
-        }
-
-        // Fallback to path-based access
-        if (!hasAccess) {
-          _logger.info('iOS: Trying path-based access for: ${scopedDir.path}');
-          hasAccess = await SecurityScopedResource.instance
-              .startAccessingSecurityScopedResource(scopedDir);
-          _logger.info('iOS: Path-based access result: $hasAccess');
-        }
-
-        if (!hasAccess) {
-          _logger
-              .severe('iOS: All access methods failed for: ${scopedDir.path}');
-          return;
-        }
-
-        try {
+      // On iOS, use scoped access via bookmark
+      if (Platform.isIOS && iosBookmark != null && iosBookmark.isNotEmpty) {
+        final dir = PickedDirectory(path: path, bookmark: iosBookmark);
+        await dirUtils.withAccess(dir, (_) async {
           await doDelete();
-        } finally {
-          if (usingBookmark && iosBookmark != null) {
-            await SecurityBookmarkService.instance
-                .stopAccessingBookmark(iosBookmark);
-          } else {
-            await SecurityScopedResource.instance
-                .stopAccessingSecurityScopedResource(scopedDir);
-          }
-        }
+          return true;
+        });
       } else {
         await doDelete();
       }

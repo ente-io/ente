@@ -52,14 +52,19 @@ class Configuration extends BaseConfiguration {
 
   @override
   // This includes both base keys (key, secretKey) and auth-specific keys.
-  List<String> get secureStorageKeys => [
-        BaseConfiguration.keyKey,
-        BaseConfiguration.secretKeyKey,
-        authSecretKeyKey,
-        SecureStorageService.autoBackupPasswordKey,
-        // Note: offlineAuthSecretKey is intentionally not included here
-        // as it persists across logouts
-      ];
+  List<String> get secureStorageKeys {
+    final keys = [
+      BaseConfiguration.keyKey,
+      BaseConfiguration.secretKeyKey,
+      authSecretKeyKey,
+    ];
+    if (!_shouldPreserveLocalBackupPassword()) {
+      keys.add(SecureStorageService.autoBackupPasswordKey);
+    }
+    // Note: offlineAuthSecretKey is intentionally not included here
+    // as it persists across logouts
+    return keys;
+  }
 
   @override
   Future<void> logout({bool autoLogout = false}) async {
@@ -106,5 +111,9 @@ class Configuration extends BaseConfiguration {
       );
     }
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
+  }
+
+  bool _shouldPreserveLocalBackupPassword() {
+    return hasOptedForOfflineMode() && !hasConfiguredAccount();
   }
 }
