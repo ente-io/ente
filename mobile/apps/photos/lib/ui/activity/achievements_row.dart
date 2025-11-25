@@ -30,7 +30,7 @@ class AchievementsRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Achievements",
+            "Streaks",
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
@@ -60,11 +60,11 @@ class _BadgeTile extends StatelessWidget {
       return const SizedBox.shrink();
     }
     return Padding(
-      padding: const EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.only(right: 16),
       child: Image.asset(
         asset,
-        width: 58,
-        height: 58,
+        width: 92,
+        height: 92,
         fit: BoxFit.cover,
       ),
     );
