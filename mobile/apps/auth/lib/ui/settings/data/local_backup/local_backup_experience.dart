@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dir_utils/dir_utils.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/secure_storage_service.dart';
@@ -9,11 +10,9 @@ import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:saf_util/saf_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef LocalBackupVariantBuilder = Widget Function(
@@ -213,10 +212,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
 
       try {
-        _logger.info('Starting manual backup...');
         final success = await LocalBackupService.instance
             .triggerAutomaticBackup(isManual: true);
-        _logger.info('Manual backup result: $success');
         if (showSnackBar) {
           _showSnackBar(
             success
@@ -374,9 +371,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<bool> _hasStoredPassword() async {
     final stored = await _readStoredPassword();
-    final hasPassword = stored != null && stored.isNotEmpty;
-    _logger.info('_hasStoredPassword check: $hasPassword');
-    return hasPassword;
+    return stored != null && stored.isNotEmpty;
   }
 
   Future<bool> _clearBackupPassword() async {
@@ -391,14 +386,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
 
   Future<String?> _readStoredPassword() async {
     try {
-      final password = await SecureStorageService.instance
+      return SecureStorageService.instance
           .read(SecureStorageService.autoBackupPasswordKey);
-      _logger.info(
-        '_readStoredPassword: ${password != null ? "found (length: ${password.length})" : "null"}',
-      );
-      return password;
     } catch (e) {
-      _logger.severe('_readStoredPassword error: $e');
+      _logger.severe('Failed to read backup password: $e');
       return null;
     }
   }
@@ -594,10 +585,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
-    final pickedPath = await FilePicker.platform.getDirectoryPath();
-    if (pickedPath != null) {
+    final picked = await DirUtils.instance.pickDirectory();
+    if (picked != null && picked.path.isNotEmpty) {
       return _persistLocation(
-        pickedPath,
+        picked.path,
         successMessage: context.l10n.initialBackupCreated,
       );
     }
@@ -731,11 +722,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     } else {
       // Other platforms (macOS, etc.)
-      String? directoryPath = await FilePicker.platform.getDirectoryPath();
+      final picked = await DirUtils.instance.pickDirectory();
 
-      if (directoryPath != null) {
+      if (picked != null && picked.path.isNotEmpty) {
         final saved = await _persistLocation(
-          directoryPath,
+          picked.path,
           successMessage:
               successMessage ?? context.l10n.locationUpdatedAndBackupCreated,
         );
@@ -763,32 +754,19 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      _logger.info('iOS: Using pre-created bookmark for: $path');
-
       // Start accessing using the bookmark
       final accessResult = await SecurityBookmarkService.instance
           .startAccessingBookmark(bookmark);
       if (accessResult == null || !accessResult.success) {
-        _logger.severe('iOS: Failed to start accessing bookmark');
+        _logger.severe('iOS: Failed to start accessing bookmark for: $path');
         return false;
       }
-      _logger.info('iOS: Scoped access granted via bookmark');
 
       try {
-        final backupDir = Directory('$path/EnteAuthBackups');
-        _logger.info('iOS: Creating backup dir');
-        await backupDir.create(recursive: true);
-        _logger.info('iOS: Backup dir created, writing initial backup');
-        await LocalBackupService.instance.writeBackupToDirectory(
-          backupDir.path,
-        );
-        _logger.info('iOS: Initial backup written successfully');
+        await LocalBackupService.instance.writeBackupToDirectory(path);
       } finally {
         await SecurityBookmarkService.instance.stopAccessingBookmark(bookmark);
       }
-
-      // Save both the path (for display) and bookmark (for access)
-      _logger.info('iOS: Saving backup path and bookmark to preferences');
       await prefs.setString('autoBackupPath', path);
       await prefs.setString(_iosBookmarkKey, bookmark);
       await prefs.remove(_treeUriKey);
@@ -847,7 +825,6 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
     }
 
-    _logger.info('Attempting to save backup path: $path');
     if (await savePath(path)) {
       return true;
     }
@@ -874,12 +851,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _pickAndPersistAndroidLocation() async {
-    final saf = SafUtil();
-    final picked = await saf.pickDirectory(
-      writePermission: true,
-      persistablePermission: true,
-    );
-    final treeUri = picked?.uri;
+    final picked = await DirUtils.instance.pickDirectory();
+    final treeUri = picked?.treeUri;
     if (treeUri == null || treeUri.isEmpty) {
       return false;
     }

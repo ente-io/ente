@@ -63,6 +63,7 @@ class FileInfo {
   final String path;
   final bool isDirectory;
   final DateTime lastModified;
+
   /// Android SAF URI (for deletion). Null on other platforms.
   final String? uri;
 }
@@ -103,10 +104,7 @@ class DirUtils {
       final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
         'pickDirectory',
       );
-      if (result == null) {
-        _logger.info('iOS: Directory picker cancelled');
-        return null;
-      }
+      if (result == null) return null;
 
       final path = result['path'] as String?;
       final bookmark = result['bookmark'] as String?;
@@ -116,7 +114,6 @@ class DirUtils {
         return null;
       }
 
-      _logger.info('iOS: Picked directory: $path');
       return PickedDirectory(path: path, bookmark: bookmark);
     } on PlatformException catch (e) {
       _logger.severe('iOS: Failed to pick directory: ${e.message}');
@@ -131,12 +128,8 @@ class DirUtils {
         writePermission: true,
         persistablePermission: true,
       );
-      if (picked == null) {
-        _logger.info('Android: Directory picker cancelled');
-        return null;
-      }
+      if (picked == null) return null;
 
-      _logger.info('Android: Picked directory: ${picked.uri}');
       return PickedDirectory(
         path: picked.name,
         treeUri: picked.uri,
@@ -150,12 +143,8 @@ class DirUtils {
   Future<PickedDirectory?> _pickDirectoryOther() async {
     try {
       final path = await FilePicker.platform.getDirectoryPath();
-      if (path == null) {
-        _logger.info('Other: Directory picker cancelled');
-        return null;
-      }
+      if (path == null) return null;
 
-      _logger.info('Other: Picked directory: $path');
       return PickedDirectory(path: path);
     } catch (e) {
       _logger.severe('Other: Failed to pick directory: $e');
@@ -188,15 +177,11 @@ class DirUtils {
       );
       if (result == null) return null;
 
-      final accessResult = AccessResult(
+      return AccessResult(
         success: result['success'] as bool,
         path: result['path'] as String,
         isStale: result['isStale'] as bool,
       );
-      _logger.info(
-        'iOS: Start access: success=${accessResult.success}, isStale=${accessResult.isStale}',
-      );
-      return accessResult;
     } on PlatformException catch (e) {
       _logger.severe('iOS: Failed to start access: ${e.message}');
       return null;
@@ -219,7 +204,6 @@ class DirUtils {
         'stopAccess',
         {'bookmark': dir.bookmark},
       );
-      _logger.info('iOS: Stopped access');
       return result ?? false;
     } on PlatformException catch (e) {
       _logger.severe('iOS: Failed to stop access: ${e.message}');
@@ -287,7 +271,6 @@ class DirUtils {
         content,
         overwrite: true,
       );
-      _logger.info('Android: Wrote file: $fileName');
       return true;
     } catch (e) {
       _logger.severe('Android: Failed to write file: $e');
@@ -309,7 +292,6 @@ class DirUtils {
         'writeFile',
         {'path': filePath, 'content': content},
       );
-      _logger.info('iOS: Wrote file: $filePath');
       return result ?? false;
     } on PlatformException catch (e) {
       _logger.severe('iOS: Failed to write file: ${e.message}');
@@ -326,9 +308,7 @@ class DirUtils {
     try {
       final dirPath = subPath != null ? '$basePath/$subPath' : basePath;
       final filePath = '$dirPath/$fileName';
-      final file = File(filePath);
-      await file.writeAsBytes(content);
-      _logger.info('Other: Wrote file: $filePath');
+      await File(filePath).writeAsBytes(content);
       return true;
     } catch (e) {
       _logger.severe('Other: Failed to write file: $e');
@@ -337,7 +317,10 @@ class DirUtils {
   }
 
   /// List files in a directory.
-  Future<List<FileInfo>> listFiles(PickedDirectory dir, {String? subPath}) async {
+  Future<List<FileInfo>> listFiles(
+    PickedDirectory dir, {
+    String? subPath,
+  }) async {
     if (Platform.isAndroid && dir.treeUri != null) {
       return _listFilesAndroid(dir.treeUri!);
     } else if (Platform.isIOS && dir.bookmark != null) {
@@ -438,9 +421,7 @@ class DirUtils {
 
   Future<bool> _deleteFileAndroid(String uri, bool isDir) async {
     try {
-      final safUtil = SafUtil();
-      await safUtil.delete(uri, isDir);
-      _logger.info('Android: Deleted: $uri');
+      await SafUtil().delete(uri, isDir);
       return true;
     } catch (e) {
       _logger.severe('Android: Failed to delete: $e');
@@ -455,12 +436,9 @@ class DirUtils {
           'deleteFile',
           {'path': path},
         );
-        _logger.info('iOS: Deleted: $path');
         return result ?? false;
       } else {
-        final file = File(path);
-        await file.delete();
-        _logger.info('Other: Deleted: $path');
+        await File(path).delete();
         return true;
       }
     } catch (e) {
@@ -491,7 +469,6 @@ class DirUtils {
         'createDirectory',
         {'path': fullPath},
       );
-      _logger.info('iOS: Created directory: $fullPath');
       return result ?? false;
     } on PlatformException catch (e) {
       _logger.severe('iOS: Failed to create directory: ${e.message}');
@@ -501,9 +478,7 @@ class DirUtils {
 
   Future<bool> _createDirectoryOther(String basePath, String subPath) async {
     try {
-      final fullPath = '$basePath/$subPath';
-      await Directory(fullPath).create(recursive: true);
-      _logger.info('Other: Created directory: $fullPath');
+      await Directory('$basePath/$subPath').create(recursive: true);
       return true;
     } catch (e) {
       _logger.severe('Other: Failed to create directory: $e');

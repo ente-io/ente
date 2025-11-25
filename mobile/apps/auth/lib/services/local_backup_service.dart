@@ -87,10 +87,8 @@ class LocalBackupService {
       final fileName = _buildFileName(now, isManual: true);
       final filePath = '$directoryPath/$fileName';
 
-      _logger.info('Writing backup to: $filePath');
       final backupFile = File(filePath);
       await backupFile.writeAsString(encryptedJson);
-      _logger.info('Backup written successfully');
 
       await _manageOldBackups(directoryPath);
 
@@ -123,38 +121,32 @@ class LocalBackupService {
         return success;
       }
 
-      // iOS with bookmark or other platforms
-      final subPath = Platform.isIOS ? 'EnteAuthBackups' : null;
-      final dir = PickedDirectory(
-        path: target.path!,
-        bookmark: target.iosBookmark,
-      );
-
-      // On iOS, use withAccess for scoped access
+      // iOS with bookmark
       if (Platform.isIOS && target.iosBookmark != null) {
+        final dir = PickedDirectory(
+          path: target.path!,
+          bookmark: target.iosBookmark,
+        );
         final result = await dirUtils.withAccess(dir, (path) async {
-          final fullPath = subPath != null ? '$path/$subPath' : path;
-          await dirUtils.createDirectory(dir, subPath!);
           final success = await dirUtils.writeFile(
-            PickedDirectory(path: fullPath),
+            PickedDirectory(path: path),
             fileName,
             contentBytes,
           );
           if (success) {
-            await _manageOldBackups(fullPath);
+            await _manageOldBackups(path);
           }
           return success;
         });
         return result ?? false;
       }
 
-      // Non-iOS: direct file write
-      final basePath = subPath != null ? '${target.path}/$subPath' : target.path!;
+      // Other platforms: direct file write
+      final basePath = target.path!;
       await Directory(basePath).create(recursive: true);
       final filePath = '$basePath/$fileName';
       await File(filePath).writeAsBytes(contentBytes);
       await _manageOldBackups(basePath);
-      _logger.info('Backup written to: $filePath');
       return true;
     } catch (e, s) {
       _logger.severe('Failed to write backup: $e', e, s);
@@ -179,7 +171,6 @@ class LocalBackupService {
       while (backupFiles.length > limit) {
         final file = backupFiles.removeAt(0);
         await dirUtils.deleteFile(dir, file);
-        _logger.info('Deleted old backup: ${file.name}');
       }
     } catch (e, s) {
       _logger.severe('Error pruning backups', e, s);
@@ -210,9 +201,7 @@ class LocalBackupService {
       while (files.length > _maxBackups) {
         final fileToDelete = files.removeAt(0);
         await fileToDelete.delete();
-        _logger.info('Deleted old backup: ${fileToDelete.path}');
       }
-      _logger.info('Backup count is now ${files.length}. Cleanup complete.');
     } catch (e, s) {
       _logger.severe('Error during old backup cleanup', e, s);
     }
@@ -221,8 +210,7 @@ class LocalBackupService {
   Future<void> deleteAllBackupsIn(String path, {String? iosBookmark}) async {
     try {
       final dirUtils = DirUtils.instance;
-      final subPath = Platform.isIOS ? 'EnteAuthBackups' : null;
-      final backupPath = subPath != null ? '$path/$subPath' : path;
+      final backupPath = path;
 
       Future<void> doDelete() async {
         final backupDir = Directory(backupPath);
@@ -247,9 +235,7 @@ class LocalBackupService {
 
         for (final file in files) {
           await file.delete();
-          _logger.info('Deleted: ${file.path}');
         }
-        _logger.info('Successfully cleaned up old backup location.');
       }
 
       // On iOS, use scoped access via bookmark
