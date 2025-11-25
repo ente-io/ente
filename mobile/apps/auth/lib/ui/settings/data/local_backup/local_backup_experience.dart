@@ -933,7 +933,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   /// Check if the selected iOS path is the device root ("On My iPhone").
   ///
   /// "On My iPhone" root cannot store files directly - user must select
-  /// or create a folder inside it.
+  /// or create a folder inside it. Only the actual iOS File Provider Storage
+  /// root (AppGroup/UUID/File Provider Storage) is invalid.
   bool _isInvalidIosPath(String path) {
     if (!Platform.isIOS) return false;
     if (path.isEmpty) return true;
@@ -944,39 +945,19 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       normalized = normalized.substring(7);
     }
 
-    // iCloud Drive paths are always valid
-    if (normalized.contains('Mobile Documents/')) {
-      return false;
-    }
+    // Only reject the actual iOS File Provider Storage root.
+    // Pattern: .../AppGroup/UUID/File Provider Storage
+    // UUID format: 8-4-4-4-12 hex characters
+    final iosRootPattern = RegExp(
+      r'/AppGroup/[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/File Provider Storage/?$',
+    );
 
-    // Check if path ends at a root-level location without a subfolder
-    // Valid paths should have content after the container/app identifier
-    // e.g., /var/mobile/Containers/Shared/AppGroup/xxx/File Provider Storage/SomeApp/MyFolder
-    // Invalid: just the root with no actual folder selected
-
-    // If path contains File Provider Storage with a folder after it, it's valid
-    final fileProviderIndex = normalized.indexOf('File Provider Storage/');
-    if (fileProviderIndex != -1) {
-      final afterProvider = normalized
-          .substring(fileProviderIndex + 'File Provider Storage/'.length);
-      // Must have at least one more path component (the actual folder)
-      if (afterProvider.isNotEmpty && afterProvider.contains('/')) {
-        return false;
-      }
-      // Just "File Provider Storage/AppName" without a subfolder - invalid
-      _logger
-          .warning('iOS: Path appears to be app root without subfolder: $path');
+    if (iosRootPattern.hasMatch(normalized)) {
+      _logger.warning('iOS: Path is File Provider Storage root: $path');
       return true;
     }
 
-    // Documents directory is valid
-    if (normalized.contains('/Documents/') ||
-        normalized.endsWith('/Documents')) {
-      return false;
-    }
-
-    // If none of the known valid patterns match, assume it's the device root
-    _logger.warning('iOS: Potentially invalid backup path: $path');
-    return true;
+    // All other paths are valid (including user-created "File Provider Storage" folders)
+    return false;
   }
 }
