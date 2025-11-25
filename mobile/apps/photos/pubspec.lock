@@ -1595,7 +1595,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "23a38887fa6b61330452555f8e686c3a3a1c91a2"
+      resolved-ref: "324f8fbdbc7ae6d326a6d541751b7a895a249089"
       url: "https://github.com/ente-io/media_extension.git"
     source: git
     version: "1.0.2"
