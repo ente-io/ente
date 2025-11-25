@@ -633,8 +633,8 @@ class _HomeWidgetState extends State<HomeWidget> {
           mediaAction.data!.startsWith("ente://")) {
         try {
           final uri = Uri.parse(mediaAction.data!);
-          // Check if this is a public album link by looking for access token parameter
-          if (uri.queryParameters.containsKey('t')) {
+          // Check if this is a public album link by hostname
+          if (_isPublicAlbumHost(mediaAction.data!)) {
             await _handlePublicAlbumLink(uri, "MediaExtension.getIntentAction");
             handledByMediaExtension = true;
           }
@@ -650,7 +650,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         final initialUri = await appLinks.getInitialLink();
         if (initialUri != null &&
             initialUri.scheme == "ente" &&
-            initialUri.queryParameters.containsKey('t')) {
+            _isPublicAlbumHost(initialUri.toString())) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         }
       } catch (e) {
@@ -662,11 +662,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       (Uri? uri) {
         if (uri != null &&
             uri.scheme == "ente" &&
-            uri.queryParameters.containsKey('t')) {
+            _isPublicAlbumHost(uri.toString())) {
           _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
         }
       },
     );
+  }
+
+  bool _isPublicAlbumHost(String url) {
+    return url.contains("albums.ente.io") || url.contains("192.168.0.61:3002");
   }
 
   @override
