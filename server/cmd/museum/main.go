@@ -329,7 +329,7 @@ func main() {
 		CollectionActionsRepo: &repo.CollectionActionsRepository{DB: db},
 	}
 
-	// Pending actions controller/handler
+	// Pending actions' controller/handler
 	collectionActionsController := &controller.CollectionActionsController{
 		Repo: &repo.CollectionActionsRepository{DB: db},
 	}

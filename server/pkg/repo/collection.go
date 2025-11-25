@@ -585,7 +585,16 @@ func (repo *CollectionRepository) AddFiles(
             (collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
             VALUES($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
-            DO UPDATE SET(is_deleted, updation_time, action_user, action) = ($5, $6, NULL, NULL)`, collectionID, file.ID, file.EncryptedKey,
+            DO UPDATE SET
+                is_deleted = EXCLUDED.is_deleted,
+                updation_time = EXCLUDED.updation_time,
+                action_user = NULL,
+                action = NULL,
+                created_at = CASE
+                    WHEN collection_files.is_deleted = TRUE AND EXCLUDED.is_deleted = FALSE
+                        THEN now_utc_micro_seconds()
+                    ELSE collection_files.created_at
+                END`, collectionID, file.ID, file.EncryptedKey,
 			file.KeyDecryptionNonce, false, updationTime, collectionOwnerID, fileOwnerID)
 		if err != nil {
 			tx.Rollback()
@@ -627,7 +636,16 @@ func (repo *CollectionRepository) RestoreFiles(ctx context.Context, userID int64
             (collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
             VALUES($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
-            DO UPDATE SET(is_deleted, updation_time, action_user, action) = ($5, $6, NULL, NULL)`, collectionID, file.ID, file.EncryptedKey,
+            DO UPDATE SET
+                is_deleted = EXCLUDED.is_deleted,
+                updation_time = EXCLUDED.updation_time,
+                action_user = NULL,
+                action = NULL,
+                created_at = CASE
+                    WHEN collection_files.is_deleted = TRUE AND EXCLUDED.is_deleted = FALSE
+                        THEN now_utc_micro_seconds()
+                    ELSE collection_files.created_at
+                END`, collectionID, file.ID, file.EncryptedKey,
 			file.KeyDecryptionNonce, false, updationTime, userID, userID)
 		if err != nil {
 			tx.Rollback()
@@ -735,7 +753,16 @@ func (repo *CollectionRepository) MoveFiles(ctx context.Context,
             (collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
             VALUES($1, $2, $3, $4, $5, $6, $7, $8)
             ON CONFLICT ON CONSTRAINT unique_collection_files_cid_fid
-            DO UPDATE SET(is_deleted, updation_time, action_user, action) = ($5, $6, NULL, NULL)`, toCollectionID, file.ID, file.EncryptedKey,
+            DO UPDATE SET
+                is_deleted = EXCLUDED.is_deleted,
+                updation_time = EXCLUDED.updation_time,
+                action_user = NULL,
+                action = NULL,
+                created_at = CASE
+                    WHEN collection_files.is_deleted = TRUE AND EXCLUDED.is_deleted = FALSE
+                        THEN now_utc_micro_seconds()
+                    ELSE collection_files.created_at
+                END`, toCollectionID, file.ID, file.EncryptedKey,
 			file.KeyDecryptionNonce, false, updationTime, collectionOwner, fileOwner)
 		if err != nil {
 			if rollbackErr := tx.Rollback(); rollbackErr != nil {
