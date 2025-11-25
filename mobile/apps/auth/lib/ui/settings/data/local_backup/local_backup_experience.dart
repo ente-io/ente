@@ -694,17 +694,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     String path, {
     String? successMessage,
   }) async {
-    // On iOS, create an EnteAuthBackups subdirectory within the selected folder
-    final targetPath = Platform.isIOS ? '$path/EnteAuthBackups' : path;
-
     final prefs = await SharedPreferences.getInstance();
     Future<bool> savePath(String target) async {
       try {
         // On iOS, we need security-scoped access to the user-selected directory
-        // before we can create subdirectories in it
         if (Platform.isIOS) {
           await SecurityScopedResource.instance
-              .startAccessingSecurityScopedResource(Directory(path));
+              .startAccessingSecurityScopedResource(Directory(target));
         }
 
         try {
@@ -724,7 +720,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         } finally {
           if (Platform.isIOS) {
             await SecurityScopedResource.instance
-                .stopAccessingSecurityScopedResource(Directory(path));
+                .stopAccessingSecurityScopedResource(Directory(target));
           }
         }
       } catch (_) {
@@ -732,13 +728,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
     }
 
-    if (await savePath(targetPath)) {
+    if (await savePath(path)) {
       return true;
     }
 
     if (Platform.isAndroid) {
       final fallbackPath = await _androidPrivateBackupPath();
-      if (fallbackPath != null && fallbackPath != targetPath) {
+      if (fallbackPath != null && fallbackPath != path) {
         final savedFallback = await savePath(fallbackPath);
         if (savedFallback) {
           return true;

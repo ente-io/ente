@@ -80,29 +80,33 @@ class LocalBackupService {
         return true;
       }
 
-      final dir = Directory(target.path!);
+      final scopedDir = Directory(target.path!);
+      // On iOS, create EnteAuthBackups subdirectory inside the user-selected folder
+      final backupDir = Platform.isIOS
+          ? Directory('${scopedDir.path}/EnteAuthBackups')
+          : scopedDir;
 
       // On iOS, we need to access security-scoped resources for directories
-      // outside the app sandbox (e.g., user-selected folders)
+      // outside the app sandbox (e.g., user-selected folders).
       if (Platform.isIOS) {
         await SecurityScopedResource.instance
-            .startAccessingSecurityScopedResource(dir);
+            .startAccessingSecurityScopedResource(scopedDir);
       }
 
       try {
-        await dir.create(recursive: true);
-        final filePath = '${dir.path}/$fileName';
+        await backupDir.create(recursive: true);
+        final filePath = '${backupDir.path}/$fileName';
         final backupFile = File(filePath);
         await backupFile.create(recursive: true);
         await backupFile.writeAsString(content);
-        await _manageOldBackups(dir.path);
+        await _manageOldBackups(backupDir.path);
         _logger
             .info('Automatic encrypted backup successful! Saved to: $filePath');
         return true;
       } finally {
         if (Platform.isIOS) {
           await SecurityScopedResource.instance
-              .stopAccessingSecurityScopedResource(dir);
+              .stopAccessingSecurityScopedResource(scopedDir);
         }
       }
     } catch (e, s) {
@@ -185,21 +189,24 @@ class LocalBackupService {
 
   Future<void> deleteAllBackupsIn(String path) async {
     try {
-      final directory = Directory(path);
+      final scopedDir = Directory(path);
+      // On iOS, backups are in EnteAuthBackups subdirectory
+      final backupDir =
+          Platform.isIOS ? Directory('$path/EnteAuthBackups') : scopedDir;
 
-      // On iOS, we need to access security-scoped resources
+      // On iOS, we need to access security-scoped resources.
       if (Platform.isIOS) {
         await SecurityScopedResource.instance
-            .startAccessingSecurityScopedResource(directory);
+            .startAccessingSecurityScopedResource(scopedDir);
       }
 
       try {
-        if (!await directory.exists()) {
+        if (!await backupDir.exists()) {
           _logger.warning('Old backup directory not found. Nothing to delete.');
           return;
         }
 
-        final files = directory
+        final files = backupDir
             .listSync()
             .where(
               (entity) =>
@@ -221,7 +228,7 @@ class LocalBackupService {
       } finally {
         if (Platform.isIOS) {
           await SecurityScopedResource.instance
-              .stopAccessingSecurityScopedResource(directory);
+              .stopAccessingSecurityScopedResource(scopedDir);
         }
       }
     } catch (e, s) {
