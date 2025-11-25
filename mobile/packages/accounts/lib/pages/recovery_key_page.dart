@@ -180,7 +180,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                             textAlign: TextAlign.justify,
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .bodyLarge,
+                                                .bodyLarge
+                                                ?.copyWith(
+                                                  color: Colors.white,
+                                                ),
                                           ),
                                         );
 
