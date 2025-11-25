@@ -78,7 +78,6 @@ class _FileSelectionActionsWidgetState
   late int currentUserID;
   late FilesSplit split;
   late CollectionActions collectionActions;
-  late bool isCollectionOwner;
   final ScreenshotController screenshotController = ScreenshotController();
   late Uint8List placeholderBytes;
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
@@ -90,6 +89,11 @@ class _FileSelectionActionsWidgetState
   final StreamController<double> _progressController =
       StreamController<double>();
 
+  bool get _canRemoveOthersFiles =>
+      widget.collection != null &&
+      CollectionsService.instance
+          .canRemoveFilesFromAllParticipants(widget.collection!);
+
   @override
   void initState() {
     super.initState();
@@ -99,8 +103,6 @@ class _FileSelectionActionsWidgetState
     split = FilesSplit.split(<EnteFile>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
-    isCollectionOwner =
-        widget.collection != null && widget.collection!.isOwner(currentUserID);
     if (widget.selectedFiles.files.isNotEmpty) {
       _selectFileChangeListener();
     }
@@ -131,8 +133,9 @@ class _FileSelectionActionsWidgetState
     final ownedFilesCount = split.ownedByCurrentUser.length;
     final ownedAndPendingUploadFilesCount =
         ownedFilesCount + split.pendingUploads.length;
+    final bool canRemoveOthersFiles = _canRemoveOthersFiles;
     final int removeCount = split.ownedByCurrentUser.length +
-        (isCollectionOwner ? split.ownedByOtherUsers.length : 0);
+        (canRemoveOthersFiles ? split.ownedByOtherUsers.length : 0);
 
     final bool anyOwnedFiles =
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
@@ -576,12 +579,12 @@ class _FileSelectionActionsWidgetState
       widget.selectedFiles
           .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
     }
-    if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
+    if (!_canRemoveOthersFiles && split.ownedByOtherUsers.isNotEmpty) {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
     final bool removingOthersFile =
-        isCollectionOwner && split.ownedByOtherUsers.isNotEmpty;
+        _canRemoveOthersFiles && split.ownedByOtherUsers.isNotEmpty;
     await collectionActions.showRemoveFromCollectionSheetV2(
       context,
       widget.collection!,

@@ -401,6 +401,20 @@ class CollectionsService {
         .toList();
   }
 
+  bool canRemoveFilesFromAllParticipants(Collection collection) {
+    final int? userID = _config.getUserID();
+    if (userID == null) {
+      return false;
+    }
+    if (collection.isOwner(userID)) {
+      return true;
+    }
+    if (!flagService.enableAdminRole) {
+      return false;
+    }
+    return collection.isAdmin(userID);
+  }
+
   List<int> getAllOwnedCollectionIDs() {
     final int userID = _config.getUserID()!;
     return _collectionIDToCollections.values
