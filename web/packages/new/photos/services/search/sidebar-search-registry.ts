@@ -1,5 +1,6 @@
 import { isDesktop } from "ente-base/app";
 import { isHLSGenerationSupported } from "ente-gallery/services/video";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import { isMLSupported } from "../ml";
 import { isDevBuildAndUser } from "../settings";
@@ -292,9 +293,13 @@ export const performSidebarAction = async (
                 .onShowCollectionSummary(ctx.pseudoIDs.archive, false)
                 .then(() => ctx.onClose());
         case "shortcuts.hidden":
-            return ctx
-                .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
-                .then(() => ctx.onClose());
+            return (
+                ctx
+                    .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
+                    // See: [Note: Workarounds for unactionable ARIA warnings]
+                    .then(() => wait(10))
+                    .then(ctx.onClose)
+            );
         case "shortcuts.trash":
             return ctx
                 .onShowCollectionSummary(ctx.pseudoIDs.trash, false)

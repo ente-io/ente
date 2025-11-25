@@ -275,22 +275,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         [setWatchFolderView],
     );
 
-    const showCollectionSummaryWithWorkarounds = useCallback(
-        (collectionSummaryID: number, isHidden?: boolean) => {
-            const action = onShowCollectionSummary(
-                collectionSummaryID,
-                isHidden,
-            );
-            return isHidden ? action.then(() => wait(10)) : action;
-        },
-        [onShowCollectionSummary],
-    );
-
     const performSidebarAction = useCallback(
         async (actionID: SidebarActionID) =>
             performSidebarRegistryAction(actionID, {
                 onClose,
-                onShowCollectionSummary: showCollectionSummaryWithWorkarounds,
+                onShowCollectionSummary,
                 onShowPlanSelector,
                 showAccount,
                 showPreferences,
@@ -318,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             handleLogout,
             handleOpenWatchFolder,
             onClose,
-            showCollectionSummaryWithWorkarounds,
+            onShowCollectionSummary,
             onShowPlanSelector,
             onShowExport,
             router,
