@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_base/models/database.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
@@ -55,6 +56,7 @@ class Configuration extends BaseConfiguration {
         BaseConfiguration.keyKey,
         BaseConfiguration.secretKeyKey,
         authSecretKeyKey,
+        SecureStorageService.autoBackupPasswordKey,
         // Note: offlineAuthSecretKey is intentionally not included here
         // as it persists across logouts
       ];

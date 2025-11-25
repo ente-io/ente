@@ -247,7 +247,8 @@ class LocalBackupService {
 
   Future<String?> _readPassword() async {
     try {
-      return SecureStorageService.instance.read('autoBackupPassword');
+      return SecureStorageService.instance
+          .read(SecureStorageService.autoBackupPasswordKey);
     } catch (e, s) {
       _logger.severe('Unable to read backup password', e, s);
       return null;

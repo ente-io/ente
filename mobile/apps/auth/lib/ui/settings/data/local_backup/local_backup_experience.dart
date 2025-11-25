@@ -70,7 +70,6 @@ class LocalBackupExperienceController {
 }
 
 class _LocalBackupExperienceState extends State<LocalBackupExperience> {
-  static const _passwordKey = 'autoBackupPassword';
   static const _locationConfiguredKey = 'hasConfiguredBackupLocation';
   static const _treeUriKey = 'autoBackupTreeUri';
 
@@ -131,7 +130,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   }
 
   Future<bool> _startEnableFlow() async {
-    final hasPassword = await _ensurePasswordConfigured(disableOnCancel: true);
+    // Always prompt for password when enabling backups, even if one exists.
+    // This ensures the user knows/remembers the password they'll need for restore.
+    final hasPassword = await _promptPassword(
+      forcePrompt: true,
+      disableOnCancel: true,
+      isUpdateFlow: false,
+    );
     if (!hasPassword) {
       return false;
     }
@@ -320,7 +325,8 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
-    await SecureStorageService.instance.write(_passwordKey, password);
+    await SecureStorageService.instance
+        .write(SecureStorageService.autoBackupPasswordKey, password);
     return true;
   }
 
@@ -333,14 +339,16 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     if (_isBackupEnabled) {
       return false;
     }
-    await SecureStorageService.instance.delete(_passwordKey);
+    await SecureStorageService.instance
+        .delete(SecureStorageService.autoBackupPasswordKey);
     _showSnackBar(context.l10n.backupPasswordCleared);
     return true;
   }
 
   Future<String?> _readStoredPassword() async {
     try {
-      return SecureStorageService.instance.read(_passwordKey);
+      return SecureStorageService.instance
+          .read(SecureStorageService.autoBackupPasswordKey);
     } catch (_) {
       return null;
     }
@@ -524,10 +532,16 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       if (result?.action == ButtonAction.second) {
         final pickedPath = await FilePicker.platform.getDirectoryPath();
         if (pickedPath != null) {
-          return _persistLocation(
-            pickedPath,
-            successMessage: context.l10n.initialBackupCreated,
-          );
+          final saved = await _persistLocation(pickedPath);
+          if (saved) {
+            final backupSuccess = await LocalBackupService.instance
+                .triggerAutomaticBackup(isManual: true);
+            if (backupSuccess) {
+              _showSnackBar(context.l10n.initialBackupCreated);
+            }
+            // If backup fails, location is still saved - UI will reflect the change
+          }
+          return saved;
         }
       }
       return false;

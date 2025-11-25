@@ -9,6 +9,9 @@ class SecureStorageService {
 
   static final SecureStorageService instance = SecureStorageService._();
 
+  /// Key for storing the local backup password
+  static const autoBackupPasswordKey = 'autoBackupPassword';
+
   final FlutterSecureStorage _storage = const FlutterSecureStorage(
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock_this_device,
