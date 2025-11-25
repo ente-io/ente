@@ -128,8 +128,7 @@ dependencies:
   lottie: ^3.3.1
   maps_launcher: ^3.0.0+1
   media_extension:
-    git:
-      url: "https://github.com/ente-io/media_extension.git"
+    path: /Users/anandbaburajan/work/media_extension
   media_kit:
   media_kit_libs_ios_video:
   media_kit_libs_video:
