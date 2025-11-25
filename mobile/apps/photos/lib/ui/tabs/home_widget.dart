@@ -300,6 +300,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
   Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
+    if (!mounted) {
+      _logger.warning("Cannot handle public album link - widget not mounted");
+      return;
+    }
     try {
       _logger.info("Handling public album link: via $via");
       final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -636,6 +640,9 @@ class _HomeWidgetState extends State<HomeWidget> {
           final uri = Uri.parse(mediaAction.data!);
           // Check if this is a public album link by hostname
           if (_isPublicAlbumHost(mediaAction.data!)) {
+            // Small delay to ensure app is fully initialized on cold start
+            await Future.delayed(const Duration(milliseconds: 500));
+            if (!mounted) return;
             await _handlePublicAlbumLink(uri, "MediaExtension.getIntentAction");
             handledByMediaExtension = true;
           } else {
