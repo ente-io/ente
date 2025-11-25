@@ -72,7 +72,6 @@ class _SharedPublicCollectionPageState
   }
 
   Future<void> _showJoinDialog() async {
-    logger.info("Showing join dialog for collection ${widget.c.collection.id}");
     final result = await showChoiceDialog(
       context,
       title: context.l10n.joinAlbum,

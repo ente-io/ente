@@ -245,10 +245,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
 
     // Initialize deep link subscription for public albums on both iOS and Android
-    // Defer until after first frame to ensure context is ready for navigation
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initDeepLinkSubscriptionForPublicAlbums();
-    });
+    _initDeepLinkSubscriptionForPublicAlbums();
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
@@ -632,23 +629,12 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
-    _logger.info("_initDeepLinkSubscriptionForPublicAlbums started");
-
-    // Log MediaExtension state for debugging
-    if (Platform.isAndroid) {
-      final mediaAction = AppLifecycleService.instance.mediaExtensionAction;
-      _logger.info(
-        "MediaExtension state: action=${mediaAction.action}, data=${mediaAction.data}, type=${mediaAction.type}",
-      );
-    }
-
     final appLinks = AppLinks();
 
     // Use AppLinks for public album deep links (works reliably on cold start)
     // Note: MediaExtension is skipped for ente:// URLs as AppLinks handles them better
     try {
       final initialUri = await appLinks.getInitialLink();
-      _logger.info("AppLinks.getInitialLink returned: $initialUri");
       if (initialUri != null) {
         if (initialUri.scheme == "ente" &&
             _isPublicAlbumHost(initialUri.toString())) {
