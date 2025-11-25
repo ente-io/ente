@@ -182,10 +182,35 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                       : null,
                   Hero(tag: "incoming", child: sharedWithYou),
                   trailingWidget: collections.incoming.isNotEmpty
-                      ? IconButtonWidget(
-                          icon: Icons.chevron_right,
-                          iconButtonType: IconButtonType.secondary,
-                          iconColor: colorTheme.blurStrokePressed,
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButtonWidget(
+                              icon: Icons.search,
+                              iconButtonType: IconButtonType.secondary,
+                              iconColor: colorTheme.blurStrokePressed,
+                              onTap: () {
+                                unawaited(
+                                  routeToPage(
+                                    context,
+                                    CollectionListPage(
+                                      collections.incoming,
+                                      sectionType:
+                                          UISectionType.incomingCollections,
+                                      tag: "incoming",
+                                      appTitle: sharedWithYou,
+                                      startInSearchMode: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButtonWidget(
+                              icon: Icons.chevron_right,
+                              iconButtonType: IconButtonType.secondary,
+                              iconColor: colorTheme.blurStrokePressed,
+                            ),
+                          ],
                         )
                       : null,
                 ),
@@ -241,10 +266,35 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                       : null,
                   Hero(tag: "outgoing", child: sharedByYou),
                   trailingWidget: collections.outgoing.isNotEmpty
-                      ? IconButtonWidget(
-                          icon: Icons.chevron_right,
-                          iconButtonType: IconButtonType.secondary,
-                          iconColor: colorTheme.blurStrokePressed,
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButtonWidget(
+                              icon: Icons.search,
+                              iconButtonType: IconButtonType.secondary,
+                              iconColor: colorTheme.blurStrokePressed,
+                              onTap: () {
+                                unawaited(
+                                  routeToPage(
+                                    context,
+                                    CollectionListPage(
+                                      collections.outgoing,
+                                      sectionType:
+                                          UISectionType.outgoingCollections,
+                                      tag: "outgoing",
+                                      appTitle: sharedByYou,
+                                      startInSearchMode: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButtonWidget(
+                              icon: Icons.chevron_right,
+                              iconButtonType: IconButtonType.secondary,
+                              iconColor: colorTheme.blurStrokePressed,
+                            ),
+                          ],
                         )
                       : null,
                 ),
