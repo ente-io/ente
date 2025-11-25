@@ -258,7 +258,9 @@ const Page: React.FC = () => {
 
     const handleCloseAuthenticateUser = useCallback(() => {
         authenticateUserVisibilityProps.onClose();
-        authenticateUserResolvers.current.reject?.();
+        authenticateUserResolvers.current.reject?.(
+            new Error("authentication dismissed"),
+        );
         resetAuthenticateUserResolvers();
     }, [authenticateUserVisibilityProps.onClose]);
 
@@ -887,13 +889,18 @@ const Page: React.FC = () => {
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
             const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
-            if (
-                isHiddenCollectionSummary &&
-                barMode != "hidden-albums" &&
-                Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
-            ) {
-                await authenticateUser();
-                lastAuthenticationForHiddenTimestamp.current = Date.now();
+            try {
+                if (
+                    isHiddenCollectionSummary &&
+                    barMode != "hidden-albums" &&
+                    Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
+                ) {
+                    await authenticateUser();
+                    lastAuthenticationForHiddenTimestamp.current = Date.now();
+                }
+            } catch (e) {
+                log.info("Skipping navigation to hidden section", e);
+                return;
             }
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },

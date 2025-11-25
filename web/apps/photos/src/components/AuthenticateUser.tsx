@@ -1,3 +1,5 @@
+import CloseIcon from "@mui/icons-material/Close";
+import { IconButton, Stack, Typography } from "@mui/material";
 import { VerifyMasterPasswordForm } from "ente-accounts/components/VerifyMasterPasswordForm";
 import { checkSessionValidity } from "ente-accounts/services/session";
 import {
@@ -38,7 +40,22 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
         open={open}
         onClose={onClose}
         sx={{ position: "absolute" }}
-        title={t("password")}
+        title={
+            <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+            >
+                <Typography variant="h6">{t("password")}</Typography>
+                <IconButton
+                    aria-label={t("cancel")}
+                    size="small"
+                    onClick={onClose}
+                >
+                    <CloseIcon fontSize="small" />
+                </IconButton>
+            </Stack>
+        }
     >
         <AuthenticateUserDialogContents {...{ open, onClose }} {...rest} />
     </TitledMiniDialog>
