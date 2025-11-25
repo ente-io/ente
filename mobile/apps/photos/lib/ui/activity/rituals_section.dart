@@ -213,6 +213,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
         builder: (context, setState) {
           final bool canSave =
               controller.text.trim().isNotEmpty && selectedAlbumId != null;
+          final bool allDaysOff = days.every((selected) => !selected);
           return SafeArea(
             child: Padding(
               padding: EdgeInsets.only(
@@ -374,21 +375,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _sectionLabel(context, "Time"),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () async {
-                            final result = await showTimePicker(
-                              context: context,
-                              initialTime: selectedTime,
-                            );
-                            if (result != null) {
-                              setState(() {
-                                selectedTime = result;
-                              });
-                            }
-                          },
-                          child: Container(
+                        if (allDaysOff)
+                          Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
                               vertical: 14,
@@ -398,28 +386,72 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                               borderRadius: BorderRadius.circular(18),
                             ),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Icon(
+                                  Icons.notifications_off_outlined,
+                                  color: colorScheme.textMuted,
+                                ),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    selectedTime.format(context),
-                                    style: textTheme.h3Bold,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.backgroundElevated2,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.schedule,
-                                    color: colorScheme.textMuted,
+                                    "Notifications are off. Tap a day to turn them on.",
+                                    style: textTheme.small.copyWith(
+                                      color: colorScheme.textMuted,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
+                          )
+                        else ...[
+                          _sectionLabel(context, "Time"),
+                          const SizedBox(height: 8),
+                          GestureDetector(
+                            onTap: () async {
+                              final result = await showTimePicker(
+                                context: context,
+                                initialTime: selectedTime,
+                              );
+                              if (result != null) {
+                                setState(() {
+                                  selectedTime = result;
+                                });
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 14,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colorScheme.fillFaint,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      selectedTime.format(context),
+                                      style: textTheme.h3Bold,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.backgroundElevated2,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      Icons.schedule,
+                                      color: colorScheme.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                         const SizedBox(height: 16),
                         _sectionLabel(context, "Album"),
                         const SizedBox(height: 8),
