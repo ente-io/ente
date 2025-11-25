@@ -10,6 +10,11 @@ import app_links
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
 
+    // Register custom security bookmark plugin for persistent directory access
+    if let registrar = self.registrar(forPlugin: "SecurityBookmarkPlugin") {
+      SecurityBookmarkPlugin.register(with: registrar)
+    }
+
     super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
