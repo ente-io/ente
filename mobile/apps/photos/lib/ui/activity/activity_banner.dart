@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/activity_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -23,10 +24,11 @@ class ActivityBanner extends StatelessWidget {
             );
         final hasFire = summary?.hasSevenDayFire ?? false;
 
+        final colorScheme = getEnteColorScheme(context);
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Material(
-            color: const Color(0xFFFAFAFA),
+            color: colorScheme.backgroundElevated,
             borderRadius: BorderRadius.circular(20),
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
@@ -70,7 +72,7 @@ class ActivityBanner extends StatelessWidget {
                     const SizedBox(width: 8),
                     Icon(
                       Icons.chevron_right_rounded,
-                      color: Colors.black.withAlpha((0.4 * 255).round()),
+                      color: colorScheme.textMuted,
                     ),
                   ],
                 ),
@@ -99,19 +101,23 @@ class _DayDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color inactiveTextColor =
+        isDark ? colorScheme.textMuted : colorScheme.textBase;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: active ? const Color(0xFF1DB954) : const Color(0xFFE7E7E7),
+        color: active ? colorScheme.primary500 : colorScheme.fillFaintPressed,
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: active ? Colors.white : inactiveTextColor,
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),
@@ -123,18 +129,19 @@ class _DayDot extends StatelessWidget {
 class _FireDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
       width: 32,
       height: 32,
-      decoration: const BoxDecoration(
-        color: Color(0xFFFFF4E5),
+      decoration: BoxDecoration(
+        color: colorScheme.warning500.withValues(alpha: 0.16),
         shape: BoxShape.circle,
       ),
       alignment: Alignment.center,
-      child: const Icon(
+      child: Icon(
         Icons.local_fire_department_rounded,
-        color: Color(0xFFFF8C00),
+        color: colorScheme.warning500,
       ),
     );
   }

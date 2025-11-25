@@ -2,6 +2,8 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:photos/models/activity/activity_models.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 
 class ActivityHeatmapCard extends StatelessWidget {
   const ActivityHeatmapCard({required this.summary, super.key});
@@ -24,9 +26,14 @@ class ActivityHeatmapCard extends StatelessWidget {
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: const Color(0xFFFAFAFA),
+          color: Theme.of(context).colorScheme.brightness == Brightness.dark
+              ? getEnteColorScheme(context).backgroundElevated2
+              : const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFF5F5F5), width: 2),
+          border: Border.all(
+            color: getEnteColorScheme(context).strokeFaint,
+            width: 2,
+          ),
         ),
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         child: _Heatmap(days: last365),
@@ -133,11 +140,11 @@ class _Heatmap extends StatelessWidget {
         final double remainingWidth =
             max(0.0, constraints.maxWidth - gridWidth - gapX);
         // Aim for ~70% of previous right padding by biasing space to the left gutter.
-        final double gutterWidth =
-            max(monthLabelWidth, remainingWidth * 0.65);
+        final double gutterWidth = max(monthLabelWidth, remainingWidth * 0.65);
+        final EnteColorScheme colorScheme = getEnteColorScheme(context);
         final BorderRadius pillRadius = BorderRadius.circular(cellHeight);
-        const TextStyle headerStyle = TextStyle(
-          color: Color(0x36000000),
+        final TextStyle headerStyle = TextStyle(
+          color: colorScheme.textMuted.withValues(alpha: 0.45),
           fontSize: 6.834,
           fontWeight: FontWeight.w600,
           height: 2.45,
@@ -219,13 +226,14 @@ class _Heatmap extends StatelessWidget {
                             children: week.asMap().entries.map((cell) {
                               final isLastCell =
                                   cell.key == dayHeader.length - 1;
+                              final Color activeColor = colorScheme.primary500;
+                              final Color inactiveColor = colorScheme.primary500
+                                  .withValues(alpha: 0.28);
                               final color = cell.value == null
                                   ? Colors.transparent
                                   : cell.value!.hasActivity
-                                      ? const Color(0xFF1DB954)
-                                      : const Color(0xFF1DB954).withValues(
-                                          alpha: 0.25,
-                                        );
+                                      ? activeColor
+                                      : inactiveColor;
                               return Row(
                                 children: [
                                   Container(

@@ -109,28 +109,27 @@ class _StarterRitualCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color:
-            isSelected ? colorScheme.fillFaintPressed : const Color(0xFFFAFAFA),
+        color: isSelected
+            ? colorScheme.fillFaintPressed
+            : colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected
-              ? colorScheme.primary500
-              : colorScheme.fillFaintPressed,
-          width: isSelected ? 1 : 0.5,
+          color: isSelected ? colorScheme.primary500 : colorScheme.strokeFaint,
+          width: isSelected ? 1 : 0.8,
         ),
       ),
       child: ListTile(
         onTap: onTap,
-        leading: const CircleAvatar(
-          backgroundColor: Color(0xFFEAEAEA),
-          child: Text(
+        leading: CircleAvatar(
+          backgroundColor: colorScheme.fillFaintPressed,
+          child: const Text(
             "📸",
             style: TextStyle(fontSize: 18),
           ),
         ),
         title: Text(
           "Take a photo every day",
-          style: Theme.of(context).textTheme.titleMedium,
+          style: getEnteTextTheme(context).body,
         ),
       ),
     );
@@ -154,14 +153,13 @@ class _RitualCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color:
-            isSelected ? colorScheme.fillFaintPressed : const Color(0xFFFAFAFA),
+        color: isSelected
+            ? colorScheme.fillFaintPressed
+            : colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected
-              ? colorScheme.primary500
-              : colorScheme.fillFaintPressed,
-          width: isSelected ? 1 : 0.5,
+          color: isSelected ? colorScheme.primary500 : colorScheme.strokeFaint,
+          width: isSelected ? 1 : 0.8,
         ),
       ),
       child: ListTile(
@@ -176,7 +174,7 @@ class _RitualCard extends StatelessWidget {
           }
         },
         leading: CircleAvatar(
-          backgroundColor: Colors.grey.shade200,
+          backgroundColor: colorScheme.fillFaintPressed,
           child: Text(
             ritual.icon,
             style: const TextStyle(fontSize: 18),
@@ -194,12 +192,12 @@ class _RitualCard extends StatelessWidget {
               ),
         trailing: PopupMenuButton<String>(
           elevation: 0,
-          color: Colors.white,
-          surfaceTintColor: Colors.white,
+          color: colorScheme.backgroundElevated,
+          surfaceTintColor: colorScheme.backgroundElevated,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(
-              color: Color.fromRGBO(0, 0, 0, 0.09),
+            side: BorderSide(
+              color: colorScheme.strokeFaint,
               width: 0.5,
             ),
           ),
@@ -214,7 +212,7 @@ class _RitualCard extends StatelessWidget {
             }
           },
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: "edit",
               padding: EdgeInsets.zero,
               child: Column(
@@ -222,37 +220,45 @@ class _RitualCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
-                    padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                     child: Row(
                       children: [
-                        Icon(Icons.edit_outlined, color: Color(0xFF0F172A)),
-                        SizedBox(width: 10),
-                        Text("Edit"),
+                        Icon(
+                          Icons.edit_outlined,
+                          color: colorScheme.textBase,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Edit",
+                          style: getEnteTextTheme(context).body,
+                        ),
                       ],
                     ),
                   ),
                   Divider(
                     height: 0.5,
                     thickness: 0.5,
-                    color: Color.fromRGBO(0, 0, 0, 0.09),
+                    color: colorScheme.strokeFaint,
                     indent: 0,
                     endIndent: 0,
                   ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: "delete",
               padding: EdgeInsets.zero,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Row(
                   children: [
-                    Icon(Icons.delete_outline, color: Colors.red),
-                    SizedBox(width: 10),
+                    const Icon(Icons.delete_outline, color: Colors.red),
+                    const SizedBox(width: 10),
                     Text(
                       "Delete",
-                      style: TextStyle(color: Colors.red),
+                      style: getEnteTextTheme(context)
+                          .body
+                          .copyWith(color: Colors.red),
                     ),
                   ],
                 ),
