@@ -232,16 +232,40 @@ const Page: React.FC = () => {
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
 
-    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+    // To resolve the pending promises when closing the AuthenticateUser modal
+    const authenticateUserResolvers = useRef<{
+        resolve?: () => void;
+        reject?: (reason?: Error) => void;
+    }>({});
+
+    const resetAuthenticateUserResolvers = () => {
+        authenticateUserResolvers.current = {};
+    };
 
     const authenticateUser = useCallback(
         () =>
-            new Promise<void>((resolve) => {
-                onAuthenticateCallback.current = resolve;
+            new Promise<void>((resolve, reject) => {
+                authenticateUserResolvers.current = { resolve, reject };
                 showAuthenticateUser();
             }),
-        [],
+        [showAuthenticateUser],
     );
+
+    const handleAuthenticateUserSuccess = useCallback(() => {
+        authenticateUserResolvers.current.resolve?.();
+        resetAuthenticateUserResolvers();
+    }, []);
+
+    const handleCloseAuthenticateUser = useCallback(() => {
+        authenticateUserVisibilityProps.onClose();
+        authenticateUserResolvers.current.reject?.();
+        resetAuthenticateUserResolvers();
+    }, [authenticateUserVisibilityProps.onClose]);
+
+    const handleSidebarClose = useCallback(() => {
+        if (authenticateUserVisibilityProps.open) return;
+        sidebarVisibilityProps.onClose();
+    }, [authenticateUserVisibilityProps.open, sidebarVisibilityProps.onClose]);
 
     // Local aliases.
     const {
@@ -1149,6 +1173,7 @@ const Page: React.FC = () => {
             />
             <Sidebar
                 {...sidebarVisibilityProps}
+                onClose={handleSidebarClose}
                 normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
@@ -1218,8 +1243,9 @@ const Page: React.FC = () => {
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
             <AuthenticateUser
-                {...authenticateUserVisibilityProps}
-                onAuthenticate={onAuthenticateCallback.current!}
+                open={authenticateUserVisibilityProps.open}
+                onClose={handleCloseAuthenticateUser}
+                onAuthenticate={handleAuthenticateUserSuccess}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}
