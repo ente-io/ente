@@ -1,0 +1,532 @@
+/// Cross-platform directory utilities with persistent access support.
+///
+/// - iOS: Uses security-scoped bookmarks for persistent directory access
+/// - Android: Uses Storage Access Framework (SAF) via saf_util/saf_stream
+/// - Other platforms: Uses standard file system access via file_picker
+library dir_utils;
+
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
+import 'package:saf_stream/saf_stream.dart';
+import 'package:saf_util/saf_util.dart';
+
+final _logger = Logger('DirUtils');
+
+/// Represents a picked directory with platform-specific access credentials.
+class PickedDirectory {
+  const PickedDirectory({
+    required this.path,
+    this.bookmark,
+    this.treeUri,
+  });
+
+  /// The display path of the directory.
+  final String path;
+
+  /// iOS security-scoped bookmark (base64 encoded). Null on other platforms.
+  final String? bookmark;
+
+  /// Android SAF tree URI. Null on other platforms.
+  final String? treeUri;
+
+  bool get isIos => bookmark != null;
+  bool get isAndroid => treeUri != null;
+}
+
+/// Result from starting security-scoped access on iOS.
+class AccessResult {
+  const AccessResult({
+    required this.success,
+    required this.path,
+    required this.isStale,
+  });
+
+  final bool success;
+  final String path;
+  final bool isStale;
+}
+
+/// Information about a file in a directory.
+class FileInfo {
+  const FileInfo({
+    required this.name,
+    required this.path,
+    required this.isDirectory,
+    required this.lastModified,
+    this.uri,
+  });
+
+  final String name;
+  final String path;
+  final bool isDirectory;
+  final DateTime lastModified;
+  /// Android SAF URI (for deletion). Null on other platforms.
+  final String? uri;
+}
+
+/// Cross-platform directory utilities.
+class DirUtils {
+  DirUtils._();
+
+  static final DirUtils instance = DirUtils._();
+  static const _channel = MethodChannel('io.ente.dir_utils');
+
+  // ============================================================
+  // Directory Picker
+  // ============================================================
+
+  /// Pick a directory with persistent access.
+  ///
+  /// On iOS, this opens the native document picker and creates a security-scoped
+  /// bookmark for persistent access across app launches.
+  ///
+  /// On Android, this opens SAF directory picker with persistent permissions.
+  ///
+  /// On other platforms, this uses file_picker.
+  ///
+  /// Returns null if the user cancels.
+  Future<PickedDirectory?> pickDirectory() async {
+    if (Platform.isIOS) {
+      return _pickDirectoryIos();
+    } else if (Platform.isAndroid) {
+      return _pickDirectoryAndroid();
+    } else {
+      return _pickDirectoryOther();
+    }
+  }
+
+  Future<PickedDirectory?> _pickDirectoryIos() async {
+    try {
+      final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'pickDirectory',
+      );
+      if (result == null) {
+        _logger.info('iOS: Directory picker cancelled');
+        return null;
+      }
+
+      final path = result['path'] as String?;
+      final bookmark = result['bookmark'] as String?;
+
+      if (path == null || bookmark == null) {
+        _logger.severe('iOS: Invalid result from directory picker');
+        return null;
+      }
+
+      _logger.info('iOS: Picked directory: $path');
+      return PickedDirectory(path: path, bookmark: bookmark);
+    } on PlatformException catch (e) {
+      _logger.severe('iOS: Failed to pick directory: ${e.message}');
+      return null;
+    }
+  }
+
+  Future<PickedDirectory?> _pickDirectoryAndroid() async {
+    try {
+      final saf = SafUtil();
+      final picked = await saf.pickDirectory(
+        writePermission: true,
+        persistablePermission: true,
+      );
+      if (picked == null) {
+        _logger.info('Android: Directory picker cancelled');
+        return null;
+      }
+
+      _logger.info('Android: Picked directory: ${picked.uri}');
+      return PickedDirectory(
+        path: picked.name,
+        treeUri: picked.uri,
+      );
+    } catch (e) {
+      _logger.severe('Android: Failed to pick directory: $e');
+      return null;
+    }
+  }
+
+  Future<PickedDirectory?> _pickDirectoryOther() async {
+    try {
+      final path = await FilePicker.platform.getDirectoryPath();
+      if (path == null) {
+        _logger.info('Other: Directory picker cancelled');
+        return null;
+      }
+
+      _logger.info('Other: Picked directory: $path');
+      return PickedDirectory(path: path);
+    } catch (e) {
+      _logger.severe('Other: Failed to pick directory: $e');
+      return null;
+    }
+  }
+
+  // ============================================================
+  // Security-Scoped Access (iOS only)
+  // ============================================================
+
+  /// Start accessing a security-scoped resource (iOS only).
+  ///
+  /// You MUST call [stopAccess] when done to balance this call.
+  /// On non-iOS platforms, this is a no-op that returns success.
+  Future<AccessResult?> startAccess(PickedDirectory dir) async {
+    if (!Platform.isIOS) {
+      return AccessResult(success: true, path: dir.path, isStale: false);
+    }
+
+    if (dir.bookmark == null) {
+      _logger.severe('iOS: No bookmark available for startAccess');
+      return null;
+    }
+
+    try {
+      final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'startAccess',
+        {'bookmark': dir.bookmark},
+      );
+      if (result == null) return null;
+
+      final accessResult = AccessResult(
+        success: result['success'] as bool,
+        path: result['path'] as String,
+        isStale: result['isStale'] as bool,
+      );
+      _logger.info(
+        'iOS: Start access: success=${accessResult.success}, isStale=${accessResult.isStale}',
+      );
+      return accessResult;
+    } on PlatformException catch (e) {
+      _logger.severe('iOS: Failed to start access: ${e.message}');
+      return null;
+    }
+  }
+
+  /// Stop accessing a security-scoped resource (iOS only).
+  ///
+  /// On non-iOS platforms, this is a no-op.
+  Future<bool> stopAccess(PickedDirectory dir) async {
+    if (!Platform.isIOS) return true;
+
+    if (dir.bookmark == null) {
+      _logger.severe('iOS: No bookmark available for stopAccess');
+      return false;
+    }
+
+    try {
+      final result = await _channel.invokeMethod<bool>(
+        'stopAccess',
+        {'bookmark': dir.bookmark},
+      );
+      _logger.info('iOS: Stopped access');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      _logger.severe('iOS: Failed to stop access: ${e.message}');
+      return false;
+    }
+  }
+
+  /// Execute a function with security-scoped access.
+  ///
+  /// Automatically calls startAccess before and stopAccess after.
+  /// On non-iOS platforms, just executes the function directly.
+  Future<T?> withAccess<T>(
+    PickedDirectory dir,
+    Future<T> Function(String path) action,
+  ) async {
+    final accessResult = await startAccess(dir);
+    if (accessResult == null || !accessResult.success) {
+      _logger.severe('Failed to start access for: ${dir.path}');
+      return null;
+    }
+
+    try {
+      return await action(accessResult.path);
+    } finally {
+      await stopAccess(dir);
+    }
+  }
+
+  // ============================================================
+  // File Operations
+  // ============================================================
+
+  /// Write a file to the directory.
+  ///
+  /// [dir] - The picked directory
+  /// [fileName] - Name of the file to create
+  /// [content] - File content as bytes
+  /// [subPath] - Optional subdirectory path within the directory
+  Future<bool> writeFile(
+    PickedDirectory dir,
+    String fileName,
+    Uint8List content, {
+    String? subPath,
+  }) async {
+    if (Platform.isAndroid && dir.treeUri != null) {
+      return _writeFileAndroid(dir.treeUri!, fileName, content);
+    } else if (Platform.isIOS && dir.bookmark != null) {
+      return _writeFileIos(dir, fileName, content, subPath: subPath);
+    } else {
+      return _writeFileOther(dir.path, fileName, content, subPath: subPath);
+    }
+  }
+
+  Future<bool> _writeFileAndroid(
+    String treeUri,
+    String fileName,
+    Uint8List content,
+  ) async {
+    try {
+      final safStream = SafStream();
+      await safStream.writeFileBytes(
+        treeUri,
+        fileName,
+        'application/octet-stream',
+        content,
+        overwrite: true,
+      );
+      _logger.info('Android: Wrote file: $fileName');
+      return true;
+    } catch (e) {
+      _logger.severe('Android: Failed to write file: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _writeFileIos(
+    PickedDirectory dir,
+    String fileName,
+    Uint8List content, {
+    String? subPath,
+  }) async {
+    try {
+      final basePath = subPath != null ? '${dir.path}/$subPath' : dir.path;
+      final filePath = '$basePath/$fileName';
+
+      final result = await _channel.invokeMethod<bool>(
+        'writeFile',
+        {'path': filePath, 'content': content},
+      );
+      _logger.info('iOS: Wrote file: $filePath');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      _logger.severe('iOS: Failed to write file: ${e.message}');
+      return false;
+    }
+  }
+
+  Future<bool> _writeFileOther(
+    String basePath,
+    String fileName,
+    Uint8List content, {
+    String? subPath,
+  }) async {
+    try {
+      final dirPath = subPath != null ? '$basePath/$subPath' : basePath;
+      final filePath = '$dirPath/$fileName';
+      final file = File(filePath);
+      await file.writeAsBytes(content);
+      _logger.info('Other: Wrote file: $filePath');
+      return true;
+    } catch (e) {
+      _logger.severe('Other: Failed to write file: $e');
+      return false;
+    }
+  }
+
+  /// List files in a directory.
+  Future<List<FileInfo>> listFiles(PickedDirectory dir, {String? subPath}) async {
+    if (Platform.isAndroid && dir.treeUri != null) {
+      return _listFilesAndroid(dir.treeUri!);
+    } else if (Platform.isIOS && dir.bookmark != null) {
+      return _listFilesIos(dir, subPath: subPath);
+    } else {
+      return _listFilesOther(dir.path, subPath: subPath);
+    }
+  }
+
+  Future<List<FileInfo>> _listFilesAndroid(String treeUri) async {
+    try {
+      final safUtil = SafUtil();
+      final entries = await safUtil.list(treeUri);
+      return entries
+          .map(
+            (e) => FileInfo(
+              name: e.name,
+              path: e.uri,
+              isDirectory: e.isDir,
+              lastModified: DateTime.fromMillisecondsSinceEpoch(e.lastModified),
+              uri: e.uri,
+            ),
+          )
+          .toList();
+    } catch (e) {
+      _logger.severe('Android: Failed to list files: $e');
+      return [];
+    }
+  }
+
+  Future<List<FileInfo>> _listFilesIos(
+    PickedDirectory dir, {
+    String? subPath,
+  }) async {
+    try {
+      final basePath = subPath != null ? '${dir.path}/$subPath' : dir.path;
+      final result = await _channel.invokeMethod<List<dynamic>>(
+        'listFiles',
+        {'path': basePath},
+      );
+      if (result == null) return [];
+
+      return result.map((e) {
+        final map = e as Map<dynamic, dynamic>;
+        return FileInfo(
+          name: map['name'] as String,
+          path: map['path'] as String,
+          isDirectory: map['isDirectory'] as bool,
+          lastModified: DateTime.fromMillisecondsSinceEpoch(
+            map['lastModified'] as int,
+          ),
+        );
+      }).toList();
+    } on PlatformException catch (e) {
+      _logger.severe('iOS: Failed to list files: ${e.message}');
+      return [];
+    }
+  }
+
+  Future<List<FileInfo>> _listFilesOther(
+    String basePath, {
+    String? subPath,
+  }) async {
+    try {
+      final dirPath = subPath != null ? '$basePath/$subPath' : basePath;
+      final dir = Directory(dirPath);
+      if (!await dir.exists()) return [];
+
+      final entries = await dir.list().toList();
+      return Future.wait(
+        entries.map((e) async {
+          final stat = await e.stat();
+          return FileInfo(
+            name: e.path.split('/').last,
+            path: e.path,
+            isDirectory: stat.type == FileSystemEntityType.directory,
+            lastModified: stat.modified,
+          );
+        }),
+      );
+    } catch (e) {
+      _logger.severe('Other: Failed to list files: $e');
+      return [];
+    }
+  }
+
+  /// Delete a file.
+  ///
+  /// For Android SAF, pass the file's URI as [filePathOrUri].
+  /// For other platforms, pass the file path.
+  Future<bool> deleteFile(PickedDirectory dir, FileInfo file) async {
+    if (Platform.isAndroid && file.uri != null) {
+      return _deleteFileAndroid(file.uri!, file.isDirectory);
+    } else {
+      return _deleteFileOther(file.path);
+    }
+  }
+
+  Future<bool> _deleteFileAndroid(String uri, bool isDir) async {
+    try {
+      final safUtil = SafUtil();
+      await safUtil.delete(uri, isDir);
+      _logger.info('Android: Deleted: $uri');
+      return true;
+    } catch (e) {
+      _logger.severe('Android: Failed to delete: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _deleteFileOther(String path) async {
+    try {
+      if (Platform.isIOS) {
+        final result = await _channel.invokeMethod<bool>(
+          'deleteFile',
+          {'path': path},
+        );
+        _logger.info('iOS: Deleted: $path');
+        return result ?? false;
+      } else {
+        final file = File(path);
+        await file.delete();
+        _logger.info('Other: Deleted: $path');
+        return true;
+      }
+    } catch (e) {
+      _logger.severe('Failed to delete: $e');
+      return false;
+    }
+  }
+
+  /// Create a subdirectory.
+  Future<bool> createDirectory(
+    PickedDirectory dir,
+    String subPath,
+  ) async {
+    if (Platform.isAndroid && dir.treeUri != null) {
+      // SAF creates directories automatically when writing files
+      return true;
+    } else if (Platform.isIOS && dir.bookmark != null) {
+      return _createDirectoryIos(dir, subPath);
+    } else {
+      return _createDirectoryOther(dir.path, subPath);
+    }
+  }
+
+  Future<bool> _createDirectoryIos(PickedDirectory dir, String subPath) async {
+    try {
+      final fullPath = '${dir.path}/$subPath';
+      final result = await _channel.invokeMethod<bool>(
+        'createDirectory',
+        {'path': fullPath},
+      );
+      _logger.info('iOS: Created directory: $fullPath');
+      return result ?? false;
+    } on PlatformException catch (e) {
+      _logger.severe('iOS: Failed to create directory: ${e.message}');
+      return false;
+    }
+  }
+
+  Future<bool> _createDirectoryOther(String basePath, String subPath) async {
+    try {
+      final fullPath = '$basePath/$subPath';
+      await Directory(fullPath).create(recursive: true);
+      _logger.info('Other: Created directory: $fullPath');
+      return true;
+    } catch (e) {
+      _logger.severe('Other: Failed to create directory: $e');
+      return false;
+    }
+  }
+
+  /// Check if a path exists.
+  Future<bool> exists(PickedDirectory dir, {String? subPath}) async {
+    if (Platform.isIOS && dir.bookmark != null) {
+      try {
+        final fullPath = subPath != null ? '${dir.path}/$subPath' : dir.path;
+        final result = await _channel.invokeMethod<bool>(
+          'exists',
+          {'path': fullPath},
+        );
+        return result ?? false;
+      } on PlatformException {
+        return false;
+      }
+    } else {
+      final fullPath = subPath != null ? '${dir.path}/$subPath' : dir.path;
+      return Directory(fullPath).existsSync() || File(fullPath).existsSync();
+    }
+  }
+}
