@@ -42,32 +42,30 @@ Future<void> share(
       // This will eat up storage, which will be reset only when the app restarts.
       // We could have cleared the cache had there been a callback to the share API.
       pathFutures.add(
-        getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile?.path),
+        getFile(file, isOrigin: true).then((fetchedFile) {
+          final path = fetchedFile?.path;
+          if (path == null && file.localID != null && file.isUploaded) {
+            _logger.warning(
+              "path was null for $file with localID: ${file.localID}. Getting file from server now",
+            );
+            return getFileFromServer(file)
+                .then((remoteFile) => remoteFile?.path);
+          }
+          return path;
+        }),
       );
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
     final resolvedPaths = <String>[];
     for (var i = 0; i < paths.length; i++) {
-      String? path = paths[i];
+      final path = paths[i];
       if (path == null) {
         _logger.warning(
           "share missing local path for file $i/${files.length} "
           "(remote: ${files[i].isRemoteFile})",
         );
-        final enteFile = files[i];
-        final localID = enteFile.localID;
-        _logger.warning(
-          "path was null for $enteFile with localID: $localID. Getting file from server now",
-        );
-        if (enteFile.isRemoteFile && enteFile.isUploaded) {
-          final file = await getFileFromServer(enteFile);
-          path = file?.path;
-        }
-        if (path == null) {
-          _logger.warning("file from server is still null");
-          continue;
-        }
+        continue;
       }
       resolvedPaths.add(path);
     }
