@@ -54,6 +54,7 @@ dependencies:
   figma_squircle: ^0.6.3
   file_picker: ^10.3.2
   file_saver: ^0.3.1
+  security_scoped_resource: ^0.0.2
   fixnum: ^1.1.0
   fk_user_agent: # no package updates on pub.dev
     git:

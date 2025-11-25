@@ -526,6 +526,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       if (result?.action == ButtonAction.second) {
         final pickedPath = await FilePicker.platform.getDirectoryPath();
         if (pickedPath != null) {
+          // Reject iCloud Drive paths on iOS
+          if (_isICloudPath(pickedPath)) {
+            _showSnackBar(context.l10n.iCloudNotSupported);
+            return false;
+          }
           return _persistLocation(
             pickedPath,
             successMessage: context.l10n.initialBackupCreated,
@@ -657,6 +662,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       String? directoryPath = await FilePicker.platform.getDirectoryPath();
 
       if (directoryPath != null) {
+        // On iOS, reject iCloud Drive paths as they don't work reliably
+        if (Platform.isIOS && _isICloudPath(directoryPath)) {
+          _showSnackBar(context.l10n.iCloudNotSupported);
+          return false;
+        }
+
         final saved = await _persistLocation(
           directoryPath,
           successMessage:
@@ -676,6 +687,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
       return false;
     }
+  }
+
+  /// Check if the path is an iCloud Drive path
+  bool _isICloudPath(String path) {
+    return path.contains('/Mobile Documents/') ||
+        path.contains('com~apple~CloudDocs');
   }
 
   Future<bool> _persistLocation(

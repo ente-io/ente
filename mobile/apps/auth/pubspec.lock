@@ -1455,6 +1455,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  security_scoped_resource:
+    dependency: "direct main"
+    description:
+      name: security_scoped_resource
+      sha256: "82279652f4932530f67cf848a55117bb2dcb5a542cb95a84b6ee78ecec9ee31f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   sentry:
     dependency: "direct main"
     description:

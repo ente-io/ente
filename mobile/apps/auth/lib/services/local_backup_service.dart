@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
+import 'package:security_scoped_resource/security_scoped_resource.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalBackupService {
@@ -80,14 +81,30 @@ class LocalBackupService {
       }
 
       final dir = Directory(target.path!);
-      await dir.create(recursive: true);
-      final filePath = '${dir.path}/$fileName';
-      final backupFile = File(filePath);
-      await backupFile.create(recursive: true);
-      await backupFile.writeAsString(content);
-      await _manageOldBackups(dir.path);
-      _logger.info('Automatic encrypted backup successful! Saved to: $filePath');
-      return true;
+
+      // On iOS, we need to access security-scoped resources for directories
+      // outside the app sandbox (e.g., user-selected folders)
+      if (Platform.isIOS) {
+        await SecurityScopedResource.instance
+            .startAccessingSecurityScopedResource(dir);
+      }
+
+      try {
+        await dir.create(recursive: true);
+        final filePath = '${dir.path}/$fileName';
+        final backupFile = File(filePath);
+        await backupFile.create(recursive: true);
+        await backupFile.writeAsString(content);
+        await _manageOldBackups(dir.path);
+        _logger
+            .info('Automatic encrypted backup successful! Saved to: $filePath');
+        return true;
+      } finally {
+        if (Platform.isIOS) {
+          await SecurityScopedResource.instance
+              .stopAccessingSecurityScopedResource(dir);
+        }
+      }
     } catch (e, s) {
       _logger.severe('Failed to write backup', e, s);
       return false;
@@ -170,31 +187,44 @@ class LocalBackupService {
   Future<void> deleteAllBackupsIn(String path) async {
     try {
       final directory = Directory(path);
-      if (!await directory.exists()) {
-        _logger.warning('Old backup directory not found. Nothing to delete.');
-        return;
+
+      // On iOS, we need to access security-scoped resources
+      if (Platform.isIOS) {
+        await SecurityScopedResource.instance
+            .startAccessingSecurityScopedResource(directory);
       }
 
-      final files = directory
-          .listSync()
-          .where(
-            (entity) =>
-                entity is File &&
-                _isBackupFile(entity.path.split('/').last),
-          )
-          .map((entity) => entity as File)
-          .toList();
+      try {
+        if (!await directory.exists()) {
+          _logger.warning('Old backup directory not found. Nothing to delete.');
+          return;
+        }
 
-      if (files.isEmpty) {
-        _logger.info('No old backup files found to delete.');
-        return;
-      }
+        final files = directory
+            .listSync()
+            .where(
+              (entity) =>
+                  entity is File && _isBackupFile(entity.path.split('/').last),
+            )
+            .map((entity) => entity as File)
+            .toList();
 
-      for (final file in files) {
-        await file.delete();
-        _logger.info('Deleted: ${file.path}');
+        if (files.isEmpty) {
+          _logger.info('No old backup files found to delete.');
+          return;
+        }
+
+        for (final file in files) {
+          await file.delete();
+          _logger.info('Deleted: ${file.path}');
+        }
+        _logger.info('Successfully cleaned up old backup location.');
+      } finally {
+        if (Platform.isIOS) {
+          await SecurityScopedResource.instance
+              .stopAccessingSecurityScopedResource(directory);
+        }
       }
-      _logger.info('Successfully cleaned up old backup location.');
     } catch (e, s) {
       _logger.severe('Error during full backup cleanup of old directory', e, s);
     }

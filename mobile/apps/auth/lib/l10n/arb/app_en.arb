@@ -622,5 +622,6 @@
   "chooseIcon": "Choose icon",
   "customOrder": "Custom order",
   "selectAnOption": "Select an option",
-  "todaysLogs": "Today's logs"
+  "todaysLogs": "Today's logs",
+  "iCloudNotSupported": "iCloud Drive folder selection is not supported. Please select a local folder instead."
 }
