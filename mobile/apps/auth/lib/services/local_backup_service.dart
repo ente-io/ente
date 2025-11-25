@@ -50,7 +50,7 @@ class LocalBackupService {
 
   Future<void> _clearBackupPassword() async {
     await SecureStorageService.instance
-        .delete(SecureStorageService.autoBackupPasswordKey);
+        .delete(AuthSecureStorageKeys.autoBackupPasswordKey);
   }
 
   Future<bool> triggerAutomaticBackup({bool isManual = false}) async {
@@ -315,7 +315,7 @@ class LocalBackupService {
   Future<String?> _readPassword() async {
     try {
       return SecureStorageService.instance
-          .read(SecureStorageService.autoBackupPasswordKey);
+          .read(AuthSecureStorageKeys.autoBackupPasswordKey);
     } catch (e, s) {
       _logger.severe('Unable to read backup password', e, s);
       return null;

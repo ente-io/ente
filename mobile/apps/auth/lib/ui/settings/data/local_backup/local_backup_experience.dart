@@ -365,7 +365,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
 
     await SecureStorageService.instance
-        .write(SecureStorageService.autoBackupPasswordKey, password);
+        .write(AuthSecureStorageKeys.autoBackupPasswordKey, password);
     return true;
   }
 
@@ -379,7 +379,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
     await SecureStorageService.instance
-        .delete(SecureStorageService.autoBackupPasswordKey);
+        .delete(AuthSecureStorageKeys.autoBackupPasswordKey);
     _showSnackBar(context.l10n.backupPasswordCleared);
     return true;
   }
@@ -387,7 +387,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
   Future<String?> _readStoredPassword() async {
     try {
       return SecureStorageService.instance
-          .read(SecureStorageService.autoBackupPasswordKey);
+          .read(AuthSecureStorageKeys.autoBackupPasswordKey);
     } catch (e) {
       _logger.severe('Failed to read backup password: $e');
       return null;
