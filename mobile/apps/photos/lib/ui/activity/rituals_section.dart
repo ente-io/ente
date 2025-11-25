@@ -16,12 +16,14 @@ class RitualsSection extends StatelessWidget {
     required this.rituals,
     required this.progress,
     this.showHeader = true,
+    this.showStarterRitual = true,
     super.key,
   });
 
   final List<Ritual> rituals;
   final Map<String, RitualProgress> progress;
   final bool showHeader;
+  final bool showStarterRitual;
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +51,22 @@ class RitualsSection extends StatelessWidget {
             const SizedBox(height: 8),
           ] else
             const SizedBox(height: 4),
+          if (showStarterRitual) const _StarterRitualCard(),
           if (rituals.isEmpty)
-            Text(
-              "Create a ritual to get daily reminders.",
-              style: Theme.of(context).textTheme.bodyMedium,
+            GestureDetector(
+              onTap: () async {
+                await _showRitualEditor(context, ritual: null);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(8, 14, 8, 10),
+                alignment: Alignment.center,
+                child: Text(
+                  "Create your own ritual to get daily reminders.",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
             )
           else
             Column(
@@ -65,6 +79,31 @@ class RitualsSection extends StatelessWidget {
                   .toList(),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _StarterRitualCard extends StatelessWidget {
+  const _StarterRitualCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Color(0xFFEAEAEA),
+          child: Text(
+            "📸",
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+        title: Text("Take a photo every day"),
       ),
     );
   }
