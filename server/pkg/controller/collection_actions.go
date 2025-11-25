@@ -1,9 +1,16 @@
 package controller
 
 import (
-    "github.com/ente-io/museum/pkg/repo"
+	"context"
+
+	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/repo"
 )
 
 type CollectionActionsController struct {
-    Repo *repo.CollectionActionsRepository
+	Repo *repo.CollectionActionsRepository
+}
+
+func (c *CollectionActionsController) ListPendingRemoveActions(ctx context.Context, userID int64, updatedAfter int64, limit int) ([]ente.CollectionAction, error) {
+	return c.Repo.ListPendingRemoveActions(ctx, userID, updatedAfter, limit)
 }

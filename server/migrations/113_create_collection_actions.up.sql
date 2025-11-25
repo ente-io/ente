@@ -17,3 +17,6 @@ CREATE TABLE IF NOT EXISTS collection_actions (
 
 CREATE INDEX IF NOT EXISTS collection_actions_user_id_idx ON collection_actions (user_id);
 CREATE INDEX IF NOT EXISTS collection_actions_collection_id_idx ON collection_actions (collection_id);
+CREATE INDEX IF NOT EXISTS collection_actions_pending_remove_delete_user_time_idx
+    ON collection_actions (user_id, updated_at)
+    WHERE action IN ('REMOVE', 'DELETE_SUGGESTED') AND is_pending = true;

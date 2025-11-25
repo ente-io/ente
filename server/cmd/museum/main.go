@@ -316,16 +316,16 @@ func main() {
 	}
 
 	collectionController := &collections.CollectionController{
-		CollectionRepo:     collectionRepo,
-		EmailCtrl:          emailNotificationCtrl,
-		AccessCtrl:         accessCtrl,
-		CollectionLinkCtrl: collectionLinkCtrl,
-		UserRepo:           userRepo,
-		FileRepo:           fileRepo,
-		CastRepo:           &castDb,
-		BillingCtrl:        billingController,
-		QueueRepo:          queueRepo,
-		TaskRepo:           taskLockingRepo,
+		CollectionRepo:        collectionRepo,
+		EmailCtrl:             emailNotificationCtrl,
+		AccessCtrl:            accessCtrl,
+		CollectionLinkCtrl:    collectionLinkCtrl,
+		UserRepo:              userRepo,
+		FileRepo:              fileRepo,
+		CastRepo:              &castDb,
+		BillingCtrl:           billingController,
+		QueueRepo:             queueRepo,
+		TaskRepo:              taskLockingRepo,
 		CollectionActionsRepo: &repo.CollectionActionsRepository{DB: db},
 	}
 
@@ -575,9 +575,8 @@ func main() {
 	}
 	privateAPI.POST("/collections", collectionHandler.Create)
 	// Collection actions (exposed for clients to fetch suggestions/removals)
-	privateAPI.GET("/collection-actions", collectionActionsHandler.List)
-	// Backward alias
-	privateAPI.GET("/pending-actions", collectionActionsHandler.List)
+	privateAPI.GET("/collection-actions/pending-remove", collectionActionsHandler.ListPendingRemove)
+
 	privateAPI.GET("/collections/:collectionID", collectionHandler.GetCollectionByID)
 	//lint:ignore SA1019 Deprecated API will be removed in the future
 	privateAPI.GET("/collections", collectionHandler.Get)
@@ -594,8 +593,8 @@ func main() {
 	privateAPI.POST("/collections/move-files", collectionHandler.MoveFiles)
 	privateAPI.POST("/collections/restore-files", collectionHandler.RestoreFiles)
 
-    privateAPI.POST("/collections/v3/remove-files", collectionHandler.RemoveFilesV3)
-    privateAPI.POST("/collections/suggest-delete", collectionHandler.SuggestDeleteInSharedCollection)
+	privateAPI.POST("/collections/v3/remove-files", collectionHandler.RemoveFilesV3)
+	privateAPI.POST("/collections/suggest-delete", collectionHandler.SuggestDeleteInSharedCollection)
 	privateAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
 	privateAPI.GET("/collections/file", collectionHandler.GetFile)
 	privateAPI.GET("/collections/sharees", collectionHandler.GetSharees)
