@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
+import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -9,9 +10,9 @@ import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:saf_util/saf_util.dart';
+import 'package:security_scoped_resource/security_scoped_resource.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 typedef LocalBackupVariantBuilder = Widget Function(
@@ -319,8 +320,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
-    const storage = FlutterSecureStorage();
-    await storage.write(key: _passwordKey, value: password);
+    await SecureStorageService.instance.write(_passwordKey, password);
     return true;
   }
 
@@ -333,16 +333,14 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     if (_isBackupEnabled) {
       return false;
     }
-    const storage = FlutterSecureStorage();
-    await storage.delete(key: _passwordKey);
+    await SecureStorageService.instance.delete(_passwordKey);
     _showSnackBar(context.l10n.backupPasswordCleared);
     return true;
   }
 
   Future<String?> _readStoredPassword() async {
-    const storage = FlutterSecureStorage();
     try {
-      return storage.read(key: _passwordKey);
+      return SecureStorageService.instance.read(_passwordKey);
     } catch (_) {
       return null;
     }
@@ -526,11 +524,6 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       if (result?.action == ButtonAction.second) {
         final pickedPath = await FilePicker.platform.getDirectoryPath();
         if (pickedPath != null) {
-          // Reject iCloud Drive paths on iOS
-          if (_isICloudPath(pickedPath)) {
-            _showSnackBar(context.l10n.iCloudNotSupported);
-            return false;
-          }
           return _persistLocation(
             pickedPath,
             successMessage: context.l10n.initialBackupCreated,
@@ -662,12 +655,6 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       String? directoryPath = await FilePicker.platform.getDirectoryPath();
 
       if (directoryPath != null) {
-        // On iOS, reject iCloud Drive paths as they don't work reliably
-        if (Platform.isIOS && _isICloudPath(directoryPath)) {
-          _showSnackBar(context.l10n.iCloudNotSupported);
-          return false;
-        }
-
         final saved = await _persistLocation(
           directoryPath,
           successMessage:
@@ -689,44 +676,55 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
   }
 
-  /// Check if the path is an iCloud Drive path
-  bool _isICloudPath(String path) {
-    return path.contains('/Mobile Documents/') ||
-        path.contains('com~apple~CloudDocs');
-  }
-
   Future<bool> _persistLocation(
     String path, {
     String? successMessage,
   }) async {
+    // On iOS, create an EnteAuthBackups subdirectory within the selected folder
+    final targetPath = Platform.isIOS ? '$path/EnteAuthBackups' : path;
+
     final prefs = await SharedPreferences.getInstance();
     Future<bool> savePath(String target) async {
       try {
-        await Directory(target).create(recursive: true);
-        await prefs.setString('autoBackupPath', target);
-        await prefs.remove(_treeUriKey);
-        await prefs.setBool(_locationConfiguredKey, true);
-        if (!mounted) return false;
-        setState(() {
-          _backupPath = target;
-          _backupTreeUri = null;
-        });
-        if (successMessage != null) {
-          _showSnackBar(successMessage);
+        // On iOS, we need security-scoped access to the user-selected directory
+        // before we can create subdirectories in it
+        if (Platform.isIOS) {
+          await SecurityScopedResource.instance
+              .startAccessingSecurityScopedResource(Directory(path));
         }
-        return true;
+
+        try {
+          await Directory(target).create(recursive: true);
+          await prefs.setString('autoBackupPath', target);
+          await prefs.remove(_treeUriKey);
+          await prefs.setBool(_locationConfiguredKey, true);
+          if (!mounted) return false;
+          setState(() {
+            _backupPath = target;
+            _backupTreeUri = null;
+          });
+          if (successMessage != null) {
+            _showSnackBar(successMessage);
+          }
+          return true;
+        } finally {
+          if (Platform.isIOS) {
+            await SecurityScopedResource.instance
+                .stopAccessingSecurityScopedResource(Directory(path));
+          }
+        }
       } catch (_) {
         return false;
       }
     }
 
-    if (await savePath(path)) {
+    if (await savePath(targetPath)) {
       return true;
     }
 
     if (Platform.isAndroid) {
       final fallbackPath = await _androidPrivateBackupPath();
-      if (fallbackPath != null && fallbackPath != path) {
+      if (fallbackPath != null && fallbackPath != targetPath) {
         final savedFallback = await savePath(fallbackPath);
         if (savedFallback) {
           return true;

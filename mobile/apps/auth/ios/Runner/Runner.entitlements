@@ -9,5 +9,9 @@
 		<string>webcredentials:web.ente.io</string>
 		<string>webcredentials:auth.ente.io</string>
 	</array>
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudDocuments</string>
+	</array>
 </dict>
 </plist>

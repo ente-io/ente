@@ -3,9 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ente_auth/models/export/ente.dart';
+import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:saf_stream/saf_stream.dart';
@@ -158,8 +158,7 @@ class LocalBackupService {
           .listSync()
           .where(
             (entity) =>
-                entity is File &&
-                _isBackupFile(entity.path.split('/').last),
+                entity is File && _isBackupFile(entity.path.split('/').last),
           )
           .map((entity) => entity as File)
           .toList();
@@ -247,9 +246,8 @@ class LocalBackupService {
   }
 
   Future<String?> _readPassword() async {
-    const storage = FlutterSecureStorage();
     try {
-      return storage.read(key: 'autoBackupPassword');
+      return SecureStorageService.instance.read('autoBackupPassword');
     } catch (e, s) {
       _logger.severe('Unable to read backup password', e, s);
       return null;
