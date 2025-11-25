@@ -288,324 +288,359 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
   String selectedEmoji = ritual?.icon ?? "📸";
   final formKey = GlobalKey<FormState>();
 
-  await showModalBottomSheet(
+  await showGeneralDialog(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
-    builder: (context) {
-      final colorScheme = getEnteColorScheme(context);
-      final textTheme = getEnteTextTheme(context);
-      return StatefulBuilder(
-        builder: (context, setState) {
-          final bool canSave =
-              controller.text.trim().isNotEmpty && selectedAlbumId != null;
-          final bool allDaysOff = days.every((selected) => !selected);
-          return SafeArea(
+    barrierLabel: "Ritual editor",
+    barrierColor: Colors.black.withValues(alpha: 0.45),
+    barrierDismissible: true,
+    transitionDuration: const Duration(milliseconds: 240),
+    pageBuilder: (dialogContext, animation, secondaryAnimation) {
+      final colorScheme = getEnteColorScheme(dialogContext);
+      final textTheme = getEnteTextTheme(dialogContext);
+      final bottomPadding = MediaQuery.of(dialogContext).padding.bottom;
+      final maxHeight = MediaQuery.of(dialogContext).size.height * 0.95;
+      return SafeArea(
+        top: false,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxHeight),
             child: Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-                left: 12,
-                right: 12,
-                top: 8,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.backgroundElevated,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 22,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              ritual == null ? "New ritual" : "Edit ritual",
-                              style: textTheme.largeBold,
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Container(
-                                  width: 70,
-                                  height: 70,
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.fillFaintPressed,
-                                    shape: BoxShape.circle,
+              padding: EdgeInsets.fromLTRB(12, 8, 12, bottomPadding + 16),
+              child: Material(
+                color: Colors.transparent,
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    final bool canSave = controller.text.trim().isNotEmpty &&
+                        selectedAlbumId != null;
+                    final bool allDaysOff = days.every((selected) => !selected);
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: colorScheme.backgroundElevated,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 22,
+                            offset: const Offset(0, 12),
+                          ),
+                        ],
+                      ),
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    ritual == null
+                                        ? "New ritual"
+                                        : "Edit ritual",
+                                    style: textTheme.largeBold,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      selectedEmoji,
-                                      style: const TextStyle(fontSize: 32),
-                                    ),
+                                  const Spacer(),
+                                  IconButton(
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
                                   ),
-                                ),
-                                Positioned(
-                                  right: -4,
-                                  bottom: -4,
-                                  child: Material(
-                                    color: colorScheme.backgroundElevated,
-                                    shape: const CircleBorder(),
-                                    elevation: 2,
-                                    child: InkWell(
-                                      customBorder: const CircleBorder(),
-                                      onTap: () async {
-                                        final emoji = await _pickEmoji(
-                                          context,
-                                          selectedEmoji,
-                                        );
-                                        if (emoji != null) {
-                                          setState(() {
-                                            selectedEmoji = emoji;
-                                          });
-                                        }
-                                      },
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(6),
-                                        child: Icon(
-                                          Icons.edit_outlined,
-                                          size: 18,
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Container(
+                                        width: 70,
+                                        height: 70,
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.fillFaintPressed,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            selectedEmoji,
+                                            style:
+                                                const TextStyle(fontSize: 32),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        right: -4,
+                                        bottom: -4,
+                                        child: Material(
+                                          color: colorScheme.backgroundElevated,
+                                          shape: const CircleBorder(),
+                                          elevation: 2,
+                                          child: InkWell(
+                                            customBorder: const CircleBorder(),
+                                            onTap: () async {
+                                              final emoji = await _pickEmoji(
+                                                context,
+                                                selectedEmoji,
+                                              );
+                                              if (emoji != null) {
+                                                setState(() {
+                                                  selectedEmoji = emoji;
+                                                });
+                                              }
+                                            },
+                                            child: const Padding(
+                                              padding: EdgeInsets.all(6),
+                                              child: Icon(
+                                                Icons.edit_outlined,
+                                                size: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: TextFormField(
-                                controller: controller,
-                                autofocus: true,
-                                onChanged: (_) => setState(() {}),
-                                decoration: InputDecoration(
-                                  hintText: "Enter your ritual",
-                                  filled: true,
-                                  fillColor: colorScheme.fillFaint,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 14,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return "Please enter a description";
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        _sectionLabel(context, "Day"),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.fillFaint,
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: List.generate(
-                              days.length,
-                              (index) => _DayCircle(
-                                label: _weekLabel(index),
-                                selected: days[index],
-                                colorScheme: colorScheme,
-                                onTap: () {
-                                  setState(() {
-                                    days[index] = !days[index];
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        if (allDaysOff)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 14,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colorScheme.fillFaint,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.notifications_off_outlined,
-                                  color: colorScheme.textMuted,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    "Notifications are off. Tap a day to turn them on.",
-                                    style: textTheme.small.copyWith(
-                                      color: colorScheme.textMuted,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        else ...[
-                          _sectionLabel(context, "Time"),
-                          const SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: () async {
-                              final result = await showTimePicker(
-                                context: context,
-                                initialTime: selectedTime,
-                              );
-                              if (result != null) {
-                                setState(() {
-                                  selectedTime = result;
-                                });
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorScheme.fillFaint,
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Row(
-                                children: [
+                                  const SizedBox(width: 12),
                                   Expanded(
-                                    child: Text(
-                                      selectedTime.format(context),
-                                      style: textTheme.h3Bold,
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.backgroundElevated2,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.schedule,
-                                      color: colorScheme.textMuted,
+                                    child: TextFormField(
+                                      controller: controller,
+                                      autofocus: true,
+                                      onChanged: (_) => setState(() {}),
+                                      decoration: InputDecoration(
+                                        hintText: "Enter your ritual",
+                                        filled: true,
+                                        fillColor: colorScheme.fillFaint,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                          vertical: 14,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null ||
+                                            value.trim().isEmpty) {
+                                          return "Please enter a description";
+                                        }
+                                        return null;
+                                      },
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-                        _sectionLabel(context, "Album"),
-                        const SizedBox(height: 8),
-                        GestureDetector(
-                          onTap: () async {
-                            final result = await _pickAlbum(context);
-                            if (result != null) {
-                              setState(() {
-                                selectedAlbum = result;
-                                selectedAlbumId = result.id;
-                                selectedAlbumName = result.displayName;
-                              });
-                            }
-                          },
-                          child: _AlbumPreviewTile(
-                            album: selectedAlbum,
-                            fallbackName: selectedAlbumName,
+                              const SizedBox(height: 20),
+                              _sectionLabel(context, "Day"),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colorScheme.fillFaint,
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    days.length,
+                                    (index) => _DayCircle(
+                                      label: _weekLabel(index),
+                                      selected: days[index],
+                                      colorScheme: colorScheme,
+                                      onTap: () {
+                                        setState(() {
+                                          days[index] = !days[index];
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if (allDaysOff)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.fillFaint,
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.notifications_off_outlined,
+                                        color: colorScheme.textMuted,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          "Notifications are off. Tap a day to turn them on.",
+                                          style: textTheme.small.copyWith(
+                                            color: colorScheme.textMuted,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else ...[
+                                _sectionLabel(context, "Time"),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    final result = await showTimePicker(
+                                      context: context,
+                                      initialTime: selectedTime,
+                                    );
+                                    if (result != null) {
+                                      setState(() {
+                                        selectedTime = result;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.fillFaint,
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            selectedTime.format(context),
+                                            style: textTheme.h3Bold,
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                colorScheme.backgroundElevated2,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: Icon(
+                                            Icons.schedule,
+                                            color: colorScheme.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              _sectionLabel(context, "Album"),
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () async {
+                                  final result = await _pickAlbum(context);
+                                  if (result != null) {
+                                    setState(() {
+                                      selectedAlbum = result;
+                                      selectedAlbumId = result.id;
+                                      selectedAlbumName = result.displayName;
+                                    });
+                                  }
+                                },
+                                child: _AlbumPreviewTile(
+                                  album: selectedAlbum,
+                                  fallbackName: selectedAlbumName,
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: canSave
+                                        ? colorScheme.primary500
+                                        : colorScheme.fillMuted,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    if (!canSave) return;
+                                    final updated = (ritual ??
+                                            activityService.createEmptyRitual())
+                                        .copyWith(
+                                      title: controller.text.trim(),
+                                      daysOfWeek: days,
+                                      timeOfDay: selectedTime,
+                                      albumId: selectedAlbumId,
+                                      albumName: selectedAlbumName,
+                                      icon: selectedEmoji,
+                                    );
+                                    await activityService.saveRitual(updated);
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text(
+                                    ritual == null
+                                        ? "Save ritual"
+                                        : "Update ritual",
+                                    style: textTheme.bodyBold
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: canSave
-                                  ? colorScheme.primary500
-                                  : colorScheme.fillMuted,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (!canSave) return;
-                              final updated = (ritual ??
-                                      activityService.createEmptyRitual())
-                                  .copyWith(
-                                title: controller.text.trim(),
-                                daysOfWeek: days,
-                                timeOfDay: selectedTime,
-                                albumId: selectedAlbumId,
-                                albumName: selectedAlbumName,
-                                icon: selectedEmoji,
-                              );
-                              await activityService.saveRitual(updated);
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(
-                              ritual == null ? "Save ritual" : "Update ritual",
-                              style: textTheme.bodyBold
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-          );
-        },
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
       );
     },
   );
