@@ -8,6 +8,7 @@ class SearchableAppBar extends StatefulWidget {
   final Function(String) onSearch;
   final VoidCallback? onSearchClosed;
   final String heroTag;
+  final bool autoActivateSearch;
 
   const SearchableAppBar({
     super.key,
@@ -16,6 +17,7 @@ class SearchableAppBar extends StatefulWidget {
     required this.onSearch,
     this.onSearchClosed,
     this.heroTag = "",
+    this.autoActivateSearch = false,
   });
 
   @override
@@ -26,6 +28,28 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
   bool _isSearchActive = false;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.autoActivateSearch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _activateSearch();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchableAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.autoActivateSearch &&
+        !oldWidget.autoActivateSearch &&
+        !_isSearchActive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _activateSearch();
+      });
+    }
+  }
 
   @override
   void dispose() {
