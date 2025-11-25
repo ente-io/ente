@@ -24,8 +24,8 @@ class Configuration extends BaseConfiguration {
 
   @override
   Future<void> init(List<EnteBaseDatabase> dbs) async {
-    await super.init(dbs);
     _preferences = await SharedPreferences.getInstance();
+    await super.init(dbs);
     _secureStorage = const FlutterSecureStorage(
       iOptions: IOSOptions(
         accessibility: KeychainAccessibility.first_unlock_this_device,
