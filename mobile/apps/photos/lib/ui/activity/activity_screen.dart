@@ -5,20 +5,37 @@ import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
 import "package:photos/ui/activity/rituals_section.dart";
 
-class ActivityScreen extends StatelessWidget {
+class ActivityScreen extends StatefulWidget {
   const ActivityScreen({super.key, this.ritual});
 
   final Ritual? ritual;
 
   @override
+  State<ActivityScreen> createState() => _ActivityScreenState();
+}
+
+class _ActivityScreenState extends State<ActivityScreen> {
+  Ritual? _selectedRitual;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRitual = widget.ritual;
+  }
+
+  @override
+  void didUpdateWidget(covariant ActivityScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.ritual != widget.ritual) {
+      _selectedRitual = widget.ritual;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final ritualTitle =
-        ritual == null ? null : (ritual!.title.isEmpty ? "Ritual" : ritual!.title);
-    final String titleText =
-        ritualTitle == null ? "Rituals" : "$ritualTitle activity";
     return Scaffold(
       appBar: AppBar(
-        title: Text(titleText),
+        title: const Text("Rituals"),
         centerTitle: false,
         actions: [
           IconButton(
@@ -36,10 +53,16 @@ class ActivityScreen extends StatelessWidget {
           valueListenable: activityService.stateNotifier,
           builder: (context, state, _) {
             final summary = state.summary;
-            final displaySummary = summary != null && ritual != null
-                ? _summaryForRitual(summary, ritual!)
+            final selectedRitual = _selectedRitual;
+            final displaySummary = summary != null && selectedRitual != null
+                ? _summaryForRitual(summary, selectedRitual)
                 : summary;
             final iconColor = Theme.of(context).iconTheme.color;
+            final String sectionTitle = selectedRitual == null
+                ? "Take a photo every day"
+                : (selectedRitual.title.isEmpty
+                    ? "Untitled ritual"
+                    : selectedRitual.title);
             return RefreshIndicator(
               onRefresh: activityService.refresh,
               child: ListView(
@@ -50,6 +73,12 @@ class ActivityScreen extends StatelessWidget {
                     rituals: state.rituals,
                     progress: summary?.ritualProgress ?? const {},
                     showHeader: false,
+                    selectedRitualId: selectedRitual?.id,
+                    onSelectionChanged: (ritual) {
+                      setState(() {
+                        _selectedRitual = ritual;
+                      });
+                    },
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -58,7 +87,7 @@ class ActivityScreen extends StatelessWidget {
                       child: Row(
                         children: [
                           Text(
-                            "Activity",
+                            sectionTitle,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const Spacer(),
@@ -82,14 +111,6 @@ class ActivityScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (ritual != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                      child: Text(
-                        "Showing activity for ${ritualTitle ?? "Ritual"}",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
                   ActivityHeatmapCard(summary: displaySummary),
                   AchievementsRow(summary: displaySummary),
                 ],

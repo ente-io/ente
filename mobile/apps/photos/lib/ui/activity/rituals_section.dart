@@ -15,6 +15,8 @@ class RitualsSection extends StatelessWidget {
   const RitualsSection({
     required this.rituals,
     required this.progress,
+    this.selectedRitualId,
+    this.onSelectionChanged,
     this.showHeader = true,
     this.showStarterRitual = true,
     super.key,
@@ -22,6 +24,8 @@ class RitualsSection extends StatelessWidget {
 
   final List<Ritual> rituals;
   final Map<String, RitualProgress> progress;
+  final String? selectedRitualId;
+  final ValueChanged<Ritual?>? onSelectionChanged;
   final bool showHeader;
   final bool showStarterRitual;
 
@@ -51,7 +55,11 @@ class RitualsSection extends StatelessWidget {
             const SizedBox(height: 8),
           ] else
             const SizedBox(height: 4),
-          if (showStarterRitual) const _StarterRitualCard(),
+          if (showStarterRitual)
+            _StarterRitualCard(
+              isSelected: selectedRitualId == null,
+              onTap: () => onSelectionChanged?.call(null),
+            ),
           if (rituals.isEmpty)
             GestureDetector(
               onTap: () async {
@@ -74,6 +82,8 @@ class RitualsSection extends StatelessWidget {
                   .map(
                     (ritual) => _RitualCard(
                       ritual: ritual,
+                      isSelected: ritual.id == selectedRitualId,
+                      onTap: () => onSelectionChanged?.call(ritual),
                     ),
                   )
                   .toList(),
@@ -85,25 +95,43 @@ class RitualsSection extends StatelessWidget {
 }
 
 class _StarterRitualCard extends StatelessWidget {
-  const _StarterRitualCard();
+  const _StarterRitualCard({
+    required this.isSelected,
+    this.onTap,
+  });
+
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
+        color:
+            isSelected ? colorScheme.fillFaintPressed : const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected
+              ? colorScheme.primary500
+              : colorScheme.fillFaintPressed,
+          width: isSelected ? 1 : 0.5,
+        ),
       ),
-      child: const ListTile(
-        leading: CircleAvatar(
+      child: ListTile(
+        onTap: onTap,
+        leading: const CircleAvatar(
           backgroundColor: Color(0xFFEAEAEA),
           child: Text(
             "📸",
             style: TextStyle(fontSize: 18),
           ),
         ),
-        title: Text("Take a photo every day"),
+        title: Text(
+          "Take a photo every day",
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
       ),
     );
   }
@@ -112,24 +140,40 @@ class _StarterRitualCard extends StatelessWidget {
 class _RitualCard extends StatelessWidget {
   const _RitualCard({
     required this.ritual,
+    this.isSelected = false,
+    this.onTap,
   });
 
   final Ritual ritual;
+  final bool isSelected;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
+        color:
+            isSelected ? colorScheme.fillFaintPressed : const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSelected
+              ? colorScheme.primary500
+              : colorScheme.fillFaintPressed,
+          width: isSelected ? 1 : 0.5,
+        ),
       ),
       child: ListTile(
         onTap: () {
-          routeToPage(
-            context,
-            ActivityScreen(ritual: ritual),
-          );
+          if (onTap != null) {
+            onTap!();
+          } else {
+            routeToPage(
+              context,
+              ActivityScreen(ritual: ritual),
+            );
+          }
         },
         leading: CircleAvatar(
           backgroundColor: Colors.grey.shade200,
@@ -568,8 +612,9 @@ String _weekLabel(int index) {
 
 Future<Collection?> _pickAlbum(BuildContext context) async {
   final service = CollectionsService.instance;
-  final albums =
-      List<Collection>.from(await CollectionsService.instance.getCollectionsForRituals());
+  final albums = List<Collection>.from(
+    await CollectionsService.instance.getCollectionsForRituals(),
+  );
   Collection? selected;
   await showModalBottomSheet(
     context: context,
