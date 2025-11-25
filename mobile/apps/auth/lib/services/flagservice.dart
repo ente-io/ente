@@ -16,6 +16,6 @@ class FeatureFlagService {
   }
 
   static bool isLocalBackupEnabled() {
-    return true;
+    return isInternalUserOrDebugBuild();
   }
 }
