@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import {
     Box,
     Dialog,
@@ -99,10 +99,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         return Array.from(groups.entries());
     }, [mapPhotos]);
 
-    const visiblePhotosByDate = useMemo(
-        () => (expanded ? photosByDate : photosByDate.slice(0, 2)),
-        [expanded, photosByDate],
-    );
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const optimalZoom = calculateOptimalZoom();
@@ -301,41 +297,35 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
         const { MapContainer, TileLayer, Marker } = mapComponents;
         return (
-            <Box sx={{ position: "relative", height: "100%", width: "100%" }}>
-                <MapContainer
-                    center={mapCenter}
-                    zoom={optimalZoom}
-                    scrollWheelZoom
-                    style={{ width: "100%", height: "100%" }}
+            <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
+                {/* Left sidebar */}
+                <Box
+                    sx={{
+                        width: expanded ? "50%" : "440px",
+                        height: "100%",
+                        bgcolor: (theme) => theme.vars.palette.background.paper,
+                        boxShadow: (theme) => theme.shadows[6],
+                        display: "flex",
+                        flexDirection: "column",
+                        overflowY: "auto",
+                        padding: 2,
+                        transition: "width 0.3s ease",
+                    }}
                 >
-                    <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        maxZoom={19}
-                        updateWhenZooming
-                    />
-                    {clusterMeta.map((cluster, index) => {
-                        const icon = createIcon(
-                            cluster.thumbnail ?? "",
-                            index === selectedClusterIndex ? 55 : 45,
-                            "#ffffff",
-                            cluster.count,
-                            index === selectedClusterIndex,
-                        );
-                        return (
-                            <Marker
-                                key={`${cluster.lat}-${cluster.lng}-${index}`}
-                                position={[cluster.lat, cluster.lng]}
-                                icon={icon ?? undefined}
-                                eventHandlers={{
-                                    click: () => setSelectedClusterIndex(index),
-                                }}
-                            />
-                        );
-                    })}
-                </MapContainer>
-                <BottomPanel expanded={expanded}>
-                    <Stack spacing={1}>
+                    {/* Sticky header section */}
+                    <Box
+                        sx={{
+                            position: "sticky",
+                            top: -16, // Stick to the very top
+                            mx: -2, // Extend to edges
+                            px: 2, // Add padding back
+                            pt: 2, // Add padding for content spacing
+                            bgcolor: (theme) =>
+                                theme.vars.palette.background.paper,
+                            zIndex: 1,
+                            pb: 2,
+                        }}
+                    >
                         <Box
                             sx={{
                                 display: "flex",
@@ -355,7 +345,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                 <Typography
                                     variant="body"
                                     color="text.secondary"
-                                    sx={{ mt: 0.25, mb: 1 }}
+                                    sx={{ mt: 0.25 }}
                                 >
                                     {mapPhotos.length}{" "}
                                     {t("memories", {
@@ -376,9 +366,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                     }}
                                 >
                                     {expanded ? (
-                                        <KeyboardArrowDownIcon />
+                                        <KeyboardArrowLeftIcon />
                                     ) : (
-                                        <KeyboardArrowUpIcon />
+                                        <KeyboardArrowRightIcon />
                                     )}
                                 </IconButton>
                                 <IconButton
@@ -394,42 +384,92 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                 </IconButton>
                             </Stack>
                         </Box>
-                        <Stack spacing={1.5}>
-                            {visiblePhotosByDate.map(([dateLabel, photos]) => (
-                                <Stack key={dateLabel} spacing={0.75}>
+                    </Box>
+                    {/* Scrollable photo content */}
+                    <Stack spacing={1.5}>
+                        {photosByDate.map(([dateLabel, photos]) => (
+                            <Stack key={dateLabel} spacing={0.75}>
+                                <Box
+                                    sx={{
+                                        position: "sticky",
+                                        top: 56,
+                                        bgcolor: (theme) =>
+                                            theme.vars.palette.background.paper,
+                                        zIndex: 0,
+                                        py: 0.5,
+                                        ml: -2,
+                                        mr: -2,
+                                        pr: 2,
+                                    }}
+                                >
                                     <Typography
                                         variant="small"
                                         color="text.secondary"
-                                        sx={{ mb: 0.25 }}
                                     >
                                         {dateLabel}
                                     </Typography>
-                                    <ThumbRow>
-                                        {photos.map((p, idx) => {
-                                            const thumb = thumbByFileID.get(
-                                                p.fileId,
-                                            );
-                                            if (!thumb) {
-                                                return (
-                                                    <PlaceholderThumb
-                                                        key={p.fileId}
-                                                    />
-                                                );
-                                            }
+                                </Box>
+                                <ThumbRow>
+                                    {photos.map((p, idx) => {
+                                        const thumb = thumbByFileID.get(
+                                            p.fileId,
+                                        );
+                                        if (!thumb) {
                                             return (
-                                                <ThumbImage
-                                                    key={`${thumb}-${idx}`}
-                                                    src={thumb}
-                                                    alt={t("view_on_map")}
+                                                <PlaceholderThumb
+                                                    key={p.fileId}
                                                 />
                                             );
-                                        })}
-                                    </ThumbRow>
-                                </Stack>
-                            ))}
-                        </Stack>
+                                        }
+                                        return (
+                                            <ThumbImage
+                                                key={`${thumb}-${idx}`}
+                                                src={thumb}
+                                                alt={t("view_on_map")}
+                                            />
+                                        );
+                                    })}
+                                </ThumbRow>
+                            </Stack>
+                        ))}
                     </Stack>
-                </BottomPanel>
+                </Box>
+                {/* Map container on the right */}
+                <Box sx={{ flex: 1, position: "relative" }}>
+                    <MapContainer
+                        center={mapCenter}
+                        zoom={optimalZoom}
+                        scrollWheelZoom
+                        style={{ width: "100%", height: "100%" }}
+                    >
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            maxZoom={19}
+                            updateWhenZooming
+                        />
+                    {clusterMeta.map((cluster, index) => {
+                        const icon = createIcon(
+                            cluster.thumbnail ?? "",
+                            index === selectedClusterIndex ? 76 : 68,
+                            "#f6f6f6",
+                            cluster.count,
+                            index === selectedClusterIndex,
+                        );
+                        return (
+                            <Marker
+                                key={`${cluster.lat}-${cluster.lng}-${index}`}
+                                    position={[cluster.lat, cluster.lng]}
+                                    icon={icon ?? undefined}
+                                    eventHandlers={{
+                                        click: () =>
+                                            setSelectedClusterIndex(index),
+                                    }}
+                                />
+                            );
+                        })}
+                    </MapContainer>
+                </Box>
             </Box>
         );
     }, [
@@ -439,12 +479,14 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         mapCenter,
         mapComponents,
         optimalZoom,
-        mapPhotos.length,
         mapPhotos,
         thumbByFileID,
         photosByDate,
         expanded,
-        visiblePhotosByDate,
+        collectionSummary.name,
+        onClose,
+        photoClusters.length,
+        selectedClusterIndex,
     ]);
 
     return (
@@ -477,30 +519,6 @@ const CenteredBox: React.FC<React.PropsWithChildren> = ({ children }) => (
             gap: 1,
             flexDirection: "column",
             textAlign: "center",
-        }}
-    >
-        {children}
-    </Box>
-);
-
-const BottomPanel: React.FC<React.PropsWithChildren<{ expanded: boolean }>> = ({
-    expanded,
-    children,
-}) => (
-    <Box
-        sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: (theme) => theme.zIndex.modal,
-            bgcolor: (theme) => theme.vars.palette.background.paper,
-            boxShadow: (theme) => theme.shadows[6],
-            p: 2,
-            borderTopLeftRadius: 12,
-            borderTopRightRadius: 12,
-            maxHeight: expanded ? "75vh" : "45vh",
-            overflowY: "auto",
         }}
     >
         {children}
