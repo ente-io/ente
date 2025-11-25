@@ -317,7 +317,6 @@ class _ActivityShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final double maxWidth = math
         .min(
@@ -326,17 +325,18 @@ class _ActivityShareCard extends StatelessWidget {
         )
         .toDouble();
     return Container(
-      color: colorScheme.backgroundBase,
+      color: Colors.black,
       padding: const EdgeInsets.all(12),
       child: Center(
         child: SizedBox(
           width: maxWidth,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? colorScheme.backgroundElevated2
-                  : Colors.white,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -367,18 +367,23 @@ class _ActivityShareCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Container(
-                    color: Colors.black,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(24),
                     ),
-                    child: Center(
-                      child: Image.asset(
-                        "assets/ente_io_green.png",
-                        width: 116,
-                        height: 27,
-                        fit: BoxFit.contain,
+                    child: Container(
+                      color: Colors.black,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          "assets/ente_io_green.png",
+                          width: 116,
+                          height: 27,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
