@@ -629,55 +629,26 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
 
-    // On Android, check if MediaExtension already consumed the VIEW intent
-    bool handledByMediaExtension = false;
-    if (Platform.isAndroid) {
-      final mediaAction = AppLifecycleService.instance.mediaExtensionAction;
-      if (mediaAction.action == IntentAction.view &&
-          mediaAction.data != null &&
-          mediaAction.data!.startsWith("ente://")) {
-        try {
-          final uri = Uri.parse(mediaAction.data!);
-          // Check if this is a public album link by hostname
-          if (_isPublicAlbumHost(mediaAction.data!)) {
-            // Small delay to ensure app is fully initialized on cold start
-            await Future.delayed(const Duration(milliseconds: 500));
-            if (!mounted) return;
-            await _handlePublicAlbumLink(uri, "MediaExtension.getIntentAction");
-            handledByMediaExtension = true;
-          } else {
-            _logger.info(
-              "uri doesn't contain 'albums.ente.io' in MediaExtension deep link",
-            );
-          }
-        } catch (e) {
-          _logger.severe("Error parsing MediaExtension deep link: $e");
-        }
-      }
-    }
-
-    // For iOS or if MediaExtension didn't have the link, use AppLinks
-    if (!handledByMediaExtension) {
-      try {
-        final initialUri = await appLinks.getInitialLink();
-        if (initialUri != null) {
-          if (initialUri.scheme == "ente" &&
-              _isPublicAlbumHost(initialUri.toString())) {
-            await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
-          } else {
-            _logger.info(
-              "uri doesn't contain 'albums.ente.io' in initial public album deep link",
-            );
-          }
+    // Use AppLinks for public album deep links (works reliably on cold start)
+    // Note: MediaExtension is skipped for ente:// URLs as AppLinks handles them better
+    try {
+      final initialUri = await appLinks.getInitialLink();
+      if (initialUri != null) {
+        if (initialUri.scheme == "ente" &&
+            _isPublicAlbumHost(initialUri.toString())) {
+          await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
-            "No initial link received in public album link subscription.",
+            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
           );
         }
-      } catch (e) {
-        _logger
-            .severe("Error while getting initial public album deep link: $e");
+      } else {
+        _logger.info(
+          "No initial link received in public album link subscription.",
+        );
       }
+    } catch (e) {
+      _logger.severe("Error while getting initial public album deep link: $e");
     }
 
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
