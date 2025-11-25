@@ -141,7 +141,7 @@ When creating a public link, by default the **Allow joining album** option is en
 
 **On desktop:**
 
-To join an public album, click the "Join album" button, sign in or sign up, and you'll be added to the album.
+To join a public album, click the "Join album" button, sign in or sign up, and you'll be added to the album.
 
 **On mobile:**
 
@@ -150,6 +150,8 @@ When you open the link on a mobile which also has the Ente Photos mobile app ins
 - Ideally, you'll be automatically redirected to the app, where you'll see a banner to join the album
 - If not automatically redirected, the OS will show an option to reopen the link in the mobile app
 - If neither happened, tap the "Join album" button on the page to open the app and join the album
+
+If the Ente Photos mobile app is not installed, click the "Join album" button, sign in or sign up, and you'll be added to the album.
 
 > [!NOTE]
 >
