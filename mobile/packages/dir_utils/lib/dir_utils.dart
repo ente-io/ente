@@ -446,41 +446,4 @@ class DirUtils {
       return false;
     }
   }
-
-  /// Create a subdirectory within a picked directory.
-  /// On iOS, this uses the native method channel for security-scoped access.
-  Future<bool> createDirectory(PickedDirectory dir, String subPath) async {
-    if (Platform.isAndroid && dir.treeUri != null) {
-      // SAF creates directories automatically when writing files
-      return true;
-    } else if (Platform.isIOS && dir.bookmark != null) {
-      return _createDirectoryIos(dir, subPath);
-    } else {
-      return _createDirectoryOther(dir.path, subPath);
-    }
-  }
-
-  Future<bool> _createDirectoryIos(PickedDirectory dir, String subPath) async {
-    try {
-      final fullPath = '${dir.path}/$subPath';
-      final result = await _channel.invokeMethod<bool>(
-        'createDirectory',
-        {'path': fullPath},
-      );
-      return result ?? false;
-    } on PlatformException catch (e) {
-      _logger.severe('iOS: Failed to create directory: ${e.message}');
-      return false;
-    }
-  }
-
-  Future<bool> _createDirectoryOther(String basePath, String subPath) async {
-    try {
-      await Directory('$basePath/$subPath').create(recursive: true);
-      return true;
-    } catch (e) {
-      _logger.severe('Other: Failed to create directory: $e');
-      return false;
-    }
-  }
 }

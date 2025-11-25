@@ -575,6 +575,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         final pickResult = await SecurityBookmarkService.instance
             .pickDirectoryAndCreateBookmark();
         if (pickResult != null) {
+          if (_isInvalidIosPath(pickResult.path)) {
+            _showSnackBar(context.l10n.iosOnMyDeviceNotSupported);
+            return false;
+          }
           return _persistLocationWithBookmark(
             pickResult.path,
             pickResult.bookmark,
@@ -706,6 +710,10 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       final result = await SecurityBookmarkService.instance
           .pickDirectoryAndCreateBookmark();
       if (result != null) {
+        if (_isInvalidIosPath(result.path)) {
+          _showSnackBar(context.l10n.iosOnMyDeviceNotSupported);
+          return false;
+        }
         final saved = await _persistLocationWithBookmark(
           result.path,
           result.bookmark,
@@ -761,21 +769,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
 
       try {
-        // Create EnteAuthBackups subdirectory using native method for iOS
-        final created = await DirUtils.instance.createDirectory(
-          PickedDirectory(path: path),
-          'EnteAuthBackups',
-        );
-        if (!created) {
-          _logger.severe('iOS: Failed to create EnteAuthBackups subdirectory');
-          return false;
-        }
-        await LocalBackupService.instance
-            .writeBackupToDirectory('$path/EnteAuthBackups');
+        // Write backup directly to the selected directory
+        await LocalBackupService.instance.writeBackupToDirectory(path);
       } finally {
         await SecurityBookmarkService.instance.stopAccessingBookmark(bookmark);
       }
-      // Store the parent path (with bookmark) - backups go to EnteAuthBackups subdir
+
       await prefs.setString('autoBackupPath', path);
       await prefs.setString(_iosBookmarkKey, bookmark);
       await prefs.remove(_treeUriKey);
@@ -929,5 +928,55 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Check if the selected iOS path is the device root ("On My iPhone").
+  ///
+  /// "On My iPhone" root cannot store files directly - user must select
+  /// or create a folder inside it.
+  bool _isInvalidIosPath(String path) {
+    if (!Platform.isIOS) return false;
+    if (path.isEmpty) return true;
+
+    // Normalize the path
+    var normalized = path;
+    if (normalized.startsWith('file://')) {
+      normalized = normalized.substring(7);
+    }
+
+    // iCloud Drive paths are always valid
+    if (normalized.contains('Mobile Documents/')) {
+      return false;
+    }
+
+    // Check if path ends at a root-level location without a subfolder
+    // Valid paths should have content after the container/app identifier
+    // e.g., /var/mobile/Containers/Shared/AppGroup/xxx/File Provider Storage/SomeApp/MyFolder
+    // Invalid: just the root with no actual folder selected
+
+    // If path contains File Provider Storage with a folder after it, it's valid
+    final fileProviderIndex = normalized.indexOf('File Provider Storage/');
+    if (fileProviderIndex != -1) {
+      final afterProvider = normalized
+          .substring(fileProviderIndex + 'File Provider Storage/'.length);
+      // Must have at least one more path component (the actual folder)
+      if (afterProvider.isNotEmpty && afterProvider.contains('/')) {
+        return false;
+      }
+      // Just "File Provider Storage/AppName" without a subfolder - invalid
+      _logger
+          .warning('iOS: Path appears to be app root without subfolder: $path');
+      return true;
+    }
+
+    // Documents directory is valid
+    if (normalized.contains('/Documents/') ||
+        normalized.endsWith('/Documents')) {
+      return false;
+    }
+
+    // If none of the known valid patterns match, assume it's the device root
+    _logger.warning('iOS: Potentially invalid backup path: $path');
+    return true;
   }
 }

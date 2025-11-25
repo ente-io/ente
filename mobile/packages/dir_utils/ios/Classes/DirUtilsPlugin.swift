@@ -31,8 +31,6 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
             handleDeleteFile(call: call, result: result)
         case "listFiles":
             handleListFiles(call: call, result: result)
-        case "createDirectory":
-            handleCreateDirectory(call: call, result: result)
         case "exists":
             handleExists(call: call, result: result)
         default:
@@ -228,27 +226,6 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
             result(FlutterError(
                 code: "LIST_ERROR",
                 message: "Failed to list files: \(error.localizedDescription)",
-                details: nil
-            ))
-        }
-    }
-
-    private func handleCreateDirectory(call: FlutterMethodCall, result: @escaping FlutterResult) {
-        guard let args = call.arguments as? [String: Any],
-              let path = args["path"] as? String else {
-            result(FlutterError(code: "INVALID_ARGS", message: "Missing 'path' argument", details: nil))
-            return
-        }
-
-        let url = URL(fileURLWithPath: path)
-
-        do {
-            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-            result(true)
-        } catch {
-            result(FlutterError(
-                code: "CREATE_DIR_ERROR",
-                message: "Failed to create directory: \(error.localizedDescription)",
                 details: nil
             ))
         }

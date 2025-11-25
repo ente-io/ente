@@ -13,9 +13,6 @@ class SecureStorageService {
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
   );
 
   Future<String?> read(String key) => _storage.read(key: key);

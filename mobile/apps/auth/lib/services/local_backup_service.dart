@@ -153,29 +153,20 @@ class LocalBackupService {
         return success;
       }
 
-      // iOS with bookmark
+      // iOS with bookmark - write directly to the selected directory
       if (Platform.isIOS && target.iosBookmark != null) {
         final dir = PickedDirectory(
           path: target.path!,
           bookmark: target.iosBookmark,
         );
         final result = await dirUtils.withAccess(dir, (path) async {
-          // Create EnteAuthBackups subdirectory using native method
-          final created = await dirUtils.createDirectory(
-            PickedDirectory(path: path),
-            'EnteAuthBackups',
-          );
-          if (!created) {
-            return false;
-          }
-          final backupPath = '$path/EnteAuthBackups';
           final success = await dirUtils.writeFile(
-            PickedDirectory(path: backupPath),
+            PickedDirectory(path: path),
             fileName,
             contentBytes,
           );
           if (success) {
-            await _manageOldBackups(backupPath);
+            await _manageOldBackups(path);
           }
           return success;
         });
@@ -251,8 +242,7 @@ class LocalBackupService {
   Future<void> deleteAllBackupsIn(String path, {String? iosBookmark}) async {
     try {
       final dirUtils = DirUtils.instance;
-      // On iOS, backups are in EnteAuthBackups subdirectory
-      final backupPath = Platform.isIOS ? '$path/EnteAuthBackups' : path;
+      final backupPath = path;
 
       Future<void> doDelete() async {
         final backupDir = Directory(backupPath);
