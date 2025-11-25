@@ -160,9 +160,15 @@ class LocalBackupService {
           bookmark: target.iosBookmark,
         );
         final result = await dirUtils.withAccess(dir, (path) async {
-          // Use EnteAuthBackups subdirectory
+          // Create EnteAuthBackups subdirectory using native method
+          final created = await dirUtils.createDirectory(
+            PickedDirectory(path: path),
+            'EnteAuthBackups',
+          );
+          if (!created) {
+            return false;
+          }
           final backupPath = '$path/EnteAuthBackups';
-          await Directory(backupPath).create(recursive: true);
           final success = await dirUtils.writeFile(
             PickedDirectory(path: backupPath),
             fileName,

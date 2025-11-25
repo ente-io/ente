@@ -761,11 +761,17 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
 
       try {
-        // Create EnteAuthBackups subdirectory inside the selected path
-        final backupDir = Directory('$path/EnteAuthBackups');
-        await backupDir.create(recursive: true);
+        // Create EnteAuthBackups subdirectory using native method for iOS
+        final created = await DirUtils.instance.createDirectory(
+          PickedDirectory(path: path),
+          'EnteAuthBackups',
+        );
+        if (!created) {
+          _logger.severe('iOS: Failed to create EnteAuthBackups subdirectory');
+          return false;
+        }
         await LocalBackupService.instance
-            .writeBackupToDirectory(backupDir.path);
+            .writeBackupToDirectory('$path/EnteAuthBackups');
       } finally {
         await SecurityBookmarkService.instance.stopAccessingBookmark(bookmark);
       }
