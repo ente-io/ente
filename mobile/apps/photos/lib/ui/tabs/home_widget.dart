@@ -625,8 +625,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
 
-    // Use AppLinks for public album deep links (works reliably on cold start)
-    // Note: MediaExtension is skipped for ente:// URLs as AppLinks handles them better
+    // Handle ente:// deep links
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
