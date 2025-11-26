@@ -50,7 +50,6 @@ import {
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
 import { useBaseContext } from "ente-base/context";
-import { isDevBuild } from "ente-base/env";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
@@ -81,7 +80,6 @@ import { type EnteFile } from "ente-media/file";
 import {
     removePublicCollectionAccessTokenJWT,
     removePublicCollectionByKey,
-    savedLastPublicCollectionReferralCode,
     savedPublicCollectionAccessTokenJWT,
     savedPublicCollectionByKey,
     savedPublicCollectionFiles,
@@ -119,7 +117,6 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[] | undefined>(
         undefined,
     );
-    const [referralCode, setReferralCode] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [isPasswordProtected, setIsPasswordProtected] = useState(false);
@@ -258,9 +255,6 @@ export default function PublicCollectionGallery() {
                         return;
                     }
 
-                    setReferralCode(
-                        (await savedLastPublicCollectionReferralCode()) ?? "",
-                    );
                     setPublicCollection(collection);
                     setIsPasswordProtected(
                         !!collection.publicURLs[0]?.passwordEnabled,
@@ -305,14 +299,14 @@ export default function PublicCollectionGallery() {
         showLoadingBar();
         setLoading(true);
         try {
-            const { collection, referralCode: userReferralCode } =
-                await pullCollection(accessToken, collectionKey.current!);
+            const { collection } = await pullCollection(
+                accessToken,
+                collectionKey.current!,
+            );
 
             if (checkAndRedirectForTripAlbum(collection)) {
                 return;
             }
-
-            setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
             const isPasswordProtected =
@@ -472,8 +466,6 @@ export default function PublicCollectionGallery() {
             : undefined;
     }, [publicCollection]);
 
-    const shouldShowReferralBanner = isDevBuild || !isCustomAlbumsAppOrigin;
-
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
     };
@@ -499,16 +491,13 @@ export default function PublicCollectionGallery() {
     );
 
     const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
-        const props = {
-            referralCode: shouldShowReferralBanner ? referralCode : undefined,
-            onAddPhotos,
-        };
+        const props = { onAddPhotos };
         return {
             component: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
             extendToInlineEdges: true,
         };
-    }, [referralCode, onAddPhotos, shouldShowReferralBanner]);
+    }, [onAddPhotos]);
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;
@@ -834,17 +823,14 @@ const FileListHeader: React.FC<FileListHeaderProps> = ({
 };
 
 interface FileListFooterProps {
-    referralCode?: string;
     onAddPhotos?: () => void;
 }
 
 /**
  * The dynamic (prop-dependent) height of {@link FileListFooter}.
  */
-const fileListFooterHeightForProps = ({
-    referralCode,
-    onAddPhotos,
-}: FileListFooterProps) => (onAddPhotos ? 104 : 0) + (referralCode ? 113 : 75);
+const fileListFooterHeightForProps = ({ onAddPhotos }: FileListFooterProps) =>
+    (onAddPhotos ? 104 : 0) + 75;
 
 /**
  * A footer shown after the listing of files.
@@ -853,10 +839,7 @@ const fileListFooterHeightForProps = ({
  * props, calculated using {@link fileListFooterHeightForProps}.
  */
 
-const FileListFooter: React.FC<FileListFooterProps> = ({
-    referralCode,
-    onAddPhotos,
-}) => (
+const FileListFooter: React.FC<FileListFooterProps> = ({ onAddPhotos }) => (
     <Stack sx={{ flex: 1, alignSelf: "flex-end" }}>
         {onAddPhotos && (
             <CenteredFill>
@@ -892,22 +875,5 @@ const FileListFooter: React.FC<FileListFooterProps> = ({
                 />
             </Typography>
         </Link>
-        {referralCode && (
-            <Typography
-                sx={{
-                    mt: "6px",
-                    mb: 0,
-                    padding: "8px",
-                    bgcolor: "accent.main",
-                    color: "accent.contrastText",
-                    textAlign: "center",
-                }}
-            >
-                <Trans
-                    i18nKey={"sharing_referral_code"}
-                    values={{ referralCode }}
-                />
-            </Typography>
-        )}
     </Stack>
 );
