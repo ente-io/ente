@@ -41,6 +41,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   String? _error;
   List<XFile> _captures = <XFile>[];
   Collection? _album;
+  int _pointers = 0;
 
   @override
   void initState() {
@@ -429,9 +430,36 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     if (!isReady || _controller == null) {
       return const SizedBox.shrink();
     }
-    return Center(
-      child: CameraPreview(_controller!),
+    return Listener(
+      onPointerDown: (_) => _pointers++,
+      onPointerUp: (_) => _pointers--,
+      child: Center(
+        child: CameraPreview(
+          _controller!,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+              );
+            },
+          ),
+        ),
+      ),
     );
+  }
+
+  void _handleScaleStart(ScaleStartDetails details) {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    // Placeholder for future zoom handling; matches camera example structure.
+  }
+
+  Future<void> _handleScaleUpdate(ScaleUpdateDetails details) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    // Only respond to pinch gestures (2 pointers) to avoid accidental zooms.
+    if (_pointers != 2) return;
+    // TODO: Wire zoom level once we expose it in UI; keeping structure for parity with example.
   }
 }
 
