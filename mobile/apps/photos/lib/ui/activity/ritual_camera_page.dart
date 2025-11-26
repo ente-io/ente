@@ -453,28 +453,48 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
     return LayoutBuilder(
       builder: (context, constraints) {
-        final double width = constraints.maxWidth;
-        final double height = constraints.maxHeight;
+        final mediaOrientation = MediaQuery.of(context).orientation;
+        final double previewAspect = mediaOrientation == Orientation.portrait
+            ? 1 / _controller!.value.aspectRatio
+            : _controller!.value.aspectRatio;
+
         final Offset? focus = _focusPointRel == null
             ? null
             : Offset(
-                _focusPointRel!.dx * width,
-                _focusPointRel!.dy * height,
+                _focusPointRel!.dx * constraints.maxWidth,
+                _focusPointRel!.dy * (constraints.maxWidth / previewAspect),
               );
+
         return Listener(
           onPointerDown: (_) => _pointers++,
           onPointerUp: (_) => _pointers--,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              CameraPreview(
-                _controller!,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onScaleStart: _handleScaleStart,
-                  onScaleUpdate: _handleScaleUpdate,
-                  onTapDown: (details) =>
-                      _onViewFinderTap(details, constraints),
+              ClipRect(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxWidth / previewAspect,
+                    child: CameraPreview(
+                      _controller!,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onScaleStart: _handleScaleStart,
+                        onScaleUpdate: _handleScaleUpdate,
+                        onTapDown: (details) => _onViewFinderTap(
+                          details,
+                          BoxConstraints.tight(
+                            Size(
+                              constraints.maxWidth,
+                              constraints.maxWidth / previewAspect,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
               if (focus != null)
@@ -510,8 +530,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                   opacity: _showZoomHint ? 1 : 0,
                   duration: const Duration(milliseconds: 120),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.45),
                       borderRadius: BorderRadius.circular(12),
