@@ -126,12 +126,6 @@ const sidebarActions = (): SidebarAction[] => {
             available: () => isDesktop,
         },
         {
-            id: "utility.logout",
-            label: t("logout"),
-            path: [preferencesCategory, t("logout")],
-            keywords: ["sign out", "signout"],
-        },
-        {
             id: "account.recoveryKey",
             label: t("recovery_key"),
             path: [accountCategory, t("recovery_key")],
@@ -270,6 +264,12 @@ const sidebarActions = (): SidebarAction[] => {
             path: [helpCategory, t("test_upload")],
             keywords: ["test", "upload"],
             available: () => isDevBuildAndUser(),
+        },
+        {
+            id: "utility.logout",
+            label: t("logout"),
+            path: [preferencesCategory, t("logout")],
+            keywords: ["sign out", "signout"],
         },
     ];
 };
