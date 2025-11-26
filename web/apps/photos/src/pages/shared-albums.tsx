@@ -59,7 +59,6 @@ import log from "ente-base/log";
 import {
     albumsAppOrigin,
     isCustomAlbumsAppOrigin,
-    photosAppOrigin,
     shouldOnlyServeAlbumsApp,
 } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
@@ -142,32 +141,6 @@ export default function PublicCollectionGallery() {
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
     const router = useRouter();
-
-    // Handle action=join parameter: redirect to web.ente.io for authentication
-    // This MUST run before any other logic to ensure proper redirect on desktop/mobile-without-app
-    // On mobile with app installed, App Links/Universal Links will open the app before this code runs
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const action = params.get("action");
-
-        if (action === "join") {
-            const t = params.get("t");
-            const jwt = params.get("jwt");
-            const hash = window.location.hash;
-
-            if (!t) {
-                return;
-            }
-
-            // Build the web app URL for authentication
-            const webAppURL = photosAppOrigin();
-
-            const jwtParam = jwt ? `&jwt=${encodeURIComponent(jwt)}` : "";
-            const redirectURL = `${webAppURL}/?joinAlbum=${t}${jwtParam}${hash}`;
-
-            window.location.href = redirectURL;
-        }
-    }, []);
 
     const showPublicLinkExpiredMessage = () =>
         showMiniDialog({
