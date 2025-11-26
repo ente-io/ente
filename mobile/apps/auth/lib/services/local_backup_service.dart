@@ -3,10 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dir_utils/dir_utils.dart';
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/models/export/ente.dart';
-import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_out_event.dart';
@@ -24,11 +23,8 @@ class LocalBackupService {
   static const _lastBackupDayKey = 'lastBackupDay';
   static const _iosBookmarkKey = 'autoBackupIosBookmark';
 
-  Future<void> init(
-    BaseConfiguration config, {
-    bool hasOptedForOfflineMode = false,
-  }) async {
-    await _clearBackupPasswordIfFreshInstall(config, hasOptedForOfflineMode);
+  Future<void> init({bool hasOptedForOfflineMode = false}) async {
+    await _clearBackupPasswordIfFreshInstall(hasOptedForOfflineMode);
 
     Bus.instance.on<SignedOutEvent>().listen((event) {
       _clearBackupPassword();
@@ -38,19 +34,15 @@ class LocalBackupService {
   /// Clear backup password on fresh install (like lock screen does).
   /// Only clears if not logged in and not in offline mode.
   Future<void> _clearBackupPasswordIfFreshInstall(
-    BaseConfiguration config,
     bool hasOptedForOfflineMode,
   ) async {
-    if ((Platform.isIOS || Platform.isMacOS) &&
-        !config.isLoggedIn() &&
-        !hasOptedForOfflineMode) {
+    if (!Configuration.instance.isLoggedIn() && !hasOptedForOfflineMode) {
       await _clearBackupPassword();
     }
   }
 
   Future<void> _clearBackupPassword() async {
-    await SecureStorageService.instance
-        .delete(AuthSecureStorageKeys.autoBackupPasswordKey);
+    await Configuration.instance.clearBackupPassword();
   }
 
   Future<bool> triggerAutomaticBackup({bool isManual = false}) async {
@@ -306,8 +298,7 @@ class LocalBackupService {
 
   Future<String?> _readPassword() async {
     try {
-      return SecureStorageService.instance
-          .read(AuthSecureStorageKeys.autoBackupPasswordKey);
+      return Configuration.instance.getBackupPassword();
     } catch (e, s) {
       _logger.severe('Unable to read backup password', e, s);
       return null;

@@ -187,7 +187,6 @@ Future<void> _init(bool bool, {String? via}) async {
     hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
   );
   await LocalBackupService.instance.init(
-    Configuration.instance,
     hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
   );
 }

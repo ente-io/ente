@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:dir_utils/dir_utils.dart';
+import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
-import 'package:ente_auth/services/secure_storage_service.dart';
 import 'package:ente_auth/services/security_bookmark_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
@@ -367,8 +367,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
-    await SecureStorageService.instance
-        .write(AuthSecureStorageKeys.autoBackupPasswordKey, password);
+    await Configuration.instance.setBackupPassword(password);
     return true;
   }
 
@@ -381,16 +380,14 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     if (_isBackupEnabled) {
       return false;
     }
-    await SecureStorageService.instance
-        .delete(AuthSecureStorageKeys.autoBackupPasswordKey);
+    await Configuration.instance.clearBackupPassword();
     _showSnackBar(context.l10n.backupPasswordCleared);
     return true;
   }
 
   Future<String?> _readStoredPassword() async {
     try {
-      return SecureStorageService.instance
-          .read(AuthSecureStorageKeys.autoBackupPasswordKey);
+      return Configuration.instance.getBackupPassword();
     } catch (e) {
       _logger.severe('Failed to read backup password: $e');
       return null;
