@@ -50,6 +50,7 @@ class FlagService {
 
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
+  bool get enableDeleteSuggestion => internalUser;
 
   bool get betaUser => flags.betaUser;
 

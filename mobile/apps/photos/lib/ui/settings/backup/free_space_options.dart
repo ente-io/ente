@@ -24,6 +24,7 @@ import "package:photos/ui/tools/debug/app_storage_viewer.dart";
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
 import "package:photos/ui/tools/similar_images_page.dart";
+import "package:photos/ui/viewer/gallery/delete_suggestions_page.dart";
 import "package:photos/ui/viewer/gallery/large_files_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -261,6 +262,39 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 const SizedBox(
                                   height: 24,
                                 ),
+                                if (flagService.internalUser)
+                                  MenuItemWidget(
+                                    captionedTextWidget:
+                                        const CaptionedTextWidget(
+                                      title: "(i) Review delete suggestions",
+                                    ),
+                                    menuItemColor: colorScheme.fillFaint,
+                                    trailingWidget: Icon(
+                                      Icons.chevron_right_outlined,
+                                      color: colorScheme.strokeBase,
+                                    ),
+                                    singleBorderRadius: 8,
+                                    alignCaptionedTextToLeft: true,
+                                    showOnlyLoadingState: true,
+                                    onTap: () async {
+                                      await routeToPage(
+                                        context,
+                                        DeleteSuggestionsPage(),
+                                      );
+                                    },
+                                  ),
+                                if (flagService.internalUser)
+                                  const Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: MenuSectionDescriptionWidget(
+                                      content:
+                                          "See files that others have suggested you can delete.",
+                                    ),
+                                  ),
+                                if (flagService.internalUser)
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
                                     title: AppLocalizations.of(context)
