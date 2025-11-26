@@ -72,7 +72,7 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
 
     useEffect(() => {
         // Check if we're in a join album context
-        const joinAlbumContext = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
+        const joinAlbumContext = sessionStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
         setIsJoinAlbumContext(!!joinAlbumContext);
     }, []);
 
