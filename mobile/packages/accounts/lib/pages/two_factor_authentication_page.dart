@@ -100,7 +100,7 @@ class _TwoFactorAuthenticationPageState
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
                 border: Border.all(
-                  color: colorScheme.strokeMuted.withOpacity(0.5),
+                  color: colorScheme.strokeMuted.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -109,7 +109,7 @@ class _TwoFactorAuthenticationPageState
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
-                  color: colorScheme.strokeMuted.withOpacity(0.5),
+                  color: colorScheme.strokeMuted.withValues(alpha: 0.5),
                 ),
               ),
             ),
