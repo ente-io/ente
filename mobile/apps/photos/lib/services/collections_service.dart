@@ -30,6 +30,7 @@ import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/api/metadata.dart";
+import 'package:photos/models/collection/action.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -1267,6 +1268,29 @@ class CollectionsService {
       if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
+      rethrow;
+    }
+  }
+
+  Future<List<CollectionAction>> fetchPendingRemovalActions() async {
+    try {
+      final response = await _enteDio.get(
+        "/collection-actions/pending-remove/",
+      );
+      final List<dynamic> rawActions =
+          (response.data["actions"] as List<dynamic>?) ?? const [];
+      final actions = rawActions
+          .map(
+            (dynamic action) => CollectionAction.fromJson(
+              Map<String, dynamic>.from(action as Map<dynamic, dynamic>),
+            ),
+          )
+          .toList(growable: false);
+      _logger
+          .info("Fetched ${actions.length} pending collection removal actions");
+      return actions;
+    } catch (e, s) {
+      _logger.warning("Failed to fetch pending removal actions", e, s);
       rethrow;
     }
   }
