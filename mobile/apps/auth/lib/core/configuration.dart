@@ -56,8 +56,8 @@ class Configuration extends BaseConfiguration {
         BaseConfiguration.keyKey,
         BaseConfiguration.secretKeyKey,
         authSecretKeyKey,
-        // Note: offlineAuthSecretKey and autoBackupPasswordKey are intentionally
-        // not included here as they persist across logouts for offline mode
+        // Note: offlineAuthSecretKey is intentionally not included here
+        // as it persists across logouts for offline mode
       ];
 
   @override
