@@ -521,6 +521,9 @@ class GalleryState extends State<Gallery> {
 
       /// To curate filters when a gallery is first opened.
       if (!result.hasMore) {
+        if (!mounted) {
+          return result;
+        }
         final searchFilterDataProvider =
             InheritedSearchFilterData.maybeOf(context)
                 ?.searchFilterDataProvider;
