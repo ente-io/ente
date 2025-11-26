@@ -71,6 +71,7 @@ import {
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
+import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
@@ -696,6 +697,8 @@ const Account: React.FC<AccountProps> = ({
         useModalVisibility();
     const { show: showTwoFactor, props: twoFactorVisibilityProps } =
         useModalVisibility();
+    const { show: showSessions, props: sessionsVisibilityProps } =
+        useModalVisibility();
     const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
         useModalVisibility();
 
@@ -710,6 +713,11 @@ const Account: React.FC<AccountProps> = ({
     const handlePasskeys = async () => {
         onRootClose();
         await openAccountsManagePasskeysPage();
+    };
+
+    const handleActiveSessions = async () => {
+        await onAuthenticateUser();
+        showSessions();
     };
 
     return (
@@ -737,6 +745,11 @@ const Account: React.FC<AccountProps> = ({
                     />
                     <RowButtonDivider />
                     <RowButton label={t("passkeys")} onClick={handlePasskeys} />
+                    <RowButtonDivider />
+                    <RowButton
+                        label={t("active_sessions")}
+                        onClick={handleActiveSessions}
+                    />
                 </RowButtonGroup>
                 <RowButtonGroup>
                     <RowButton
@@ -763,6 +776,10 @@ const Account: React.FC<AccountProps> = ({
             />
             <TwoFactorSettings
                 {...twoFactorVisibilityProps}
+                onRootClose={onRootClose}
+            />
+            <SessionsSettings
+                {...sessionsVisibilityProps}
                 onRootClose={onRootClose}
             />
             <DeleteAccount
