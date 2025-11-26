@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 
 import "package:camera/camera.dart";
@@ -42,6 +43,14 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   List<XFile> _captures = <XFile>[];
   Collection? _album;
   int _pointers = 0;
+  double _minAvailableZoom = 1.0;
+  double _maxAvailableZoom = 1.0;
+  double _currentZoom = 1.0;
+  double _baseZoom = 1.0;
+  Offset? _focusPointRel;
+  Timer? _focusHideTimer;
+  Timer? _zoomHintTimer;
+  bool _showZoomHint = false;
 
   @override
   void initState() {
@@ -54,6 +63,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _focusHideTimer?.cancel();
+    _zoomHintTimer?.cancel();
     _controller?.dispose();
     _cleanupCaptures();
     super.dispose();
@@ -110,10 +121,17 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           target,
           ResolutionPreset.high,
           imageFormatGroup: ImageFormatGroup.jpeg,
-          enableAudio: false,
+          enableAudio: true,
         );
         await controller.initialize();
         _controller = controller;
+      }
+      if (_controller != null) {
+        _minAvailableZoom = await _controller!.getMinZoomLevel();
+        _maxAvailableZoom = await _controller!.getMaxZoomLevel();
+        _currentZoom = 1.0;
+        _baseZoom = 1.0;
+        await _controller!.setZoomLevel(_currentZoom);
       }
       if (!mounted) {
         await _controller?.dispose();
@@ -356,8 +374,11 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                   ),
                   const SizedBox(width: 12),
                   _CaptureButton(
-                    onTap:
-                        _capturing || _saving || !isReady ? null : _takePicture,
+                    onTap: _capturing || _saving || !isReady
+                        ? null
+                        : () async {
+                            await _takePicture();
+                          },
                     busy: _capturing,
                   ),
                   const SizedBox(width: 12),
@@ -430,36 +451,157 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     if (!isReady || _controller == null) {
       return const SizedBox.shrink();
     }
-    return Listener(
-      onPointerDown: (_) => _pointers++,
-      onPointerUp: (_) => _pointers--,
-      child: Center(
-        child: CameraPreview(
-          _controller!,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onScaleStart: _handleScaleStart,
-                onScaleUpdate: _handleScaleUpdate,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final double height = constraints.maxHeight;
+        final Offset? focus = _focusPointRel == null
+            ? null
+            : Offset(
+                _focusPointRel!.dx * width,
+                _focusPointRel!.dy * height,
               );
-            },
+        return Listener(
+          onPointerDown: (_) => _pointers++,
+          onPointerUp: (_) => _pointers--,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CameraPreview(
+                _controller!,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onScaleStart: _handleScaleStart,
+                  onScaleUpdate: _handleScaleUpdate,
+                  onTapDown: (details) =>
+                      _onViewFinderTap(details, constraints),
+                ),
+              ),
+              if (focus != null)
+                Positioned(
+                  left: focus.dx - 24,
+                  top: focus.dy - 24,
+                  child: AnimatedOpacity(
+                    opacity: _focusPointRel == null ? 0 : 1,
+                    duration: const Duration(milliseconds: 120),
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          width: 2,
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              Positioned(
+                left: 12,
+                top: 12,
+                child: AnimatedOpacity(
+                  opacity: _showZoomHint ? 1 : 0,
+                  duration: const Duration(milliseconds: 120),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "${_currentZoom.toStringAsFixed(1)}x",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   void _handleScaleStart(ScaleStartDetails details) {
     if (_controller == null || !_controller!.value.isInitialized) return;
-    // Placeholder for future zoom handling; matches camera example structure.
+    _baseZoom = _currentZoom;
   }
 
   Future<void> _handleScaleUpdate(ScaleUpdateDetails details) async {
     if (_controller == null || !_controller!.value.isInitialized) return;
     // Only respond to pinch gestures (2 pointers) to avoid accidental zooms.
     if (_pointers != 2) return;
-    // TODO: Wire zoom level once we expose it in UI; keeping structure for parity with example.
+    final double newZoom =
+        (_baseZoom * details.scale).clamp(_minAvailableZoom, _maxAvailableZoom);
+    if (newZoom == _currentZoom) return;
+    _currentZoom = newZoom;
+    try {
+      await _controller!.setZoomLevel(_currentZoom);
+      _showZoomIndicator();
+    } catch (_) {
+      // Ignore zoom failures to avoid interrupting capture flow.
+    }
+  }
+
+  void _onViewFinderTap(
+    TapDownDetails details,
+    BoxConstraints constraints,
+  ) {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+    final offset = Offset(
+      details.localPosition.dx / constraints.maxWidth,
+      details.localPosition.dy / constraints.maxHeight,
+    );
+    try {
+      controller.setExposurePoint(offset);
+      controller.setFocusPoint(offset);
+      _showFocusIndicator(offset);
+    } catch (_) {
+      // Best effort; not all devices support focus/exposure points.
+    }
+  }
+
+  void _showFocusIndicator(Offset normalizedOffset) {
+    _focusHideTimer?.cancel();
+    setState(() {
+      _focusPointRel = normalizedOffset;
+    });
+    _focusHideTimer = Timer(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          _focusPointRel = null;
+        });
+      }
+    });
+  }
+
+  void _showZoomIndicator() {
+    _zoomHintTimer?.cancel();
+    setState(() {
+      _showZoomHint = true;
+    });
+    _zoomHintTimer = Timer(const Duration(milliseconds: 900), () {
+      if (mounted) {
+        setState(() {
+          _showZoomHint = false;
+        });
+      }
+    });
   }
 }
 
