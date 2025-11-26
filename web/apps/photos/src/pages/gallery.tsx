@@ -233,11 +233,15 @@ const Page: React.FC = () => {
         useModalVisibility();
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+    const onAuthenticateCancelCallback = useRef<(() => void) | undefined>(
+        undefined,
+    );
 
     const authenticateUser = useCallback(
         () =>
-            new Promise<void>((resolve) => {
+            new Promise<void>((resolve, reject) => {
                 onAuthenticateCallback.current = resolve;
+                onAuthenticateCancelCallback.current = reject;
                 showAuthenticateUser();
             }),
         [],
@@ -245,7 +249,23 @@ const Page: React.FC = () => {
 
     const handleCloseAuthenticateUser = useCallback(() => {
         authenticateUserVisibilityProps.onClose();
+        // Reject the pending authentication promise so the caller knows
+        // authentication was cancelled (e.g., user clicked backdrop).
+        if (onAuthenticateCancelCallback.current) {
+            onAuthenticateCancelCallback.current();
+            onAuthenticateCancelCallback.current = undefined;
+        }
     }, [authenticateUserVisibilityProps.onClose]);
+
+    const handleAuthenticate = useCallback(() => {
+        // Clear the cancel callback first since authentication succeeded.
+        onAuthenticateCancelCallback.current = undefined;
+        // Then resolve the promise.
+        if (onAuthenticateCallback.current) {
+            onAuthenticateCallback.current();
+            onAuthenticateCallback.current = undefined;
+        }
+    }, []);
 
     const handleSidebarClose = useCallback(() => {
         sidebarVisibilityProps.onClose();
@@ -882,8 +902,14 @@ const Page: React.FC = () => {
                 barMode != "hidden-albums" &&
                 Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
             ) {
-                await authenticateUser();
-                lastAuthenticationForHiddenTimestamp.current = Date.now();
+                try {
+                    await authenticateUser();
+                    lastAuthenticationForHiddenTimestamp.current = Date.now();
+                } catch {
+                    // User cancelled authentication (e.g., clicked backdrop).
+                    // Don't proceed to show the collection.
+                    return;
+                }
             }
 
             handleShowCollectionSummaryWithID(collectionSummaryID);
@@ -1236,7 +1262,7 @@ const Page: React.FC = () => {
             <AuthenticateUser
                 open={authenticateUserVisibilityProps.open}
                 onClose={handleCloseAuthenticateUser}
-                onAuthenticate={onAuthenticateCallback.current!}
+                onAuthenticate={handleAuthenticate}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}
