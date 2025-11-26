@@ -625,16 +625,19 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
 
-    // Handle ente:// deep links
+    // Handle public album deep links:
+    // - iOS: Universal Links (https://albums.ente.io/...)
+    // - Android: Custom scheme (ente://albums.ente.io/...) from web join feature
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
-        if (initialUri.scheme == "ente" &&
-            _isPublicAlbumUrl(initialUri.toString())) {
+        if (_isPublicAlbumUrl(initialUri.toString()) &&
+            (Platform.isIOS ||
+                (Platform.isAndroid && initialUri.scheme == "ente"))) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
-            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+            "Ignoring deep link: $initialUri",
           );
         }
       } else {
@@ -649,11 +652,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (uri.scheme == "ente" && _isPublicAlbumUrl(uri.toString())) {
+          if (_isPublicAlbumUrl(uri.toString()) &&
+              (Platform.isIOS ||
+                  (Platform.isAndroid && uri.scheme == "ente"))) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
-              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+              "Ignoring deep link: $uri",
             );
           }
         } else {
