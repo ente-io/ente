@@ -187,6 +187,9 @@ func main() {
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
+	collectionActionRepo := &repo.CollectionActionsRepository{
+		DB: db,
+	}
 
 	embeddingRepo := &embedding.Repository{DB: db}
 
@@ -326,12 +329,12 @@ func main() {
 		BillingCtrl:           billingController,
 		QueueRepo:             queueRepo,
 		TaskRepo:              taskLockingRepo,
-		CollectionActionsRepo: &repo.CollectionActionsRepository{DB: db},
+		CollectionActionsRepo: collectionActionRepo,
 	}
 
 	// Pending actions' controller/handler
 	collectionActionsController := &controller.CollectionActionsController{
-		Repo: &repo.CollectionActionsRepository{DB: db},
+		Repo: collectionActionRepo,
 	}
 	collectionActionsHandler := &api.CollectionActionsHandler{
 		Controller: collectionActionsController,

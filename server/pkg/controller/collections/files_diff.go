@@ -42,7 +42,6 @@ func (c *CollectionController) GetDiffV2(ctx *gin.Context, cID int64, userID int
 		}
 		if diff[idx].OwnerID != userID {
 			diff[idx].MagicMetadata = nil
-			diff[idx].PubicMagicMetadata = nil
 			diff[idx].Action = nil
 			diff[idx].ActionUserID = nil
 		}
