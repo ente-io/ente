@@ -36,7 +36,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                     sx={{
                         fontWeight: 500,
                         fontSize: "16px",
-                        color: "#000000",
+                        color: "text.base",
                         mb: 1,
                         mt: 3,
                     }}
@@ -49,14 +49,14 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                     sx={{
                         px: 4,
                         py: multiline ? 4 : 2,
-                        bgcolor: "#FFFFFF",
+                        bgcolor: "background.paper",
                         borderRadius: "12px",
                     }}
                 >
                     <Typography
                         variant="body"
                         sx={{
-                            color: "#757575",
+                            color: "text.muted",
                             whiteSpace: "pre-wrap",
                             wordBreak: "break-word",
                         }}
@@ -71,7 +71,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                             top: multiline ? 8 : "50%",
                             right: 8,
                             transform: multiline ? "none" : "translateY(-50%)",
-                            color: "#4caf50",
+                            color: "success.main",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -88,8 +88,8 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                             top: multiline ? 8 : "50%",
                             right: 8,
                             transform: multiline ? "none" : "translateY(-50%)",
-                            color: "#757575",
-                            "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
+                            color: "text.muted",
+                            "&:hover": { bgcolor: "fill.faintHover" },
                         }}
                     >
                         <Copy01Icon size={16} />

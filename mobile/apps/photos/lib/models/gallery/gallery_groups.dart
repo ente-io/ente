@@ -364,7 +364,7 @@ class GalleryGroups {
 
     // Only add dummy files if swipe-to-select feature is enabled
     // Dummy files are used for gesture tracking in swipe-to-select
-    if (!limitSelectionToOne) {
+    if (localSettings.isSwipeToSelectEnabled && !limitSelectionToOne) {
       // Add dummy files to fill the last row if needed
       final incompleteRowCount = groupFiles.length % crossAxisCount;
       if (incompleteRowCount != 0) {
@@ -390,7 +390,7 @@ class GalleryGroups {
       endCreationTime: lastFile.creationTime!
     );
 
-    if (!limitSelectionToOne) {
+    if (localSettings.isSwipeToSelectEnabled && !limitSelectionToOne) {
       _allFilesWithDummies.addAll(groupFiles);
     }
 

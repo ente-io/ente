@@ -50,6 +50,7 @@ class FlagService {
 
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
+  bool get enableDeleteSuggestion => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -67,8 +68,7 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
-  bool get enableUploadV2 =>
-      internalUser && ((flags.serverApiFlag & _uploadV2Flag) != 0);
+  bool get enableUploadV2 => ((flags.serverApiFlag & _uploadV2Flag) != 0);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
@@ -93,6 +93,7 @@ class FlagService {
   Future<void> refreshFlags() async {
     await _fetch();
   }
+  bool get ritualsFlag => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

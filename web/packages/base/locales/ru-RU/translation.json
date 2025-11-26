@@ -587,6 +587,8 @@
     "oldest_first": "Сначала старые",
     "pin_album": "Закрепить альбом",
     "unpin_album": "Открепить альбом",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Не удалось просмотреть этот файл",
     "download_complete": "Загрузка завершена",
     "downloading_album": "Загрузка {{name}}",

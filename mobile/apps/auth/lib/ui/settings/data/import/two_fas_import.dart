@@ -117,8 +117,8 @@ Future<int?> _process2FasExportFile(
     try {
       await showTextInputDialog(
         context,
-        title: "Enter password to decrypt 2FAS backup",
-        submitButtonLabel: "Submit",
+        title: context.l10n.enterPasswordToDecrypt2FASBackup,
+        submitButtonLabel: context.l10n.submit,
         isPasswordInput: true,
         onSubmit: (value) async {
           password = value;
@@ -137,8 +137,8 @@ Future<int?> _process2FasExportFile(
       if (password != null) {
         await showErrorDialog(
           context,
-          "Failed to decrypt 2Fas export",
-          "Please check your password and try again.",
+          context.l10n.failedToDecrypt2FASExport,
+          context.l10n.pleaseCheckPasswordAndTryAgain,
         );
       }
       return null;

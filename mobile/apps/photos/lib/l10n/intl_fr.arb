@@ -1204,6 +1204,11 @@
   "noImagesWithLocation": "Aucune image avec localisation",
   "unpinAlbum": "Désépingler l'album",
   "pinAlbum": "Épingler l'album",
+  "pin": "Épingler",
+  "pinToTop": "Épingler en haut",
+  "unpin": "Désépingler",
+  "visibility": "Visibilité",
+  "hideFromMemories": "Masquer des souvenirs",
   "create": "Créer",
   "viewAll": "Tout afficher",
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
@@ -1389,8 +1394,8 @@
   "appLockDescriptions": "Choisissez entre l'écran de verrouillage par défaut de votre appareil et un écran de verrouillage personnalisé avec un code PIN ou un mot de passe.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pour activer le verrouillage de l'application vous devez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
   "authToViewPasskey": "Veuillez vous authentifier pour afficher votre clé de récupération",
-  "loopVideoOn": "Vidéo en boucle activée",
-  "loopVideoOff": "Vidéo en boucle désactivée",
+  "loopVideoOn": "Désactiver la lecture en boucle",
+  "loopVideoOff": "Activer la lecture en boucle",
   "localSyncErrorMessage": "Il semble que quelque chose s'est mal passé car la synchronisation des photos locales prend plus de temps que prévu. Veuillez contacter notre équipe d'assistance",
   "showPerson": "Montrer la personne",
   "sort": "Trier",
@@ -2008,6 +2013,72 @@
   "artisticPortraits": "Portraits joyeux",
   "streetFood": "Bouchés de la bouffe",
   "riverCruises": "Vue sur le fleuve",
+  "facesTimelineBannerTitle": "Souvenirs",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Voir les photos de {name}au fil des années",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Souvenirs",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} avait {count, plural, one {{count} an} other {{count} ans}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {# an plus tôt} other {# ans plus tôt}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Le partage de vidéos arrive bientôt",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Précédent",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Suivant",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Lecture",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pause",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "L'historique des visages est en préparation...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Enfants amusants",
   "coastalCliffs": "Falaises au bord de mer"
 }

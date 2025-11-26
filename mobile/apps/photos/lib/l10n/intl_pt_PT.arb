@@ -1365,8 +1365,6 @@
   "appLockDescriptions": "Escolha entre o ecrã de bloqueio predefinido do seu dispositivo e um ecrã de bloqueio personalizado com um PIN ou uma palavra-passe.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio de aplicações, configure o código de acesso do dispositivo ou o bloqueio de ecrã nas definições do sistema.",
   "authToViewPasskey": "Autentique-se para ver a sua chave de acesso",
-  "loopVideoOn": "Repetir vídeo ligado",
-  "loopVideoOff": "Repetir vídeo desligado",
   "localSyncErrorMessage": "Parece que algo correu mal, uma vez que a sincronização de fotografias locais está a demorar mais tempo do que o esperado. Contacte a nossa equipa de apoio",
   "showPerson": "Mostrar pessoa",
   "sort": "Ordenar",

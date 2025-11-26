@@ -37,13 +37,14 @@ Future<void> sendLogs(
   Function? postShare,
   String? subject,
   String? body,
+  String? dialogBody,
 }) async {
   // ignore: unawaited_futures
   showDialogWidget(
     context: context,
     title: context.strings.reportABug,
     icon: Icons.bug_report_outlined,
-    body: context.strings.logsDialogBody,
+    body: dialogBody ?? context.strings.logsDialogBody,
     buttons: [
       ButtonWidget(
         isInAlert: true,

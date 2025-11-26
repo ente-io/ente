@@ -1,0 +1,29 @@
+name: dir_utils
+description: Cross-platform directory utilities with persistent access support (iOS security-scoped bookmarks, Android SAF)
+version: 1.0.0
+homepage: https://github.com/ente-io/ente
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=2.5.0"
+
+dependencies:
+  file_picker: ^10.0.0
+  flutter:
+    sdk: flutter
+  logging: ^1.2.0
+  saf_stream: any
+  saf_util: any
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: DirUtilsPlugin
+      macos:
+        pluginClass: DirUtilsPlugin

@@ -6,6 +6,7 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
+import "package:photos/services/activity/activity_service.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/filedata/filedata_service.dart";
@@ -192,6 +193,12 @@ SmartAlbumsService? _smartAlbumsService;
 SmartAlbumsService get smartAlbumsService {
   _smartAlbumsService ??= SmartAlbumsService();
   return _smartAlbumsService!;
+}
+
+ActivityService? _activityService;
+ActivityService get activityService {
+  _activityService ??= ActivityService.instance;
+  return _activityService!;
 }
 
 CollectionsService? _collectionsService;

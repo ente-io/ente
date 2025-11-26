@@ -137,7 +137,7 @@ class FileActions {
             final collection =
                 updatedAllCollections.firstWhere((c) => c.id == collectionId);
             _logger.severe(
-              'Failed to remove file from ${collection.name}: $e',
+              'Failed to remove file from collection (ID: ${collection.id}): $e',
             );
           }
         }
@@ -154,7 +154,7 @@ class FileActions {
             );
           } catch (e) {
             _logger.severe(
-              'Failed to move file to collection ${collection.name}: $e',
+              'Failed to move file to collection (ID: ${collection.id}): $e',
             );
           }
         }
