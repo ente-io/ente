@@ -4,7 +4,6 @@ import "dart:io";
 
 import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -525,9 +524,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (value.isEmpty) {
           return;
         }
-        // Check if this is a public album link (ente:// scheme or albums.ente.io)
-        if (value[0].path.startsWith("ente://") ||
-            value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (_isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
@@ -594,10 +592,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        // Check if this is a public album link (ente:// scheme or albums.ente.io)
-        if (value.isNotEmpty &&
-            (value[0].path.startsWith("ente://") ||
-                value[0].path.contains("albums.ente.io"))) {
+        // Check if this is a public album link
+        if (value.isNotEmpty && _isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
@@ -635,7 +631,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
         if (initialUri.scheme == "ente" &&
-            _isPublicAlbumHost(initialUri.toString())) {
+            _isPublicAlbumUrl(initialUri.toString())) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
@@ -654,7 +650,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (uri.scheme == "ente" && _isPublicAlbumHost(uri.toString())) {
+          if (uri.scheme == "ente" && _isPublicAlbumUrl(uri.toString())) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
@@ -671,10 +667,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  bool _isPublicAlbumHost(String url) {
-    if (url.contains("albums.ente.io")) return true;
-    if (kDebugMode && url.contains("192.168.0.61:3002")) return true;
-    return false;
+  bool _isPublicAlbumUrl(String url) {
+    return url.contains("albums.ente.io");
   }
 
   @override
