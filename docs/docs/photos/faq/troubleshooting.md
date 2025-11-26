@@ -142,6 +142,14 @@ Open `Settings > Preferences > Advanced` (desktop/web), disable the "Faster uplo
 
 If uploads still fail after disabling this option, check your network connectivity and firewall settings.
 
+### How do I retry failed file downloads? {#retry-failed-downloads}
+
+If some files fail to download from your Ente library on web or desktop, you can easily retry them:
+
+**Solution:**
+
+When files fail to download, a modal dialog appears showing the failed downloads. Click the **retry icon** in the modal to attempt downloading the failed files again.
+
 ### Why can't the app detect certain file types? {#file-type-detection}
 
 The desktop/web app tries to detect if a particular file is a video or image. If the detection fails, the app skips the upload.

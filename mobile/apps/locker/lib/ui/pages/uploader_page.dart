@@ -167,6 +167,13 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           context.l10n.uploadStorageLimitErrorBody,
           isDismissable: true,
         );
+      } else if (e is FileLimitReachedError) {
+        await showErrorDialog(
+          context,
+          context.l10n.uploadFileCountLimitErrorTitle,
+          context.l10n.uploadFileCountLimitErrorBody,
+          isDismissable: true,
+        );
       } else if (e is FileTooLargeForPlanError) {
         await showErrorDialog(
           context,

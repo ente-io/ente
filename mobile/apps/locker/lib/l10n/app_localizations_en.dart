@@ -372,7 +372,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingShareLink => 'Creating link...';
 
   @override
-  String get shareThisLink => 'Anyone with this link can access your item.';
+  String get shareThisLink =>
+      'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.';
 
   @override
   String get copyLink => 'Copy link';
@@ -536,6 +537,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportBug => 'Report bug';
+
+  @override
+  String get logsDialogBodyLocker =>
+      'This will send logs to help us debug your issue.';
 
   @override
   String get social => 'Social';
@@ -1134,6 +1139,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get uploadStorageLimitErrorBody =>
       'You\'ve run out of storage space. Free up space to continue uploading.';
+
+  @override
+  String get uploadFileCountLimitErrorTitle => 'File limit reached';
+
+  @override
+  String get uploadFileCountLimitErrorBody =>
+      'Your individual or family account has hit the 1000-file limit.';
+
+  @override
+  String get uploadFileCountLimitErrorToast =>
+      'Action failed. Your individual or family account has hit the 1000-file limit.';
+
+  @override
+  String get uploadSubscriptionRequiredErrorBody =>
+      'Subscription required to save info items.';
 
   @override
   String get uploadFileTooLargeErrorTitle => 'File too large';

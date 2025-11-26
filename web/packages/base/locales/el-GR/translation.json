@@ -587,6 +587,8 @@
     "oldest_first": "Παλαιότερα πρώτα",
     "pin_album": "Καρφίτσωμα άλμπουμ",
     "unpin_album": "Ξεκαρφίτσωμα άλμπουμ",
+    "pin_person": "",
+    "unpin_person": "",
     "unpreviewable_file_message": "Δεν ήταν δυνατή η προεπισκόπηση αυτού του αρχείου",
     "download_complete": "Η λήψη ολοκληρώθηκε",
     "downloading_album": "Λήψη {{name}}",

@@ -8,7 +8,6 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -318,7 +317,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _logger
               .info('Received shared media files via stream: ${value.length}');
           for (var file in value) {
-            _logger.info('Shared file: ${file.path}, type: ${file.type}');
+            _logger.info('Shared file received, type: ${file.type}');
           }
           if (value.isNotEmpty) {
             _handleSharedFiles(value);
@@ -349,7 +348,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _logger
             .info('Found initial shared media files: ${initialMedia.length}');
         for (var file in initialMedia) {
-          _logger.info('Initial shared file: ${file.path}, type: ${file.type}');
+          _logger.info('Initial shared file, type: ${file.type}');
         }
         await _handleSharedFiles(initialMedia);
       } else {
@@ -370,14 +369,14 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     try {
       for (final sharedFile in sharedFiles) {
-        _logger.info('Processing shared file: ${sharedFile.path}');
+        _logger.info('Processing shared file');
         if (sharedFile.path.isNotEmpty) {
           final file = File(sharedFile.path);
           if (await file.exists()) {
-            _logger.info('File exists, uploading: ${sharedFile.path}');
+            _logger.info('File exists, uploading');
             await uploadFiles([file]);
           } else {
-            _logger.warning('Shared file does not exist: ${sharedFile.path}');
+            _logger.warning('Shared file does not exist');
           }
         } else {
           _logger.warning('Shared file has empty path');
@@ -495,17 +494,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   void _handleClearSearch() {
-    // Clear text and unfocus to properly dismiss search
+    // Clear text and unfocus before dismissing search
     searchController.clear();
     _searchFocusNode.unfocus();
-    // Simulate ESC key to deactivate search state
-    // ignore: prefer_const_constructors
-    final escapeEvent = KeyDownEvent(
-      physicalKey: PhysicalKeyboardKey.escape,
-      logicalKey: LogicalKeyboardKey.escape,
-      timeStamp: const Duration(seconds: 0),
-    );
-    handleKeyEvent(escapeEvent);
+
+    dismissSearch();
   }
 
   @override

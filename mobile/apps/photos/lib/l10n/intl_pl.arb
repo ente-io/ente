@@ -1380,8 +1380,6 @@
   "appLockDescriptions": "Wybierz między domyślnym ekranem blokady urządzenia a niestandardowym ekranem blokady z kodem PIN lub hasłem.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Aby włączyć blokadę aplikacji, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach systemu.",
   "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić swój klucz dostępu",
-  "loopVideoOn": "Pętla wideo włączona",
-  "loopVideoOff": "Pętla wideo wyłączona",
   "localSyncErrorMessage": "Wygląda na to, że coś poszło nie tak, ponieważ lokalna synchronizacja zdjęć zajmuje więcej czasu, niż oczekiwano. Skontaktuj się z naszym zespołem pomocy technicznej",
   "showPerson": "Pokaż osobę",
   "sort": "Sortuj",
