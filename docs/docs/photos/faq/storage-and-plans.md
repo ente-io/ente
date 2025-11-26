@@ -368,7 +368,7 @@ We support **annual** subscriptions over PayPal.
 
 ### Does Ente accept crypto payments? {#crypto-payment}
 
-Yes! We accept the following cryptocurrencies:
+Yes! We support *annual plans* with crypto payments and accept the following cryptocurrencies:
 
 - **Bitcoin** (BTC)
 - **Ethereum** (ETH)
