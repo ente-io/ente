@@ -265,9 +265,8 @@ const Page: React.FC = () => {
     }, [authenticateUserVisibilityProps.onClose]);
 
     const handleSidebarClose = useCallback(() => {
-        if (authenticateUserVisibilityProps.open) return;
         sidebarVisibilityProps.onClose();
-    }, [authenticateUserVisibilityProps.open, sidebarVisibilityProps.onClose]);
+    }, [sidebarVisibilityProps.onClose]);
 
     const handleSidebarActionHandled = useCallback(
         () => setPendingSidebarAction(undefined),
@@ -894,22 +893,16 @@ const Page: React.FC = () => {
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
             const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
-            try {
-                if (
-                    isHiddenCollectionSummary &&
-                    barMode != "hidden-albums" &&
-                    Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
-                ) {
-                    await authenticateUser();
-                    lastAuthenticationForHiddenTimestamp.current = Date.now();
-                }
-            } catch (e) {
-                // Re-throw so the promise rejects and the sidebar stays open
-                // (the .then(ctx.onClose) chain in sidebar-search-registry
-                // won't execute on rejection).
-                log.info("Skipping navigation to hidden section", e);
-                throw e;
+
+            if (
+                isHiddenCollectionSummary &&
+                barMode != "hidden-albums" &&
+                Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
+            ) {
+                await authenticateUser();
+                lastAuthenticationForHiddenTimestamp.current = Date.now();
             }
+
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },
         [authenticateUser, handleShowCollectionSummaryWithID, barMode],

@@ -117,6 +117,7 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("export_data"),
             path: [preferencesCategory, t("export_data")],
             keywords: ["export", "download"],
+            available: () => isDesktop,
         },
         {
             id: "utility.logout",
@@ -298,7 +299,6 @@ export const performSidebarAction = async (
                     .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
                     // See: [Note: Workarounds for unactionable ARIA warnings]
                     .then(() => wait(10))
-                    .then(ctx.onClose)
             );
         case "shortcuts.trash":
             return ctx

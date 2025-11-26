@@ -336,9 +336,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         if (!pendingAction) return;
         void performSidebarActionRef
             .current(pendingAction)
-            // Catch rejections (e.g., user dismissed auth) to prevent
-            // unhandled rejection errors from surfacing to the UI.
-            .catch(() => undefined)
             .finally(() => onActionHandledRef.current?.(pendingAction));
     }, [pendingAction]);
 
@@ -681,9 +678,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
         void onShowCollectionSummary(PseudoCollectionID.hiddenItems, true)
             // See: [Note: Workarounds for unactionable ARIA warnings]
             .then(() => wait(10))
-            .then(onCloseSidebar)
-            // Catch rejection when user dismisses auth modal
-            .catch(() => undefined);
+            .then(onCloseSidebar);
 
     const summaryCaption = (summaryID: number) =>
         normalCollectionSummaries.get(summaryID)?.fileCount.toString();
