@@ -1,8 +1,8 @@
 import "dart:io";
 import "dart:math" as math;
-import "dart:typed_data";
 import "dart:ui" as ui;
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:path_provider/path_provider.dart";
@@ -11,7 +11,9 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
+import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/activity/rituals_section.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -155,6 +157,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   ),
                   ActivityHeatmapCard(summary: displaySummary),
                   AchievementsRow(summary: displaySummary),
+                  if (kDebugMode)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                      child: _DebugCameraLauncher(
+                        selectedRitual: selectedRitual,
+                        onLaunch: _openRitualCamera,
+                      ),
+                    ),
                 ],
               ),
             );
@@ -321,6 +331,92 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       },
       generatedAt: summary.generatedAt,
+    );
+  }
+
+  void _openRitualCamera(Ritual ritual) {
+    final albumId = ritual.albumId;
+    if (albumId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Set an album for this ritual to launch the camera."),
+        ),
+      );
+      return;
+    }
+    routeToPage(
+      context,
+      RitualCameraPage(
+        ritualId: ritual.id,
+        albumId: albumId,
+      ),
+    );
+  }
+}
+
+class _DebugCameraLauncher extends StatelessWidget {
+  const _DebugCameraLauncher({
+    required this.selectedRitual,
+    required this.onLaunch,
+  });
+
+  final Ritual? selectedRitual;
+  final ValueChanged<Ritual> onLaunch;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final bool hasAlbum = selectedRitual?.albumId != null;
+    final bool canLaunch = selectedRitual != null && hasAlbum;
+    final String buttonLabel = canLaunch
+        ? "Open in-app camera for ${selectedRitual!.title.isEmpty ? "ritual" : selectedRitual!.title}"
+        : "Select a ritual with an album to open the camera";
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.fillFaint,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.bug_report_outlined,
+                color: colorScheme.textMuted,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "Debug: launch ritual camera",
+                style: textTheme.bodyBold.copyWith(
+                  color: colorScheme.textMuted,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton.icon(
+            onPressed: canLaunch && selectedRitual != null
+                ? () => onLaunch(selectedRitual!)
+                : null,
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: Text(buttonLabel),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+          if (!hasAlbum)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                "Pick a ritual (not the starter) and set an album to enable.",
+                style: textTheme.smallMuted,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

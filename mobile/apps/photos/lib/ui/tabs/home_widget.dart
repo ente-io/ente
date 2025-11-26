@@ -946,7 +946,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (payload != null) {
       debugPrint('notification payload: $payload');
       final uri = Uri.tryParse(payload);
-      if (uri != null && uri.host.toLowerCase() == "ritual") {
+      if (uri != null &&
+          (uri.host.toLowerCase() == "ritual" ||
+              uri.host.toLowerCase() == "camera")) {
         final ritualId = uri.queryParameters["ritualId"] ?? "";
         final albumIdRaw = uri.queryParameters["albumId"];
         final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty

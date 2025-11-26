@@ -1,13 +1,22 @@
+import "dart:io";
+
+import "package:camera/camera.dart";
 import "package:flutter/material.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/actions/collection/collection_file_actions.dart";
+import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/activity/activity_screen.dart";
+import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
-class RitualCameraPage extends StatelessWidget {
+class RitualCameraPage extends StatefulWidget {
   const RitualCameraPage({
     super.key,
     required this.ritualId,
@@ -16,6 +25,246 @@ class RitualCameraPage extends StatelessWidget {
 
   final String ritualId;
   final int? albumId;
+
+  @override
+  State<RitualCameraPage> createState() => _RitualCameraPageState();
+}
+
+class _RitualCameraPageState extends State<RitualCameraPage>
+    with WidgetsBindingObserver {
+  CameraController? _controller;
+  List<CameraDescription> _cameras = <CameraDescription>[];
+  CameraDescription? _activeCamera;
+  bool _initializing = true;
+  bool _capturing = false;
+  bool _saving = false;
+  String? _error;
+  List<XFile> _captures = <XFile>[];
+  Collection? _album;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _loadAlbum();
+    _initializeCamera();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller?.dispose();
+    _cleanupCaptures();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
+      controller.dispose();
+      _controller = null;
+    } else if (state == AppLifecycleState.resumed && _activeCamera != null) {
+      _initializeCamera(_activeCamera);
+    }
+  }
+
+  Future<void> _loadAlbum() async {
+    if (widget.albumId == null) return;
+    final collection =
+        CollectionsService.instance.getCollectionByID(widget.albumId!);
+    if (mounted) {
+      setState(() {
+        _album = collection;
+      });
+    }
+  }
+
+  Future<void> _initializeCamera([CameraDescription? description]) async {
+    if (!flagService.ritualsFlag) return;
+    setState(() {
+      _initializing = true;
+      _error = null;
+    });
+    try {
+      _cameras = _cameras.isEmpty ? await availableCameras() : _cameras;
+      if (_cameras.isEmpty) {
+        setState(() {
+          _error = "No camera found on this device.";
+          _initializing = false;
+        });
+        return;
+      }
+      final CameraDescription target =
+          description ?? _preferredCamera() ?? _cameras.first;
+      final controller = CameraController(
+        target,
+        ResolutionPreset.high,
+        imageFormatGroup: ImageFormatGroup.jpeg,
+        enableAudio: false,
+      );
+      await controller.initialize();
+      if (!mounted) {
+        await controller.dispose();
+        return;
+      }
+      await _controller?.dispose();
+      setState(() {
+        _controller = controller;
+        _activeCamera = target;
+        _initializing = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = "Unable to start camera. Please check permissions.";
+        _initializing = false;
+      });
+    }
+  }
+
+  CameraDescription? _preferredCamera() {
+    for (final camera in _cameras) {
+      if (camera.lensDirection == CameraLensDirection.back) {
+        return camera;
+      }
+    }
+    return null;
+  }
+
+  Future<void> _switchCamera() async {
+    if (_cameras.length < 2 || _saving) return;
+    final current = _activeCamera;
+    if (current == null) return;
+    final nextIndex = (_cameras.indexOf(current) + 1) % _cameras.length;
+    await _initializeCamera(_cameras[nextIndex]);
+  }
+
+  Future<void> _takePicture() async {
+    if (_controller == null ||
+        !_controller!.value.isInitialized ||
+        _capturing ||
+        _saving) {
+      return;
+    }
+    setState(() {
+      _capturing = true;
+    });
+    try {
+      final XFile capture = await _controller!.takePicture();
+      if (!mounted) return;
+      setState(() {
+        _captures = List<XFile>.from(_captures)..add(capture);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      showShortToast(context, "Unable to capture photo. Please try again.");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _capturing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _onAccept() async {
+    if (_captures.isEmpty) {
+      showShortToast(context, "Capture at least one photo first.");
+      return;
+    }
+    if (widget.albumId == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text("Ritual album missing. Edit the ritual to set an album."),
+        ),
+      );
+      await routeToPage(context, const ActivityScreen());
+      return;
+    }
+    final List<XFile> pending = List<XFile>.from(_captures);
+    setState(() {
+      _saving = true;
+    });
+    try {
+      final shared = pending
+          .map(
+            (file) => SharedMediaFile(
+              path: file.path,
+              type: SharedMediaType.image,
+            ),
+          )
+          .toList(growable: false);
+      final actions = CollectionActions(CollectionsService.instance);
+      await actions.addToCollection(
+        context,
+        widget.albumId!,
+        true,
+        sharedFiles: shared,
+      );
+      if (!mounted) return;
+      showShortToast(
+        context,
+        _album == null ? "Added to album" : "Added to ${_album!.displayName}",
+      );
+      final collection = _album ??
+          CollectionsService.instance.getCollectionByID(widget.albumId!);
+      if (collection != null && mounted) {
+        final thumbnail =
+            await CollectionsService.instance.getCover(collection);
+        if (!mounted) return;
+        replacePage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(
+              collection,
+              thumbnail,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Couldn't add photos to the album: $e"),
+          ),
+        );
+      }
+    } finally {
+      _cleanupCaptures(pending);
+      if (mounted) {
+        setState(() {
+          _saving = false;
+          _captures = <XFile>[];
+        });
+      }
+    }
+  }
+
+  void _cleanupCaptures([List<XFile>? files]) {
+    final targets = files ?? _captures;
+    for (final capture in targets) {
+      try {
+        File(capture.path).deleteSync();
+      } catch (_) {
+        // ignore cleanup failures
+      }
+    }
+    _captures = <XFile>[];
+  }
+
+  void _onDiscard() {
+    _cleanupCaptures();
+    setState(() {
+      _captures = <XFile>[];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,65 +281,236 @@ class RitualCameraPage extends StatelessWidget {
         ),
       );
     }
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final bool isReady = _controller != null &&
+        _controller!.value.isInitialized &&
+        !_initializing;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Ritual capture"),
+        title: Text(_album?.displayName ?? "Ritual capture"),
+        actions: [
+          IconButton(
+            onPressed: _captures.isEmpty || _saving ? null : _onDiscard,
+            icon: const Icon(Icons.refresh),
+            tooltip: "Discard and retake",
+          ),
+          IconButton(
+            onPressed: (_cameras.length < 2 || _saving || _initializing)
+                ? null
+                : _switchCamera,
+            icon: const Icon(Icons.cameraswitch_rounded),
+            tooltip: "Switch camera",
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: FutureBuilder<Collection?>(
-          future: _loadCollection(),
-          builder: (context, snapshot) {
-            final collection = snapshot.data;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Ready to take today's ritual photo?",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                color: Colors.black,
+                child: Center(
+                  child: _buildCameraArea(isReady, colorScheme),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  "Use your device camera to take a photo, then add it to the selected album. We will improve this with an in-app camera flow soon.",
+              ),
+            ),
+            if (_album != null || widget.albumId != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.photo_album_outlined,
+                      color: colorScheme.textMuted,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _album?.displayName ??
+                            "Album ID ${widget.albumId ?? "-"}",
+                        style: textTheme.smallMuted,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (collection != null) {
-                      routeToPage(
-                        context,
-                        CollectionPage(
-                          CollectionWithThumbnail(collection, null),
-                        ),
-                      );
-                    } else {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  icon: const Icon(Icons.photo_camera_rounded),
-                  label: Text(
-                    collection == null
-                        ? "Open album"
-                        : "Go to ${collection.displayName}",
+              ),
+            if (_captures.isNotEmpty) _CapturedStrip(captures: _captures),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: (_captures.isNotEmpty && !_saving)
+                          ? _onDiscard
+                          : null,
+                      child: const Text("Retake"),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                OutlinedButton(
-                  onPressed: () {
-                    routeToPage(context, const ActivityScreen());
-                  },
-                  child: const Text("View activity"),
-                ),
-              ],
-            );
-          },
+                  const SizedBox(width: 12),
+                  _CaptureButton(
+                    onTap:
+                        _capturing || _saving || !isReady ? null : _takePicture,
+                    busy: _capturing,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed:
+                          (_captures.isNotEmpty && !_saving) ? _onAccept : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.primary500,
+                        foregroundColor: colorScheme.backgroundBase,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: _saving
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: colorScheme.backgroundBase,
+                              ),
+                            )
+                          : const Text("Add to album"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<Collection?> _loadCollection() async {
-    if (albumId == null) return null;
-    return CollectionsService.instance.getCollectionByID(albumId!);
+  Widget _buildCameraArea(bool isReady, EnteColorScheme colorScheme) {
+    if (_initializing) {
+      return const CircularProgressIndicator();
+    }
+    if (_error != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: colorScheme.textMuted,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _initializing ? null : _initializeCamera,
+              child: const Text("Try again"),
+            ),
+            TextButton(
+              onPressed: () {
+                routeToPage(context, const ActivityScreen());
+              },
+              child: const Text("Back to rituals"),
+            ),
+          ],
+        ),
+      );
+    }
+    if (!isReady || _controller == null) {
+      return const SizedBox.shrink();
+    }
+    return Center(
+      child: CameraPreview(_controller!),
+    );
+  }
+}
+
+class _CapturedStrip extends StatelessWidget {
+  const _CapturedStrip({required this.captures});
+
+  final List<XFile> captures;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return SizedBox(
+      height: 96,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        itemCount: captures.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final file = captures[index];
+          return ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              width: 80,
+              height: 80,
+              color: colorScheme.fillFaintPressed,
+              child: Image.file(
+                File(file.path),
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CaptureButton extends StatelessWidget {
+  const _CaptureButton({
+    required this.onTap,
+    required this.busy,
+  });
+
+  final VoidCallback? onTap;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: onTap == null
+              ? colorScheme.fillMuted
+              : colorScheme.backgroundBase,
+          border: Border.all(
+            color: colorScheme.primary500,
+            width: 3,
+          ),
+        ),
+        child: Center(
+          child: busy
+              ? CircularProgressIndicator(
+                  color: colorScheme.primary500,
+                  strokeWidth: 3,
+                )
+              : Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: onTap == null
+                        ? colorScheme.strokeFaint
+                        : colorScheme.primary500,
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 }

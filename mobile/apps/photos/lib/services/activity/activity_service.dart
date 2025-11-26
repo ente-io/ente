@@ -317,8 +317,14 @@ class ActivityService {
         id: baseId + scheduled,
         channelID: "ritual_reminders",
         channelName: "Ritual reminders",
-        payload:
-            "ente://ritual?ritualId=${ritual.id}&albumId=${ritual.albumId ?? ""}",
+        payload: Uri(
+          scheme: "ente",
+          host: "camera",
+          queryParameters: {
+            "ritualId": ritual.id,
+            "albumId": ritual.albumId?.toString() ?? "",
+          },
+        ).toString(),
         dateTime: scheduledDate,
       );
       scheduled += 1;

@@ -266,6 +266,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  camera:
+    dependency: "direct main"
+    description:
+      name: camera
+      sha256: "87a27e0553e3432119c1c2f6e4b9a1bbf7d2c660552b910bfa59185a9facd632"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.2+1"
+  camera_android_camerax:
+    dependency: transitive
+    description:
+      name: camera_android_camerax
+      sha256: "2c0746d55f513bed55f52e0b5d9bda18c1533bb16bb89ea93d8033f3815e6cd8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.23+1"
+  camera_avfoundation:
+    dependency: transitive
+    description:
+      name: camera_avfoundation
+      sha256: "951ef122d01ebba68b7a54bfe294e8b25585635a90465c311b2f875ae72c412f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.21+2"
+  camera_platform_interface:
+    dependency: transitive
+    description:
+      name: camera_platform_interface
+      sha256: "98cfc9357e04bad617671b4c1f78a597f25f08003089dd94050709ae54effc63"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.12.0"
+  camera_web:
+    dependency: transitive
+    description:
+      name: camera_web
+      sha256: "77e53acb64d9de8917424eeb32b5c7c73572d1e00954bbf54a1e609d79a751a2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.5+1"
   cast:
     dependency: transitive
     description:
@@ -3146,4 +3186,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.8.1 <4.0.0"
-  flutter: ">=3.32.0"
+  flutter: ">=3.32.8"
