@@ -8,6 +8,8 @@ PODS:
     - FlutterMacOS
   - device_info_plus (0.0.1):
     - Flutter
+  - dir_utils (1.0.0):
+    - Flutter
   - DKImagePickerController/Core (4.3.9):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
@@ -138,6 +140,7 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - dir_utils (from `.symlinks/plugins/dir_utils/ios`)
   - ente_qr (from `.symlinks/plugins/ente_qr/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
@@ -186,6 +189,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cupertino_http/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
+  dir_utils:
+    :path: ".symlinks/plugins/dir_utils/ios"
   ente_qr:
     :path: ".symlinks/plugins/ente_qr/ios"
   file_picker:
@@ -246,6 +251,7 @@ SPEC CHECKSUMS:
   connectivity_plus: cb623214f4e1f6ef8fe7403d580fdad517d2f7dd
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   device_info_plus: 335f3ce08d2e174b9fdc3db3db0f4e3b1f66bd89
+  dir_utils: c668f14c9a72a5087d11c4722cb272de0a87ce10
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   ente_qr: 2a30f91f9e938c229ebcbc98a6f8f018d1ac665d
