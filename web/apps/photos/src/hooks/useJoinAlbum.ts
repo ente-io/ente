@@ -55,7 +55,7 @@ const handleWebFallback = (
 const tryDeepLinkWithFallback = (
     deepLinkURL: string,
     fallbackFn: () => void | Promise<void>,
-    timeoutMs = 4000,
+    timeoutMs = 2500,
 ): (() => void) => {
     let appOpened = false;
 
@@ -122,18 +122,22 @@ export const useJoinAlbum = ({
             handleWebFallback(accessToken, currentHash, jwtToken);
         };
 
-        // Check if on mobile and try deep link first
-        if (isTouchscreen) {
+        // Check if on Android and try deep link first.
+        // Skip deep linking on iOS - custom URL schemes show an error
+        // dialog when the app isn't installed. On iOS Safari, if the photos app
+        // is installed, a banner already appears at the top prompting to open in app.
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isTouchscreen && !isIOS) {
             // Extract hostname from albumsAppOrigin for deep linking
             const albumsHost = new URL(albumsAppOrigin()).host;
 
-            // For all mobile devices, use custom scheme with action=join parameter
+            // For Android, use custom scheme with action=join parameter
             // Format: ente://HOST/?action=join&t=TOKEN#HASH
             const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
             tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
         } else {
-            // Desktop: use the standard web flow directly
+            // Desktop and iOS: use the standard web flow directly
             handleWebFallback(accessToken, currentHash, jwtToken);
         }
     };
