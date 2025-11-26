@@ -1684,17 +1684,13 @@ const Help: React.FC<HelpProps> = ({
                         onClick={handleSupport}
                     />
                 </RowButtonGroup>
-            </Stack>
-            <Stack sx={{ px: "16px" }}>
-                <RowButton
-                    variant="secondary"
-                    label={
-                        <Typography variant="mini" color="text.muted">
-                            {t("view_logs")}
-                        </Typography>
-                    }
-                    onClick={confirmViewLogs}
-                />
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<ChevronRightIcon />}
+                        label={t("view_logs")}
+                        onClick={confirmViewLogs}
+                    />
+                </RowButtonGroup>
                 {isDevBuildAndUser() && (
                     <RowButton
                         variant="secondary"
