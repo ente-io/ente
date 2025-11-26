@@ -123,6 +123,7 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
     type MouseEventHandler,
 } from "react";
@@ -318,12 +319,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
     );
 
+    // Use refs for callbacks to prevent the effect from re-running when
+    // callback identities change. This is critical because closing the auth
+    // modal causes handleSidebarClose to get a new identity (it depends on
+    // authenticateUserVisibilityProps.open), which cascades to
+    // performSidebarAction, causing this effect to re-run while pendingAction
+    // is still set - reopening the modal.
+    const performSidebarActionRef = useRef(performSidebarAction);
+    const onActionHandledRef = useRef(onActionHandled);
+    useEffect(() => {
+        performSidebarActionRef.current = performSidebarAction;
+        onActionHandledRef.current = onActionHandled;
+    });
+
     useEffect(() => {
         if (!pendingAction) return;
-        void performSidebarAction(pendingAction).finally(() =>
-            onActionHandled?.(pendingAction),
-        );
-    }, [pendingAction, performSidebarAction, onActionHandled]);
+        void performSidebarActionRef
+            .current(pendingAction)
+            .finally(() => onActionHandledRef.current?.(pendingAction));
+    }, [pendingAction]);
 
     return (
         <RootSidebarDrawer open={open} onClose={onClose}>

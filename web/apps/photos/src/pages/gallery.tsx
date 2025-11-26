@@ -269,6 +269,11 @@ const Page: React.FC = () => {
         sidebarVisibilityProps.onClose();
     }, [authenticateUserVisibilityProps.open, sidebarVisibilityProps.onClose]);
 
+    const handleSidebarActionHandled = useCallback(
+        () => setPendingSidebarAction(undefined),
+        [],
+    );
+
     // Local aliases.
     const {
         user,
@@ -1186,7 +1191,7 @@ const Page: React.FC = () => {
                     state.uncategorizedCollectionSummaryID
                 }
                 pendingAction={pendingSidebarAction}
-                onActionHandled={() => setPendingSidebarAction(undefined)}
+                onActionHandled={handleSidebarActionHandled}
                 onShowPlanSelector={showPlanSelector}
                 onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 onShowExport={showExport}
