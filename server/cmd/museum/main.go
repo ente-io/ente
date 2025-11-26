@@ -576,6 +576,8 @@ func main() {
 	privateAPI.POST("/collections", collectionHandler.Create)
 	// Collection actions (exposed for clients to fetch suggestions/removals)
 	privateAPI.GET("/collection-actions/pending-remove", collectionActionsHandler.ListPendingRemove)
+	privateAPI.GET("/collection-actions/delete-suggestions", collectionActionsHandler.ListDeleteSuggestions)
+	privateAPI.POST("/collection-actions/reject-delete-suggestions", collectionActionsHandler.RejectDeleteSuggestions)
 
 	privateAPI.GET("/collections/:collectionID", collectionHandler.GetCollectionByID)
 	//lint:ignore SA1019 Deprecated API will be removed in the future

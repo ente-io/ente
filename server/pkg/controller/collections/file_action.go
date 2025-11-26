@@ -150,6 +150,11 @@ func (c *CollectionController) RemoveFilesV3(ctx *gin.Context, actorUserID int64
 	collectionOwnerID := accessResp.Collection.Owner.ID
 	role := accessResp.Role
 
+	// Validate that all requested files exist in the target collection
+	if err := c.CollectionRepo.VerifyAllFileIDsExistsInCollection(ctx, req.CollectionID, req.FileIDs); err != nil {
+		return stacktrace.Propagate(err, "file not found in collection")
+	}
+
 	// Partition fileIDs by owner
 	ownerToFilesMap, err := c.FileRepo.GetOwnerToFileIDsMap(ctx, req.FileIDs)
 	if err != nil {
@@ -231,7 +236,7 @@ func (c *CollectionController) SuggestDeleteInSharedCollection(ctx *gin.Context,
 	if _, ok := ownerMap[actorUserID]; ok {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "can not suggest delete for actor-owned files")
 	}
-	if removeErr := c.RemoveFilesV3(ctx, actorUserID, ente.RemoveFilesV3Request{FileIDs: req.FileIDs, CollectionID: req.CollectionID}); removeErr != nil {
+	if removeErr := c.RemoveFilesV3(ctx, actorUserID, ente.RemoveFilesV3Request(req)); removeErr != nil {
 		return stacktrace.Propagate(removeErr, "failed to remove files")
 	}
 

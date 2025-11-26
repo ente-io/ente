@@ -5,7 +5,7 @@ This document supplements `collections-architecture.md` with admin/owner removal
 ## Summary
 
 - Adds soft action markers to `collection_files` to drive client behavior: `action_user`, `action`.
-- Introduces a `collection_actions` store for per-user pending actions (`REMOVE`, `DELETE_SUGGESTED`); `/collection-actions/pending-remove` currently exposes the `REMOVE` queue.
+- Introduces a `collection_actions` store for per-user pending actions (`REMOVE`, `DELETE_SUGGESTED`); `/collection-actions/pending-remove` exposes the `REMOVE` queue and `/collection-actions/delete-suggestions` exposes the `DELETE_SUGGESTED` queue.
 - Extends removal flows so admins/owners can orchestrate deletes in shared collections while preserving invariants.
 
 ## Endpoints
@@ -20,16 +20,58 @@ This document supplements `collections-architecture.md` with admin/owner removal
   - Owner-owned files: set `REMOVE` marker on the membership and create two actions for the owner (`REMOVE`, `DELETE_SUGGESTED`).
   - Other owners’ files: remove membership; create `DELETE_SUGGESTED` actions for the respective file owners.
 
-- `GET /collection-actions/pending-remove?updatedAt=...`
-  - Returns pending `REMOVE` actions newer than the provided timestamp (limit 2000). Each entry includes the actor, collection, and file ID so clients can guide the owner workflow.
-  - `DELETE_SUGGESTED` entries share the same table but do not have an HTTP feed yet; they are reserved for forthcoming client flows.
+- `GET /collection-actions/pending-remove?sinceTime=<int64>`
+  - Returns pending `REMOVE` actions newer than `sinceTime` (limit 2000). Each entry includes the actor, collection, and file ID so clients can guide the owner workflow.
+  - Response shape: `{ "actions": [CollectionAction...], "hasMore": boolean }`.
+- `GET /collection-actions/delete-suggestions?sinceTime=...`
+  - Returns pending `DELETE_SUGGESTED` actions newer than the provided timestamp (limit 2000, same as pending remove).
+  - Server validates that every referenced file is owned by the authenticated user; mismatches surface as 500s so we can detect data drifts early.
+  - If a referenced file already lives in trash or was permanently deleted (any non-restored trash row), the server marks the action as resolved (`is_pending=false`) and omits it from the response since the user already acted on it.
+- `POST /collection-actions/reject-delete-suggestions`
+  - Payload: `{ "fileIDs": [ ... ] }` (max 2000 IDs per request).
+  - Marks the provided delete suggestions as resolved (sets `is_pending=false`) for the authenticated user, if they were still pending.
+
+### Owner Removal Flow (explicit)
+
+- Collection owners do not use `/collections/v3/remove-files` for their own files.
+- Instead, they should relocate using `/collections/move-files` (owner-only). This inserts into the target collection and soft-deletes the membership in the source collection so the file disappears from the album while remaining owned elsewhere (see `pkg/repo/collection.go:734+`).
+
+### Suggest Delete behavior (expanded)
+
+- `POST /collections/suggest-delete` removes the memberships for all non-owner files in the target collection and generates `DELETE_SUGGESTED` actions for each remote owner (see `pkg/controller/collections/file_action.go:234–241`).
+- For album-owner-owned files, it sets a `REMOVE` action marker to let the owner handle the follow-up and also enqueues a `DELETE_SUGGESTED` for the owner.
+- Clients can fetch the suggestions feed via `GET /collection-actions/delete-suggestions?sinceTime=...`.
 
 ## Diff Semantics
 
 - `GET /collections/v2/diff`
-  - For non-owners: entries with `action in {REMOVE, DELETE_SUGGESTED}` are masked as `isDeleted=true`; `action` and `actionUser` are omitted.
-  - For the file owner: `action` and `actionUser` are included to drive follow-up behavior.
-- Public and cast diffs always mask entries with actions (`REMOVE`, `DELETE_SUGGESTED`, plus legacy `DELETE`) as deleted and strip action details.
+  - Non-owners: entries with `action in {REMOVE, DELETE_SUGGESTED}` are surfaced as if deleted (`isDeleted=true`), and `action`/`actionUser`/private metadata are stripped.
+  - File owner: receives `action` and `actionUser` along with the entry; entry is not forced to deleted solely due to action markers.
+- Public and cast diffs: entries with `action in {REMOVE, DELETE_SUGGESTED, DELETE}` are always masked as deleted and action details are stripped.
+
+## Examples and Errors
+
+- Remove files v3
+  - Request
+    - `POST /collections/v3/remove-files`
+    - Body: `{ "collectionID": 123, "fileIDs": [111, 222, 333] }`
+  - Errors
+    - If the album owner attempts to remove their own files: HTTP 400 with message `"can not remove files owned collection owner, admins can perform remove suggestion"` (see `pkg/controller/collections/file_action.go`).
+    - If a non-admin attempts to remove album-owner-owned files: HTTP 400 with message `"can not remove files owned by album owner"`.
+
+- Suggest delete
+  - Request
+    - `POST /collections/suggest-delete`
+    - Body: `{ "collectionID": 123, "fileIDs": [444, 555] }`
+  - Notes
+    - The server rejects actor-owned targets; clients must not include files owned by the actor.
+    - Upon success, memberships for non-owner files are removed and delete suggestions are created for each remote owner.
+
+## Reactivation (Resurrect) Semantics
+
+- When a previously-deleted membership is reactivated via `AddFiles`, `RestoreFiles`, or `MoveFiles`:
+  - Soft action markers are cleared (`action`, `action_user` set to NULL).
+  - `created_at` is refreshed only when the row transitions from deleted→active; otherwise it remains unchanged (see `pkg/repo/collection.go` upsert in `MoveFiles`).
 
 ## Client Guidance
 

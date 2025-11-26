@@ -44,8 +44,7 @@ func (r *CollectionActionsRepository) CreateBulk(ctx context.Context, userID int
 	args := make([]interface{}, 0, len(fileIDs)*8)
 	for i := range fileIDs {
 		id := base.MustNewID("cact")
-		var fileID int64
-		fileID = fileIDs[i]
+		fileID := fileIDs[i]
 		idx := i*8 + 1
 		valueStrings = append(valueStrings, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)",
 			idx, idx+1, idx+2, idx+3, idx+4, idx+5, idx+6, idx+7))
@@ -91,7 +90,7 @@ func (r *CollectionActionsRepository) ListPendingRemoveActions(ctx context.Conte
 			v := fileID.Int64
 			ca.FileID = &v
 		}
-		if data != nil && len(data) > 0 {
+		if len(data) > 0 {
 			var m map[string]interface{}
 			if err := json.Unmarshal(data, &m); err != nil {
 				return result, stacktrace.Propagate(err, "failed to unmarshal data")
@@ -112,12 +111,99 @@ func (r *CollectionActionsRepository) ListPendingRemoveActions(ctx context.Conte
 	return result, nil
 }
 
+func (r *CollectionActionsRepository) ListPendingDeleteSuggestions(ctx context.Context, userID int64, updatedAfter int64, limit int) ([]ente.CollectionAction, error) {
+	rows, err := r.DB.QueryContext(ctx, `SELECT ca.id, ca.user_id, ca.actor_user_id, ca.collection_id, ca.file_id, ca.data, ca.action, ca.is_pending, ca.created_at, ca.updated_at,
+	        f.owner_id,
+	        (t.file_id IS NOT NULL) AS is_in_trash
+	    FROM collection_actions ca
+	    LEFT JOIN files f
+	        ON f.file_id = ca.file_id
+	    LEFT JOIN trash t
+	        ON t.user_id = ca.user_id
+	        AND t.file_id = ca.file_id
+	        AND t.is_restored = false
+	    WHERE ca.user_id = $1
+	        AND ca.action = $2
+	        AND ca.is_pending = true
+	        AND ca.updated_at > $3
+	    ORDER BY ca.updated_at
+	    LIMIT $4`, userID, ente.ActionDeleteSuggested, updatedAfter, limit)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+
+	result := make([]ente.CollectionAction, 0)
+	staleActionIDs := make([]string, 0)
+	for rows.Next() {
+		var (
+			ca            ente.CollectionAction
+			data          []byte
+			fileID        sql.NullInt64
+			ownerID       sql.NullInt64
+			hasTrashEntry bool
+		)
+		if err := rows.Scan(&ca.ID, &ca.UserID, &ca.ActorUserID, &ca.CollectionID, &fileID, &data, &ca.Action, &ca.IsPending, &ca.CreatedAt, &ca.UpdatedAt, &ownerID, &hasTrashEntry); err != nil {
+			return result, stacktrace.Propagate(err, "")
+		}
+		if !fileID.Valid {
+			staleActionIDs = append(staleActionIDs, ca.ID)
+			continue
+		}
+		fid := fileID.Int64
+		ca.FileID = &fid
+
+		if !ownerID.Valid {
+			staleActionIDs = append(staleActionIDs, ca.ID)
+			continue
+		}
+		if ownerID.Int64 != ca.UserID {
+			return result, stacktrace.NewError(fmt.Sprintf("delete suggestion action %s references file %d owned by %d for user %d", ca.ID, fid, ownerID.Int64, ca.UserID))
+		}
+		if hasTrashEntry {
+			staleActionIDs = append(staleActionIDs, ca.ID)
+			continue
+		}
+		if len(data) > 0 {
+			var m map[string]interface{}
+			if err := json.Unmarshal(data, &m); err != nil {
+				return result, stacktrace.Propagate(err, "failed to unmarshal data")
+			}
+			ca.Data = m
+		}
+		result = append(result, ca)
+	}
+	if len(staleActionIDs) > 0 {
+		if err := r.resetPendingForActions(ctx, staleActionIDs); err != nil {
+			return result, stacktrace.Propagate(err, "failed to reset stale delete-suggested actions")
+		}
+	}
+	return result, nil
+}
+
 func (r *CollectionActionsRepository) resetPendingForActions(ctx context.Context, ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
 	_, err := r.DB.ExecContext(ctx, `UPDATE collection_actions SET is_pending = false WHERE id = ANY($1)`, pq.Array(ids))
 	return stacktrace.Propagate(err, "")
+}
+
+func (r *CollectionActionsRepository) RejectDeleteSuggestions(ctx context.Context, userID int64, fileIDs []int64) (int64, error) {
+	if len(fileIDs) == 0 {
+		return 0, nil
+	}
+	res, err := r.DB.ExecContext(ctx, `UPDATE collection_actions
+	        SET is_pending = false
+	    WHERE user_id = $1
+	        AND action = $2
+	        AND is_pending = true
+	        AND file_id = ANY($3)`, userID, ente.ActionDeleteSuggested, pq.Array(fileIDs))
+	if err != nil {
+		return 0, stacktrace.Propagate(err, "")
+	}
+	rowsAffected, err := res.RowsAffected()
+	return rowsAffected, stacktrace.Propagate(err, "")
 }
 
 func marshalCollectionActionData(data map[string]interface{}) (interface{}, error) {

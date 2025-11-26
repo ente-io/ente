@@ -20,3 +20,8 @@ CREATE INDEX IF NOT EXISTS collection_actions_collection_id_idx ON collection_ac
 CREATE INDEX IF NOT EXISTS collection_actions_pending_remove_delete_user_time_idx
     ON collection_actions (user_id, updated_at)
     WHERE action IN ('REMOVE', 'DELETE_SUGGESTED') AND is_pending = true;
+
+CREATE TRIGGER update_collection_actions_updated_at
+    BEFORE UPDATE ON collection_actions
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_updated_at_microseconds_column();
