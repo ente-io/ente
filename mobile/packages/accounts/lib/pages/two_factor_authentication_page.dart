@@ -48,6 +48,9 @@ class _TwoFactorAuthenticationPageState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
+    // TODO: Use primary500 instead of strokeMuted once theming is properly
+    // set up for Locker app to show app-specific colors. Currently,
+    // colorScheme.primary500 doesn't work on Locker app.
     final pinPutDecoration = PinTheme(
       height: 45,
       width: 45,
