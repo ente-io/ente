@@ -232,36 +232,19 @@ const Page: React.FC = () => {
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
 
-    // To resolve the pending promises when closing the AuthenticateUser modal
-    const authenticateUserResolvers = useRef<{
-        resolve?: () => void;
-        reject?: (reason?: Error) => void;
-    }>({});
-
-    const resetAuthenticateUserResolvers = () => {
-        authenticateUserResolvers.current = {};
-    };
+    const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
     const authenticateUser = useCallback(
         () =>
-            new Promise<void>((resolve, reject) => {
-                authenticateUserResolvers.current = { resolve, reject };
+            new Promise<void>((resolve) => {
+                onAuthenticateCallback.current = resolve;
                 showAuthenticateUser();
             }),
-        [showAuthenticateUser],
+        [],
     );
-
-    const handleAuthenticateUserSuccess = useCallback(() => {
-        authenticateUserResolvers.current.resolve?.();
-        resetAuthenticateUserResolvers();
-    }, []);
 
     const handleCloseAuthenticateUser = useCallback(() => {
         authenticateUserVisibilityProps.onClose();
-        authenticateUserResolvers.current.reject?.(
-            new Error("authentication dismissed"),
-        );
-        resetAuthenticateUserResolvers();
     }, [authenticateUserVisibilityProps.onClose]);
 
     const handleSidebarClose = useCallback(() => {
@@ -1253,7 +1236,7 @@ const Page: React.FC = () => {
             <AuthenticateUser
                 open={authenticateUserVisibilityProps.open}
                 onClose={handleCloseAuthenticateUser}
-                onAuthenticate={handleAuthenticateUserSuccess}
+                onAuthenticate={onAuthenticateCallback.current!}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}

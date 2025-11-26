@@ -55,7 +55,13 @@ const sidebarActions = (): SidebarAction[] => {
             id: "account.subscription",
             label: t("subscription"),
             path: [accountCategory, t("subscription")],
-            keywords: ["subscription", "plan", "upgrade", "billing"],
+            keywords: [
+                "subscription",
+                "plan",
+                "upgrade",
+                "billing",
+                "pricings",
+            ],
         },
         {
             id: "shortcuts.uncategorized",
@@ -378,12 +384,26 @@ const matchesSearch = (
     path: string[],
     keywords: string[] = [],
 ) => {
+    const searchVariants = getSearchVariants(normalized);
     const haystack = [label, ...path, ...keywords]
         .filter(Boolean)
         .map((s) => s.toLowerCase());
 
-    const re = new RegExp("(^|[\\s.,!?\"'-_])" + escapeRegex(normalized));
+    const re = new RegExp(
+        "(^|[\\s.,!?\"'-_])(" +
+            searchVariants.map((s) => escapeRegex(s)).join("|") +
+            ")",
+    );
     return haystack.some((h) => re.test(h));
+};
+
+const getSearchVariants = (search: string) => {
+    const variants = new Set<string>([search]);
+    if (search.endsWith("ies")) variants.add(search.slice(0, -3) + "y");
+    if (search.endsWith("es")) variants.add(search.slice(0, -2));
+    if (search.endsWith("s")) variants.add(search.slice(0, -1));
+
+    return [...variants].filter((v) => v.length > 1);
 };
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
