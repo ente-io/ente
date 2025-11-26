@@ -57,15 +57,15 @@ export const storeJoinAlbumContext = async (
 
     const serializedContext = JSON.stringify(context);
 
-    localStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, serializedContext);
+    sessionStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, serializedContext);
 };
 
 /**
  * Retrieve stored album context after authentication.
- * Checks localStorage for the stored context.
+ * Checks sessionStorage for the stored context.
  */
 export const getJoinAlbumContext = (): JoinAlbumContext | null => {
-    const stored = localStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
+    const stored = sessionStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
     if (!stored) {
         return null;
     }
@@ -82,7 +82,7 @@ export const getJoinAlbumContext = (): JoinAlbumContext | null => {
  * Clear the stored album context after successful join or timeout.
  */
 export const clearJoinAlbumContext = () => {
-    localStorage.removeItem(JOIN_ALBUM_CONTEXT_KEY);
+    sessionStorage.removeItem(JOIN_ALBUM_CONTEXT_KEY);
 };
 
 /**
@@ -166,7 +166,7 @@ export const processPendingAlbumJoin = async (): Promise<number | null> => {
 
             // Update the context with the actual collection ID
             const updatedContext = { ...context, collectionID };
-            localStorage.setItem(
+            sessionStorage.setItem(
                 JOIN_ALBUM_CONTEXT_KEY,
                 JSON.stringify(updatedContext),
             );

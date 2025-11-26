@@ -78,7 +78,7 @@ const Page: React.FC = () => {
                             ...(jwtFromURL && { accessTokenJWT: jwtFromURL }),
                         };
 
-                        localStorage.setItem(
+                        sessionStorage.setItem(
                             JOIN_ALBUM_CONTEXT_KEY,
                             JSON.stringify(context),
                         );
