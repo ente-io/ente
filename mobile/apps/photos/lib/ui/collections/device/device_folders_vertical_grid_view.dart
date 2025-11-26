@@ -12,13 +12,29 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/device_collection.dart';
 import "package:photos/ui/collections/device/device_folder_item.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/searchable_appbar.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/utils/standalone/debouncer.dart";
 
-class DeviceFolderVerticalGridView extends StatelessWidget {
+class DeviceFolderVerticalGridView extends StatefulWidget {
   final Widget? appTitle;
   final String? tag;
-  const DeviceFolderVerticalGridView({this.appTitle, this.tag, super.key});
+  final bool startInSearchMode;
+  const DeviceFolderVerticalGridView({
+    this.appTitle,
+    this.tag,
+    this.startInSearchMode = false,
+    super.key,
+  });
+
+  @override
+  State<DeviceFolderVerticalGridView> createState() =>
+      _DeviceFolderVerticalGridViewState();
+}
+
+class _DeviceFolderVerticalGridViewState
+    extends State<DeviceFolderVerticalGridView> {
+  String _searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +42,27 @@ class DeviceFolderVerticalGridView extends StatelessWidget {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: <Widget>[
-          SliverAppBar(
-            elevation: 0,
-            title: tag != null
-                ? Hero(
-                    tag: tag!,
-                    child: appTitle ?? const SizedBox.shrink(),
-                  )
-                : appTitle ?? const SizedBox.shrink(),
-            floating: true,
+          SearchableAppBar(
+            title: widget.appTitle ?? const SizedBox.shrink(),
+            heroTag: widget.tag ?? "",
+            autoActivateSearch: widget.startInSearchMode,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            onSearch: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            onSearchClosed: () {
+              if (_searchQuery.isNotEmpty) {
+                setState(() {
+                  _searchQuery = "";
+                });
+              }
+            },
           ),
-          const _DeviceFolderVerticalGridViewBody(),
+          _DeviceFolderVerticalGridViewBody(
+            searchQuery: _searchQuery,
+          ),
         ],
       ),
     );
@@ -44,7 +70,8 @@ class DeviceFolderVerticalGridView extends StatelessWidget {
 }
 
 class _DeviceFolderVerticalGridViewBody extends StatefulWidget {
-  const _DeviceFolderVerticalGridViewBody();
+  final String searchQuery;
+  const _DeviceFolderVerticalGridViewBody({required this.searchQuery});
 
   @override
   State<_DeviceFolderVerticalGridViewBody> createState() =>
@@ -100,6 +127,17 @@ class _DeviceFolderVerticalGridViewBodyState
           FilesDB.instance.getDeviceCollections(includeCoverThumbnail: true),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
+          List<DeviceCollection> deviceCollections = snapshot.data!;
+          if (widget.searchQuery.isNotEmpty) {
+            final String query = widget.searchQuery.toLowerCase();
+            deviceCollections = deviceCollections
+                .where(
+                  (deviceCollection) =>
+                      deviceCollection.name.toLowerCase().contains(query),
+                )
+                .toList();
+          }
+
           final double screenWidth = MediaQuery.sizeOf(context).width;
           final int albumsCountInCrossAxis =
               max(screenWidth ~/ maxThumbnailWidth, 3);
@@ -110,7 +148,7 @@ class _DeviceFolderVerticalGridViewBodyState
               (screenWidth - totalCrossAxisSpacing - horizontalPadding) /
                   albumsCountInCrossAxis;
 
-          return snapshot.data!.isEmpty
+          return deviceCollections.isEmpty
               ? const SliverFillRemaining(child: EmptyState())
               : SliverPadding(
                   padding: const EdgeInsets.only(
@@ -127,13 +165,13 @@ class _DeviceFolderVerticalGridViewBodyState
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
-                        final deviceCollection = snapshot.data![index];
+                        final deviceCollection = deviceCollections[index];
                         return DeviceFolderItem(
                           deviceCollection,
                           sideOfThumbnail: sideOfThumbnail,
                         );
                       },
-                      childCount: snapshot.data!.length,
+                      childCount: deviceCollections.length,
                     ),
                   ),
                 );

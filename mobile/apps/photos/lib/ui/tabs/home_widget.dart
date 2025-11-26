@@ -51,6 +51,7 @@ import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/activity/ritual_camera_page.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -944,6 +945,23 @@ class _HomeWidgetState extends State<HomeWidget> {
     final String? payload = notificationResponse.payload;
     if (payload != null) {
       debugPrint('notification payload: $payload');
+      final uri = Uri.tryParse(payload);
+      if (uri != null && uri.host.toLowerCase() == "ritual") {
+        final ritualId = uri.queryParameters["ritualId"] ?? "";
+        final albumIdRaw = uri.queryParameters["albumId"];
+        final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
+            ? int.tryParse(albumIdRaw)
+            : null;
+        // ignore: unawaited_futures
+        routeToPage(
+          context,
+          RitualCameraPage(
+            ritualId: ritualId,
+            albumId: albumId,
+          ),
+        );
+        return;
+      }
       if (payload.toLowerCase().contains("onthisday")) {
         _logger.info("On this day notification received");
         // ignore: unawaited_futures
