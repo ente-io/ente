@@ -254,11 +254,8 @@ extension DirUtilsPlugin: UIDocumentPickerDelegate {
             return
         }
 
-        NSLog("DirUtilsPlugin: Picked directory URL: \(url.absoluteString)")
-
         // Start accessing the security-scoped resource
         let didStartAccessing = url.startAccessingSecurityScopedResource()
-        NSLog("DirUtilsPlugin: startAccessingSecurityScopedResource: \(didStartAccessing)")
 
         defer {
             if didStartAccessing {
@@ -275,7 +272,6 @@ extension DirUtilsPlugin: UIDocumentPickerDelegate {
             )
 
             let base64Bookmark = bookmarkData.base64EncodedString()
-            NSLog("DirUtilsPlugin: Bookmark created successfully, length: \(base64Bookmark.count)")
 
             result([
                 "path": url.path,

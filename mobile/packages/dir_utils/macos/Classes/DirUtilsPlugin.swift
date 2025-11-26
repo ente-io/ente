@@ -56,7 +56,6 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
             )
 
             let base64Bookmark = bookmarkData.base64EncodedString()
-            NSLog("DirUtilsPlugin (macOS): Bookmark created successfully for path: \(path), length: \(base64Bookmark.count)")
 
             result([
                 "path": url.path,
@@ -94,7 +93,6 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
 
             // Critical: must call startAccessingSecurityScopedResource on the resolved URL
             let success = url.startAccessingSecurityScopedResource()
-            NSLog("DirUtilsPlugin (macOS): startAccess for \(url.path), success: \(success), isStale: \(isStale)")
 
             result([
                 "success": success,
@@ -129,7 +127,6 @@ public class DirUtilsPlugin: NSObject, FlutterPlugin {
             )
 
             url.stopAccessingSecurityScopedResource()
-            NSLog("DirUtilsPlugin (macOS): stopAccess for \(url.path)")
             result(true)
         } catch {
             NSLog("DirUtilsPlugin (macOS): Failed to stop access: \(error)")
