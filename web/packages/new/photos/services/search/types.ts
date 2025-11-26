@@ -38,6 +38,7 @@ export type SidebarActionID =
     | "account.subscription"
     | "account.recoveryKey"
     | "account.twoFactor"
+    | "account.twoFactor.reconfigure"
     | "account.passkeys"
     | "account.changePassword"
     | "account.changeEmail"

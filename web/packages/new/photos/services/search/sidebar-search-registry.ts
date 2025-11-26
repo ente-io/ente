@@ -144,6 +144,12 @@ const sidebarActions = (): SidebarAction[] => {
             keywords: ["2fa", "otp", "mfa", "two", "factor", "two factor"],
         },
         {
+            id: "account.twoFactor.reconfigure",
+            label: t("reconfigure"),
+            path: [accountCategory, t("two_factor"), t("reconfigure")],
+            keywords: ["reconfigure", "update", "2fa", "two factor"],
+        },
+        {
             id: "account.passkeys",
             label: t("passkeys"),
             path: [accountCategory, t("passkeys")],
@@ -305,6 +311,7 @@ export const performSidebarAction = async (
                     .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
                     // See: [Note: Workarounds for unactionable ARIA warnings]
                     .then(() => wait(10))
+                    .then(() => ctx.onClose())
             );
         case "shortcuts.trash":
             return ctx
@@ -341,6 +348,7 @@ export const performSidebarAction = async (
 
         case "account.recoveryKey":
         case "account.twoFactor":
+        case "account.twoFactor.reconfigure":
         case "account.passkeys":
         case "account.changePassword":
         case "account.changeEmail":

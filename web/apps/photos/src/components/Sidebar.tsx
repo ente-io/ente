@@ -196,6 +196,7 @@ type AccountAction = Extract<
     SidebarActionID,
     | "account.recoveryKey"
     | "account.twoFactor"
+    | "account.twoFactor.reconfigure"
     | "account.passkeys"
     | "account.changePassword"
     | "account.changeEmail"
@@ -922,6 +923,7 @@ const Account: React.FC<AccountProps> = ({
             case "account.recoveryKey":
                 showRecoveryKey();
                 break;
+            case "account.twoFactor.reconfigure":
             case "account.twoFactor":
                 showTwoFactor();
                 break;
