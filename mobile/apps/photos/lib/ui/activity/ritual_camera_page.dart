@@ -101,20 +101,24 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       }
       final CameraDescription target =
           description ?? _preferredCamera() ?? _cameras.first;
-      final controller = CameraController(
-        target,
-        ResolutionPreset.high,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-        enableAudio: false,
-      );
-      await controller.initialize();
+      final bool reuseExisting = _controller != null;
+      if (reuseExisting) {
+        await _controller!.setDescription(target);
+      } else {
+        final controller = CameraController(
+          target,
+          ResolutionPreset.high,
+          imageFormatGroup: ImageFormatGroup.jpeg,
+          enableAudio: false,
+        );
+        await controller.initialize();
+        _controller = controller;
+      }
       if (!mounted) {
-        await controller.dispose();
+        await _controller?.dispose();
         return;
       }
-      await _controller?.dispose();
       setState(() {
-        _controller = controller;
         _activeCamera = target;
         _initializing = false;
       });
