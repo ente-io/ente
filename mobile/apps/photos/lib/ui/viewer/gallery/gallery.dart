@@ -160,6 +160,7 @@ class GalleryState extends State<Gallery> {
   List<EnteFile> _allFilesWithDummies = [];
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
+  InheritedSearchFilterData? _inheritedSearchFilterData;
 
   @override
   void initState() {
@@ -325,6 +326,12 @@ class GalleryState extends State<Gallery> {
         setState(() {});
       }
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(context);
   }
 
   void _updateGalleryGroups({bool callSetState = true}) {
@@ -524,9 +531,11 @@ class GalleryState extends State<Gallery> {
 
       /// To curate filters when a gallery is first opened.
       if (!result.hasMore) {
+        if (!mounted) {
+          return result;
+        }
         final searchFilterDataProvider =
-            InheritedSearchFilterData.maybeOf(context)
-                ?.searchFilterDataProvider;
+            _inheritedSearchFilterData?.searchFilterDataProvider;
         if (searchFilterDataProvider != null &&
             !searchFilterDataProvider.isSearchingNotifier.value) {
           unawaited(

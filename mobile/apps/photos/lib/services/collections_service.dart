@@ -30,6 +30,7 @@ import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/api/metadata.dart";
+import 'package:photos/models/collection/action.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -399,6 +400,20 @@ class CollectionsService {
               allowedRoles.contains(c.getRole(userID)),
         )
         .toList();
+  }
+
+  bool canRemoveFilesFromAllParticipants(Collection collection) {
+    final int? userID = _config.getUserID();
+    if (userID == null) {
+      return false;
+    }
+    if (collection.isOwner(userID)) {
+      return true;
+    }
+    if (!flagService.enableAdminRole) {
+      return false;
+    }
+    return collection.isAdmin(userID);
   }
 
   List<int> getAllOwnedCollectionIDs() {
@@ -1316,6 +1331,73 @@ class CollectionsService {
     }
   }
 
+  Future<List<CollectionAction>> fetchPendingRemovalActions() async {
+    try {
+      final response = await _enteDio.get(
+        "/collection-actions/pending-remove/",
+      );
+      final List<dynamic> rawActions =
+          (response.data["actions"] as List<dynamic>?) ?? const [];
+      final actions = rawActions
+          .map(
+            (dynamic action) => CollectionAction.fromJson(
+              Map<String, dynamic>.from(action as Map<dynamic, dynamic>),
+            ),
+          )
+          .toList(growable: false);
+      _logger
+          .info("Fetched ${actions.length} pending collection removal actions");
+      return actions;
+    } catch (e, s) {
+      _logger.warning("Failed to fetch pending removal actions", e, s);
+      rethrow;
+    }
+  }
+
+  Future<List<int>> fetchDeleteSuggestionFileIDs() async {
+    try {
+      final response =
+          await _enteDio.get("/collection-actions/delete-suggestions/");
+      final List<dynamic> rawActions =
+          (response.data["actions"] as List<dynamic>?) ?? const [];
+      final actions = rawActions
+          .map(
+            (dynamic action) => CollectionAction.fromJson(
+              Map<String, dynamic>.from(action as Map<dynamic, dynamic>),
+            ),
+          )
+          .toList(growable: false);
+      final Set<int> uniqueFileIDs = <int>{};
+      for (final action in actions) {
+        if (action.fileID != null) {
+          uniqueFileIDs.add(action.fileID!);
+        }
+      }
+      _logger.info(
+        "Fetched ${uniqueFileIDs.length} unique delete suggestion file IDs",
+      );
+      return uniqueFileIDs.toList();
+    } catch (e, s) {
+      _logger.warning("Failed to fetch delete suggestion actions", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> rejectDeleteSuggestions(List<int> fileIDs) async {
+    if (fileIDs.isEmpty) {
+      return;
+    }
+    try {
+      await _enteDio.post(
+        "/collection-actions/reject-delete-suggestions/",
+        data: {"fileIDs": fileIDs},
+      );
+    } catch (e, s) {
+      _logger.warning("Failed to reject delete suggestions", e, s);
+      rethrow;
+    }
+  }
+
   Future<Collection> getCollectionFromPublicLink(
     BuildContext context,
     Uri uri,
@@ -2135,6 +2217,39 @@ class CollectionsService {
           .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
       Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));
     }
+    RemoteSyncService.instance.sync(silently: true).ignore();
+  }
+
+  Future<void> suggestDeleteFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    final List<int> fileIDs =
+        files.map((file) => file.uploadedFileID).whereType<int>().toList();
+    if (fileIDs.isEmpty) {
+      return;
+    }
+    final params = <String, dynamic>{
+      "collectionID": collectionID,
+      "fileIDs": fileIDs,
+    };
+    final resp = await _enteDio.post(
+      "/collections/suggest-delete",
+      data: params,
+    );
+    if (resp.statusCode != 200) {
+      throw Exception("Failed to send delete suggestion");
+    }
+
+    await _filesDB.removeFromCollection(collectionID, fileIDs);
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collectionID,
+        files,
+        "suggestDelete",
+      ),
+    );
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "suggestDelete"));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
