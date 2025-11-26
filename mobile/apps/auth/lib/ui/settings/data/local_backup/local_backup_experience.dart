@@ -182,13 +182,13 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         return;
       }
 
-      // On iOS, check if we have a bookmark - if not, we need to re-pick
-      if (Platform.isIOS) {
+      // On iOS/macOS, check if we have a bookmark - if not, we need to re-pick
+      if (Platform.isIOS || Platform.isMacOS) {
         final prefs = await SharedPreferences.getInstance();
         final bookmark = prefs.getString(_iosBookmarkKey);
         if (bookmark == null || bookmark.isEmpty) {
           _logger.warning(
-            'iOS: No bookmark found, need to re-select backup location',
+            '${Platform.operatingSystem}: No bookmark found, need to re-select backup location',
           );
           if (showSnackBar) {
             _showSnackBar(context.l10n.selectFolderToContinue);
@@ -261,7 +261,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return true;
     }
 
-    // On iOS, just check if we have a path configured.
+    // On iOS/macOS, just check if we have a path configured.
     // Directory creation happens in the backup service with proper scoped access.
     var resolvedPath = _backupPath;
     if (resolvedPath == null || resolvedPath.isEmpty) {
@@ -274,9 +274,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
       resolvedPath = _backupPath;
     }
-    // On iOS, don't try to create directory here - it requires scoped access
+    // On iOS/macOS, don't try to create directory here - it requires scoped access
     // which is handled by the backup service.
-    if (!Platform.isIOS && resolvedPath != null && resolvedPath.isNotEmpty) {
+    if (!Platform.isIOS &&
+        !Platform.isMacOS &&
+        resolvedPath != null &&
+        resolvedPath.isNotEmpty) {
       await Directory(resolvedPath).create(recursive: true);
     }
     return true;
@@ -589,6 +592,20 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       return false;
     }
 
+    if (Platform.isMacOS) {
+      // On macOS, use DirUtils which creates a security-scoped bookmark
+      final picked = await DirUtils.instance.pickDirectory();
+      if (picked != null && picked.path.isNotEmpty && picked.bookmark != null) {
+        return _persistLocationWithBookmark(
+          picked.path,
+          picked.bookmark!,
+          successMessage: context.l10n.initialBackupCreated,
+        );
+      }
+      return false;
+    }
+
+    // Other platforms (Windows, Linux, etc.)
     final picked = await DirUtils.instance.pickDirectory();
     if (picked != null && picked.path.isNotEmpty) {
       return _persistLocation(
@@ -726,8 +743,24 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         _showSnackBar(context.l10n.selectFolderToContinue);
       }
       return false;
+    } else if (Platform.isMacOS) {
+      // On macOS, use DirUtils which creates a security-scoped bookmark
+      final picked = await DirUtils.instance.pickDirectory();
+      if (picked != null && picked.path.isNotEmpty && picked.bookmark != null) {
+        final saved = await _persistLocationWithBookmark(
+          picked.path,
+          picked.bookmark!,
+          successMessage:
+              successMessage ?? context.l10n.locationUpdatedAndBackupCreated,
+        );
+        return saved;
+      }
+      if (requireSelection) {
+        _showSnackBar(context.l10n.selectFolderToContinue);
+      }
+      return false;
     } else {
-      // Other platforms (macOS, etc.)
+      // Other platforms (Windows, Linux, etc.)
       final picked = await DirUtils.instance.pickDirectory();
 
       if (picked != null && picked.path.isNotEmpty) {
@@ -752,19 +785,23 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     }
   }
 
-  /// iOS-specific: Persist location with pre-created bookmark
+  /// iOS/macOS: Persist location with pre-created bookmark
   Future<bool> _persistLocationWithBookmark(
     String path,
     String bookmark, {
     String? successMessage,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+    final dirUtils = DirUtils.instance;
+    final pickedDir = PickedDirectory(path: path, bookmark: bookmark);
+
     try {
       // Start accessing using the bookmark
-      final accessResult = await SecurityBookmarkService.instance
-          .startAccessingBookmark(bookmark);
+      final accessResult = await dirUtils.startAccess(pickedDir);
       if (accessResult == null || !accessResult.success) {
-        _logger.severe('iOS: Failed to start accessing bookmark for: $path');
+        _logger.severe(
+          '${Platform.operatingSystem}: Failed to start accessing bookmark for: $path',
+        );
         return false;
       }
 
@@ -772,7 +809,7 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
         // Write backup directly to the selected directory
         await LocalBackupService.instance.writeBackupToDirectory(path);
       } finally {
-        await SecurityBookmarkService.instance.stopAccessingBookmark(bookmark);
+        await dirUtils.stopAccess(pickedDir);
       }
 
       await prefs.setString('autoBackupPath', path);
@@ -790,7 +827,11 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
       }
       return true;
     } catch (e, s) {
-      _logger.severe('Failed to persist iOS location with bookmark', e, s);
+      _logger.severe(
+        'Failed to persist ${Platform.operatingSystem} location with bookmark',
+        e,
+        s,
+      );
       return false;
     }
   }
@@ -802,12 +843,12 @@ class _LocalBackupExperienceState extends State<LocalBackupExperience> {
     final prefs = await SharedPreferences.getInstance();
     Future<bool> savePath(String target) async {
       try {
-        if (Platform.isIOS) {
-          // On iOS, use native picker with bookmark via _persistLocationWithBookmark.
+        if (Platform.isIOS || Platform.isMacOS) {
+          // On iOS/macOS, use native picker with bookmark via _persistLocationWithBookmark.
           // This path is only for non-native picker which won't have scoped access.
           _logger.warning(
-            'iOS: _persistLocation called without bookmark. '
-            'Use native picker for iOS.',
+            '${Platform.operatingSystem}: _persistLocation called without bookmark. '
+            'Use native picker for ${Platform.operatingSystem}.',
           );
           return false;
         } else {

@@ -25,3 +25,5 @@ flutter:
     platforms:
       ios:
         pluginClass: DirUtilsPlugin
+      macos:
+        pluginClass: DirUtilsPlugin

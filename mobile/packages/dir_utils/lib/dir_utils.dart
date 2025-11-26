@@ -32,7 +32,8 @@ class PickedDirectory {
   /// Android SAF tree URI. Null on other platforms.
   final String? treeUri;
 
-  bool get isIos => bookmark != null;
+  /// Returns true if this directory has a security-scoped bookmark (iOS or macOS).
+  bool get hasBookmark => bookmark != null;
   bool get isAndroid => treeUri != null;
 }
 
@@ -94,6 +95,8 @@ class DirUtils {
       return _pickDirectoryIos();
     } else if (Platform.isAndroid) {
       return _pickDirectoryAndroid();
+    } else if (Platform.isMacOS) {
+      return _pickDirectoryMacOS();
     } else {
       return _pickDirectoryOther();
     }
@@ -140,6 +143,40 @@ class DirUtils {
     }
   }
 
+  Future<PickedDirectory?> _pickDirectoryMacOS() async {
+    try {
+      // Use file_picker to pick the directory
+      final path = await FilePicker.platform.getDirectoryPath();
+      if (path == null) return null;
+
+      // Create a security-scoped bookmark from the picked path
+      // This must be done while we still have access (same session as picker)
+      final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+        'createBookmarkFromPath',
+        {'path': path},
+      );
+
+      if (result == null) {
+        _logger.severe('macOS: Failed to create bookmark for path: $path');
+        return null;
+      }
+
+      final bookmark = result['bookmark'] as String?;
+      if (bookmark == null) {
+        _logger.severe('macOS: Invalid result from createBookmarkFromPath');
+        return null;
+      }
+
+      return PickedDirectory(path: path, bookmark: bookmark);
+    } on PlatformException catch (e) {
+      _logger.severe('macOS: Failed to pick directory: ${e.message}');
+      return null;
+    } catch (e) {
+      _logger.severe('macOS: Failed to pick directory: $e');
+      return null;
+    }
+  }
+
   Future<PickedDirectory?> _pickDirectoryOther() async {
     try {
       final path = await FilePicker.platform.getDirectoryPath();
@@ -153,20 +190,22 @@ class DirUtils {
   }
 
   // ============================================================
-  // Security-Scoped Access (iOS only)
+  // Security-Scoped Access (iOS/macOS)
   // ============================================================
 
-  /// Start accessing a security-scoped resource (iOS only).
+  /// Start accessing a security-scoped resource (iOS/macOS).
   ///
   /// You MUST call [stopAccess] when done to balance this call.
-  /// On non-iOS platforms, this is a no-op that returns success.
+  /// On platforms without bookmark support, this is a no-op that returns success.
   Future<AccessResult?> startAccess(PickedDirectory dir) async {
-    if (!Platform.isIOS) {
+    if (!Platform.isIOS && !Platform.isMacOS) {
       return AccessResult(success: true, path: dir.path, isStale: false);
     }
 
     if (dir.bookmark == null) {
-      _logger.severe('iOS: No bookmark available for startAccess');
+      _logger.severe(
+        '${Platform.operatingSystem}: No bookmark available for startAccess',
+      );
       return null;
     }
 
@@ -183,19 +222,22 @@ class DirUtils {
         isStale: result['isStale'] as bool,
       );
     } on PlatformException catch (e) {
-      _logger.severe('iOS: Failed to start access: ${e.message}');
+      _logger
+          .severe('${Platform.operatingSystem}: Failed to start access: $e');
       return null;
     }
   }
 
-  /// Stop accessing a security-scoped resource (iOS only).
+  /// Stop accessing a security-scoped resource (iOS/macOS).
   ///
-  /// On non-iOS platforms, this is a no-op.
+  /// On platforms without bookmark support, this is a no-op.
   Future<bool> stopAccess(PickedDirectory dir) async {
-    if (!Platform.isIOS) return true;
+    if (!Platform.isIOS && !Platform.isMacOS) return true;
 
     if (dir.bookmark == null) {
-      _logger.severe('iOS: No bookmark available for stopAccess');
+      _logger.severe(
+        '${Platform.operatingSystem}: No bookmark available for stopAccess',
+      );
       return false;
     }
 
@@ -206,7 +248,8 @@ class DirUtils {
       );
       return result ?? false;
     } on PlatformException catch (e) {
-      _logger.severe('iOS: Failed to stop access: ${e.message}');
+      _logger
+          .severe('${Platform.operatingSystem}: Failed to stop access: $e');
       return false;
     }
   }
@@ -214,7 +257,7 @@ class DirUtils {
   /// Execute a function with security-scoped access.
   ///
   /// Automatically calls startAccess before and stopAccess after.
-  /// On non-iOS platforms, just executes the function directly.
+  /// On platforms without bookmark support, just executes the function directly.
   Future<T?> withAccess<T>(
     PickedDirectory dir,
     Future<T> Function(String path) action,
@@ -250,8 +293,8 @@ class DirUtils {
   }) async {
     if (Platform.isAndroid && dir.treeUri != null) {
       return _writeFileAndroid(dir.treeUri!, fileName, content);
-    } else if (Platform.isIOS && dir.bookmark != null) {
-      return _writeFileIos(dir, fileName, content, subPath: subPath);
+    } else if ((Platform.isIOS || Platform.isMacOS) && dir.bookmark != null) {
+      return _writeFileWithBookmark(dir, fileName, content, subPath: subPath);
     } else {
       return _writeFileOther(dir.path, fileName, content, subPath: subPath);
     }
@@ -278,7 +321,7 @@ class DirUtils {
     }
   }
 
-  Future<bool> _writeFileIos(
+  Future<bool> _writeFileWithBookmark(
     PickedDirectory dir,
     String fileName,
     Uint8List content, {
@@ -294,7 +337,9 @@ class DirUtils {
       );
       return result ?? false;
     } on PlatformException catch (e) {
-      _logger.severe('iOS: Failed to write file: ${e.message}');
+      _logger.severe(
+        '${Platform.operatingSystem}: Failed to write file: ${e.message}',
+      );
       return false;
     }
   }
@@ -323,8 +368,8 @@ class DirUtils {
   }) async {
     if (Platform.isAndroid && dir.treeUri != null) {
       return _listFilesAndroid(dir.treeUri!);
-    } else if (Platform.isIOS && dir.bookmark != null) {
-      return _listFilesIos(dir, subPath: subPath);
+    } else if ((Platform.isIOS || Platform.isMacOS) && dir.bookmark != null) {
+      return _listFilesWithBookmark(dir, subPath: subPath);
     } else {
       return _listFilesOther(dir.path, subPath: subPath);
     }
@@ -351,7 +396,7 @@ class DirUtils {
     }
   }
 
-  Future<List<FileInfo>> _listFilesIos(
+  Future<List<FileInfo>> _listFilesWithBookmark(
     PickedDirectory dir, {
     String? subPath,
   }) async {
@@ -375,7 +420,9 @@ class DirUtils {
         );
       }).toList();
     } on PlatformException catch (e) {
-      _logger.severe('iOS: Failed to list files: ${e.message}');
+      _logger.severe(
+        '${Platform.operatingSystem}: Failed to list files: ${e.message}',
+      );
       return [];
     }
   }
@@ -431,7 +478,7 @@ class DirUtils {
 
   Future<bool> _deleteFileOther(String path) async {
     try {
-      if (Platform.isIOS) {
+      if (Platform.isIOS || Platform.isMacOS) {
         final result = await _channel.invokeMethod<bool>(
           'deleteFile',
           {'path': path},

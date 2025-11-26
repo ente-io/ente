@@ -153,15 +153,15 @@ class LocalBackupService {
         return success;
       }
 
-      // iOS with bookmark - write directly to the selected directory
-      if (Platform.isIOS && target.iosBookmark != null) {
+      // iOS/macOS with bookmark - write directly to the selected directory
+      if ((Platform.isIOS || Platform.isMacOS) && target.iosBookmark != null) {
         final dir = PickedDirectory(
           path: target.path!,
           bookmark: target.iosBookmark,
         );
         final result = await dirUtils.withAccess(dir, (path) async {
           final success = await dirUtils.writeFile(
-            PickedDirectory(path: path),
+            PickedDirectory(path: path, bookmark: target.iosBookmark),
             fileName,
             contentBytes,
           );
@@ -173,7 +173,7 @@ class LocalBackupService {
         return result ?? false;
       }
 
-      // Other platforms: direct file write
+      // Other platforms (Windows, Linux): direct file write
       final basePath = target.path!;
       await Directory(basePath).create(recursive: true);
       final filePath = '$basePath/$fileName';
@@ -270,8 +270,10 @@ class LocalBackupService {
         }
       }
 
-      // On iOS, use scoped access via bookmark
-      if (Platform.isIOS && iosBookmark != null && iosBookmark.isNotEmpty) {
+      // On iOS/macOS, use scoped access via bookmark
+      if ((Platform.isIOS || Platform.isMacOS) &&
+          iosBookmark != null &&
+          iosBookmark.isNotEmpty) {
         final dir = PickedDirectory(path: path, bookmark: iosBookmark);
         await dirUtils.withAccess(dir, (_) async {
           await doDelete();
