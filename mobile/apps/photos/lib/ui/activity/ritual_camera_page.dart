@@ -36,6 +36,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   CameraController? _controller;
   List<CameraDescription> _cameras = <CameraDescription>[];
   CameraDescription? _activeCamera;
+  bool _pausedForNavigation = false;
   bool _initializing = true;
   bool _capturing = false;
   bool _saving = false;
@@ -201,13 +202,18 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
     if (widget.albumId == null) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      final navContext = context;
+      ScaffoldMessenger.of(navContext).showSnackBar(
         const SnackBar(
-          content:
-              Text("Ritual album missing. Edit the ritual to set an album."),
+          content: Text(
+            "Ritual album missing. Edit the ritual to set an album.",
+          ),
         ),
       );
-      await routeToPage(context, const ActivityScreen());
+      await _pausePreview();
+      if (!mounted) return;
+      await routeToPage(navContext, const ActivityScreen())
+          .whenComplete(_resumePreview);
       return;
     }
     final List<XFile> pending = List<XFile>.from(_captures);
@@ -287,6 +293,36 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     setState(() {
       _captures = <XFile>[];
     });
+  }
+
+  Future<void> _pausePreview() async {
+    final controller = _controller;
+    if (controller == null ||
+        !controller.value.isInitialized ||
+        controller.value.isPreviewPaused) {
+      return;
+    }
+    try {
+      await controller.pausePreview();
+      _pausedForNavigation = true;
+    } catch (_) {
+      // ignore pause failures
+    }
+  }
+
+  Future<void> _resumePreview() async {
+    final controller = _controller;
+    if (controller == null ||
+        !controller.value.isInitialized ||
+        !_pausedForNavigation) {
+      return;
+    }
+    try {
+      await controller.resumePreview();
+      _pausedForNavigation = false;
+    } catch (_) {
+      // ignore resume failures
+    }
   }
 
   @override
@@ -439,8 +475,11 @@ class _RitualCameraPageState extends State<RitualCameraPage>
               child: const Text("Try again"),
             ),
             TextButton(
-              onPressed: () {
-                routeToPage(context, const ActivityScreen());
+              onPressed: () async {
+                await _pausePreview();
+                if (!mounted) return;
+                await routeToPage(context, const ActivityScreen())
+                    .whenComplete(_resumePreview);
               },
               child: const Text("Back to rituals"),
             ),
