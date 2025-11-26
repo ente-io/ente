@@ -1,4 +1,5 @@
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
@@ -11,7 +12,6 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
-import 'package:locker/ui/pages/login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -196,7 +196,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _navigateToSignInPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = const LoginPage();
+      page = LoginPage(Configuration.instance);
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
