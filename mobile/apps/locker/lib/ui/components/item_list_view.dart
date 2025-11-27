@@ -5,17 +5,14 @@ import "package:flutter/services.dart";
 import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
-import 'package:locker/models/item_view_type.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import "package:locker/ui/components/collection_list_widget.dart";
-import "package:locker/ui/components/collection_row_widget.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
 import "package:locker/ui/components/file_list_widget.dart";
-import "package:locker/ui/components/file_row_widget.dart";
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 
@@ -47,7 +44,6 @@ class ItemListView extends StatefulWidget {
   final List<OverflowMenuAction>? collectionOverflowActions;
   final SelectedCollections? selectedCollections;
   final SelectedFiles? selectedFiles;
-  final ItemViewType viewType;
   final ScrollPhysics? physics;
 
   const ItemListView({
@@ -59,7 +55,6 @@ class ItemListView extends StatefulWidget {
     this.collectionOverflowActions,
     this.selectedCollections,
     this.selectedFiles,
-    this.viewType = ItemViewType.listView,
     this.physics = const NeverScrollableScrollPhysics(),
   });
 
@@ -102,8 +97,8 @@ class _ItemListViewState extends State<ItemListView> {
   void _toggleCollectionSelection(Collection collection) {
     // TODO(aman): Re-enable collection multi-select when bulk actions return.
     return;
-    HapticFeedback.lightImpact();
-    widget.selectedCollections!.toggleSelection(collection);
+    // HapticFeedback.lightImpact();
+    // widget.selectedCollections!.toggleSelection(collection);
   }
 
   void _toggleFileSelection(EnteFile file) {
@@ -121,31 +116,10 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
-    return widget.viewType == ItemViewType.gridView
-        ? _buildGridView()
-        : _buildListView();
-  }
-
-  Widget _buildListView() {
     return ListView.separated(
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       shrinkWrap: true,
       physics: widget.physics,
-      itemCount: _sortedItems.length,
-      itemBuilder: (context, index) => _buildItem(index),
-    );
-  }
-
-  Widget _buildGridView() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: widget.physics,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.45,
-      ),
       itemCount: _sortedItems.length,
       itemBuilder: (context, index) => _buildItem(index),
     );
@@ -220,25 +194,14 @@ class _ItemListViewState extends State<ItemListView> {
     Function(Collection)? onTap,
     Function(Collection)? onLongPress,
   }) {
-    if (widget.viewType == ItemViewType.gridView) {
-      return CollectionRowWidget(
-        collection: collection,
-        overflowActions: widget.collectionOverflowActions,
-        isLastItem: isLastItem,
-        selectedCollections: widget.selectedCollections,
-        onTapCallback: onTap,
-        onLongPressCallback: onLongPress,
-      );
-    } else {
-      return CollectionListWidget(
-        collection: collection,
-        overflowActions: widget.collectionOverflowActions,
-        isLastItem: isLastItem,
-        selectedCollections: widget.selectedCollections,
-        onTapCallback: onTap,
-        onLongPressCallback: onLongPress,
-      );
-    }
+    return CollectionListWidget(
+      collection: collection,
+      overflowActions: widget.collectionOverflowActions,
+      isLastItem: isLastItem,
+      selectedCollections: widget.selectedCollections,
+      onTapCallback: onTap,
+      onLongPressCallback: onLongPress,
+    );
   }
 
   Widget _createFileWidget({
@@ -247,25 +210,14 @@ class _ItemListViewState extends State<ItemListView> {
     Function(EnteFile)? onTap,
     Function(EnteFile)? onLongPress,
   }) {
-    if (widget.viewType == ItemViewType.gridView) {
-      return FileRowWidget(
-        file: file,
-        overflowActions: widget.fileOverflowActions,
-        isLastItem: isLastItem,
-        selectedFiles: widget.selectedFiles,
-        onTapCallback: onTap,
-        onLongPressCallback: onLongPress,
-      );
-    } else {
-      return FileListWidget(
-        file: file,
-        overflowActions: widget.fileOverflowActions,
-        isLastItem: isLastItem,
-        selectedFiles: widget.selectedFiles,
-        onTapCallback: onTap,
-        onLongPressCallback: onLongPress,
-      );
-    }
+    return FileListWidget(
+      file: file,
+      overflowActions: widget.fileOverflowActions,
+      isLastItem: isLastItem,
+      selectedFiles: widget.selectedFiles,
+      onTapCallback: onTap,
+      onLongPressCallback: onLongPress,
+    );
   }
 
   Widget _buildDefaultEmptyState(BuildContext context) {

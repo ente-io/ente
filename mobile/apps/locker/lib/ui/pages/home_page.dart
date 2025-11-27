@@ -615,7 +615,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           padding: EdgeInsets.only(
             left: 16.0,
             right: 16.0,
-            top: 16.0,
+            top: 32.0,
             bottom: scrollBottomPadding,
           ),
           physics: const AlwaysScrollableScrollPhysics(),
