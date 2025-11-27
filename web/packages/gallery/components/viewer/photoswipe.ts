@@ -720,15 +720,63 @@ export class FileViewerPhotoSwipe {
          * media-controller element into fullscreen, which hides the PhotoSwipe
          * UI controls (close, info, navigation, etc.). By using document-level
          * fullscreen on document.body, all controls remain accessible.
+         *
+         * In fullscreen mode, we hide the top navigation bar and only show the
+         * video timeline controls at the bottom (with auto-hide behavior).
          */
         const handleFullscreenButtonClick = (e: Event) => {
             e.stopPropagation();
             e.preventDefault();
-            void (
-                document.fullscreenElement
-                    ? document.exitFullscreen()
-                    : document.body.requestFullscreen()
-            );
+            if (document.fullscreenElement) {
+                void document.exitFullscreen();
+            } else {
+                void document.body.requestFullscreen();
+                // Hide top navigation bar in fullscreen, show only video controls
+                pswp.element?.classList.add("pswp--video-fullscreen");
+                // Track mouse movement to show controls when near bottom
+                document.addEventListener(
+                    "mousemove",
+                    handleMouseMoveInFullscreen,
+                );
+            }
+        };
+
+        /**
+         * Update UI state when fullscreen mode changes (e.g., user presses Esc).
+         */
+        const handleFullscreenChange = () => {
+            if (!document.fullscreenElement) {
+                // Exiting fullscreen - restore the top navigation bar
+                pswp.element?.classList.remove("pswp--video-fullscreen");
+                pswp.element?.classList.remove("pswp--controls-visible");
+                document.removeEventListener(
+                    "mousemove",
+                    handleMouseMoveInFullscreen,
+                );
+            }
+        };
+
+        /**
+         * Timer ID for hiding controls after mouse inactivity in fullscreen.
+         */
+        let hideControlsTimer: ReturnType<typeof setTimeout> | undefined;
+
+        /**
+         * Show video controls on mouse movement, hide after inactivity.
+         */
+        const handleMouseMoveInFullscreen = () => {
+            pswp.element?.classList.add("pswp--controls-visible");
+
+            // Clear any pending hide timer
+            if (hideControlsTimer) {
+                clearTimeout(hideControlsTimer);
+            }
+
+            // Hide controls after inactivity
+            hideControlsTimer = setTimeout(() => {
+                pswp.element?.classList.remove("pswp--controls-visible");
+                hideControlsTimer = undefined;
+            }, 2000);
         };
 
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
@@ -1668,6 +1716,10 @@ export class FileViewerPhotoSwipe {
 
         pswp.on("initialLayout", () => {
             pswp.element!.addEventListener("mousedown", blurMediaChromeFocus);
+            document.addEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
         });
 
         // The PhotoSwipe dialog has being closed and the animations have
@@ -1677,6 +1729,17 @@ export class FileViewerPhotoSwipe {
                 "mousedown",
                 blurMediaChromeFocus,
             );
+            document.removeEventListener(
+                "fullscreenchange",
+                handleFullscreenChange,
+            );
+            document.removeEventListener(
+                "mousemove",
+                handleMouseMoveInFullscreen,
+            );
+            if (hideControlsTimer) {
+                clearTimeout(hideControlsTimer);
+            }
             fileViewerDidClose();
             // Let our parent know that we have been closed.
             onClose();
