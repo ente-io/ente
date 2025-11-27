@@ -46,7 +46,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: enteColorScheme.backdropBase,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: ExpandableNotifier(
         controller: expandableController,
@@ -61,6 +61,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
               leadingIcon: widget.leadingIcon,
               menuItemColor: enteColorScheme.backdropBase,
               expandableController: expandableController,
+              singleBorderRadius: 12,
             ),
             collapsed: const SizedBox.shrink(),
             expanded: widget.selectionOptionsWidget,
