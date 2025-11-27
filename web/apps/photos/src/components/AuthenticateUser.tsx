@@ -1,4 +1,3 @@
-import { Stack, Typography } from "@mui/material";
 import { VerifyMasterPasswordForm } from "ente-accounts/components/VerifyMasterPasswordForm";
 import { checkSessionValidity } from "ente-accounts/services/session";
 import {
@@ -39,15 +38,7 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
         open={open}
         onClose={onClose}
         sx={{ position: "absolute" }}
-        title={
-            <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-            >
-                <Typography variant="h6">{t("password")}</Typography>
-            </Stack>
-        }
+        title={t("password")}
     >
         <AuthenticateUserDialogContents {...{ open, onClose }} {...rest} />
     </TitledMiniDialog>

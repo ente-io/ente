@@ -9,6 +9,13 @@ Ente provides multiple ways to search and discover your photos. From basic date 
 
 ## Basic Search
 
+You can quickly access search using the keyboard shortcut:
+
+- **Windows/Linux**: `Ctrl + K`
+- **Mac**: `Cmd + K`
+
+This focuses the search bar from anywhere in the app, letting you start searching immediately.
+
 ### Date search
 
 Search for photos by specific dates, months, or years. Simply type a date in the search bar:
@@ -30,6 +37,10 @@ Learn more about [adding descriptions to photos](/photos/faq/metadata-and-editin
 ### Album search
 
 Search for albums by name or search within specific albums to narrow down results.
+
+### Settings search
+
+Find settings by searching for their names or related terms.
 
 ## Location-Based Search
 
