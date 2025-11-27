@@ -1,6 +1,13 @@
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DevicesIcon from "@mui/icons-material/Devices";
-import { CircularProgress, Divider, Stack, Typography } from "@mui/material";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import {
+    CircularProgress,
+    Divider,
+    IconButton,
+    Stack,
+    Typography,
+} from "@mui/material";
 import {
     getActiveSessions,
     terminateSession,
@@ -23,9 +30,15 @@ export const SessionsSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
     const handleRootClose = () => {
         onClose();
         onRootClose();
+    };
+
+    const handleRefresh = () => {
+        setRefreshTrigger((prev) => prev + 1);
     };
 
     return (
@@ -33,13 +46,28 @@ export const SessionsSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             {...{ open, onClose }}
             onRootClose={handleRootClose}
             title={t("active_sessions")}
+            actionButton={
+                <IconButton
+                    onClick={handleRefresh}
+                    color="primary"
+                    sx={{ opacity: 0.2 }}
+                >
+                    <RefreshIcon />
+                </IconButton>
+            }
         >
-            <SessionsSettingsContents />
+            <SessionsSettingsContents refreshTrigger={refreshTrigger} />
         </TitledNestedSidebarDrawer>
     );
 };
 
-const SessionsSettingsContents: React.FC = () => {
+interface SessionsSettingsContentsProps {
+    refreshTrigger: number;
+}
+
+const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
+    refreshTrigger,
+}) => {
     const { logout, showMiniDialog } = useBaseContext();
 
     const [sessions, setSessions] = useState<Session[] | undefined>(); // storing and displaying the current active sessions
@@ -67,7 +95,7 @@ const SessionsSettingsContents: React.FC = () => {
 
     useEffect(() => {
         void fetchSessions();
-    }, [fetchSessions]);
+    }, [fetchSessions, refreshTrigger]);
 
     const handleTerminateSession = useCallback(
         (session: Session) => {
