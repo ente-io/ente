@@ -1,17 +1,19 @@
 import CloseIcon from "@mui/icons-material/Close";
-import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     Dialog,
     DialogContent,
     IconButton,
     Stack,
+    Tooltip,
     Typography,
 } from "@mui/material";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadManager } from "ente-gallery/services/download";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection } from "ente-media/collection";
@@ -29,7 +31,13 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { t } from "i18next";
 import "leaflet/dist/leaflet.css";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+    Activity,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import {
     calculateOptimalZoom,
     clusterPhotosByProximity,
@@ -83,7 +91,19 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const [thumbByFileID, setThumbByFileID] = useState<Map<number, string>>(
         new Map(),
     ); // map storing the file thumbnails against the fileID for showing the file thumbnails in the left sidebar
-    const [expanded, setExpanded] = useState(false); //keep track whether the sidebar is expanded or not
+
+    // FileViewer state
+    const [openFileViewer, setOpenFileViewer] = useState(false);
+    const [currentFileIndex, setCurrentFileIndex] = useState(0);
+    const [viewerFiles, setViewerFiles] = useState<EnteFile[]>([]);
+
+    const user = useMemo(() => {
+        try {
+            return ensureLocalUser();
+        } catch {
+            return undefined;
+        }
+    }, []);
 
     const formatDateLabel = (timestamp: string) =>
         new Date(timestamp).toLocaleDateString(undefined, {
@@ -266,6 +286,32 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         });
     }, [photoClusters]);
 
+    // Handle thumbnail click to open FileViewer
+    const handlePhotoClick = useCallback(
+        (fileId: number) => {
+            // Get all files from filesByID sorted by creation time
+            const allFiles = Array.from(filesByID.values()).sort(
+                (a, b) =>
+                    new Date(fileCreationTime(b) / 1000).getTime() -
+                    new Date(fileCreationTime(a) / 1000).getTime(),
+            );
+
+            // Find the index of the clicked file
+            const clickedIndex = allFiles.findIndex((f) => f.id === fileId);
+
+            if (clickedIndex !== -1 && allFiles.length > 0) {
+                setViewerFiles(allFiles);
+                setCurrentFileIndex(clickedIndex);
+                setOpenFileViewer(true);
+            }
+        },
+        [filesByID],
+    );
+
+    const handleCloseFileViewer = useCallback(() => {
+        setOpenFileViewer(false);
+    }, []);
+
     const body = useMemo(() => {
         if (isLoading) {
             return (
@@ -311,7 +357,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 {/* Left sidebar */}
                 <Box
                     sx={{
-                        width: expanded ? "50%" : "440px",
+                        width: "600px",
                         height: "100%",
                         bgcolor: (theme) => theme.vars.palette.background.paper,
                         boxShadow: (theme) => theme.shadows[6],
@@ -319,7 +365,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                         flexDirection: "column",
                         overflowY: "auto",
                         padding: 2,
-                        transition: "width 0.3s ease",
                     }}
                 >
                     {/* Sticky header section */}
@@ -355,44 +400,45 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                 <Typography
                                     variant="body"
                                     color="text.secondary"
-                                    sx={{ mt: 0.25 }}
+                                    sx={{
+                                        mt: 0.25,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 0.5,
+                                    }}
                                 >
                                     {mapPhotos.length}{" "}
                                     {t("memories", {
                                         defaultValue: "memories",
                                     })}
+                                    {collectionSummary.fileCount !==
+                                        mapPhotos.length && (
+                                        <Tooltip
+                                            title={`${collectionSummary.fileCount - mapPhotos.length} images aren't shown since they don't have the proper location metadata`}
+                                            arrow
+                                        >
+                                            <InfoOutlinedIcon
+                                                sx={{
+                                                    fontSize: 16,
+                                                    color: "text.muted",
+                                                    cursor: "pointer",
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    )}
                                 </Typography>
                             </Stack>
-                            <Stack direction="row" spacing={1}>
-                                <IconButton
-                                    onClick={() => setExpanded((prev) => !prev)}
-                                    aria-label={
-                                        expanded ? t("collapse") : t("expand")
-                                    }
-                                    sx={{
-                                        bgcolor: (theme) =>
-                                            theme.vars.palette.background.paper,
-                                        boxShadow: (theme) => theme.shadows[2],
-                                    }}
-                                >
-                                    {expanded ? (
-                                        <KeyboardArrowLeftIcon />
-                                    ) : (
-                                        <KeyboardArrowRightIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    onClick={onClose}
-                                    aria-label={t("close")}
-                                    sx={{
-                                        bgcolor: (theme) =>
-                                            theme.vars.palette.background.paper,
-                                        boxShadow: (theme) => theme.shadows[2],
-                                    }}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
-                            </Stack>
+                            <IconButton
+                                onClick={onClose}
+                                aria-label={t("close")}
+                                sx={{
+                                    bgcolor: (theme) =>
+                                        theme.vars.palette.background.paper,
+                                    boxShadow: (theme) => theme.shadows[2],
+                                }}
+                            >
+                                <CloseIcon />
+                            </IconButton>
                         </Box>
                     </Box>
                     {/* Scrollable photo content */}
@@ -436,6 +482,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                                 key={`${thumb}-${idx}`}
                                                 src={thumb}
                                                 alt={t("view_on_map")}
+                                                onClick={() =>
+                                                    handlePhotoClick(p.fileId)
+                                                }
                                             />
                                         );
                                     })}
@@ -492,28 +541,46 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         mapPhotos,
         thumbByFileID,
         photosByDate,
-        expanded,
         collectionSummary.name,
+        collectionSummary.fileCount,
         onClose,
         photoClusters.length,
         selectedClusterIndex,
+        handlePhotoClick,
     ]);
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose}>
-            <Box
-                sx={{
-                    position: "relative",
-                    width: "100vw",
-                    height: "100vh",
-                    bgcolor: "background.default",
-                }}
-            >
-                <DialogContent sx={{ padding: "0 !important", height: "100%" }}>
-                    {body}
-                </DialogContent>
-            </Box>
-        </Dialog>
+        <>
+            <Activity mode={openFileViewer ? "visible" : "hidden"}>
+                <FileViewer
+                    open={openFileViewer}
+                    onClose={handleCloseFileViewer}
+                    initialIndex={currentFileIndex}
+                    files={viewerFiles}
+                    user={user}
+                    onVisualFeedback={() => {
+                        // No-op for map view
+                    }}
+                />
+            </Activity>
+
+            <Dialog fullScreen open={open && !openFileViewer} onClose={onClose}>
+                <Box
+                    sx={{
+                        position: "relative",
+                        width: "100vw",
+                        height: "100vh",
+                        bgcolor: "background.default",
+                    }}
+                >
+                    <DialogContent
+                        sx={{ padding: "0 !important", height: "100%" }}
+                    >
+                        {body}
+                    </DialogContent>
+                </Box>
+            </Dialog>
+        </>
     );
 };
 
@@ -566,18 +633,30 @@ const ThumbRow: React.FC<React.PropsWithChildren> = ({ children }) => (
     </Box>
 );
 
-const ThumbImage = ({ src, alt }: { src: string; alt: string }) => (
+const ThumbImage = ({
+    src,
+    alt,
+    onClick,
+}: {
+    src: string;
+    alt: string;
+    onClick?: () => void;
+}) => (
     <Box
         component="img"
         src={src}
         alt={alt}
+        onClick={onClick}
         sx={{
-            width: 100,
-            height: 100,
+            width: 140,
+            height: 140,
             objectFit: "cover",
             borderRadius: 0,
             flexShrink: 0,
             border: (theme) => `1px solid ${theme.palette.divider}`,
+            cursor: onClick ? "pointer" : "default",
+            transition: "transform 0.15s ease-in-out",
+            "&:hover": onClick ? { transform: "scale(1.02)" } : {},
         }}
     />
 );
@@ -585,8 +664,8 @@ const ThumbImage = ({ src, alt }: { src: string; alt: string }) => (
 const PlaceholderThumb = () => (
     <Box
         sx={{
-            width: 100,
-            height: 100,
+            width: 140,
+            height: 140,
             borderRadius: 0,
             flexShrink: 0,
             bgcolor: (theme) => theme.vars.palette.fill.faint,
