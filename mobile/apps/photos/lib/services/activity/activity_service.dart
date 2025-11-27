@@ -296,8 +296,10 @@ class ActivityService {
     final rituals = await _loadRituals();
     rituals.removeWhere((r) => r.id == id);
     await _persistRituals(rituals);
+    _logger.info("Clearing scheduled notifications for ritual $id (delete)");
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: "ritualId=$id",
+      logLines: false,
     );
     await refresh();
   }
@@ -309,10 +311,14 @@ class ActivityService {
 
   Future<void> _scheduleRitualNotifications(Ritual ritual) async {
     _logger.info(
+      "Clearing scheduled notifications for ritual ${ritual.id} (save path)",
+    );
+    _logger.info(
       "Scheduling ritual reminders for ritual ${ritual.id} (save path)",
     );
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: ritual.id,
+      logLines: false,
     );
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

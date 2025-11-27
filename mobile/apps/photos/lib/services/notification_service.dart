@@ -220,29 +220,40 @@ class NotificationService {
 
   Future<void> clearAllScheduledNotifications({
     String? containingPayload,
+    bool logLines = true,
   }) async {
     try {
-      _logger.info("Clearing all scheduled notifications");
+      if (logLines) {
+        _logger.info("Clearing all scheduled notifications");
+      }
       final pending = await _notificationsPlugin.pendingNotificationRequests();
       if (pending.isEmpty) {
-        _logger.info("No pending notifications to clear");
+        if (logLines) {
+          _logger.info("No pending notifications to clear");
+        }
         return;
       }
       for (final request in pending) {
         if (containingPayload != null &&
             !request.payload.toString().contains(containingPayload)) {
-          _logger.info(
-            "Skip clearing of notification with id: ${request.id} and payload: ${request.payload}",
-          );
+          if (logLines) {
+            _logger.info(
+              "Skip clearing of notification with id: ${request.id} and payload: ${request.payload}",
+            );
+          }
           continue;
         }
-        _logger.info(
-          "Clearing notification with id: ${request.id} and payload: ${request.payload}",
-        );
+        if (logLines) {
+          _logger.info(
+            "Clearing notification with id: ${request.id} and payload: ${request.payload}",
+          );
+        }
         await _notificationsPlugin.cancel(request.id);
-        _logger.info(
-          "Cleared notification with id: ${request.id} and payload: ${request.payload}",
-        );
+        if (logLines) {
+          _logger.info(
+            "Cleared notification with id: ${request.id} and payload: ${request.payload}",
+          );
+        }
       }
     } catch (e, s) {
       _logger.severe("Something is wrong with scheduled notifications", e, s);
