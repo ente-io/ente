@@ -272,7 +272,7 @@ class _RitualCard extends StatelessWidget {
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 6, 0),
+            padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
             child: SizedBox(
               height: 64,
               child: Row(
