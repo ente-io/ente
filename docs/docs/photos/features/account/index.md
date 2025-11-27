@@ -75,7 +75,7 @@ Learn more about [Passkeys](/photos/features/account/passkeys).
 
 ### Session management
 
-If you suspect a device is lost or left signed in, you can terminate its session from the web app. Open `Sidebar > Account > View Sessions` at [web.ente.io](https://web.ente.io) to review and revoke active logins instantly.
+If you suspect a device is lost or left signed in, you can terminate its session from the web or desktop app. Open `Settings > Account > View Sessions` at [web.ente.io](https://web.ente.io) to review and revoke active logins instantly.
 
 ### End-to-end encryption
 
