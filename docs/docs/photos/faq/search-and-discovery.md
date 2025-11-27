@@ -317,11 +317,6 @@ Ente supports multiple search types:
 
 Simply type in the search bar and Ente will show matching results across all these categories.
 
-**Quick access**: Press `Ctrl+K` (Windows/Linux) or `Cmd+K` (Mac) to quickly focus the search bar from anywhere in the app.
-
-On web/desktop, the search bar also surfaces sidebar options (like Albums, People, Archive, Preferences, Account Settings) so you can jump to those sections without scrolling.
-
-
 ### Can I save my searches? {#save-searches}
 
 Currently, you cannot save searches. However, you can:
