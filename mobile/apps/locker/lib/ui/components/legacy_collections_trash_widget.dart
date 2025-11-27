@@ -1,7 +1,11 @@
+import "package:ente_legacy/pages/emergency_page.dart";
+import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/pages/all_collections_page.dart";
 import "package:locker/ui/pages/trash_page.dart";
@@ -11,113 +15,115 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildCollectionsItem(context),
-        _buildTrashItem(context),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Column(
+        children: [
+          _buildLegacyItem(context),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildCollectionsItem(context)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildTrashItem(context)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildCollectionsItem(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final borderRadius = BorderRadius.circular(20.0);
+    final borderRadius = BorderRadius.circular(20);
 
-    return Container(
-      margin: const EdgeInsets.only(top: 4.0, bottom: 8.0),
-      child: InkWell(
-        onTap: () => _openCollections(context),
-        borderRadius: borderRadius,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withAlpha(30),
-            border: Border.all(
-              color: Theme.of(context).dividerColor.withAlpha(50),
-              width: 0.5,
-            ),
-            borderRadius: borderRadius,
+    return InkWell(
+      onTap: () => _openCollections(context),
+      borderRadius: borderRadius,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          border: Border.all(
+            color: colorScheme.backdropBase,
+            width: 1.5,
           ),
-          child: Row(
-            children: [
-              HugeIcon(
+          borderRadius: borderRadius,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: colorScheme.backgroundElevated,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: HugeIcon(
                 icon: HugeIcons.strokeRoundedWallet05,
-                color:
-                    Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
-                size: 22,
+                color: colorScheme.textBase,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  context.l10n.collections,
-                  style: textTheme.large.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.l10n.collections,
+                style: textTheme.small,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withAlpha(60),
-                size: 20,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildTrashItem(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final borderRadius = BorderRadius.circular(20.0);
+    final borderRadius = BorderRadius.circular(20);
 
-    return Container(
-      margin: const EdgeInsets.only(top: 4.0, bottom: 16.0),
-      child: InkWell(
-        onTap: () => _openTrash(context),
-        borderRadius: borderRadius,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withAlpha(30),
-            border: Border.all(
-              color: Theme.of(context).dividerColor.withAlpha(50),
-              width: 0.5,
-            ),
-            borderRadius: borderRadius,
+    return InkWell(
+      onTap: () => _openTrash(context),
+      borderRadius: borderRadius,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          border: Border.all(
+            color: colorScheme.backdropBase,
+            width: 1.5,
           ),
-          child: Row(
-            children: [
-              HugeIcon(
+          borderRadius: borderRadius,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: colorScheme.backgroundElevated,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: HugeIcon(
                 icon: HugeIcons.strokeRoundedDelete01,
-                color:
-                    Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
-                size: 22,
+                color: colorScheme.textBase,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  context.l10n.trash,
-                  style: textTheme.large.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.l10n.trash,
+                style: textTheme.small,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withAlpha(60),
-                size: 20,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -139,5 +145,80 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
         builder: (context) => TrashPage(trashFiles: trashFiles),
       ),
     );
+  }
+
+  Widget _buildLegacyItem(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final borderRadius = BorderRadius.circular(20);
+
+    return InkWell(
+      onTap: () => _openLegacy(context),
+      borderRadius: borderRadius,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          border: Border.all(
+            color: colorScheme.backdropBase,
+            width: 1.5,
+          ),
+          borderRadius: borderRadius,
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              height: 60,
+              width: 60,
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.backgroundElevated,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: colorScheme.primary700,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.l10n.legacy,
+                style: textTheme.small,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Icon(
+                Icons.chevron_right,
+                color: colorScheme.textMuted,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openLegacy(BuildContext context) async {
+    final hasAuthenticated = kDebugMode ||
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+          context,
+          "Authenticate to manage legacy contacts",
+        );
+    if (hasAuthenticated && context.mounted) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return EmergencyPage(config: Configuration.instance);
+          },
+        ),
+      );
+    }
   }
 }
