@@ -115,7 +115,16 @@ class _ActivityScreenState extends State<ActivityScreen> {
           valueListenable: activityService.stateNotifier,
           builder: (context, state, _) {
             final summary = state.summary;
-            final selectedRitual = _selectedRitual;
+            Ritual? selectedRitual = _selectedRitual;
+            if (selectedRitual != null) {
+              final match = state.rituals
+                  .where((ritual) => ritual.id == selectedRitual!.id);
+              if (match.isNotEmpty) {
+                selectedRitual = match.first;
+              } else {
+                selectedRitual = null;
+              }
+            }
             final displaySummary = summary != null && selectedRitual != null
                 ? _summaryForRitual(summary, selectedRitual)
                 : summary;
