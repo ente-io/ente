@@ -23,6 +23,7 @@ import (
 	storagebonusCtrl "github.com/ente-io/museum/pkg/controller/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/user"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/gin-contrib/requestid"
 	"github.com/sirupsen/logrus"
@@ -32,7 +33,6 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/repo"
-	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/gin-gonic/gin"
 )
@@ -570,9 +570,10 @@ func (h *AdminHandler) GetEmailsFromHashes(c *gin.Context) {
 }
 
 type adminAlertContext struct {
-	ID      int64
-	Email   string
-	HasTOTP bool
+	ID          int64
+	Email       string
+	MaskedEmail string
+	HasTOTP     bool
 }
 
 func (h *AdminHandler) notifyAdminAction(adminID int64, format string, args ...interface{}) {
@@ -580,6 +581,8 @@ func (h *AdminHandler) notifyAdminAction(adminID int64, format string, args ...i
 	adminIdentifier := fmt.Sprintf("%d", adminID)
 	if err != nil {
 		logrus.WithError(err).WithField("admin_id", adminID).Warn("failed to fetch admin details for admin action alert")
+	} else if adminCtx.MaskedEmail != "" {
+		adminIdentifier = adminCtx.MaskedEmail
 	} else if adminCtx.Email != "" {
 		adminIdentifier = adminCtx.Email
 	}
@@ -597,14 +600,15 @@ func (h *AdminHandler) getAdminAlertContext(adminID int64) (adminAlertContext, e
 	}
 	hasTOTP := user.IsTwoFactorEnabled != nil && *user.IsTwoFactorEnabled
 	return adminAlertContext{
-		ID:      adminID,
-		Email:   user.Email,
-		HasTOTP: hasTOTP,
+		ID:          adminID,
+		Email:       user.Email,
+		MaskedEmail: emailUtil.GetMaskedEmailWithHint(user.Email),
+		HasTOTP:     hasTOTP,
 	}, nil
 }
 
 func (h *AdminHandler) alertIfAdminMissing2FA(ctx adminAlertContext) {
-	if ctx.HasTOTP || h.PasskeyController == nil {
+	if h.PasskeyController == nil {
 		return
 	}
 	passkeys, err := h.PasskeyController.GetPasskeys(ctx.ID)
@@ -615,12 +619,21 @@ func (h *AdminHandler) alertIfAdminMissing2FA(ctx adminAlertContext) {
 	if len(passkeys) > 0 {
 		return
 	}
-	identifier := ctx.Email
+	identifier := ctx.MaskedEmail
+	if identifier == "" {
+		identifier = ctx.Email
+	}
 	if identifier == "" {
 		identifier = fmt.Sprintf("%d", ctx.ID)
 	}
+	icon := "⚠️"
+	message := "is missing passkey 2FA even though TOTP is enabled. Please register a passkey."
+	if !ctx.HasTOTP {
+		icon = "🚨"
+		message = "does not have TOTP or passkey 2FA enabled. Please protect your account with a passkey"
+	}
 	h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%s) does not have TOTP or passkey 2FA enabled. Please configure 2FA at the earliest.", identifier))
+		fmt.Sprintf("%s Admin (%s) %s", icon, identifier, message))
 }
 
 func (h *AdminHandler) attachSubscription(ctx *gin.Context, userID int64, response gin.H) {
