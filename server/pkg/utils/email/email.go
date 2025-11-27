@@ -354,6 +354,48 @@ func GetMaskedEmail(email string) string {
 	}
 }
 
+// GetMaskedEmailWithHint masks both the username and non-TLD domain segments while keeping helpful hints.
+func GetMaskedEmailWithHint(email string) string {
+	email = strings.TrimSpace(email)
+	at := strings.LastIndex(email, "@")
+	if at <= 0 || at == len(email)-1 {
+		return "[invalid_email]"
+	}
+	local := email[:at]
+	domain := email[at+1:]
+
+	maskedLocal := maskEmailSegment(local)
+	if domain == "" {
+		return maskedLocal + "@[invalid_domain]"
+	}
+
+	domainParts := strings.Split(domain, ".")
+	if len(domainParts) == 1 {
+		return fmt.Sprintf("%s@%s", maskedLocal, maskEmailSegment(domainParts[0]))
+	}
+
+	tld := domainParts[len(domainParts)-1]
+	mainParts := domainParts[:len(domainParts)-1]
+	for i, part := range mainParts {
+		mainParts[i] = maskEmailSegment(part)
+	}
+	return fmt.Sprintf("%s@%s.%s", maskedLocal, strings.Join(mainParts, "."), tld)
+}
+
+func maskEmailSegment(segment string) string {
+	segment = strings.TrimSpace(segment)
+	if segment == "" {
+		return "*"
+	}
+	if len(segment) == 1 {
+		return segment + "*"
+	}
+	if len(segment) == 2 {
+		return segment[:1] + "*"
+	}
+	return segment[:1] + strings.Repeat("*", len(segment)-2) + segment[len(segment)-1:]
+}
+
 // getMailBody generates the mail html body from provided template and data
 func getMailBody(templateName string, templateData map[string]interface{}) (string, error) {
 	htmlbody := new(bytes.Buffer)
