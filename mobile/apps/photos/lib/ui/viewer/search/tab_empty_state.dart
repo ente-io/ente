@@ -37,7 +37,10 @@ class SearchTabEmptyState extends StatelessWidget {
               labelText: AppLocalizations.of(context).addYourPhotosNow,
               icon: Icons.arrow_forward_outlined,
               onTap: () async {
-                await handleBackupEntryFlow(context);
+                await handleBackupEntryFlow(
+                  context,
+                  flowType: BackupFlowType.folderSelectionOnly,
+                );
               },
             ),
           ],

@@ -47,6 +47,7 @@ class StartBackupHookWidget extends StatelessWidget {
                           await handleBackupEntryFlow(
                             context,
                             isFirstBackup: true,
+                            flowType: BackupFlowType.limitedOrFolderSelection,
                           );
                         },
                         text: AppLocalizations.of(context).startBackup,

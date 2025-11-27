@@ -42,6 +42,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           await handleBackupEntryFlow(
             context,
             isFirstBackup: false,
+            flowType: BackupFlowType.folderSelectionOnly,
           );
         },
       ),

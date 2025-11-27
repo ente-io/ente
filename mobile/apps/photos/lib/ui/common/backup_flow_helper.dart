@@ -31,128 +31,84 @@ enum BackupFlowType {
 /// Helper to centralize navigation when users choose to add photos/backup.
 ///
 /// [isFirstBackup] indicates if this is the first backup flow.
-/// [flowType] determines how permissions are handled (only when onlyNewPhotos
-/// flag is disabled).
+/// [flowType] determines how permissions are handled.
 Future<void> handleBackupEntryFlow(
   BuildContext context, {
   bool isFirstBackup = false,
   BackupFlowType flowType = BackupFlowType.fullPermission,
 }) async {
-  // When onlyNewPhotos flag is disabled, use the original simple flows
-  if (!flagService.enableOnlyBackupFuturePhotos) {
-    await _handleLegacyBackupFlow(
-      context,
-      isFirstBackup: isFirstBackup,
-      flowType: flowType,
-    );
+  // New flow only for skipped permission users when flag is enabled
+  final shouldUseNewFlow = flagService.enableOnlyBackupFuturePhotos &&
+      backupPreferenceService.hasSkippedOnboardingPermission;
+
+  if (shouldUseNewFlow) {
+    await _handleSkippedPermissionFlow(context);
     return;
   }
 
-  final state = await _requestPermissions();
-  if (state == null) return;
-
-  // Permission denied or restricted - offer to open settings
-  if (state != PermissionState.authorized && state != PermissionState.limited) {
-    if (!context.mounted) return;
-    await showChoiceDialog(
-      context,
-      title: context.l10n.allowPermTitle,
-      body: context.l10n.allowPermBody,
-      firstButtonLabel: context.l10n.openSettings,
-      firstButtonOnTap: () async {
-        await PhotoManager.openSetting();
-      },
-    );
-    return;
-  }
-
-  // iOS limited permission - offer to expand access or open settings
-  if (state == PermissionState.limited && Platform.isIOS) {
-    if (!context.mounted) return;
-    await _showLimitedPermissionSheet(context, hasGrantedLimit: true);
-    // Fall through to folder selection after dialog
-  }
-
-  if (!context.mounted) return;
-
-  // If user skipped permission onboarding, show loading screen first
-  // (LoadingPhotosWidget handles navigation to folder selection internally)
-  if (backupPreferenceService.hasSkippedOnboardingPermission) {
-    await routeToPage(
-      context,
-      const LoadingPhotosWidget(isOnboardingFlow: false),
-    );
-    return;
-  }
-
-  await routeToPage(
-    context,
-    BackupFolderSelectionPage(
-      isFirstBackup: isFirstBackup,
-    ),
-  );
+  // Otherwise use standard flow based on flowType
+  await _handleStandardFlow(context, isFirstBackup: isFirstBackup, flowType: flowType);
 }
 
-/// Legacy backup flow (pre-onlyNewPhotos feature).
-/// Handles different flow types matching original widget implementations.
-Future<void> _handleLegacyBackupFlow(
+/// New flow for users who skipped permission during onboarding.
+/// Shows LoadingPhotosWidget after granting permissions.
+Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
+  final state = await _requestPermissions();
+  if (state == null || !context.mounted) return;
+
+  if (!_hasMinimalPermission(state)) {
+    await _showPermissionDeniedDialog(context);
+    return;
+  }
+
+  if (state == PermissionState.limited && Platform.isIOS) {
+    await _showLimitedPermissionSheet(context, hasGrantedLimit: true);
+    if (!context.mounted) return;
+  }
+
+  // LoadingPhotosWidget handles navigation to folder selection internally
+  await routeToPage(context, const LoadingPhotosWidget(isOnboardingFlow: false));
+}
+
+/// Standard backup flow based on flowType.
+Future<void> _handleStandardFlow(
   BuildContext context, {
   required bool isFirstBackup,
   required BackupFlowType flowType,
 }) async {
   switch (flowType) {
     case BackupFlowType.folderSelectionOnly:
-      // tab_empty_state, backup_section_widget: just navigate
-      await routeToPage(
-        context,
-        BackupFolderSelectionPage(
-          isFirstBackup: isFirstBackup,
-        ),
-      );
+      await _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
 
     case BackupFlowType.limitedOrFolderSelection:
-      // start_backup_hook_widget: presentLimited or folder selection
       if (permissionService.hasGrantedLimitedPermissions()) {
         unawaited(PhotoManager.presentLimited());
       } else {
-        // ignore: unawaited_futures
-        routeToPage(
-          context,
-          BackupFolderSelectionPage(
-            isFirstBackup: isFirstBackup,
-          ),
-        );
+        unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
       }
 
     case BackupFlowType.fullPermission:
-      // home_header_widget: full permission flow
       await _requestPermissions();
+      if (!context.mounted) return;
 
-      if (!permissionService.hasGrantedFullPermission()) {
-        if (!context.mounted) return;
-        if (Platform.isAndroid) {
-          await PhotoManager.openSetting();
-        } else {
-          final bool hasGrantedLimit =
-              permissionService.hasGrantedLimitedPermissions();
-          // ignore: unawaited_futures
-          _showLimitedPermissionSheet(context, hasGrantedLimit: hasGrantedLimit);
-        }
+      if (permissionService.hasGrantedFullPermission()) {
+        unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
+      } else if (Platform.isAndroid) {
+        await PhotoManager.openSetting();
       } else {
-        unawaited(
-          routeToPage(
-            context,
-            BackupFolderSelectionPage(
-              isFirstBackup: isFirstBackup,
-            ),
-          ),
+        // ignore: unawaited_futures
+        _showLimitedPermissionSheet(
+          context,
+          hasGrantedLimit: permissionService.hasGrantedLimitedPermissions(),
         );
       }
   }
 }
 
-/// Requests photo permissions and updates the permission service.
-/// Returns the fresh [PermissionState] or null if an error occurred.
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper functions
+// ─────────────────────────────────────────────────────────────────────────────
+
 Future<PermissionState?> _requestPermissions() async {
   try {
     final state = await permissionService.requestPhotoMangerPermissions();
@@ -164,26 +120,37 @@ Future<PermissionState?> _requestPermissions() async {
   }
 }
 
-/// Shows an action sheet for iOS limited permission, offering to open settings
-/// or select more photos.
+bool _hasMinimalPermission(PermissionState state) =>
+    state == PermissionState.authorized || state == PermissionState.limited;
+
+Future<void> _navigateToFolderSelection(
+  BuildContext context, {
+  required bool isFirstBackup,
+}) =>
+    routeToPage(context, BackupFolderSelectionPage(isFirstBackup: isFirstBackup));
+
+Future<void> _showPermissionDeniedDialog(BuildContext context) =>
+    showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      firstButtonOnTap: () async => PhotoManager.openSetting(),
+    );
+
 Future<void> _showLimitedPermissionSheet(
   BuildContext context, {
   required bool hasGrantedLimit,
-}) {
-  return showChoiceActionSheet(
-    context,
-    title: context.l10n.preserveMore,
-    body: context.l10n.grantFullAccessPrompt,
-    firstButtonLabel: context.l10n.openSettings,
-    firstButtonOnTap: () async {
-      await PhotoManager.openSetting();
-    },
-    secondButtonLabel:
-        hasGrantedLimit ? context.l10n.selectMorePhotos : context.l10n.cancel,
-    secondButtonOnTap: () async {
-      if (hasGrantedLimit) {
-        await PhotoManager.presentLimited();
-      }
-    },
-  );
-}
+}) =>
+    showChoiceActionSheet(
+      context,
+      title: context.l10n.preserveMore,
+      body: context.l10n.grantFullAccessPrompt,
+      firstButtonLabel: context.l10n.openSettings,
+      firstButtonOnTap: () async => PhotoManager.openSetting(),
+      secondButtonLabel:
+          hasGrantedLimit ? context.l10n.selectMorePhotos : context.l10n.cancel,
+      secondButtonOnTap: () async {
+        if (hasGrantedLimit) await PhotoManager.presentLimited();
+      },
+    );
