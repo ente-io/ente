@@ -1,7 +1,8 @@
+import "dart:io";
+
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/events/permission_granted_event.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/sync/local_sync_service.dart";
@@ -19,46 +20,77 @@ Future<void> handleBackupEntryFlow(
   BuildContext context, {
   Widget Function()? onFirstImportComplete,
 }) async {
-  final state = await permissionService.requestPhotoMangerPermissions();
-  if (state == PermissionState.authorized || state == PermissionState.limited) {
+  try {
+    final PermissionState state =
+        await permissionService.requestPhotoMangerPermissions();
     await permissionService.onUpdatePermission(state);
-    SyncService.instance.onPermissionGranted().ignore();
-    // Note: Don't fire PermissionGrantedEvent before navigation - it causes
-    // home_widget to show its own LoadingPhotosWidget while we navigate to ours,
-    // resulting in duplicate BackupFolderSelectionPage navigations.
-    if (context.mounted) {
-      final Widget Function() targetBuilder = onFirstImportComplete ??
-          () => const BackupFolderSelectionPage(
-                isFirstBackup: false,
-              );
-      final shouldWaitForFirstImport =
-          !LocalSyncService.instance.hasCompletedFirstImport();
-      if (shouldWaitForFirstImport) {
-        // Wait for initial sync, then proceed to folder selection
-        await routeToPage(
-          context,
-          const LoadingPhotosWidget(isOnboardingFlow: false),
-        );
-      } else {
-        await routeToPage(
-          context,
-          targetBuilder(),
-        );
-      }
-      // Fire event after backup flow completes to refresh home_widget
-      Bus.instance.fire(PermissionGrantedEvent());
+  } on Exception catch (e, s) {
+    Logger("BackupEntryFlow").severe(
+      "Failed to request permission: ${e.toString()}",
+      e,
+      s,
+    );
+    return;
+  }
+
+  if (!permissionService.hasGrantedFullPermission()) {
+    if (!context.mounted) {
+      return;
     }
+    if (Platform.isAndroid) {
+      await PhotoManager.openSetting();
+      return;
+    }
+    final bool hasGrantedLimit =
+        permissionService.hasGrantedLimitedPermissions();
+    await showChoiceActionSheet(
+      context,
+      title: context.l10n.preserveMore,
+      body: context.l10n.grantFullAccessPrompt,
+      firstButtonLabel: context.l10n.openSettings,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+      secondButtonLabel:
+          hasGrantedLimit ? context.l10n.selectMorePhotos : context.l10n.cancel,
+      secondButtonOnTap: hasGrantedLimit
+          ? () async {
+              await PhotoManager.presentLimited();
+            }
+          : null,
+    );
+    return;
+  }
+
+  SyncService.instance.onPermissionGranted().ignore();
+  // Note: Don't fire PermissionGrantedEvent before navigation - it causes
+  // home_widget to show its own LoadingPhotosWidget while we navigate to ours,
+  // resulting in duplicate BackupFolderSelectionPage navigations.
+  if (!context.mounted) {
+    return;
+  }
+  final Widget Function() targetBuilder = onFirstImportComplete ??
+      () => const BackupFolderSelectionPage(
+            isFirstBackup: false,
+          );
+  final shouldWaitForFirstImport =
+      !LocalSyncService.instance.hasCompletedFirstImport();
+  if (shouldWaitForFirstImport) {
+    // Wait for initial sync, then proceed to folder selection
+    await routeToPage(
+      context,
+      const LoadingPhotosWidget(isOnboardingFlow: false),
+    );
   } else {
-    if (context.mounted) {
-      await showChoiceDialog(
-        context,
-        title: context.l10n.allowPermTitle,
-        body: context.l10n.allowPermBody,
-        firstButtonLabel: context.l10n.openSettings,
-        firstButtonOnTap: () async {
-          await PhotoManager.openSetting();
-        },
-      );
-    }
+    await routeToPage(
+      context,
+      targetBuilder(),
+    );
+  }
+
+  // Refresh home UI state without firing PermissionGrantedEvent to avoid
+  // duplicate navigation to folder selection.
+  if (context.mounted) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 }
