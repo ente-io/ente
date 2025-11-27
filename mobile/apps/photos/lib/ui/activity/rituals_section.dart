@@ -173,6 +173,7 @@ class _RitualCard extends StatelessWidget {
             );
           }
         },
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 8, 6, 8),
         leading: CircleAvatar(
           backgroundColor: colorScheme.fillFaintPressed,
           child: Text(
@@ -191,6 +192,7 @@ class _RitualCard extends StatelessWidget {
                 style: getEnteTextTheme(context).smallMuted,
               ),
         trailing: PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert_rounded),
           elevation: 0,
           color: colorScheme.backgroundElevated,
           surfaceTintColor: colorScheme.backgroundElevated,
