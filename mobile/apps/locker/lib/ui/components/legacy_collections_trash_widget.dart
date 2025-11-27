@@ -12,25 +12,30 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Column(
         children: [
-          _buildLegacyItem(context),
-          const SizedBox(height: 8),
+          _LegacyItem(),
+          SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _buildCollectionsItem(context)),
-              const SizedBox(width: 8),
-              Expanded(child: _buildTrashItem(context)),
+              Expanded(child: _CollectionsItem()),
+              SizedBox(width: 8),
+              Expanded(child: _TrashItem()),
             ],
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildCollectionsItem(BuildContext context) {
+class _CollectionsItem extends StatelessWidget {
+  const _CollectionsItem();
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
@@ -78,7 +83,20 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildTrashItem(BuildContext context) {
+  Future<void> _openCollections(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AllCollectionsPage(),
+      ),
+    );
+  }
+}
+
+class _TrashItem extends StatelessWidget {
+  const _TrashItem();
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
@@ -126,14 +144,6 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _openCollections(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AllCollectionsPage(),
-      ),
-    );
-  }
-
   Future<void> _openTrash(BuildContext context) async {
     final trashFiles = await TrashService.instance.getTrashFiles();
     if (!context.mounted) return;
@@ -143,8 +153,13 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildLegacyItem(BuildContext context) {
+class _LegacyItem extends StatelessWidget {
+  const _LegacyItem();
+
+  @override
+  Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final borderRadius = BorderRadius.circular(20);
@@ -170,7 +185,7 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(10.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: colorScheme.primary700.withOpacity(0.08),
+                    color: colorScheme.primary700.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.all(8.0),
