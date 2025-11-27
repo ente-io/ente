@@ -624,7 +624,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 ),
               Positioned(
                 left: 12,
-                top: 12,
+                top: 88, // keep below top bar so it stays visible
                 child: AnimatedOpacity(
                   opacity: _showZoomHint ? 1 : 0,
                   duration: const Duration(milliseconds: 120),
