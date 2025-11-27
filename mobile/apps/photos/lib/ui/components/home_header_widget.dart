@@ -35,7 +35,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
         IconButtonWidget(
           icon: Icons.add_photo_alternate_outlined,
           iconButtonType: IconButtonType.primary,
-          onTap: () async => handleBackupEntryFlow(context),
+          onTap: () async => handleFullPermissionBackupFlow(context),
         ),
       ],
     );

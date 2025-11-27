@@ -13,61 +13,71 @@ import "package:photos/utils/navigation_util.dart";
 
 final _logger = Logger("BackupFlowHelper");
 
-/// Defines how the backup entry flow should handle permissions.
-enum BackupFlowType {
-  /// Full permission flow - request permissions, show dialogs if denied/limited.
-  /// Used by: home_header_widget
-  fullPermission,
+/// Full permission flow - request permissions, show dialogs if denied/limited.
+/// Used by: home_header_widget
+Future<void> handleFullPermissionBackupFlow(BuildContext context) async {
+  if (await _handleSkippedPermissionFlow(context)) return;
 
-  /// If limited permission, show presentLimited; else go to folder selection.
-  /// Used by: start_backup_hook_widget
-  limitedOrFolderSelection,
+  await _requestPermissions();
+  if (!context.mounted) return;
 
-  /// Just navigate to folder selection without permission handling.
-  /// Used by: tab_empty_state, backup_section_widget
-  folderSelectionOnly,
+  if (permissionService.hasGrantedFullPermission()) {
+    unawaited(_navigateToFolderSelection(context, isFirstBackup: false));
+  } else if (Platform.isAndroid) {
+    await PhotoManager.openSetting();
+  } else {
+    // ignore: unawaited_futures
+    _showLimitedPermissionSheet(
+      context,
+      hasGrantedLimit: permissionService.hasGrantedLimitedPermissions(),
+    );
+  }
 }
 
-/// Helper to centralize navigation when users choose to add photos/backup.
-///
-/// [isFirstBackup] indicates if this is the first backup flow.
-/// [flowType] determines how permissions are handled.
-Future<void> handleBackupEntryFlow(
+/// If limited permission, show presentLimited; else go to folder selection.
+/// Used by: start_backup_hook_widget
+Future<void> handleLimitedOrFolderBackupFlow(
+  BuildContext context, {
+  bool isFirstBackup = true,
+}) async {
+  if (await _handleSkippedPermissionFlow(context)) return;
+
+  if (permissionService.hasGrantedLimitedPermissions()) {
+    unawaited(PhotoManager.presentLimited());
+  } else {
+    unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
+  }
+}
+
+/// Just navigate to folder selection without permission handling.
+/// Used by: tab_empty_state, backup_section_widget
+Future<void> handleFolderSelectionBackupFlow(
   BuildContext context, {
   bool isFirstBackup = false,
-  BackupFlowType flowType = BackupFlowType.fullPermission,
 }) async {
-  // New flow only for skipped permission users when flag is enabled
-  final shouldUseNewFlow =
-      backupPreferenceService.hasSkippedOnboardingPermission;
+  if (await _handleSkippedPermissionFlow(context)) return;
 
-  if (shouldUseNewFlow) {
-    await _handleSkippedPermissionFlow(context);
-    return;
-  }
-
-  // Otherwise use standard flow based on flowType
-  await _handleStandardFlow(
-    context,
-    isFirstBackup: isFirstBackup,
-    flowType: flowType,
-  );
+  await _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
 }
 
-/// New flow for users who skipped permission during onboarding.
-/// Shows LoadingPhotosWidget after granting permissions.
-Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
+/// Handles skipped permission flow if user skipped during onboarding.
+/// Returns true if handled (caller should return), false otherwise.
+Future<bool> _handleSkippedPermissionFlow(BuildContext context) async {
+  if (!backupPreferenceService.hasSkippedOnboardingPermission) {
+    return false;
+  }
+
   final state = await _requestPermissions();
-  if (state == null || !context.mounted) return;
+  if (state == null || !context.mounted) return true;
 
   if (!_hasMinimalPermission(state)) {
     await _showPermissionDeniedDialog(context);
-    return;
+    return true;
   }
 
   if (state == PermissionState.limited && Platform.isIOS) {
     await _showLimitedPermissionSheet(context, hasGrantedLimit: true);
-    if (!context.mounted) return;
+    if (!context.mounted) return true;
   }
 
   // LoadingPhotosWidget handles navigation to folder selection internally
@@ -75,45 +85,7 @@ Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
     context,
     const LoadingPhotosWidget(isOnboardingFlow: false),
   );
-}
-
-/// Standard backup flow based on flowType.
-Future<void> _handleStandardFlow(
-  BuildContext context, {
-  required bool isFirstBackup,
-  required BackupFlowType flowType,
-}) async {
-  switch (flowType) {
-    case BackupFlowType.folderSelectionOnly:
-      await _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
-
-    case BackupFlowType.limitedOrFolderSelection:
-      if (permissionService.hasGrantedLimitedPermissions()) {
-        unawaited(PhotoManager.presentLimited());
-      } else {
-        unawaited(
-          _navigateToFolderSelection(context, isFirstBackup: isFirstBackup),
-        );
-      }
-
-    case BackupFlowType.fullPermission:
-      await _requestPermissions();
-      if (!context.mounted) return;
-
-      if (permissionService.hasGrantedFullPermission()) {
-        unawaited(
-          _navigateToFolderSelection(context, isFirstBackup: isFirstBackup),
-        );
-      } else if (Platform.isAndroid) {
-        await PhotoManager.openSetting();
-      } else {
-        // ignore: unawaited_futures
-        _showLimitedPermissionSheet(
-          context,
-          hasGrantedLimit: permissionService.hasGrantedLimitedPermissions(),
-        );
-      }
-  }
+  return true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

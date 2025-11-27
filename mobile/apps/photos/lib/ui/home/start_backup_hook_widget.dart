@@ -44,10 +44,9 @@ class StartBackupHookWidget extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: GradientButton(
                         onTap: () async {
-                          await handleBackupEntryFlow(
+                          await handleLimitedOrFolderBackupFlow(
                             context,
                             isFirstBackup: true,
-                            flowType: BackupFlowType.limitedOrFolderSelection,
                           );
                         },
                         text: AppLocalizations.of(context).startBackup,
