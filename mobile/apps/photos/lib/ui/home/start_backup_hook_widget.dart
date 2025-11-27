@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/ui/common/backup_flow_helper.dart';
 import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 
 class StartBackupHookWidget extends StatelessWidget {
   final Widget headerWidget;
@@ -47,10 +46,7 @@ class StartBackupHookWidget extends StatelessWidget {
                         onTap: () async {
                           await handleBackupEntryFlow(
                             context,
-                            onFirstImportComplete: () =>
-                                const BackupFolderSelectionPage(
-                              isFirstBackup: true,
-                            ),
+                            isFirstBackup: true,
                           );
                         },
                         text: AppLocalizations.of(context).startBackup,

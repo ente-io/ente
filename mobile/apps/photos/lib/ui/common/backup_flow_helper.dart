@@ -5,8 +5,6 @@ import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/sync/local_sync_service.dart";
-import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -18,31 +16,36 @@ import "package:photos/utils/navigation_util.dart";
 /// selection.
 Future<void> handleBackupEntryFlow(
   BuildContext context, {
-  Widget Function()? onFirstImportComplete,
+  bool isFirstBackup = false,
 }) async {
+  PermissionState state;
   try {
-    final PermissionState state =
-        await permissionService.requestPhotoMangerPermissions();
+    // Always fetch fresh permission state from the platform instead of relying
+    // on cached prefs; this avoids stale reads when users change OS settings.
+    state = await permissionService.requestPhotoMangerPermissions();
     await permissionService.onUpdatePermission(state);
-  } on Exception catch (e, s) {
+  } catch (e, s) {
     Logger("BackupEntryFlow").severe(
-      "Failed to request permission: ${e.toString()}",
+      "Failed to request permission",
       e,
       s,
     );
     return;
   }
 
-  if (!permissionService.hasGrantedFullPermission()) {
+  if (state != PermissionState.authorized && state != PermissionState.limited) {
     if (!context.mounted) {
       return;
     }
+
     if (Platform.isAndroid) {
+      // On Android, we can only direct users to system settings for upgrades.
       await PhotoManager.openSetting();
       return;
     }
-    final bool hasGrantedLimit =
-        permissionService.hasGrantedLimitedPermissions();
+
+    // On iOS, offer a path to either open settings or expand limited access.
+    final bool hasLimited = state == PermissionState.limited;
     await showChoiceActionSheet(
       context,
       title: context.l10n.preserveMore,
@@ -52,39 +55,35 @@ Future<void> handleBackupEntryFlow(
         await PhotoManager.openSetting();
       },
       secondButtonLabel:
-          hasGrantedLimit ? context.l10n.selectMorePhotos : context.l10n.cancel,
-      secondButtonOnTap: hasGrantedLimit
-          ? () async {
-              await PhotoManager.presentLimited();
-            }
-          : null,
+          hasLimited ? context.l10n.selectMorePhotos : context.l10n.cancel,
+      secondButtonOnTap: () async {
+        if (hasLimited) {
+          await PhotoManager.presentLimited();
+        }
+      },
     );
     return;
   }
 
-  SyncService.instance.onPermissionGranted().ignore();
-  // Note: Don't fire PermissionGrantedEvent before navigation - it causes
-  // home_widget to show its own LoadingPhotosWidget while we navigate to ours,
-  // resulting in duplicate BackupFolderSelectionPage navigations.
   if (!context.mounted) {
     return;
   }
-  final Widget Function() targetBuilder = onFirstImportComplete ??
-      () => const BackupFolderSelectionPage(
-            isFirstBackup: false,
-          );
-  final shouldWaitForFirstImport =
-      !LocalSyncService.instance.hasCompletedFirstImport();
-  if (shouldWaitForFirstImport) {
-    // Wait for initial sync, then proceed to folder selection
+
+  final bool didSkipPermissionOnboarding =
+      backupPreferenceService.hasSkippedOnboardingPermission;
+  // If the user skipped permission onboarding, still show the loading screen
+  // before navigating to folder selection; otherwise proceed directly.
+  if (didSkipPermissionOnboarding) {
     await routeToPage(
       context,
       const LoadingPhotosWidget(isOnboardingFlow: false),
     );
-  } else {
-    await routeToPage(
-      context,
-      targetBuilder(),
-    );
   }
+
+  await routeToPage(
+    context,
+    BackupFolderSelectionPage(
+      isFirstBackup: isFirstBackup,
+    ),
+  );
 }
