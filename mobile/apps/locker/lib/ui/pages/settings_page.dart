@@ -75,6 +75,7 @@ class SettingsPage extends StatelessWidget {
         const UsageCardWidget(),
         const SizedBox(height: 12),
         const LegacyCollectionsTrashWidget(),
+        const SizedBox(height: 12),
         const AccountSectionWidget(),
         sectionSpacing,
       ]);

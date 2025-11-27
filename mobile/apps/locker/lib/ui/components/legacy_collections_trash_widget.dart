@@ -20,11 +20,11 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
       child: Column(
         children: [
           _buildLegacyItem(context),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(child: _buildCollectionsItem(context)),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(child: _buildTrashItem(context)),
             ],
           ),
@@ -110,7 +110,7 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
               ),
               padding: const EdgeInsets.all(8.0),
               child: HugeIcon(
-                icon: HugeIcons.strokeRoundedDelete01,
+                icon: HugeIcons.strokeRoundedDelete02,
                 color: colorScheme.textBase,
               ),
             ),
@@ -173,7 +173,7 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(10.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: colorScheme.backgroundElevated,
+                    color: colorScheme.primary700.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.all(8.0),
@@ -196,7 +196,6 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
               child: Icon(
                 Icons.chevron_right,
                 color: colorScheme.textMuted,
-                size: 20,
               ),
             ),
           ],
