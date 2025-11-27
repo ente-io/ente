@@ -90,7 +90,11 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
         } catch (e) {
             log.error("Failed to fetch active sessions", e);
             if (isHTTP401Error(e)) {
-                showMiniDialog(sessionExpiredDialogAttributes(logout));
+                // Use setTimeout to show the session expired dialog
+                // after the current confirmation dialog closes
+                setTimeout(() => {
+                    showMiniDialog(sessionExpiredDialogAttributes(logout));
+                }, 0);
             } else {
                 const isNetworkError =
                     e instanceof TypeError && e.message === "Failed to fetch";
@@ -129,9 +133,15 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
                             } catch (e) {
                                 log.error("Failed to terminate session", e);
                                 if (isHTTP401Error(e)) {
-                                    showMiniDialog(
-                                        sessionExpiredDialogAttributes(logout),
-                                    );
+                                    // Use setTimeout to show the session expired dialog
+                                    // after the current confirmation dialog closes
+                                    setTimeout(() => {
+                                        showMiniDialog(
+                                            sessionExpiredDialogAttributes(
+                                                logout,
+                                            ),
+                                        );
+                                    }, 0);
                                 } else {
                                     showMiniDialog({
                                         title: t("error"),
