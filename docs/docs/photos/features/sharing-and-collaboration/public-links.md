@@ -43,14 +43,6 @@ Create a shareable link without creating an album first:
 4. Configure options
 5. Share the link
 
-**On web/desktop:**
-
-1. Select one or more photos
-2. Click the share icon
-3. Select "Create quick link"
-4. Configure options
-5. Share the link
-
 **How it works:** Ente creates a special hidden album behind the scenes and adds your selected photos to it. The link works exactly like a regular public link - recipients see an album with the photos you selected.
 
 **Managing quick links:**
