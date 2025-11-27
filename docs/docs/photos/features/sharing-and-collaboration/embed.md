@@ -114,6 +114,10 @@ The embedded album viewer includes:
 - Password protection (if enabled on the album)
 - Automatic updates when you add new photos to the album
 
+> [!NOTE]
+>
+> The embed only supports the continuous layout.
+
 ## Privacy and security
 
 - The embed uses the same encryption and security as regular Ente albums
