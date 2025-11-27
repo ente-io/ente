@@ -46,6 +46,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final ritualsEnabled = flagService.ritualsFlag;
     if (!ritualsEnabled) {
       return Scaffold(
@@ -70,11 +71,30 @@ class _ActivityScreenState extends State<ActivityScreen> {
         title: const Text("Rituals"),
         centerTitle: false,
         actions: [
+          if (_selectedRitual != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: colorScheme.fillFaint,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  minimumSize: const Size(40, 40),
+                ),
+                icon: const Icon(Icons.camera_alt_outlined),
+                onPressed: _selectedRitual != null
+                    ? () => _openRitualCamera(_selectedRitual!)
+                    : null,
+                tooltip: "Open ritual camera",
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: IconButton(
               style: IconButton.styleFrom(
-                backgroundColor: getEnteColorScheme(context).fillFaint,
+                backgroundColor: colorScheme.fillFaint,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -101,7 +121,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 : summary;
             final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
-            final colorScheme = getEnteColorScheme(context);
             final String sectionTitle = selectedRitual == null
                 ? "Take a photo every day"
                 : (selectedRitual.title.isEmpty
@@ -177,14 +196,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   ),
                   ActivityHeatmapCard(summary: displaySummary),
                   AchievementsRow(summary: displaySummary),
-                  if (kDebugMode)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                      child: _DebugCameraLauncher(
-                        selectedRitual: selectedRitual,
-                        onLaunch: _openRitualCamera,
-                      ),
-                    ),
                 ],
               ),
             );
@@ -369,73 +380,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
       RitualCameraPage(
         ritualId: ritual.id,
         albumId: albumId,
-      ),
-    );
-  }
-}
-
-class _DebugCameraLauncher extends StatelessWidget {
-  const _DebugCameraLauncher({
-    required this.selectedRitual,
-    required this.onLaunch,
-  });
-
-  final Ritual? selectedRitual;
-  final ValueChanged<Ritual> onLaunch;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final bool hasAlbum = selectedRitual?.albumId != null;
-    final bool canLaunch = selectedRitual != null && hasAlbum;
-    final String buttonLabel = canLaunch
-        ? "Open in-app camera for ${selectedRitual!.title.isEmpty ? "ritual" : selectedRitual!.title}"
-        : "Select a ritual with an album to open the camera";
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.bug_report_outlined,
-                color: colorScheme.textMuted,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "Debug: launch ritual camera",
-                style: textTheme.bodyBold.copyWith(
-                  color: colorScheme.textMuted,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton.icon(
-            onPressed: canLaunch && selectedRitual != null
-                ? () => onLaunch(selectedRitual!)
-                : null,
-            icon: const Icon(Icons.camera_alt_outlined),
-            label: Text(buttonLabel),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
-          if (!hasAlbum)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                "Pick a ritual (not the starter) and set an album to enable.",
-                style: textTheme.smallMuted,
-              ),
-            ),
-        ],
       ),
     );
   }
