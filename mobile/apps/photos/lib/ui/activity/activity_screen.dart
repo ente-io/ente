@@ -121,11 +121,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 : summary;
             final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
-            final String sectionTitle = selectedRitual == null
+            final String heatmapTitle = selectedRitual == null
                 ? "Take a photo every day"
                 : (selectedRitual.title.isEmpty
                     ? "Untitled ritual"
                     : selectedRitual.title);
+            final String heatmapEmoji =
+                selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
+            final String shareTitle = heatmapTitle;
             final bool shareEnabled = summaryToShare != null;
             return RefreshIndicator(
               onRefresh: activityService.refresh,
@@ -151,7 +154,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       child: Row(
                         children: [
                           Text(
-                            sectionTitle,
+                            "Activity",
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const Spacer(),
@@ -161,7 +164,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             onTap: summaryToShare != null
                                 ? () => _shareActivity(
                                       summaryToShare,
-                                      sectionTitle,
+                                      shareTitle,
+                                      emoji: selectedRitual?.icon,
                                     )
                                 : null,
                             child: SizedBox(
@@ -194,7 +198,11 @@ class _ActivityScreenState extends State<ActivityScreen> {
                       ),
                     ),
                   ),
-                  ActivityHeatmapCard(summary: displaySummary),
+                  ActivityHeatmapCard(
+                    summary: displaySummary,
+                    headerTitle: heatmapTitle,
+                    headerEmoji: heatmapEmoji,
+                  ),
                   AchievementsRow(summary: displaySummary),
                 ],
               ),
@@ -207,8 +215,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   Future<void> _shareActivity(
     ActivitySummary summary,
-    String title,
-  ) async {
+    String title, {
+    String? emoji,
+  }) async {
     OverlayEntry? entry;
     final prevPaintSize = debugPaintSizeEnabled;
     final prevPaintBaselines = debugPaintBaselinesEnabled;
@@ -235,6 +244,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 child: _ActivityShareCard(
                   summary: summary,
                   title: title,
+                  emoji: emoji,
                 ),
               ),
             ),
@@ -389,10 +399,12 @@ class _ActivityShareCard extends StatelessWidget {
   const _ActivityShareCard({
     required this.summary,
     required this.title,
+    this.emoji,
   });
 
   final ActivitySummary summary;
   final String title;
+  final String? emoji;
 
   @override
   Widget build(BuildContext context) {
@@ -443,6 +455,8 @@ class _ActivityShareCard extends StatelessWidget {
                       summary: summary,
                       compact: true,
                       allowHorizontalScroll: false,
+                      headerTitle: title,
+                      headerEmoji: emoji,
                     ),
                   ),
                   const SizedBox(height: 6),

@@ -10,15 +10,20 @@ class ActivityHeatmapCard extends StatelessWidget {
     required this.summary,
     this.compact = false,
     this.allowHorizontalScroll = false,
+    this.headerTitle,
+    this.headerEmoji,
     super.key,
   });
 
   final ActivitySummary? summary;
   final bool compact;
   final bool allowHorizontalScroll;
+  final String? headerTitle;
+  final String? headerEmoji;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     final last365 = summary?.last365Days ??
         List.generate(
           372,
@@ -43,20 +48,59 @@ class ActivityHeatmapCard extends StatelessWidget {
           ),
         ),
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        child: allowHorizontalScroll
-            ? SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                clipBehavior: Clip.none,
-                child: _Heatmap(
-                  days: last365,
-                  compact: compact,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if ((headerTitle ?? "").isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 12, 4, 12),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SizedBox(
+                      width: constraints.maxWidth,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          if ((headerEmoji ?? "").isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Text(
+                                headerEmoji ?? "",
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          Flexible(
+                            child: Text(
+                              headerTitle ?? "",
+                              style: textTheme.bodyMuted,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              )
-            : _Heatmap(
-                days: last365,
-                compact: compact,
               ),
+            allowHorizontalScroll
+                ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const ClampingScrollPhysics(),
+                    clipBehavior: Clip.none,
+                    child: _Heatmap(
+                      days: last365,
+                      compact: compact,
+                    ),
+                  )
+                : _Heatmap(
+                    days: last365,
+                    compact: compact,
+                  ),
+          ],
+        ),
       ),
     );
   }
