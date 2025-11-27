@@ -97,7 +97,7 @@ You can view and manage all devices logged into your Ente account:
     - **Web/Desktop**: Settings → Account → Active sessions
     - **Mobile**: Settings → Security → Active sessions
 3. View all devices where you're currently logged in
-4. Terminate sessions remotely by clicking "Log out" next to any device
+4. To terminate a device, click on it and select **Terminate** from the popup
 
 This is useful if you've lost a device or want to ensure old devices no longer have access to your account.
 
