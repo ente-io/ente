@@ -1,14 +1,11 @@
-import "package:ente_legacy/pages/emergency_page.dart";
-import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/pages/all_collections_page.dart";
 import "package:locker/ui/pages/trash_page.dart";
+import "package:locker/ui/utils/legacy_utils.dart";
 
 class LegacyCollectionsTrashWidget extends StatelessWidget {
   const LegacyCollectionsTrashWidget({super.key});
@@ -153,7 +150,7 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
     final borderRadius = BorderRadius.circular(20);
 
     return InkWell(
-      onTap: () => _openLegacy(context),
+      onTap: () => openLegacyPage(context),
       borderRadius: borderRadius,
       child: Container(
         decoration: BoxDecoration(
@@ -202,22 +199,5 @@ class LegacyCollectionsTrashWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _openLegacy(BuildContext context) async {
-    final hasAuthenticated = kDebugMode ||
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-          context,
-          "Authenticate to manage legacy contacts",
-        );
-    if (hasAuthenticated && context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return EmergencyPage(config: Configuration.instance);
-          },
-        ),
-      );
-    }
   }
 }
