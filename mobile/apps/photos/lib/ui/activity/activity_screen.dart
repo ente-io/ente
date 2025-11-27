@@ -70,13 +70,23 @@ class _ActivityScreenState extends State<ActivityScreen> {
         title: const Text("Rituals"),
         centerTitle: false,
         actions: [
-          IconButton(
-            padding: const EdgeInsets.only(right: 12),
-            icon: const Icon(Icons.add_rounded),
-            onPressed: () async {
-              await showRitualEditor(context, ritual: null);
-            },
-            tooltip: "Add ritual",
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: getEnteColorScheme(context).fillFaint,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.all(8),
+                minimumSize: const Size(40, 40),
+              ),
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () async {
+                await showRitualEditor(context, ritual: null);
+              },
+              tooltip: "Add ritual",
+            ),
           ),
         ],
       ),
@@ -91,6 +101,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 : summary;
             final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
+            final colorScheme = getEnteColorScheme(context);
             final String sectionTitle = selectedRitual == null
                 ? "Take a photo every day"
                 : (selectedRitual.title.isEmpty
@@ -139,14 +150,23 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               height: 44,
                               child: Align(
                                 alignment: Alignment.centerRight,
-                                child: Icon(
-                                  Icons.share_outlined,
-                                  size: 22,
-                                  color: shareEnabled
-                                      ? iconColor
-                                      : Theme.of(context)
-                                          .disabledColor
-                                          .withValues(alpha: 0.7),
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.fillFaint,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Icon(
+                                      Icons.share_outlined,
+                                      size: 22,
+                                      color: shareEnabled
+                                          ? iconColor
+                                          : Theme.of(context)
+                                              .disabledColor
+                                              .withValues(alpha: 0.7),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),

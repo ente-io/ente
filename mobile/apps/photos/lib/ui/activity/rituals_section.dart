@@ -31,6 +31,7 @@ class RitualsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -48,6 +49,14 @@ class RitualsSection extends StatelessWidget {
                   onPressed: () async {
                     await _showRitualEditor(context, ritual: null);
                   },
+                  style: IconButton.styleFrom(
+                    backgroundColor: colorScheme.fillFaint,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    minimumSize: const Size(40, 40),
+                  ),
                   icon: const Icon(Icons.add_rounded),
                 ),
               ],
