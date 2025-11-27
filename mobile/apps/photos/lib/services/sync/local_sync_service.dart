@@ -129,6 +129,9 @@ class LocalSyncService {
       }
       if (!hasCompletedFirstImport()) {
         await _prefs.setBool(kHasCompletedFirstImportKey, true);
+        if (backupPreferenceService.hasSkippedOnboardingPermission) {
+          await backupPreferenceService.setOnboardingPermissionSkipped(false);
+        }
         await _refreshDeviceFolderCountAndCover(isFirstSync: true);
         _logger.info("first gallery import finished");
         Bus.instance
