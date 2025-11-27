@@ -47,7 +47,7 @@ class ActivityService {
         Bus.instance.on<FilesUpdatedEvent>().listen((event) {
       _scheduleRefresh();
     });
-    _scheduleRefresh(initial: true);
+    _scheduleRefresh(initial: true, scheduleAllRituals: true);
   }
 
   void dispose() {
@@ -55,15 +55,18 @@ class ActivityService {
     _debounce?.cancel();
   }
 
-  void _scheduleRefresh({bool initial = false}) {
+  void _scheduleRefresh({
+    bool initial = false,
+    bool scheduleAllRituals = false,
+  }) {
     _debounce?.cancel();
     _debounce = Timer(
       initial ? const Duration(seconds: 8) : const Duration(seconds: 1),
-      refresh,
+      () => unawaited(refresh(scheduleAllRituals: scheduleAllRituals)),
     );
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool scheduleAllRituals = false}) async {
     if (!flagService.ritualsFlag) {
       stateNotifier.value = const ActivityState(
         loading: false,
@@ -79,8 +82,10 @@ class ActivityService {
         error: null,
       );
       final rituals = await _loadRituals();
-      for (final ritual in rituals) {
-        await _scheduleRitualNotifications(ritual);
+      if (scheduleAllRituals) {
+        for (final ritual in rituals) {
+          await _scheduleRitualNotifications(ritual);
+        }
       }
       final summary = await _buildSummary(rituals);
       stateNotifier.value = ActivityState(
