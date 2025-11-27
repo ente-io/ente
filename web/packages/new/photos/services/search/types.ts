@@ -43,6 +43,7 @@ export type SidebarActionID =
     | "account.changePassword"
     | "account.changeEmail"
     | "account.deleteAccount"
+    | "account.sessions"
     | "preferences.language"
     | "preferences.theme"
     | "preferences.customDomains"

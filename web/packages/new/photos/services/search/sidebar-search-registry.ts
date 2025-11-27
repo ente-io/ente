@@ -168,6 +168,12 @@ const sidebarActions = (): SidebarAction[] => {
             keywords: ["delete", "remove"],
         },
         {
+            id: "account.sessions",
+            label: t("active_sessions"),
+            path: [accountCategory, t("active_sessions")],
+            keywords: ["sessions", "devices", "logout"],
+        },
+        {
             id: "preferences.language",
             label: t("language"),
             path: [preferencesCategory, t("language")],
@@ -353,6 +359,7 @@ export const performSidebarAction = async (
         case "account.changePassword":
         case "account.changeEmail":
         case "account.deleteAccount":
+        case "account.sessions":
             ctx.setPendingAccountAction(actionID);
             ctx.showAccount();
             return Promise.resolve();
