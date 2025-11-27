@@ -70,20 +70,10 @@ class RitualsSection extends StatelessWidget {
               onTap: () => onSelectionChanged?.call(null),
             ),
           if (rituals.isEmpty)
-            GestureDetector(
+            _CreateRitualCard(
               onTap: () async {
                 await _showRitualEditor(context, ritual: null);
               },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(8, 14, 8, 10),
-                alignment: Alignment.center,
-                child: Text(
-                  "Create your own ritual to get daily reminders.",
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
             )
           else
             Column(
@@ -143,6 +133,54 @@ class _StarterRitualCard extends StatelessWidget {
   }
 }
 
+class _CreateRitualCard extends StatelessWidget {
+  const _CreateRitualCard({this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 1,
+        ),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
+        leading: CircleAvatar(
+          radius: 20,
+          backgroundColor: colorScheme.fillFaintPressed,
+          child: Icon(
+            Icons.add_rounded,
+            color: colorScheme.textBase,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          "Create your own ritual",
+          style: textTheme.body,
+        ),
+        subtitle: Text(
+          "Get daily reminders",
+          style: textTheme.smallMuted,
+        ),
+        trailing: Icon(
+          Icons.chevron_right_rounded,
+          color: colorScheme.textMuted,
+        ),
+      ),
+    );
+  }
+}
+
 class _RitualCard extends StatelessWidget {
   const _RitualCard({
     required this.ritual,
@@ -178,7 +216,7 @@ class _RitualCard extends StatelessWidget {
             );
           }
         },
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(12, 8, 6, 8),
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 8),
         leading: CircleAvatar(
           backgroundColor: colorScheme.fillFaintPressed,
           child: Text(
