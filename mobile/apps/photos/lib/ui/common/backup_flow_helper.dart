@@ -57,8 +57,7 @@ Future<bool?> handleFolderSelectionBackupFlow(
   bool isFirstBackup = false,
 }) async {
   if (_shouldRunFirstImportFlow()) {
-    await _handleFirstImportFlow(context);
-    return null;
+    return _handleFirstImportFlow(context);
   }
 
   return _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
@@ -68,16 +67,16 @@ bool _shouldRunFirstImportFlow() =>
     flagService.enableOnlyBackupFuturePhotos &&
     !LocalSyncService.instance.hasCompletedFirstImport();
 
-Future<void> _handleFirstImportFlow(BuildContext context) async {
+Future<bool?> _handleFirstImportFlow(BuildContext context) async {
   final state = await _requestPermissions();
-  if (state == null || !context.mounted) return;
+  if (state == null || !context.mounted) return null;
 
   if (!_hasMinimalPermission(state)) {
     await _showPermissionDeniedDialog(context);
-    return;
+    return null;
   }
 
-  await routeToPage(
+  return routeToPage<bool>(
     context,
     const LoadingPhotosWidget(isOnboardingFlow: false),
   );
