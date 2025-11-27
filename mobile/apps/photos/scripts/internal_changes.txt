@@ -1,3 +1,4 @@
+- Laurens: update Usearch VectorDB with potential fix for crash
 - Neeraj: (i) Allow owner and admins to suggest delete. Suggestion can be reviewed from Free up space
 - Neeraj: (i) Allow admins to remove any photo from shared albums
 - Laurens: Simplify album search by adding search bars to album and sharing tabs
