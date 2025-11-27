@@ -13,8 +13,6 @@ import "package:photos/utils/navigation_util.dart";
 
 final _logger = Logger("BackupFlowHelper");
 
-/// Full permission flow - request permissions, show dialogs if denied/limited.
-/// Used by: home_header_widget
 Future<void> handleFullPermissionBackupFlow(BuildContext context) async {
   if (backupPreferenceService.hasSkippedOnboardingPermission) {
     await _handleSkippedPermissionFlow(context);
@@ -37,8 +35,6 @@ Future<void> handleFullPermissionBackupFlow(BuildContext context) async {
   }
 }
 
-/// If limited permission, show presentLimited; else go to folder selection.
-/// Used by: start_backup_hook_widget
 Future<void> handleLimitedOrFolderBackupFlow(
   BuildContext context, {
   bool isFirstBackup = true,
@@ -55,8 +51,6 @@ Future<void> handleLimitedOrFolderBackupFlow(
   }
 }
 
-/// Just navigate to folder selection without permission handling.
-/// Used by: tab_empty_state, backup_section_widget
 Future<void> handleFolderSelectionBackupFlow(
   BuildContext context, {
   bool isFirstBackup = false,
@@ -69,8 +63,6 @@ Future<void> handleFolderSelectionBackupFlow(
   await _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
 }
 
-/// Handles flow for users who skipped permission during onboarding.
-/// Shows LoadingPhotosWidget after granting permissions.
 Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
   final state = await _requestPermissions();
   if (state == null || !context.mounted) return;
@@ -80,16 +72,11 @@ Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
     return;
   }
 
-  // LoadingPhotosWidget handles navigation to folder selection internally
   await routeToPage(
     context,
     const LoadingPhotosWidget(isOnboardingFlow: false),
   );
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helper functions
-// ─────────────────────────────────────────────────────────────────────────────
 
 Future<PermissionState?> _requestPermissions() async {
   try {
