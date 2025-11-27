@@ -300,9 +300,9 @@ class BackupSettingsScreen extends StatelessWidget {
           shouldStickToDarkTheme: true,
           isInAlert: true,
         ),
-        const ButtonWidget(
-          labelText: "Continue anyway",
-          buttonType: ButtonType.secondary,
+        ButtonWidget(
+          labelText: context.l10n.continueLabel,
+          buttonType: ButtonType.neutral,
           buttonAction: ButtonAction.second,
           shouldSurfaceExecutionStates: false,
           shouldStickToDarkTheme: true,
@@ -317,10 +317,10 @@ class BackupSettingsScreen extends StatelessWidget {
           isInAlert: true,
         ),
       ],
-      title: "Select backup folders",
+      title: "Only backup new photos",
       body: hasAllFoldersSelected
-          ? "All folders are currently selected for backup. Choose specific folders or continue anyway."
-          : "No folders are currently selected for backup. Choose folders to back up, or continue anyway.",
+          ? "All folders are currently selected for backup.\nYou can manually select folders you want to backup or continue for now, and change your folder selection later."
+          : "No folders are currently selected for backup.\nYou can manually select folders you want to backup or continue for now, and change your folder selection later.",
     );
 
     if (result?.action == null || result!.action == ButtonAction.cancel) {
