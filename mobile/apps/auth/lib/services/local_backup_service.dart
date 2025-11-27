@@ -11,6 +11,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_out_event.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalBackupService {
@@ -204,27 +205,24 @@ class LocalBackupService {
   Future<void> _manageOldBackups(String backupPath) async {
     try {
       final directory = Directory(backupPath);
-      final files = directory
-          .listSync()
-          .where(
-            (entity) =>
-                entity is File && _isBackupFile(entity.path.split('/').last),
-          )
-          .map((entity) => entity as File)
+      final entities = await directory.list().toList();
+      final files = entities
+          .whereType<File>()
+          .where((f) => _isBackupFile(p.basename(f.path)))
           .toList();
 
-      files.sort((a, b) {
-        final mtimeCompare =
-            a.lastModifiedSync().compareTo(b.lastModifiedSync());
-        if (mtimeCompare != 0) {
-          return mtimeCompare;
-        }
-        return a.path.compareTo(b.path);
+      // Sort by mtime async
+      final filesWithMtime = await Future.wait(
+        files.map((f) async => (f, await f.lastModified())),
+      );
+      filesWithMtime.sort((a, b) {
+        final cmp = a.$2.compareTo(b.$2);
+        return cmp != 0 ? cmp : a.$1.path.compareTo(b.$1.path);
       });
 
-      while (files.length > _maxBackups) {
-        final fileToDelete = files.removeAt(0);
-        await fileToDelete.delete();
+      final sorted = filesWithMtime.map((e) => e.$1).toList();
+      while (sorted.length > _maxBackups) {
+        await sorted.removeAt(0).delete();
       }
     } catch (e, s) {
       _logger.severe('Error during old backup cleanup', e, s);
@@ -243,13 +241,10 @@ class LocalBackupService {
           return;
         }
 
-        final files = backupDir
-            .listSync()
-            .where(
-              (entity) =>
-                  entity is File && _isBackupFile(entity.path.split('/').last),
-            )
-            .map((entity) => entity as File)
+        final entities = await backupDir.list().toList();
+        final files = entities
+            .whereType<File>()
+            .where((f) => _isBackupFile(p.basename(f.path)))
             .toList();
 
         if (files.isEmpty) {

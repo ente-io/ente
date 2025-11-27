@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   logging: ^1.2.0
+  path: ^1.8.0
   saf_stream: any
   saf_util: any
 
