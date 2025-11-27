@@ -87,10 +87,4 @@ Future<void> handleBackupEntryFlow(
       targetBuilder(),
     );
   }
-
-  // Refresh home UI state without firing PermissionGrantedEvent to avoid
-  // duplicate navigation to folder selection.
-  if (context.mounted) {
-    Navigator.of(context).popUntil((route) => route.isFirst);
-  }
 }
