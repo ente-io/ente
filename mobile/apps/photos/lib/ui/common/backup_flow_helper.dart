@@ -16,7 +16,10 @@ final _logger = Logger("BackupFlowHelper");
 /// Full permission flow - request permissions, show dialogs if denied/limited.
 /// Used by: home_header_widget
 Future<void> handleFullPermissionBackupFlow(BuildContext context) async {
-  if (await _handleSkippedPermissionFlow(context)) return;
+  if (backupPreferenceService.hasSkippedOnboardingPermission) {
+    await _handleSkippedPermissionFlow(context);
+    return;
+  }
 
   await _requestPermissions();
   if (!context.mounted) return;
@@ -40,7 +43,10 @@ Future<void> handleLimitedOrFolderBackupFlow(
   BuildContext context, {
   bool isFirstBackup = true,
 }) async {
-  if (await _handleSkippedPermissionFlow(context)) return;
+  if (backupPreferenceService.hasSkippedOnboardingPermission) {
+    await _handleSkippedPermissionFlow(context);
+    return;
+  }
 
   if (permissionService.hasGrantedLimitedPermissions()) {
     unawaited(PhotoManager.presentLimited());
@@ -55,29 +61,23 @@ Future<void> handleFolderSelectionBackupFlow(
   BuildContext context, {
   bool isFirstBackup = false,
 }) async {
-  if (await _handleSkippedPermissionFlow(context)) return;
+  if (backupPreferenceService.hasSkippedOnboardingPermission) {
+    await _handleSkippedPermissionFlow(context);
+    return;
+  }
 
   await _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
 }
 
-/// Handles skipped permission flow if user skipped during onboarding.
-/// Returns true if handled (caller should return), false otherwise.
-Future<bool> _handleSkippedPermissionFlow(BuildContext context) async {
-  if (!backupPreferenceService.hasSkippedOnboardingPermission) {
-    return false;
-  }
-
+/// Handles flow for users who skipped permission during onboarding.
+/// Shows LoadingPhotosWidget after granting permissions.
+Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
   final state = await _requestPermissions();
-  if (state == null || !context.mounted) return true;
+  if (state == null || !context.mounted) return;
 
   if (!_hasMinimalPermission(state)) {
     await _showPermissionDeniedDialog(context);
-    return true;
-  }
-
-  if (state == PermissionState.limited && Platform.isIOS) {
-    await _showLimitedPermissionSheet(context, hasGrantedLimit: true);
-    if (!context.mounted) return true;
+    return;
   }
 
   // LoadingPhotosWidget handles navigation to folder selection internally
@@ -85,7 +85,6 @@ Future<bool> _handleSkippedPermissionFlow(BuildContext context) async {
     context,
     const LoadingPhotosWidget(isOnboardingFlow: false),
   );
-  return true;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
