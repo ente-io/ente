@@ -9,6 +9,7 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/backup_flow_helper.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -20,7 +21,6 @@ import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
-import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/standalone/debouncer.dart';
 
@@ -328,14 +328,7 @@ class BackupSettingsScreen extends StatelessWidget {
     }
 
     if (result.action == ButtonAction.first) {
-      final selected = await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const BackupFolderSelectionPage(
-            isFirstBackup: false,
-          ),
-        ),
-      );
+      final bool? selected = await handleFolderSelectionBackupFlow(context);
       if (selected != true) {
         return false;
       }

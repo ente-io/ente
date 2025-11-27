@@ -6,6 +6,7 @@ import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -14,8 +15,8 @@ import "package:photos/utils/navigation_util.dart";
 final _logger = Logger("BackupFlowHelper");
 
 Future<void> handleFullPermissionBackupFlow(BuildContext context) async {
-  if (backupPreferenceService.hasSkippedOnboardingPermission) {
-    await _handleSkippedPermissionFlow(context);
+  if (_shouldRunFirstImportFlow()) {
+    await _handleFirstImportFlow(context);
     return;
   }
 
@@ -39,8 +40,8 @@ Future<void> handleLimitedOrFolderBackupFlow(
   BuildContext context, {
   bool isFirstBackup = true,
 }) async {
-  if (backupPreferenceService.hasSkippedOnboardingPermission) {
-    await _handleSkippedPermissionFlow(context);
+  if (_shouldRunFirstImportFlow()) {
+    await _handleFirstImportFlow(context);
     return;
   }
 
@@ -51,19 +52,23 @@ Future<void> handleLimitedOrFolderBackupFlow(
   }
 }
 
-Future<void> handleFolderSelectionBackupFlow(
+Future<bool?> handleFolderSelectionBackupFlow(
   BuildContext context, {
   bool isFirstBackup = false,
 }) async {
-  if (backupPreferenceService.hasSkippedOnboardingPermission) {
-    await _handleSkippedPermissionFlow(context);
-    return;
+  if (_shouldRunFirstImportFlow()) {
+    await _handleFirstImportFlow(context);
+    return null;
   }
 
-  await _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
+  return _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
 }
 
-Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
+bool _shouldRunFirstImportFlow() =>
+    flagService.enableOnlyBackupFuturePhotos &&
+    !LocalSyncService.instance.hasCompletedFirstImport();
+
+Future<void> _handleFirstImportFlow(BuildContext context) async {
   final state = await _requestPermissions();
   if (state == null || !context.mounted) return;
 
@@ -92,11 +97,11 @@ Future<PermissionState?> _requestPermissions() async {
 bool _hasMinimalPermission(PermissionState state) =>
     state == PermissionState.authorized || state == PermissionState.limited;
 
-Future<void> _navigateToFolderSelection(
+Future<bool?> _navigateToFolderSelection(
   BuildContext context, {
   required bool isFirstBackup,
 }) =>
-    routeToPage(
+    routeToPage<bool>(
       context,
       BackupFolderSelectionPage(isFirstBackup: isFirstBackup),
     );
