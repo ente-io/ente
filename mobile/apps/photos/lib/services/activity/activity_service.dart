@@ -266,14 +266,27 @@ class ActivityService {
   Future<void> saveRitual(Ritual ritual) async {
     final rituals = await _loadRituals();
     final existingIndex = rituals.indexWhere((r) => r.id == ritual.id);
-    if (existingIndex == -1) {
+    final bool isNew = existingIndex == -1;
+    final Ritual? previous = isNew ? null : rituals[existingIndex];
+    final bool albumChanged = previous?.albumId != ritual.albumId;
+    if (isNew) {
       rituals.add(ritual);
     } else {
       rituals[existingIndex] = ritual;
     }
     await _persistRituals(rituals);
-    await _scheduleRitualNotifications(ritual);
-    await refresh();
+    unawaited(_scheduleRitualNotifications(ritual));
+
+    if (isNew || albumChanged) {
+      await refresh();
+    } else {
+      // No activity data changes; just update rituals in state.
+      stateNotifier.value = stateNotifier.value.copyWith(
+        rituals: rituals,
+        loading: false,
+        error: null,
+      );
+    }
   }
 
   Future<void> deleteRitual(String id) async {
