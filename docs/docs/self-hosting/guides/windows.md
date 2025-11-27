@@ -186,6 +186,9 @@ services:
       ENTE_ALBUMS_ORIGIN: http://localhost:3002
       # ENTE_ALBUMS_ORIGIN: http://192.168.1.42:3002
       # ENTE_ALBUMS_ORIGIN: https://albums.mydomain.com
+      ENTE_PHOTOS_ORIGIN: http://localhost:3000
+      # ENTE_PHOTOS_ORIGIN: http://192.168.1.42:3000
+      # ENTE_PHOTOS_ORIGIN: https://photos.mydomain.com
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
 
