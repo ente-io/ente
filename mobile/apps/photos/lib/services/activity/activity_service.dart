@@ -61,7 +61,7 @@ class ActivityService {
   }) {
     _debounce?.cancel();
     _debounce = Timer(
-      initial ? const Duration(seconds: 8) : const Duration(seconds: 1),
+      initial ? const Duration(seconds: 5) : const Duration(seconds: 1),
       () => unawaited(refresh(scheduleAllRituals: scheduleAllRituals)),
     );
   }
