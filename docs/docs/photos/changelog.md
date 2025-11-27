@@ -6,6 +6,15 @@ description: Release notes of recent updates to Ente Photos mobile and desktop a
 # Changelog - Ente Photos
 
 A short summary list of changes to the Ente Photos mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
+## v1.2.20 (mobile) - Nov 2025
+
+- Move Add button to top in Albums, Contacts, and Location Tags screens for easier access
+- Add full scrollable overview of people in the person edit page for easier merging of people
+- Enable select all functionality in shared album date headers
+- Update "Send Link" feature to share only link text instead of image
+- Improve the scroll position behavior in the similar images page
+- Fix OCR for HEIC files on Android
+- Fix continuous loading in map view when no images have location data
 
 ## v1.2.18 (mobile) - Nov 2025
 

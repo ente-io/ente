@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
 
@@ -441,7 +442,7 @@ class DirUtils {
         entries.map((e) async {
           final stat = await e.stat();
           return FileInfo(
-            name: e.path.split('/').last,
+            name: p.basename(e.path),
             path: e.path,
             isDirectory: stat.type == FileSystemEntityType.directory,
             lastModified: stat.modified,
