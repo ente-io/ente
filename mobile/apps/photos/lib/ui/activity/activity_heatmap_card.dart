@@ -191,14 +191,27 @@ class _Heatmap extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Keep a minimum gutter width in case the container gets very narrow.
-        final double monthLabelWidth = compact ? 28 : 32;
-        final double gapX = compact ? 2.5 : 4;
-        final double gapY = compact ? 2 : 3;
-        final double cellWidth = compact ? 30 : 38.31;
-        final double cellHeight = compact ? 8.5 : 9.82;
-        final double headerRowHeight = compact ? 13 : 16;
-        final double headerToGridGap = compact ? 3 : 4;
+        final double baseMonthLabelWidth = compact ? 28 : 32;
+        final double baseGapX = compact ? 2.5 : 4;
+        final double baseGapY = compact ? 2 : 3;
+        final double baseCellWidth = compact ? 30 : 38.31;
+        final double baseCellHeight = compact ? 8.5 : 9.82;
+        final double baseHeaderRowHeight = compact ? 13 : 16;
+        final double baseHeaderToGridGap = compact ? 3 : 4;
+        final double baseTotalWidth =
+            (7 * baseCellWidth) + (7 * baseGapX) + baseMonthLabelWidth;
+        final double availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : baseTotalWidth;
+        double scale = availableWidth / baseTotalWidth;
+        scale = scale.clamp(0.7, 1.0);
+        final double monthLabelWidth = baseMonthLabelWidth * scale;
+        final double gapX = baseGapX * scale;
+        final double gapY = baseGapY * scale;
+        final double cellWidth = baseCellWidth * scale;
+        final double cellHeight = baseCellHeight * scale;
+        final double headerRowHeight = baseHeaderRowHeight * scale;
+        final double headerToGridGap = baseHeaderToGridGap * scale;
         final double gridWidth =
             (dayHeader.length * cellWidth) + ((dayHeader.length - 1) * gapX);
         final double remainingWidth =
@@ -209,7 +222,7 @@ class _Heatmap extends StatelessWidget {
         final BorderRadius pillRadius = BorderRadius.circular(cellHeight);
         final TextStyle headerStyle = TextStyle(
           color: colorScheme.textMuted.withValues(alpha: 0.45),
-          fontSize: compact ? 6.2 : 6.834,
+          fontSize: (compact ? 6.2 : 6.834) * scale.clamp(0.8, 1.0),
           fontWeight: FontWeight.w600,
           height: compact ? 2.2 : 2.45,
           fontFamily: "Inter",
@@ -245,7 +258,7 @@ class _Heatmap extends StatelessWidget {
                 width: gutterWidth,
                 child: Padding(
                   padding: EdgeInsets.only(
-                    top: headerRowHeight + headerToGridGap + 8,
+                    top: headerRowHeight + headerToGridGap + (8 * scale),
                   ),
                   child: Column(
                     children: weeks.asMap().entries.map((entry) {
@@ -259,7 +272,7 @@ class _Heatmap extends StatelessWidget {
                             child: Text(
                               monthLabels[entry.key] ?? "",
                               style: headerStyle.copyWith(
-                                fontSize: 8.542,
+                                fontSize: 8.542 * scale.clamp(0.8, 1.0),
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
@@ -277,7 +290,7 @@ class _Heatmap extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8 * scale),
                     Row(children: dayHeaderRow),
                     SizedBox(height: headerToGridGap),
                     ...weeks.asMap().entries.map(
