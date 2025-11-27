@@ -244,10 +244,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
-    // MediaExtension plugin handles the deeplink for android
-    // [todo 4/Feb/2025]We need to validate if calling this method doesn't break
-    // android deep linking
-    Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
+    // Initialize deep link subscription for public albums on both iOS and Android
+    _initDeepLinkSubscriptionForPublicAlbums();
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
@@ -299,6 +297,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
   Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
+    if (!mounted) {
+      _logger.warning("Cannot handle public album link - widget not mounted");
+      return;
+    }
     try {
       _logger.info("Handling public album link: via $via");
       final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -331,6 +333,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         return;
       }
+
+      // Check for action=join parameter to show join dialog
+      final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
+          Configuration.instance.isLoggedIn();
 
       // Check for trip layout and show in webview
       if (collection.pubMagicMetadata.layout == "trip") {
@@ -397,11 +403,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                     await routeToPage(
                       context,
                       SharedPublicCollectionPage(
-                        files: sharedFiles,
                         CollectionWithThumbnail(
                           collection,
                           null,
                         ),
+                        files: sharedFiles,
+                        shouldShowJoinDialog: shouldShowJoinDialog,
                       ),
                     );
                   }
@@ -424,16 +431,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         await dialog.hide();
 
-        routeToPage(
+        await routeToPage(
           context,
           SharedPublicCollectionPage(
-            files: sharedFiles,
             CollectionWithThumbnail(
               collection,
               null,
             ),
+            files: sharedFiles,
+            shouldShowJoinDialog: shouldShowJoinDialog,
           ),
-        ).ignore();
+        );
         if (sharedFiles.length == 1) {
           await routeToPage(
             context,
@@ -503,9 +511,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    if (Platform.isIOS) {
-      _publicAlbumLinkSubscription.cancel();
-    }
+    _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
     super.dispose();
@@ -519,7 +525,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (value.isEmpty) {
           return;
         }
-        if (value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (_isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
@@ -586,7 +593,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (value.isNotEmpty && _isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
@@ -617,14 +625,20 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
+
+    // Handle public album deep links:
+    // - iOS: Universal Links (https://albums.ente.io/...)
+    // - Android: Custom scheme (ente://albums.ente.io/...) from web join feature
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
-        if (initialUri.toString().contains("albums.ente.io")) {
+        if (_isPublicAlbumUrl(initialUri.toString()) &&
+            (Platform.isIOS ||
+                (Platform.isAndroid && initialUri.scheme == "ente"))) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
-            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+            "Ignoring deep link: $initialUri",
           );
         }
       } else {
@@ -639,11 +653,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (uri.toString().contains("albums.ente.io")) {
+          if (_isPublicAlbumUrl(uri.toString()) &&
+              (Platform.isIOS ||
+                  (Platform.isAndroid && uri.scheme == "ente"))) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
-              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+              "Ignoring deep link: $uri",
             );
           }
         } else {
@@ -654,6 +670,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         _logger.severe("Error while getting public album deep link: $err");
       },
     );
+  }
+
+  bool _isPublicAlbumUrl(String url) {
+    return url.contains("albums.ente.io");
   }
 
   @override
