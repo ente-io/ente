@@ -2214,8 +2214,8 @@ class CollectionsService {
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
       Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));
+          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom", type: EventType.deletedFromRemote,));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom", type: EventType.deletedFromRemote,));
     }
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
@@ -2247,9 +2247,10 @@ class CollectionsService {
         collectionID,
         files,
         "suggestDelete",
+        type: EventType.deletedFromRemote,
       ),
     );
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "suggestDelete"));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "suggestDelete", type: EventType.deletedFromRemote,));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
