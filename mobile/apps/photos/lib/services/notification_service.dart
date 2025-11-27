@@ -151,11 +151,14 @@ class NotificationService {
     String payload = "ente://home",
     required DateTime dateTime,
     Duration? timeoutDurationAndroid,
+    bool logSchedule = true,
   }) async {
     try {
-      _logger.info(
-        "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
-      );
+      if (logSchedule) {
+        _logger.info(
+          "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
+        );
+      }
       await initTimezones();
       if (!hasGrantedPermissions()) {
         _logger.warning("Notification permissions not granted");
@@ -165,7 +168,9 @@ class NotificationService {
           return;
         }
       } else {
-        _logger.info("Notification permissions already granted");
+        if (logSchedule) {
+          _logger.info("Notification permissions already granted");
+        }
       }
       final androidSpecs = AndroidNotificationDetails(
         channelID,
@@ -198,9 +203,11 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: payload,
       );
-      _logger.info(
-        "Scheduled notification with: $title, $message, $channelID, $channelName, $payload for $dateTime",
-      );
+      if (logSchedule) {
+        _logger.info(
+          "Scheduled notification with: $title, $message, $channelID, $channelName, $payload for $dateTime",
+        );
+      }
     } catch (e, s) {
       // For now we're swallowing any exceptions here because we don't want the memories logic to get disturbed
       _logger.severe(

@@ -83,6 +83,9 @@ class ActivityService {
       );
       final rituals = await _loadRituals();
       if (scheduleAllRituals) {
+        _logger.info(
+          "Scheduling ritual reminders for ${rituals.length} rituals (startup refresh)",
+        );
         for (final ritual in rituals) {
           await _scheduleRitualNotifications(ritual);
         }
@@ -305,6 +308,9 @@ class ActivityService {
   }
 
   Future<void> _scheduleRitualNotifications(Ritual ritual) async {
+    _logger.info(
+      "Scheduling ritual reminders for ritual ${ritual.id} (save path)",
+    );
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: ritual.id,
     );
@@ -344,6 +350,7 @@ class ActivityService {
           },
         ).toString(),
         dateTime: scheduledDate,
+        logSchedule: false,
       );
       scheduled += 1;
     }
