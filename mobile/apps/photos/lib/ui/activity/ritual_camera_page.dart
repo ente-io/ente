@@ -3,12 +3,14 @@ import "dart:io";
 
 import "package:camera/camera.dart";
 import "package:flutter/material.dart";
+import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/text_style.dart";
 import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/activity/activity_screen.dart";
@@ -16,6 +18,8 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
+
+enum _CameraScreenMode { capture, review }
 
 class RitualCameraPage extends StatefulWidget {
   const RitualCameraPage({
@@ -36,6 +40,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   CameraController? _controller;
   List<CameraDescription> _cameras = <CameraDescription>[];
   CameraDescription? _activeCamera;
+  Ritual? _ritual;
+  _CameraScreenMode _mode = _CameraScreenMode.capture;
+  int _selectedIndex = 0;
   bool _pausedForNavigation = false;
   bool _initializing = true;
   bool _capturing = false;
@@ -52,18 +59,24 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   Timer? _focusHideTimer;
   Timer? _zoomHintTimer;
   bool _showZoomHint = false;
+  static const int _maxCaptures = 20;
+  late final VoidCallback _activityListener;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _activityListener = _syncRitualFromActivity;
+    activityService.stateNotifier.addListener(_activityListener);
     _loadAlbum();
+    _syncRitualFromActivity();
     _initializeCamera();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    activityService.stateNotifier.removeListener(_activityListener);
     _focusHideTimer?.cancel();
     _zoomHintTimer?.cancel();
     _controller?.dispose();
@@ -93,6 +106,22 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     if (mounted) {
       setState(() {
         _album = collection;
+      });
+    }
+  }
+
+  void _syncRitualFromActivity() {
+    final rituals = activityService.stateNotifier.value.rituals;
+    Ritual? match;
+    for (final ritual in rituals) {
+      if (ritual.id == widget.ritualId) {
+        match = ritual;
+        break;
+      }
+    }
+    if (match != null && mounted) {
+      setState(() {
+        _ritual = match;
       });
     }
   }
@@ -195,6 +224,27 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
+  Future<void> _onShutterTap() async {
+    if (_captures.length >= _maxCaptures) {
+      if (mounted) {
+        showShortToast(context, "You can add up to $_maxCaptures photos.");
+      }
+      return;
+    }
+    final int previousCount = _captures.length;
+    await _takePicture();
+    if (!mounted) return;
+    final int newCount = _captures.length;
+    if (newCount > previousCount) {
+      setState(() {
+        _selectedIndex = newCount - 1;
+        if (previousCount == 0) {
+          _mode = _CameraScreenMode.review;
+        }
+      });
+    }
+  }
+
   Future<void> _onAccept() async {
     if (_captures.isEmpty) {
       showShortToast(context, "Capture at least one photo first.");
@@ -276,6 +326,39 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
+  void _enterReview() {
+    if (_captures.isEmpty) return;
+    setState(() {
+      _mode = _CameraScreenMode.review;
+      _selectedIndex = _captures.length - 1;
+    });
+  }
+
+  void _returnToCapture() {
+    setState(() {
+      _mode = _CameraScreenMode.capture;
+    });
+  }
+
+  void _removeCapture(int index) {
+    if (index < 0 || index >= _captures.length) return;
+    final file = _captures[index];
+    try {
+      File(file.path).deleteSync();
+    } catch (_) {
+      // best-effort cleanup
+    }
+    setState(() {
+      _captures.removeAt(index);
+      if (_captures.isEmpty) {
+        _mode = _CameraScreenMode.capture;
+        _selectedIndex = 0;
+      } else {
+        _selectedIndex = index.clamp(0, _captures.length - 1);
+      }
+    });
+  }
+
   void _cleanupCaptures([List<XFile>? files]) {
     final targets = files ?? _captures;
     for (final capture in targets) {
@@ -286,13 +369,6 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       }
     }
     _captures = <XFile>[];
-  }
-
-  void _onDiscard() {
-    _cleanupCaptures();
-    setState(() {
-      _captures = <XFile>[];
-    });
   }
 
   Future<void> _pausePreview() async {
@@ -328,14 +404,14 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   @override
   Widget build(BuildContext context) {
     if (!flagService.ritualsFlag) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text("Ritual capture"),
-        ),
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text("Rituals are currently limited to internal users."),
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Text("Rituals are currently limited to internal users."),
+            ),
           ),
         ),
       );
@@ -345,102 +421,35 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     final bool isReady = _controller != null &&
         _controller!.value.isInitialized &&
         !_initializing;
+    final bool hasCaptures = _captures.isNotEmpty;
+    final XFile? selectedCapture =
+        hasCaptures && _selectedIndex < _captures.length
+            ? _captures[_selectedIndex]
+            : null;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_album?.displayName ?? "Ritual capture"),
-        actions: [
-          IconButton(
-            onPressed: _captures.isEmpty || _saving ? null : _onDiscard,
-            icon: const Icon(Icons.refresh),
-            tooltip: "Discard and retake",
-          ),
-          IconButton(
-            onPressed: (_cameras.length < 2 || _saving || _initializing)
-                ? null
-                : _switchCamera,
-            icon: const Icon(Icons.cameraswitch_rounded),
-            tooltip: "Switch camera",
-          ),
-        ],
-      ),
+      backgroundColor: Colors.black,
       body: SafeArea(
-        child: Column(
+        bottom: false,
+        child: Stack(
           children: [
-            Expanded(
-              child: Container(
-                color: Colors.black,
-                child: Center(
-                  child: _buildCameraArea(isReady, colorScheme),
-                ),
-              ),
+            Positioned.fill(
+              child: _mode == _CameraScreenMode.capture
+                  ? _buildCameraArea(isReady, colorScheme)
+                  : _buildReviewArea(selectedCapture),
             ),
-            if (_album != null || widget.albumId != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.photo_album_outlined,
-                      color: colorScheme.textMuted,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        _album?.displayName ??
-                            "Album ID ${widget.albumId ?? "-"}",
-                        style: textTheme.smallMuted,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (_captures.isNotEmpty) _CapturedStrip(captures: _captures),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: (_captures.isNotEmpty && !_saving)
-                          ? _onDiscard
-                          : null,
-                      child: const Text("Retake"),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  _CaptureButton(
-                    onTap: _capturing || _saving || !isReady
-                        ? null
-                        : () async {
-                            await _takePicture();
-                          },
-                    busy: _capturing,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed:
-                          (_captures.isNotEmpty && !_saving) ? _onAccept : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary500,
-                        foregroundColor: colorScheme.backgroundBase,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: _saving
-                          ? SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: colorScheme.backgroundBase,
-                              ),
-                            )
-                          : const Text("Add to album"),
-                    ),
-                  ),
-                ],
-              ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildTopBar(textTheme),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _mode == _CameraScreenMode.capture
+                  ? _buildCaptureControls(colorScheme, isReady)
+                  : _buildReviewControls(colorScheme, textTheme),
             ),
           ],
         ),
@@ -448,9 +457,55 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     );
   }
 
+  Widget _buildTopBar(EnteTextTheme textTheme) {
+    final String title = _ritual?.title.trim().isNotEmpty == true
+        ? _ritual!.title.trim()
+        : "Take a photo";
+    final String icon = _ritual?.icon.isNotEmpty == true ? _ritual!.icon : "📸";
+    return Container(
+      color: Colors.black,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  icon,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: textTheme.smallBold.copyWith(color: Colors.white),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          _RoundIconButton(
+            onTap: () => Navigator.of(context).maybePop(),
+            icon: Icons.close,
+            background: Colors.white.withValues(alpha: 0.12),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCameraArea(bool isReady, EnteColorScheme colorScheme) {
     if (_initializing) {
-      return const CircularProgressIndicator();
+      return const Center(child: CircularProgressIndicator());
     }
     if (_error != null) {
       return Padding(
@@ -504,6 +559,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 _focusPointRel!.dy * (constraints.maxWidth / previewAspect),
               );
 
+        final Size previewSize =
+            Size(constraints.maxWidth, constraints.maxWidth / previewAspect);
+
         return Listener(
           onPointerDown: (_) => _pointers++,
           onPointerUp: (_) => _pointers--,
@@ -514,8 +572,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
-                    width: constraints.maxWidth,
-                    height: constraints.maxWidth / previewAspect,
+                    width: previewSize.width,
+                    height: previewSize.height,
                     child: CameraPreview(
                       _controller!,
                       child: GestureDetector(
@@ -524,15 +582,17 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                         onScaleUpdate: _handleScaleUpdate,
                         onTapDown: (details) => _onViewFinderTap(
                           details,
-                          BoxConstraints.tight(
-                            Size(
-                              constraints.maxWidth,
-                              constraints.maxWidth / previewAspect,
-                            ),
-                          ),
+                          BoxConstraints.tight(previewSize),
                         ),
                       ),
                     ),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: CustomPaint(
+                    painter: _GridPainter(),
                   ),
                 ),
               ),
@@ -592,6 +652,183 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildReviewArea(XFile? selectedCapture) {
+    if (selectedCapture == null) {
+      return Container(
+        color: Colors.black,
+        child: const Center(
+          child: Text(
+            "No photos yet",
+            style: TextStyle(color: Colors.white70),
+          ),
+        ),
+      );
+    }
+    return Container(
+      color: Colors.black,
+      child: Image.file(
+        File(selectedCapture.path),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      ),
+    );
+  }
+
+  Widget _buildCaptureControls(
+    EnteColorScheme colorScheme,
+    bool isReady,
+  ) {
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bool canCapture =
+        !_capturing && !_saving && isReady && _captures.length < _maxCaptures;
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomPadding),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.88),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 96,
+            child: _captures.isEmpty
+                ? const SizedBox.shrink()
+                : _StackedPreview(
+                    captures: _captures,
+                    onTap: _enterReview,
+                  ),
+          ),
+          Expanded(
+            child: Center(
+              child: _ShutterButton(
+                enabled: canCapture,
+                busy: _capturing,
+                onTap: canCapture ? _onShutterTap : null,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 96,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (_captures.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _ConfirmChip(
+                      count: _captures.length,
+                      onTap: _enterReview,
+                    ),
+                  ),
+                _RoundIconButton(
+                  onTap: (_cameras.length < 2 || _saving || _initializing)
+                      ? null
+                      : _switchCamera,
+                  icon: Icons.cameraswitch_rounded,
+                  background: Colors.white.withValues(alpha: 0.12),
+                  iconColor: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewControls(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bool multi = _captures.length > 1;
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomPadding),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.88),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (multi) ...[
+            SizedBox(
+              height: 90,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _captures.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final capture = _captures[index];
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                    child: _ReviewThumb(
+                      file: capture,
+                      selected: index == _selectedIndex,
+                      onRemove: () => _removeCapture(index),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          Row(
+            children: [
+              _RoundIconButton(
+                onTap: _saving ? null : _returnToCapture,
+                icon: Icons.add_photo_alternate_outlined,
+                background: Colors.white.withValues(alpha: 0.12),
+                iconColor: Colors.white,
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed:
+                    (_captures.isNotEmpty && !_saving) ? _onAccept : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: _saving
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: colorScheme.textBase,
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.check_circle_outline),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Add to album",
+                            style: textTheme.bodyBold
+                                .copyWith(color: Colors.black),
+                          ),
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -666,86 +903,268 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   }
 }
 
-class _CapturedStrip extends StatelessWidget {
-  const _CapturedStrip({required this.captures});
+class _StackedPreview extends StatelessWidget {
+  const _StackedPreview({
+    required this.captures,
+    required this.onTap,
+  });
 
   final List<XFile> captures;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return SizedBox(
-      height: 96,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        itemCount: captures.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final file = captures[index];
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 80,
-              height: 80,
-              color: colorScheme.fillFaintPressed,
-              child: Image.file(
-                File(file.path),
-                fit: BoxFit.cover,
+    final display = captures.reversed.take(2).toList();
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        height: 64,
+        width: 74,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: display.asMap().entries.map((entry) {
+            final index = entry.key;
+            final capture = entry.value;
+            final double offset = index * -6;
+            return Positioned(
+              left: offset,
+              top: offset.abs() / 2,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 1.5,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Image.file(
+                    File(capture.path),
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 }
 
-class _CaptureButton extends StatelessWidget {
-  const _CaptureButton({
-    required this.onTap,
-    required this.busy,
-  });
+class _ConfirmChip extends StatelessWidget {
+  const _ConfirmChip({required this.count, required this.onTap});
 
-  final VoidCallback? onTap;
-  final bool busy;
+  final int count;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 72,
-        height: 72,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: onTap == null
-              ? colorScheme.fillMuted
-              : colorScheme.backgroundBase,
-          border: Border.all(
-            color: colorScheme.primary500,
-            width: 3,
-          ),
+          color: const Color(0xFF08C225),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.16),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Center(
-          child: busy
-              ? CircularProgressIndicator(
-                  color: colorScheme.primary500,
-                  strokeWidth: 3,
-                )
-              : Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: onTap == null
-                        ? colorScheme.strokeFaint
-                        : colorScheme.primary500,
-                  ),
-                ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.check,
+              size: 18,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              "$count",
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _ShutterButton extends StatelessWidget {
+  const _ShutterButton({
+    required this.onTap,
+    required this.enabled,
+    required this.busy,
+  });
+
+  final VoidCallback? onTap;
+  final bool enabled;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 78,
+        height: 78,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white,
+            width: 3,
+          ),
+        ),
+        child: Center(
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: enabled ? Colors.white : Colors.white30,
+            ),
+            child: busy
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3,
+                      color: Colors.black,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RoundIconButton extends StatelessWidget {
+  const _RoundIconButton({
+    required this.onTap,
+    required this.icon,
+    this.background,
+    this.iconColor,
+  });
+
+  final VoidCallback? onTap;
+  final IconData icon;
+  final Color? background;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: background ?? Colors.black.withValues(alpha: 0.1),
+        ),
+        child: Icon(
+          icon,
+          color: iconColor ?? Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewThumb extends StatelessWidget {
+  const _ReviewThumb({
+    required this.file,
+    required this.onRemove,
+    required this.selected,
+  });
+
+  final XFile file;
+  final VoidCallback onRemove;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? Colors.white : Colors.white54,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.file(
+              File(file.path),
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          top: -6,
+          right: -6,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF35151),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              child: const Icon(
+                Icons.close,
+                size: 16,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.12)
+      ..strokeWidth = 1;
+    final double thirdWidth = size.width / 3;
+    final double thirdHeight = size.height / 3;
+    for (int i = 1; i < 3; i++) {
+      canvas.drawLine(
+        Offset(thirdWidth * i, 0),
+        Offset(thirdWidth * i, size.height),
+        paint,
+      );
+      canvas.drawLine(
+        Offset(0, thirdHeight * i),
+        Offset(size.width, thirdHeight * i),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
