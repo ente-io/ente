@@ -620,37 +620,39 @@ class _HomePageState extends UploaderPageState<HomePage>
         final scrollBottomPadding =
             MediaQuery.of(context).padding.bottom + 120.0;
 
-        return SingleChildScrollView(
+        return Padding(
           padding: EdgeInsets.only(
             left: 16.0,
             right: 16.0,
             top: 32.0,
             bottom: scrollBottomPadding,
           ),
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRecentsSection(),
-              ],
-            ),
-          ),
+          child: _recentFiles.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: HomeEmptyStateWidget(),
+                  ),
+                )
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        RecentsSectionWidget(
+                          collections: _filterOutUncategorized(_collections),
+                          recentFiles: _recentFiles,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
         );
       },
-    );
-  }
-
-  Widget _buildRecentsSection() {
-    if (_recentFiles.isEmpty) {
-      return const HomeEmptyStateWidget();
-    }
-    return RecentsSectionWidget(
-      collections: _filterOutUncategorized(_collections),
-      recentFiles: _recentFiles,
     );
   }
 
