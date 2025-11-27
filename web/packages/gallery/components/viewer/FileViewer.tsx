@@ -137,6 +137,12 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     user?: LocalUser;
     /**
+     * Optional z-index for the PhotoSwipe dialog.
+     *
+     * Use this when FileViewer needs to appear above other dialogs/modals.
+     */
+    zIndex?: number;
+    /**
      * The list of files that are currently being displayed in the context in
      * which the file viewer was invoked.
      *
@@ -292,6 +298,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     open,
     onClose,
     user,
+    zIndex,
     files,
     initialIndex,
     disableDownload,
@@ -820,6 +827,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 initialIndex,
                 haveUser,
                 showFullscreenButton,
+                zIndex,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -848,6 +856,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         open,
         onClose,
         user,
+        zIndex,
         initialIndex,
         disableDownload,
         showFullscreenButton,

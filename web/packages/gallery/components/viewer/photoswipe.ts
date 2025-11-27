@@ -92,7 +92,7 @@ export interface FileViewerPhotoSwipeDelegate {
 
 type FileViewerPhotoSwipeOptions = Pick<
     FileViewerProps,
-    "initialIndex" | "showFullscreenButton"
+    "initialIndex" | "showFullscreenButton" | "zIndex"
 > & {
     /**
      * `true` if we're running in the context of a logged in user, and so
@@ -193,6 +193,7 @@ export class FileViewerPhotoSwipe {
         initialIndex,
         haveUser,
         showFullscreenButton,
+        zIndex,
         delegate,
         onClose,
         onAnnotate,
@@ -1658,6 +1659,11 @@ export class FileViewerPhotoSwipe {
         // Initializing PhotoSwipe adds it to the DOM as a dialog-like div with
         // the class "pswp".
         pswp.init();
+
+        // Apply custom z-index if provided.
+        if (zIndex !== undefined && pswp.element) {
+            pswp.element.style.zIndex = String(zIndex);
+        }
     }
 
     /**

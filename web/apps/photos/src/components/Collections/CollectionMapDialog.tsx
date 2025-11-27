@@ -31,13 +31,7 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { t } from "i18next";
 import "leaflet/dist/leaflet.css";
-import React, {
-    Activity,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     calculateOptimalZoom,
     clusterPhotosByProximity,
@@ -551,20 +545,19 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
     return (
         <>
-            <Activity mode={openFileViewer ? "visible" : "hidden"}>
-                <FileViewer
-                    open={openFileViewer}
-                    onClose={handleCloseFileViewer}
-                    initialIndex={currentFileIndex}
-                    files={viewerFiles}
-                    user={user}
-                    onVisualFeedback={() => {
-                        // No-op for map view
-                    }}
-                />
-            </Activity>
+            <FileViewer
+                open={openFileViewer}
+                onClose={handleCloseFileViewer}
+                initialIndex={currentFileIndex}
+                files={viewerFiles}
+                user={user}
+                onVisualFeedback={() => {
+                    // No-op for map view
+                }}
+                zIndex={1301}
+            />
 
-            <Dialog fullScreen open={open && !openFileViewer} onClose={onClose}>
+            <Dialog fullScreen open={open} onClose={onClose}>
                 <Box
                     sx={{
                         position: "relative",
