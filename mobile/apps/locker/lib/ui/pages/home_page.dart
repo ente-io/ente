@@ -5,7 +5,6 @@ import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
-import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
@@ -85,19 +84,9 @@ class CustomLockerAppBar extends StatelessWidget
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onLongPress: () {
-                      sendLogs(
-                        context,
-                        'support@ente.io',
-                        subject: context.l10n.lockerLogs,
-                        body: 'Debug logs for Locker app.\n\n',
-                      );
-                    },
-                    child: Image.asset(
-                      'assets/locker-logo.png',
-                      height: 28,
-                    ),
+                  Image.asset(
+                    'assets/locker-logo.png',
+                    height: 28,
                   ),
                   const SizedBox(width: 48),
                 ],
