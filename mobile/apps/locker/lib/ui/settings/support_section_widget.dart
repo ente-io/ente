@@ -34,7 +34,6 @@ class SupportSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.contactSupport,
-            makeTextBold: true,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
@@ -50,7 +49,6 @@ class SupportSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.suggestFeatures,
-            makeTextBold: true,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
@@ -65,7 +63,6 @@ class SupportSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.reportABug,
-            makeTextBold: true,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {

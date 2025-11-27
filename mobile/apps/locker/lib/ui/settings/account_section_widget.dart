@@ -35,7 +35,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.recoveryKey,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
@@ -69,7 +68,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.changeEmail,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
@@ -96,7 +94,6 @@ class AccountSectionWidget extends StatelessWidget {
       // MenuItemWidget(
       //   captionedTextWidget: CaptionedTextWidget(
       //     title: l10n.changePassword,
-      //     makeTextBold: true,
       //   ),
       //   trailingIcon: Icons.chevron_right_outlined,
       //   onTap: () async {
@@ -125,7 +122,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.logout,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
@@ -136,7 +132,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.deleteAccount,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {

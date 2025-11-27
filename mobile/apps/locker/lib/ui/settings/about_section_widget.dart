@@ -26,7 +26,6 @@ class AboutSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.weAreOpenSource,
-            makeTextBold: true,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
@@ -66,7 +65,6 @@ class AboutMenuItemWidget extends StatelessWidget {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: title,
-        makeTextBold: true,
       ),
       trailingIcon: Icons.chevron_right_outlined,
       onTap: () async {

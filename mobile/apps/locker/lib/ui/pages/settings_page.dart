@@ -1,20 +1,13 @@
-import "dart:io";
-
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
-import "package:locker/ui/settings/about_section_widget.dart";
-import 'package:locker/ui/settings/account_section_widget.dart';
 import "package:locker/ui/settings/app_version_widget.dart";
 import "package:locker/ui/settings/settings_title_bar_widget.dart";
-import "package:locker/ui/settings/social_section_widget.dart";
-import "package:locker/ui/settings/support_section_widget.dart";
-import "package:locker/ui/settings/theme_switch_widget.dart";
+import "package:locker/ui/settings/settings_widgets.dart";
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
@@ -45,7 +38,6 @@ class SettingsPage extends StatelessWidget {
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     final enteTextTheme = getEnteTextTheme(context);
-    const sectionSpacing = SizedBox(height: 8);
     final List<Widget> contents = [];
 
     if (hasLoggedIn) {
@@ -76,33 +68,11 @@ class SettingsPage extends StatelessWidget {
         const SizedBox(height: 12),
         const LegacyCollectionsTrashWidget(),
         const SizedBox(height: 12),
-        const AccountSectionWidget(),
-        sectionSpacing,
       ]);
-
-      // TODO(aman): Re-add after app-lock is implemented w/ Locker designs
-      // contents.addAll([
-      //   const SecuritySectionWidget(),
-      //   sectionSpacing,
-      // ]);
-
-      if (Platform.isAndroid ||
-          Platform.isWindows ||
-          Platform.isLinux ||
-          kDebugMode) {
-        contents.addAll([
-          const ThemeSwitchWidget(),
-          sectionSpacing,
-        ]);
-      }
     }
 
     contents.addAll([
-      const SupportSectionWidget(),
-      sectionSpacing,
-      const SocialSectionWidget(),
-      sectionSpacing,
-      const AboutSectionWidget(),
+      SettingsWidgets(hasLoggedIn: hasLoggedIn),
       const AppVersionWidget(),
       const Padding(
         padding: EdgeInsets.only(bottom: 60),

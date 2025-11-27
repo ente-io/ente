@@ -55,7 +55,6 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
             header: MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: widget.title,
-                makeTextBold: true,
               ),
               isExpandable: true,
               leadingIcon: widget.leadingIcon,

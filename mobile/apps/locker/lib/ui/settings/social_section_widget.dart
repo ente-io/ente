@@ -79,7 +79,6 @@ class SocialsMenuItemWidget extends StatelessWidget {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: text,
-        makeTextBold: true,
       ),
       trailingIcon: Icons.chevron_right_outlined,
       onTap: () async {
