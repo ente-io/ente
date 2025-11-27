@@ -325,6 +325,9 @@ class ActivityService {
       final targetDate = today.add(Duration(days: offset));
       final dayIndex = targetDate.weekday % 7; // Sunday -> 0
       if (!ritual.daysOfWeek[dayIndex]) continue;
+      final icon = ritual.icon.isEmpty ? "📸" : ritual.icon;
+      final title =
+          ritual.title.trim().isEmpty ? icon : "$icon ${ritual.title.trim()}";
       final scheduledDate = DateTime(
         targetDate.year,
         targetDate.month,
@@ -336,11 +339,11 @@ class ActivityService {
         continue;
       }
       await NotificationService.instance.scheduleNotification(
-        ritual.title.isEmpty ? "Time for your ritual" : ritual.title,
-        message: ritual.title,
+        title,
+        message: "Take a photo now",
         id: baseId + scheduled,
         channelID: "ritual_reminders",
-        channelName: "Ritual reminders",
+        channelName: "Rituals",
         payload: Uri(
           scheme: "ente",
           host: "camera",
