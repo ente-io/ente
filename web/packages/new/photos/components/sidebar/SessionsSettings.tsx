@@ -77,7 +77,7 @@ const SessionsSettingsContents: React.FC = () => {
                 title: t("terminate_session"),
                 message: isCurrentDevice
                     ? t("terminate_session_confirm_message_self")
-                    : t("terminate_session_confirm_message"),
+                    : `${t("terminate_session_confirm_message")}: ${session.prettyUA}`,
                 continue: {
                     text: t("terminate"),
                     color: "critical",
