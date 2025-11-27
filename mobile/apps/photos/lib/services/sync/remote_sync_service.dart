@@ -570,13 +570,14 @@ class RemoteSyncService {
   }
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
-    List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
-    if (flagService.enableOnlyBackupFuturePhotos) {
-      originalFiles = filterFilesBasedOnOnlyNew(
-        originalFiles,
-        localSettings.onlyNewSinceEpoch,
-      );
-    }
+    // Note: "only backup new photos" filtering is applied at the local sync
+    // stage (see _syncDeviceCollectionFilesForUpload) where we filter by
+    // localID before setting collectionID. Files that reach here with a
+    // collectionID but no uploadedFileID either:
+    // 1. Passed the only-new filter during auto-backup sync, OR
+    // 2. Were manually added by the user to a collection
+    // In case 2, we should NOT filter them out - user explicitly chose them.
+    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
     if (originalFiles.isEmpty) {
       return originalFiles;
     }
@@ -613,24 +614,6 @@ class RemoteSyncService {
     _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
     return filesToBeUploaded;
-  }
-
-  @visibleForTesting
-  List<EnteFile> filterFilesBasedOnOnlyNew(
-    List<EnteFile> files,
-    int? onlyNewSince,
-  ) {
-    if (onlyNewSince == null) {
-      return files;
-    }
-    return files.where((file) {
-      final creationTime = file.creationTime;
-      if (creationTime == null || creationTime == 0) {
-        // Missing creation time - assume old file, exclude from only-new backups
-        return false;
-      }
-      return creationTime >= onlyNewSince;
-    }).toList();
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
