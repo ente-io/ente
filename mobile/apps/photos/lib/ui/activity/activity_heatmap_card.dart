@@ -42,10 +42,6 @@ class ActivityHeatmapCard extends StatelessWidget {
               ? getEnteColorScheme(context).backgroundElevated2
               : const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: getEnteColorScheme(context).strokeFaint,
-            width: 2,
-          ),
         ),
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         child: Column(
