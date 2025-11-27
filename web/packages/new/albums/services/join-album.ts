@@ -25,42 +25,6 @@ export interface JoinAlbumContext {
 }
 
 /**
- * Store the album context before redirecting to auth.
- * This preserves the album information across the authentication flow.
- */
-export const storeJoinAlbumContext = async (
-    accessToken: string,
-    collectionKey: string,
-    collectionKeyHash: string,
-    collection: Collection,
-) => {
-    // Import the function to get saved JWT token for password-protected albums
-    const { savedPublicCollectionAccessTokenJWT } = await import(
-        "./public-albums-fdb"
-    );
-
-    // Get the JWT token if this is a password-protected album
-    const accessTokenJWT =
-        await savedPublicCollectionAccessTokenJWT(accessToken);
-
-    const context: JoinAlbumContext = {
-        accessToken,
-        collectionKey,
-        collectionKeyHash,
-        collectionID: collection.id,
-    };
-
-    // Add JWT token if present
-    if (accessTokenJWT) {
-        context.accessTokenJWT = accessTokenJWT;
-    }
-
-    const serializedContext = JSON.stringify(context);
-
-    sessionStorage.setItem(JOIN_ALBUM_CONTEXT_KEY, serializedContext);
-};
-
-/**
  * Retrieve stored album context after authentication.
  * Checks sessionStorage for the stored context.
  */
