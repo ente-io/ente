@@ -712,6 +712,25 @@ export class FileViewerPhotoSwipe {
             setTimeout(() => _updateVideoControlsAndPlayback(itemData), 0);
         };
 
+        /**
+         * Handle click on the media-fullscreen-button by intercepting it and
+         * using document-level fullscreen instead.
+         *
+         * The default behavior of media-fullscreen-button puts only the
+         * media-controller element into fullscreen, which hides the PhotoSwipe
+         * UI controls (close, info, navigation, etc.). By using document-level
+         * fullscreen on document.body, all controls remain accessible.
+         */
+        const handleFullscreenButtonClick = (e: Event) => {
+            e.stopPropagation();
+            e.preventDefault();
+            void (
+                document.fullscreenElement
+                    ? document.exitFullscreen()
+                    : document.body.requestFullscreen()
+            );
+        };
+
         const _updateVideoControlsAndPlayback = (itemData: ItemData) => {
             const container = mediaControlsContainerElement;
             const controls =
@@ -1312,6 +1331,17 @@ export class FileViewerPhotoSwipe {
                     if (menu instanceof MediaChromeMenu) {
                         menu.addEventListener("change", onVideoQualityChange);
                     }
+                    // Override the media-fullscreen-button to use document-level
+                    // fullscreen instead of element-level fullscreen. This
+                    // ensures the PhotoSwipe UI controls remain accessible.
+                    const fullscreenButton = element.querySelector(
+                        "media-fullscreen-button",
+                    );
+                    fullscreenButton?.addEventListener(
+                        "click",
+                        handleFullscreenButtonClick,
+                        { capture: true },
+                    );
                     pswp.on("change", () =>
                         updateVideoControlsAndPlayback(currSlideData()),
                     );
