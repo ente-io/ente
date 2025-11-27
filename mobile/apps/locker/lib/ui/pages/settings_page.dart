@@ -6,6 +6,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
 import "package:locker/ui/settings/about_section_widget.dart";
 import 'package:locker/ui/settings/account_section_widget.dart';
@@ -73,6 +74,7 @@ class SettingsPage extends StatelessWidget {
         const SizedBox(height: 12),
         const UsageCardWidget(),
         const SizedBox(height: 12),
+        const LegacyCollectionsTrashWidget(),
         const AccountSectionWidget(),
         sectionSpacing,
       ]);
