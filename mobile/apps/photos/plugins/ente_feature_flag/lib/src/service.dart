@@ -89,11 +89,15 @@ class FlagService {
   bool get enableOnlyBackupFuturePhotos => internalUser;
 
   bool get facesTimeline => internalUser;
-
-  Future<void> refreshFlags() async {
-    await _fetch();
-  }
   bool get ritualsFlag => internalUser;
+
+  Future<void> tryRefreshFlags() async {
+    try {
+      await _fetch();
+    } catch (e) {
+      debugPrint("Failed to refresh flags: $e");
+    }
+  }
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

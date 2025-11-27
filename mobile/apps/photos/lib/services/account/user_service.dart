@@ -418,7 +418,7 @@ class UserService {
           throw Exception("unexpected response during passkey verification");
         }
         await dialog.hide();
-        await _refreshRemoteFlagsBlocking();
+        await flagService.tryRefreshFlags();
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(AccountConfiguredEvent());
       }
@@ -805,7 +805,7 @@ class UserService {
             Configuration.instance.getKeyAttributes()!,
             keyEncryptionKey: keyEncryptionKey,
           );
-          await _refreshRemoteFlagsBlocking();
+          await flagService.tryRefreshFlags();
           Configuration.instance.resetVolatilePassword();
           page = const HomeWidget();
         } else {
@@ -1285,14 +1285,6 @@ class UserService {
     } catch (e, s) {
       _logger.severe("failed to fetch families token", e, s);
       rethrow;
-    }
-  }
-
-  Future<void> _refreshRemoteFlagsBlocking() async {
-    try {
-      await flagService.refreshFlags();
-    } catch (e, s) {
-      _logger.warning("Failed to refresh remote feature flags", e, s);
     }
   }
 
