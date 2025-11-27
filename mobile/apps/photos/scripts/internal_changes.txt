@@ -1,7 +1,11 @@
-- Laurens: Improve UI for merging cluster with person
-- Laurens: Improve scroll position for similar images after bulk delete
+- Neeraj: (i) Allow owner and admins to suggest delete. Suggestion can be reviewed from Free up space
+- Neeraj: (i) Allow admins to remove any photo from shared albums
+- Laurens: Simplify album search by adding search bars to album and sharing tabs
+- Ashil: Add option to enable/disable swipe-to-select in Settings > General > Gallery, defaults to disabled for Samsung S-series devices (2018+) due to gesture conflicts
+- Laurens: Add ability to pin Persons or hide them from home gallery memories
+- Laurens: Minor tweaks to Ente Rewind
+- Laurens: (i) People Memory Lane feature
 - Neeraj: (i) Show public link to album participants
 - Neeraj: (i) Admin role, only enables participant management. Photos management WIP.
 - Prateek: (i) Optimize home widget image quality with V2 implementation (1024px vs 512px, uses PhotoManager thumbnails for local files, isolate processing for remote images)
-- Neeraj: (i) Safeguards for Bitflip errors (md5, immedidate decryption)
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking

@@ -1385,8 +1385,6 @@
   "appLockDescriptions": "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio do aplicativo, defina uma senha de acesso no dispositivo ou bloqueie sua tela nas opções do sistema.",
   "authToViewPasskey": "Autentique-se para ver sua chave de acesso",
-  "loopVideoOn": "Repetir vídeo ativado",
-  "loopVideoOff": "Repetir vídeo desativado",
   "localSyncErrorMessage": "Ocorreu um erro devido à sincronização de localização das fotos estar levando mais tempo que o esperado. Entre em contato conosco.",
   "showPerson": "Mostrar pessoa",
   "sort": "Ordenar",

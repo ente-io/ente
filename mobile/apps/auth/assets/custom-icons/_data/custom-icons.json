@@ -270,6 +270,10 @@
       ]
     },
     {
+      "title": "Borrowell",
+      "slug": "borrowell"
+    },
+    {
       "title": "Brave Creators",
       "slug": "brave_creators",
       "altNames": [
@@ -350,6 +354,10 @@
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
+    },
+    {
+      "title": "Chexy",
+      "slug": "chexy"
     },
     {
       "title": "Chucklefish"
@@ -546,6 +554,10 @@
       "altNames": [
         "Murena"
       ]
+    },
+    {
+      "title": "Ecobee",
+      "slug": "ecobee"
     },
     {
       "title": "emeritihealth",
@@ -789,6 +801,10 @@
     {
       "title": "ID.me",
       "slug": "id_me"
+    },
+    {
+      "title": "IDrive",
+      "slug": "idrive"
     },
     {
       "title": "ImmoScout24",
@@ -1249,7 +1265,7 @@
     {
       "title": "Parallels",
       "slug": "parallels",
-      "hex": "#E61E25",
+      "hex": "E61E25",
       "altNames": ["Parallels Desktop", "Parallels VM"]
     },
     {
@@ -1382,6 +1398,10 @@
         "七牛云",
         "qiniu"
       ]
+    },
+    {
+      "title": "Questrade",
+      "slug": "questrade"
     },
     {
       "title": "R10.net",
@@ -1838,6 +1858,15 @@
   "altNames": ["VHV", "VHV Versicherung"]
     },
     {
+      "title": "Via Rail",
+      "slug": "via_rail",
+      "altNames": [
+        "Via",
+        "VIA Rail",
+        "Via Rail Canada"
+      ]
+    },
+    {
       "title": "Vikunja"
     },
     {
@@ -2053,6 +2082,23 @@
         "International Business Machines",
         "IBMid"
       ]
+    },
+    {
+      "title": "Peking University",
+      "slug": "peking_university",
+      "altNames": [
+        "北京大学",
+        "PKU",
+        "Peking Univ"
+      ]
+    },
+    {
+      "title": "Netim",
+      "slug": "netim"
+    },
+    {
+      "title": "Wordfence",
+      "slug": "wordfence"
     }
   ]
 }

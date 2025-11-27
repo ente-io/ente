@@ -180,7 +180,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                             textAlign: TextAlign.justify,
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .bodyLarge,
+                                                .bodyLarge
+                                                ?.copyWith(
+                                                  color: Colors.white,
+                                                ),
                                           ),
                                         );
 
@@ -325,12 +328,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       await _recoveryKeyFile.delete();
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [
-          XFile(_recoveryKeyFile.path),
-        ],
-      ),
+    await shareFiles(
+      [
+        XFile(
+          _recoveryKeyFile.path,
+          mimeType: 'text/plain',
+        ),
+      ],
+      context: context,
     );
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {

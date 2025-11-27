@@ -7,6 +7,9 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Sinu kaheastmelise autentimise koodide turvaline varundus",
+  "featureBackupCodes": "Läbivalt krüptitud varundus ja sünkroonimine",
+  "featureOpenSource": "Avatud lähtekoodiga ja\nauditeeritud turvaekspertide poolt",
+  "signUp": "Loo konto ja liitu",
   "onBoardingGetStarted": "Alusta",
   "setupFirstAccount": "Lisa oma esimene kasutajakonto",
   "importScanQrCode": "Skanneeri QR-koodi",

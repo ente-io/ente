@@ -1,3 +1,4 @@
+import ReplayIcon from "@mui/icons-material/Replay";
 import { useBaseContext } from "ente-base/context";
 import {
     isSaveComplete,
@@ -86,31 +87,41 @@ export const DownloadStatusNotifications: React.FC<
         }
     };
 
-    return saveGroups.map((group, index) => (
-        <Notification
-            key={group.id}
-            horizontal="left"
-            sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
-            open={true}
-            onClose={createOnClose(group)}
-            keepOpenOnClick
-            attributes={{
-                color: isSaveCompleteWithErrors(group)
-                    ? "critical"
-                    : "secondary",
-                title: isSaveCompleteWithErrors(group)
-                    ? t("download_failed")
-                    : isSaveComplete(group)
-                      ? t("download_complete")
-                      : t("downloading_album", { name: group.title }),
-                caption: isSaveComplete(group)
-                    ? group.title
-                    : t("download_progress", {
-                          count: group.success + group.failed,
-                          total: group.total,
-                      }),
-                onClick: createOnClick(group),
-            }}
-        />
-    ));
+    return saveGroups.map((group, index) => {
+        const hasErrors = isSaveCompleteWithErrors(group);
+        const canRetry = hasErrors && !!group.retry;
+        const failedTitle = `${t("download_failed")} (${group.failed}/${group.total})`;
+
+        return (
+            <Notification
+                key={group.id}
+                horizontal="left"
+                sx={{ "&&": { bottom: `${index * 80 + 20}px` } }}
+                open={true}
+                onClose={createOnClose(group)}
+                keepOpenOnClick
+                attributes={{
+                    color: hasErrors ? "critical" : "secondary",
+                    title: hasErrors
+                        ? failedTitle
+                        : isSaveComplete(group)
+                          ? t("download_complete")
+                          : t("downloading_album", { name: group.title }),
+                    caption: isSaveComplete(group)
+                        ? group.title
+                        : t("download_progress", {
+                              count: group.success + group.failed,
+                              total: group.total,
+                          }),
+                    onClick: createOnClick(group),
+                    endIcon: canRetry ? (
+                        <ReplayIcon titleAccess={t("retry")} />
+                    ) : undefined,
+                    onEndIconClick: canRetry
+                        ? () => group.retry?.()
+                        : undefined,
+                }}
+            />
+        );
+    });
 };

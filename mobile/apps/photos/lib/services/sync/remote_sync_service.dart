@@ -27,6 +27,7 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/language_service.dart";
 import 'package:photos/services/local_file_update_service.dart';
@@ -127,6 +128,9 @@ class RemoteSyncService {
       }
       await _pullDiff();
       await trashSyncService.syncTrash();
+      if (flagService.enableAdminRole) {
+        await _collectionsService.movePendingRemovalActionsToUncategorized();
+      }
       if (!hasSyncedBefore) {
         await _prefs.setBool(_isFirstRemoteSyncDone, true);
         await syncDeviceCollectionFilesForUpload();

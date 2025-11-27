@@ -246,7 +246,7 @@ class _CapsuleFormFieldState extends State<CapsuleFormField> {
   }
 }
 
-class CapsuleDisplayField extends StatelessWidget {
+class CapsuleDisplayField extends StatefulWidget {
   const CapsuleDisplayField({
     super.key,
     required this.labelText,
@@ -268,18 +268,28 @@ class CapsuleDisplayField extends StatelessWidget {
   final EdgeInsets contentPadding;
 
   @override
+  State<CapsuleDisplayField> createState() => _CapsuleDisplayFieldState();
+}
+
+class _CapsuleDisplayFieldState extends State<CapsuleDisplayField> {
+  bool _isVisible = false;
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final displayValue = isSecret ? '••••••••' : value;
-    final textLineHeight = lineHeight ?? ((maxLines ?? 1) > 1 ? 1.5 : 1.3);
+    final displayValue = (widget.isSecret && !_isVisible)
+        ? '•' * widget.value.length
+        : widget.value;
+    final textLineHeight =
+        widget.lineHeight ?? ((widget.maxLines ?? 1) > 1 ? 1.5 : 1.3);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (labelText.isNotEmpty) ...[
+        if (widget.labelText.isNotEmpty) ...[
           Text(
-            labelText,
+            widget.labelText,
             style: textTheme.body,
           ),
           const SizedBox(height: 8),
@@ -290,37 +300,58 @@ class CapsuleDisplayField extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
           ),
           child: Padding(
-            padding: contentPadding,
+            padding: widget.contentPadding,
             child: Row(
-              crossAxisAlignment: (maxLines ?? 1) > 1
+              crossAxisAlignment: (widget.maxLines ?? 1) > 1
                   ? CrossAxisAlignment.start
                   : CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: isSecret
+                  child: (widget.isSecret && !_isVisible)
                       ? Text(
                           displayValue,
                           style:
                               textTheme.body.copyWith(height: textLineHeight),
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          overflow: TextOverflow.clip,
                         )
                       : SelectableText(
                           displayValue,
                           style:
                               textTheme.body.copyWith(height: textLineHeight),
-                          maxLines: maxLines,
+                          maxLines: widget.maxLines,
                         ),
                 ),
-                if (onCopy != null) ...[
+                if (widget.isSecret) ...[
                   const SizedBox(width: 12),
-                  InkWell(
-                    onTap: onCopy,
-                    borderRadius: BorderRadius.circular(12),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isVisible = !_isVisible;
+                      });
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: colorScheme.fillBase.withOpacity(0.1),
+                        color: colorScheme.fillBase.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _isVisible ? Icons.visibility : Icons.visibility_off,
+                        size: 16,
+                        color: colorScheme.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
+                if (widget.onCopy != null) ...[
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: widget.onCopy,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colorScheme.fillBase.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(

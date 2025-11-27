@@ -8,7 +8,6 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -58,7 +57,6 @@ class CustomLockerAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final hasQuery = searchController.text.isNotEmpty;
     final showClearIcon = isSearchActive || hasQuery;
 
@@ -97,17 +95,14 @@ class CustomLockerAppBar extends StatelessWidget
                     onLongPress: () {
                       sendLogs(
                         context,
-                        'vishnu@ente.io',
+                        'support@ente.io',
                         subject: context.l10n.lockerLogs,
                         body: 'Debug logs for Locker app.\n\n',
                       );
                     },
-                    child: Text(
-                      context.l10n.locker,
-                      style: textTheme.h3Bold.copyWith(
-                        color: Colors.white,
-                        fontFamily: 'Montserrat',
-                      ),
+                    child: Image.asset(
+                      'assets/locker-logo.png',
+                      height: 28,
                     ),
                   ),
                   const SizedBox(width: 48),
@@ -133,7 +128,7 @@ class CustomLockerAppBar extends StatelessWidget
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
                     hintStyle: TextStyle(
-                      color: colorScheme.textMuted,
+                      color: colorScheme.iconColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -322,7 +317,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _logger
               .info('Received shared media files via stream: ${value.length}');
           for (var file in value) {
-            _logger.info('Shared file: ${file.path}, type: ${file.type}');
+            _logger.info('Shared file received, type: ${file.type}');
           }
           if (value.isNotEmpty) {
             _handleSharedFiles(value);
@@ -353,7 +348,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _logger
             .info('Found initial shared media files: ${initialMedia.length}');
         for (var file in initialMedia) {
-          _logger.info('Initial shared file: ${file.path}, type: ${file.type}');
+          _logger.info('Initial shared file, type: ${file.type}');
         }
         await _handleSharedFiles(initialMedia);
       } else {
@@ -374,14 +369,14 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     try {
       for (final sharedFile in sharedFiles) {
-        _logger.info('Processing shared file: ${sharedFile.path}');
+        _logger.info('Processing shared file');
         if (sharedFile.path.isNotEmpty) {
           final file = File(sharedFile.path);
           if (await file.exists()) {
-            _logger.info('File exists, uploading: ${sharedFile.path}');
+            _logger.info('File exists, uploading');
             await uploadFiles([file]);
           } else {
-            _logger.warning('Shared file does not exist: ${sharedFile.path}');
+            _logger.warning('Shared file does not exist');
           }
         } else {
           _logger.warning('Shared file has empty path');
@@ -450,7 +445,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   Future<void> _loadRecentFiles(List<Collection> collections) async {
     final allFiles = <EnteFile>[];
 
-    allFiles.addAll(await CollectionService.instance.getAllFiles());
+    for (final collection in collections) {
+      allFiles.addAll(
+        await CollectionService.instance.getFilesInCollection(collection),
+      );
+    }
 
     final uniqueFiles = <EnteFile>[];
     final seenHashes = <String>{};
@@ -495,17 +494,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   void _handleClearSearch() {
-    // Clear text and unfocus to properly dismiss search
+    // Clear text and unfocus before dismissing search
     searchController.clear();
     _searchFocusNode.unfocus();
-    // Simulate ESC key to deactivate search state
-    // ignore: prefer_const_constructors
-    final escapeEvent = KeyDownEvent(
-      physicalKey: PhysicalKeyboardKey.escape,
-      logicalKey: LogicalKeyboardKey.escape,
-      timeStamp: const Duration(seconds: 0),
-    );
-    handleKeyEvent(escapeEvent);
+
+    dismissSearch();
   }
 
   @override

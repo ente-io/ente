@@ -1,8 +1,10 @@
 import 'package:dots_indicator/dots_indicator.dart';
+import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/password_reentry_page.dart';
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import "package:ente_ui/pages/developer_settings_page.dart";
+import "package:ente_ui/pages/web_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +12,6 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
 import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
-import 'package:locker/ui/pages/login_page.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -65,13 +66,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Column(
                       children: [
                         const Padding(padding: EdgeInsets.all(12)),
-                        Text(
-                          l10n.locker,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Image.asset(
+                          'assets/locker-logo.png',
+                          height: 28,
                         ),
                         const Padding(padding: EdgeInsets.all(28)),
                         _getFeatureSlider(context),
@@ -127,15 +124,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
-                  onPressed: () {
-                    showCreateNewAccountDialog(
+                  onPressed: () async {
+                    final result = await showCreateNewAccountDialog(
                       context,
                       title: l10n.unlockLockerPaidPlanTitle,
                       body: l10n.unlockLockerPaidPlanBody,
-                      buttonLabel: l10n.okay,
+                      buttonLabel: l10n.checkoutEntePhotos,
                       assetPath: "assets/file_lock.png",
                       icon: const SizedBox.shrink(),
                     );
+
+                    if (result?.action == ButtonAction.first) {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return WebPage(
+                              l10n.checkoutEntePhotos,
+                              "https://ente.io/",
+                            );
+                          },
+                        ),
+                      );
+                    }
                   },
                   child: Text(
                     l10n.noAccountCta,
@@ -186,7 +196,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _navigateToSignInPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = const LoginPage();
+      page = LoginPage(Configuration.instance);
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {

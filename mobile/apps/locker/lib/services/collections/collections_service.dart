@@ -236,6 +236,21 @@ class CollectionService {
     }
   }
 
+  /// Removes orphaned files that exist in files table but have no collection mappings.
+  /// This is a one-time cleanup for files deleted from trash before the fix was applied.
+  ///
+  /// This migration fix can be removed after a year or so (around Nov 2026)
+  /// once all users have had the corrected trash deletion logic applied.
+  Future<void> cleanupOrphanedFiles() async {
+    try {
+      await _db.cleanupOrphanedFiles();
+      _logger.info("Cleaned up orphaned files from database");
+    } catch (e) {
+      _logger.severe("Failed to cleanup orphaned files: $e");
+      rethrow;
+    }
+  }
+
   /// Adds a file to a collection. By default this triggers a full sync to
   /// update local state. Set [runSync] to false to delay syncing (useful when
   /// adding the same file to multiple collections during an upload).
@@ -246,7 +261,8 @@ class CollectionService {
   }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
-      _logger.info("Added file ${file.title} to collection ${collection.id}");
+      _logger.info(
+          "Added file (ID: ${file.uploadedFileID}) to collection ${collection.id}",);
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -277,8 +293,8 @@ class CollectionService {
       await _db.deleteFilesFromCollection(collection, [file]);
 
       if (runSync) {
-        await sync();
         await TrashService.instance.syncTrash();
+        await sync();
       }
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
@@ -292,7 +308,7 @@ class CollectionService {
         collection,
         newName,
       );
-      _logger.info("Renamed collection ${collection.id} to $newName");
+      _logger.info("Renamed collection ${collection.id}");
       // Let sync update the local state
       await sync();
     } catch (e, s) {
@@ -316,6 +332,9 @@ class CollectionService {
   }
 
   Future<void> _init() async {
+    // One-time cleanup of orphaned files from before the trash deletion fix
+    unawaited(cleanupOrphanedFiles());
+
     // ignore: unawaited_futures
     sync().then((_) {
       if (Configuration.instance.getKey() != null) {
@@ -381,8 +400,9 @@ class CollectionService {
   Future<void> move(
     List<EnteFile> files,
     Collection from,
-    Collection to,
-  ) async {
+    Collection to, {
+    bool runSync = true,
+  }) async {
     if (files.isEmpty) {
       _logger.info("No files to move");
       return;
@@ -404,11 +424,10 @@ class CollectionService {
       // Add to target collection
       await _db.addFilesToCollection(to, files);
 
-      // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent('files_moved'));
-
       // Let sync update the local state to ensure consistency
-      await sync();
+      if (runSync) {
+        await sync();
+      }
     } catch (e, stackTrace) {
       _logger.severe("Failed to move files: $e", e, stackTrace);
       rethrow;
@@ -627,6 +646,7 @@ class CollectionService {
           entry.value,
           collection,
           toCollection,
+          runSync: false,
         );
       }
     }
@@ -720,7 +740,7 @@ class CollectionService {
 
       final random = Random();
       final randomName = availableNames[random.nextInt(availableNames.length)];
-      _logger.info("Selected random unused collection name: $randomName");
+      _logger.info("Selected random unused collection name");
       return randomName;
     } catch (e) {
       _logger.severe("Failed to get random unused collection name: $e");
@@ -754,7 +774,8 @@ class CollectionService {
         collectionKey,
       );
 
-      _logger.info("Successfully decrypted file key for file ${file.title}");
+      _logger.info(
+          "Successfully decrypted file key for file (ID: ${file.uploadedFileID})",);
       return fileKey;
     } catch (e) {
       _logger.severe("Failed to get file key: $e");

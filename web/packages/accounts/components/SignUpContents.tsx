@@ -35,10 +35,11 @@ import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types"
 import { isMuseumHTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { saveMasterKeyInSessionAndSafeStore } from "ente-base/session";
+import { JOIN_ALBUM_CONTEXT_KEY } from "ente-new/albums/services/join-album";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { z } from "zod";
 import { PasswordStrengthHint } from "./PasswordStrength";
@@ -67,6 +68,13 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
     host,
 }) => {
     const [showPassword, setShowPassword] = useState(false);
+    const [isJoinAlbumContext, setIsJoinAlbumContext] = useState(false);
+
+    useEffect(() => {
+        // Check if we're in a join album context
+        const joinAlbumContext = sessionStorage.getItem(JOIN_ALBUM_CONTEXT_KEY);
+        setIsJoinAlbumContext(!!joinAlbumContext);
+    }, []);
 
     const handleToggleShowHidePassword = useCallback(
         () => setShowPassword((show) => !show),
@@ -316,7 +324,9 @@ export const SignUpContents: React.FC<SignUpContentsProps> = ({
 
     return (
         <>
-            <AccountsPageTitle>{t("sign_up")}</AccountsPageTitle>
+            <AccountsPageTitle>
+                {isJoinAlbumContext ? t("signup_to_join_album") : t("sign_up")}
+            </AccountsPageTitle>
             {form}
             <Divider sx={{ mt: 1 }} />
             <AccountsPageFooter>

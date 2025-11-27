@@ -3,9 +3,22 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloseIcon from "@mui/icons-material/Close";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Link, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    DialogTitle,
+    IconButton,
+    Link,
+    Paper,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
+import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
+import { AlbumAddedNotification } from "components/AlbumAddedNotification";
 import { AuthenticateUser } from "components/AuthenticateUser";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
@@ -28,6 +41,7 @@ import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
+import { FilledIconButton } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
@@ -46,6 +60,10 @@ import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
+import {
+    hasPendingAlbumToJoin,
+    processPendingAlbumJoin,
+} from "ente-new/albums/services/join-album";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -168,7 +186,22 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [albumJoinedToast, setAlbumJoinedToast] = useState<{
+        open: boolean;
+        albumId?: number;
+    }>({ open: false });
 
+    /**
+     * Tracks a pending file addition operation.
+     *
+     * Used to temporarily store the file and optional source collection ID
+     * when adding a single file to a collection, allowing the operation
+     * to be completed after any necessary user interactions (like selecting
+     * a target collection).
+     */
+    const pendingSingleFileAdd = useRef<
+        { file: EnteFile; sourceCollectionSummaryID?: number } | undefined
+    >(undefined);
     /**
      * A queue to serialize calls to {@link remoteFilesPull}.
      */
@@ -231,6 +264,14 @@ const Page: React.FC = () => {
     } = useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
         useModalVisibility();
+
+    // Progress UI state for single-file add-to-album from the FileViewer
+    const [addToAlbumProgress, setAddToAlbumProgress] = useState<{
+        open: boolean;
+        phase: AddToAlbumPhase;
+        albumId?: number;
+        albumName?: string;
+    }>({ open: false, phase: "processing" });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
     const onAuthenticateCancelCallback = useRef<(() => void) | undefined>(
@@ -376,8 +417,34 @@ const Page: React.FC = () => {
                 trashItems: await savedTrashItems(),
             });
 
-            // Fetch data from remote.
+            // Check for pending album join BEFORE fetching data
+            let joinedAlbumId: number | null = null;
+
+            if (hasPendingAlbumToJoin()) {
+                try {
+                    const joinedCollectionId = await processPendingAlbumJoin();
+                    if (joinedCollectionId) {
+                        joinedAlbumId = joinedCollectionId;
+                    }
+                } catch (error) {
+                    log.error("Failed to join album", error);
+                    showMiniDialog({
+                        title: t("error"),
+                        message:
+                            t("album_join_failed") +
+                            ": " +
+                            (error as Error).message,
+                    });
+                }
+            }
+
+            // Fetch data from remote (this will include the newly joined album if any)
             await remotePull();
+
+            // Now that data is loaded, show the toast if we joined an album
+            if (joinedAlbumId) {
+                setAlbumJoinedToast({ open: true, albumId: joinedAlbumId });
+            }
 
             // Clear the first load message if needed.
             setIsFirstLoad(false);
@@ -749,15 +816,40 @@ const Page: React.FC = () => {
 
     const handleAlbumNameSubmit = useCallback(
         async (name: string) => {
-            const collection = await createAlbum(name);
-            setPostCreateAlbumOp((postCreateAlbumOp) => {
-                // The function returned by createHandleCollectionOp does its
-                // own progress and error reporting, defer to that.
-                createOnSelectForCollectionOp(postCreateAlbumOp!)(collection);
-                return undefined;
-            });
+            try {
+                const collection = await createAlbum(name);
+
+                if (pendingSingleFileAdd.current) {
+                    await performCollectionOp(
+                        "add",
+                        collection,
+                        [pendingSingleFileAdd.current.file],
+                        pendingSingleFileAdd.current.sourceCollectionSummaryID,
+                    );
+
+                    await remotePull({ silent: true });
+                    // Show custom toast with album name and navigation
+                    setAddToAlbumProgress({
+                        open: true,
+                        phase: "done",
+                        albumId: collection.id,
+                        albumName: collection.name,
+                    });
+                }
+
+                setPostCreateAlbumOp((postCreateAlbumOp) => {
+                    // The function returned by createHandleCollectionOp does its
+                    // own progress and error reporting, defer to that.
+                    createOnSelectForCollectionOp(postCreateAlbumOp!)(
+                        collection,
+                    );
+                    return undefined;
+                });
+            } finally {
+                pendingSingleFileAdd.current = undefined;
+            }
         },
-        [createOnSelectForCollectionOp],
+        [createOnSelectForCollectionOp, remotePull],
     );
 
     const createFileOpHandler = (op: FileOp) => () => {
@@ -1026,6 +1118,72 @@ const Page: React.FC = () => {
         [],
     );
 
+    /**
+     * Handles adding a single file to a collection by opening a collection selector dialog.
+     *
+     * @param file - The EnteFile to be added to a collection
+     * @param sourceCollectionSummaryID - Optional ID of the source collection where the file currently resides
+     *
+     * @remarks
+     * This function stores the pending file operation, displays a collection selector modal,
+     * and handles three scenarios:
+     * - User selects an existing collection: adds the file and triggers a remote pull
+     * - User creates a new collection: sets up post-create operation and shows album name input
+     * - User cancels: clears the pending operation
+     *
+     * The function shows/hides a loading bar during the add operation and handles errors generically.
+     */
+    const handleAddSingleFileToCollection = useCallback(
+        (file: EnteFile, sourceCollectionSummaryID?: number) => {
+            pendingSingleFileAdd.current = { file, sourceCollectionSummaryID };
+
+            const handleSelect = async (collection: Collection) => {
+                try {
+                    // Show add-to-album progress UI for this operation.
+                    setAddToAlbumProgress({ open: true, phase: "processing" });
+                    showLoadingBar();
+                    await performCollectionOp(
+                        "add",
+                        collection,
+                        [file],
+                        sourceCollectionSummaryID,
+                    );
+                    await remotePull({ silent: true });
+                    // Show custom toast with album name and navigation
+                    setAddToAlbumProgress({
+                        open: true,
+                        phase: "done",
+                        albumId: collection.id,
+                        albumName: collection.name,
+                    });
+                } catch (e) {
+                    onGenericError(e);
+                    // Do not show the toast on failure; handled by generic error notification
+                } finally {
+                    pendingSingleFileAdd.current = undefined;
+                    hideLoadingBar();
+                }
+            };
+
+            const handleCreate = () => {
+                setPostCreateAlbumOp("add");
+                showAlbumNameInput();
+            };
+
+            handleOpenCollectionSelector({
+                action: "add",
+                sourceCollectionSummaryID,
+                onSelectCollection: (collection) =>
+                    void handleSelect(collection),
+                onCreateCollection: handleCreate,
+                onCancel: () => {
+                    pendingSingleFileAdd.current = undefined;
+                },
+            });
+        },
+        [handleOpenCollectionSelector, remotePull, onGenericError],
+    );
+
     const showAppDownloadFooter =
         state.collectionFiles.length < 30 && !isInSearchMode;
 
@@ -1256,6 +1414,7 @@ const Page: React.FC = () => {
                     onVisualFeedback={handleVisualFeedback}
                     onSelectCollection={handleSelectCollection}
                     onSelectPerson={handleSelectPerson}
+                    onAddFileToCollection={handleAddSingleFileToCollection}
                 />
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
@@ -1269,7 +1428,67 @@ const Page: React.FC = () => {
                 title={t("new_album")}
                 label={t("album_name")}
                 submitButtonTitle={t("create")}
+                onClose={() => {
+                    // If the user dismisses the album name dialog without
+                    // submitting, clear any pending single-file add so that it
+                    // doesn't leak into a future album creation.
+                    pendingSingleFileAdd.current = undefined;
+                    albumNameInputVisibilityProps.onClose();
+                }}
                 onSubmit={handleAlbumNameSubmit}
+            />
+            <Snackbar
+                open={albumJoinedToast.open}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+                <Paper sx={{ width: "min(360px, 100svw)" }}>
+                    <DialogTitle>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Box>
+                                <Typography variant="h3">
+                                    {t("joined_album")}
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" sx={{ gap: 1 }}>
+                                <FilledIconButton
+                                    onClick={() => {
+                                        if (albumJoinedToast.albumId) {
+                                            dispatch({
+                                                type: "showCollectionSummary",
+                                                collectionSummaryID:
+                                                    albumJoinedToast.albumId,
+                                            });
+                                        }
+                                        setAlbumJoinedToast({ open: false });
+                                    }}
+                                >
+                                    <ArrowForwardIcon />
+                                </FilledIconButton>
+                                <FilledIconButton
+                                    onClick={() =>
+                                        setAlbumJoinedToast({ open: false })
+                                    }
+                                >
+                                    <CloseIcon />
+                                </FilledIconButton>
+                            </Stack>
+                        </Stack>
+                    </DialogTitle>
+                </Paper>
+            </Snackbar>
+            <AlbumAddedNotification
+                open={addToAlbumProgress.open}
+                onClose={() =>
+                    setAddToAlbumProgress((s) => ({ ...s, open: false }))
+                }
+                phase={addToAlbumProgress.phase}
+                albumName={addToAlbumProgress.albumName}
             />
         </FullScreenDropZone>
     );

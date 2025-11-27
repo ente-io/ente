@@ -1365,8 +1365,6 @@
   "appLockDescriptions": "Velg mellom enhetens standard låseskjerm og en egendefinert låseskjerm med en PIN-kode eller passord.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "For å aktivere applås, vennligst angi passord eller skjermlås i systeminnstillingene.",
   "authToViewPasskey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
-  "loopVideoOn": "Gjenta video på",
-  "loopVideoOff": "Gjenta video av",
   "localSyncErrorMessage": "Ser ut som noe gikk galt siden lokal synkronisering av bilder tar lengre tid enn forventet. Vennligst kontakt vårt supportteam",
   "showPerson": "Vis person",
   "sort": "Sorter",

@@ -1365,8 +1365,6 @@
   "appLockDescriptions": "Vyberte si mezi výchozí uzamčenou obrazovkou zařízení a vlastní uzamčenou obrazovkou s PIN kódem nebo heslem.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Chcete-li povolit zámek aplikace, nastavte v nastavení systému přístupový kód zařízení nebo zámek obrazovky.",
   "authToViewPasskey": "Pro zobrazení vašeho přístupového klíče se prosím ověřte",
-  "loopVideoOn": "Přehrát video ve smyčce",
-  "loopVideoOff": "Zrušit přehrávání ve smyčce",
   "localSyncErrorMessage": "Zdá se, že došlo k nějaké chybě, protože synchronizace místních fotografií trvá déle, než se očekávalo. Obraťte se prosím na náš tým podpory",
   "showPerson": "Zobrazit osobu",
   "sort": "Seřadit",

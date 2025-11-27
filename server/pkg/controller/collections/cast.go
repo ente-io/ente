@@ -39,6 +39,14 @@ func (c *CollectionController) GetCastDiff(ctx *gin.Context, sinceTime int64) ([
 		if diff[idx].MagicMetadata != nil {
 			diff[idx].MagicMetadata = nil
 		}
+		// For cast diffs, treat action markers as deleted and strip action details
+		if diff[idx].Action != nil && !diff[idx].IsDeleted {
+			if *diff[idx].Action == ente.ActionRemove || *diff[idx].Action == ente.ActionDeleteSuggested {
+				diff[idx].IsDeleted = true
+			}
+		}
+		diff[idx].Action = nil
+		diff[idx].ActionUserID = nil
 	}
 	return diff, hasMore, nil
 }

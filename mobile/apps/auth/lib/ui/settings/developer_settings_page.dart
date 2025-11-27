@@ -4,6 +4,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_ui/components/centered_constrained_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
@@ -33,45 +34,47 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
       appBar: AppBar(
         title: Text(context.l10n.developerSettings),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _urlController,
-              decoration: InputDecoration(
-                labelText: context.l10n.serverEndpoint,
-                hintText: Configuration.instance.getHttpEndpoint(),
+      body: CenteredConstrainedWidget(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextField(
+                controller: _urlController,
+                decoration: InputDecoration(
+                  labelText: context.l10n.serverEndpoint,
+                  hintText: Configuration.instance.getHttpEndpoint(),
+                ),
+                autofocus: true,
               ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 40),
-            GradientButton(
-              onTap: () async {
-                String url = _urlController.text;
-                _logger.info("Entered endpoint: $url");
-                try {
-                  final uri = Uri.parse(url);
-                  if ((uri.scheme == "http" || uri.scheme == "https")) {
-                    await _ping(url);
-                    await Configuration.instance.setHttpEndpoint(url);
-                    showToast(context, context.l10n.endpointUpdatedMessage);
-                    Navigator.of(context).pop();
-                  } else {
-                    throw const FormatException();
+              const SizedBox(height: 40),
+              GradientButton(
+                onTap: () async {
+                  String url = _urlController.text;
+                  _logger.info("Entered endpoint: $url");
+                  try {
+                    final uri = Uri.parse(url);
+                    if ((uri.scheme == "http" || uri.scheme == "https")) {
+                      await _ping(url);
+                      await Configuration.instance.setHttpEndpoint(url);
+                      showToast(context, context.l10n.endpointUpdatedMessage);
+                      Navigator.of(context).pop();
+                    } else {
+                      throw const FormatException();
+                    }
+                  } catch (e) {
+                    // ignore: unawaited_futures
+                    showErrorDialog(
+                      context,
+                      context.l10n.invalidEndpoint,
+                      context.l10n.invalidEndpointMessage,
+                    );
                   }
-                } catch (e) {
-                  // ignore: unawaited_futures
-                  showErrorDialog(
-                    context,
-                    context.l10n.invalidEndpoint,
-                    context.l10n.invalidEndpointMessage,
-                  );
-                }
-              },
-              text: context.l10n.saveAction,
-            ),
-          ],
+                },
+                text: context.l10n.saveAction,
+              ),
+            ],
+          ),
         ),
       ),
     );

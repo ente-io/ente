@@ -150,6 +150,13 @@ class _LoginPageState extends State<LoginPage> {
             context.l10n.oops,
             context.l10n.unlockLockerPaidPlanBody,
           );
+        } else if (enteErrCode != null &&
+            enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+          await showErrorDialog(
+            context,
+            "We're out of beta seats for now",
+            "This preview access has reached capacity. We'll be opening it to more users soon.",
+          );
         } else {
           await showErrorDialog(
             context,
@@ -262,11 +269,9 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
-        title: Text(
-          l10n.locker,
-          style: textTheme.h3Bold.copyWith(
-            color: colorScheme.primary700,
-          ),
+        title: Image.asset(
+          'assets/locker-logo-blue.png',
+          height: 28,
         ),
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,

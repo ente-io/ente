@@ -170,12 +170,44 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         [activeCollection, onRemotePull],
     );
 
+    const hasAlbumFiles = fileCount > 0;
+
     const confirmDeleteCollection = () => {
+        if (hasAlbumFiles) {
+            showMiniDialog({
+                title: t("delete_album_title"),
+                message: (
+                    <Trans
+                        i18nKey={"delete_album_message"}
+                        components={{
+                            a: (
+                                <Box
+                                    component={"span"}
+                                    sx={{ color: "text.base" }}
+                                />
+                            ),
+                        }}
+                    />
+                ),
+                continue: {
+                    text: t("keep_photos"),
+                    color: "primary",
+                    action: deleteCollectionButKeepFiles,
+                },
+                secondary: {
+                    text: t("delete_photos"),
+                    color: "critical",
+                    action: deleteCollectionAlongWithFiles,
+                },
+            });
+            return;
+        }
+
         showMiniDialog({
             title: t("delete_album_title"),
             message: (
                 <Trans
-                    i18nKey={"delete_album_message"}
+                    i18nKey={"delete_album_message_no_photos"}
                     components={{
                         a: (
                             <Box
@@ -187,12 +219,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 />
             ),
             continue: {
-                text: t("keep_photos"),
-                color: "primary",
-                action: deleteCollectionButKeepFiles,
-            },
-            secondary: {
-                text: t("delete_photos"),
+                text: t("delete_album"),
                 color: "critical",
                 action: deleteCollectionAlongWithFiles,
             },

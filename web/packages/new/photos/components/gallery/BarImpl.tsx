@@ -564,6 +564,18 @@ const CollectionBarCardIcon_ = styled(Overlay)`
     }
 `;
 
+const PersonPinnedIcon = styled(Overlay)`
+    padding: 4px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    color: white;
+    z-index: 1;
+    & > .MuiSvgIcon-root {
+        font-size: 20px;
+    }
+`;
+
 const ActiveIndicator = styled("div")(
     ({ theme }) => `
     height: 3px;
@@ -592,6 +604,13 @@ const PersonCard: React.FC<PersonCardProps> = ({
             onClick={() => onSelectPerson(person.id)}
         >
             {person.name && <CardText>{person.name}</CardText>}
+            {person.isPinned && (
+                <PersonPinnedIcon>
+                    <PushPinIcon
+                        sx={{ "&&": { fontSize: "18px", color: "white" } }}
+                    />
+                </PersonPinnedIcon>
+            )}
         </ItemCard>
         {activePerson?.id === person.id && <ActiveIndicator />}
     </div>

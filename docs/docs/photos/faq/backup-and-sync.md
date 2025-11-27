@@ -184,14 +184,48 @@ Open `Settings > Backup > Backup status` to see:
 - Check the sync status indicator in the bottom right corner
 - Click to expand and see detailed progress
 
+### How does Ente handle media when Optimize iPhone Storage is enabled? {#optimize-iphone-storage}
+
+When Optimize iPhone Storage is enabled, iOS keeps lower-resolution previews on your device. Ente displays those previews during on-device viewing.
+
+However, for backup, Ente always retrieves the original, full-resolution photo or video directly from iCloud. The same full-resolution files will be available when you download them from Ente.
+
 ### Does Ente backup Live Photos from iPhone? {#live-photos-backup}
 
-Yes! Ente backs up both components of Live Photos:
+Yes! Ente fully supports Live Photos from iPhone.
 
-- The photo component
-- The video component
+**What gets backed up:**
 
-Both are preserved in their original quality.
+- The still image (HEIC, JPEG, etc.)
+- The video clip (MOV, MP4, etc.)
+- Both components in their original quality with no compression
+
+**How it works:**
+
+When you back up a Live Photo, Ente automatically detects it by analyzing the file name, file path, and creation date (both components must be created within a day of each other). Once detected, Ente packages both the image and video components together into a single encrypted ZIP file. This keeps the two parts linked together.
+
+Ente uses a special hash (unique identifier) that combines both components, ensuring they remain associated with each other. This means when you download or view your Live Photo later, both parts are always retrieved together.
+
+Because they're stored as one file, you won't see them as separate items in your library - they appear as a single Live Photo, just like on your iPhone.
+
+**How to view:**
+
+- **On mobile**: Long-press a Live Photo to play the video
+- **On web**: Hover over a Live Photo to see it animate
+- **On desktop**: Hover over a Live Photo to play it
+
+**Sharing Live Photos:**
+
+Live Photos behave differently depending on how you share them:
+
+- **Using "Send link"**: The recipient gets the full Live Photo with both image and video components
+- **Using the "Share" option**: Only the still image is shared
+- **Using "Download"**: Downloads the complete Live Photo (image + video)
+- **Using "Share" button to save/download**: Only saves the still image
+
+### Does Ente backup Burst photos? {#burst-photos-backup}
+
+Ente backs up a single primary full-resolution image from the Burst. Additional frames from the Burst sequence are not backed up unless each frame is selected and uploaded.
 
 ## Background Sync
 

@@ -1595,7 +1595,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "23a38887fa6b61330452555f8e686c3a3a1c91a2"
+      resolved-ref: "324f8fbdbc7ae6d326a6d541751b7a895a249089"
       url: "https://github.com/ente-io/media_extension.git"
     source: git
     version: "1.0.2"
@@ -1711,8 +1711,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: b6eb61dd1606f1b140bbfc9f1f5d1af8b27dfc3b
-      resolved-ref: b6eb61dd1606f1b140bbfc9f1f5d1af8b27dfc3b
+      ref: "8dba33ad89eea99683780469bc4d0ec4993d61c3"
+      resolved-ref: "8dba33ad89eea99683780469bc4d0ec4993d61c3"
       url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"

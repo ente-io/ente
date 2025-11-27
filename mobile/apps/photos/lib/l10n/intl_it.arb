@@ -1357,8 +1357,6 @@
   "appLockDescriptions": "Scegli tra la schermata di blocco predefinita del dispositivo e una schermata di blocco personalizzata con PIN o password.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Per abilitare il blocco dell'app, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema.",
   "authToViewPasskey": "Autenticati per visualizzare le tue passkey",
-  "loopVideoOn": "Loop video attivo",
-  "loopVideoOff": "Loop video disattivo",
   "localSyncErrorMessage": "Sembra che qualcosa sia andato storto dal momento che la sincronizzazione delle foto locali richiede più tempo del previsto. Si prega di contattare il nostro team di supporto",
   "showPerson": "Mostra persona",
   "sort": "Ordina",
