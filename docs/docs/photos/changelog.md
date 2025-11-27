@@ -16,8 +16,6 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Fix OCR for HEIC files on Android
 - Fix continuous loading in map view when no images have location data
 
-
-
 ## v1.2.18 (mobile) - Nov 2025
 
 - **Jump to date** - See surrounding photos for any photo by selecting the jump to date option in the file's info pane.
