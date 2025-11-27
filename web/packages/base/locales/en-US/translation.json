@@ -174,6 +174,7 @@
     "error": "Error",
     "note": "Note",
     "offline_message": "You are offline, cached memories are being shown",
+    "network_error": "Network error. Please check your connection.",
     "install": "Install",
     "install_mobile_app": "Install our <a>Android</a> or <b>iOS</b> app to automatically backup all your photos",
     "download_app": "Download desktop app",

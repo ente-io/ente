@@ -8,6 +8,7 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
+import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import {
     getActiveSessions,
     terminateSession,
@@ -19,6 +20,7 @@ import {
     type NestedSidebarDrawerVisibilityProps,
 } from "ente-base/components/mui/SidebarDrawer";
 import { useBaseContext } from "ente-base/context";
+import { isHTTP401Error } from "ente-base/http";
 import { formattedDateTime } from "ente-base/i18n-date";
 import log from "ente-base/log";
 import { savedAuthToken } from "ente-base/token";
@@ -87,11 +89,19 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
             setCurrentToken(token ?? undefined);
         } catch (e) {
             log.error("Failed to fetch active sessions", e);
-            setError(t("generic_error"));
+            if (isHTTP401Error(e)) {
+                showMiniDialog(sessionExpiredDialogAttributes(logout));
+            } else {
+                const isNetworkError =
+                    e instanceof TypeError && e.message === "Failed to fetch";
+                setError(
+                    isNetworkError ? t("network_error") : t("generic_error"),
+                );
+            }
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [logout, showMiniDialog]);
 
     useEffect(() => {
         void fetchSessions();
@@ -118,10 +128,16 @@ const SessionsSettingsContents: React.FC<SessionsSettingsContentsProps> = ({
                                 await fetchSessions();
                             } catch (e) {
                                 log.error("Failed to terminate session", e);
-                                showMiniDialog({
-                                    title: t("error"),
-                                    message: t("terminate_session_failed"),
-                                });
+                                if (isHTTP401Error(e)) {
+                                    showMiniDialog(
+                                        sessionExpiredDialogAttributes(logout),
+                                    );
+                                } else {
+                                    showMiniDialog({
+                                        title: t("error"),
+                                        message: t("terminate_session_failed"),
+                                    });
+                                }
                             }
                         }
                     },
