@@ -38,7 +38,7 @@ Future<void> handleBackupEntryFlow(
   BackupFlowType flowType = BackupFlowType.fullPermission,
 }) async {
   // New flow only for skipped permission users when flag is enabled
-  final shouldUseNewFlow = flagService.enableOnlyBackupFuturePhotos &&
+  final shouldUseNewFlow =
       backupPreferenceService.hasSkippedOnboardingPermission;
 
   if (shouldUseNewFlow) {
@@ -47,7 +47,11 @@ Future<void> handleBackupEntryFlow(
   }
 
   // Otherwise use standard flow based on flowType
-  await _handleStandardFlow(context, isFirstBackup: isFirstBackup, flowType: flowType);
+  await _handleStandardFlow(
+    context,
+    isFirstBackup: isFirstBackup,
+    flowType: flowType,
+  );
 }
 
 /// New flow for users who skipped permission during onboarding.
@@ -67,7 +71,10 @@ Future<void> _handleSkippedPermissionFlow(BuildContext context) async {
   }
 
   // LoadingPhotosWidget handles navigation to folder selection internally
-  await routeToPage(context, const LoadingPhotosWidget(isOnboardingFlow: false));
+  await routeToPage(
+    context,
+    const LoadingPhotosWidget(isOnboardingFlow: false),
+  );
 }
 
 /// Standard backup flow based on flowType.
@@ -84,7 +91,9 @@ Future<void> _handleStandardFlow(
       if (permissionService.hasGrantedLimitedPermissions()) {
         unawaited(PhotoManager.presentLimited());
       } else {
-        unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
+        unawaited(
+          _navigateToFolderSelection(context, isFirstBackup: isFirstBackup),
+        );
       }
 
     case BackupFlowType.fullPermission:
@@ -92,7 +101,9 @@ Future<void> _handleStandardFlow(
       if (!context.mounted) return;
 
       if (permissionService.hasGrantedFullPermission()) {
-        unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
+        unawaited(
+          _navigateToFolderSelection(context, isFirstBackup: isFirstBackup),
+        );
       } else if (Platform.isAndroid) {
         await PhotoManager.openSetting();
       } else {
@@ -127,7 +138,10 @@ Future<void> _navigateToFolderSelection(
   BuildContext context, {
   required bool isFirstBackup,
 }) =>
-    routeToPage(context, BackupFolderSelectionPage(isFirstBackup: isFirstBackup));
+    routeToPage(
+      context,
+      BackupFolderSelectionPage(isFirstBackup: isFirstBackup),
+    );
 
 Future<void> _showPermissionDeniedDialog(BuildContext context) =>
     showChoiceDialog(
