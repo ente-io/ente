@@ -11,6 +11,56 @@ import type { Person } from "ente-new/photos/services/ml/people";
 import type { LocationTag } from "../user-entity";
 
 /**
+ * Represents the unique identifiers for various sidebar actions in the application.
+ *
+ * These IDs are organized into categories:
+ * - `shortcuts.*`: Quick access actions like uncategorized items, archive, hidden items, and trash
+ * - `utility.*`: General utility actions such as account management, folder watching, deduplication, preferences, help, export, and logout
+ * - `account.*`: Account-specific settings including recovery key, two-factor authentication, passkeys, password/email management, and account deletion
+ * - `preferences.*`: User preference options like language, theme, custom domains, map settings, advanced options, ML search, and streamable videos
+ * - `help.*`: Help-related actions including help center, blog, feature requests, support, log viewing, and test upload
+ *
+ * @remarks
+ * This type is used to ensure type safety when referencing sidebar actions throughout the application.
+ */
+export type SidebarActionID =
+    | "shortcuts.uncategorized"
+    | "shortcuts.archive"
+    | "shortcuts.hidden"
+    | "shortcuts.trash"
+    | "utility.account"
+    | "utility.watchFolders"
+    | "utility.deduplicate"
+    | "utility.preferences"
+    | "utility.help"
+    | "utility.export"
+    | "utility.logout"
+    | "account.subscription"
+    | "account.recoveryKey"
+    | "account.twoFactor"
+    | "account.twoFactor.reconfigure"
+    | "account.passkeys"
+    | "account.changePassword"
+    | "account.changeEmail"
+    | "account.deleteAccount"
+    | "account.sessions"
+    | "preferences.language"
+    | "preferences.theme"
+    | "preferences.customDomains"
+    | "preferences.map"
+    | "preferences.advanced"
+    | "preferences.fasterUpload"
+    | "preferences.openOnStartup"
+    | "preferences.mlSearch"
+    | "preferences.streamableVideos"
+    | "help.helpCenter"
+    | "help.blog"
+    | "help.requestFeature"
+    | "help.support"
+    | "help.viewLogs"
+    | "help.testUpload";
+
+/**
  * A search suggestion.
  *
  * These (wrapped up in {@link SearchOption}s) are shown in the search results
@@ -26,6 +76,7 @@ export type SearchSuggestion = { label: string } & (
     | { type: "city"; city: City }
     | { type: "clip"; clipScoreForFileID: Map<number, number> }
     | { type: "person"; person: Person }
+    | { type: "sidebarAction"; actionID: SidebarActionID; path: string[] }
 );
 
 /**

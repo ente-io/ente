@@ -128,7 +128,10 @@ import {
     filterSearchableFiles,
     updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
-import type { SearchOption } from "ente-new/photos/services/search/types";
+import {
+    type SearchOption,
+    type SidebarActionID,
+} from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
@@ -232,6 +235,9 @@ const Page: React.FC = () => {
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
+    const [pendingSidebarAction, setPendingSidebarAction] = useState<
+        SidebarActionID | undefined
+    >(undefined);
 
     /**
      * The last time (epoch milliseconds) when we prompted the user for their
@@ -268,13 +274,46 @@ const Page: React.FC = () => {
     }>({ open: false, phase: "processing" });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+    const onAuthenticateCancelCallback = useRef<(() => void) | undefined>(
+        undefined,
+    );
 
     const authenticateUser = useCallback(
         () =>
-            new Promise<void>((resolve) => {
+            new Promise<void>((resolve, reject) => {
                 onAuthenticateCallback.current = resolve;
+                onAuthenticateCancelCallback.current = reject;
                 showAuthenticateUser();
             }),
+        [],
+    );
+
+    const handleCloseAuthenticateUser = useCallback(() => {
+        authenticateUserVisibilityProps.onClose();
+        // Reject the pending authentication promise so the caller knows
+        // authentication was cancelled (e.g., user clicked backdrop).
+        if (onAuthenticateCancelCallback.current) {
+            onAuthenticateCancelCallback.current();
+            onAuthenticateCancelCallback.current = undefined;
+        }
+    }, [authenticateUserVisibilityProps.onClose]);
+
+    const handleAuthenticate = useCallback(() => {
+        // Clear the cancel callback first since authentication succeeded.
+        onAuthenticateCancelCallback.current = undefined;
+        // Then resolve the promise.
+        if (onAuthenticateCallback.current) {
+            onAuthenticateCallback.current();
+            onAuthenticateCallback.current = undefined;
+        }
+    }, []);
+
+    const handleSidebarClose = useCallback(() => {
+        sidebarVisibilityProps.onClose();
+    }, [sidebarVisibilityProps.onClose]);
+
+    const handleSidebarActionHandled = useCallback(
+        () => setPendingSidebarAction(undefined),
         [],
     );
 
@@ -882,6 +921,13 @@ const Page: React.FC = () => {
                     type: "showPerson",
                     personID: searchOption.suggestion.person.id,
                 });
+            } else if (type == "sidebarAction") {
+                setPendingSidebarAction(searchOption.suggestion.actionID);
+                showSidebar();
+
+                const shouldExitSearchMode =
+                    options?.shouldExitSearchMode ?? true;
+                dispatch({ type: "exitSearch", shouldExitSearchMode });
             } else {
                 dispatch({
                     type: "enterSearchMode",
@@ -942,14 +988,22 @@ const Page: React.FC = () => {
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
             const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
+
             if (
                 isHiddenCollectionSummary &&
                 barMode != "hidden-albums" &&
                 Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
             ) {
-                await authenticateUser();
-                lastAuthenticationForHiddenTimestamp.current = Date.now();
+                try {
+                    await authenticateUser();
+                    lastAuthenticationForHiddenTimestamp.current = Date.now();
+                } catch {
+                    // User cancelled authentication (e.g., clicked backdrop).
+                    // Don't proceed to show the collection.
+                    return;
+                }
             }
+
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },
         [authenticateUser, handleShowCollectionSummaryWithID, barMode],
@@ -1294,10 +1348,13 @@ const Page: React.FC = () => {
             />
             <Sidebar
                 {...sidebarVisibilityProps}
+                onClose={handleSidebarClose}
                 normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
                 }
+                pendingAction={pendingSidebarAction}
+                onActionHandled={handleSidebarActionHandled}
                 onShowPlanSelector={showPlanSelector}
                 onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 onShowExport={showExport}
@@ -1362,8 +1419,9 @@ const Page: React.FC = () => {
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
             <AuthenticateUser
-                {...authenticateUserVisibilityProps}
-                onAuthenticate={onAuthenticateCallback.current!}
+                open={authenticateUserVisibilityProps.open}
+                onClose={handleCloseAuthenticateUser}
+                onAuthenticate={handleAuthenticate}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}

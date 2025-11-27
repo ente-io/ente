@@ -102,8 +102,8 @@ const AuthenticateUserDialogContents: React.FC<AuthenticateUserProps> = ({
             keyAttributes={keyAttributes}
             submitButtonTitle={t("authenticate")}
             onVerify={() => {
-                onClose();
                 onAuthenticate();
+                onClose();
             }}
         />
     );
