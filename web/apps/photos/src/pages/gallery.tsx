@@ -3,9 +3,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloseIcon from "@mui/icons-material/Close";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Link, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    DialogTitle,
+    IconButton,
+    Link,
+    Paper,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
 import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
 import { AlbumAddedNotification } from "components/AlbumAddedNotification";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -30,6 +41,7 @@ import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
+import { FilledIconButton } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
@@ -48,6 +60,10 @@ import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
+import {
+    hasPendingAlbumToJoin,
+    processPendingAlbumJoin,
+} from "ente-new/albums/services/join-album";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -167,6 +183,10 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [albumJoinedToast, setAlbumJoinedToast] = useState<{
+        open: boolean;
+        albumId?: number;
+    }>({ open: false });
 
     /**
      * Tracks a pending file addition operation.
@@ -358,8 +378,34 @@ const Page: React.FC = () => {
                 trashItems: await savedTrashItems(),
             });
 
-            // Fetch data from remote.
+            // Check for pending album join BEFORE fetching data
+            let joinedAlbumId: number | null = null;
+
+            if (hasPendingAlbumToJoin()) {
+                try {
+                    const joinedCollectionId = await processPendingAlbumJoin();
+                    if (joinedCollectionId) {
+                        joinedAlbumId = joinedCollectionId;
+                    }
+                } catch (error) {
+                    log.error("Failed to join album", error);
+                    showMiniDialog({
+                        title: t("error"),
+                        message:
+                            t("album_join_failed") +
+                            ": " +
+                            (error as Error).message,
+                    });
+                }
+            }
+
+            // Fetch data from remote (this will include the newly joined album if any)
             await remotePull();
+
+            // Now that data is loaded, show the toast if we joined an album
+            if (joinedAlbumId) {
+                setAlbumJoinedToast({ open: true, albumId: joinedAlbumId });
+            }
 
             // Clear the first load message if needed.
             setIsFirstLoad(false);
@@ -1333,6 +1379,51 @@ const Page: React.FC = () => {
                 }}
                 onSubmit={handleAlbumNameSubmit}
             />
+            <Snackbar
+                open={albumJoinedToast.open}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+                <Paper sx={{ width: "min(360px, 100svw)" }}>
+                    <DialogTitle>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Box>
+                                <Typography variant="h3">
+                                    {t("joined_album")}
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" sx={{ gap: 1 }}>
+                                <FilledIconButton
+                                    onClick={() => {
+                                        if (albumJoinedToast.albumId) {
+                                            dispatch({
+                                                type: "showCollectionSummary",
+                                                collectionSummaryID:
+                                                    albumJoinedToast.albumId,
+                                            });
+                                        }
+                                        setAlbumJoinedToast({ open: false });
+                                    }}
+                                >
+                                    <ArrowForwardIcon />
+                                </FilledIconButton>
+                                <FilledIconButton
+                                    onClick={() =>
+                                        setAlbumJoinedToast({ open: false })
+                                    }
+                                >
+                                    <CloseIcon />
+                                </FilledIconButton>
+                            </Stack>
+                        </Stack>
+                    </DialogTitle>
+                </Paper>
+            </Snackbar>
             <AlbumAddedNotification
                 open={addToAlbumProgress.open}
                 onClose={() =>
