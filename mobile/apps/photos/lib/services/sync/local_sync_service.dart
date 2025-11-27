@@ -150,7 +150,7 @@ class LocalSyncService {
         await getDeviceFolderWithCountAndCoverID();
     final bool hasUpdated = await _db.updateDeviceCoverWithCount(
       result,
-      shouldBackup: localSettings.hasSelectedAllFoldersForBackup,
+      shouldBackup: backupPreferenceService.hasSelectedAllFoldersForBackup,
     );
     // do not fire UI update event during first sync. Otherwise the next screen
     // to shop the backup folder is skipped
@@ -257,13 +257,11 @@ class LocalSyncService {
   /// bypass it (e.g., onboarding skipped or only-new backup). Falls back to the
   /// stored completion value otherwise.
   bool hasCompletedFirstImportOrBypassed() {
-    final hasCompleted = hasCompletedFirstImport();
-    if (!flagService.enableOnlyBackupFuturePhotos) {
-      return hasCompleted;
+    if (hasCompletedFirstImport()) {
+      return true;
     }
-    return hasCompleted ||
-        localSettings.hasOnboardingPermissionSkipped ||
-        localSettings.isOnlyNewBackupEnabled;
+    return backupPreferenceService.hasSkippedOnboardingPermission ||
+        backupPreferenceService.isOnlyNewBackupEnabled;
   }
 
   // Warning: resetLocalSync should only be used for testing imported related
@@ -295,7 +293,8 @@ class LocalSyncService {
       // of newly discovered device paths
       await FilesDB.instance.insertLocalAssets(
         result.item1,
-        shouldAutoBackup: localSettings.hasSelectedAllFoldersForBackup,
+        shouldAutoBackup:
+            backupPreferenceService.hasSelectedAllFoldersForBackup,
       );
 
       _logger.info(

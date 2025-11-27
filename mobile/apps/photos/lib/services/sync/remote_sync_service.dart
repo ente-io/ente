@@ -370,10 +370,11 @@ class RemoteSyncService {
         await _db.getDevicePathIDToLocalIDMap();
 
     // Fetch all newer local IDs once if only-new backup is enabled
-    Set<String>? newerLocalIDs;
-    if (flagService.enableOnlyBackupFuturePhotos &&
-        localSettings.isOnlyNewBackupEnabled) {
-      final int onlyNewSince = localSettings.onlyNewSinceEpoch!;
+    final backNewPhotosOnly = backupPreferenceService.isOnlyNewBackupEnabled;
+
+    late final Set<String> newerLocalIDs;
+    if (backNewPhotosOnly) {
+      final int onlyNewSince = backupPreferenceService.onlyNewSinceEpoch!;
       // Single DB query for all newer files
       newerLocalIDs = await _db.getAllLocalIDsNewerThan(onlyNewSince);
       _logger.info("Found ${newerLocalIDs.length} newer files");
@@ -397,7 +398,7 @@ class RemoteSyncService {
       }
 
       // Filter by only-new using pre-fetched set
-      if (newerLocalIDs != null) {
+      if (backNewPhotosOnly) {
         // Keep only files that are in newerLocalIDs (removes old files)
         localIDsToSync.retainAll(newerLocalIDs);
       }
@@ -465,7 +466,7 @@ class RemoteSyncService {
       }
     }
     if (moreFilesMarkedForBackup &&
-        !localSettings.hasSelectedAllFoldersForBackup) {
+        !backupPreferenceService.hasSelectedAllFoldersForBackup) {
       // "force reload due to display new files"
       Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
@@ -485,7 +486,7 @@ class RemoteSyncService {
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
-      localSettings.setSelectAllFoldersForBackup(false).ignore();
+      backupPreferenceService.setSelectAllFoldersForBackup(false).ignore();
     }
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),

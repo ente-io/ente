@@ -1004,7 +1004,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _shouldShowPermissionWidget() {
     if (flagService.enableOnlyBackupFuturePhotos) {
       return !permissionService.hasGrantedPermissions() &&
-          !localSettings.hasOnboardingPermissionSkipped;
+          !backupPreferenceService.hasSkippedOnboardingPermission;
     } else {
       return !permissionService.hasGrantedPermissions();
     }
@@ -1015,7 +1015,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (!permissionService.hasGrantedPermissions()) {
         return false;
       }
-      return !localSettings.isOnlyNewBackupEnabled &&
+      return !backupPreferenceService.isOnlyNewBackupEnabled &&
           !LocalSyncService.instance.hasCompletedFirstImport();
     } else {
       return !LocalSyncService.instance.hasCompletedFirstImport();
@@ -1023,7 +1023,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   bool _shouldShowBackupHook() {
-    final bool noFoldersSelected = !localSettings.hasSelectedAnyBackupFolder;
+    final bool noFoldersSelected =
+        !backupPreferenceService.hasSelectedAnyBackupFolder;
     final bool hasLimitedPermission =
         permissionService.hasGrantedLimitedPermissions();
     final bool hasActiveCollections =
@@ -1046,8 +1047,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (_collectionsSyncTriggered) {
       return;
     }
-    if (!(localSettings.hasOnboardingPermissionSkipped ||
-        localSettings.isOnlyNewBackupEnabled)) {
+    if (!(backupPreferenceService.hasSkippedOnboardingPermission ||
+        backupPreferenceService.isOnlyNewBackupEnabled)) {
       return;
     }
     _collectionsSyncTriggered = true;
