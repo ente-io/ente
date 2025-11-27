@@ -139,82 +139,79 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
             final String shareTitle = heatmapTitle;
             final bool shareEnabled = summaryToShare != null;
-            return RefreshIndicator(
-              onRefresh: activityService.refresh,
-              child: ListView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 48),
-                children: [
-                  RitualsSection(
-                    rituals: state.rituals,
-                    progress: summary?.ritualProgress ?? const {},
-                    showHeader: false,
-                    selectedRitualId: selectedRitual?.id,
-                    onSelectionChanged: (ritual) {
-                      setState(() {
-                        _selectedRitual = ritual;
-                      });
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        children: [
-                          Text(
-                            "Activity",
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const Spacer(),
-                          InkWell(
-                            key: _shareButtonKey,
-                            customBorder: const CircleBorder(),
-                            onTap: summaryToShare != null
-                                ? () => _shareActivity(
-                                      summaryToShare,
-                                      shareTitle,
-                                      emoji: selectedRitual?.icon,
-                                    )
-                                : null,
-                            child: SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.fillFaint,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Icon(
-                                      Icons.share_outlined,
-                                      size: 22,
-                                      color: shareEnabled
-                                          ? iconColor
-                                          : Theme.of(context)
-                                              .disabledColor
-                                              .withValues(alpha: 0.7),
-                                    ),
+            return ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 48),
+              children: [
+                RitualsSection(
+                  rituals: state.rituals,
+                  progress: summary?.ritualProgress ?? const {},
+                  showHeader: false,
+                  selectedRitualId: selectedRitual?.id,
+                  onSelectionChanged: (ritual) {
+                    setState(() {
+                      _selectedRitual = ritual;
+                    });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Text(
+                          "Activity",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        InkWell(
+                          key: _shareButtonKey,
+                          customBorder: const CircleBorder(),
+                          onTap: summaryToShare != null
+                              ? () => _shareActivity(
+                                    summaryToShare,
+                                    shareTitle,
+                                    emoji: selectedRitual?.icon,
+                                  )
+                              : null,
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.fillFaint,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    Icons.share_outlined,
+                                    size: 22,
+                                    color: shareEnabled
+                                        ? iconColor
+                                        : Theme.of(context)
+                                            .disabledColor
+                                            .withValues(alpha: 0.7),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  ActivityHeatmapCard(
-                    summary: displaySummary,
-                    headerTitle: heatmapTitle,
-                    headerEmoji: heatmapEmoji,
-                  ),
-                  AchievementsRow(summary: displaySummary),
-                ],
-              ),
+                ),
+                ActivityHeatmapCard(
+                  summary: displaySummary,
+                  headerTitle: heatmapTitle,
+                  headerEmoji: heatmapEmoji,
+                ),
+                AchievementsRow(summary: displaySummary),
+              ],
             );
           },
         ),
