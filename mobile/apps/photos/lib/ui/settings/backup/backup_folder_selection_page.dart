@@ -43,8 +43,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   void initState() {
-    _treatAsOnboarding =
-        widget.isOnboarding || localSettings.hasOnboardingPermissionSkipped;
+    _treatAsOnboarding = widget.isOnboarding ||
+        backupPreferenceService.hasSkippedOnboardingPermission;
     FilesDB.instance
         .getDeviceCollections(includeCoverThumbnail: true)
         .then((files) async {
@@ -231,17 +231,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       for (String pathID in _allDevicePathIDs) {
         syncStatus[pathID] = _selectedDevicePathIDs.contains(pathID);
       }
-      await localSettings.setHasSelectedAnyBackupFolder(
+      await backupPreferenceService.setHasSelectedAnyBackupFolder(
         _selectedDevicePathIDs.isNotEmpty,
       );
-      await localSettings.setSelectAllFoldersForBackup(
+      await backupPreferenceService.setSelectAllFoldersForBackup(
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
-      await localSettings.setHasManualFolderSelection(true);
-      if (localSettings.hasOnboardingPermissionSkipped) {
-        await localSettings.setOnboardingPermissionSkipped(false);
+      await backupPreferenceService.setHasManualFolderSelection(true);
+      if (backupPreferenceService.hasSkippedOnboardingPermission) {
+        await backupPreferenceService.setOnboardingPermissionSkipped(false);
       }
       if (context.mounted) {
         Navigator.of(context).pop(true);

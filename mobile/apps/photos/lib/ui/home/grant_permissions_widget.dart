@@ -7,11 +7,9 @@ import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/backup_preference_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
-import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/standalone/debouncer.dart';
 import "package:styled_text/styled_text.dart";
 
@@ -25,7 +23,6 @@ class GrantPermissionsWidget extends StatefulWidget {
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
   final bool _showOnlyNewFeature = flagService.enableOnlyBackupFuturePhotos;
-  final LocalSettings _localSettings = localSettings;
   final Debouncer _onlyNewActionDebouncer = Debouncer(
     const Duration(milliseconds: 500),
     leading: true,
@@ -131,8 +128,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
       _logger.info("Permission state: $state");
       if (state == PermissionState.authorized ||
           state == PermissionState.limited) {
-        await _setOnlyNewSinceNow();
-        await BackupPreferenceService.instance.autoSelectAllFoldersIfEligible();
+        await backupPreferenceService.setOnlyNewSinceSevenDaysAgo();
         await onPermissionGranted(
           state,
           shouldMarkLimitedFolders: false,
@@ -169,7 +165,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Future<void> _onTapSkip() async {
-    await _localSettings.setOnboardingPermissionSkipped(true);
+    await backupPreferenceService.setOnboardingPermissionSkipped(true);
     SyncService.instance.sync().ignore();
     if (mounted) {
       setState(() {});
@@ -195,39 +191,14 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }) async {
     _logger.info("Permission granted " + state.toString());
     await permissionService.onUpdatePermission(state);
-    await _localSettings.setOnboardingPermissionSkipped(false);
+    await backupPreferenceService.setOnboardingPermissionSkipped(false);
     if (shouldMarkLimitedFolders && state == PermissionState.limited) {
       // when limited permission is granted, by default mark all folders for
       // backup
-      await _localSettings.setSelectAllFoldersForBackup(true);
+      await backupPreferenceService.setSelectAllFoldersForBackup(true);
     }
     SyncService.instance.onPermissionGranted().ignore();
     Bus.instance.fire(PermissionGrantedEvent());
-  }
-
-  Future<void> _setOnlyNewSinceNow() async {
-    // Calculate 7 days ago at 12 AM (start of day)
-    final now = DateTime.now();
-    final sevenDaysAgo = now.subtract(const Duration(days: 7));
-    final threshold = DateTime(
-      sevenDaysAgo.year,
-      sevenDaysAgo.month,
-      sevenDaysAgo.day,
-      0, // hour: 12 AM
-      0, // minute
-      0, // second
-      0, // millisecond
-      0, // microsecond
-    ).microsecondsSinceEpoch;
-
-    if (threshold <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $threshold");
-      return;
-    }
-    _logger.info(
-      "Setting only-new backup threshold to $threshold (7 days ago at 12 AM)",
-    );
-    await _localSettings.setOnlyNewSinceEpoch(threshold);
   }
 
   String _getHeaderText(BuildContext context) {
