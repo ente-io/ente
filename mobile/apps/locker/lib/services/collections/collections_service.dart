@@ -262,7 +262,8 @@ class CollectionService {
     try {
       await _apiClient.addToCollection(collection, [file]);
       _logger.info(
-          "Added file (ID: ${file.uploadedFileID}) to collection ${collection.id}",);
+        "Added file (ID: ${file.uploadedFileID}) to collection ${collection.id}",
+      );
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -775,7 +776,8 @@ class CollectionService {
       );
 
       _logger.info(
-          "Successfully decrypted file key for file (ID: ${file.uploadedFileID})",);
+        "Successfully decrypted file key for file (ID: ${file.uploadedFileID})",
+      );
       return fileKey;
     } catch (e) {
       _logger.severe("Failed to get file key: $e");

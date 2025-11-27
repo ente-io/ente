@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import "package:locker/core/constants.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/settings/about_section_widget.dart";
-import "package:locker/ui/settings/common_settings.dart";
+import "package:locker/ui/drawer/about_section_widget.dart";
+import "package:locker/ui/drawer/common_settings.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 class SupportSectionWidget extends StatelessWidget {

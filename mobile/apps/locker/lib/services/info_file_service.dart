@@ -46,7 +46,8 @@ class InfoFileService {
       final uploadedFile = await _uploadInfoFile(enteFile, collection);
 
       _logger.info(
-          'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',);
+        'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',
+      );
       return uploadedFile;
     } catch (e, s) {
       _logger.severe('Failed to create and upload info file', e, s);
@@ -86,7 +87,8 @@ class InfoFileService {
 
       if (success) {
         _logger.info(
-            'Successfully updated info file (ID: ${existingFile.uploadedFileID})',);
+          'Successfully updated info file (ID: ${existingFile.uploadedFileID})',
+        );
         return true;
       } else {
         throw Exception('Failed to update file metadata on server');

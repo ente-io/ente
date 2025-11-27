@@ -16,9 +16,9 @@ import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
+import "package:locker/ui/drawer/drawer_page.dart";
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/save_page.dart';
-import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/utils/legacy_utils.dart";
 import 'package:locker/utils/collection_sort_util.dart';
@@ -195,7 +195,7 @@ class HomePage extends UploaderPage {
 
 class _HomePageState extends UploaderPageState<HomePage>
     with TickerProviderStateMixin, SearchMixin {
-  late final _settingsPage = SettingsPage(
+  late final _settingsPage = DrawerPage(
     emailNotifier: UserService.instance.emailValueNotifier,
     scaffoldKey: scaffoldKey,
   );

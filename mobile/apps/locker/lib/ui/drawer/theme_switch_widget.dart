@@ -5,7 +5,7 @@ import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/settings/common_settings.dart";
+import "package:locker/ui/drawer/common_settings.dart";
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({super.key});

@@ -147,7 +147,8 @@ class FileUploader {
       );
 
       _logger.info(
-          'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',);
+        'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',
+      );
       return uploadedFile;
     } catch (e, s) {
       _logger.severe('Failed to upload info file', e, s);

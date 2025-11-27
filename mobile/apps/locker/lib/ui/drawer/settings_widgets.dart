@@ -4,11 +4,11 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/ui/settings/about_section_widget.dart";
-import "package:locker/ui/settings/account_section_widget.dart";
-import "package:locker/ui/settings/social_section_widget.dart";
-import "package:locker/ui/settings/support_section_widget.dart";
-import "package:locker/ui/settings/theme_switch_widget.dart";
+import "package:locker/ui/drawer/about_section_widget.dart";
+import "package:locker/ui/drawer/account_section_widget.dart";
+import "package:locker/ui/drawer/social_section_widget.dart";
+import "package:locker/ui/drawer/support_section_widget.dart";
+import "package:locker/ui/drawer/theme_switch_widget.dart";
 
 class SettingsWidgets extends StatelessWidget {
   final bool hasLoggedIn;

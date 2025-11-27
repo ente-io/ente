@@ -5,15 +5,15 @@ import "package:flutter/material.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
-import "package:locker/ui/settings/app_version_widget.dart";
-import "package:locker/ui/settings/settings_title_bar_widget.dart";
-import "package:locker/ui/settings/settings_widgets.dart";
+import "package:locker/ui/drawer/app_version_widget.dart";
+import "package:locker/ui/drawer/drawer_title_bar_widget.dart";
+import "package:locker/ui/drawer/settings_widgets.dart";
 
-class SettingsPage extends StatelessWidget {
+class DrawerPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
   final GlobalKey<ScaffoldState> scaffoldKey;
 
-  const SettingsPage({
+  const DrawerPage({
     super.key,
     required this.emailNotifier,
     required this.scaffoldKey,
@@ -85,7 +85,7 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SettingsTitleBarWidget(
+            DrawerTitleBarWidget(
               scaffoldKey: scaffoldKey,
             ),
             Padding(
