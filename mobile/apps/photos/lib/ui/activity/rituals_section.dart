@@ -109,13 +109,11 @@ class _StarterRitualCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected
-            ? colorScheme.fillFaintPressed
-            : colorScheme.backgroundElevated2,
+        color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : colorScheme.strokeFaint,
-          width: isSelected ? 1 : 0.8,
+          color: isSelected ? colorScheme.primary500 : Colors.transparent,
+          width: isSelected ? 2 : 0,
         ),
       ),
       child: ListTile(
@@ -153,13 +151,11 @@ class _RitualCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected
-            ? colorScheme.fillFaintPressed
-            : colorScheme.backgroundElevated2,
+        color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : colorScheme.strokeFaint,
-          width: isSelected ? 1 : 0.8,
+          color: isSelected ? colorScheme.primary500 : Colors.transparent,
+          width: isSelected ? 2 : 0,
         ),
       ),
       child: ListTile(
