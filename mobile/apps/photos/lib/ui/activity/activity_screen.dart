@@ -210,7 +210,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   headerTitle: heatmapTitle,
                   headerEmoji: heatmapEmoji,
                 ),
-                AchievementsRow(summary: displaySummary),
+                if (selectedRitual != null)
+                  AchievementsRow(summary: displaySummary),
               ],
             );
           },
