@@ -1,4 +1,3 @@
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import { albumsAppOrigin, photosAppOrigin } from "ente-base/origins";
 import type { Collection } from "ente-media/collection";
@@ -106,8 +105,6 @@ export const useJoinAlbum = ({
     collectionKey,
     credentials,
 }: UseJoinAlbumProps): UseJoinAlbumReturn => {
-    const isTouchscreen = useIsTouchscreen();
-
     const handleJoinAlbum = () => {
         if (!publicCollection || !accessToken || !collectionKey) {
             return;
@@ -122,17 +119,12 @@ export const useJoinAlbum = ({
             handleWebFallback(accessToken, currentHash, jwtToken);
         };
 
-        // Check if on Android and try deep link first.
+        // Check if on Android and try deep link with custom scheme with action=join parameter.
         // Skip deep linking on iOS - custom URL schemes show an error
         // dialog when the app isn't installed. On iOS Safari, if the photos app
         // is installed, a banner already appears at the top prompting to open in app.
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        if (isTouchscreen && !isIOS) {
-            // Extract hostname from albumsAppOrigin for deep linking
+        if (navigator.userAgent.includes("Android")) {
             const albumsHost = new URL(albumsAppOrigin()).host;
-
-            // For Android, use custom scheme with action=join parameter
-            // Format: ente://HOST/?action=join&t=TOKEN#HASH
             const deepLinkURL = `ente://${albumsHost}/?action=join&t=${encodeURIComponent(accessToken)}#${currentHash}`;
 
             tryDeepLinkWithFallback(deepLinkURL, fallbackToWeb);
