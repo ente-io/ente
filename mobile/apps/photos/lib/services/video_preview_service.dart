@@ -63,7 +63,9 @@ class VideoPreviewService {
         cacheManager = DefaultCacheManager(),
         videoCacheManager = VideoCacheManager.instance,
         config = Configuration.instance {
-    _listenToSyncCompletion();
+    if (flagService.pauseStreamDuringUpload) {
+      _listenToSyncCompletion();
+    }
   }
 
   void _listenToSyncCompletion() {
@@ -298,7 +300,8 @@ class VideoPreviewService {
     bool forceUpload = false,
   }) async {
     // Check if file upload is happening before processing video for streaming
-    if (FileUploader.instance.isUploading) {
+    if (flagService.pauseStreamDuringUpload &&
+        FileUploader.instance.isUploading) {
       _logger.info(
         "Pausing video streaming because file upload is in progress",
       );
@@ -1275,7 +1278,8 @@ class VideoPreviewService {
       if (_hasQueuedFile && !forceProcess) return;
 
       // Don't start streaming if file uploads are in progress
-      if (FileUploader.instance.isUploading) {
+      if (flagService.pauseStreamDuringUpload &&
+          FileUploader.instance.isUploading) {
         _logger.info("Skipping stream queue - file upload in progress");
         _pausedDueToUpload = true;
         // Clear queue to ensure clean state when resuming
@@ -1284,7 +1288,9 @@ class VideoPreviewService {
       }
 
       // Reset flag - streaming is resuming (either from sync listener or other flow)
-      _pausedDueToUpload = false;
+      if (flagService.pauseStreamDuringUpload) {
+        _pausedDueToUpload = false;
+      }
 
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;

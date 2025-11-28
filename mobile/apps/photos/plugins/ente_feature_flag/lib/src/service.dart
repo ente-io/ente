@@ -90,6 +90,8 @@ class FlagService {
 
   bool get ritualsFlag => internalUser;
 
+  bool get pauseStreamDuringUpload => internalUser;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }
