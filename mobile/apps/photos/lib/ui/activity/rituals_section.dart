@@ -7,6 +7,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/activity_screen.dart";
+import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -328,6 +329,21 @@ class _RitualCard extends StatelessWidget {
                               ),
                       ],
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    color: colorScheme.textBase,
+                    style: IconButton.styleFrom(
+                      backgroundColor: colorScheme.fillFaint,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      minimumSize: const Size(40, 40),
+                    ),
+                    onPressed: () => _openRitualCamera(context, ritual),
+                    tooltip: "Open ritual camera",
                   ),
                   PopupMenuButton<String>(
                     padding: EdgeInsets.zero,
@@ -1173,6 +1189,25 @@ class _DayCircle extends StatelessWidget {
       ),
     );
   }
+}
+
+void _openRitualCamera(BuildContext context, Ritual ritual) {
+  final albumId = ritual.albumId;
+  if (albumId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Set an album for this ritual to launch the camera."),
+      ),
+    );
+    return;
+  }
+  routeToPage(
+    context,
+    RitualCameraPage(
+      ritualId: ritual.id,
+      albumId: albumId,
+    ),
+  );
 }
 
 Widget _sectionLabel(BuildContext context, String label) {
