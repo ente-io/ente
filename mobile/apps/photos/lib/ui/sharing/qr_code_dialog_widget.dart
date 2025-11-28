@@ -9,9 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/buttons/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:share_plus/share_plus.dart';
 
 class QrCodeDialogWidget extends StatefulWidget {
@@ -79,33 +77,60 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
         ? '${widget.collection.displayName.substring(0, 27)}...'
         : widget.collection.displayName;
 
+    // QR container uses light theme colors (always light background for scanability)
+    const qrContainerColor = Color(0xFFF5F5F7);
+    const qrTextColor = Colors.black;
+
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(23.89),
       ),
       child: Container(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.fromLTRB(19, 17, 19, 19),
         decoration: BoxDecoration(
           color: enteColorScheme.backgroundBase,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(23.89),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header with close button
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "QR Code",
-                  style: enteTextTheme.largeBold,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                  color: enteColorScheme.strokeBase,
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(left: 7, bottom: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "QR Code",
+                    style: enteTextTheme.largeBold.copyWith(
+                      fontSize: 19.11,
+                      fontWeight: FontWeight.w700,
+                      height: 1.43,
+                      letterSpacing: -0.76,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 35.23,
+                      height: 35.23,
+                      decoration: BoxDecoration(
+                        color: isDarkMode
+                            ? const Color(0xFF292929)
+                            : qrContainerColor,
+                        borderRadius: BorderRadius.circular(17.6),
+                      ),
+                      child: Icon(
+                        Icons.close,
+                        color: isDarkMode ? Colors.white : qrTextColor,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 8),
 
@@ -113,81 +138,93 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
             RepaintBoundary(
               key: _qrKey,
               child: Container(
-                padding: const EdgeInsets.all(28),
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.grey.shade200,
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  color: qrContainerColor,
+                  borderRadius: BorderRadius.circular(22.09),
                 ),
                 child: Stack(
+                  alignment: Alignment.center,
                   children: [
                     Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Album name at top center (inside border) - Reduced size
+                        // Album name at top center (inside border)
                         Text(
                           albumName,
-                          style: enteTextTheme.bodyBold.copyWith(
-                            color: Colors.black87,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.3,
+                          style: enteTextTheme.largeBold.copyWith(
+                            color: qrTextColor,
+                            fontSize: 19.11,
+                            height: 1.43,
+                            letterSpacing: -0.76,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 20),
 
-                        // QR Code with better spacing
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.grey.shade100,
-                              width: 1,
+                        // QR Code with pretty styling
+                        SizedBox(
+                          width: qrSize - 100,
+                          height: qrSize - 100,
+                          child: PrettyQrView(
+                            qrImage: QrImage(
+                              QrCode.fromData(
+                                data: publicUrl,
+                                errorCorrectLevel: QrErrorCorrectLevel.L,
+                              ),
                             ),
-                          ),
-                          child: QrImageView(
-                            data: publicUrl,
-                            version: QrVersions.auto,
-                            size: qrSize - 100,
-                            eyeStyle: const QrEyeStyle(
-                              eyeShape: QrEyeShape.square,
-                              color: Colors.black,
+                            decoration: PrettyQrDecoration(
+                              shape: PrettyQrShape.custom(
+                                const PrettyQrDotsSymbol(
+                                  color: qrTextColor,
+                                  unifiedFinderPattern: false,
+                                  unifiedAlignmentPatterns: false,
+                                ),
+                                finderPattern: PrettyQrSquaresSymbol(
+                                  color: qrTextColor,
+                                  rounding: 0.5,
+                                  unifiedFinderPattern: true,
+                                  finderPatternOuterThickness: 1.4,
+                                  finderPatternOuterColor:
+                                      enteColorScheme.primary500,
+                                  finderPatternInnerDotSize: 0.8,
+                                  finderPatternInnerRounding: 1.0,
+                                ),
+                                alignmentPatterns: const PrettyQrSquaresSymbol(
+                                  color: qrTextColor,
+                                  rounding: 1.0,
+                                ),
+                              ),
+                              image: const PrettyQrDecorationImage(
+                                image: AssetImage('assets/qr_logo.png'),
+                                scale: 0.25,
+                                padding: EdgeInsets.all(24),
+                                position:
+                                    PrettyQrDecorationImagePosition.embedded,
+                              ),
+                              background: Colors.transparent,
+                              quietZone: PrettyQrQuietZone.zero,
                             ),
-                            dataModuleStyle: const QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.square,
-                              color: Colors.black,
-                            ),
-                            errorCorrectionLevel: QrErrorCorrectLevel.M,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 42),
                       ],
                     ),
 
-                    // Ente branding at bottom right (inside border) - Fixed positioning
+                    // Ente branding at bottom right (inside border)
                     Positioned(
-                      bottom: -2,
+                      bottom: 0,
                       right: 2,
                       child: Text(
                         'ente',
-                        style: enteTextTheme.small.copyWith(
-                          color: enteColorScheme.primary700,
-                          fontSize: 14,
-                          letterSpacing: 1.2,
-                          fontWeight: FontWeight.w600,
+                        style: enteTextTheme.brandSmall.copyWith(
+                          color: enteColorScheme.primary500,
+                          fontSize: 16.20,
+                          fontWeight: FontWeight.w800,
+                          height: 1.25,
+                          letterSpacing: -0.49,
                         ),
                       ),
                     ),
@@ -197,13 +234,26 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
             ),
             const SizedBox(height: 24),
 
-            // Share button
-            ButtonWidget(
-              buttonType: ButtonType.primary,
-              icon: Icons.adaptive.share,
-              labelText: "Share",
+            // Save button
+            GestureDetector(
               onTap: _shareQrCode,
-              shouldSurfaceExecutionStates: false,
+              child: Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: enteColorScheme.primary500,
+                  borderRadius: BorderRadius.circular(10.75),
+                ),
+                child: Text(
+                  'Save',
+                  textAlign: TextAlign.center,
+                  style: enteTextTheme.bodyBold.copyWith(
+                    color: Colors.white,
+                    height: 1.25,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
