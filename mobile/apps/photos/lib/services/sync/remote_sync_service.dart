@@ -368,10 +368,22 @@ class RemoteSyncService {
     deviceCollections.sort((a, b) => a.count.compareTo(b.count));
     final Map<String, Set<String>> pathIdToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
+
+    // Fetch all newer local IDs once if only-new backup is enabled
+    final backNewPhotosOnly = backupPreferenceService.isOnlyNewBackupEnabled;
+
+    late final Set<String> newerLocalIDs;
+    if (backNewPhotosOnly) {
+      final int onlyNewSince = backupPreferenceService.onlyNewSinceEpoch!;
+      // Single DB query for all newer files
+      newerLocalIDs = await _db.getAllLocalIDsNewerThan(onlyNewSince);
+      _logger.info("Found ${newerLocalIDs.length} newer files");
+    }
+
     bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
       final Set<String> localIDsToSync =
-          pathIdToLocalIDs[deviceCollection.id] ?? {};
+          pathIdToLocalIDs[deviceCollection.id]?.toSet() ?? {};
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
@@ -383,6 +395,12 @@ class RemoteSyncService {
             _logger.severe("removeQueuedLocalFiles failed", e, s);
           }
         }
+      }
+
+      // Filter by only-new using pre-fetched set
+      if (backNewPhotosOnly) {
+        // Keep only files that are in newerLocalIDs (removes old files)
+        localIDsToSync.retainAll(newerLocalIDs);
       }
 
       if (localIDsToSync.isEmpty) {
@@ -447,7 +465,8 @@ class RemoteSyncService {
         }
       }
     }
-    if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
+    if (moreFilesMarkedForBackup &&
+        !backupPreferenceService.hasSelectedAllFoldersForBackup) {
       // "force reload due to display new files"
       Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
@@ -467,7 +486,7 @@ class RemoteSyncService {
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
     if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
-      Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
+      backupPreferenceService.setSelectAllFoldersForBackup(false).ignore();
     }
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(<EnteFile>[], source: "deviceFolderSync"),
@@ -556,6 +575,13 @@ class RemoteSyncService {
   }
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
+    // Note: "only backup new photos" filtering is applied at the local sync
+    // stage (see _syncDeviceCollectionFilesForUpload) where we filter by
+    // localID before setting collectionID. Files that reach here with a
+    // collectionID but no uploadedFileID either:
+    // 1. Passed the only-new filter during auto-backup sync, OR
+    // 2. Were manually added by the user to a collection
+    // In case 2, we should NOT filter them out - user explicitly chose them.
     final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
     if (originalFiles.isEmpty) {
       return originalFiles;
