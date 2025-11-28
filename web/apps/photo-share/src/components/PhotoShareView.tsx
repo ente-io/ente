@@ -167,7 +167,7 @@ export const PhotoShareView: React.FC = () => {
                     {loading && (
                         <CircularProgress
                             sx={{ color: "accent.main" }}
-                            size={40}
+                            size={32}
                         />
                     )}
 
