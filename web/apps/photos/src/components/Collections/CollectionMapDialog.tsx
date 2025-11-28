@@ -14,8 +14,6 @@ import {
     Tooltip,
     Typography,
     type IconButtonProps,
-    type SxProps,
-    type Theme,
 } from "@mui/material";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -71,23 +69,22 @@ interface MapControlsProps {
     onClose: () => void;
 }
 
-const floatingIconButtonSx: SxProps<Theme> = {
-    bgcolor: (theme) => theme.vars.palette.background.paper,
-    boxShadow: (theme) => theme.shadows[4],
-    width: 48,
-    height: 48,
-    borderRadius: "16px",
-    transition: "transform 0.2s ease-out",
-    "&:hover": {
-        bgcolor: (theme) => theme.vars.palette.background.paper,
-        transform: "scale(1.05)",
-    },
-};
-
 const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => (
     <IconButton
         {...props}
-        sx={[floatingIconButtonSx, ...(sx ? [sx] : [])]}
+        sx={{
+            bgcolor: (theme) => theme.vars.palette.background.paper,
+            boxShadow: (theme) => theme.shadows[4],
+            width: 48,
+            height: 48,
+            borderRadius: "16px",
+            transition: "transform 0.2s ease-out",
+            "&:hover": {
+                bgcolor: (theme) => theme.vars.palette.background.paper,
+                transform: "scale(1.05)",
+            },
+            ...sx,
+        }}
     />
 );
 
