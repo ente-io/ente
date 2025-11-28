@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto/ente_crypto.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -55,39 +54,31 @@ class SingleFileShareService {
       // Get the file key
       final fileKey = getFileKey(file);
 
-      // Derive a key from the passphrase using KDF
-      final kdfSalt = Sodium.randombytesBuf(Sodium.cryptoPwhashSaltbytes);
-      const opsLimit = 2; // INTERACTIVE
-      const memLimit = 67108864; // 64 MB
-
-      final derivedKey = Sodium.cryptoPwhash(
-        Sodium.cryptoSecretboxKeybytes,
+      // Derive a key from the passphrase using KDF (same as Locker)
+      final kdfSalt = CryptoUtil.getSaltToDeriveKey();
+      final derivedKey = await CryptoUtil.deriveInteractiveKey(
         Uint8List.fromList(utf8.encode(passphrase)),
         kdfSalt,
-        opsLimit,
-        memLimit,
-        Sodium.cryptoPwhashAlgArgon2id13,
       );
 
       // Encrypt the file key with the derived key
-      final nonce = Sodium.randombytesBuf(Sodium.cryptoSecretboxNoncebytes);
-      final encryptedFileKey =
-          Sodium.cryptoSecretboxEasy(fileKey, nonce, derivedKey);
+      final encryptedKey = CryptoUtil.encryptSync(fileKey, derivedKey.key);
 
       // Create the share URL on server
       final response = await _enteDio.post(
         "/files/share-url",
         data: {
           "fileID": file.uploadedFileID,
-          "encryptedFileKey": CryptoUtil.bin2base64(encryptedFileKey),
-          "encryptedFileKeyNonce": CryptoUtil.bin2base64(nonce),
+          "app": "photos",
+          "encryptedFileKey": CryptoUtil.bin2base64(encryptedKey.encryptedData!),
+          "encryptedFileKeyNonce": CryptoUtil.bin2base64(encryptedKey.nonce!),
           "kdfNonce": CryptoUtil.bin2base64(kdfSalt),
-          "kdfMemLimit": memLimit,
-          "kdfOpsLimit": opsLimit,
+          "kdfMemLimit": derivedKey.memLimit,
+          "kdfOpsLimit": derivedKey.opsLimit,
         },
       );
 
-      final fileShareUrl = FileShareUrl.fromMap(response.data["result"]);
+      final fileShareUrl = FileShareUrl.fromMap(response.data);
       _fileShareCache[file.uploadedFileID!] = fileShareUrl;
 
       _logger.info('Created share URL for file ${file.uploadedFileID}');
@@ -123,7 +114,7 @@ class SingleFileShareService {
         queryParameters: {"sinceTime": 0},
       );
 
-      final List<dynamic> urls = response.data["result"] ?? [];
+      final List<dynamic> urls = response.data["diff"] ?? [];
       for (final urlData in urls) {
         final shareUrl = FileShareUrl.fromMap(urlData);
         _fileShareCache[shareUrl.fileID] = shareUrl;
@@ -191,7 +182,7 @@ class SingleFileShareService {
         queryParameters: {"sinceTime": sinceTime},
       );
 
-      final List<dynamic> urls = response.data["result"] ?? [];
+      final List<dynamic> urls = response.data["diff"] ?? [];
       final result = <FileShareUrl>[];
 
       for (final urlData in urls) {
