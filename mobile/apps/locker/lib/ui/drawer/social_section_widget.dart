@@ -5,7 +5,7 @@ import "package:ente_ui/components/menu_item_widget.dart";
 import 'package:flutter/material.dart';
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/settings/common_settings.dart";
+import "package:locker/ui/drawer/common_settings.dart";
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SocialSectionWidget extends StatelessWidget {
@@ -79,7 +79,6 @@ class SocialsMenuItemWidget extends StatelessWidget {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: text,
-        makeTextBold: true,
       ),
       trailingIcon: Icons.chevron_right_outlined,
       onTap: () async {

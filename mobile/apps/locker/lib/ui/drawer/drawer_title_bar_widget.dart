@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class SettingsTitleBarWidget extends StatelessWidget {
-  const SettingsTitleBarWidget({
+class DrawerTitleBarWidget extends StatelessWidget {
+  const DrawerTitleBarWidget({
     super.key,
     required this.scaffoldKey,
   });

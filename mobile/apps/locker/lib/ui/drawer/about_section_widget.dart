@@ -4,7 +4,7 @@ import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/settings/common_settings.dart";
+import "package:locker/ui/drawer/common_settings.dart";
 import "package:url_launcher/url_launcher.dart";
 
 class AboutSectionWidget extends StatelessWidget {
@@ -26,7 +26,6 @@ class AboutSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: context.l10n.weAreOpenSource,
-            makeTextBold: true,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           onTap: () async {
@@ -66,7 +65,6 @@ class AboutMenuItemWidget extends StatelessWidget {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: title,
-        makeTextBold: true,
       ),
       trailingIcon: Icons.chevron_right_outlined,
       onTap: () async {

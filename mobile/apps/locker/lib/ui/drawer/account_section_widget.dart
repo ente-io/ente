@@ -1,20 +1,18 @@
 import "package:ente_accounts/pages/delete_account_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_legacy/pages/emergency_page.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/change_email_dialog_locker.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
 import "package:locker/ui/components/recovery_key_dialog_locker.dart";
-import "package:locker/ui/settings/common_settings.dart";
+import "package:locker/ui/drawer/common_settings.dart";
 
 class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({super.key});
@@ -36,36 +34,7 @@ class AccountSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: context.l10n.legacy,
-          makeTextBold: true,
-        ),
-        trailingIcon: Icons.chevron_right_outlined,
-        showOnlyLoadingState: true,
-        onTap: () async {
-          final hasAuthenticated = kDebugMode ||
-              await LocalAuthenticationService.instance
-                  .requestLocalAuthentication(
-                context,
-                "Authenticate to manage legacy contacts",
-              );
-          if (hasAuthenticated) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return EmergencyPage(
-                    config: Configuration.instance,
-                  );
-                },
-              ),
-            ).ignore();
-          }
-        },
-      ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
           title: l10n.recoveryKey,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
@@ -99,7 +68,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.changeEmail,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
@@ -126,7 +94,6 @@ class AccountSectionWidget extends StatelessWidget {
       // MenuItemWidget(
       //   captionedTextWidget: CaptionedTextWidget(
       //     title: l10n.changePassword,
-      //     makeTextBold: true,
       //   ),
       //   trailingIcon: Icons.chevron_right_outlined,
       //   onTap: () async {
@@ -155,7 +122,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.logout,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
@@ -166,7 +132,6 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.deleteAccount,
-          makeTextBold: true,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         onTap: () async {
