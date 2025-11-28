@@ -111,8 +111,15 @@ const parseDates = (tags: RawExifTags) => {
     // Some customers (not sure how prevalent this is) reported photos with Exif
     // dates set to "0000:00:00 00:00:00". Ignore any date whose timestamp is 0
     // so that we try with a subsequent (possibly correct) date in the sequence.
-    const valid = (d: ParsedMetadataDate | undefined) =>
-        d?.timestamp ? d : undefined;
+    //
+    // Also filter out the specific corrupted date "4501:01:01 00:00:00".
+    // There was this issue where the date defaulted to 4501,
+    // and this check is prevent that, it falls back to the proper one.
+    const valid = (d: ParsedMetadataDate | undefined) => {
+        if (!d?.timestamp) return undefined;
+        if (d.dateTime === "4501-01-01T00:00:00.000") return undefined;
+        return d;
+    };
 
     const exif = parseExifDates(tags);
     const iptc = parseIPTCDates(tags);
