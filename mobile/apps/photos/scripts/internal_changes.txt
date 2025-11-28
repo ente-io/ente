@@ -1,3 +1,6 @@
+- Prateek: (i) Run collection and person sync on skip/only-new backup flow to ensure remote albums appear after granting permissions
+- Prateek: (i) Add "Start with latest backups" option in grant permissions screen to backup only new photos (last 7 days onwards)
+- Prateek: (i) Add skip option in grant permissions screen to bypass backup during onboarding
 - Laurens: update Usearch VectorDB with potential fix for crash
 - Neeraj: (i) Allow owner and admins to suggest delete. Suggestion can be reviewed from Free up space
 - Neeraj: (i) Allow admins to remove any photo from shared albums

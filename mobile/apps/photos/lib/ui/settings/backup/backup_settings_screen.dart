@@ -1,22 +1,35 @@
 import "dart:io";
 
 import 'package:flutter/material.dart';
+import "package:photo_manager/photo_manager.dart";
 import 'package:photos/core/configuration.dart';
-import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
-import "package:photos/services/wake_lock_service.dart";
+import 'package:photos/generated/l10n.dart';
+import 'package:photos/l10n/l10n.dart';
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/sync/sync_service.dart';
+import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/backup_flow_helper.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
+  static final Debouncer _onlyNewToggleDebouncer = Debouncer(
+    const Duration(milliseconds: 500),
+    leading: true,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +110,14 @@ class BackupSettingsScreen extends StatelessWidget {
                               isTopBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
                               isBottomBorderRadiusRemoved:
-                                  flagService.enableMobMultiPart,
+                                  flagService.enableMobMultiPart ||
+                                      _shouldShowOnlyNewToggle(),
                             ),
+                            if (_shouldShowOnlyNewToggle())
+                              ..._buildOnlyNewToggleSection(
+                                context,
+                                colorScheme,
+                              ),
                             if (flagService.enableMobMultiPart)
                               DividerWidget(
                                 dividerType: DividerType.menuNoIcon,
@@ -173,5 +192,150 @@ class BackupSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _shouldShowOnlyNewToggle() {
+    return flagService.enableOnlyBackupFuturePhotos;
+  }
+
+  List<Widget> _buildOnlyNewToggleSection(
+    BuildContext context,
+    dynamic colorScheme,
+  ) {
+    return [
+      DividerWidget(
+        dividerType: DividerType.menuNoIcon,
+        bgColor: colorScheme.fillFaint,
+      ),
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Backup only new photos",
+        ),
+        menuItemColor: colorScheme.fillFaint,
+        trailingWidget: ToggleSwitchWidget(
+          value: () => backupPreferenceService.isOnlyNewBackupEnabled,
+          onChanged: () async {
+            final hasPermission = await _ensurePhotoPermissions(context);
+            if (!hasPermission) {
+              return;
+            }
+            final shouldProceed = await _maybeHandleFolderSelection(
+              context: context,
+            );
+            if (!shouldProceed) {
+              return;
+            }
+            final isEnabled = backupPreferenceService.isOnlyNewBackupEnabled;
+            if (!isEnabled) {
+              await backupPreferenceService.setOnlyNewSinceNow();
+              _onlyNewToggleDebouncer.run(() async {
+                await SyncService.instance.sync();
+              });
+            } else {
+              await backupPreferenceService.clearOnlyNewSinceEpoch();
+              _onlyNewToggleDebouncer.run(() async {
+                await SyncService.instance.sync();
+              });
+            }
+            if (backupPreferenceService.hasSkippedOnboardingPermission) {
+              await backupPreferenceService.setOnboardingPermissionSkipped(
+                false,
+              );
+            }
+          },
+        ),
+        singleBorderRadius: 8,
+        alignCaptionedTextToLeft: true,
+        isTopBorderRadiusRemoved: true,
+        isGestureDetectorDisabled: true,
+      ),
+    ];
+  }
+
+  Future<bool> _ensurePhotoPermissions(BuildContext context) async {
+    final state = await permissionService.requestPhotoMangerPermissions();
+    if (state == PermissionState.authorized ||
+        state == PermissionState.limited) {
+      await permissionService.onUpdatePermission(state);
+      SyncService.instance.onPermissionGranted().ignore();
+      return true;
+    }
+    if (!context.mounted) {
+      return false;
+    }
+    await showChoiceDialog(
+      context,
+      title: context.l10n.allowPermTitle,
+      body: context.l10n.allowPermBody,
+      firstButtonLabel: context.l10n.openSettings,
+      secondButtonLabel: context.l10n.cancel,
+      firstButtonOnTap: () async {
+        await PhotoManager.openSetting();
+      },
+    );
+    return false;
+  }
+
+  Future<bool> _maybeHandleFolderSelection({
+    required BuildContext context,
+  }) async {
+    final needsFolderPrompt =
+        !backupPreferenceService.hasManualFolderSelection &&
+            (backupPreferenceService.hasSelectedAllFoldersForBackup ||
+                !backupPreferenceService.hasSelectedAnyBackupFolder);
+    if (!needsFolderPrompt) {
+      return true;
+    }
+
+    final hasAllFoldersSelected =
+        backupPreferenceService.hasSelectedAllFoldersForBackup;
+    final result = await showActionSheet(
+      context: context,
+      buttons: [
+        const ButtonWidget(
+          labelText: "Select folders",
+          buttonType: ButtonType.primary,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: false,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: context.l10n.continueLabel,
+          buttonType: ButtonType.neutral,
+          buttonAction: ButtonAction.second,
+          shouldSurfaceExecutionStates: false,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+        ButtonWidget(
+          labelText: context.l10n.cancel,
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          shouldSurfaceExecutionStates: false,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      title: "Only backup new photos",
+      body: hasAllFoldersSelected
+          ? "All folders are currently selected for backup.\nYou can manually select folders you want to backup or continue for now, and change your folder selection later."
+          : "No folders are currently selected for backup.\nYou can manually select folders you want to backup or continue for now, and change your folder selection later.",
+    );
+
+    if (result?.action == null || result!.action == ButtonAction.cancel) {
+      return false;
+    }
+
+    if (result.action == ButtonAction.first) {
+      final bool? selected = await handleFolderSelectionBackupFlow(context);
+      if (selected != true) {
+        return false;
+      }
+    } else if (result.action == ButtonAction.second) {
+      await backupPreferenceService.setHasManualFolderSelection(true);
+    }
+
+    return true;
   }
 }
