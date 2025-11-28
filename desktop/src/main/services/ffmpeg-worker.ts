@@ -228,7 +228,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  *
  * Example invocation:
  *
- *     ffmpeg -i in.mov -vf "scale=-2:'min(720,ih)',fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p" -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
+ *     ffmpeg -i in.mov -vf "scale='if(lt(iw,ih),min(720,iw),-2)':'if(lt(iw,ih),-2,min(720,ih))',fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p" -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
  *
  * See: [Note: Preview variant of videos]
  *
@@ -446,11 +446,11 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
                       // enough bitrate to require rescaling anyways.
                       rescaleVideo || tonemap
                           ? [
-                                // Scales the video to maximum 720p height,
-                                // keeping aspect ratio and the calculated
-                                // dimension divisible by 2 (some of the other
-                                // operations require an even pixel count).
-                                "scale=-2:'min(720,ih)'",
+                                // Scale smaller dimension to 720p (or keep
+                                // original if less than 720p). Portrait videos
+                                // scale width, landscape videos scale height.
+                                // -2 keeps aspect ratio with even pixel count.
+                                "scale='if(lt(iw,ih),min(720,iw),-2)':'if(lt(iw,ih),-2,min(720,ih))'",
                                 // Convert the video to a constant 30 fps,
                                 // duplicating or dropping frames as necessary.
                                 "fps=30",
