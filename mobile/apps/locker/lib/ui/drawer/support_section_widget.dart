@@ -14,8 +14,6 @@ import "package:url_launcher/url_launcher_string.dart";
 class SupportSectionWidget extends StatelessWidget {
   const SupportSectionWidget({super.key});
 
-  get supportEmail => null;
-
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
