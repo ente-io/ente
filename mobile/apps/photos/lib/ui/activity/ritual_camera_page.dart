@@ -40,6 +40,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   CameraController? _controller;
   List<CameraDescription> _cameras = <CameraDescription>[];
   CameraDescription? _activeCamera;
+  late final PageController _pageController;
   Ritual? _ritual;
   _CameraScreenMode _mode = _CameraScreenMode.capture;
   int _selectedIndex = 0;
@@ -62,10 +63,37 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   static const int _maxCaptures = 20;
   late final VoidCallback _activityListener;
 
+  void _ensurePageVisible(int index, {bool animate = false}) {
+    if (_captures.isEmpty) return;
+    final int capped = index.clamp(0, _captures.length - 1);
+    void jump() {
+      if (animate) {
+        _pageController.animateToPage(
+          capped,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      } else {
+        _pageController.jumpToPage(capped);
+      }
+    }
+
+    if (_pageController.hasClients) {
+      jump();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_pageController.hasClients) {
+          jump();
+        }
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _pageController = PageController();
     _activityListener = _syncRitualFromActivity;
     activityService.stateNotifier.addListener(_activityListener);
     _loadAlbum();
@@ -80,6 +108,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     _focusHideTimer?.cancel();
     _zoomHintTimer?.cancel();
     _controller?.dispose();
+    _pageController.dispose();
     _cleanupCaptures();
     super.dispose();
   }
@@ -212,6 +241,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       setState(() {
         _captures = List<XFile>.from(_captures)..add(capture);
       });
+      _ensurePageVisible(_captures.length - 1, animate: true);
     } catch (_) {
       if (!mounted) return;
       showShortToast(context, "Unable to capture photo. Please try again.");
@@ -242,6 +272,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           _mode = _CameraScreenMode.review;
         }
       });
+      _ensurePageVisible(_selectedIndex, animate: true);
     }
   }
 
@@ -338,6 +369,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       _mode = _CameraScreenMode.review;
       _selectedIndex = _captures.length - 1;
     });
+    _ensurePageVisible(_selectedIndex);
   }
 
   void _returnToCapture() {
@@ -363,6 +395,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         _selectedIndex = index.clamp(0, _captures.length - 1);
       }
     });
+    if (_captures.isNotEmpty) {
+      _ensurePageVisible(_selectedIndex);
+    }
   }
 
   void _cleanupCaptures([List<XFile>? files]) {
@@ -427,11 +462,6 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     final bool isReady = _controller != null &&
         _controller!.value.isInitialized &&
         !_initializing;
-    final bool hasCaptures = _captures.isNotEmpty;
-    final XFile? selectedCapture =
-        hasCaptures && _selectedIndex < _captures.length
-            ? _captures[_selectedIndex]
-            : null;
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
@@ -441,7 +471,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             Positioned.fill(
               child: _mode == _CameraScreenMode.capture
                   ? _buildCameraArea(isReady, colorScheme)
-                  : _buildReviewArea(selectedCapture),
+                  : _buildReviewArea(),
             ),
             Positioned(
               top: 0,
@@ -455,7 +485,27 @@ class _RitualCameraPageState extends State<RitualCameraPage>
               bottom: 0,
               child: _mode == _CameraScreenMode.capture
                   ? _buildCaptureControls(colorScheme, isReady)
-                  : _buildReviewControls(colorScheme, textTheme),
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_captures.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+                            child: _ThumbnailStrip(
+                              captures: _captures,
+                              selectedIndex: _selectedIndex,
+                              onSelect: (index) {
+                                setState(() {
+                                  _selectedIndex = index;
+                                });
+                                _ensurePageVisible(index);
+                              },
+                              onRemove: _removeCapture,
+                            ),
+                          ),
+                        _buildReviewControls(colorScheme, textTheme),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -662,8 +712,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     );
   }
 
-  Widget _buildReviewArea(XFile? selectedCapture) {
-    if (selectedCapture == null) {
+  Widget _buildReviewArea() {
+    if (_captures.isEmpty) {
       return Container(
         color: Colors.black,
         child: const Center(
@@ -676,11 +726,23 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
     return Container(
       color: Colors.black,
-      child: Image.file(
-        File(selectedCapture.path),
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: _captures.length,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        itemBuilder: (context, index) {
+          final capture = _captures[index];
+          return Image.file(
+            File(capture.path),
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          );
+        },
       ),
     );
   }
@@ -738,6 +800,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 if (_captures.isNotEmpty)
                   Positioned(
                     top: -120, // increased gap above switch button
+                    right: 0,
                     child: _ConfirmChip(
                       count: _captures.length,
                       onTap: _enterReview,
@@ -756,9 +819,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     EnteTextTheme textTheme,
   ) {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
-    final bool multi = _captures.length > 1;
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 32, 16, 26 + bottomPadding),
+      padding: EdgeInsets.fromLTRB(16, 18, 16, 24 + bottomPadding),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.60),
       ),
@@ -766,32 +828,6 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (multi) ...[
-            SizedBox(
-              height: 90,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _captures.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final capture = _captures[index];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = index;
-                      });
-                    },
-                    child: _ReviewThumb(
-                      file: capture,
-                      selected: index == _selectedIndex,
-                      onRemove: () => _removeCapture(index),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
           Row(
             children: [
               _RoundIconButton(
@@ -914,6 +950,43 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   }
 }
 
+class _ThumbnailStrip extends StatelessWidget {
+  const _ThumbnailStrip({
+    required this.captures,
+    required this.selectedIndex,
+    required this.onSelect,
+    required this.onRemove,
+  });
+
+  final List<XFile> captures;
+  final int selectedIndex;
+  final ValueChanged<int> onSelect;
+  final ValueChanged<int> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 88,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: captures.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final capture = captures[index];
+          return GestureDetector(
+            onTap: () => onSelect(index),
+            child: _ReviewThumb(
+              file: capture,
+              selected: index == selectedIndex,
+              onRemove: () => onRemove(index),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _StackedPreview extends StatelessWidget {
   const _StackedPreview({
     required this.captures,
@@ -925,7 +998,9 @@ class _StackedPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final display = captures.reversed.take(2).toList();
+    final display = captures.length <= 2
+        ? List<XFile>.from(captures)
+        : captures.sublist(captures.length - 2);
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -936,26 +1011,16 @@ class _StackedPreview extends StatelessWidget {
           children: display.asMap().entries.map((entry) {
             final index = entry.key;
             final capture = entry.value;
-            final double offset = index * -6;
+            final double offset = index * 10;
             return Positioned(
               left: offset,
-              top: offset.abs() / 2,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Image.file(
-                    File(capture.path),
-                    width: 64,
-                    height: 64,
-                    fit: BoxFit.cover,
-                  ),
+                child: Image.file(
+                  File(capture.path),
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
                 ),
               ),
             );
@@ -1128,7 +1193,7 @@ class _ReviewThumb extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? Colors.white : Colors.white54,
+              color: Colors.white,
               width: selected ? 2 : 1,
             ),
           ),
