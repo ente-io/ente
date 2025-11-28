@@ -1,0 +1,12 @@
+{
+    "name": "ente-wasm",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "build": "wasm-pack build --target bundler"
+    },
+    "devDependencies": {
+        "ente-build-config": "*",
+        "wasm-pack": "^0.13.1"
+    }
+}
