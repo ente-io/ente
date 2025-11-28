@@ -97,6 +97,8 @@ export const usePhotoShare = (): UsePhotoShareResult => {
                                 const fullFileUrl = await getFileUrl(
                                     token,
                                     decryptedInfo.fileKey,
+                                    decryptedInfo.fileName,
+                                    decryptedInfo.fileType,
                                     decryptedInfo.fileDecryptionHeader,
                                     decryptedInfo.fileNonce,
                                 );

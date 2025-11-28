@@ -8,6 +8,7 @@ import {
     toB64,
 } from "ente-base/crypto";
 import { apiOrigin } from "ente-base/origins";
+import { renderableImageBlob } from "ente-gallery/services/convert";
 import type {
     DecryptedFileInfo,
     FileLinkInfo,
@@ -367,10 +368,15 @@ export const downloadThumbnail = async (
 
 /**
  * Get decrypted file as a blob URL for viewing
+ *
+ * Applies format conversion when needed (e.g., HEIC to JPEG) so that the
+ * browser can render the file.
  */
 export const getFileUrl = async (
     accessToken: string,
     fileKey: string,
+    fileName: string,
+    fileType: "image" | "video" | "other",
     fileDecryptionHeader?: string,
     fileNonce?: string,
 ): Promise<string | null> => {
@@ -402,9 +408,72 @@ export const getFileUrl = async (
         decryptedData = encryptedData;
     }
 
-    const blob = new Blob([new Uint8Array(decryptedData)]);
+    const blob = new Blob([decryptedData]);
+
+    // Apply format conversion for images (HEIC, etc.)
+    if (fileType === "image") {
+        try {
+            const renderableBlob = await renderableImageBlob(blob, fileName);
+            return URL.createObjectURL(renderableBlob);
+        } catch {
+            // If conversion fails, return original blob
+            return URL.createObjectURL(blob);
+        }
+    }
+
+    // For videos, check if browser can play and apply conversion if needed
+    if (fileType === "video") {
+        const videoUrl = URL.createObjectURL(blob);
+        const canPlay = await isVideoPlayable(videoUrl);
+        if (canPlay) {
+            return videoUrl;
+        }
+        // Try to convert unplayable videos (only for smaller files on web)
+        if (blob.size < 100 * 1024 * 1024) {
+            try {
+                const { convertToMP4 } = await import(
+                    "ente-gallery/services/ffmpeg"
+                );
+                const convertedBlob = await convertToMP4(blob);
+                URL.revokeObjectURL(videoUrl);
+                return URL.createObjectURL(
+                    new Blob([convertedBlob], { type: "video/mp4" }),
+                );
+            } catch {
+                // If conversion fails, return original
+                return videoUrl;
+            }
+        }
+        return videoUrl;
+    }
+
     return URL.createObjectURL(blob);
 };
+
+/**
+ * Check if the browser can play a video at the given URL.
+ */
+const isVideoPlayable = (url: string): Promise<boolean> =>
+    new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+            video.remove();
+            resolve(false);
+        }, 1000);
+
+        const video = document.createElement("video");
+        video.addEventListener("canplay", () => {
+            clearTimeout(timeout);
+            video.remove();
+            resolve(video.duration > 0);
+        });
+        video.addEventListener("error", () => {
+            clearTimeout(timeout);
+            video.remove();
+            resolve(false);
+        });
+
+        video.src = url;
+    });
 
 /**
  * Download and decrypt file
