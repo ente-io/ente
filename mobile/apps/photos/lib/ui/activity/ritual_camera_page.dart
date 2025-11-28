@@ -267,6 +267,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       return;
     }
     final List<XFile> pending = List<XFile>.from(_captures);
+    bool saved = false;
     setState(() {
       _saving = true;
     });
@@ -286,6 +287,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         true,
         sharedFiles: shared,
       );
+      saved = true;
       if (!mounted) return;
       showShortToast(
         context,
@@ -316,12 +318,16 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         );
       }
     } finally {
-      _cleanupCaptures(pending);
       if (mounted) {
         setState(() {
           _saving = false;
-          _captures = <XFile>[];
+          if (saved) {
+            _captures = <XFile>[];
+          }
         });
+      }
+      if (saved) {
+        _cleanupCaptures(pending);
       }
     }
   }
