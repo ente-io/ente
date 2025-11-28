@@ -1,5 +1,9 @@
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import RemoveIcon from "@mui/icons-material/Remove";
 import {
     Box,
     Dialog,
@@ -45,6 +49,7 @@ interface MapComponents {
     MapContainer: typeof import("react-leaflet").MapContainer;
     TileLayer: typeof import("react-leaflet").TileLayer;
     Marker: typeof import("react-leaflet").Marker;
+    useMap: typeof import("react-leaflet").useMap;
 }
 
 interface CollectionMapDialogProps extends ModalVisibilityProps {
@@ -59,6 +64,127 @@ interface MapClusterMeta {
     thumbnail?: string;
     fileIDs: number[];
 }
+
+interface MapControlsProps {
+    useMap: typeof import("react-leaflet").useMap;
+    onClose: () => void;
+}
+
+const MapControls: React.FC<MapControlsProps> = ({ useMap, onClose }) => {
+    const map = useMap();
+
+    const handleZoomIn = () => {
+        map.zoomIn();
+    };
+
+    const handleZoomOut = () => {
+        map.zoomOut();
+    };
+
+    const handleOpenInMaps = () => {
+        const center = map.getCenter();
+        const url = `https://www.google.com/maps?q=${center.lat},${center.lng}&z=${map.getZoom()}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+    };
+
+    return (
+        <>
+            {/* Back button - Top Left */}
+            <IconButton
+                onClick={onClose}
+                sx={{
+                    position: "absolute",
+                    left: 16,
+                    top: 16,
+                    zIndex: 1000,
+                    bgcolor: (theme) => theme.vars.palette.background.paper,
+                    boxShadow: (theme) => theme.shadows[4],
+                    width: 48,
+                    height: 48,
+                    borderRadius: "16px",
+                    transition: "transform 0.2s ease-out",
+                    "&:hover": {
+                        bgcolor: (theme) => theme.vars.palette.background.paper,
+                        transform: "scale(1.05)",
+                    },
+                }}
+            >
+                <ArrowBackIcon />
+            </IconButton>
+
+            {/* Open in external map - Top Right */}
+            <IconButton
+                onClick={handleOpenInMaps}
+                sx={{
+                    position: "absolute",
+                    right: 16,
+                    top: 16,
+                    zIndex: 1000,
+                    bgcolor: (theme) => theme.vars.palette.background.paper,
+                    boxShadow: (theme) => theme.shadows[4],
+                    width: 48,
+                    height: 48,
+                    borderRadius: "16px",
+                    transition: "transform 0.2s ease-out",
+                    "&:hover": {
+                        bgcolor: (theme) => theme.vars.palette.background.paper,
+                        transform: "scale(1.05)",
+                    },
+                }}
+            >
+                <NavigationIcon />
+            </IconButton>
+
+            {/* Zoom controls - Bottom Right */}
+            <Stack
+                spacing={1}
+                sx={{
+                    position: "absolute",
+                    right: 16,
+                    bottom: 16,
+                    zIndex: 1000,
+                }}
+            >
+                <IconButton
+                    onClick={handleZoomIn}
+                    sx={{
+                        bgcolor: (theme) => theme.vars.palette.background.paper,
+                        boxShadow: (theme) => theme.shadows[4],
+                        width: 48,
+                        height: 48,
+                        borderRadius: "16px",
+                        transition: "transform 0.2s ease-out",
+                        "&:hover": {
+                            bgcolor: (theme) =>
+                                theme.vars.palette.background.paper,
+                            transform: "scale(1.05)",
+                        },
+                    }}
+                >
+                    <AddIcon />
+                </IconButton>
+                <IconButton
+                    onClick={handleZoomOut}
+                    sx={{
+                        bgcolor: (theme) => theme.vars.palette.background.paper,
+                        boxShadow: (theme) => theme.shadows[4],
+                        width: 48,
+                        height: 48,
+                        borderRadius: "16px",
+                        transition: "transform 0.2s ease-out",
+                        "&:hover": {
+                            bgcolor: (theme) =>
+                                theme.vars.palette.background.paper,
+                            transform: "scale(1.05)",
+                        },
+                    }}
+                >
+                    <RemoveIcon />
+                </IconButton>
+            </Stack>
+        </>
+    );
+};
 
 export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     open,
@@ -129,6 +255,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                     MapContainer: mod.MapContainer,
                     TileLayer: mod.TileLayer,
                     Marker: mod.Marker,
+                    useMap: mod.useMap,
                 }),
             )
             .catch((e: unknown) => {
@@ -345,7 +472,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             );
         }
 
-        const { MapContainer, TileLayer, Marker } = mapComponents;
+        const { MapContainer, TileLayer, Marker, useMap } = mapComponents;
         return (
             <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
                 {/* Left sidebar */}
@@ -371,7 +498,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                             pt: 2, // Add padding for content spacing
                             bgcolor: (theme) =>
                                 theme.vars.palette.background.paper,
-                            zIndex: 1,
+                            zIndex: 3,
                             pb: 2,
                         }}
                     >
@@ -422,17 +549,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                     )}
                                 </Typography>
                             </Stack>
-                            <IconButton
-                                onClick={onClose}
-                                aria-label={t("close")}
-                                sx={{
-                                    bgcolor: (theme) =>
-                                        theme.vars.palette.background.paper,
-                                    boxShadow: (theme) => theme.shadows[2],
-                                }}
-                            >
-                                <CloseIcon />
-                            </IconButton>
                         </Box>
                     </Box>
                     {/* Scrollable photo content */}
@@ -445,8 +561,8 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                                         top: 56,
                                         bgcolor: (theme) =>
                                             theme.vars.palette.background.paper,
-                                        zIndex: 0,
-                                        py: 0.5,
+                                        zIndex: 2,
+                                        py: 1.5,
                                         ml: -2,
                                         mr: -2,
                                         pr: 2,
@@ -493,6 +609,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                         center={mapCenter}
                         zoom={optimalZoom}
                         scrollWheelZoom
+                        zoomControl={false}
                         style={{ width: "100%", height: "100%" }}
                     >
                         <TileLayer
@@ -501,6 +618,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                             maxZoom={19}
                             updateWhenZooming
                         />
+                        <MapControls useMap={useMap} onClose={onClose} />
                         {clusterMeta.map((cluster, index) => {
                             const icon = createIcon(
                                 cluster.thumbnail ?? "",
@@ -621,7 +739,15 @@ const CenteredBox: React.FC<CenteredBoxProps> = ({
 );
 
 const ThumbRow: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.25, pb: 1 }}>
+    <Box
+        sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 0.25,
+            pb: 1,
+            overflow: "hidden",
+        }}
+    >
         {children}
     </Box>
 );
