@@ -19,6 +19,7 @@ interface UsePhotoShareResult {
     thumbnailUrl: string | null;
     fileUrl: string | null;
     handleDownload: () => Promise<void>;
+    enableDownload: boolean;
 }
 
 export const usePhotoShare = (): UsePhotoShareResult => {
@@ -166,5 +167,6 @@ export const usePhotoShare = (): UsePhotoShareResult => {
         thumbnailUrl,
         fileUrl,
         handleDownload,
+        enableDownload: fileInfo?.enableDownload ?? true,
     };
 };

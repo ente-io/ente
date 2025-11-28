@@ -229,6 +229,9 @@ export const decryptFileInfo = async (
     fileLinkInfo: FileLinkInfo,
     keyMaterial: LinkKeyMaterial,
 ): Promise<DecryptedFileInfo> => {
+    // enableDownload defaults to true if not specified
+    const enableDownload = fileLinkInfo.link?.enableDownload ?? true;
+
     try {
         const file = fileLinkInfo.file;
         const ownerName = fileLinkInfo.ownerName;
@@ -262,6 +265,7 @@ export const decryptFileInfo = async (
                 fileNonce: undefined,
                 fileKey,
                 fileType: "other",
+                enableDownload,
             };
         }
 
@@ -289,6 +293,7 @@ export const decryptFileInfo = async (
             fileNonce: undefined,
             fileKey,
             fileType: getFileType(fileName),
+            enableDownload,
         };
     } catch {
         const fallbackKey =
@@ -308,6 +313,7 @@ export const decryptFileInfo = async (
                 fileNonce: undefined,
                 fileKey: fallbackKey,
                 fileType: "other",
+                enableDownload,
             };
         }
 
@@ -323,6 +329,7 @@ export const decryptFileInfo = async (
             fileNonce: undefined,
             fileKey: fallbackKey,
             fileType: "other",
+            enableDownload,
         };
     }
 };

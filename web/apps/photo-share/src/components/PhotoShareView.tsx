@@ -1,17 +1,24 @@
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
+import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
     Box,
     CircularProgress,
     IconButton,
-    Tooltip,
+    styled,
     Typography,
 } from "@mui/material";
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import Head from "next/head";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { FileInfoPanel } from "./FileInfoPanel";
 import { usePhotoShare } from "../hooks/usePhotoShare";
 
 export const PhotoShareView: React.FC = () => {
-    const [isHovering, setIsHovering] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [showFileInfo, setShowFileInfo] = useState(false);
 
     const {
         loading,
@@ -21,27 +28,52 @@ export const PhotoShareView: React.FC = () => {
         thumbnailUrl,
         fileUrl,
         handleDownload,
+        enableDownload,
     } = usePhotoShare();
 
     // Use full file URL if available, otherwise fall back to thumbnail
     const displayUrl = fileUrl || thumbnailUrl;
     const isVideo = fileInfo?.fileType === "video";
+    const isImage = fileInfo?.fileType === "image";
+
+    const handleToggleFullscreen = useCallback(() => {
+        void (
+            document.fullscreenElement
+                ? document.exitFullscreen()
+                : document.body.requestFullscreen()
+        ).then(() => setIsFullscreen(!!document.fullscreenElement));
+    }, []);
+
+    const handleCopyAsPNG = useCallback(async () => {
+        if (!displayUrl) return;
+        try {
+            const blob = await createImagePNGBlob(displayUrl);
+            await navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob }),
+            ]);
+        } catch (e) {
+            console.error("Failed to copy image:", e);
+        }
+    }, [displayUrl]);
+
+    const handleOpenFileInfo = useCallback(() => setShowFileInfo(true), []);
+    const handleCloseFileInfo = useCallback(() => setShowFileInfo(false), []);
 
     return (
         <>
             <Head>
                 <meta name="robots" content="noindex, nofollow" />
-                {fileInfo?.fileName && <title>{fileInfo.fileName}</title>}
+                <title>Ente Photos</title>
             </Head>
             <Box
                 sx={{
                     minHeight: "100dvh",
-                    bgcolor: "background.default",
+                    bgcolor: "#000000",
                     display: "flex",
                     flexDirection: "column",
                 }}
             >
-                {/* Header */}
+                {/* Header - always visible */}
                 <Box
                     sx={{
                         position: "fixed",
@@ -51,51 +83,73 @@ export const PhotoShareView: React.FC = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        px: 2,
-                        py: 1.5,
+                        pl: 3,
+                        pr: 1,
+                        pt: 1,
+                        height: 56,
                         zIndex: 10,
                         background:
                             "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%)",
-                        opacity: isHovering || loading ? 1 : 0,
-                        transition: "opacity 0.3s ease",
                     }}
                 >
-                    <a
-                        href="https://ente.io/photos"
+                    <EnteLogoLink
+                        href="https://ente.io"
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ display: "block", lineHeight: 0 }}
                     >
-                        <Box
-                            component="img"
-                            src="/images/ente-photos-white.svg"
-                            alt="Ente Photos"
-                            sx={{ height: "32px", cursor: "pointer" }}
-                        />
-                    </a>
+                        <EnteLogo height={18} />
+                    </EnteLogoLink>
                     {fileInfo && !loading && (
-                        <Tooltip title="Download">
-                            <IconButton
-                                onClick={handleDownload}
-                                disabled={downloading}
-                                sx={{
-                                    color: "white",
-                                    bgcolor: "rgba(255,255,255,0.1)",
-                                    "&:hover": {
-                                        bgcolor: "rgba(255,255,255,0.2)",
-                                    },
-                                }}
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                            {/* Download button - only if enabled */}
+                            {enableDownload && (
+                                <BarIconButton
+                                    title="Download"
+                                    onClick={handleDownload}
+                                    disabled={downloading}
+                                >
+                                    {downloading ? (
+                                        <CircularProgress
+                                            size={24}
+                                            sx={{ color: "white" }}
+                                        />
+                                    ) : (
+                                        <FileDownloadOutlinedIcon />
+                                    )}
+                                </BarIconButton>
+                            )}
+                            {/* Info button */}
+                            <BarIconButton
+                                title="Info"
+                                onClick={handleOpenFileInfo}
                             >
-                                {downloading ? (
-                                    <CircularProgress
-                                        size={24}
-                                        sx={{ color: "white" }}
-                                    />
+                                <InfoOutlinedIcon sx={{ fontSize: 22 }} />
+                            </BarIconButton>
+                            {/* Copy as PNG button - only for images */}
+                            {isImage && displayUrl && (
+                                <BarIconButton
+                                    title="Copy as PNG"
+                                    onClick={handleCopyAsPNG}
+                                >
+                                    <ContentCopyIcon sx={{ fontSize: 18 }} />
+                                </BarIconButton>
+                            )}
+                            {/* Fullscreen button */}
+                            <BarIconButton
+                                title={
+                                    isFullscreen
+                                        ? "Exit fullscreen"
+                                        : "Fullscreen"
+                                }
+                                onClick={handleToggleFullscreen}
+                            >
+                                {isFullscreen ? (
+                                    <FullscreenExitOutlinedIcon />
                                 ) : (
-                                    <FileDownloadOutlinedIcon />
+                                    <FullscreenOutlinedIcon />
                                 )}
-                            </IconButton>
-                        </Tooltip>
+                            </BarIconButton>
+                        </Box>
                     )}
                 </Box>
 
@@ -107,33 +161,14 @@ export const PhotoShareView: React.FC = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         position: "relative",
-                        cursor: isHovering ? "default" : "none",
                     }}
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
-                    onTouchStart={() => setIsHovering(true)}
                 >
                     {/* Loading State */}
                     {loading && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                gap: 2,
-                            }}
-                        >
-                            <CircularProgress
-                                sx={{ color: "accent.main" }}
-                                size={40}
-                            />
-                            <Typography
-                                variant="small"
-                                sx={{ color: "text.muted" }}
-                            >
-                                Loading...
-                            </Typography>
-                        </Box>
+                        <CircularProgress
+                            sx={{ color: "accent.main" }}
+                            size={40}
+                        />
                     )}
 
                     {/* Error State */}
@@ -202,45 +237,55 @@ export const PhotoShareView: React.FC = () => {
                         </>
                     )}
                 </Box>
-
-                {/* Footer with file info */}
-                {fileInfo && !loading && !error && (
-                    <Box
-                        sx={{
-                            position: "fixed",
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            px: 2,
-                            py: 2,
-                            background:
-                                "linear-gradient(0deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 100%)",
-                            opacity: isHovering ? 1 : 0,
-                            transition: "opacity 0.3s ease",
-                        }}
-                    >
-                        <Typography
-                            variant="small"
-                            sx={{
-                                color: "white",
-                                textAlign: "center",
-                                textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-                            }}
-                        >
-                            {fileInfo.fileName}
-                            {fileInfo.ownerName && (
-                                <span style={{ opacity: 0.7 }}>
-                                    {" "}
-                                    &bull; Shared by {fileInfo.ownerName}
-                                </span>
-                            )}
-                        </Typography>
-                    </Box>
-                )}
             </Box>
+
+            {/* File Info Panel */}
+            {fileInfo && (
+                <FileInfoPanel
+                    open={showFileInfo}
+                    onClose={handleCloseFileInfo}
+                    fileInfo={fileInfo}
+                />
+            )}
         </>
     );
 };
+
+/**
+ * Return a promise that resolves with a "image/png" blob derived from the given
+ * {@link imageURL} that can be written to the navigator's clipboard.
+ */
+const createImagePNGBlob = async (imageURL: string): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.getContext("2d")!.drawImage(image, 0, 0);
+            canvas.toBlob(
+                (blob) =>
+                    blob ? resolve(blob) : reject(new Error("toBlob failed")),
+                "image/png",
+            );
+        };
+        image.onerror = reject;
+        image.src = imageURL;
+    });
+
+const EnteLogoLink = styled("a")`
+    line-height: 0;
+    color: white;
+    &:hover {
+        color: white;
+    }
+`;
+
+const BarIconButton = styled(IconButton)`
+    color: rgba(255, 255, 255, 0.7);
+    &:hover {
+        color: white;
+        background-color: transparent;
+    }
+`;
+

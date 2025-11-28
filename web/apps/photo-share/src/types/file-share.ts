@@ -4,6 +4,7 @@ export interface FileLinkMeta {
     kdfNonce?: string;
     kdfMemLimit?: number;
     kdfOpsLimit?: number;
+    enableDownload?: boolean;
 }
 
 export interface FileLinkInfo {
@@ -61,6 +62,7 @@ export interface DecryptedFileInfo {
     fileNonce?: string;
     fileKey?: string;
     fileType: "image" | "video" | "other";
+    enableDownload: boolean;
 }
 
 export type LinkKeyMaterial =
