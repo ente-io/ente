@@ -20,6 +20,10 @@ derivation functions. Since only you know your password, only you can decrypt
 your files. For technical details, please see our
 [architecture document](https://ente.io/architecture).
 
+### What data can Ente see from my photos and videos? {#what-data-can-ente-see}
+
+In terms of your library, the only things Ente has access to is how many files you have, and how big these files are, simply because it's technically needed to store your photos.
+
 ### How is my data encrypted? {#data-encryption}
 
 We use the following encryption algorithms:
