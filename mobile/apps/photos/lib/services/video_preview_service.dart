@@ -123,9 +123,13 @@ class VideoPreviewService {
   }
 
   void clearQueue() {
-    // Fire paused events for all items being cleared so UI can reset
+    // Fire events for all items being cleared so UI can reset
+    // Use paused status when flag is enabled (items will resume), otherwise uploaded
+    final status = flagService.pauseStreamDuringUpload
+        ? PreviewItemStatus.paused
+        : PreviewItemStatus.uploaded;
     for (final fileId in _items.keys) {
-      _fireVideoPreviewStateChange(fileId, PreviewItemStatus.paused);
+      _fireVideoPreviewStateChange(fileId, status);
     }
     fileQueue.clear();
     _items.clear();
