@@ -13,6 +13,9 @@ import {
     Stack,
     Tooltip,
     Typography,
+    type IconButtonProps,
+    type SxProps,
+    type Theme,
 } from "@mui/material";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
@@ -58,10 +61,35 @@ interface CollectionMapDialogProps extends ModalVisibilityProps {
     activeCollection: Collection;
 }
 
+interface PhotoGroup {
+    dateLabel: string;
+    photos: JourneyPoint[];
+}
+
 interface MapControlsProps {
     useMap: typeof import("react-leaflet").useMap;
     onClose: () => void;
 }
+
+const floatingIconButtonSx: SxProps<Theme> = {
+    bgcolor: (theme) => theme.vars.palette.background.paper,
+    boxShadow: (theme) => theme.shadows[4],
+    width: 48,
+    height: 48,
+    borderRadius: "16px",
+    transition: "transform 0.2s ease-out",
+    "&:hover": {
+        bgcolor: (theme) => theme.vars.palette.background.paper,
+        transform: "scale(1.05)",
+    },
+};
+
+const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => (
+    <IconButton
+        {...props}
+        sx={[floatingIconButtonSx, ...(sx ? [sx] : [])]}
+    />
+);
 
 const MapControls: React.FC<MapControlsProps> = ({ useMap, onClose }) => {
     const map = useMap();
@@ -83,50 +111,20 @@ const MapControls: React.FC<MapControlsProps> = ({ useMap, onClose }) => {
     return (
         <>
             {/* Back button - Top Left */}
-            <IconButton
+            <FloatingIconButton
                 onClick={onClose}
-                sx={{
-                    position: "absolute",
-                    left: 16,
-                    top: 16,
-                    zIndex: 1000,
-                    bgcolor: (theme) => theme.vars.palette.background.paper,
-                    boxShadow: (theme) => theme.shadows[4],
-                    width: 48,
-                    height: 48,
-                    borderRadius: "16px",
-                    transition: "transform 0.2s ease-out",
-                    "&:hover": {
-                        bgcolor: (theme) => theme.vars.palette.background.paper,
-                        transform: "scale(1.05)",
-                    },
-                }}
+                sx={{ position: "absolute", left: 16, top: 16, zIndex: 1000 }}
             >
                 <ArrowBackIcon />
-            </IconButton>
+            </FloatingIconButton>
 
             {/* Open in external map - Top Right */}
-            <IconButton
+            <FloatingIconButton
                 onClick={handleOpenInMaps}
-                sx={{
-                    position: "absolute",
-                    right: 16,
-                    top: 16,
-                    zIndex: 1000,
-                    bgcolor: (theme) => theme.vars.palette.background.paper,
-                    boxShadow: (theme) => theme.shadows[4],
-                    width: 48,
-                    height: 48,
-                    borderRadius: "16px",
-                    transition: "transform 0.2s ease-out",
-                    "&:hover": {
-                        bgcolor: (theme) => theme.vars.palette.background.paper,
-                        transform: "scale(1.05)",
-                    },
-                }}
+                sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
             >
                 <NavigationIcon />
-            </IconButton>
+            </FloatingIconButton>
 
             {/* Zoom controls - Bottom Right */}
             <Stack
@@ -138,42 +136,12 @@ const MapControls: React.FC<MapControlsProps> = ({ useMap, onClose }) => {
                     zIndex: 1000,
                 }}
             >
-                <IconButton
-                    onClick={handleZoomIn}
-                    sx={{
-                        bgcolor: (theme) => theme.vars.palette.background.paper,
-                        boxShadow: (theme) => theme.shadows[4],
-                        width: 48,
-                        height: 48,
-                        borderRadius: "16px",
-                        transition: "transform 0.2s ease-out",
-                        "&:hover": {
-                            bgcolor: (theme) =>
-                                theme.vars.palette.background.paper,
-                            transform: "scale(1.05)",
-                        },
-                    }}
-                >
+                <FloatingIconButton onClick={handleZoomIn}>
                     <AddIcon />
-                </IconButton>
-                <IconButton
-                    onClick={handleZoomOut}
-                    sx={{
-                        bgcolor: (theme) => theme.vars.palette.background.paper,
-                        boxShadow: (theme) => theme.shadows[4],
-                        width: 48,
-                        height: 48,
-                        borderRadius: "16px",
-                        transition: "transform 0.2s ease-out",
-                        "&:hover": {
-                            bgcolor: (theme) =>
-                                theme.vars.palette.background.paper,
-                            transform: "scale(1.05)",
-                        },
-                    }}
-                >
+                </FloatingIconButton>
+                <FloatingIconButton onClick={handleZoomOut}>
                     <RemoveIcon />
-                </IconButton>
+                </FloatingIconButton>
             </Stack>
         </>
     );
@@ -265,7 +233,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             month: "short",
         });
 
-    const photosByDate = useMemo(() => {
+    const photoGroups = useMemo<PhotoGroup[]>(() => {
         const groups = new Map<string, JourneyPoint[]>();
         visiblePhotos.forEach((p) => {
             const dateLabel = formatDateLabel(p.timestamp);
@@ -274,7 +242,10 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             }
             groups.get(dateLabel)!.push(p);
         });
-        return Array.from(groups.entries());
+        return Array.from(groups.entries()).map(([dateLabel, photos]) => ({
+            dateLabel,
+            photos,
+        }));
     }, [visiblePhotos]);
 
     const visiblePhotoOrder = useMemo(() => {
@@ -504,6 +475,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 </CenteredBox>
             );
         }
+
         if (error) {
             return (
                 <CenteredBox>
@@ -513,6 +485,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 </CenteredBox>
             );
         }
+
         if (!mapComponents) {
             return (
                 <CenteredBox>
@@ -522,6 +495,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 </CenteredBox>
             );
         }
+
         if (!mapPhotos.length || !mapCenter) {
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
@@ -535,246 +509,39 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             );
         }
 
-        const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
-            mapComponents;
         return (
-            <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
-                {/* Left sidebar */}
-                <Box
-                    sx={{
-                        width: "600px",
-                        height: "100%",
-                        bgcolor: (theme) => theme.vars.palette.background.paper,
-                        boxShadow: (theme) => theme.shadows[6],
-                        display: "flex",
-                        flexDirection: "column",
-                        overflowY: "auto",
-                        padding: 2,
-                    }}
-                >
-                    {/* Sticky header section */}
-                    <Box
-                        sx={{
-                            position: "sticky",
-                            top: -16, // Stick to the very top
-                            mx: -2, // Extend to edges
-                            px: 2, // Add padding back
-                            pt: 2, // Add padding for content spacing
-                            bgcolor: (theme) =>
-                                theme.vars.palette.background.paper,
-                            zIndex: 3,
-                            pb: 2,
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                gap: 1,
-                            }}
-                        >
-                            <Stack>
-                                <Typography
-                                    variant="h5"
-                                    sx={{ fontWeight: 700 }}
-                                    noWrap
-                                >
-                                    {collectionSummary.name}
-                                </Typography>
-                                <Typography
-                                    variant="body"
-                                    color="text.secondary"
-                                    sx={{
-                                        mt: 0.25,
-                                        display: "flex",
-                                        alignItems: "center",
-                                        gap: 0.5,
-                                    }}
-                                >
-                                    {visiblePhotos.length}{" "}
-                                    {t("memories", {
-                                        defaultValue: "memories",
-                                    })}
-                                    {collectionSummary.fileCount !==
-                                        mapPhotos.length && (
-                                        <Tooltip
-                                            title={`${collectionSummary.fileCount - mapPhotos.length} images aren't shown since they don't have the proper location metadata`}
-                                            arrow
-                                        >
-                                            <InfoOutlinedIcon
-                                                sx={{
-                                                    fontSize: 16,
-                                                    color: "text.muted",
-                                                    cursor: "pointer",
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    )}
-                                </Typography>
-                            </Stack>
-                        </Box>
-                    </Box>
-                    {/* Scrollable photo content */}
-                    <Stack spacing={1.5}>
-                        {visiblePhotos.length ? (
-                            photosByDate.map(([dateLabel, photos]) => (
-                                <Stack key={dateLabel} spacing={0.75}>
-                                    <Box
-                                        sx={{
-                                            position: "sticky",
-                                            top: 56,
-                                            bgcolor: (theme) =>
-                                                theme.vars.palette.background
-                                                    .paper,
-                                            zIndex: 2,
-                                            py: 1.5,
-                                            ml: -2,
-                                            mr: -2,
-                                            pr: 2,
-                                        }}
-                                    >
-                                        <Typography
-                                            variant="small"
-                                            color="text.secondary"
-                                        >
-                                            {dateLabel}
-                                        </Typography>
-                                    </Box>
-                                    <ThumbRow>
-                                        {photos.map((p, idx) => {
-                                            const thumb = thumbByFileID.get(
-                                                p.fileId,
-                                            );
-                                            const photoOrderIndex =
-                                                visiblePhotoOrder.get(
-                                                    p.fileId,
-                                                ) ?? idx;
-                                            const animationDelay =
-                                                photoOrderIndex * 30;
-                                            if (!thumb) {
-                                                return (
-                                                    <PlaceholderThumb
-                                                        key={`${p.fileId}-${visiblePhotosWave}`}
-                                                        animationDelay={
-                                                            animationDelay
-                                                        }
-                                                    />
-                                                );
-                                            }
-                                            return (
-                                                <ThumbImage
-                                                    key={`${p.fileId}-${visiblePhotosWave}`}
-                                                    src={thumb}
-                                                    alt={t("view_on_map")}
-                                                    onClick={() =>
-                                                        handlePhotoClick(
-                                                            p.fileId,
-                                                        )
-                                                    }
-                                                    animationDelay={
-                                                        animationDelay
-                                                    }
-                                                />
-                                            );
-                                        })}
-                                    </ThumbRow>
-                                </Stack>
-                            ))
-                        ) : (
-                            <NoVisiblePhotos>
-                                <Typography
-                                    variant="body"
-                                    sx={{ fontWeight: 600 }}
-                                >
-                                    {t("no_photos_found_here", {
-                                        defaultValue: "No photos found here",
-                                    })}
-                                </Typography>
-                                <Typography
-                                    variant="small"
-                                    color="text.secondary"
-                                >
-                                    {t("zoom_out_to_see_photos", {
-                                        defaultValue: "Zoom out to see photos",
-                                    })}
-                                </Typography>
-                            </NoVisiblePhotos>
-                        )}
-                    </Stack>
-                </Box>
-                {/* Map container on the right */}
-                <Box sx={{ flex: 1, position: "relative" }}>
-                    <MapContainer
-                        center={mapCenter}
-                        zoom={optimalZoom}
-                        scrollWheelZoom
-                        zoomControl={false}
-                        style={{ width: "100%", height: "100%" }}
-                    >
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            maxZoom={19}
-                            updateWhenZooming
-                        />
-                        <MapControls useMap={useMap} onClose={onClose} />
-                        <MapViewportListener
-                            useMap={useMap}
-                            photos={mapPhotos}
-                            onVisiblePhotosChange={setVisiblePhotos}
-                        />
-                        <MarkerClusterGroup
-                            chunkedLoading
-                            iconCreateFunction={createClusterCustomIcon}
-                            maxClusterRadius={80}
-                            spiderfyOnMaxZoom={true}
-                            showCoverageOnHover={false}
-                            zoomToBoundsOnClick={true}
-                            animate={true}
-                            animateAddingMarkers={true}
-                            spiderfyDistanceMultiplier={1.5}
-                        >
-                            {mapPhotos.map((photo) => {
-                                const thumbnailUrl =
-                                    thumbByFileID.get(photo.fileId) ??
-                                    photo.image;
-                                const icon = createIcon(
-                                    thumbnailUrl,
-                                    68,
-                                    "#f6f6f6",
-                                    undefined,
-                                    false,
-                                );
-                                return (
-                                    <Marker
-                                        key={photo.fileId}
-                                        position={[photo.lat, photo.lng]}
-                                        icon={icon ?? undefined}
-                                    />
-                                );
-                            })}
-                        </MarkerClusterGroup>
-                    </MapContainer>
-                </Box>
-            </Box>
+            <MapLayout
+                collectionSummary={collectionSummary}
+                visiblePhotos={visiblePhotos}
+                photoGroups={photoGroups}
+                mapPhotos={mapPhotos}
+                thumbByFileID={thumbByFileID}
+                visiblePhotoOrder={visiblePhotoOrder}
+                visiblePhotosWave={visiblePhotosWave}
+                mapComponents={mapComponents}
+                mapCenter={mapCenter}
+                optimalZoom={optimalZoom}
+                createClusterCustomIcon={createClusterCustomIcon}
+                onClose={onClose}
+                onVisiblePhotosChange={setVisiblePhotos}
+                onPhotoClick={handlePhotoClick}
+            />
         );
     }, [
+        collectionSummary,
         createClusterCustomIcon,
         error,
+        handlePhotoClick,
         isLoading,
         mapCenter,
         mapComponents,
-        optimalZoom,
         mapPhotos,
-        thumbByFileID,
-        photosByDate,
-        collectionSummary.name,
-        collectionSummary.fileCount,
         onClose,
-        handlePhotoClick,
+        optimalZoom,
+        photoGroups,
+        thumbByFileID,
         visiblePhotoOrder,
-        visiblePhotos.length,
+        visiblePhotos,
         visiblePhotosWave,
     ]);
 
@@ -811,6 +578,350 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         </>
     );
 };
+
+interface MapLayoutProps {
+    collectionSummary: CollectionSummary;
+    visiblePhotos: JourneyPoint[];
+    photoGroups: PhotoGroup[];
+    mapPhotos: JourneyPoint[];
+    thumbByFileID: Map<number, string>;
+    visiblePhotoOrder: Map<number, number>;
+    visiblePhotosWave: number;
+    mapComponents: MapComponents;
+    mapCenter: [number, number];
+    optimalZoom: number;
+    createClusterCustomIcon: (cluster: unknown) => unknown;
+    onClose: () => void;
+    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onPhotoClick: (fileId: number) => void;
+}
+
+function MapLayout({
+    collectionSummary,
+    visiblePhotos,
+    photoGroups,
+    mapPhotos,
+    thumbByFileID,
+    visiblePhotoOrder,
+    visiblePhotosWave,
+    mapComponents,
+    mapCenter,
+    optimalZoom,
+    createClusterCustomIcon,
+    onClose,
+    onVisiblePhotosChange,
+    onPhotoClick,
+}: MapLayoutProps) {
+    return (
+        <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
+            <CollectionSidebar
+                collectionSummary={collectionSummary}
+                visiblePhotos={visiblePhotos}
+                photoGroups={photoGroups}
+                mapPhotosCount={mapPhotos.length}
+                thumbByFileID={thumbByFileID}
+                visiblePhotoOrder={visiblePhotoOrder}
+                visiblePhotosWave={visiblePhotosWave}
+                onPhotoClick={onPhotoClick}
+            />
+            <Box sx={{ flex: 1, position: "relative" }}>
+                <MapCanvas
+                    mapComponents={mapComponents}
+                    mapCenter={mapCenter}
+                    mapPhotos={mapPhotos}
+                    optimalZoom={optimalZoom}
+                    thumbByFileID={thumbByFileID}
+                    createClusterCustomIcon={createClusterCustomIcon}
+                    onClose={onClose}
+                    onVisiblePhotosChange={onVisiblePhotosChange}
+                />
+            </Box>
+        </Box>
+    );
+}
+
+interface CollectionSidebarProps {
+    collectionSummary: CollectionSummary;
+    visiblePhotos: JourneyPoint[];
+    photoGroups: PhotoGroup[];
+    mapPhotosCount: number;
+    thumbByFileID: Map<number, string>;
+    visiblePhotoOrder: Map<number, number>;
+    visiblePhotosWave: number;
+    onPhotoClick: (fileId: number) => void;
+}
+
+function CollectionSidebar({
+    collectionSummary,
+    visiblePhotos,
+    photoGroups,
+    mapPhotosCount,
+    thumbByFileID,
+    visiblePhotoOrder,
+    visiblePhotosWave,
+    onPhotoClick,
+}: CollectionSidebarProps) {
+    return (
+        <Box
+            sx={{
+                width: "600px",
+                height: "100%",
+                bgcolor: (theme) => theme.vars.palette.background.paper,
+                boxShadow: (theme) => theme.shadows[6],
+                display: "flex",
+                flexDirection: "column",
+                overflowY: "auto",
+                padding: 2,
+            }}
+        >
+            <SidebarHeader
+                collectionSummary={collectionSummary}
+                visibleCount={visiblePhotos.length}
+                mapPhotosCount={mapPhotosCount}
+            />
+            <PhotoList
+                photoGroups={photoGroups}
+                thumbByFileID={thumbByFileID}
+                visiblePhotoOrder={visiblePhotoOrder}
+                visiblePhotosWave={visiblePhotosWave}
+                onPhotoClick={onPhotoClick}
+            />
+        </Box>
+    );
+}
+
+interface SidebarHeaderProps {
+    collectionSummary: CollectionSummary;
+    visibleCount: number;
+    mapPhotosCount: number;
+}
+
+function SidebarHeader({
+    collectionSummary,
+    visibleCount,
+    mapPhotosCount,
+}: SidebarHeaderProps) {
+    const missingCount = collectionSummary.fileCount - mapPhotosCount;
+
+    return (
+        <Box
+            sx={{
+                position: "sticky",
+                top: -16,
+                mx: -2,
+                px: 2,
+                pt: 2,
+                bgcolor: (theme) => theme.vars.palette.background.paper,
+                zIndex: 3,
+                pb: 2,
+            }}
+        >
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 1,
+                }}
+            >
+                <Stack>
+                    <Typography variant="h5" sx={{ fontWeight: 700 }} noWrap>
+                        {collectionSummary.name}
+                    </Typography>
+                    <Typography
+                        variant="body"
+                        color="text.secondary"
+                        sx={{
+                            mt: 0.25,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                        }}
+                    >
+                        {visibleCount}{" "}
+                        {t("memories", { defaultValue: "memories" })}
+                        {missingCount > 0 && (
+                            <Tooltip
+                                title={`${missingCount} images aren't shown since they don't have the proper location metadata`}
+                                arrow
+                            >
+                                <InfoOutlinedIcon
+                                    sx={{
+                                        fontSize: 16,
+                                        color: "text.muted",
+                                        cursor: "pointer",
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
+                    </Typography>
+                </Stack>
+            </Box>
+        </Box>
+    );
+}
+
+interface PhotoListProps {
+    photoGroups: PhotoGroup[];
+    thumbByFileID: Map<number, string>;
+    visiblePhotoOrder: Map<number, number>;
+    visiblePhotosWave: number;
+    onPhotoClick: (fileId: number) => void;
+}
+
+function PhotoList({
+    photoGroups,
+    thumbByFileID,
+    visiblePhotoOrder,
+    visiblePhotosWave,
+    onPhotoClick,
+}: PhotoListProps) {
+    if (!photoGroups.length) {
+        return (
+            <NoVisiblePhotos>
+                <Typography variant="body" sx={{ fontWeight: 600 }}>
+                    {t("no_photos_found_here", {
+                        defaultValue: "No photos found here",
+                    })}
+                </Typography>
+                <Typography variant="small" color="text.secondary">
+                    {t("zoom_out_to_see_photos", {
+                        defaultValue: "Zoom out to see photos",
+                    })}
+                </Typography>
+            </NoVisiblePhotos>
+        );
+    }
+
+    return (
+        <Stack spacing={1.5}>
+            {photoGroups.map(({ dateLabel, photos }) => (
+                <Stack key={dateLabel} spacing={0.75}>
+                    <Box
+                        sx={{
+                            position: "sticky",
+                            top: 56,
+                            bgcolor: (theme) =>
+                                theme.vars.palette.background.paper,
+                            zIndex: 2,
+                            py: 1.5,
+                            ml: -2,
+                            mr: -2,
+                            pr: 2,
+                        }}
+                    >
+                        <Typography variant="small" color="text.secondary">
+                            {dateLabel}
+                        </Typography>
+                    </Box>
+                    <ThumbRow>
+                        {photos.map((photo, idx) => {
+                            const thumb = thumbByFileID.get(photo.fileId);
+                            const photoOrderIndex =
+                                visiblePhotoOrder.get(photo.fileId) ?? idx;
+                            const animationDelay = photoOrderIndex * 30;
+                            if (!thumb) {
+                                return (
+                                    <PlaceholderThumb
+                                        key={`${photo.fileId}-${visiblePhotosWave}`}
+                                        animationDelay={animationDelay}
+                                    />
+                                );
+                            }
+                            return (
+                                <ThumbImage
+                                    key={`${photo.fileId}-${visiblePhotosWave}`}
+                                    src={thumb}
+                                    alt={t("view_on_map")}
+                                    onClick={() => onPhotoClick(photo.fileId)}
+                                    animationDelay={animationDelay}
+                                />
+                            );
+                        })}
+                    </ThumbRow>
+                </Stack>
+            ))}
+        </Stack>
+    );
+}
+
+interface MapCanvasProps {
+    mapComponents: MapComponents;
+    mapCenter: [number, number];
+    mapPhotos: JourneyPoint[];
+    optimalZoom: number;
+    thumbByFileID: Map<number, string>;
+    createClusterCustomIcon: (cluster: unknown) => unknown;
+    onClose: () => void;
+    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+}
+
+function MapCanvas({
+    mapComponents,
+    mapCenter,
+    mapPhotos,
+    optimalZoom,
+    thumbByFileID,
+    createClusterCustomIcon,
+    onClose,
+    onVisiblePhotosChange,
+}: MapCanvasProps) {
+    const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
+        mapComponents;
+
+    return (
+        <MapContainer
+            center={mapCenter}
+            zoom={optimalZoom}
+            scrollWheelZoom
+            zoomControl={false}
+            style={{ width: "100%", height: "100%" }}
+        >
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+                updateWhenZooming
+            />
+            <MapControls useMap={useMap} onClose={onClose} />
+            <MapViewportListener
+                useMap={useMap}
+                photos={mapPhotos}
+                onVisiblePhotosChange={onVisiblePhotosChange}
+            />
+            <MarkerClusterGroup
+                chunkedLoading
+                iconCreateFunction={createClusterCustomIcon}
+                maxClusterRadius={80}
+                spiderfyOnMaxZoom={true}
+                showCoverageOnHover={false}
+                zoomToBoundsOnClick={true}
+                animate={true}
+                animateAddingMarkers={true}
+                spiderfyDistanceMultiplier={1.5}
+            >
+                {mapPhotos.map((photo) => {
+                    const thumbnailUrl =
+                        thumbByFileID.get(photo.fileId) ?? photo.image;
+                    const icon = createIcon(
+                        thumbnailUrl,
+                        68,
+                        "#f6f6f6",
+                        undefined,
+                        false,
+                    );
+                    return (
+                        <Marker
+                            key={photo.fileId}
+                            position={[photo.lat, photo.lng]}
+                            icon={icon ?? undefined}
+                        />
+                    );
+                })}
+            </MarkerClusterGroup>
+        </MapContainer>
+    );
+}
 
 interface CenteredBoxProps extends React.PropsWithChildren {
     onClose?: () => void;
