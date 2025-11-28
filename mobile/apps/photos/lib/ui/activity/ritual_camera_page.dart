@@ -41,6 +41,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   List<CameraDescription> _cameras = <CameraDescription>[];
   CameraDescription? _activeCamera;
   late final PageController _pageController;
+  late final ScrollController _thumbScrollController;
   Ritual? _ritual;
   _CameraScreenMode _mode = _CameraScreenMode.capture;
   int _selectedIndex = 0;
@@ -62,6 +63,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   bool _showZoomHint = false;
   static const int _maxCaptures = 20;
   late final VoidCallback _activityListener;
+  static const double _thumbnailSize = 80;
+  static const double _thumbnailSpacing = 12;
 
   void _ensurePageVisible(int index, {bool animate = false}) {
     if (_captures.isEmpty) return;
@@ -89,11 +92,50 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
+  void _scrollThumbsToIndex(int index, {bool animate = true}) {
+    if (_captures.isEmpty) return;
+    final int capped = index.clamp(0, _captures.length - 1);
+    void jump() {
+      if (!_thumbScrollController.hasClients) return;
+      final double itemStart = capped * (_thumbnailSize + _thumbnailSpacing);
+      final double itemEnd = itemStart + _thumbnailSize;
+      const double padding = 20;
+      final double viewport = _thumbScrollController.position.viewportDimension;
+      double newOffset = _thumbScrollController.offset;
+      if (itemStart - padding < newOffset) {
+        newOffset = itemStart - padding;
+      } else if (itemEnd + padding > newOffset + viewport) {
+        newOffset = itemEnd + padding - viewport;
+      }
+      final double maxOffset = _thumbScrollController.position.maxScrollExtent;
+      newOffset = newOffset.clamp(0.0, maxOffset);
+      if ((newOffset - _thumbScrollController.offset).abs() < 0.5) {
+        return;
+      }
+      if (animate) {
+        _thumbScrollController.animateTo(
+          newOffset,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      } else {
+        _thumbScrollController.jumpTo(newOffset);
+      }
+    }
+
+    if (_thumbScrollController.hasClients) {
+      jump();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => jump());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _pageController = PageController();
+    _thumbScrollController = ScrollController();
     _activityListener = _syncRitualFromActivity;
     activityService.stateNotifier.addListener(_activityListener);
     _loadAlbum();
@@ -109,6 +151,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     _zoomHintTimer?.cancel();
     _controller?.dispose();
     _pageController.dispose();
+    _thumbScrollController.dispose();
     _cleanupCaptures();
     super.dispose();
   }
@@ -242,6 +285,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         _captures = List<XFile>.from(_captures)..add(capture);
       });
       _ensurePageVisible(_captures.length - 1, animate: true);
+      _scrollThumbsToIndex(_captures.length - 1, animate: true);
     } catch (_) {
       if (!mounted) return;
       showShortToast(context, "Unable to capture photo. Please try again.");
@@ -273,6 +317,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         }
       });
       _ensurePageVisible(_selectedIndex, animate: true);
+      _scrollThumbsToIndex(_selectedIndex, animate: true);
     }
   }
 
@@ -397,6 +442,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     });
     if (_captures.isNotEmpty) {
       _ensurePageVisible(_selectedIndex);
+      _scrollThumbsToIndex(_selectedIndex);
     }
   }
 
@@ -494,11 +540,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                             child: _ThumbnailStrip(
                               captures: _captures,
                               selectedIndex: _selectedIndex,
+                              controller: _thumbScrollController,
                               onSelect: (index) {
                                 setState(() {
                                   _selectedIndex = index;
                                 });
                                 _ensurePageVisible(index);
+                                _scrollThumbsToIndex(index);
                               },
                               onRemove: _removeCapture,
                             ),
@@ -733,6 +781,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           setState(() {
             _selectedIndex = index;
           });
+          _scrollThumbsToIndex(index);
         },
         itemBuilder: (context, index) {
           final capture = _captures[index];
@@ -954,12 +1003,14 @@ class _ThumbnailStrip extends StatelessWidget {
   const _ThumbnailStrip({
     required this.captures,
     required this.selectedIndex,
+    required this.controller,
     required this.onSelect,
     required this.onRemove,
   });
 
   final List<XFile> captures;
   final int selectedIndex;
+  final ScrollController controller;
   final ValueChanged<int> onSelect;
   final ValueChanged<int> onRemove;
 
@@ -970,6 +1021,8 @@ class _ThumbnailStrip extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: captures.length,
+        clipBehavior: Clip.none,
+        controller: controller,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final capture = captures[index];
