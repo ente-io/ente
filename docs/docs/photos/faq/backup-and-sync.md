@@ -227,6 +227,10 @@ Live Photos behave differently depending on how you share them:
 
 Ente backs up a single primary full-resolution image from the Burst. Additional frames from the Burst sequence are not backed up unless each frame is selected and uploaded.
 
+### Why do I see duplicate files in the iOS app when the same photo is in an iCloud Shared Album? {#icloud-shared-album-duplicates}
+
+iCloud Shared Albums store compressed copies, not the original files. Because of this, Ente sees the shared-album copy as a different file, so it gets backed up separately and appears as a duplicate.
+
 ## Background Sync
 
 ### How does background sync work? {#how-background-sync-works}
