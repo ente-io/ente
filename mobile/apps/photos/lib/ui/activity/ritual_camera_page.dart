@@ -555,6 +555,15 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                       ],
                     ),
             ),
+            if (_mode == _CameraScreenMode.capture && _captures.isNotEmpty)
+              Positioned(
+                right: 16,
+                bottom: 161 + MediaQuery.of(context).padding.bottom,
+                child: _ConfirmChip(
+                  count: _captures.length,
+                  onTap: _enterReview,
+                ),
+              ),
           ],
         ),
       ),
@@ -653,19 +662,29 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     return LayoutBuilder(
       builder: (context, constraints) {
         final mediaOrientation = MediaQuery.of(context).orientation;
-        final double previewAspect = mediaOrientation == Orientation.portrait
-            ? 1 / _controller!.value.aspectRatio
-            : _controller!.value.aspectRatio;
+
+        final Size? rawPreviewSize = _controller!.value.previewSize;
+        final Size fallbackSize =
+            Size(constraints.maxWidth, constraints.maxHeight);
+        final Size viewSize = Size(constraints.maxWidth, constraints.maxHeight);
+        final Size rotatedPreviewSize =
+            mediaOrientation == Orientation.portrait && rawPreviewSize != null
+                ? Size(rawPreviewSize.height, rawPreviewSize.width)
+                : (rawPreviewSize ?? fallbackSize);
+        final FittedSizes fittedSizes = applyBoxFit(
+          BoxFit.cover,
+          rotatedPreviewSize,
+          viewSize,
+        );
+        final Rect previewRect = Alignment.center
+            .inscribe(fittedSizes.destination, Offset.zero & viewSize);
 
         final Offset? focus = _focusPointRel == null
             ? null
             : Offset(
-                _focusPointRel!.dx * constraints.maxWidth,
-                _focusPointRel!.dy * (constraints.maxWidth / previewAspect),
+                previewRect.left + _focusPointRel!.dx * previewRect.width,
+                previewRect.top + _focusPointRel!.dy * previewRect.height,
               );
-
-        final Size previewSize =
-            Size(constraints.maxWidth, constraints.maxWidth / previewAspect);
 
         return Listener(
           onPointerDown: (_) => _pointers++,
@@ -677,20 +696,20 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
-                    width: previewSize.width,
-                    height: previewSize.height,
-                    child: CameraPreview(
-                      _controller!,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onScaleStart: _handleScaleStart,
-                        onScaleUpdate: _handleScaleUpdate,
-                        onTapDown: (details) => _onViewFinderTap(
-                          details,
-                          BoxConstraints.tight(previewSize),
-                        ),
-                      ),
-                    ),
+                    width: rotatedPreviewSize.width,
+                    height: rotatedPreviewSize.height,
+                    child: CameraPreview(_controller!),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onScaleStart: _handleScaleStart,
+                  onScaleUpdate: _handleScaleUpdate,
+                  onTapDown: (details) => _onViewFinderTap(
+                    details,
+                    previewRect,
                   ),
                 ),
               ),
@@ -846,15 +865,6 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                     size: 48,
                   ),
                 ),
-                if (_captures.isNotEmpty)
-                  Positioned(
-                    top: -120, // increased gap above switch button
-                    right: 0,
-                    child: _ConfirmChip(
-                      count: _captures.length,
-                      onTap: _enterReview,
-                    ),
-                  ),
               ],
             ),
           ),
@@ -951,20 +961,27 @@ class _RitualCameraPageState extends State<RitualCameraPage>
 
   void _onViewFinderTap(
     TapDownDetails details,
-    BoxConstraints constraints,
+    Rect previewRect,
   ) {
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
+    if (!previewRect.contains(details.localPosition)) {
+      return;
+    }
     final offset = Offset(
-      details.localPosition.dx / constraints.maxWidth,
-      details.localPosition.dy / constraints.maxHeight,
+      (details.localPosition.dx - previewRect.left) / previewRect.width,
+      (details.localPosition.dy - previewRect.top) / previewRect.height,
     );
     try {
-      controller.setExposurePoint(offset);
-      controller.setFocusPoint(offset);
-      _showFocusIndicator(offset);
+      final clamped = Offset(
+        offset.dx.clamp(0.0, 1.0),
+        offset.dy.clamp(0.0, 1.0),
+      );
+      controller.setExposurePoint(clamped);
+      controller.setFocusPoint(clamped);
+      _showFocusIndicator(clamped);
     } catch (_) {
       // Best effort; not all devices support focus/exposure points.
     }
