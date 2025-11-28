@@ -243,7 +243,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  context.l10n.save,
+                  context.l10n.share,
                   textAlign: TextAlign.center,
                   style: enteTextTheme.bodyBold.copyWith(
                     color: Colors.white,
