@@ -132,8 +132,18 @@ const getColors = (appName: AppName) => ({
                   ? _colors.accentShare
                   : _colors.accentPhotos,
     },
-    ...{ light: appName == "share" ? _colors.lightShare : _colors.light },
-    ...{ dark: appName == "share" ? _colors.darkShare : _colors.dark },
+    ...{
+        light:
+            appName == "share" || appName == "photo-share"
+                ? _colors.lightShare
+                : _colors.light,
+    },
+    ...{
+        dark:
+            appName == "share" || appName == "photo-share"
+                ? _colors.darkShare
+                : _colors.dark,
+    },
 });
 
 /**
@@ -851,3 +861,8 @@ export const castTheme = getTheme("cast");
  * The MUI {@link Theme} to use for the locker public app.
  */
 export const shareTheme = getTheme("share");
+
+/**
+ * The MUI {@link Theme} to use for the photos single file share app.
+ */
+export const photosShareTheme = getTheme("photo-share");

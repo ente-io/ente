@@ -130,3 +130,21 @@ export const shareAppOrigin = (): string =>
  */
 export const photosAppOrigin = (): string =>
     process.env.NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT ?? "https://web.ente.io";
+
+/**
+ * A static build time constant that is `true` if {@link photosShareAppOrigin}
+ * has been customized.
+ */
+export const isCustomPhotosShareAppOrigin =
+    !!process.env.NEXT_PUBLIC_ENTE_PHOTOS_SHARE_ENDPOINT;
+
+/**
+ * Return the origin that serves single file sharing for photos.
+ *
+ * Defaults to our production instance, "https://photos.ente.io", but can be
+ * overridden by setting the `NEXT_PUBLIC_ENTE_PHOTOS_SHARE_ENDPOINT`
+ * environment variable.
+ */
+export const photosShareAppOrigin = (): string =>
+    process.env.NEXT_PUBLIC_ENTE_PHOTOS_SHARE_ENDPOINT ??
+    "https://photos.ente.io";

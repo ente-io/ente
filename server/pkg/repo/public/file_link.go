@@ -16,9 +16,10 @@ import (
 // FileLinkRepository defines the methods for inserting, updating and
 // retrieving entities related to public file
 type FileLinkRepository struct {
-	DB         *sql.DB
-	photoHost  string
-	lockerHost string
+	DB              *sql.DB
+	photoHost       string
+	lockerHost      string
+	photosShareHost string
 }
 
 // NewFileLinkRepo ..
@@ -31,10 +32,15 @@ func NewFileLinkRepo(db *sql.DB) *FileLinkRepository {
 	if lockerHost == "" {
 		lockerHost = "https://share.ente.io"
 	}
+	photosShareHost := viper.GetString("apps.public-photo-share")
+	if photosShareHost == "" {
+		photosShareHost = "https://photos.ente.io"
+	}
 	return &FileLinkRepository{
-		DB:         db,
-		photoHost:  albumHost,
-		lockerHost: lockerHost,
+		DB:              db,
+		photoHost:       albumHost,
+		lockerHost:      lockerHost,
+		photosShareHost: photosShareHost,
 	}
 }
 
@@ -42,7 +48,8 @@ func (pcr *FileLinkRepository) FileLink(app ente.App, token string) string {
 	if app == ente.Locker {
 		return fmt.Sprintf("%s/%s", pcr.lockerHost, token)
 	}
-	return fmt.Sprintf("%s/file/?t=%s", pcr.photoHost, token)
+	// Photos single file share uses photos.ente.io/{token} format
+	return fmt.Sprintf("%s/%s", pcr.photosShareHost, token)
 }
 
 func (pcr *FileLinkRepository) Insert(

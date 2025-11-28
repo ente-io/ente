@@ -39,6 +39,7 @@ import 'package:photos/services/machine_learning/semantic_search/semantic_search
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/services/single_file_share_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
@@ -185,6 +186,8 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await CollectionsService.instance.init(prefs);
     _logger.info("(for debugging) CollectionsService init done $tlog");
 
+    SingleFileShareService.instance.init();
+
     // Upload & Sync Related
     await FileUploader.instance.init(prefs, true);
     LocalFileUpdateService.instance.init(prefs);
@@ -280,6 +283,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
     _logger.info("CollectionsService init done $tlog");
+
+    SingleFileShareService.instance.init();
 
     FavoritesService.instance.initFav().ignore();
     LocalFileUpdateService.instance.init(preferences);

@@ -25,6 +25,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/single_file_share_service.dart";
 import "package:photos/services/video_memory_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -838,12 +839,40 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
+
     final dialog = createProgressDialog(
       context,
       AppLocalizations.of(context).creatingLink,
       isDismissible: true,
     );
     await dialog.show();
+
+    // Use single file sharing when exactly 1 file is selected
+    if (split.ownedByCurrentUser.length == 1) {
+      try {
+        final file = split.ownedByCurrentUser.first;
+        final url = await SingleFileShareService.instance.createShareUrl(file);
+        await dialog.hide();
+        unawaited(Clipboard.setData(ClipboardData(text: url)));
+        await shareText(
+          url,
+          context: context,
+          key: sendLinkButtonKey,
+        );
+        widget.selectedFiles.clearAll();
+        if (mounted) {
+          setState(() => {});
+        }
+        return;
+      } catch (e) {
+        await dialog.hide();
+        _logger.severe('Failed to create single file share link', e);
+        await showGenericErrorDialog(context: context, error: e);
+        return;
+      }
+    }
+
+    // For multiple files, use collection-based sharing
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
