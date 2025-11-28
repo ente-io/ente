@@ -448,11 +448,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         return "${seconds.toInt()}s";
       }
       return "${seconds.toStringAsFixed(1)}s";
-    } else if (numerator == 1) {
-      // If the fraction already has numerator 1, use it directly (e.g., 1/100)
-      return "$numerator/$denominator";
     } else {
-      // For other fractions, calculate and display as 1/x
+      // For exposures < 1 second, always convert to 1/x format
+      // e.g., 529/200000 → 1/378
       final reciprocal = (1 / seconds).round();
       return "1/$reciprocal";
     }
