@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Share with non-Ente users",
   "createPublicLink": "Create public link",
   "sendLink": "Send link",
+  "qrCode": "QR Code",
   "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
   "copyEmbedHtml": "Copy embed HTML",
