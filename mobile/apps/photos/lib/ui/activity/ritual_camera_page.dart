@@ -503,6 +503,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             onTap: () => Navigator.of(context).maybePop(),
             icon: Icons.close,
             background: Colors.white.withValues(alpha: 0.12),
+            size: 44,
           ),
         ],
       ),
@@ -692,9 +693,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     final bool canCapture =
         !_capturing && !_saving && isReady && _captures.length < _maxCaptures;
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomPadding),
+      padding: EdgeInsets.fromLTRB(16, 32, 16, 26 + bottomPadding),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.88),
+        color: Colors.black.withValues(alpha: 0.60),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -719,26 +720,29 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           ),
           SizedBox(
             width: 96,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            child: Stack(
+              clipBehavior: Clip.none,
               children: [
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _RoundIconButton(
+                    onTap: (_cameras.length < 2 || _saving || _initializing)
+                        ? null
+                        : _switchCamera,
+                    icon: Icons.cameraswitch_rounded,
+                    background: Colors.white.withValues(alpha: 0.12),
+                    iconColor: Colors.white,
+                    size: 48,
+                  ),
+                ),
                 if (_captures.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                  Positioned(
+                    top: -120, // increased gap above switch button
                     child: _ConfirmChip(
                       count: _captures.length,
                       onTap: _enterReview,
                     ),
                   ),
-                _RoundIconButton(
-                  onTap: (_cameras.length < 2 || _saving || _initializing)
-                      ? null
-                      : _switchCamera,
-                  icon: Icons.cameraswitch_rounded,
-                  background: Colors.white.withValues(alpha: 0.12),
-                  iconColor: Colors.white,
-                ),
               ],
             ),
           ),
@@ -754,9 +758,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
     final bool multi = _captures.length > 1;
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + bottomPadding),
+      padding: EdgeInsets.fromLTRB(16, 32, 16, 26 + bottomPadding),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.88),
+        color: Colors.black.withValues(alpha: 0.60),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -795,6 +799,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 icon: Icons.add_photo_alternate_outlined,
                 background: Colors.white.withValues(alpha: 0.12),
                 iconColor: Colors.white,
+                size: 44,
               ),
               const Spacer(),
               ElevatedButton(
@@ -972,32 +977,53 @@ class _ConfirmChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF08C225),
-          borderRadius: BorderRadius.circular(18),
+        width: 48,
+        height: 48,
+        decoration: const BoxDecoration(
+          color: Color(0xFF08C225),
+          shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.16),
+              color: Colors.black38,
               blurRadius: 8,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            const Icon(
-              Icons.check,
-              size: 18,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              "$count",
-              style: const TextStyle(
+            const Center(
+              child: Icon(
+                Icons.check,
                 color: Colors.white,
-                fontWeight: FontWeight.w700,
+                size: 26,
+              ),
+            ),
+            Positioned(
+              right: -2,
+              top: -2,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFF08C225),
+                    width: 1.5,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    "$count",
+                    style: const TextStyle(
+                      color: Color(0xFF08C225),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -1026,7 +1052,7 @@ class _ShutterButton extends StatelessWidget {
         width: 78,
         height: 78,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(26),
           border: Border.all(
             color: Colors.white,
             width: 3,
@@ -1034,21 +1060,12 @@ class _ShutterButton extends StatelessWidget {
         ),
         child: Center(
           child: Container(
-            width: 64,
-            height: 64,
+            width: 68,
+            height: 68,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(21),
               color: enabled ? Colors.white : Colors.white30,
             ),
-            child: busy
-                ? const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: Colors.black,
-                    ),
-                  )
-                : const SizedBox.shrink(),
           ),
         ),
       ),
@@ -1062,20 +1079,22 @@ class _RoundIconButton extends StatelessWidget {
     required this.icon,
     this.background,
     this.iconColor,
+    this.size = 44,
   });
 
   final VoidCallback? onTap;
   final IconData icon;
   final Color? background;
   final Color? iconColor;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: background ?? Colors.black.withValues(alpha: 0.1),
