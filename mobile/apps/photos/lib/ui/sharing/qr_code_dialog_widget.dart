@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:share_plus/share_plus.dart';
@@ -77,54 +78,53 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
         ? '${widget.collection.displayName.substring(0, 27)}...'
         : widget.collection.displayName;
 
-    // QR container uses light theme colors (always light background for scanability)
-    const qrContainerColor = Color(0xFFF5F5F7);
-    const qrTextColor = Colors.black;
+    // QR text color - always black for scanability
+    const qrTextColor = textBaseLight;
 
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(23.89),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(19, 17, 19, 19),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
         decoration: BoxDecoration(
           color: enteColorScheme.backgroundBase,
-          borderRadius: BorderRadius.circular(23.89),
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header with close button
             Padding(
-              padding: const EdgeInsets.only(left: 7, bottom: 4),
+              padding: const EdgeInsets.only(left: 6, bottom: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     "QR Code",
                     style: enteTextTheme.largeBold.copyWith(
-                      fontSize: 19.11,
+                      fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      height: 1.43,
-                      letterSpacing: -0.76,
                     ),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      width: 35.23,
-                      height: 35.23,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
                         color: isDarkMode
-                            ? const Color(0xFF292929)
-                            : qrContainerColor,
-                        borderRadius: BorderRadius.circular(17.6),
+                            ? enteColorScheme.backgroundElevated2
+                            : qrBoxColor,
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: Icon(
                         Icons.close,
-                        color: isDarkMode ? Colors.white : qrTextColor,
+                        color: isDarkMode
+                            ? enteColorScheme.textBase
+                            : qrTextColor,
                         size: 20,
                       ),
                     ),
@@ -141,8 +141,8 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                 decoration: BoxDecoration(
-                  color: qrContainerColor,
-                  borderRadius: BorderRadius.circular(22.09),
+                  color: qrBoxColor,
+                  borderRadius: BorderRadius.circular(22),
                 ),
                 child: Stack(
                   alignment: Alignment.center,
@@ -156,9 +156,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                           albumName,
                           style: enteTextTheme.largeBold.copyWith(
                             color: qrTextColor,
-                            fontSize: 19.11,
-                            height: 1.43,
-                            letterSpacing: -0.76,
+                            fontSize: 20,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -221,10 +219,8 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                         'ente',
                         style: enteTextTheme.brandSmall.copyWith(
                           color: enteColorScheme.primary500,
-                          fontSize: 16.20,
+                          fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          height: 1.25,
-                          letterSpacing: -0.49,
                         ),
                       ),
                     ),
@@ -243,7 +239,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
                   color: enteColorScheme.primary500,
-                  borderRadius: BorderRadius.circular(10.75),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   'Save',
