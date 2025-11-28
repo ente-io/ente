@@ -17,6 +17,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import 'package:photos/generated/intl/app_localizations.dart';
@@ -49,6 +50,7 @@ class VideoPreviewService {
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
+  bool _pausedDueToUpload = false;
 
   bool get _hasQueuedFile => fileQueue.isNotEmpty;
 
@@ -60,7 +62,21 @@ class VideoPreviewService {
         fileMagicService = FileMagicService.instance,
         cacheManager = DefaultCacheManager(),
         videoCacheManager = VideoCacheManager.instance,
-        config = Configuration.instance;
+        config = Configuration.instance {
+    _listenToSyncCompletion();
+  }
+
+  void _listenToSyncCompletion() {
+    Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status == SyncStatus.completedBackup &&
+          isVideoStreamingEnabled &&
+          _pausedDueToUpload) {
+        _logger.info("Sync completed, resuming stream processing");
+        _pausedDueToUpload = false;
+        queueFiles(duration: const Duration(seconds: 2));
+      }
+    });
+  }
 
   VideoPreviewService(
     this.config,
@@ -288,8 +304,11 @@ class VideoPreviewService {
       _logger.info(
         "Pausing video streaming because file upload is in progress",
       );
+      _pausedDueToUpload = true;
+      uploadingFileId = -1;
+      // Clear queue - will be rebuilt from DB when processing resumes
+      clearQueue();
       computeController.releaseCompute(stream: true);
-      // Don't clear queue - items should remain pending to be processed after uploads complete
       return;
     }
 
@@ -300,14 +319,10 @@ class VideoPreviewService {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
+      uploadingFileId = -1;
       computeController.releaseCompute(stream: true);
-      // Only clear queue if user explicitly disabled streaming (permanent condition)
-      // Don't clear for temporary conditions like compute unavailable or device unhealthy
-      if (!isVideoStreamingEnabled) {
-        clearQueue();
-      } else {
-        _logger.info("No permission to run compute - queue preserved");
-      }
+      // Clear queue - will be rebuilt from DB when processing resumes
+      clearQueue();
       return;
     }
 
@@ -1264,8 +1279,14 @@ class VideoPreviewService {
       // Don't start streaming if file uploads are in progress
       if (FileUploader.instance.isUploading) {
         _logger.info("Skipping stream queue - file upload in progress");
+        _pausedDueToUpload = true;
+        // Clear queue to ensure clean state when resuming
+        clearQueue();
         return;
       }
+
+      // Reset flag - streaming is resuming (either from sync listener or other flow)
+      _pausedDueToUpload = false;
 
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
