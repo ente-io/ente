@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/l10n/l10n.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
@@ -103,7 +104,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "QR Code",
+                    context.l10n.qrCode,
                     style: enteTextTheme.largeBold.copyWith(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -242,7 +243,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Save',
+                  context.l10n.save,
                   textAlign: TextAlign.center,
                   style: enteTextTheme.bodyBold.copyWith(
                     color: Colors.white,
