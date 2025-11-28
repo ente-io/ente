@@ -171,7 +171,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
                             qrImage: QrImage(
                               QrCode.fromData(
                                 data: publicUrl,
-                                errorCorrectLevel: QrErrorCorrectLevel.L,
+                                errorCorrectLevel: QrErrorCorrectLevel.M,
                               ),
                             ),
                             decoration: PrettyQrDecoration(
