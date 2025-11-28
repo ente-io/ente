@@ -362,3 +362,40 @@ body:has(
         display: none;
     }
 }
+
+/*
+  Video fullscreen mode styles.
+
+  When entering fullscreen via the video controls, we hide the PhotoSwipe
+  navigation UI (top bar, arrows) and only show the video controls at the
+  bottom. The controls auto-hide and appear when the user moves to the bottom.
+ */
+
+/* Hide navigation controls in video fullscreen mode */
+.pswp-ente.pswp--video-fullscreen .pswp__top-bar,
+.pswp-ente.pswp--video-fullscreen .pswp__button--arrow {
+    display: none !important;
+}
+
+/* Auto-hide video controls in fullscreen, show when mouse near bottom */
+.pswp-ente.pswp--video-fullscreen .pswp__media-controls {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Show controls when hovering or when settings menu is open */
+.pswp-ente.pswp--video-fullscreen .pswp__media-controls:hover,
+.pswp-ente.pswp--video-fullscreen:has(media-settings-menu:not([hidden]))
+    .pswp__media-controls {
+    opacity: 1;
+}
+
+/* JS adds this class when mouse is near bottom of screen */
+.pswp-ente.pswp--video-fullscreen.pswp--controls-visible .pswp__media-controls {
+    opacity: 1;
+}
+
+/* Also hide the caption in video fullscreen mode */
+.pswp-ente.pswp--video-fullscreen .pswp__caption {
+    display: none;
+}
