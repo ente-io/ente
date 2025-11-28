@@ -627,29 +627,62 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                 const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
                                     vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
                                     color: colorScheme.fillFaint,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: List.generate(
-                                      days.length,
-                                      (index) => _DayCircle(
-                                        label: _weekLabel(index),
-                                        selected: days[index],
-                                        colorScheme: colorScheme,
-                                        onTap: () {
-                                          setState(() {
-                                            days[index] = !days[index];
-                                          });
-                                        },
-                                      ),
-                                    ),
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      const double maxCircleSize = 38;
+                                      const double minCircleSize = 20;
+                                      const double minSpacing = 6;
+                                      final double availableWidth =
+                                          constraints.maxWidth;
+
+                                      double circleSize = maxCircleSize;
+                                      double spacing =
+                                          (availableWidth - circleSize * 7) / 8;
+
+                                      if (spacing < minSpacing) {
+                                        spacing = minSpacing;
+                                        circleSize =
+                                            ((availableWidth - (spacing * 8)) /
+                                                    7)
+                                                .clamp(
+                                          minCircleSize,
+                                          maxCircleSize,
+                                        );
+                                        spacing =
+                                            (availableWidth - circleSize * 7) /
+                                                8;
+                                      }
+
+                                      final children = <Widget>[
+                                        SizedBox(width: spacing),
+                                      ];
+                                      for (int index = 0;
+                                          index < days.length;
+                                          index++) {
+                                        children.add(
+                                          _DayCircle(
+                                            label: _weekLabel(index),
+                                            selected: days[index],
+                                            size: circleSize,
+                                            colorScheme: colorScheme,
+                                            onTap: () {
+                                              setState(() {
+                                                days[index] = !days[index];
+                                              });
+                                            },
+                                          ),
+                                        );
+                                        children.add(SizedBox(width: spacing));
+                                      }
+
+                                      return Row(children: children);
+                                    },
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -1154,12 +1187,14 @@ class _DayCircle extends StatelessWidget {
   const _DayCircle({
     required this.label,
     required this.selected,
+    required this.size,
     required this.colorScheme,
     required this.onTap,
   });
 
   final String label;
   final bool selected;
+  final double size;
   final EnteColorScheme colorScheme;
   final VoidCallback onTap;
 
@@ -1170,12 +1205,12 @@ class _DayCircle extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        width: 38,
-        height: 38,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color:
               selected ? colorScheme.primary500 : colorScheme.fillFaintPressed,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(size / 2),
         ),
         child: Center(
           child: Text(
