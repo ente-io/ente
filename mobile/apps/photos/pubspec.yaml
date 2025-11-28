@@ -32,6 +32,7 @@ dependencies:
       ref: 95c7a9f
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
+  camera: ^0.11.0+2
   chewie: 1.13.0
   collection: #dart
   computer: # logged task name in verbose in fork

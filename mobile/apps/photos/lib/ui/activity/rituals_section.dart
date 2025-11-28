@@ -31,6 +31,7 @@ class RitualsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -48,6 +49,14 @@ class RitualsSection extends StatelessWidget {
                   onPressed: () async {
                     await _showRitualEditor(context, ritual: null);
                   },
+                  style: IconButton.styleFrom(
+                    backgroundColor: colorScheme.fillFaint,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.all(8),
+                    minimumSize: const Size(40, 40),
+                  ),
                   icon: const Icon(Icons.add_rounded),
                 ),
               ],
@@ -61,20 +70,10 @@ class RitualsSection extends StatelessWidget {
               onTap: () => onSelectionChanged?.call(null),
             ),
           if (rituals.isEmpty)
-            GestureDetector(
+            _CreateRitualCard(
               onTap: () async {
                 await _showRitualEditor(context, ritual: null);
               },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(8, 14, 8, 10),
-                alignment: Alignment.center,
-                child: Text(
-                  "Create your own ritual to get daily reminders.",
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
             )
           else
             Column(
@@ -109,27 +108,124 @@ class _StarterRitualCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected
-            ? colorScheme.fillFaintPressed
-            : colorScheme.backgroundElevated2,
+        color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : colorScheme.strokeFaint,
-          width: isSelected ? 1 : 0.8,
+          color: isSelected ? colorScheme.primary500 : Colors.transparent,
+          width: isSelected ? 2 : 0,
         ),
       ),
-      child: ListTile(
-        onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.fillFaintPressed,
-          child: const Text(
-            "📸",
-            style: TextStyle(fontSize: 18),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: colorScheme.fillFaintPressed,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "📸",
+                      style: TextStyle(
+                        fontSize: 18,
+                        height: 1,
+                        decoration: TextDecoration.none,
+                      ),
+                      textHeightBehavior: _tightTextHeightBehavior,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    "Take a photo every day",
+                    style: getEnteTextTheme(context).body,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        title: Text(
-          "Take a photo every day",
-          style: getEnteTextTheme(context).body,
+      ),
+    );
+  }
+}
+
+class _CreateRitualCard extends StatelessWidget {
+  const _CreateRitualCard({this.onTap});
+
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: colorScheme.fillFaintPressed,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.add_rounded,
+                    color: colorScheme.textBase,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Create your own ritual",
+                        style: textTheme.body,
+                      ),
+                      Text(
+                        "Get daily reminders",
+                        style: textTheme.smallMuted,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: colorScheme.textMuted,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -150,121 +246,171 @@ class _RitualCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: isSelected
-            ? colorScheme.fillFaintPressed
-            : colorScheme.backgroundElevated2,
+        color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : colorScheme.strokeFaint,
-          width: isSelected ? 1 : 0.8,
+          color: isSelected ? colorScheme.primary500 : Colors.transparent,
+          width: isSelected ? 2 : 0,
         ),
       ),
-      child: ListTile(
-        onTap: () {
-          if (onTap != null) {
-            onTap!();
-          } else {
-            routeToPage(
-              context,
-              ActivityScreen(ritual: ritual),
-            );
-          }
-        },
-        leading: CircleAvatar(
-          backgroundColor: colorScheme.fillFaintPressed,
-          child: Text(
-            ritual.icon,
-            style: const TextStyle(fontSize: 18),
-          ),
-        ),
-        title: Text(ritual.title.isEmpty ? "Untitled ritual" : ritual.title),
-        subtitle: ritual.albumName == null || ritual.albumName!.isEmpty
-            ? Text(
-                "Album not set",
-                style: getEnteTextTheme(context).smallMuted,
-              )
-            : Text(
-                ritual.albumName!,
-                style: getEnteTextTheme(context).smallMuted,
-              ),
-        trailing: PopupMenuButton<String>(
-          elevation: 0,
-          color: colorScheme.backgroundElevated,
-          surfaceTintColor: colorScheme.backgroundElevated,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: colorScheme.strokeFaint,
-              width: 0.5,
-            ),
-          ),
-          onSelected: (value) async {
-            switch (value) {
-              case "edit":
-                await _showRitualEditor(context, ritual: ritual);
-                break;
-              case "delete":
-                await activityService.deleteRitual(ritual.id);
-                break;
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            if (onTap != null) {
+              onTap!();
+            } else {
+              routeToPage(
+                context,
+                ActivityScreen(ritual: ritual),
+              );
             }
           },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: "edit",
-              padding: EdgeInsets.zero,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 0, 0),
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                    child: Row(
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: colorScheme.fillFaintPressed,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        ritual.icon,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          height: 1,
+                          decoration: TextDecoration.none,
+                        ),
+                        textHeightBehavior: _tightTextHeightBehavior,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.edit_outlined,
-                          color: colorScheme.textBase,
-                        ),
-                        const SizedBox(width: 10),
                         Text(
-                          "Edit",
-                          style: getEnteTextTheme(context).body,
+                          ritual.title.isEmpty
+                              ? "Untitled ritual"
+                              : ritual.title,
+                          style: textTheme.body,
+                          textHeightBehavior: _tightTextHeightBehavior,
                         ),
+                        ritual.albumName == null || ritual.albumName!.isEmpty
+                            ? Text(
+                                "Album not set",
+                                style: textTheme.smallMuted,
+                                textHeightBehavior: _tightTextHeightBehavior,
+                              )
+                            : Text(
+                                ritual.albumName!,
+                                style: textTheme.smallMuted,
+                                textHeightBehavior: _tightTextHeightBehavior,
+                              ),
                       ],
                     ),
                   ),
-                  Divider(
-                    height: 0.5,
-                    thickness: 0.5,
-                    color: colorScheme.strokeFaint,
-                    indent: 0,
-                    endIndent: 0,
+                  PopupMenuButton<String>(
+                    padding: EdgeInsets.zero,
+                    splashRadius: 20,
+                    icon: const Icon(Icons.more_vert_rounded),
+                    elevation: 0,
+                    color: colorScheme.backgroundElevated,
+                    surfaceTintColor: colorScheme.backgroundElevated,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: colorScheme.strokeFaint,
+                        width: 0.5,
+                      ),
+                    ),
+                    onSelected: (value) async {
+                      switch (value) {
+                        case "edit":
+                          await _showRitualEditor(context, ritual: ritual);
+                          break;
+                        case "delete":
+                          await activityService.deleteRitual(ritual.id);
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: "edit",
+                        padding: EdgeInsets.zero,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.edit_outlined,
+                                    color: colorScheme.textBase,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    "Edit",
+                                    style: getEnteTextTheme(context).body,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Divider(
+                              height: 0.5,
+                              thickness: 0.5,
+                              color: colorScheme.strokeFaint,
+                              indent: 0,
+                              endIndent: 0,
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: "delete",
+                        padding: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                "Delete",
+                                style: getEnteTextTheme(context)
+                                    .body
+                                    .copyWith(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            PopupMenuItem(
-              value: "delete",
-              padding: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete_outline, color: Colors.red),
-                    const SizedBox(width: 10),
-                    Text(
-                      "Delete",
-                      style: getEnteTextTheme(context)
-                          .body
-                          .copyWith(color: Colors.red),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -295,234 +441,200 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
     barrierDismissible: true,
     transitionDuration: const Duration(milliseconds: 240),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
+      final mediaQuery = MediaQuery.of(dialogContext);
       final colorScheme = getEnteColorScheme(dialogContext);
       final textTheme = getEnteTextTheme(dialogContext);
-      final bottomPadding = MediaQuery.of(dialogContext).padding.bottom;
-      final maxHeight = MediaQuery.of(dialogContext).size.height * 0.95;
-      return SafeArea(
-        top: false,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxHeight),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(12, 8, 12, bottomPadding + 16),
-              child: Material(
-                color: Colors.transparent,
-                child: StatefulBuilder(
-                  builder: (context, setState) {
-                    final bool canSave = controller.text.trim().isNotEmpty &&
-                        selectedAlbumId != null;
-                    final bool allDaysOff = days.every((selected) => !selected);
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.backgroundElevated,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.06),
-                            blurRadius: 22,
-                            offset: const Offset(0, 12),
-                          ),
-                        ],
-                      ),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                        child: Form(
-                          key: formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    ritual == null
-                                        ? "New ritual"
-                                        : "Edit ritual",
-                                    style: textTheme.largeBold,
-                                  ),
-                                  const Spacer(),
-                                  IconButton(
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Container(
-                                        width: 70,
-                                        height: 70,
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.fillFaintPressed,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            selectedEmoji,
-                                            style:
-                                                const TextStyle(fontSize: 32),
+      final bottomPadding = mediaQuery.viewPadding.bottom;
+      final maxHeight = mediaQuery.size.height * 0.95;
+      return MediaQuery.removeViewInsets(
+        context: dialogContext,
+        removeBottom: true,
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(12, 8, 12, bottomPadding + 16),
+                child: Material(
+                  color: Colors.transparent,
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      final bool canSave = controller.text.trim().isNotEmpty &&
+                          selectedAlbumId != null;
+                      final bool allDaysOff =
+                          days.every((selected) => !selected);
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.backgroundElevated,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 22,
+                              offset: const Offset(0, 12),
+                            ),
+                          ],
+                        ),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                          child: Form(
+                            key: formKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      ritual == null
+                                          ? "New ritual"
+                                          : "Edit ritual",
+                                      style: textTheme.largeBold,
+                                    ),
+                                    const Spacer(),
+                                    IconButton(
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Container(
+                                          width: 70,
+                                          height: 70,
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.fillFaintPressed,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              selectedEmoji,
+                                              style:
+                                                  const TextStyle(fontSize: 32),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Positioned(
-                                        right: -4,
-                                        bottom: -4,
-                                        child: Material(
-                                          color: colorScheme.backgroundElevated,
-                                          shape: const CircleBorder(),
-                                          elevation: 2,
-                                          child: InkWell(
-                                            customBorder: const CircleBorder(),
-                                            onTap: () async {
-                                              final emoji = await _pickEmoji(
-                                                context,
-                                                selectedEmoji,
-                                              );
-                                              if (emoji != null) {
-                                                setState(() {
-                                                  selectedEmoji = emoji;
-                                                });
-                                              }
-                                            },
-                                            child: const Padding(
-                                              padding: EdgeInsets.all(6),
-                                              child: Icon(
-                                                Icons.edit_outlined,
-                                                size: 18,
+                                        Positioned(
+                                          right: -4,
+                                          bottom: -4,
+                                          child: Material(
+                                            color:
+                                                colorScheme.backgroundElevated,
+                                            shape: const CircleBorder(),
+                                            elevation: 2,
+                                            child: InkWell(
+                                              customBorder:
+                                                  const CircleBorder(),
+                                              onTap: () async {
+                                                final emoji = await _pickEmoji(
+                                                  context,
+                                                  selectedEmoji,
+                                                );
+                                                if (emoji != null) {
+                                                  setState(() {
+                                                    selectedEmoji = emoji;
+                                                  });
+                                                }
+                                              },
+                                              child: const Padding(
+                                                padding: EdgeInsets.all(6),
+                                                child: Icon(
+                                                  Icons.edit_outlined,
+                                                  size: 18,
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: controller,
-                                      autofocus: true,
-                                      onChanged: (_) => setState(() {}),
-                                      decoration: InputDecoration(
-                                        hintText: "Enter your ritual",
-                                        filled: true,
-                                        fillColor: colorScheme.fillFaint,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 14,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(18),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(18),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(18),
-                                          borderSide: BorderSide.none,
-                                        ),
-                                      ),
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.trim().isEmpty) {
-                                          return "Please enter a description";
-                                        }
-                                        return null;
-                                      },
+                                      ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              _sectionLabel(context, "Day"),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 10,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colorScheme.fillFaint,
-                                  borderRadius: BorderRadius.circular(18),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: List.generate(
-                                    days.length,
-                                    (index) => _DayCircle(
-                                      label: _weekLabel(index),
-                                      selected: days[index],
-                                      colorScheme: colorScheme,
-                                      onTap: () {
-                                        setState(() {
-                                          days[index] = !days[index];
-                                        });
-                                      },
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: controller,
+                                        autofocus: true,
+                                        textCapitalization:
+                                            TextCapitalization.sentences,
+                                        onChanged: (_) => setState(() {}),
+                                        decoration: InputDecoration(
+                                          hintText: "Enter your ritual",
+                                          filled: true,
+                                          fillColor: colorScheme.fillFaint,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                            horizontal: 14,
+                                            vertical: 14,
+                                          ),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(18),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(18),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(18),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          if (value == null ||
+                                              value.trim().isEmpty) {
+                                            return "Please enter a description";
+                                          }
+                                          return null;
+                                        },
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              if (allDaysOff)
+                                const SizedBox(height: 20),
+                                _sectionLabel(context, "Day"),
+                                const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 14,
+                                    horizontal: 10,
+                                    vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
                                     color: colorScheme.fillFaint,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.notifications_off_outlined,
-                                        color: colorScheme.textMuted,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: List.generate(
+                                      days.length,
+                                      (index) => _DayCircle(
+                                        label: _weekLabel(index),
+                                        selected: days[index],
+                                        colorScheme: colorScheme,
+                                        onTap: () {
+                                          setState(() {
+                                            days[index] = !days[index];
+                                          });
+                                        },
                                       ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          "Notifications are off. Tap a day to turn them on.",
-                                          style: textTheme.small.copyWith(
-                                            color: colorScheme.textMuted,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                )
-                              else ...[
-                                _sectionLabel(context, "Time"),
-                                const SizedBox(height: 8),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final result = await showTimePicker(
-                                      context: context,
-                                      initialTime: selectedTime,
-                                    );
-                                    if (result != null) {
-                                      setState(() {
-                                        selectedTime = result;
-                                      });
-                                    }
-                                  },
-                                  child: Container(
+                                ),
+                                const SizedBox(height: 16),
+                                if (allDaysOff)
+                                  Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 14,
                                       vertical: 14,
@@ -532,96 +644,142 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                     child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
+                                        Icon(
+                                          Icons.notifications_off_outlined,
+                                          color: colorScheme.textMuted,
+                                        ),
+                                        const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
-                                            selectedTime.format(context),
-                                            style: textTheme.h3Bold,
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.all(10),
-                                          decoration: BoxDecoration(
-                                            color:
-                                                colorScheme.backgroundElevated2,
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: Icon(
-                                            Icons.schedule,
-                                            color: colorScheme.textMuted,
+                                            "Notifications are off. Tap a day to turn them on.",
+                                            style: textTheme.small.copyWith(
+                                              color: colorScheme.textMuted,
+                                            ),
                                           ),
                                         ),
                                       ],
                                     ),
+                                  )
+                                else ...[
+                                  _sectionLabel(context, "Time"),
+                                  const SizedBox(height: 8),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final result = await showTimePicker(
+                                        context: context,
+                                        initialTime: selectedTime,
+                                      );
+                                      if (result != null) {
+                                        setState(() {
+                                          selectedTime = result;
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 14,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.fillFaint,
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              selectedTime.format(context),
+                                              style: textTheme.h3Bold,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: colorScheme
+                                                  .backgroundElevated2,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Icon(
+                                              Icons.schedule,
+                                              color: colorScheme.textMuted,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 16),
+                                _sectionLabel(context, "Album"),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    final result = await _pickAlbum(context);
+                                    if (result != null) {
+                                      setState(() {
+                                        selectedAlbum = result;
+                                        selectedAlbumId = result.id;
+                                        selectedAlbumName = result.displayName;
+                                      });
+                                    }
+                                  },
+                                  child: _AlbumPreviewTile(
+                                    album: selectedAlbum,
+                                    fallbackName: selectedAlbumName,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: canSave
+                                          ? colorScheme.primary500
+                                          : colorScheme.fillMuted,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      if (!canSave) return;
+                                      final updated = (ritual ??
+                                              activityService
+                                                  .createEmptyRitual())
+                                          .copyWith(
+                                        title: controller.text.trim(),
+                                        daysOfWeek: days,
+                                        timeOfDay: selectedTime,
+                                        albumId: selectedAlbumId,
+                                        albumName: selectedAlbumName,
+                                        icon: selectedEmoji,
+                                      );
+                                      await activityService.saveRitual(updated);
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text(
+                                      ritual == null
+                                          ? "Save ritual"
+                                          : "Update ritual",
+                                      style: textTheme.bodyBold
+                                          .copyWith(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                               ],
-                              const SizedBox(height: 16),
-                              _sectionLabel(context, "Album"),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () async {
-                                  final result = await _pickAlbum(context);
-                                  if (result != null) {
-                                    setState(() {
-                                      selectedAlbum = result;
-                                      selectedAlbumId = result.id;
-                                      selectedAlbumName = result.displayName;
-                                    });
-                                  }
-                                },
-                                child: _AlbumPreviewTile(
-                                  album: selectedAlbum,
-                                  fallbackName: selectedAlbumName,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: canSave
-                                        ? colorScheme.primary500
-                                        : colorScheme.fillMuted,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 14,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18),
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    if (!canSave) return;
-                                    final updated = (ritual ??
-                                            activityService.createEmptyRitual())
-                                        .copyWith(
-                                      title: controller.text.trim(),
-                                      daysOfWeek: days,
-                                      timeOfDay: selectedTime,
-                                      albumId: selectedAlbumId,
-                                      albumName: selectedAlbumName,
-                                      icon: selectedEmoji,
-                                    );
-                                    await activityService.saveRitual(updated);
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text(
-                                    ritual == null
-                                        ? "Save ritual"
-                                        : "Update ritual",
-                                    style: textTheme.bodyBold
-                                        .copyWith(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -652,188 +810,231 @@ String _weekLabel(int index) {
 }
 
 Future<Collection?> _pickAlbum(BuildContext context) async {
-  final service = CollectionsService.instance;
   final albums = List<Collection>.from(
     await CollectionsService.instance.getCollectionsForRituals(),
   );
   Collection? selected;
+
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) {
-      final colorScheme = getEnteColorScheme(context);
-      final textTheme = getEnteTextTheme(context);
-      final controller = TextEditingController();
-      return StatefulBuilder(
-        builder: (context, setState) {
-          final trimmedQuery = controller.text.trim();
-          final bool canCreateAlbum = trimmedQuery.isNotEmpty;
-          final queryLower = trimmedQuery.toLowerCase();
-          final filteredAlbums = queryLower.isEmpty
-              ? albums
-              : albums
-                  .where(
-                    (album) =>
-                        album.displayName.toLowerCase().contains(queryLower),
-                  )
-                  .toList();
-          Future<void> createAlbum() async {
-            final trimmed = controller.text.trim();
-            if (trimmed.isEmpty) return;
-            final created = await service.createAlbum(trimmed);
-            if (!context.mounted) return;
-            selected = created;
-            Navigator.of(context).pop();
-          }
-
-          return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 12,
-                right: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-                top: 8,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.backgroundElevated,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 8, 0),
-                      child: Row(
-                        children: [
-                          Text(
-                            "Select album",
-                            style: textTheme.bodyBold,
-                          ),
-                          const Spacer(),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                      child: TextField(
-                        controller: controller,
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          hintText: "Search or create new",
-                          prefixIcon: const Icon(Icons.search_rounded),
-                          filled: true,
-                          fillColor: colorScheme.fillFaint,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(
-                              color: colorScheme.strokeFaint,
-                            ),
-                          ),
-                        ),
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (_) async => createAlbum(),
-                      ),
-                    ),
-                    Flexible(
-                      child: SizedBox(
-                        height: 360,
-                        child: filteredAlbums.isEmpty
-                            ? Center(
-                                child: Text(
-                                  albums.isEmpty
-                                      ? "No albums yet"
-                                      : "No matching albums",
-                                  style: textTheme.small
-                                      .copyWith(color: colorScheme.textMuted),
-                                ),
-                              )
-                            : ListView.separated(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                itemBuilder: (context, index) {
-                                  final album = filteredAlbums[index];
-                                  return GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () {
-                                      selected = album;
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: AlbumColumnItemWidget(
-                                      album,
-                                      selectedCollections: selected == album
-                                          ? <Collection>[album]
-                                          : const <Collection>[],
-                                    ),
-                                  );
-                                },
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: 10),
-                                itemCount: filteredAlbums.length,
-                              ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: canCreateAlbum
-                                ? colorScheme.primary500
-                                : colorScheme.fillMuted,
-                            foregroundColor: colorScheme.backgroundBase,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: canCreateAlbum ? createAlbum : null,
-                          child: Text(
-                            canCreateAlbum
-                                ? 'Create "${trimmedQuery.trim()}"'
-                                : "Create new",
-                            style: textTheme.bodyBold.copyWith(
-                              color: canCreateAlbum
-                                  ? Colors.white
-                                  : colorScheme.textMuted,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+      return _AlbumPickerSheet(
+        albums: albums,
+        onSelected: (collection) => selected = collection,
       );
     },
   );
+
   return selected;
+}
+
+class _AlbumPickerSheet extends StatefulWidget {
+  const _AlbumPickerSheet({
+    required this.albums,
+    required this.onSelected,
+  });
+
+  final List<Collection> albums;
+  final ValueChanged<Collection?> onSelected;
+
+  @override
+  State<_AlbumPickerSheet> createState() => _AlbumPickerSheetState();
+}
+
+class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
+  late final TextEditingController _controller;
+  Collection? _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final service = CollectionsService.instance;
+    final mediaQuery = MediaQuery.of(context);
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final trimmedQuery = _controller.text.trim();
+    final bool canCreateAlbum = trimmedQuery.isNotEmpty;
+    final queryLower = trimmedQuery.toLowerCase();
+    final filteredAlbums = queryLower.isEmpty
+        ? widget.albums
+        : widget.albums
+            .where(
+              (album) => album.displayName.toLowerCase().contains(queryLower),
+            )
+            .toList();
+
+    Future<void> createAlbum() async {
+      final trimmed = _controller.text.trim();
+      if (trimmed.isEmpty) return;
+      final created = await service.createAlbum(trimmed);
+      if (!context.mounted) return;
+      _selected = created;
+      widget.onSelected(created);
+      Navigator.of(context).pop();
+    }
+
+    return MediaQuery.removeViewInsets(
+      context: context,
+      removeBottom: true,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 12,
+            right: 12,
+            bottom: mediaQuery.viewPadding.bottom + 16,
+            top: 8,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundElevated,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 8, 0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Select album",
+                        style: textTheme.bodyBold,
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                  child: TextField(
+                    controller: _controller,
+                    textInputAction: TextInputAction.done,
+                    decoration: InputDecoration(
+                      hintText: "Search or create new",
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      filled: true,
+                      fillColor: colorScheme.fillFaint,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: colorScheme.strokeFaint,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: colorScheme.strokeFaint,
+                        ),
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                    onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                  ),
+                ),
+                Flexible(
+                  child: SizedBox(
+                    height: 360,
+                    child: filteredAlbums.isEmpty
+                        ? Center(
+                            child: Text(
+                              widget.albums.isEmpty
+                                  ? "No albums yet"
+                                  : "No matching albums",
+                              style: textTheme.small.copyWith(
+                                color: colorScheme.textMuted,
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                            itemBuilder: (context, index) {
+                              final album = filteredAlbums[index];
+                              return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  _selected = album;
+                                  widget.onSelected(album);
+                                  Navigator.of(context).pop();
+                                },
+                                child: AlbumColumnItemWidget(
+                                  album,
+                                  selectedCollections: _selected == album
+                                      ? <Collection>[album]
+                                      : const <Collection>[],
+                                ),
+                              );
+                            },
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
+                            itemCount: filteredAlbums.length,
+                          ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: canCreateAlbum
+                            ? colorScheme.primary500
+                            : colorScheme.fillMuted,
+                        foregroundColor: colorScheme.backgroundBase,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: canCreateAlbum ? createAlbum : null,
+                      child: Text(
+                        canCreateAlbum
+                            ? 'Create "${trimmedQuery.trim()}"'
+                            : "Create new",
+                        style: textTheme.bodyBold.copyWith(
+                          color: canCreateAlbum
+                              ? Colors.white
+                              : colorScheme.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _AlbumPreviewTile extends StatelessWidget {
@@ -1149,3 +1350,8 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
   );
   return selected;
 }
+
+const _tightTextHeightBehavior = TextHeightBehavior(
+  applyHeightToFirstAscent: false,
+  applyHeightToLastDescent: false,
+);

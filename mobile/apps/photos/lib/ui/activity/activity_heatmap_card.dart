@@ -10,15 +10,20 @@ class ActivityHeatmapCard extends StatelessWidget {
     required this.summary,
     this.compact = false,
     this.allowHorizontalScroll = false,
+    this.headerTitle,
+    this.headerEmoji,
     super.key,
   });
 
   final ActivitySummary? summary;
   final bool compact;
   final bool allowHorizontalScroll;
+  final String? headerTitle;
+  final String? headerEmoji;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
     final last365 = summary?.last365Days ??
         List.generate(
           372,
@@ -37,26 +42,61 @@ class ActivityHeatmapCard extends StatelessWidget {
               ? getEnteColorScheme(context).backgroundElevated2
               : const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: getEnteColorScheme(context).strokeFaint,
-            width: 2,
-          ),
         ),
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        child: allowHorizontalScroll
-            ? SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                clipBehavior: Clip.none,
-                child: _Heatmap(
-                  days: last365,
-                  compact: compact,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if ((headerTitle ?? "").isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 12, 4, 12),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SizedBox(
+                      width: constraints.maxWidth,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          if ((headerEmoji ?? "").isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Text(
+                                headerEmoji ?? "",
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          Flexible(
+                            child: Text(
+                              headerTitle ?? "",
+                              style: textTheme.bodyMuted,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
-              )
-            : _Heatmap(
-                days: last365,
-                compact: compact,
               ),
+            allowHorizontalScroll
+                ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const ClampingScrollPhysics(),
+                    clipBehavior: Clip.none,
+                    child: _Heatmap(
+                      days: last365,
+                      compact: compact,
+                    ),
+                  )
+                : _Heatmap(
+                    days: last365,
+                    compact: compact,
+                  ),
+          ],
+        ),
       ),
     );
   }
@@ -151,14 +191,27 @@ class _Heatmap extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Keep a minimum gutter width in case the container gets very narrow.
-        final double monthLabelWidth = compact ? 28 : 32;
-        final double gapX = compact ? 2.5 : 4;
-        final double gapY = compact ? 2 : 3;
-        final double cellWidth = compact ? 30 : 38.31;
-        final double cellHeight = compact ? 8.5 : 9.82;
-        final double headerRowHeight = compact ? 13 : 16;
-        final double headerToGridGap = compact ? 3 : 4;
+        final double baseMonthLabelWidth = compact ? 28 : 32;
+        final double baseGapX = compact ? 2.5 : 4;
+        final double baseGapY = compact ? 2 : 3;
+        final double baseCellWidth = compact ? 30 : 38.31;
+        final double baseCellHeight = compact ? 8.5 : 9.82;
+        final double baseHeaderRowHeight = compact ? 13 : 16;
+        final double baseHeaderToGridGap = compact ? 3 : 4;
+        final double baseTotalWidth =
+            (7 * baseCellWidth) + (7 * baseGapX) + baseMonthLabelWidth;
+        final double availableWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : baseTotalWidth;
+        double scale = availableWidth / baseTotalWidth;
+        scale = scale.clamp(0.7, 1.0);
+        final double monthLabelWidth = baseMonthLabelWidth * scale;
+        final double gapX = baseGapX * scale;
+        final double gapY = baseGapY * scale;
+        final double cellWidth = baseCellWidth * scale;
+        final double cellHeight = baseCellHeight * scale;
+        final double headerRowHeight = baseHeaderRowHeight * scale;
+        final double headerToGridGap = baseHeaderToGridGap * scale;
         final double gridWidth =
             (dayHeader.length * cellWidth) + ((dayHeader.length - 1) * gapX);
         final double remainingWidth =
@@ -169,7 +222,7 @@ class _Heatmap extends StatelessWidget {
         final BorderRadius pillRadius = BorderRadius.circular(cellHeight);
         final TextStyle headerStyle = TextStyle(
           color: colorScheme.textMuted.withValues(alpha: 0.45),
-          fontSize: compact ? 6.2 : 6.834,
+          fontSize: (compact ? 6.2 : 6.834) * scale.clamp(0.8, 1.0),
           fontWeight: FontWeight.w600,
           height: compact ? 2.2 : 2.45,
           fontFamily: "Inter",
@@ -205,7 +258,7 @@ class _Heatmap extends StatelessWidget {
                 width: gutterWidth,
                 child: Padding(
                   padding: EdgeInsets.only(
-                    top: headerRowHeight + headerToGridGap + 8,
+                    top: headerRowHeight + headerToGridGap + (8 * scale),
                   ),
                   child: Column(
                     children: weeks.asMap().entries.map((entry) {
@@ -219,7 +272,7 @@ class _Heatmap extends StatelessWidget {
                             child: Text(
                               monthLabels[entry.key] ?? "",
                               style: headerStyle.copyWith(
-                                fontSize: 8.542,
+                                fontSize: 8.542 * scale.clamp(0.8, 1.0),
                                 height: 1.4,
                               ),
                               textAlign: TextAlign.center,
@@ -237,7 +290,7 @@ class _Heatmap extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
+                    SizedBox(height: 8 * scale),
                     Row(children: dayHeaderRow),
                     SizedBox(height: headerToGridGap),
                     ...weeks.asMap().entries.map(

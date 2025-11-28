@@ -1,8 +1,8 @@
 import "dart:io";
 import "dart:math" as math;
-import "dart:typed_data";
 import "dart:ui" as ui;
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:path_provider/path_provider.dart";
@@ -11,7 +11,9 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
+import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/activity/rituals_section.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -44,6 +46,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final ritualsEnabled = flagService.ritualsFlag;
     if (!ritualsEnabled) {
       return Scaffold(
@@ -68,13 +71,42 @@ class _ActivityScreenState extends State<ActivityScreen> {
         title: const Text("Rituals"),
         centerTitle: false,
         actions: [
-          IconButton(
-            padding: const EdgeInsets.only(right: 12),
-            icon: const Icon(Icons.add_rounded),
-            onPressed: () async {
-              await showRitualEditor(context, ritual: null);
-            },
-            tooltip: "Add ritual",
+          if (_selectedRitual != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: colorScheme.fillFaint,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  minimumSize: const Size(40, 40),
+                ),
+                icon: const Icon(Icons.camera_alt_outlined),
+                onPressed: _selectedRitual != null
+                    ? () => _openRitualCamera(_selectedRitual!)
+                    : null,
+                tooltip: "Open ritual camera",
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.fillFaint,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.all(8),
+                minimumSize: const Size(40, 40),
+              ),
+              icon: const Icon(Icons.add_rounded),
+              onPressed: () async {
+                await showRitualEditor(context, ritual: null);
+              },
+              tooltip: "Add ritual",
+            ),
           ),
         ],
       ),
@@ -83,80 +115,104 @@ class _ActivityScreenState extends State<ActivityScreen> {
           valueListenable: activityService.stateNotifier,
           builder: (context, state, _) {
             final summary = state.summary;
-            final selectedRitual = _selectedRitual;
+            Ritual? selectedRitual = _selectedRitual;
+            if (selectedRitual != null) {
+              final match = state.rituals
+                  .where((ritual) => ritual.id == selectedRitual!.id);
+              if (match.isNotEmpty) {
+                selectedRitual = match.first;
+              } else {
+                selectedRitual = null;
+              }
+            }
             final displaySummary = summary != null && selectedRitual != null
                 ? _summaryForRitual(summary, selectedRitual)
                 : summary;
             final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
-            final String sectionTitle = selectedRitual == null
+            final String heatmapTitle = selectedRitual == null
                 ? "Take a photo every day"
                 : (selectedRitual.title.isEmpty
                     ? "Untitled ritual"
                     : selectedRitual.title);
+            final String heatmapEmoji =
+                selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
+            final String shareTitle = heatmapTitle;
             final bool shareEnabled = summaryToShare != null;
-            return RefreshIndicator(
-              onRefresh: activityService.refresh,
-              child: ListView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 48),
-                children: [
-                  RitualsSection(
-                    rituals: state.rituals,
-                    progress: summary?.ritualProgress ?? const {},
-                    showHeader: false,
-                    selectedRitualId: selectedRitual?.id,
-                    onSelectionChanged: (ritual) {
-                      setState(() {
-                        _selectedRitual = ritual;
-                      });
-                    },
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        children: [
-                          Text(
-                            sectionTitle,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const Spacer(),
-                          InkWell(
-                            key: _shareButtonKey,
-                            customBorder: const CircleBorder(),
-                            onTap: summaryToShare != null
-                                ? () => _shareActivity(
-                                      summaryToShare,
-                                      sectionTitle,
-                                    )
-                                : null,
-                            child: SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Icon(
-                                  Icons.share_outlined,
-                                  size: 22,
-                                  color: shareEnabled
-                                      ? iconColor
-                                      : Theme.of(context)
-                                          .disabledColor
-                                          .withValues(alpha: 0.7),
+            return ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 48),
+              children: [
+                RitualsSection(
+                  rituals: state.rituals,
+                  progress: summary?.ritualProgress ?? const {},
+                  showHeader: false,
+                  selectedRitualId: selectedRitual?.id,
+                  onSelectionChanged: (ritual) {
+                    setState(() {
+                      _selectedRitual = ritual;
+                    });
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      children: [
+                        Text(
+                          "Activity",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        InkWell(
+                          key: _shareButtonKey,
+                          customBorder: const CircleBorder(),
+                          onTap: summaryToShare != null
+                              ? () => _shareActivity(
+                                    summaryToShare,
+                                    shareTitle,
+                                    emoji: selectedRitual?.icon,
+                                  )
+                              : null,
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: colorScheme.fillFaint,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    Icons.share_outlined,
+                                    size: 22,
+                                    color: shareEnabled
+                                        ? iconColor
+                                        : Theme.of(context)
+                                            .disabledColor
+                                            .withValues(alpha: 0.7),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                  ActivityHeatmapCard(summary: displaySummary),
+                ),
+                ActivityHeatmapCard(
+                  summary: displaySummary,
+                  headerTitle: heatmapTitle,
+                  headerEmoji: heatmapEmoji,
+                ),
+                if (selectedRitual != null)
                   AchievementsRow(summary: displaySummary),
-                ],
-              ),
+              ],
             );
           },
         ),
@@ -166,8 +222,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   Future<void> _shareActivity(
     ActivitySummary summary,
-    String title,
-  ) async {
+    String title, {
+    String? emoji,
+  }) async {
     OverlayEntry? entry;
     final prevPaintSize = debugPaintSizeEnabled;
     final prevPaintBaselines = debugPaintBaselinesEnabled;
@@ -194,6 +251,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 child: _ActivityShareCard(
                   summary: summary,
                   title: title,
+                  emoji: emoji,
                 ),
               ),
             ),
@@ -323,16 +381,37 @@ class _ActivityScreenState extends State<ActivityScreen> {
       generatedAt: summary.generatedAt,
     );
   }
+
+  void _openRitualCamera(Ritual ritual) {
+    final albumId = ritual.albumId;
+    if (albumId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Set an album for this ritual to launch the camera."),
+        ),
+      );
+      return;
+    }
+    routeToPage(
+      context,
+      RitualCameraPage(
+        ritualId: ritual.id,
+        albumId: albumId,
+      ),
+    );
+  }
 }
 
 class _ActivityShareCard extends StatelessWidget {
   const _ActivityShareCard({
     required this.summary,
     required this.title,
+    this.emoji,
   });
 
   final ActivitySummary summary;
   final String title;
+  final String? emoji;
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +462,8 @@ class _ActivityShareCard extends StatelessWidget {
                       summary: summary,
                       compact: true,
                       allowHorizontalScroll: false,
+                      headerTitle: title,
+                      headerEmoji: emoji,
                     ),
                   ),
                   const SizedBox(height: 6),

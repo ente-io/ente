@@ -47,7 +47,7 @@ class ActivityService {
         Bus.instance.on<FilesUpdatedEvent>().listen((event) {
       _scheduleRefresh();
     });
-    _scheduleRefresh(initial: true);
+    _scheduleRefresh(initial: true, scheduleAllRituals: true);
   }
 
   void dispose() {
@@ -55,15 +55,18 @@ class ActivityService {
     _debounce?.cancel();
   }
 
-  void _scheduleRefresh({bool initial = false}) {
+  void _scheduleRefresh({
+    bool initial = false,
+    bool scheduleAllRituals = false,
+  }) {
     _debounce?.cancel();
     _debounce = Timer(
-      initial ? const Duration(seconds: 8) : const Duration(seconds: 1),
-      refresh,
+      initial ? const Duration(seconds: 5) : const Duration(seconds: 1),
+      () => unawaited(refresh(scheduleAllRituals: scheduleAllRituals)),
     );
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool scheduleAllRituals = false}) async {
     if (!flagService.ritualsFlag) {
       stateNotifier.value = const ActivityState(
         loading: false,
@@ -79,8 +82,13 @@ class ActivityService {
         error: null,
       );
       final rituals = await _loadRituals();
-      for (final ritual in rituals) {
-        await _scheduleRitualNotifications(ritual);
+      if (scheduleAllRituals) {
+        _logger.info(
+          "Scheduling ritual reminders for ${rituals.length} rituals (startup refresh)",
+        );
+        for (final ritual in rituals) {
+          await _scheduleRitualNotifications(ritual);
+        }
       }
       final summary = await _buildSummary(rituals);
       stateNotifier.value = ActivityState(
@@ -261,22 +269,37 @@ class ActivityService {
   Future<void> saveRitual(Ritual ritual) async {
     final rituals = await _loadRituals();
     final existingIndex = rituals.indexWhere((r) => r.id == ritual.id);
-    if (existingIndex == -1) {
+    final bool isNew = existingIndex == -1;
+    final Ritual? previous = isNew ? null : rituals[existingIndex];
+    final bool albumChanged = previous?.albumId != ritual.albumId;
+    if (isNew) {
       rituals.add(ritual);
     } else {
       rituals[existingIndex] = ritual;
     }
     await _persistRituals(rituals);
-    await _scheduleRitualNotifications(ritual);
-    await refresh();
+    unawaited(_scheduleRitualNotifications(ritual));
+
+    if (isNew || albumChanged) {
+      await refresh();
+    } else {
+      // No activity data changes; just update rituals in state.
+      stateNotifier.value = stateNotifier.value.copyWith(
+        rituals: rituals,
+        loading: false,
+        error: null,
+      );
+    }
   }
 
   Future<void> deleteRitual(String id) async {
     final rituals = await _loadRituals();
     rituals.removeWhere((r) => r.id == id);
     await _persistRituals(rituals);
+    _logger.info("Clearing scheduled notifications for ritual $id (delete)");
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: "ritualId=$id",
+      logLines: false,
     );
     await refresh();
   }
@@ -287,8 +310,15 @@ class ActivityService {
   }
 
   Future<void> _scheduleRitualNotifications(Ritual ritual) async {
+    _logger.info(
+      "Clearing scheduled notifications for ritual ${ritual.id} (save path)",
+    );
+    _logger.info(
+      "Scheduling ritual reminders for ritual ${ritual.id} (save path)",
+    );
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: ritual.id,
+      logLines: false,
     );
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -301,6 +331,9 @@ class ActivityService {
       final targetDate = today.add(Duration(days: offset));
       final dayIndex = targetDate.weekday % 7; // Sunday -> 0
       if (!ritual.daysOfWeek[dayIndex]) continue;
+      final icon = ritual.icon.isEmpty ? "📸" : ritual.icon;
+      final title =
+          ritual.title.trim().isEmpty ? icon : "$icon ${ritual.title.trim()}";
       final scheduledDate = DateTime(
         targetDate.year,
         targetDate.month,
@@ -312,14 +345,21 @@ class ActivityService {
         continue;
       }
       await NotificationService.instance.scheduleNotification(
-        ritual.title.isEmpty ? "Time for your ritual" : ritual.title,
-        message: ritual.title,
+        title,
+        message: "Take a photo now",
         id: baseId + scheduled,
         channelID: "ritual_reminders",
-        channelName: "Ritual reminders",
-        payload:
-            "ente://ritual?ritualId=${ritual.id}&albumId=${ritual.albumId ?? ""}",
+        channelName: "Rituals",
+        payload: Uri(
+          scheme: "ente",
+          host: "camera",
+          queryParameters: {
+            "ritualId": ritual.id,
+            "albumId": ritual.albumId?.toString() ?? "",
+          },
+        ).toString(),
         dateTime: scheduledDate,
+        logSchedule: false,
       );
       scheduled += 1;
     }
