@@ -52,7 +52,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   String? _error;
   List<XFile> _captures = <XFile>[];
   Collection? _album;
-  int _pointers = 0;
+  bool _isPinching = false;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _currentZoom = 1.0;
@@ -686,94 +686,91 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 previewRect.top + _focusPointRel!.dy * previewRect.height,
               );
 
-        return Listener(
-          onPointerDown: (_) => _pointers++,
-          onPointerUp: (_) => _pointers--,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ClipRect(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: rotatedPreviewSize.width,
-                    height: rotatedPreviewSize.height,
-                    child: CameraPreview(_controller!),
-                  ),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRect(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: rotatedPreviewSize.width,
+                  height: rotatedPreviewSize.height,
+                  child: CameraPreview(_controller!),
                 ),
               ),
-              Positioned.fill(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onScaleStart: _handleScaleStart,
-                  onScaleUpdate: _handleScaleUpdate,
-                  onTapDown: (details) => _onViewFinderTap(
-                    details,
-                    previewRect,
-                  ),
+            ),
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+                onScaleEnd: _handleScaleEnd,
+                onTapDown: (details) => _onViewFinderTap(
+                  details,
+                  previewRect,
                 ),
               ),
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _GridPainter(),
-                  ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _GridPainter(),
                 ),
               ),
-              if (focus != null)
-                Positioned(
-                  left: focus.dx - 24,
-                  top: focus.dy - 24,
-                  child: AnimatedOpacity(
-                    opacity: _focusPointRel == null ? 0 : 1,
-                    duration: const Duration(milliseconds: 120),
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          width: 2,
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+            ),
+            if (focus != null)
               Positioned(
-                left: 12,
-                top: 88, // keep below top bar so it stays visible
+                left: focus.dx - 24,
+                top: focus.dy - 24,
                 child: AnimatedOpacity(
-                  opacity: _showZoomHint ? 1 : 0,
+                  opacity: _focusPointRel == null ? 0 : 1,
                   duration: const Duration(milliseconds: 120),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "${_currentZoom.toStringAsFixed(1)}x",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        width: 2,
                       ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            Positioned(
+              left: 12,
+              top: 88, // keep below top bar so it stays visible
+              child: AnimatedOpacity(
+                opacity: _showZoomHint ? 1 : 0,
+                duration: const Duration(milliseconds: 120),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "${_currentZoom.toStringAsFixed(1)}x",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -832,12 +829,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         children: [
           SizedBox(
             width: 96,
-            child: _captures.isEmpty
-                ? const SizedBox.shrink()
-                : _StackedPreview(
-                    captures: _captures,
-                    onTap: _enterReview,
-                  ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _LatestPreview(
+                captures: _captures,
+                onTap: _enterReview,
+              ),
+            ),
           ),
           Expanded(
             child: Center(
@@ -940,16 +938,27 @@ class _RitualCameraPageState extends State<RitualCameraPage>
 
   void _handleScaleStart(ScaleStartDetails details) {
     if (_controller == null || !_controller!.value.isInitialized) return;
+    _isPinching = details.pointerCount >= 2;
     _baseZoom = _currentZoom;
+  }
+
+  void _handleScaleEnd(ScaleEndDetails details) {
+    _isPinching = false;
   }
 
   Future<void> _handleScaleUpdate(ScaleUpdateDetails details) async {
     if (_controller == null || !_controller!.value.isInitialized) return;
-    // Only respond to pinch gestures (2 pointers) to avoid accidental zooms.
-    if (_pointers != 2) return;
+    if (details.pointerCount < 2) {
+      _isPinching = false;
+      return;
+    }
+    if (!_isPinching) {
+      _isPinching = true;
+      _baseZoom = _currentZoom;
+    }
     final double newZoom =
         (_baseZoom * details.scale).clamp(_minAvailableZoom, _maxAvailableZoom);
-    if (newZoom == _currentZoom) return;
+    if ((newZoom - _currentZoom).abs() < 0.001) return;
     _currentZoom = newZoom;
     try {
       await _controller!.setZoomLevel(_currentZoom);
@@ -1057,46 +1066,59 @@ class _ThumbnailStrip extends StatelessWidget {
   }
 }
 
-class _StackedPreview extends StatelessWidget {
-  const _StackedPreview({
-    required this.captures,
-    required this.onTap,
-  });
+class _LatestPreview extends StatelessWidget {
+  const _LatestPreview({required this.captures, required this.onTap});
 
   final List<XFile> captures;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final display = captures.length <= 2
-        ? List<XFile>.from(captures)
-        : captures.sublist(captures.length - 2);
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        height: 64,
-        width: 74,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: display.asMap().entries.map((entry) {
-            final index = entry.key;
-            final capture = entry.value;
-            final double offset = index * 10;
-            return Positioned(
-              left: offset,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(capture.path),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
+    final XFile? lastCapture = captures.isNotEmpty ? captures.last : null;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+        return FadeTransition(
+          opacity: fade,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.94, end: 1.0).animate(fade),
+            child: child,
+          ),
+        );
+      },
+      child: lastCapture == null
+          ? const SizedBox.shrink()
+          : GestureDetector(
+              key: ValueKey(lastCapture.path),
+              onTap: onTap,
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(lastCapture.path),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white, width: 1),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }).toList(),
-        ),
-      ),
+            ),
     );
   }
 }
