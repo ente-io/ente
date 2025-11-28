@@ -50,6 +50,7 @@ class FlagService {
 
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
+  bool get enableDeleteSuggestion => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -86,6 +87,8 @@ class FlagService {
   bool get useWidgetV2 => internalUser;
 
   bool get facesTimeline => internalUser;
+
+  bool get ritualsFlag => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

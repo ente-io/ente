@@ -99,8 +99,8 @@ Future<int?> _processAegisExportFile(
     try {
       await showTextInputDialog(
         context,
-        title: "Enter password to aegis vault",
-        submitButtonLabel: "Submit",
+        title: context.l10n.enterPasswordToAegisVault,
+        submitButtonLabel: context.l10n.submit,
         isPasswordInput: true,
         onSubmit: (value) async {
           password = value;
@@ -120,8 +120,8 @@ Future<int?> _processAegisExportFile(
       if (password != null) {
         await showErrorDialog(
           context,
-          "Failed to decrypt aegis vault",
-          "Please check your password and try again.",
+          context.l10n.failedToDecryptAegisVault,
+          context.l10n.pleaseCheckPasswordAndTryAgain,
         );
       }
       return null;

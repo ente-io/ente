@@ -140,6 +140,10 @@ class Collection {
     return (owner.id ?? -100) == userID;
   }
 
+  bool isAdmin(int userID) {
+    return getRole(userID) == CollectionParticipantRole.admin;
+  }
+
   bool canAutoAdd(int userID) {
     final participantRole = getRole(userID);
     final canEditCollection = isOwner(userID) ||

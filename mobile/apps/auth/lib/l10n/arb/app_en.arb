@@ -551,6 +551,7 @@
   "backupSecurityNotice": "This encrypted backup holds your 2FA keys. If lost, you may not be able to recover your accounts. Keep it safe!",
   "locationUpdatedAndBackupCreated": "Location updated and initial backup created!",
   "initialBackupCreated": "Initial backup created!",
+  "backupCreated": "Backup created!",
   "passwordTooShort": "Password must be at least 8 characters long.",
   "noDefaultBackupFolder": "Could not create default backup folder.",
   "backupLocationChoiceDescription": "Where do you want to save your backups?",
@@ -559,16 +560,14 @@
   "couldNotDetermineLocation":"Could not determine location...",
   "saveAction":"Save",
   "saveBackup":"Save backup",
-  "changeLocation": "Change location",
-  "changeCurrentLocation": "Change current location",
   "updateBackupPassword": "Update backup password",
   "setBackupPassword": "Set backup password",
   "createBackupNow": "Create backup now",
   "clearBackupFolder": "Clear backup folder",
   "clearBackupPassword": "Clear backup password",
   "selectBackupFolder": "Select a backup folder",
-  "backupLocation": "Backup location",
-  "changeFolder": "Change folder",
+  "setBackupFolder": "Set backup folder",
+  "backupFolderLabel": "Backup folder:",
   "backupPasswordHint": "Your backup will be encrypted with this password.",
   "authToUpdateBackupPassword": "Authenticate to update backup password",
   "authToSetBackupPassword": "Authenticate to set backup password",
@@ -577,6 +576,7 @@
   "currentBackupFolder": "Current backup folder:",
   "selectFolder": "Select folder",
   "selectFolderToContinue": "Select a folder to continue",
+  "iosOnMyDeviceNotSupported": "\"On My iPhone\" cannot be used directly. Please select or create a folder inside it.",
   "done": "Done",
   "addNew": "Add new",
   "selected": "selected",
@@ -613,5 +613,15 @@
         "example": "2"
       }
     }
-  }
+  },
+  "enterPasswordToAegisVault": "Enter password to aegis vault",
+  "submit": "Submit",
+  "failedToDecryptAegisVault": "Failed to decrypt aegis vault",
+  "pleaseCheckPasswordAndTryAgain": "Please check your password and try again.",
+  "enterPasswordToDecrypt2FASBackup": "Enter password to decrypt 2FAS backup",
+  "failedToDecrypt2FASExport": "Failed to decrypt 2Fas export",
+  "chooseIcon": "Choose icon",
+  "customOrder": "Custom order",
+  "selectAnOption": "Select an option",
+  "todaysLogs": "Today's logs"
 }

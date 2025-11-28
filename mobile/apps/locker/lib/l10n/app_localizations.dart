@@ -1018,6 +1018,12 @@ abstract class AppLocalizations {
   /// **'Report bug'**
   String get reportBug;
 
+  /// Dialog body text for sending logs in Locker app (without file name warning)
+  ///
+  /// In en, this message translates to:
+  /// **'This will send logs to help us debug your issue.'**
+  String get logsDialogBodyLocker;
+
   /// No description provided for @social.
   ///
   /// In en, this message translates to:

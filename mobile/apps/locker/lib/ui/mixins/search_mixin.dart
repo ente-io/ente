@@ -266,7 +266,7 @@ mixin SearchMixin<T extends StatefulWidget> on State<T> {
         files: collectionNameMatches ? files : [],
       );
     } catch (e) {
-      debugPrint('Error searching in collection ${collection.displayName}: $e');
+      debugPrint('Error searching in collection (ID: ${collection.id}): $e');
       final collectionNameMatches = _containsQuery(
         collection.displayName ?? '',
         query,

@@ -1398,14 +1398,12 @@ class FilesDB with SqlDbBase {
   Future<void> removeFromCollection(int collectionID, List<int> fileIDs) async {
     final db = await instance.sqliteAsyncDB;
     final inParam = fileIDs.join(',');
-    unawaited(
-      db.execute(
-        '''
+    await db.execute(
+      '''
       DELETE FROM $filesTable
       WHERE $columnCollectionID = ? AND $columnUploadedFileID IN ($inParam);
       ''',
-        [collectionID],
-      ),
+      [collectionID],
     );
   }
 

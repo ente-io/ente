@@ -3,7 +3,7 @@ import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:expandable/expandable.dart";
 import 'package:flutter/material.dart';
-import "package:locker/ui/settings/common_settings.dart";
+import "package:locker/ui/drawer/common_settings.dart";
 
 class ExpandableMenuItemWidget extends StatefulWidget {
   final String title;
@@ -46,7 +46,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: enteColorScheme.backdropBase,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: ExpandableNotifier(
         controller: expandableController,
@@ -55,12 +55,12 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
             header: MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: widget.title,
-                makeTextBold: true,
               ),
               isExpandable: true,
               leadingIcon: widget.leadingIcon,
               menuItemColor: enteColorScheme.backdropBase,
               expandableController: expandableController,
+              singleBorderRadius: 12,
             ),
             collapsed: const SizedBox.shrink(),
             expanded: widget.selectionOptionsWidget,

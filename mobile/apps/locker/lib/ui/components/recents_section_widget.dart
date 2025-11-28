@@ -6,12 +6,9 @@ import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
-import 'package:locker/models/item_view_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
-import "package:locker/services/files/download/service_locator.dart";
 import 'package:locker/services/files/sync/models/file.dart';
-import "package:locker/ui/collections/section_title.dart";
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 
@@ -38,14 +35,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   int _filtersComputationId = 0;
   final Map<int, List<Collection>> _fileCollectionsCache = {};
   final Map<int, Future<List<Collection>>> _fileCollectionsRequests = {};
-  ItemViewType? _viewType;
 
   @override
   void initState() {
     super.initState();
     _originalCollectionOrder = List.from(widget.collections);
     _availableCollections = List.from(widget.collections);
-    _viewType = localSettings.itemViewType();
   }
 
   @override
@@ -78,51 +73,12 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildRecentsHeader(),
-        const SizedBox(height: 12),
         if (filterChipsRow != null) ...[
           filterChipsRow,
           const SizedBox(height: 16),
         ],
         _buildRecentsTable(context),
       ],
-    );
-  }
-
-  Widget _buildRecentsHeader() {
-    final colorScheme = getEnteColorScheme(context);
-    return SectionOptions(
-      SectionTitle(title: context.l10n.recents),
-      trailingWidget: GestureDetector(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          localSettings.setItemViewType(
-            _viewType == ItemViewType.listView
-                ? ItemViewType.gridView
-                : ItemViewType.listView,
-          );
-          setState(() {
-            _viewType = _viewType == ItemViewType.listView
-                ? ItemViewType.gridView
-                : ItemViewType.listView;
-          });
-        },
-        child: Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: colorScheme.backdropBase,
-          ),
-          padding: const EdgeInsets.all(12),
-          child: HugeIcon(
-            icon: _viewType == ItemViewType.listView
-                ? HugeIcons.strokeRoundedGridView
-                : HugeIcons.strokeRoundedMenu01,
-            color: colorScheme.textBase,
-          ),
-        ),
-      ),
     );
   }
 
@@ -174,7 +130,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
           : ItemListView(
               key: const ValueKey('items_list'),
               files: _displayedFiles,
-              viewType: _viewType ?? ItemViewType.listView,
             ),
     );
   }

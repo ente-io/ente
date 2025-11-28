@@ -11,6 +11,7 @@ enum GalleryType {
   hiddenOwnedCollection,
   favorite,
   trash,
+  deleteSuggestions,
   localFolder,
   // indicator for gallery view of collections shared with the user
   sharedCollection,
@@ -46,6 +47,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.cluster:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -71,6 +73,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.cluster:
       case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -97,6 +100,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -121,6 +125,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
       case GalleryType.trash:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -145,6 +150,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.quickLink:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -169,6 +175,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -194,6 +201,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.cluster:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -223,6 +231,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -253,6 +262,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.sharedCollection:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
     }
   }
@@ -386,6 +396,7 @@ extension GalleryAppBarExtn on GalleryType {
       case GalleryType.searchResults:
       case GalleryType.magic:
       case GalleryType.sharedPublicCollection:
+      case GalleryType.deleteSuggestions:
         return false;
       case GalleryType.uncategorized:
       case GalleryType.cluster:

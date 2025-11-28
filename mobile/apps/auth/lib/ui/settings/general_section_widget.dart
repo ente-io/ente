@@ -9,7 +9,6 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
-import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -17,6 +16,7 @@ import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_logging/logging.dart';
+import 'package:ente_ui/components/toggle_switch_widget.dart';
 import 'package:flutter/material.dart';
 
 class AdvancedSectionWidget extends StatefulWidget {

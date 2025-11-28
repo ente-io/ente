@@ -361,6 +361,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  dir_utils:
+    dependency: "direct main"
+    description:
+      path: "../../packages/dir_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
   dots_indicator:
     dependency: "direct main"
     description:

@@ -1,6 +1,7 @@
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_configuration/base_configuration.dart';
 import 'package:ente_strings/ente_strings.dart';
+import 'package:ente_ui/components/centered_constrained_widget.dart';
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -39,7 +40,9 @@ class _SessionsPageState extends State<SessionsPage> {
         elevation: 0,
         title: Text(context.strings.activeSessions),
       ),
-      body: _getBody(),
+      body: CenteredConstrainedWidget(
+        child: _getBody(),
+      ),
     );
   }
 
