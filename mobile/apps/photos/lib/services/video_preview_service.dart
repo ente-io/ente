@@ -448,8 +448,11 @@ class VideoPreviewService {
         final videoFilters = <String>[];
 
         if (rescaleVideo || needsTonemap) {
-          // scale video to 720p or keep original height if less than 720p
-          videoFilters.add("scale=-2:'min(720,ih)'");
+          // scale smaller dimension to 720p (or keep original if less than 720p)
+          // portrait: scale width to min(720,iw), landscape: scale height to min(720,ih)
+          videoFilters.add(
+            "scale='if(lt(iw,ih),min(720,iw),-2)':'if(lt(iw,ih),-2,min(720,ih))'",
+          );
 
           // reduce fps to 30 if it is more than 30
           if (applyFPS) videoFilters.add("fps=30");
