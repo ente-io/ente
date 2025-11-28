@@ -121,6 +121,10 @@ class VideoPreviewService {
   }
 
   void clearQueue() {
+    // Fire paused events for all items being cleared so UI can reset
+    for (final fileId in _items.keys) {
+      _fireVideoPreviewStateChange(fileId, PreviewItemStatus.paused);
+    }
     fileQueue.clear();
     _items.clear();
   }
