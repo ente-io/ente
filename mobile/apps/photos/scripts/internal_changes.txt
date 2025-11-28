@@ -1,3 +1,4 @@
+- Prateek: Revamp QR code dialog with styled design and theme colors
 - Laurens: Improve UI for merging cluster with person
 - Laurens: Improve scroll position for similar images after bulk delete
 - Neeraj: (i) Show public link to album participants
