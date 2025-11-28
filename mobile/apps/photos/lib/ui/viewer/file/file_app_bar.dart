@@ -21,6 +21,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import "package:photos/services/local_authentication_service.dart";
+import "package:photos/services/single_file_share_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
@@ -32,6 +33,7 @@ import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/share_util.dart";
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
@@ -231,6 +233,17 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
+    // Send link option for uploaded files owned by user
+    if (isOwnedByUser && isFileUploaded && !isFileHidden) {
+      items.add(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).sendLink,
+          value: 11,
+          icon: Icons.link,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
+    }
     if ((widget.file.fileType == FileType.image ||
             widget.file.fileType == FileType.livePhoto) &&
         Platform.isAndroid) {
@@ -374,6 +387,8 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('recreate');
             } else if (value == 10) {
               await _handleAddToAlbum();
+            } else if (value == 11) {
+              await _handleSendLink();
             }
           },
         ),
@@ -554,5 +569,23 @@ class FileAppBarState extends State<FileAppBar> {
       selectedFiles: selectedFiles,
       actionType: CollectionActionType.addFiles,
     );
+  }
+
+  Future<void> _handleSendLink() async {
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).creatingLink,
+    );
+    await dialog.show();
+    try {
+      final url =
+          await SingleFileShareService.instance.createShareUrl(widget.file);
+      await dialog.hide();
+      await shareText(url, context: context);
+    } catch (e, s) {
+      _logger.severe("Failed to create share link", e, s);
+      await dialog.hide();
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 }

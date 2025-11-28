@@ -4,7 +4,9 @@ import { haveWindow } from "../env";
 import {
     albumsAppOrigin,
     isCustomAlbumsAppOrigin,
+    isCustomPhotosShareAppOrigin,
     isCustomShareAppOrigin,
+    photosShareAppOrigin,
     shareAppOrigin,
 } from "../origins";
 
@@ -138,4 +140,45 @@ export const CustomHeadShare: React.FC<CustomHeadProps> = ({ title }) =>
         <CustomHead {...{ title }} />
     ) : (
         <CustomHeadShareStatic />
+    );
+
+/**
+ * A static SSR-ed variant of {@link CustomHead} for use with the photo-share
+ * app (single file sharing) deployed on production Ente instances.
+ */
+export const CustomHeadPhotosShareStatic: React.FC = () => (
+    <Head>
+        <title>Ente Photos</title>
+        <link rel="icon" href="/images/favicon.png" type="image/png" />
+        <meta
+            name="description"
+            content="Safely store and share your best moments"
+        />
+        <meta
+            property="og:image"
+            content="https://photos.ente.io/images/preview.jpg"
+        />
+        <meta
+            name="twitter:image"
+            content="https://photos.ente.io/images/preview.jpg"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="referrer" content="strict-origin-when-cross-origin" />
+    </Head>
+);
+
+/**
+ * A convenience fan out to conditionally show one of {@link CustomHead} or
+ * {@link CustomHeadPhotosShareStatic}.
+ *
+ * This component defaults to {@link CustomHeadPhotosShareStatic} during SSR
+ * unless a custom endpoint is defined.
+ */
+export const CustomHeadPhotosShare: React.FC<CustomHeadProps> = ({ title }) =>
+    isCustomPhotosShareAppOrigin ||
+    (haveWindow() &&
+        new URL(window.location.href).origin != photosShareAppOrigin()) ? (
+        <CustomHead {...{ title }} />
+    ) : (
+        <CustomHeadPhotosShareStatic />
     );

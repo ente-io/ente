@@ -91,10 +91,13 @@ apps:
     # For self-hosted instances, set this to the URL where your embed app is running.
     embed-albums:
     # Default is https://share.ente.io
-    #
     # If you're running a self-hosted instance and wish to serve public links for locker,
-    # set this to the URL where your albums web app is running.
+    # set this to the URL where your public locker share web app is running.
     public-locker:
+    # Default is https://photos.ente.io
+    # If you're running a self-hosted instance and wish to serve single file share links
+    # for photos, set this to the URL where your photo-share web app is running.
+    public-photo-share:
     # Default is https://cast.ente.io
     cast:
     # Default is https://accounts.ente.io
