@@ -347,6 +347,31 @@ class CollectionDB extends EnteBaseDatabase {
     await batch.commit();
   }
 
+  Future<void> deleteFilesByUploadedFileIDs(
+    List<int> uploadedFileIDs,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return;
+    }
+
+    final batch = _db.batch();
+
+    for (final uploadedFileID in uploadedFileIDs) {
+      batch.delete(
+        _collectionFilesTable,
+        where: 'uploaded_file_id = ?',
+        whereArgs: [uploadedFileID],
+      );
+      batch.delete(
+        _filesTable,
+        where: 'uploaded_file_id = ?',
+        whereArgs: [uploadedFileID],
+      );
+    }
+
+    await batch.commit();
+  }
+
   Future<List<EnteFile>> getFilesInCollection(Collection collection) async {
     final result = await _db.rawQuery(
       '''
@@ -424,6 +449,35 @@ class CollectionDB extends EnteBaseDatabase {
   Future<List<EnteFile>> getAllFiles() async {
     final result = await _db.query(_filesTable);
     return result.map((row) => _mapToFile(row)).toList();
+  }
+
+  /// Removes orphaned files that exist in files table but have no collection mappings.
+  /// This can happen if files were deleted from trash before the cleanup fix was applied.
+  Future<void> cleanupOrphanedFiles() async {
+    final orphanedFiles = await _db.rawQuery(
+      '''
+      SELECT f.uploaded_file_id, f.title
+      FROM $_filesTable f
+      LEFT JOIN $_collectionFilesTable cf ON f.uploaded_file_id = cf.uploaded_file_id
+      WHERE cf.uploaded_file_id IS NULL
+    ''',
+    );
+
+    if (orphanedFiles.isEmpty) {
+      return;
+    }
+
+    final batch = _db.batch();
+    for (final row in orphanedFiles) {
+      final fileId = row['uploaded_file_id'];
+      batch.delete(
+        _filesTable,
+        where: 'uploaded_file_id = ?',
+        whereArgs: [fileId],
+      );
+    }
+
+    await batch.commit();
   }
 
   Map<String, dynamic> _collectionToMap(Collection collection) {

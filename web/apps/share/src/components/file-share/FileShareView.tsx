@@ -1,4 +1,5 @@
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import { Notification } from "ente-new/photos/components/Notification";
 import Head from "next/head";
 import React from "react";
@@ -8,6 +9,9 @@ import { getLockerFileIcon } from "../../utils/file-type";
 import { LockerTypeDisplay } from "./LockerTypeDisplay";
 
 export const FileShareView: React.FC = () => {
+    const { systemMode } = useColorScheme();
+    const isDarkMode = systemMode === "dark";
+
     const {
         loading,
         downloading,
@@ -27,7 +31,7 @@ export const FileShareView: React.FC = () => {
             <Box
                 sx={{
                     minHeight: "100dvh",
-                    bgcolor: "#1071FF",
+                    bgcolor: "accent.main",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -42,18 +46,18 @@ export const FileShareView: React.FC = () => {
                             md: "calc(100dvh - 48px)",
                         },
                         width: "100%",
-                        bgcolor: "#FAFAFA",
+                        bgcolor: "background.default",
                         borderRadius: { xs: "20px", md: "40px" },
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         "& ::selection": {
-                            backgroundColor: "#1071FF",
-                            color: "#FFFFFF",
+                            backgroundColor: "accent.main",
+                            color: "fixed.white",
                         },
                         "& ::-moz-selection": {
-                            backgroundColor: "#1071FF",
-                            color: "#FFFFFF",
+                            backgroundColor: "accent.main",
+                            color: "fixed.white",
                         },
                     }}
                 >
@@ -72,10 +76,15 @@ export const FileShareView: React.FC = () => {
                             rel="noopener noreferrer"
                             style={{ display: "block", lineHeight: 0 }}
                         >
-                            <img
-                                src="/images/ente-locker.svg"
+                            <Box
+                                component="img"
+                                src={
+                                    isDarkMode
+                                        ? "/images/ente-locker-white.svg"
+                                        : "/images/ente-locker.svg"
+                                }
                                 alt="Ente Locker"
-                                style={{ height: "56px", cursor: "pointer" }}
+                                sx={{ height: "56px", cursor: "pointer" }}
                             />
                         </a>
                     </Box>
@@ -110,7 +119,7 @@ export const FileShareView: React.FC = () => {
                                 }}
                             >
                                 <CircularProgress
-                                    sx={{ color: "#1071FF" }}
+                                    sx={{ color: "accent.main" }}
                                     size={32}
                                 />
                             </Box>
@@ -181,7 +190,7 @@ export const FileShareView: React.FC = () => {
                                                 : "22px",
                                             textAlign: "center",
                                             wordBreak: "break-word",
-                                            color: "#000000",
+                                            color: "text.base",
                                         }}
                                     >
                                         {fileInfo.fileName}
@@ -192,7 +201,7 @@ export const FileShareView: React.FC = () => {
                                         <Typography
                                             variant="body"
                                             sx={{
-                                                color: "#757575",
+                                                color: "text.muted",
                                                 mt: -2,
                                                 fontSize: "1rem",
                                             }}
@@ -229,14 +238,14 @@ export const FileShareView: React.FC = () => {
                                                 py: 2.5,
                                                 fontSize: "1rem",
                                                 fontWeight: 600,
-                                                bgcolor: "#1071FF",
-                                                color: "white",
+                                                bgcolor: "accent.main",
+                                                color: "accent.contrastText",
                                                 "&:hover": {
-                                                    bgcolor: "#0056CC",
+                                                    bgcolor: "accent.dark",
                                                 },
                                                 "&:disabled": {
-                                                    bgcolor: "#1071FF",
-                                                    color: "white",
+                                                    bgcolor: "accent.main",
+                                                    color: "accent.contrastText",
                                                     opacity: 0.7,
                                                 },
                                                 borderRadius: "22px",
@@ -249,7 +258,7 @@ export const FileShareView: React.FC = () => {
                                                         size={20}
                                                         sx={{
                                                             mr: 1,
-                                                            color: "white",
+                                                            color: "accent.contrastText",
                                                         }}
                                                     />
                                                     Downloading...

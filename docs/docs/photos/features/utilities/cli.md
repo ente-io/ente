@@ -53,17 +53,17 @@ This will prompt for your email and password, then store your session securely.
 
 ### Exporting photos
 
-The CLI supports **incremental exports**, downloading only new or changed files:
+The CLI supports **incremental exports**, downloading only new or changed files. Set or change the destination directory per account, then run the export:
 
 ```bash
-# Export all photos
+# Configure the export directory for your account (run once)
+ente account update --app photos --email you@example.com --dir /path/to/backup
+
+# Export all photos to the configured directory
 ente export
 
-# Export to specific directory
-ente export --dir /path/to/backup
-
-# Export specific album
-ente export --album "Album Name"
+# Export specific albums
+ente export --albums "Album Name","Another Album"
 ```
 
 **Key features:**
@@ -81,10 +81,14 @@ For complete command documentation, see the [CLI README](https://github.com/ente
 
 You can automate exports using cron (Linux/macOS) or Task Scheduler (Windows).
 
-**Example cron job for daily export at 2 AM:**
+Set the export directory for the account once (outside cron) and then schedule `ente export`:
 
 ```bash
-0 2 * * * /usr/local/bin/ente export --dir /nas/ente-backup
+# Run once to set the directory the export job should use
+/usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
+
+# Daily export at 2 AM
+0 2 * * * /usr/local/bin/ente export
 ```
 
 **Steps to set up:**
@@ -108,7 +112,8 @@ The recommended approach for keeping NAS and Ente synced is to use the CLI to **
 **Example for daily NAS sync:**
 
 ```bash
-0 2 * * * /usr/local/bin/ente export --dir /nas/ente-backup
+/usr/local/bin/ente account update --app photos --email you@example.com --dir /nas/ente-backup
+0 2 * * * /usr/local/bin/ente export
 ```
 
 **Important:** Two-way sync is not currently supported. The CLI only pulls data from Ente to local storage - changes to local files won't sync back to Ente.

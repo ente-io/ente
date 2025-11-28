@@ -111,13 +111,16 @@ const decryptPubMagicMetadata = async (
     data: string,
     header: string,
     fileKey: string,
-): Promise<{ info?: string | LockerInfo } | null> => {
+): Promise<{ info?: string | LockerInfo; editedName: string } | null> => {
     try {
         const decryptedPubMagicMetadata = await decryptMetadataJSON(
             { encryptedData: data, decryptionHeader: header },
             fileKey,
         );
-        return decryptedPubMagicMetadata as { info?: string | LockerInfo };
+        return decryptedPubMagicMetadata as {
+            info?: string | LockerInfo;
+            editedName: string;
+        };
     } catch {
         return null;
     }
@@ -147,11 +150,19 @@ const parseLockerInfo = (
  */
 const extractFileInfo = (
     metadata: FileMetadata,
+    pubMagicMetadata: {
+        info?: string | LockerInfo | undefined;
+        editedName: string;
+    } | null,
     file: FileLinkInfo["file"],
     infoObject: LockerInfo | undefined,
 ): { fileName: string; fileSize: number; uploadedTime: number } => {
     const fileName =
-        metadata.fileName || metadata.title || metadata.name || "Unknown file";
+        pubMagicMetadata?.editedName ||
+        metadata.fileName ||
+        metadata.title ||
+        metadata.name ||
+        "Unknown file";
 
     const pubMagicFileSize = infoObject?.data?.size;
     const fileSizeFromInfo = file?.info?.fileSize || 0;
@@ -268,7 +279,10 @@ export const decryptFileInfo = async (
         );
 
         // Try to decrypt pubMagicMetadata if it exists
-        let pubMagicMetadata: { info?: string | LockerInfo } | null = null;
+        let pubMagicMetadata: {
+            info?: string | LockerInfo;
+            editedName: string;
+        } | null = null;
         if (file.pubMagicMetadata?.data && file.pubMagicMetadata.header) {
             pubMagicMetadata = await decryptPubMagicMetadata(
                 file.pubMagicMetadata.data,
@@ -284,6 +298,7 @@ export const decryptFileInfo = async (
         // Extract file info
         const { fileName, fileSize, uploadedTime } = extractFileInfo(
             metadata,
+            pubMagicMetadata,
             file,
             infoObject,
         );

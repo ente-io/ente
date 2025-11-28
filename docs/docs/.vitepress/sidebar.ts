@@ -117,6 +117,10 @@ export const sidebar = [
                                 link: "/photos/features/albums-and-organization/albums",
                             },
                             {
+                                text: "Auto-add people",
+                                link: "/photos/features/albums-and-organization/auto-add-people",
+                            },
+                            {
                                 text: "Archiving",
                                 link: "/photos/features/albums-and-organization/archive",
                             },
@@ -188,6 +192,10 @@ export const sidebar = [
                                 text: "Map and location",
                                 link: "/photos/features/search-and-discovery/map-and-location",
                             },
+                            {
+                                text: "Jump to Date",
+                                link: "/photos/features/search-and-discovery/jump-to-date",
+                            },
                         ],
                     },
                     {
@@ -209,6 +217,10 @@ export const sidebar = [
                             {
                                 text: "Notifications",
                                 link: "/photos/features/utilities/notifications",
+                            },
+                            {
+                                text: "Swipe to Select",
+                                link: "/photos/features/utilities/swipe-to-select",
                             },
                             {
                                 text: "Video editor",

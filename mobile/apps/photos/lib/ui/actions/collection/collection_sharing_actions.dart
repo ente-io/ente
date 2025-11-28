@@ -583,10 +583,26 @@ class CollectionActions {
   }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner.id == currentUserID;
+    final bool canRemoveAllParticipants =
+        collectionsService.canRemoveFilesFromAllParticipants(collection);
+    final bool isCollectionAdmin = canRemoveAllParticipants && !isCollectionOwner;
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
     );
+    if (isCollectionAdmin) {
+      final filesToRemove = <EnteFile>[
+        ...split.ownedByCurrentUser,
+        ...split.ownedByOtherUsers,
+      ];
+      if (filesToRemove.isNotEmpty) {
+        await collectionsService.removeFromCollection(
+          collection.id,
+          filesToRemove,
+        );
+      }
+      return;
+    }
     if (isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
       await collectionsService.removeFromCollection(
         collection.id,

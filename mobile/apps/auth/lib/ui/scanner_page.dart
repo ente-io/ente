@@ -53,9 +53,13 @@ class ScannerPageState extends State<ScannerPage> {
     final theme = Theme.of(context);
     final bool isLight = theme.brightness == Brightness.light;
     final Color galleryBackgroundColor =
-        isLight ? Colors.black.withOpacity(0.035) : Colors.white.withOpacity(0.18);
+        isLight
+            ? Colors.black.withValues(alpha: 0.035)
+            : Colors.white.withValues(alpha: 0.18);
     final Color galleryPressedColor =
-        isLight ? Colors.black.withOpacity(0.07) : Colors.white.withOpacity(0.26);
+        isLight
+            ? Colors.black.withValues(alpha: 0.07)
+            : Colors.white.withValues(alpha: 0.26);
     final Color galleryIconColor = isLight ? Colors.black : Colors.white;
     return Scaffold(
       appBar: AppBar(

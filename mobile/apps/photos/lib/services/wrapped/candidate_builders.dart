@@ -23,21 +23,40 @@ part "builders/narrative_candidate_builder.dart";
 part "builders/badge_selector.dart";
 part "builders/media_selector.dart";
 
-const int kWrappedSelectorCandidateCap = 400;
+const int kWrappedSelectorCandidateCap = 1200;
 
-List<int> limitSelectorCandidates(Iterable<int> ids) {
+List<int> limitSelectorCandidates(
+  WrappedEngineContext context,
+  Iterable<int> ids, {
+  int? cap,
+}) {
   final List<int> limited = <int>[];
   final Set<int> seen = <int>{};
+  final int limit = cap ?? kWrappedSelectorCandidateCap;
+  if (limit <= 0) {
+    return limited;
+  }
   for (final int id in ids) {
     if (id <= 0 || !seen.add(id)) {
       continue;
     }
+    if (!context.isSelectableUploadedFileID(id)) {
+      continue;
+    }
     limited.add(id);
-    if (limited.length >= kWrappedSelectorCandidateCap) {
+    if (limited.length >= limit) {
       break;
     }
   }
   return limited;
+}
+
+List<int> buildMetaUploadedIDs(List<int> candidates, int desiredCount) {
+  if (candidates.isEmpty || desiredCount <= 0) {
+    return const <int>[];
+  }
+  final int limit = math.min(desiredCount, candidates.length);
+  return candidates.take(limit).toList(growable: false);
 }
 
 /// Provides basic context details for candidate builders.
@@ -53,6 +72,12 @@ class WrappedEngineContext {
     Set<int>? favoriteUploadedFileIDs,
     Set<int>? archivedCollectionIDs,
   })  : files = List<EnteFile>.unmodifiable(files),
+        fileByUploadedID = Map<int, EnteFile>.unmodifiable(
+          <int, EnteFile>{
+            for (final EnteFile file in files)
+              if (file.uploadedFileID != null) file.uploadedFileID!: file,
+          },
+        ),
         people = people ?? WrappedPeopleContext.empty(),
         aesthetics = aesthetics ?? WrappedAestheticsContext.empty(),
         cities = List<WrappedCity>.unmodifiable(
@@ -68,11 +93,28 @@ class WrappedEngineContext {
   final int year;
   final DateTime now;
   final List<EnteFile> files;
+  final Map<int, EnteFile> fileByUploadedID;
   final WrappedPeopleContext people;
   final WrappedAestheticsContext aesthetics;
   final List<WrappedCity> cities;
   final Set<int> favoriteUploadedFileIDs;
   final Set<int> archivedCollectionIDs;
+
+  EnteFile? fileForUploadedID(int uploadedFileID) {
+    return fileByUploadedID[uploadedFileID];
+  }
+
+  bool isSelectableUploadedFileID(int uploadedFileID) {
+    final EnteFile? file = fileByUploadedID[uploadedFileID];
+    if (file == null) {
+      return false;
+    }
+    final int? collectionID = file.collectionID;
+    if (collectionID != null && archivedCollectionIDs.contains(collectionID)) {
+      return false;
+    }
+    return file.magicMetadata.visibility != archiveVisibility;
+  }
 }
 
 /// Contract for producing Wrapped candidate cards for a specific domain.

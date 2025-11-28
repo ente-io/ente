@@ -29,6 +29,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
@@ -299,6 +300,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
+    _logger.info("ActivityService init $tlog");
+    await activityService.init();
+    _logger.info("ActivityService init done $tlog");
+
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
     }
@@ -314,8 +319,17 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
+    await FacesTimelineService.instance.init();
+    if (flagService.facesTimeline) {
+      FacesTimelineService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Faces timeline disabled via feature flag");
+    }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
+    await localSettings.initSwipeToSelectDefault();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -336,6 +350,7 @@ void logLocalSettings() {
     'Gallery grid size': localSettings.getPhotoGridSize(),
     'Video streaming enabled':
         VideoPreviewService.instance.isVideoStreamingEnabled,
+    'Swipe to select enabled': localSettings.isSwipeToSelectEnabled,
   };
 
   final formattedSettings =

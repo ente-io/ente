@@ -3,7 +3,11 @@
 ## v1.7.16 (unreleased)
 
 - Support Greek translations.
-- .
+- Ability to terminate sessions on other devices.
+- Quick access for search: Ctrl/Cmd + K.
+- Search now shows settings.
+- Ability to pin people.
+- Ability to add a photo to an album from the photo viewer menu.
 
 ## v1.7.15
 

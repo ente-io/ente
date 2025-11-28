@@ -102,7 +102,7 @@ Yes, we offer 10 GB of storage for free, forever.
 
 On the free plan, you cannot:
 
-- Share albums or create public links
+- Create public links
 - Set up family plans
 
 All other features work on the free plan, including:
@@ -111,6 +111,7 @@ All other features work on the free plan, including:
 - End-to-end encryption
 - Map view
 - Machine learning (face recognition, magic search)
+- Share albums
 - Background sync
 - Receiving shared albums from others
 
@@ -144,6 +145,16 @@ Learn more in the [Family plans guide](/photos/features/account/family-plans).
 ### How many family members can I add to my plan? {#family-members-limit}
 
 You can invite up to 5 family members to your plan. Including yourself, a total of 6 people can share a single subscription while paying only once.
+
+### Do family plan storage amounts stack across members? {#family-storage-stacking}
+
+No. Storage from different accounts does not stack.
+
+When you create a family and add members, everyone in the family shares the storage of the admin's subscription.
+
+(Example: If you have a 1 TB plan and add someone with a 200 GB plan, your family will still have 1 TB total shared storage. Their 200 GB does not combine with yours. Once they join your family, their own individual subscription becomes redundant— they will use the shared family storage instead.)
+
+Family plans are designed to allow multiple people to use a single subscription, not to combine multiple plans into a larger pool.
 
 ### Can family members see each other's photos? {#family-privacy}
 
@@ -358,7 +369,7 @@ We support **annual** subscriptions over PayPal.
 
 ### Does Ente accept crypto payments? {#crypto-payment}
 
-Yes! We accept the following cryptocurrencies:
+Yes! We support *annual plans* with crypto payments and accept the following cryptocurrencies:
 
 - **Bitcoin** (BTC)
 - **Ethereum** (ETH)

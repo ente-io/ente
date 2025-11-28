@@ -356,6 +356,10 @@
       "hex": "D14633"
     },
     {
+      "title": "Chexy",
+      "slug": "chexy"
+    },
+    {
       "title": "Chucklefish"
     },
     {
@@ -1261,7 +1265,7 @@
     {
       "title": "Parallels",
       "slug": "parallels",
-      "hex": "#E61E25",
+      "hex": "E61E25",
       "altNames": ["Parallels Desktop", "Parallels VM"]
     },
     {
@@ -2087,6 +2091,14 @@
         "PKU",
         "Peking Univ"
       ]
+    },
+    {
+      "title": "Netim",
+      "slug": "netim"
+    },
+    {
+      "title": "Wordfence",
+      "slug": "wordfence"
     }
   ]
 }

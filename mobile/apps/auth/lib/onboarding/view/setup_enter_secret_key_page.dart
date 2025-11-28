@@ -295,6 +295,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
+                    runSpacing: 8,
                     alignment: WrapAlignment.start,
                     children: [
                       ...allTags.map(

@@ -1,7 +1,7 @@
 name: locker
 description: "Ente Locker – Safe space for your important documents"
 publish_to: "none"
-version: 0.1.2+9
+version: 0.1.3+31
 environment:
   sdk: ">=3.0.0 <4.0.0"
 
@@ -78,6 +78,7 @@ dependencies:
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3
   flutter_lints: ^4.0.0
+  flutter_native_splash: ^2.2.13
   flutter_test:
     sdk: flutter
 
@@ -87,7 +88,6 @@ flutter:
 
   assets:
     - assets/
-    - assets/icons/
 
   fonts:
     - family: Inter
@@ -101,9 +101,30 @@ flutter:
       fonts:
         - asset: assets/fonts/Montserrat-Bold.ttf
 
-flutter_icons:
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/launcher-icons/icon-ios-default.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#1071FF"
   adaptive_icon_foreground: "assets/launcher-icons/icon-foreground.png"
-  adaptive_icon_background: "#1071ff"
-  android: "icon_blue"
-  ios: "IconBlue"
-  image_path: "assets/launcher-icons/icon-blue.png"
+  adaptive_icon_monochrome: "assets/launcher-icons/icon-monochrome-foreground.png"
+  adaptive_icon_foreground_inset: 4
+  image_path_ios_dark_transparent: "assets/launcher-icons/icon-ios-foreground.png"
+  image_path_ios_tinted_grayscale: "assets/launcher-icons/icon-ios-tinted.png"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#000000"
+  image: "assets/launcher-icons/icon-foreground.png"
+  android_gravity: center
+  ios_content_mode: center
+  android: true
+  ios: true
+  web: false
+  android_12:
+    image: "assets/launcher-icons/icon-foreground.png"
+    color: "#FFFFFF"
+    icon_background_color: "#FFFFFF"
+    color_dark: "#000000"
+    icon_background_color_dark: "#000000"

@@ -9,6 +9,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_page.dart';
@@ -153,6 +154,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     }
     await dialog.hide();
     Configuration.instance.resetVolatilePassword();
+    await flagService.tryRefreshFlags();
     Bus.instance.fire(SubscriptionPurchasedEvent());
     unawaited(
       Navigator.of(context).pushAndRemoveUntil(

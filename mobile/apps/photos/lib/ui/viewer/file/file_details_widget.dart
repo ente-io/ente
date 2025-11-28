@@ -410,10 +410,49 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     }
 
     if (exif["EXIF ExposureTime"] != null) {
-      _exifData["exposureTime"] = exif["EXIF ExposureTime"].toString();
+      _exifData["exposureTime"] =
+          _formatExposureTime(exif["EXIF ExposureTime"]!);
     }
     if (exif["EXIF ISOSpeedRatings"] != null) {
       _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();
+    }
+  }
+
+  /// Formats exposure time from EXIF data into a human-readable string.
+  ///
+  /// For shutter speeds >= 1 second, displays as decimal with 's' suffix (e.g., "1.3s")
+  /// For shutter speeds < 1 second, displays as a fraction (e.g., "1/100")
+  String _formatExposureTime(IfdTag exposureTimeTag) {
+    final values = exposureTimeTag.values.toList();
+    if (values.isEmpty) {
+      return exposureTimeTag.toString();
+    }
+
+    final value = values[0];
+    if (value is! Ratio) {
+      return exposureTimeTag.toString();
+    }
+
+    final numerator = value.numerator;
+    final denominator = value.denominator;
+
+    if (denominator == 0) {
+      return exposureTimeTag.toString();
+    }
+
+    final double seconds = numerator / denominator;
+
+    if (seconds >= 1) {
+      // For exposures >= 1 second, show as decimal seconds
+      if (seconds == seconds.roundToDouble()) {
+        return "${seconds.toInt()}s";
+      }
+      return "${seconds.toStringAsFixed(1)}s";
+    } else {
+      // For exposures < 1 second, always convert to 1/x format
+      // e.g., 529/200000 → 1/378
+      final reciprocal = (1 / seconds).round();
+      return "1/$reciprocal";
     }
   }
 }

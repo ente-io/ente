@@ -1384,8 +1384,6 @@
   "appLockDescriptions": "Kies tussen het standaard vergrendelscherm van uw apparaat en een aangepast vergrendelscherm met een pincode of wachtwoord.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "authToViewPasskey": "Verifieer uzelf om uw toegangssleutel te bekijken",
-  "loopVideoOn": "Video in lus afspelen aan",
-  "loopVideoOff": "Video in lus afspelen uit",
   "localSyncErrorMessage": "Het lijkt erop dat er iets mis is gegaan omdat het synchroniseren van lokale foto's meer tijd kost dan verwacht. Neem contact op met ons supportteam",
   "showPerson": "Toon persoon",
   "sort": "Sorteren",

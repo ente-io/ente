@@ -27,6 +27,10 @@ These images accept two environment variables to allow you to customize them:
   externally visible origin where the albums app is hosted. Default:
   "https://localhost:3002".
 
+- `ENTE_PHOTOS_ORIGIN` - The externally visible origin where the photos app is
+  hosted. This is used for features like join album links. Default:
+  "https://localhost:3000".
+
 For example, if your API server is running at `https://api.example.org`, you can
 configure your Docker image to connect to it:
 

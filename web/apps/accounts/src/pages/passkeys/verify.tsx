@@ -5,6 +5,7 @@ import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
 import { Stack100vhCenter } from "ente-base/components/containers";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { HTTPError } from "ente-base/http";
 import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
@@ -35,6 +36,8 @@ const Page = () => {
         | "unrecoverableFailure" /* Unrecoverable error - generic */
         | "failedDuringSignChallenge" /* Recoverable error in signChallenge */
         | "failed" /* Recoverable error otherwise */
+        | "lockerRegistrationDisabled" /* Locker only for Photos paid users */
+        | "lockerRolloutLimitReached" /* Locker beta seats exhausted */
         | "needUserFocus" /* See docs for `Continuation` */
         | "waitingForUser" /* ...to authenticate with their passkey */
         | "redirectingWeb" /* Redirect back to the requesting app (HTTP) */
@@ -174,7 +177,14 @@ const Page = () => {
             });
         } catch (e) {
             log.error("Failed to finish passkey authentication", e);
-            setStatus("failed");
+            const lockerErrorCode = await lockerAccessErrorCode(e);
+            if (lockerErrorCode == "LOCKER_REGISTRATION_DISABLED") {
+                setStatus("lockerRegistrationDisabled");
+            } else if (lockerErrorCode == "LOCKER_ROLLOUT_LIMIT") {
+                setStatus("lockerRolloutLimitReached");
+            } else {
+                setStatus("failed");
+            }
             return;
         }
 
@@ -247,6 +257,18 @@ const Page = () => {
         failed: (
             <RetriableFailed onRetry={handleRetry} onRecover={handleRecover} />
         ),
+        lockerRegistrationDisabled: (
+            <LockerAccessError
+                title="Oops"
+                body="Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker"
+            />
+        ),
+        lockerRolloutLimitReached: (
+            <LockerAccessError
+                title="We're out of beta seats for now"
+                body="This preview access has reached capacity. We'll be opening it to more users soon."
+            />
+        ),
         needUserFocus: <Verify onVerify={handleVerify} />,
         waitingForUser: <WaitingForUser />,
         redirectingWeb: <RedirectingWeb />,
@@ -305,6 +327,22 @@ const Failed: React.FC<FailedProps> = ({ message }) => (
         <InfoIcon color="secondary" />
         <Typography variant="h6">{t("passkey_login_failed")}</Typography>
         <Typography sx={{ color: "text.muted" }}>{message}</Typography>
+    </ContentPaper>
+);
+
+interface LockerAccessErrorProps {
+    title: string;
+    body: string;
+}
+
+const LockerAccessError: React.FC<LockerAccessErrorProps> = ({
+    title,
+    body,
+}) => (
+    <ContentPaper>
+        <InfoIcon color="secondary" fontSize="large" />
+        <Typography variant="h5">{title}</Typography>
+        <Typography sx={{ color: "text.muted" }}>{body}</Typography>
     </ContentPaper>
 );
 
@@ -460,3 +498,44 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => (
         </ButtonStack>
     </ContentPaper>
 );
+
+type LockerErrorCode =
+    | "LOCKER_REGISTRATION_DISABLED"
+    | "LOCKER_ROLLOUT_LIMIT"
+    | undefined;
+
+interface LockerErrorPayload {
+    code: string;
+}
+
+const isLockerErrorPayload = (
+    payload: unknown,
+): payload is LockerErrorPayload =>
+    typeof payload == "object" &&
+    payload !== null &&
+    "code" in payload &&
+    typeof (payload as { code: unknown }).code === "string";
+
+const lockerAccessErrorCode = async (
+    error: unknown,
+): Promise<LockerErrorCode> => {
+    if (!(error instanceof HTTPError) || error.res.status !== 403) {
+        return undefined;
+    }
+
+    try {
+        const payload = (await error.res.clone().json()) as unknown;
+        const code = isLockerErrorPayload(payload) ? payload.code : undefined;
+
+        if (
+            code === "LOCKER_REGISTRATION_DISABLED" ||
+            code === "LOCKER_ROLLOUT_LIMIT"
+        ) {
+            return code;
+        }
+    } catch (parseError) {
+        log.warn("Failed to parse locker access error payload", parseError);
+    }
+
+    return undefined;
+};

@@ -116,6 +116,13 @@ class _LoginPasswordVerificationPageState
           context.strings.oops,
           'Sorry, this account doesn’t have Locker access yet.',
         );
+      } else if (enteErrCode != null &&
+          enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+        await _showContactSupportDialog(
+          context,
+          "We're out of beta seats for now",
+          "This preview access has reached capacity. We'll be opening it to more users soon.",
+        );
       } else if (e.response != null && e.response!.statusCode == 401) {
         _logger.severe('server reject, failed verify SRP login', e, s);
         await _showContactSupportDialog(

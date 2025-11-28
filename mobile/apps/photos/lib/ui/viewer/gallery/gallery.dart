@@ -160,6 +160,7 @@ class GalleryState extends State<Gallery> {
   List<EnteFile> _allFilesWithDummies = [];
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
+  InheritedSearchFilterData? _inheritedSearchFilterData;
 
   @override
   void initState() {
@@ -304,7 +305,8 @@ class GalleryState extends State<Gallery> {
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
 
-    if (widget.galleryType == GalleryType.homepage) {
+    if (localSettings.isSwipeToSelectEnabled &&
+        widget.galleryType == GalleryType.homepage) {
       _swipeActiveNotifier.addListener(() {
         Bus.instance.fire(
           HomepageSwipeToSelectInProgressEvent(
@@ -324,6 +326,12 @@ class GalleryState extends State<Gallery> {
         setState(() {});
       }
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _inheritedSearchFilterData = InheritedSearchFilterData.maybeOf(context);
   }
 
   void _updateGalleryGroups({bool callSetState = true}) {
@@ -486,7 +494,9 @@ class GalleryState extends State<Gallery> {
   }
 
   void _updateSwipeHelper() {
-    if (widget.selectedFiles != null && _allFilesWithDummies.isNotEmpty) {
+    if (localSettings.isSwipeToSelectEnabled &&
+        widget.selectedFiles != null &&
+        _allFilesWithDummies.isNotEmpty) {
       // Dispose existing helper if present
       _swipeHelper?.dispose();
       // Use allFilesWithDummies to match the rendered grid structure.
@@ -521,9 +531,11 @@ class GalleryState extends State<Gallery> {
 
       /// To curate filters when a gallery is first opened.
       if (!result.hasMore) {
+        if (!mounted) {
+          return result;
+        }
         final searchFilterDataProvider =
-            InheritedSearchFilterData.maybeOf(context)
-                ?.searchFilterDataProvider;
+            _inheritedSearchFilterData?.searchFilterDataProvider;
         if (searchFilterDataProvider != null &&
             !searchFilterDataProvider.isSearchingNotifier.value) {
           unawaited(
@@ -601,7 +613,8 @@ class GalleryState extends State<Gallery> {
     }
 
     final widthAvailable = MediaQuery.sizeOf(context).width;
-    final shouldEnableSwipeSelection = widget.limitSelectionToOne == false;
+    final shouldEnableSwipeSelection = localSettings.isSwipeToSelectEnabled &&
+        widget.limitSelectionToOne == false;
 
     if (groupHeaderExtent == null) {
       final photoGridSize = localSettings.getPhotoGridSize();

@@ -50,6 +50,7 @@ class FlagService {
 
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
+  bool get enableDeleteSuggestion => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -59,8 +60,6 @@ class FlagService {
 
   bool get mapEnabled => flags.mapEnabled;
 
-  bool get enteWrapped => false; // TODO: lau: set to true before December release
-
   bool get isBetaUser => internalUser || flags.betaUser;
 
   bool get recoveryKeyVerified => flags.recoveryKeyVerified;
@@ -69,8 +68,7 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
-  bool get enableUploadV2 =>
-      internalUser && ((flags.serverApiFlag & _uploadV2Flag) != 0);
+  bool get enableUploadV2 => ((flags.serverApiFlag & _uploadV2Flag) != 0);
 
   bool get enableVectorDb => hasGrantedMLConsent;
 
@@ -87,6 +85,19 @@ class FlagService {
   bool get useNativeVideoEditor => true;
 
   bool get useWidgetV2 => internalUser;
+
+  bool get enableOnlyBackupFuturePhotos => internalUser;
+
+  bool get facesTimeline => internalUser;
+  bool get ritualsFlag => internalUser;
+
+  Future<void> tryRefreshFlags() async {
+    try {
+      await _fetch();
+    } catch (e) {
+      debugPrint("Failed to refresh flags: $e");
+    }
+  }
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

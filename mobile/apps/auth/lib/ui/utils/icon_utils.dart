@@ -26,20 +26,54 @@ class IconUtils {
   }
 
   Map<String, AllIconData> getAllIcons() {
-    Set<String> processedIconPaths = {};
-    final allIcons = <String, AllIconData>{};
+    try {
+      Set<String> processedIconPaths = {};
+      final allIcons = <String, AllIconData>{};
 
-    final simpleIterator = _simpleIcons.entries.iterator;
-    final customIterator = _customIcons.entries.iterator;
+      final simpleIterator = _simpleIcons.entries.iterator;
+      final customIterator = _customIcons.entries.iterator;
 
-    var simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
-    var customEntry = customIterator.moveNext() ? customIterator.current : null;
+      var simpleEntry =
+          simpleIterator.moveNext() ? simpleIterator.current : null;
+      var customEntry =
+          customIterator.moveNext() ? customIterator.current : null;
 
-    String simpleIconPath, customIconPath;
+      String simpleIconPath, customIconPath;
 
-    while (simpleEntry != null && customEntry != null) {
-      if (simpleEntry.key.compareTo(customEntry.key) <= 0) {
+      while (simpleEntry != null && customEntry != null) {
+        if (simpleEntry.key.compareTo(customEntry.key) <= 0) {
+          simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
+          if (!processedIconPaths.contains(simpleIconPath)) {
+            allIcons[simpleEntry.key] = AllIconData(
+              title: simpleEntry.key,
+              type: IconType.simpleIcon,
+              color: simpleEntry.value,
+            );
+            processedIconPaths.add(simpleIconPath);
+          }
+          simpleEntry =
+              simpleIterator.moveNext() ? simpleIterator.current : null;
+        } else {
+          customIconPath =
+              "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
+
+          if (!processedIconPaths.contains(customIconPath)) {
+            allIcons[customEntry.key] = AllIconData(
+              title: customEntry.key,
+              type: IconType.customIcon,
+              color: customEntry.value.color,
+              slug: customEntry.value.slug,
+            );
+            processedIconPaths.add(customIconPath);
+          }
+          customEntry =
+              customIterator.moveNext() ? customIterator.current : null;
+        }
+      }
+
+      while (simpleEntry != null) {
         simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
+
         if (!processedIconPaths.contains(simpleIconPath)) {
           allIcons[simpleEntry.key] = AllIconData(
             title: simpleEntry.key,
@@ -49,7 +83,9 @@ class IconUtils {
           processedIconPaths.add(simpleIconPath);
         }
         simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
-      } else {
+      }
+
+      while (customEntry != null) {
         customIconPath =
             "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
 
@@ -64,39 +100,12 @@ class IconUtils {
         }
         customEntry = customIterator.moveNext() ? customIterator.current : null;
       }
+
+      return allIcons;
+    } catch (e, s) {
+      Logger("IconUtils").severe("Failed to get all icons", e, s);
+      return {};
     }
-
-    while (simpleEntry != null) {
-      simpleIconPath = "assets/simple-icons/icons/${simpleEntry.key}.svg";
-
-      if (!processedIconPaths.contains(simpleIconPath)) {
-        allIcons[simpleEntry.key] = AllIconData(
-          title: simpleEntry.key,
-          type: IconType.simpleIcon,
-          color: simpleEntry.value,
-        );
-        processedIconPaths.add(simpleIconPath);
-      }
-      simpleEntry = simpleIterator.moveNext() ? simpleIterator.current : null;
-    }
-
-    while (customEntry != null) {
-      customIconPath =
-          "assets/custom-icons/icons/${customEntry.value.slug ?? customEntry.key}.svg";
-
-      if (!processedIconPaths.contains(customIconPath)) {
-        allIcons[customEntry.key] = AllIconData(
-          title: customEntry.key,
-          type: IconType.customIcon,
-          color: customEntry.value.color,
-          slug: customEntry.value.slug,
-        );
-        processedIconPaths.add(customIconPath);
-      }
-      customEntry = customIterator.moveNext() ? customIterator.current : null;
-    }
-
-    return allIcons;
   }
 
   Widget getIcon(
@@ -104,37 +113,46 @@ class IconUtils {
     String provider, {
     double width = 24,
   }) {
-    final providerTitle = _getProviderTitle(provider);
-    final List<String> titlesList = [providerTitle];
-    titlesList.addAll(
-      _titleSplitCharacters
-          .where((char) => providerTitle.contains(char))
-          .map((char) => providerTitle.split(char)[0]),
-    );
-    for (final title in titlesList) {
-      if (_customIcons.containsKey(title)) {
-        return getSVGIcon(
-          "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
-          title,
-          _customIcons[title]!.color,
-          width,
-          context,
-        );
-      } else if (_simpleIcons.containsKey(title)) {
-        final simpleIconPath = normalizeSimpleIconName(title);
-        return getSVGIcon(
-          "assets/simple-icons/icons/$simpleIconPath.svg",
-          title,
-          _simpleIcons[title],
-          width,
-          context,
-        );
+    try {
+      final providerTitle = _getProviderTitle(provider);
+      final List<String> titlesList = [providerTitle];
+      titlesList.addAll(
+        _titleSplitCharacters
+            .where((char) => providerTitle.contains(char))
+            .map((char) => providerTitle.split(char)[0]),
+      );
+      for (final title in titlesList) {
+        if (_customIcons.containsKey(title)) {
+          return getSVGIcon(
+            "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
+            title,
+            _customIcons[title]!.color,
+            width,
+            context,
+          );
+        } else if (_simpleIcons.containsKey(title)) {
+          final simpleIconPath = normalizeSimpleIconName(title);
+          return getSVGIcon(
+            "assets/simple-icons/icons/$simpleIconPath.svg",
+            title,
+            _simpleIcons[title],
+            width,
+            context,
+          );
+        }
       }
-    }
-    if (providerTitle.isNotEmpty) {
+      if (providerTitle.isNotEmpty) {
+        return _fallbackAvatar(provider, width, context);
+      } else {
+        return const SizedBox.shrink();
+      }
+    } catch (e, s) {
+      Logger("IconUtils").warning(
+        "Failed to get icon for provider '$provider'",
+        e,
+        s,
+      );
       return _fallbackAvatar(provider, width, context);
-    } else {
-      return const SizedBox.shrink();
     }
   }
 
@@ -146,22 +164,31 @@ class IconUtils {
     BuildContext context,
   ) {
     final iconColor = _getAdaptiveColor(color, context);
-    return SvgPicture.asset(
-      path,
-      width: width,
-      semanticsLabel: title,
-      colorFilter: iconColor != null
-          ? ColorFilter.mode(
-              iconColor,
-              BlendMode.srcIn,
-            )
-          : null,
-      errorBuilder: (context, error, stackTrace) {
-        Logger("IconUtils")
-            .warning("Failed to load icon $path", error, stackTrace);
-        return _fallbackAvatar(title, width, context);
-      },
-    );
+    try {
+      return SvgPicture.asset(
+        path,
+        width: width,
+        semanticsLabel: title,
+        colorFilter: iconColor != null
+            ? ColorFilter.mode(
+                iconColor,
+                BlendMode.srcIn,
+              )
+            : null,
+        errorBuilder: (context, error, stackTrace) {
+          Logger("IconUtils")
+              .warning("Failed to load icon $path", error, stackTrace);
+          return _fallbackAvatar(title, width, context);
+        },
+      );
+    } catch (e, s) {
+      Logger("IconUtils").warning(
+        "Failed to create SVG icon for '$title' at path '$path'",
+        e,
+        s,
+      );
+      return _fallbackAvatar(title, width, context);
+    }
   }
 
   Widget _fallbackAvatar(String provider, double width, BuildContext context) {
@@ -176,9 +203,11 @@ class IconUtils {
       child: Text(
         providerTitle.toUpperCase()[0],
         style: showLargeIcon
-            ? getEnteTextTheme(context).h3Bold
+            ? getEnteTextTheme(context)
+                .h3Bold
                 .copyWith(color: Colors.white, fontSize: width * 0.6)
-            : getEnteTextTheme(context).body
+            : getEnteTextTheme(context)
+                .body
                 .copyWith(color: Colors.white, fontSize: width * 0.6),
       ),
     );
