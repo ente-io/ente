@@ -111,8 +111,10 @@ class _StarterRitualCard extends StatelessWidget {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : Colors.transparent,
-          width: isSelected ? 2 : 0,
+          color: isSelected
+              ? colorScheme.primary500
+              : colorScheme.backgroundElevated2,
+          width: 2,
         ),
       ),
       child: Material(
@@ -175,8 +177,8 @@ class _CreateRitualCard extends StatelessWidget {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.strokeFaint,
-          width: 1,
+          color: colorScheme.backgroundElevated2,
+          width: 2,
         ),
       ),
       child: Material(
@@ -253,8 +255,10 @@ class _RitualCard extends StatelessWidget {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : Colors.transparent,
-          width: isSelected ? 2 : 0,
+          color: isSelected
+              ? colorScheme.primary500
+              : colorScheme.backgroundElevated2,
+          width: 2,
         ),
       ),
       child: Material(
