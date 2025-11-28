@@ -91,6 +91,8 @@ class FlagService {
   bool get facesTimeline => internalUser;
   bool get ritualsFlag => internalUser;
 
+  bool get pauseStreamDuringUpload => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
