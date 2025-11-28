@@ -39,7 +39,6 @@ import "leaflet/dist/leaflet.css";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     calculateOptimalZoom,
-    clusterPhotosByProximity,
     createIcon,
     getMapCenter,
 } from "../TripLayout/mapHelpers";
@@ -51,19 +50,12 @@ interface MapComponents {
     TileLayer: typeof import("react-leaflet").TileLayer;
     Marker: typeof import("react-leaflet").Marker;
     useMap: typeof import("react-leaflet").useMap;
+    MarkerClusterGroup: typeof import("react-leaflet-cluster").default;
 }
 
 interface CollectionMapDialogProps extends ModalVisibilityProps {
     collectionSummary: CollectionSummary;
     activeCollection: Collection;
-}
-
-interface MapClusterMeta {
-    lat: number;
-    lng: number;
-    count: number;
-    thumbnail?: string;
-    fileIDs: number[];
 }
 
 interface MapControlsProps {
@@ -240,16 +232,13 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         null,
     ); // for storing the leaflet elements
 
-    const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]); //image data for rendering in map(clustered by proximity)
     const [mapCenter, setMapCenter] = useState<[number, number] | null>(null); //stores the center fo the map for rendering
-
-    const [selectedClusterIndex, setSelectedClusterIndex] = useState(0); //the current image group in selection
 
     const [filesByID, setFilesByID] = useState<Map<number, EnteFile>>(
         new Map(),
     ); //maintains a map for the files in view for the thumbnail population
 
-    const [mapPhotos, setMapPhotos] = useState<JourneyPoint[]>([]); //flat list of all geotagged photos, powers the left
+    const [mapPhotos, setMapPhotos] = useState<JourneyPoint[]>([]); //flat list of all geotagged photos, powers the map markers
     const [thumbByFileID, setThumbByFileID] = useState<Map<number, string>>(
         new Map(),
     ); // map storing the file thumbnails against the fileID for showing the file thumbnails in the left sidebar
@@ -301,13 +290,17 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const optimalZoom = calculateOptimalZoom();
 
     useEffect(() => {
-        void import("react-leaflet")
-            .then((mod) =>
+        void Promise.all([
+            import("react-leaflet"),
+            import("react-leaflet-cluster"),
+        ])
+            .then(([leaflet, cluster]) =>
                 setMapComponents({
-                    MapContainer: mod.MapContainer,
-                    TileLayer: mod.TileLayer,
-                    Marker: mod.Marker,
-                    useMap: mod.useMap,
+                    MapContainer: leaflet.MapContainer,
+                    TileLayer: leaflet.TileLayer,
+                    Marker: leaflet.Marker,
+                    useMap: leaflet.useMap,
+                    MarkerClusterGroup: cluster.default,
                 }),
             )
             .catch((e: unknown) => {
@@ -317,7 +310,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
     useEffect(() => {
         if (!open) return;
-        setSelectedClusterIndex(0);
         void loadMapData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, collectionSummary.id, activeCollection.id]);
@@ -380,9 +372,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             });
 
             if (!locationPoints.length) {
-                setPhotoClusters([]);
                 setMapCenter(null);
                 setFilesByID(new Map());
+                setMapPhotos([]);
                 return;
             }
 
@@ -392,9 +384,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                     new Date(a.timestamp).getTime(),
             );
 
-            const clusters = clusterPhotosByProximity(locationPoints);
+            // Generate thumbnails for all photos
             const { thumbnailUpdates } = await generateNeededThumbnails({
-                photoClusters: clusters,
+                photoClusters: [locationPoints], // Wrap in array for compatibility
                 files,
             });
 
@@ -402,19 +394,11 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 const thumb = thumbnailUpdates.get(point.fileId);
                 return thumb ? { ...point, image: thumb } : point;
             });
-            const clustersWithThumbs = clusters.map((cluster) =>
-                cluster.map((point) => {
-                    const thumb = thumbnailUpdates.get(point.fileId);
-                    return thumb ? { ...point, image: thumb } : point;
-                }),
-            );
 
-            setPhotoClusters(clustersWithThumbs);
             setFilesByID(new Map(files.map((file) => [file.id, file])));
-            setMapCenter(getMapCenter(clustersWithThumbs, pointsWithThumbs));
+            setMapCenter(getMapCenter([], pointsWithThumbs));
             setMapPhotos(pointsWithThumbs);
             void loadAllThumbs(pointsWithThumbs, files);
-            setSelectedClusterIndex(0);
         } catch (e) {
             setError(t("something_went_wrong"));
             onGenericError(e);
@@ -442,22 +426,49 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         return files.filter((file) => hiddenCollections.has(file.collectionID));
     };
 
-    const clusterMeta = useMemo<MapClusterMeta[]>(() => {
-        return photoClusters.map((cluster) => {
-            const avgLat =
-                cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-            const avgLng =
-                cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
-            const preview = cluster.find((p) => p.image)?.image;
-            return {
-                lat: avgLat,
-                lng: avgLng,
-                count: cluster.length,
-                thumbnail: preview,
-                fileIDs: cluster.map((p) => p.fileId),
-            };
+    // Map to store position -> photo data for cluster icon access
+    const photosByPosition = useMemo(() => {
+        const map = new Map<string, JourneyPoint>();
+        mapPhotos.forEach((photo) => {
+            const key = `${photo.lat},${photo.lng}`;
+            map.set(key, photo);
         });
-    }, [photoClusters]);
+        return map;
+    }, [mapPhotos]);
+
+    // Custom cluster icon creator function for react-leaflet-cluster
+    const createClusterCustomIcon = useCallback(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (cluster: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const count = cluster.getChildCount();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const childMarkers = cluster.getAllChildMarkers();
+
+            // Get the first marker with an image as the cluster thumbnail
+            let thumbnailUrl = "";
+            for (const marker of childMarkers) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+                const latlng = marker.getLatLng();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const key = `${latlng.lat},${latlng.lng}`;
+                const photo = photosByPosition.get(key);
+                if (photo) {
+                    // Use thumbByFileID first, fallback to photo.image
+                    const thumb =
+                        thumbByFileID.get(photo.fileId) ?? photo.image;
+                    if (thumb) {
+                        thumbnailUrl = thumb;
+                        break;
+                    }
+                }
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            return createIcon(thumbnailUrl, 68, "#f6f6f6", count, false);
+        },
+        [photosByPosition, thumbByFileID],
+    );
 
     // Handle thumbnail click to open FileViewer
     const handlePhotoClick = useCallback(
@@ -511,7 +522,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 </CenteredBox>
             );
         }
-        if (!photoClusters.length || !mapCenter) {
+        if (!mapPhotos.length || !mapCenter) {
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
@@ -524,7 +535,8 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             );
         }
 
-        const { MapContainer, TileLayer, Marker, useMap } = mapComponents;
+        const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
+            mapComponents;
         return (
             <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
                 {/* Left sidebar */}
@@ -712,32 +724,43 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                             photos={mapPhotos}
                             onVisiblePhotosChange={setVisiblePhotos}
                         />
-                        {clusterMeta.map((cluster, index) => {
-                            const icon = createIcon(
-                                cluster.thumbnail ?? "",
-                                index === selectedClusterIndex ? 76 : 68,
-                                "#f6f6f6",
-                                cluster.count,
-                                index === selectedClusterIndex,
-                            );
-                            return (
-                                <Marker
-                                    key={`${cluster.lat}-${cluster.lng}-${index}`}
-                                    position={[cluster.lat, cluster.lng]}
-                                    icon={icon ?? undefined}
-                                    eventHandlers={{
-                                        click: () =>
-                                            setSelectedClusterIndex(index),
-                                    }}
-                                />
-                            );
-                        })}
+                        <MarkerClusterGroup
+                            chunkedLoading
+                            iconCreateFunction={createClusterCustomIcon}
+                            maxClusterRadius={80}
+                            spiderfyOnMaxZoom={true}
+                            showCoverageOnHover={false}
+                            zoomToBoundsOnClick={true}
+                            animate={true}
+                            animateAddingMarkers={true}
+                            spiderfyDistanceMultiplier={1.5}
+                        >
+                            {mapPhotos.map((photo) => {
+                                const thumbnailUrl =
+                                    thumbByFileID.get(photo.fileId) ??
+                                    photo.image;
+                                const icon = createIcon(
+                                    thumbnailUrl,
+                                    68,
+                                    "#f6f6f6",
+                                    undefined,
+                                    false,
+                                );
+                                return (
+                                    <Marker
+                                        key={photo.fileId}
+                                        position={[photo.lat, photo.lng]}
+                                        icon={icon ?? undefined}
+                                    />
+                                );
+                            })}
+                        </MarkerClusterGroup>
                     </MapContainer>
                 </Box>
             </Box>
         );
     }, [
-        clusterMeta,
+        createClusterCustomIcon,
         error,
         isLoading,
         mapCenter,
@@ -749,9 +772,10 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         collectionSummary.name,
         collectionSummary.fileCount,
         onClose,
-        photoClusters.length,
-        selectedClusterIndex,
         handlePhotoClick,
+        visiblePhotoOrder,
+        visiblePhotos.length,
+        visiblePhotosWave,
     ]);
 
     return (
