@@ -18,7 +18,13 @@ import (
 	"time"
 )
 
-const ()
+const (
+	// AWS S3 CopyObject has a 5GB limit. For larger files, use multipart copy
+	maxCopyObjectSize = 5 * 1024 * 1024 * 1024 // 5GB in bytes
+	// Each part in multipart copy should be at least 5MB and can be up to 5GB (AWS requirement)
+	// Using maximum 5GB part size to minimize number of parts and API calls
+	multipartCopyPartSize = 5 * 1024 * 1024 * 1024 // 5GB in bytes (AWS max)
+)
 
 type FileCopyController struct {
 	S3Config       *s3config.S3Config
@@ -190,6 +196,12 @@ func (fc *FileCopyController) createCopy(c *gin.Context, fcInternal fileCopyInte
 
 // Helper function for S3 object copying.
 func copyS3Object(s3Client *s3.S3, bucket *string, req *copyS3ObjectReq) error {
+	// For files larger than 5GB, use multipart copy
+	if req.SourceS3Object.FileSize > maxCopyObjectSize {
+		return copyS3ObjectMultipart(s3Client, bucket, req)
+	}
+
+	// For files <= 5GB, use simple CopyObject
 	copySource := fmt.Sprintf("%s/%s", *bucket, req.SourceS3Object.ObjectKey)
 	copyInput := &s3.CopyObjectInput{
 		Bucket:     bucket,
@@ -203,5 +215,102 @@ func copyS3Object(s3Client *s3.S3, bucket *string, req *copyS3ObjectReq) error {
 		return fmt.Errorf("failed to copy (%s) from %s to %s: %w", req.SourceS3Object.Type, copySource, req.DestObjectKey, err)
 	}
 	logrus.WithField("duration", elapsed).WithField("size", req.SourceS3Object.FileSize).Infof("copied (%s) from %s to %s", req.SourceS3Object.Type, copySource, req.DestObjectKey)
+	return nil
+}
+
+// copyS3ObjectMultipart copies large S3 objects (>5GB) using multipart upload
+func copyS3ObjectMultipart(s3Client *s3.S3, bucket *string, req *copyS3ObjectReq) error {
+	copySource := fmt.Sprintf("%s/%s", *bucket, req.SourceS3Object.ObjectKey)
+	start := time.Now()
+
+	// Step 1: Initiate multipart upload
+	createOutput, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: bucket,
+		Key:    &req.DestObjectKey,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to initiate multipart upload for %s: %w", req.DestObjectKey, err)
+	}
+	uploadID := createOutput.UploadId
+
+	// Ensure we abort the multipart upload if something goes wrong
+	defer func() {
+		if err != nil {
+			abortInput := &s3.AbortMultipartUploadInput{
+				Bucket:   bucket,
+				Key:      &req.DestObjectKey,
+				UploadId: uploadID,
+			}
+			if _, abortErr := s3Client.AbortMultipartUpload(abortInput); abortErr != nil {
+				logrus.WithError(abortErr).Errorf("failed to abort multipart upload %s", *uploadID)
+			}
+		}
+	}()
+
+	// Step 2: Upload parts
+	fileSize := req.SourceS3Object.FileSize
+	numParts := (fileSize + multipartCopyPartSize - 1) / multipartCopyPartSize
+	completedParts := make([]*s3.CompletedPart, numParts)
+
+	logrus.WithFields(logrus.Fields{
+		"size":      fileSize,
+		"numParts":  numParts,
+		"partSize":  multipartCopyPartSize,
+	}).Infof("starting multipart copy for (%s) from %s to %s", req.SourceS3Object.Type, copySource, req.DestObjectKey)
+
+	for i := int64(0); i < numParts; i++ {
+		partNumber := i + 1
+		startByte := i * multipartCopyPartSize
+		endByte := startByte + multipartCopyPartSize - 1
+		if endByte >= fileSize {
+			endByte = fileSize - 1
+		}
+
+		copyRange := fmt.Sprintf("bytes=%d-%d", startByte, endByte)
+		uploadPartCopyInput := &s3.UploadPartCopyInput{
+			Bucket:          bucket,
+			CopySource:      &copySource,
+			CopySourceRange: &copyRange,
+			Key:             &req.DestObjectKey,
+			PartNumber:      &partNumber,
+			UploadId:        uploadID,
+		}
+
+		uploadPartOutput, uploadErr := s3Client.UploadPartCopy(uploadPartCopyInput)
+		if uploadErr != nil {
+			err = fmt.Errorf("failed to upload part %d for %s: %w", partNumber, req.DestObjectKey, uploadErr)
+			return err
+		}
+
+		completedParts[i] = &s3.CompletedPart{
+			ETag:       uploadPartOutput.CopyPartResult.ETag,
+			PartNumber: &partNumber,
+		}
+
+		logrus.Debugf("uploaded part %d/%d for %s", partNumber, numParts, req.DestObjectKey)
+	}
+
+	// Step 3: Complete multipart upload
+	completeInput := &s3.CompleteMultipartUploadInput{
+		Bucket:   bucket,
+		Key:      &req.DestObjectKey,
+		UploadId: uploadID,
+		MultipartUpload: &s3.CompletedMultipartUpload{
+			Parts: completedParts,
+		},
+	}
+
+	_, err = s3Client.CompleteMultipartUpload(completeInput)
+	if err != nil {
+		return fmt.Errorf("failed to complete multipart upload for %s: %w", req.DestObjectKey, err)
+	}
+
+	elapsed := time.Since(start)
+	logrus.WithFields(logrus.Fields{
+		"duration": elapsed,
+		"size":     fileSize,
+		"numParts": numParts,
+	}).Infof("completed multipart copy for (%s) from %s to %s", req.SourceS3Object.Type, copySource, req.DestObjectKey)
+
 	return nil
 }
