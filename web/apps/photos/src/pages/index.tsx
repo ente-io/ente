@@ -1,3 +1,5 @@
+// TODO(MR): WASM
+// import { file_download_url } from "ente-wasm";
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { LoginContents } from "ente-accounts/components/LoginContents";
 import { SignUpContents } from "ente-accounts/components/SignUpContents";
@@ -47,6 +49,12 @@ const Page: React.FC = () => {
         void (async () => {
             refreshHost();
             const currentURL = new URL(window.location.href);
+
+            if (process.env.NEXT_PUBLIC_ENTE_WIP_WASM) {
+                // TODO(MR): WASM. Test code. remove.
+                const { file_download_url } = await import("ente-wasm");
+                console.log(file_download_url("https://example.org", 88n));
+            }
 
             // Store join album context immediately if present in URL
             // This ensures it survives the authentication flow

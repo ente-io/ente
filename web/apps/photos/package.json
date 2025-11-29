@@ -10,6 +10,7 @@
         "ente-gallery": "*",
         "ente-media": "*",
         "ente-new": "*",
+        "ente-wasm": "*",
         "memoize-one": "^6.0.0",
         "ml-matrix": "^6.12.1",
         "p-debounce": "^5.0.0",
