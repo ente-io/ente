@@ -1,19 +1,13 @@
-import "dart:io";
-
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
-import "package:locker/ui/drawer/account_section_widget.dart";
 import "package:locker/ui/drawer/app_version_widget.dart";
 import "package:locker/ui/drawer/drawer_title_bar_widget.dart";
-import "package:locker/ui/drawer/security_section_widget.dart";
 import "package:locker/ui/drawer/settings_widgets.dart";
-import "package:locker/ui/drawer/theme_switch_widget.dart";
 
 class DrawerPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
@@ -74,25 +68,8 @@ class DrawerPage extends StatelessWidget {
         const UsageCardWidget(),
         const SizedBox(height: 12),
         const LegacyCollectionsTrashWidget(),
-        const SizedBox(height: 12),
-        const AccountSectionWidget(),
         sectionSpacing,
       ]);
-
-      contents.addAll([
-        const SecuritySectionWidget(),
-        sectionSpacing,
-      ]);
-
-      if (Platform.isAndroid ||
-          Platform.isWindows ||
-          Platform.isLinux ||
-          kDebugMode) {
-        contents.addAll([
-          const ThemeSwitchWidget(),
-          sectionSpacing,
-        ]);
-      }
     }
 
     contents.addAll([
