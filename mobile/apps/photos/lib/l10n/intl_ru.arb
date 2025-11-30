@@ -118,6 +118,10 @@
   "enterYourPassword": "Введите ваш пароль",
   "welcomeBack": "С возвращением!",
   "contactSupport": "Связаться с поддержкой",
+  "locationPickerTip": "Вы также можете добавить местоположение по центру фотографии из экрана информации о фотографии",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Неверный пароль",
   "pleaseTryAgain": "Пожалуйста, попробуйте снова",
   "recreatePasswordTitle": "Пересоздать пароль",
@@ -1200,6 +1204,11 @@
   "noImagesWithLocation": "Нет фото с местоположением",
   "unpinAlbum": "Открепить альбом",
   "pinAlbum": "Закрепить альбом",
+  "pin": "Прикрепить",
+  "pinToTop": "Закрепить сверху",
+  "unpin": "Открепить",
+  "visibility": "Видимость",
+  "hideFromMemories": "Скрыть из воспоминаний",
   "create": "Создать",
   "viewAll": "Посмотреть все",
   "nothingSharedWithYouYet": "С вами пока ничем не поделились",
@@ -1385,8 +1394,8 @@
   "appLockDescriptions": "Выберите между экраном блокировки устройства и пользовательским с PIN-кодом или паролем.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Для блокировки приложения, пожалуйста, настройте код или экран блокировки в настройках устройства.",
   "authToViewPasskey": "Пожалуйста, авторизуйтесь для просмотра ключа доступа",
-  "loopVideoOn": "Видео зациклено",
-  "loopVideoOff": "Видео не зациклено",
+  "loopVideoOn": "Отключить повтор",
+  "loopVideoOff": "Запустить повтор",
   "localSyncErrorMessage": "Похоже, что-то пошло не так: синхронизация фото занимает больше времени, чем ожидалось. Пожалуйста, обратитесь в поддержку",
   "showPerson": "Показать человека",
   "sort": "Сортировать",
@@ -1849,6 +1858,18 @@
   "addedToStreamRecreationQueue": "Добавлено в очередь регенерации потока",
   "videoPreviewAlreadyExists": "Видео-превью уже существует",
   "videoAlreadyInQueue": "Видеофайл уже в очереди",
+  "videoExportFailed": "Не удалось создать видео, пожалуйста, попробуйте снова.",
+  "videoExportSuccess": "Видео успешно создано в {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Добавлено в очередь",
   "creatingStream": "Создание потока",
   "similarImages": "Похожие фотографии",
@@ -1992,6 +2013,72 @@
   "artisticPortraits": "Художественный портрет",
   "streetFood": "Уличная еда",
   "riverCruises": "Вид на реку",
+  "facesTimelineBannerTitle": "Линия воспоминаний",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Смотрите фотографии {name} на протяжении многих лет",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Линия воспоминаний",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} было {count, plural, one {{count} год} few {{count} года} many {{count} лет} other {{count} лет}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {# год назад} few {# года назад} many {# лет назад} other {# лет назад}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Обмен видео скоро появится",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Предыдущий",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Далее",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Воспроизвести",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Приостановить",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Таймлайн готовиться...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Игра детей",
   "coastalCliffs": "Скалы у моря"
 }

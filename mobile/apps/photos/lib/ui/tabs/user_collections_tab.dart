@@ -126,6 +126,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   .color!
                   .withValues(alpha: 0.5),
             );
+    final colorScheme = getEnteColorScheme(context);
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -155,10 +156,34 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                     title: AppLocalizations.of(context).onDevice,
                   ),
                 ),
-                trailingWidget: IconButtonWidget(
-                  icon: Icons.chevron_right,
-                  iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                trailingWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButtonWidget(
+                      icon: Icons.search,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokePressed,
+                      onTap: () {
+                        unawaited(
+                          routeToPage(
+                            context,
+                            DeviceFolderVerticalGridView(
+                              appTitle: SectionTitle(
+                                title: AppLocalizations.of(context).onDevice,
+                              ),
+                              tag: "OnDeviceAppTitle",
+                              startInSearchMode: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButtonWidget(
+                      icon: Icons.chevron_right,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokePressed,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -180,10 +205,35 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   );
                 },
                 SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: IconButtonWidget(
-                  icon: Icons.chevron_right,
-                  iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                trailingWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButtonWidget(
+                      icon: Icons.search,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokePressed,
+                      onTap: () {
+                        unawaited(
+                          routeToPage(
+                            context,
+                            CollectionListPage(
+                              collections,
+                              sectionType: UISectionType.homeCollections,
+                              appTitle: SectionTitle(
+                                titleWithBrand: getOnEnteSection(context),
+                              ),
+                              startInSearchMode: true,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButtonWidget(
+                      icon: Icons.chevron_right,
+                      iconButtonType: IconButtonType.secondary,
+                      iconColor: colorScheme.blurStrokePressed,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -200,7 +250,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 : const SliverToBoxAdapter(child: EmptyState()),
             SliverToBoxAdapter(
               child: Divider(
-                color: getEnteColorScheme(context).strokeFaint,
+                color: colorScheme.strokeFaint,
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 12)),

@@ -480,8 +480,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         for (final file in files) {
           _logger.fine(
-            'Processing file ${file.uploadedFileID} (${file.displayName}) '
-            'for add-to operation.',
+            'Processing file ${file.uploadedFileID} for add-to operation',
           );
           List<Collection> currentCollections;
           try {

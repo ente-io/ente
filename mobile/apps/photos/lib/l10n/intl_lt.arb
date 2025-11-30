@@ -1383,8 +1383,6 @@
   "appLockDescriptions": "Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Kad įjungtumėte programos užraktą, sistemos nustatymuose nustatykite įrenginio prieigos kodą arba ekrano užraktą.",
   "authToViewPasskey": "Nustatykite tapatybę, kad peržiūrėtumėte savo slaptaraktį",
-  "loopVideoOn": "Įjungtas vaizdo įrašo ciklas",
-  "loopVideoOff": "Išjungtas vaizdo įrašo ciklas",
   "localSyncErrorMessage": "Atrodo, kad kažkas nutiko ne taip, nes vietinių nuotraukų sinchronizavimas trunka ilgiau nei tikėtasi. Susisiekite su mūsų palaikymo komanda.",
   "showPerson": "Rodyti asmenį",
   "sort": "Rikiuoti",

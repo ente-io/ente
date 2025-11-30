@@ -7,9 +7,19 @@
     "description": "Text shown in the AppBar of the Counter Page"
   },
   "onBoardingBody": "Sichern Sie Ihre 2FA-Codes",
+  "featureBackupCodes": "Ende-zu-Ende-Verschlüsselung\nBackup und Synchronisierung",
+  "featureSearchEtc": "Suche, Tags, Teilen,\nnächster Code und viel mehr",
+  "featureOpenSource": "Open Source und\nvon Sicherheitsexperten geprüft",
+  "signUp": "Registrieren",
   "onBoardingGetStarted": "Los geht's",
   "setupFirstAccount": "Ihr erstes Konto einrichten",
+  "allTabEmptyHint": "Noch nichts hier. Drück auf das +, um einen Code hinzuzufügen oder öffne den Papierkorb um einen wiederherzustellen.",
+  "@allTabEmptyHint": {
+    "description": "Shown when the All tab has no active codes but Trash contains codes"
+  },
   "importScanQrCode": "QR-Code scannen",
+  "qrCode": "QR-Code",
+  "qr": "QR",
   "importEnterSetupKey": "Einen Setup-Schlüssel eingeben",
   "importAccountPageTitle": "Kontodaten eingeben",
   "secretCanNotBeEmpty": "Geheimnis darf nicht leer sein",
@@ -138,6 +148,7 @@
   "existingUser": "Bestehender Benutzer",
   "newUser": "Neu bei Ente",
   "delete": "Löschen",
+  "addTag": "Tag hinzufügen",
   "enterYourPasswordHint": "Geben Sie Ihr Passwort ein",
   "forgotPassword": "Passwort vergessen",
   "oops": "Hoppla",
@@ -300,6 +311,7 @@
   "checking": "Prüfe...",
   "youAreOnTheLatestVersion": "Sie haben die aktuellste Version",
   "warning": "Warnung",
+  "note": "Notiz",
   "exportWarningDesc": "Die exportierte Datei enthält vertrauliche Informationen. Bitte sicher speichern.",
   "iUnderStand": "Verstanden",
   "@iUnderStand": {
@@ -368,12 +380,14 @@
   "useOffline": "Ohne Backup verwenden",
   "signInToBackup": "Melden Sie sich an, um Ihre Codes zu sichern",
   "singIn": "Anmelden",
+  "sigInBackupReminder": "Ente wird die Codes automatisch nach einer Anmeldung sichern.\n\nWir empfehlen aber, als ein extra Backup, die Codes zu exportieren.",
   "offlineModeWarning": "Sie haben sich dafür entschieden, ohne Sicherungen fortzufahren. Bitte führen Sie manuelle Sicherungen durch, um sicherzustellen, dass Ihre Codes sicher sind.",
   "showLargeIcons": "Große Symbole anzeigen",
   "compactMode": "Kompaktmodus",
   "shouldHideCode": "Codes ausblenden",
   "doubleTapToViewHiddenCode": "Sie können auf einen Eintrag doppelt tippen, um den Code anzuzeigen",
   "focusOnSearchBar": "Suche beim App-Start fokussieren",
+  "minimizeToTrayOnClose": "Beim Schließen in die Taskleiste minimieren",
   "confirmUpdatingkey": "Sind Sie sich sicher, dass Sie den geheimen Schlüssel bearbeiten wollen?",
   "minimizeAppOnCopy": "Beim Kopieren App minimieren",
   "editCodeAuthMessage": "Authentifizieren, um Code zu bearbeiten",
@@ -529,9 +543,56 @@
   "localBackupSettingsTitle": "Lokales Backup",
   "localBackupSidebarTitle": "Lokales Backup",
   "enableAutomaticBackups": "Automatische Backups aktivieren",
+  "backupDescription": "Dadurch werden Ihre Daten automatisch an einem Speicherort auf dem Gerät gesichert. Backups werden aktualisiert, wenn Einträge hinzugefügt, editiert oder gelöscht werden",
   "currentLocation": "Aktueller Backup Standort:",
   "securityNotice": "Sicherheitshinweis",
   "backupSecurityNotice": "Diese verschlüsselte Sicherung enthält Ihre 2FA-Schlüssel. Wenn Sie verloren gehen, können Sie Ihre Konten nicht wiederherstellen. Bewahren Sie sie sicher!",
+  "locationUpdatedAndBackupCreated": "Speicherort übernommen und erstes Backup erstellt!",
   "initialBackupCreated": "Initiale Sicherung erstellt!",
-  "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein."
+  "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+  "noDefaultBackupFolder": "Standard Backup Ordner konnte nicht erstellt werden.",
+  "backupLocationChoiceDescription": "Wo möchten sie ihre Backups speichern?",
+  "chooseBackupLocation": "Sicherungsort festlegen",
+  "loadDefaultLocation": "Lade Standard Speicherort...",
+  "couldNotDetermineLocation": "Standort konnte nicht ermittelt werden...",
+  "saveBackup": "Backup speichern",
+  "changeLocation": "Speicherort ändern",
+  "changeCurrentLocation": "Aktuellen Standort ändern",
+  "done": "Fertig",
+  "addNew": "Hinzufügen",
+  "selected": "ausgewählt",
+  "moveMultipleToTrashMessage": "Sind Sie sich sicher, dass Sie {count} Item(s) in den Papierkorb verschieben möchten?",
+  "nSelected": "{count, plural, =1{1 ausgewählt} other{{count} ausgewählt}}",
+  "@nSelected": {
+    "description": "Text to indicate number of items selected",
+    "placeholders": {
+      "count": {
+        "description": "Number of items selected",
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "pinnedCount": "{count, plural, =1{1 Item angeheftet} other{{count} angeheftete items}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "unpinnedCount": "{count, plural, =1{1 item losgelöst} other{{count} items losgelöst}}",
+  "@unpinnedCount": {
+    "description": "Text to show number of items unpinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items unpinned",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  }
 }

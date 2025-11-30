@@ -13,6 +13,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/metadata.dart";
+import 'package:photos/models/collection/action.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/collection_magic.dart";
@@ -107,6 +108,65 @@ extension HiddenService on CollectionsService {
       return cachedUncategorizedCollection!;
     }
     return _createUncategorizedCollection();
+  }
+
+  Future<void> movePendingRemovalActionsToUncategorized() async {
+    try {
+      final pendingActions = await fetchPendingRemovalActions();
+      if (pendingActions.isEmpty) {
+        return;
+      }
+
+      final Map<int, Set<int>> collectionToFileIDs = {};
+      for (final CollectionAction action in pendingActions) {
+        final int? fileID = action.fileID;
+        if (fileID == null) {
+          continue;
+        }
+        collectionToFileIDs
+            .putIfAbsent(action.collectionID, () => <int>{})
+            .add(fileID);
+      }
+
+      if (collectionToFileIDs.isEmpty) {
+        return;
+      }
+
+      final List<int> uploadedFileIDs =
+          collectionToFileIDs.values.expand((ids) => ids).toSet().toList();
+      final Map<int, List<EnteFile>> localFilesByCollection =
+          await filesDB.getAllFilesGroupByCollectionID(uploadedFileIDs);
+      final Collection uncategorizedCollection =
+          await getUncategorizedCollection();
+
+      for (final MapEntry<int, Set<int>> entry in collectionToFileIDs.entries) {
+        final int collectionID = entry.key;
+        final Set<int> pendingFileIDs = entry.value;
+        final List<EnteFile> localFiles =
+            localFilesByCollection[collectionID] ?? <EnteFile>[];
+        final List<EnteFile> filesToMove = localFiles
+            .where(
+              (file) =>
+                  file.uploadedFileID != null &&
+                  pendingFileIDs.contains(file.uploadedFileID),
+            )
+            .toList();
+        if (filesToMove.isEmpty) {
+          continue;
+        }
+        await move(
+          filesToMove,
+          toCollectionID: uncategorizedCollection.id,
+          fromCollectionID: collectionID,
+        );
+      }
+    } catch (error, stackTrace) {
+      _logger.warning(
+        "Failed to process pending collection removal actions",
+        error,
+        stackTrace,
+      );
+    }
   }
 
   Future<bool> hideFiles(

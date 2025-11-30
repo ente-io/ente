@@ -187,6 +187,9 @@ func main() {
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
+	collectionActionRepo := &repo.CollectionActionsRepository{
+		DB: db,
+	}
 
 	embeddingRepo := &embedding.Repository{DB: db}
 
@@ -316,16 +319,25 @@ func main() {
 	}
 
 	collectionController := &collections.CollectionController{
-		CollectionRepo:     collectionRepo,
-		EmailCtrl:          emailNotificationCtrl,
-		AccessCtrl:         accessCtrl,
-		CollectionLinkCtrl: collectionLinkCtrl,
-		UserRepo:           userRepo,
-		FileRepo:           fileRepo,
-		CastRepo:           &castDb,
-		BillingCtrl:        billingController,
-		QueueRepo:          queueRepo,
-		TaskRepo:           taskLockingRepo,
+		CollectionRepo:        collectionRepo,
+		EmailCtrl:             emailNotificationCtrl,
+		AccessCtrl:            accessCtrl,
+		CollectionLinkCtrl:    collectionLinkCtrl,
+		UserRepo:              userRepo,
+		FileRepo:              fileRepo,
+		CastRepo:              &castDb,
+		BillingCtrl:           billingController,
+		QueueRepo:             queueRepo,
+		TaskRepo:              taskLockingRepo,
+		CollectionActionsRepo: collectionActionRepo,
+	}
+
+	// Pending actions' controller/handler
+	collectionActionsController := &controller.CollectionActionsController{
+		Repo: collectionActionRepo,
+	}
+	collectionActionsHandler := &api.CollectionActionsHandler{
+		Controller: collectionActionsController,
 	}
 
 	userController := user.NewUserController(
@@ -565,6 +577,11 @@ func main() {
 		Controller: collectionController,
 	}
 	privateAPI.POST("/collections", collectionHandler.Create)
+	// Collection actions (exposed for clients to fetch suggestions/removals)
+	privateAPI.GET("/collection-actions/pending-remove", collectionActionsHandler.ListPendingRemove)
+	privateAPI.GET("/collection-actions/delete-suggestions", collectionActionsHandler.ListDeleteSuggestions)
+	privateAPI.POST("/collection-actions/reject-delete-suggestions", collectionActionsHandler.RejectDeleteSuggestions)
+
 	privateAPI.GET("/collections/:collectionID", collectionHandler.GetCollectionByID)
 	//lint:ignore SA1019 Deprecated API will be removed in the future
 	privateAPI.GET("/collections", collectionHandler.Get)
@@ -582,6 +599,7 @@ func main() {
 	privateAPI.POST("/collections/restore-files", collectionHandler.RestoreFiles)
 
 	privateAPI.POST("/collections/v3/remove-files", collectionHandler.RemoveFilesV3)
+	privateAPI.POST("/collections/suggest-delete", collectionHandler.SuggestDeleteInSharedCollection)
 	privateAPI.GET("/collections/v2/diff", collectionHandler.GetDiffV2)
 	privateAPI.GET("/collections/file", collectionHandler.GetFile)
 	privateAPI.GET("/collections/sharees", collectionHandler.GetSharees)

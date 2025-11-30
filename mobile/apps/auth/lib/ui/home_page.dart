@@ -110,6 +110,7 @@ class _HomePageState extends State<HomePage> {
     _codeSortKey = PreferenceService.instance.codeSortKey();
     _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
+    LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
     });
@@ -1186,7 +1187,7 @@ class _HomePageState extends State<HomePage> {
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(newCode);
       }
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     } finally {
       _isImportingFromGallery = false;
     }
@@ -1209,7 +1210,7 @@ class _HomePageState extends State<HomePage> {
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(result.code);
       }
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }
   }
 
@@ -1223,7 +1224,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (code != null) {
       await CodeStore.instance.addCode(code);
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }
   }
 

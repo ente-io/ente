@@ -211,7 +211,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     if (index == 0 &&
                         (canManageParticipants || admins.isNotEmpty)) {
                       return const MenuSectionTitle(
-                        title: 'Admins',
+                        title: '(i) Admins',
                         iconData: Icons.admin_panel_settings_outlined,
                       );
                     } else if (index > 0 && index <= admins.length) {
@@ -265,8 +265,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       return MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: admins.isNotEmpty
-                              ? 'Add more admins'
-                              : 'Add admin',
+                              ? '(i) Add more admins'
+                              : '(i) Add admin',
                           makeTextBold: true,
                         ),
                         leadingIcon: Icons.add_outlined,

@@ -1,4 +1,4 @@
-import 'dart:io';
+import "dart:io";
 
 import 'package:ente_base/typedefs.dart';
 import 'package:ente_ui/components/loading_widget.dart';
@@ -38,6 +38,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final Widget stateIcon = _stateIcon(enteColorScheme);
+    final isDarwin = Platform.isIOS || Platform.isMacOS;
 
     return Row(
       children: [
@@ -54,9 +55,9 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
           height: 31,
           child: FittedBox(
             fit: BoxFit.contain,
-            child: Platform.isAndroid
+            child: !isDarwin
                 ? Switch(
-                    inactiveTrackColor: Colors.transparent,
+                    inactiveTrackColor: enteColorScheme.fillMuted,
                     activeTrackColor: enteColorScheme.primary500,
                     activeColor: Colors.white,
                     inactiveThumbColor: enteColorScheme.primary500,
@@ -65,17 +66,60 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     ),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     value: toggleValue ?? false,
-                    onChanged: _onChanged,
+                    onChanged: _handleToggleChange,
                   )
                 : CupertinoSwitch(
+                    activeColor: enteColorScheme.primary500,
+                    trackColor: enteColorScheme.fillMuted,
+                    thumbColor: Colors.white,
                     value: toggleValue ?? false,
-                    activeTrackColor: enteColorScheme.primary500,
-                    onChanged: _onChanged,
+                    onChanged: _handleToggleChange,
                   ),
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _handleToggleChange(bool negationOfToggleValue) async {
+    setState(() {
+      toggleValue = negationOfToggleValue;
+      //start showing inProgress statu icons if toggle takes more than debounce time
+      _debouncer.run(
+        () => Future(
+          () {
+            setState(() {
+              executionState = ExecutionState.inProgress;
+            });
+          },
+        ),
+      );
+    });
+    final Stopwatch stopwatch = Stopwatch()..start();
+    await widget.onChanged.call().onError(
+          (error, stackTrace) => _debouncer.cancelDebounce(),
+        );
+    //for toggle feedback on short unsuccessful onChanged
+    await _feedbackOnUnsuccessfulToggle(stopwatch);
+    //debouncer gets canceled if onChanged takes less than debounce time
+    _debouncer.cancelDebounce();
+
+    final newValue = widget.value.call();
+    setState(() {
+      if (toggleValue == newValue) {
+        if (executionState == ExecutionState.inProgress) {
+          executionState = ExecutionState.successful;
+          Future.delayed(const Duration(seconds: 2), () {
+            setState(() {
+              executionState = ExecutionState.idle;
+            });
+          });
+        }
+      } else {
+        toggleValue = !toggleValue!;
+        executionState = ExecutionState.idle;
+      }
+    });
   }
 
   Widget _stateIcon(enteColorScheme) {
