@@ -37,7 +37,13 @@ import {
 } from "ente-new/photos/services/photos-fdb";
 import { t } from "i18next";
 import "leaflet/dist/leaflet.css";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     calculateOptimalZoom,
     createIcon,
@@ -156,22 +162,51 @@ const MapViewportListener: React.FC<MapViewportListenerProps> = ({
     onVisiblePhotosChange,
 }) => {
     const map = useMap();
+    const previousVisibleIds = useRef<string | null>(null);
+    const previousClusterCount = useRef<number | null>(null);
+
+    const getClusterCount = useCallback(() => {
+        const container = map.getContainer();
+
+        return container.querySelectorAll(".marker-cluster").length;
+    }, [map]);
 
     const updateVisiblePhotos = useCallback(() => {
         const bounds = map.getBounds();
         const inView = photos.filter((photo) =>
             bounds.contains([photo.lat, photo.lng]),
         );
+        const idsSignature = inView
+            .map((photo) => photo.fileId)
+            .sort((a, b) => a - b)
+            .join(",");
+        const clusterCount = getClusterCount();
+        const clusterChanged = previousClusterCount.current !== clusterCount;
+
+        if (previousVisibleIds.current === idsSignature && !clusterChanged) {
+            return;
+        }
+
+        previousVisibleIds.current = idsSignature;
+        previousClusterCount.current = clusterCount;
         onVisiblePhotosChange(inView);
-    }, [map, onVisiblePhotosChange, photos]);
+    }, [getClusterCount, map, onVisiblePhotosChange, photos]);
 
     useEffect(() => {
         if (!photos.length) {
+            previousVisibleIds.current = "";
+            previousClusterCount.current = getClusterCount();
             onVisiblePhotosChange([]);
             return;
         }
         updateVisiblePhotos();
-    }, [photos, onVisiblePhotosChange, updateVisiblePhotos]);
+    }, [
+        getClusterCount,
+        map,
+        photos,
+        onVisiblePhotosChange,
+        updateVisiblePhotos,
+    ]);
 
     useEffect(() => {
         map.on("moveend", updateVisiblePhotos);
