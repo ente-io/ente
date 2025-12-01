@@ -12,31 +12,6 @@ import 'package:share_plus/share_plus.dart';
 
 const Color _kDefaultQrBoxColor = Color(0xFFF5F5F7);
 const Color _kDefaultQrTextColor = Color(0xFF1C1C1C);
-const TextStyle _kDefaultDialogTitleStyle = TextStyle(
-  fontSize: 20,
-  fontWeight: FontWeight.w700,
-);
-const TextStyle _kDefaultTitleStyle = TextStyle(
-  fontSize: 19.11,
-  fontWeight: FontWeight.w600,
-  letterSpacing: -0.76,
-  height: 1.2,
-  leadingDistribution: TextLeadingDistribution.even,
-  color: _kDefaultQrTextColor,
-);
-const TextStyle _kDefaultSubtitleStyle = TextStyle(
-  fontSize: 12,
-  fontWeight: FontWeight.w600,
-  letterSpacing: -0.48,
-  height: 1.2,
-  leadingDistribution: TextLeadingDistribution.even,
-  color: Color(0x991C1C1C),
-);
-const TextStyle _kDefaultShareButtonStyle = TextStyle(
-  fontSize: 16,
-  fontWeight: FontWeight.w600,
-  color: Colors.white,
-);
 
 sealed class QrBranding {
   const QrBranding();
@@ -115,14 +90,14 @@ class QrCodeDialog extends StatefulWidget {
     this.closeButtonBackgroundColor,
     this.closeButtonIconColor,
     this.shareButtonBackgroundColor,
-    this.qrCardPadding = const EdgeInsets.fromLTRB(20, 20, 20, 12),
+    this.qrCardPadding = const EdgeInsets.all(20),
     this.backgroundBorderRadius = 24,
     this.cardBorderRadius = 22,
     this.horizontalPadding = 80,
     this.maxQrSize = 300,
     this.minQrSize = 150,
-    this.titleMaxWidth = 225,
-    this.subtitleMaxWidth = 175,
+    this.titleMaxWidth = 224,
+    this.subtitleMaxWidth = 176,
     this.dialogTitleTextStyle,
     this.titleTextStyle,
     this.subtitleTextStyle,
@@ -221,12 +196,15 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final isDark = theme.brightness == Brightness.dark;
     final double qrSize = min(
       mediaQuery.size.width - widget.horizontalPadding,
       widget.maxQrSize,
     );
     final double qrCodeSize = max(qrSize - 100, widget.minQrSize);
+    // Round to nearest even number for crisp rendering
+    final double qrCodeSizeEven = (qrCodeSize / 2).round() * 2.0;
 
     final dialogBackgroundColor =
         widget.backgroundColor ?? theme.colorScheme.surface;
@@ -238,14 +216,33 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
     final shareButtonColor =
         widget.shareButtonBackgroundColor ?? widget.accentColor;
 
-    final titleStyle = widget.titleTextStyle ?? _kDefaultTitleStyle;
-    final subtitleStyle = widget.subtitleTextStyle ?? _kDefaultSubtitleStyle;
+    // Use theme text styles with copyWith for customization
+    final titleStyle = widget.titleTextStyle ??
+        textTheme.titleMedium?.copyWith(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+          color: _kDefaultQrTextColor,
+        );
+    final subtitleStyle = widget.subtitleTextStyle ??
+        textTheme.bodySmall?.copyWith(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
+          color: _kDefaultQrTextColor.withValues(alpha: 0.6),
+        );
     final dialogTitleStyle = widget.dialogTitleTextStyle ??
-        _kDefaultDialogTitleStyle.copyWith(
+        textTheme.titleLarge?.copyWith(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
           color: theme.colorScheme.onSurface,
         );
-    final shareButtonStyle =
-        widget.shareButtonTextStyle ?? _kDefaultShareButtonStyle;
+    final shareButtonStyle = widget.shareButtonTextStyle ??
+        textTheme.labelLarge?.copyWith(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        );
 
     final decoration =
         widget.decoration ?? _buildDefaultDecoration(widget.accentColor);
@@ -271,7 +268,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 : null,
           ),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -342,8 +339,8 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                               ),
                             const SizedBox(height: 20),
                             SizedBox(
-                              width: qrCodeSize,
-                              height: qrCodeSize,
+                              width: qrCodeSizeEven,
+                              height: qrCodeSizeEven,
                               child: PrettyQrView(
                                 qrImage: QrImage(
                                   QrCode.fromData(

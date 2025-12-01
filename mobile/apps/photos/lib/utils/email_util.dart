@@ -217,7 +217,7 @@ Future<void> exportLogs(BuildContext context, String zipFilePath) async {
       name: logFileName,
       filePath: zipFilePath,
       mimeType: MimeType.zip,
-      fileExtension: 'zip',
+      ext: 'zip',
     );
   } else {
     await SharePlus.instance.share(
