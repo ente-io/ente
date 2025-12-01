@@ -75,24 +75,32 @@ interface MapControlsProps {
     onClose: () => void;
 }
 
-const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => (
-    <IconButton
-        {...props}
-        sx={{
-            bgcolor: (theme) => theme.vars.palette.background.paper,
-            boxShadow: (theme) => theme.shadows[4],
-            width: 48,
-            height: 48,
-            borderRadius: "16px",
-            transition: "transform 0.2s ease-out",
-            "&:hover": {
-                bgcolor: (theme) => theme.vars.palette.background.paper,
-                transform: "scale(1.05)",
-            },
-            ...sx,
-        }}
-    />
-);
+const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => {
+    const baseSx = {
+        bgcolor: (theme: { vars: { palette: { background: { paper: string } } } }) =>
+            theme.vars.palette.background.paper,
+        boxShadow: (theme: { shadows: string[] }) => theme.shadows[4],
+        width: 48,
+        height: 48,
+        borderRadius: "16px",
+        transition: "transform 0.2s ease-out",
+        "&:hover": {
+            bgcolor: (theme: { vars: { palette: { background: { paper: string } } } }) =>
+                theme.vars.palette.background.paper,
+            transform: "scale(1.05)",
+        },
+    };
+
+    const mergedSx =
+        sx == null
+            ? baseSx
+            : Array.isArray(sx)
+              ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                [baseSx, ...sx]
+              : [baseSx, sx];
+
+    return <IconButton {...props} sx={mergedSx} />;
+};
 
 const MapControls: React.FC<MapControlsProps> = ({ useMap, onClose }) => {
     const map = useMap();
