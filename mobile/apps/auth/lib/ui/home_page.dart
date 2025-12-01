@@ -15,7 +15,6 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
@@ -34,6 +33,7 @@ import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
+import 'package:ente_auth/ui/qr_code_dialog.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
@@ -446,12 +446,11 @@ class _HomePageState extends State<HomePage> {
     if (!isAuthSuccessful) return;
 
     _codeDisplayStore.clearSelection();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ViewQrPage(code: code);
-        },
-      ),
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return QrCodeDialog(code: code);
+      },
     );
   }
 

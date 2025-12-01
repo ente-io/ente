@@ -9,7 +9,6 @@ import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
@@ -17,6 +16,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
+import 'package:ente_auth/ui/qr_code_dialog.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -894,13 +894,11 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (!isAuthSuccessful) {
       return;
     }
-    // ignore: unused_local_variable
-    final Code? code = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ViewQrPage(code: widget.code);
-        },
-      ),
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return QrCodeDialog(code: widget.code);
+      },
     );
   }
 

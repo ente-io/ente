@@ -1349,6 +1349,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  pretty_qr_code:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "912bf168492c90ee2a20b2997926372eb18adb0f"
+      url: "https://github.com/ente-io/flutter_pretty_qr_fork"
+    source: git
+    version: "3.5.0"
   privacy_screen:
     dependency: "direct main"
     description:
