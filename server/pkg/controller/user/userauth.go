@@ -362,25 +362,17 @@ func (c *UserController) ensureLockerAccess(userID int64, app ente.App) error {
 		return nil
 	}
 
-	// Check if user has Photos or Auth tokens (existing Ente user)
-	// Free tier: Users with existing Photos/Auth account can use Locker with limited features
+	// Check if user has completed registration (has key_attributes)
+	// This is permanent data that persists even if user logs out of all sessions
+	// Free tier: Users with existing Ente account can use Locker with limited features
 	// Paid tier: Users with paid Photos subscription get full Locker features
-	apps, err := c.UserAuthRepo.GetAppsForUser(userID)
+	_, err := c.UserRepo.GetKeyAttributes(userID)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to check user apps")
-	}
-
-	hasPhotosOrAuth := false
-	for _, userApp := range apps {
-		if userApp == ente.Photos || userApp == ente.Auth {
-			hasPhotosOrAuth = true
-			break
+		if errors.Is(err, sql.ErrNoRows) {
+			return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled,
+				"locker is available only to existing Ente users")
 		}
-	}
-
-	if !hasPhotosOrAuth {
-		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled,
-			"locker is available only to existing Ente users")
+		return stacktrace.Propagate(err, "failed to check user key attributes")
 	}
 
 	// Check rollout limit
