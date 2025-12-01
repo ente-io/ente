@@ -257,133 +257,140 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
       shadowColor: isDark
           ? Colors.black.withValues(alpha: 0.7)
           : Colors.grey.withValues(alpha: 0.5),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-        decoration: BoxDecoration(
-          color: dialogBackgroundColor,
-          borderRadius: BorderRadius.circular(widget.backgroundBorderRadius),
-          border: isDark
-              ? Border.all(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  width: 1,
-                )
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 6, bottom: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(widget.dialogTitle, style: dialogTitleStyle),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: closeBgColor,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        size: 20,
-                        color: closeIconColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            RepaintBoundary(
-              key: _qrKey,
-              child: Container(
-                width: double.infinity,
-                padding: widget.qrCardPadding,
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(widget.cardBorderRadius),
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: widget.titleMaxWidth,
-                          child: Text(
-                            widget.title,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: titleStyle,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Container(
+          decoration: BoxDecoration(
+            color: dialogBackgroundColor,
+            borderRadius: BorderRadius.circular(widget.backgroundBorderRadius),
+            border: isDark
+                ? Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  )
+                : null,
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 6, bottom: 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(widget.dialogTitle, style: dialogTitleStyle),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: closeBgColor,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            size: 20,
+                            color: closeIconColor,
                           ),
                         ),
-                        if (widget.subtitle != null &&
-                            widget.subtitle!.isNotEmpty)
-                          SizedBox(
-                            width: widget.subtitleMaxWidth,
-                            child: Text(
-                              widget.subtitle!,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: subtitleStyle,
-                            ),
-                          ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: qrCodeSize,
-                          height: qrCodeSize,
-                          child: PrettyQrView(
-                            qrImage: QrImage(
-                              QrCode.fromData(
-                                data: widget.data,
-                                errorCorrectLevel: widget.errorCorrectionLevel,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                RepaintBoundary(
+                  key: _qrKey,
+                  child: Container(
+                    width: double.infinity,
+                    padding: widget.qrCardPadding,
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius:
+                          BorderRadius.circular(widget.cardBorderRadius),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: widget.titleMaxWidth,
+                              child: Text(
+                                widget.title,
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: titleStyle,
                               ),
                             ),
-                            decoration: decoration,
-                          ),
+                            if (widget.subtitle != null &&
+                                widget.subtitle!.isNotEmpty)
+                              SizedBox(
+                                width: widget.subtitleMaxWidth,
+                                child: Text(
+                                  widget.subtitle!,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: subtitleStyle,
+                                ),
+                              ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: qrCodeSize,
+                              height: qrCodeSize,
+                              child: PrettyQrView(
+                                qrImage: QrImage(
+                                  QrCode.fromData(
+                                    data: widget.data,
+                                    errorCorrectLevel:
+                                        widget.errorCorrectionLevel,
+                                  ),
+                                ),
+                                decoration: decoration,
+                              ),
+                            ),
+                            const SizedBox(height: 42),
+                          ],
                         ),
-                        const SizedBox(height: 42),
+                        if (widget.branding != null)
+                          Positioned(
+                            bottom: 0,
+                            right: 2,
+                            child: _buildBranding(
+                              widget.branding!,
+                              widget.accentColor,
+                            ),
+                          ),
                       ],
                     ),
-                    if (widget.branding != null)
-                      Positioned(
-                        bottom: 0,
-                        right: 2,
-                        child: _buildBranding(
-                          widget.branding!,
-                          widget.accentColor,
-                        ),
-                      ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: _shareQrCode,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: shareButtonColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      widget.shareButtonText,
+                      textAlign: TextAlign.center,
+                      style: shareButtonStyle,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            GestureDetector(
-              onTap: _shareQrCode,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: shareButtonColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  widget.shareButtonText,
-                  textAlign: TextAlign.center,
-                  style: shareButtonStyle,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
