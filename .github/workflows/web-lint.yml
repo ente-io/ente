@@ -37,6 +37,8 @@ jobs:
 
             - run: yarn install --frozen-lockfile
 
+            - run: yarn build:wasm
+
             - run: yarn lint
 
             - run: yarn test:run
