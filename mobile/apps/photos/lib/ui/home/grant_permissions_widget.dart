@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/core/event_bus.dart";
+import "package:photos/ente_theme_data.dart";
 import "package:photos/events/permission_granted_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/gradient_button.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/standalone/debouncer.dart';
@@ -39,87 +41,125 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     final headerText = _getHeaderText(context);
+
+    if (_showOnlyNewFeature) {
+      return Scaffold(
+        body: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.only(top: 44),
+                sliver: SliverToBoxAdapter(
+                  child: _buildHeaderContent(context, isLightMode, headerText),
+                ),
+              ),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 36, bottom: 20),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildNewFeatureActionArea(context),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(top: 20, bottom: 120),
           child: Column(
             children: [
-              const SizedBox(
-                height: 24,
-              ),
+              const SizedBox(height: 24),
+              _buildHeaderContent(context, isLightMode, headerText),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: getEnteColorScheme(context).backgroundBase,
+              spreadRadius: 190,
+              blurRadius: 30,
+              offset: const Offset(0, 170),
+            ),
+          ],
+        ),
+        width: double.infinity,
+        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+        child: OutlinedButton(
+          key: const ValueKey("grantPermissionButton"),
+          onPressed: _onTapSelectFolders,
+          child: Text(AppLocalizations.of(context).continueLabel),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    );
+  }
+
+  Widget _buildHeaderContent(
+    BuildContext context,
+    bool isLightMode,
+    String headerText,
+  ) {
+    return Column(
+      children: [
+        Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              isLightMode
+                  ? Image.asset(
+                      'assets/loading_photos_background.png',
+                      color: Colors.white.withValues(alpha: 0.4),
+                      colorBlendMode: BlendMode.modulate,
+                    )
+                  : Image.asset(
+                      'assets/loading_photos_background_dark.png',
+                    ),
               Center(
-                child: Stack(
-                  alignment: Alignment.center,
+                child: Column(
                   children: [
-                    isLightMode
-                        ? Image.asset(
-                            'assets/loading_photos_background.png',
-                            color: Colors.white.withValues(alpha: 0.4),
-                            colorBlendMode: BlendMode.modulate,
-                          )
-                        : Image.asset(
-                            'assets/loading_photos_background_dark.png',
-                          ),
-                    Center(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 42),
-                          Image.asset(
-                            "assets/gallery_locked.png",
-                            height: 160,
-                          ),
-                        ],
-                      ),
+                    const SizedBox(height: 42),
+                    Image.asset(
+                      "assets/gallery_locked.png",
+                      height: 160,
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 36),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-                child: StyledText(
-                  text: headerText,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(fontWeight: FontWeight.w700),
-                  tags: {
-                    'i': StyledTextTag(
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall!
-                          .copyWith(fontWeight: FontWeight.w400),
-                    ),
-                  },
                 ),
               ),
             ],
           ),
         ),
-      ),
-      floatingActionButton: _showOnlyNewFeature
-          ? _buildNewFeatureActionArea(context)
-          : Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                    color: getEnteColorScheme(context).backgroundBase,
-                    spreadRadius: 190,
-                    blurRadius: 30,
-                    offset: const Offset(0, 170),
-                  ),
-                ],
+        const SizedBox(height: 36),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
+          child: StyledText(
+            text: headerText,
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall!
+                .copyWith(fontWeight: FontWeight.w700),
+            tags: {
+              'i': StyledTextTag(
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(fontWeight: FontWeight.w400),
               ),
-              width: double.infinity,
-              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
-              child: OutlinedButton(
-                key: const ValueKey("grantPermissionButton"),
-                onPressed: _onTapSelectFolders,
-                child: Text(AppLocalizations.of(context).continueLabel),
-              ),
-            ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -214,39 +254,31 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   }
 
   Widget _buildNewFeatureActionArea(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: getEnteColorScheme(context).backgroundBase,
-            spreadRadius: 190,
-            blurRadius: 30,
-            offset: const Offset(0, 170),
-          ),
-        ],
-      ),
-      width: double.infinity,
-      padding: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              key: const ValueKey("onlyNewPhotosButton"),
-              onPressed: () => _onlyNewActionDebouncer.run(() async {
-                await _onTapOnlyNewPhotos();
-              }),
-              child: const Text("Start with latest backups"),
-            ),
+          GradientButton(
+            key: const ValueKey("selectFoldersButton"),
+            onTap: _onTapSelectFolders,
+            text: "Select folders",
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: OutlinedButton(
-              key: const ValueKey("selectFoldersButton"),
-              onPressed: _onTapSelectFolders,
-              child: const Text("Select folders"),
+            child: ElevatedButton(
+              key: const ValueKey("onlyNewPhotosButton"),
+              style: Theme.of(context).colorScheme.optionalActionButtonStyle,
+              onPressed: () => _onlyNewActionDebouncer.run(() async {
+                await _onTapOnlyNewPhotos();
+              }),
+              child: const Text(
+                "Start with latest photos",
+                style: TextStyle(
+                  color: Colors.black, // same for both themes
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 16),
