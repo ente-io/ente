@@ -1,3 +1,4 @@
+- Prateek: Revamp QR code dialog with styled design and theme colors
 - Prateek: (i) Run collection and person sync on skip/only-new backup flow to ensure remote albums appear after granting permissions
 - Prateek: (i) Add "Start with latest backups" option in grant permissions screen to backup only new photos (last 7 days onwards)
 - Prateek: (i) Add skip option in grant permissions screen to bypass backup during onboarding
