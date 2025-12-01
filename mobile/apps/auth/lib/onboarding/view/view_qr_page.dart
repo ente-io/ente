@@ -17,6 +17,8 @@ class ViewQrPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final double qrSize = min(screenWidth - 80, 300.0);
+    final double qrCodeSize =
+        max(qrSize - 100, 150.0); // Ensure minimum size of 150
     final enteTextTheme = getEnteTextTheme(context);
     final l10n = context.l10n;
 
@@ -29,11 +31,7 @@ class ViewQrPage extends StatelessWidget {
     // QR text color - always black for scanability
     const qrTextColor = textBaseLight;
 
-    // Get account name, truncate if too long
-    final String accountName = (code?.account ?? '').length > 30
-        ? '${(code?.account ?? '').substring(0, 27)}...'
-        : code?.account ?? '';
-
+    final String accountName = code?.account ?? '';
     final String issuerName = code?.issuer ?? '';
 
     return Scaffold(
@@ -63,31 +61,45 @@ class ViewQrPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           // Account name at top center (inside border)
-                          Text(
-                            accountName,
-                            style: enteTextTheme.largeBold.copyWith(
-                              color: qrTextColor,
-                              fontSize: 20,
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: qrCodeSize + 40,
                             ),
-                            textAlign: TextAlign.center,
+                            child: Text(
+                              accountName,
+                              style: enteTextTheme.largeBold.copyWith(
+                                color: qrTextColor,
+                                fontSize: 20,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                           if (issuerName.isNotEmpty) ...[
                             const SizedBox(height: 4),
-                            Text(
-                              issuerName,
-                              style: enteTextTheme.small.copyWith(
-                                color: qrTextColor.withValues(alpha: 0.7),
-                                fontSize: 14,
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: qrCodeSize,
                               ),
-                              textAlign: TextAlign.center,
+                              child: Text(
+                                issuerName,
+                                style: enteTextTheme.small.copyWith(
+                                  color: qrTextColor.withValues(alpha: 0.7),
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                           const SizedBox(height: 20),
 
                           // QR Code with pretty styling
                           SizedBox(
-                            width: qrSize - 100,
-                            height: qrSize - 100,
+                            width: qrCodeSize,
+                            height: qrCodeSize,
                             child: PrettyQrView(
                               qrImage: QrImage(
                                 QrCode.fromData(

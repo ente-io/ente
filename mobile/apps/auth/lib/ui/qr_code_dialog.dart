@@ -84,11 +84,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
         .replaceAll('algorithm=sha256', 'algorithm=SHA256')
         .replaceAll('algorithm=sha512', 'algorithm=SHA512');
 
-    // Get account name, truncate if too long
-    final String accountName = (widget.code.account).length > 30
-        ? '${(widget.code.account).substring(0, 27)}...'
-        : widget.code.account;
-
+    final String accountName = widget.code.account;
     final String issuerName = widget.code.issuer;
 
     // QR text color - always black for scanability
@@ -164,23 +160,37 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Account name at top center (inside border)
-                        Text(
-                          accountName,
-                          style: enteTextTheme.largeBold.copyWith(
-                            color: qrTextColor,
-                            fontSize: 20,
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: qrCodeSize + 40,
                           ),
-                          textAlign: TextAlign.center,
+                          child: Text(
+                            accountName,
+                            style: enteTextTheme.largeBold.copyWith(
+                              color: qrTextColor,
+                              fontSize: 20,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         if (issuerName.isNotEmpty) ...[
                           const SizedBox(height: 4),
-                          Text(
-                            issuerName,
-                            style: enteTextTheme.small.copyWith(
-                              color: qrTextColor.withValues(alpha: 0.7),
-                              fontSize: 14,
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: qrCodeSize,
                             ),
-                            textAlign: TextAlign.center,
+                            child: Text(
+                              issuerName,
+                              style: enteTextTheme.small.copyWith(
+                                color: qrTextColor.withValues(alpha: 0.7),
+                                fontSize: 14,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ],
                         const SizedBox(height: 20),
