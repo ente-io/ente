@@ -15,11 +15,11 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
@@ -49,6 +49,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -446,12 +447,31 @@ class _HomePageState extends State<HomePage> {
     if (!isAuthSuccessful) return;
 
     _codeDisplayStore.clearSelection();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ViewQrPage(code: code);
-        },
-      ),
+    final qrData = code.rawData
+        .replaceAll('algorithm=Algorithm.', 'algorithm=')
+        .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+        .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+        .replaceAll('algorithm=sha512', 'algorithm=SHA512');
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return QrCodeDialog(
+          data: qrData,
+          title: code.account,
+          subtitle: code.issuer,
+          accentColor: accentColor,
+          shareFileName: 'ente_auth_qr_${code.account}.png',
+          shareText: 'QR code for ${code.account}',
+          dialogTitle: context.l10n.qrCode,
+          shareButtonText: context.l10n.share,
+          logoAssetPath: 'assets/qr_logo.png',
+          branding: const QrSvgBranding(
+            assetPath: 'assets/svg/auth-logo.svg',
+            height: 12,
+          ),
+        );
+      },
     );
   }
 

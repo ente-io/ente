@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/generated/l10n.dart';
@@ -9,7 +10,6 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
-import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/utils/share_util.dart';
 
 class PublicLinkEnabledActionsWidget extends StatelessWidget {
@@ -103,11 +103,27 @@ class PublicLinkEnabledActionsWidget extends StatelessWidget {
           leadingIcon: Icons.qr_code_outlined,
           menuItemColor: enteColorScheme.fillFaint,
           onTap: () async {
+            final enteColorScheme = getEnteColorScheme(context);
             await showDialog<void>(
               context: context,
               builder: (BuildContext dialogContext) {
-                return QrCodeDialogWidget(
-                  collection: collection,
+                return QrCodeDialog(
+                  data: url,
+                  title: collection.displayName,
+                  accentColor: enteColorScheme.primary500,
+                  shareFileName: 'ente_qr_${collection.displayName}.png',
+                  shareText:
+                      'Scan this QR code to view my ${collection.displayName} album on ente',
+                  dialogTitle: AppLocalizations.of(context).qrCode,
+                  shareButtonText: AppLocalizations.of(context).share,
+                  logoAssetPath: 'assets/qr_logo.png',
+                  branding: const QrTextBranding(
+                    text: 'ente',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 );
               },
             );

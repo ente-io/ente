@@ -186,6 +186,9 @@ const EnteColorScheme darkScheme = EnteColorScheme(
 
 const accentColor = Color(0xFFA75CFF);
 
+// QR code container background
+const Color qrBoxColor = Color.fromRGBO(245, 245, 247, 1);
+
 // Background Colors
 const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
