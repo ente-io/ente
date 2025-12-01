@@ -39,6 +39,8 @@ jobs:
 
             - run: yarn lint
 
+            - run: yarn test:run
+
             - name: Audit dependencies
               run: |
                   yarn audit --level critical || exit_code=$?

@@ -26,7 +26,9 @@
         "dev:photos": "yarn build:wasm && yarn workspace photos next dev -p 3000",
         "dev:share": "yarn build:wasm && yarn workspace share next dev -p 3005",
         "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint\" \"yarn workspaces run tsc\"",
-        "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\""
+        "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --fix\" \"yarn workspaces run tsc\"",
+        "test": "yarn workspace ente-wasm test",
+        "test:run": "yarn workspace ente-wasm test run"
     },
     "resolutions": {
         "@types/react": "^19.2.2",

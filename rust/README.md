@@ -126,7 +126,7 @@ cargo build      # build
 cargo test       # test
 ```
 
-**ente-wasm (web/packages/ente-wasm/):**
+**ente-wasm (web/packages/wasm/):**
 
 ```sh
 yarn install     # installs wasm-pack

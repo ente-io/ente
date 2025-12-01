@@ -616,17 +616,17 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
-  ente_qr_ui:
-    dependency: "direct main"
-    description:
-      path: "../../packages/qr"
-      relative: true
-    source: path
-    version: "0.0.1"
   ente_photos_rust:
     dependency: "direct main"
     description:
       path: rust_builder
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_qr_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/qr"
       relative: true
     source: path
     version: "0.0.1"
