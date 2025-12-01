@@ -1,7 +1,7 @@
 [package]
 name = "rust_lib_photos"
-version = "0.1.0"
-edition = "2021"
+version = "0.0.1"
+edition = "2024"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]
@@ -9,7 +9,6 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 flutter_rust_bridge = "=2.11.1"
 usearch = "2.21.3"
-ente-core = { path = "../../../../rust/core" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
