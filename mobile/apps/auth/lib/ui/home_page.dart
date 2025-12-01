@@ -19,6 +19,7 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
@@ -33,7 +34,6 @@ import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
-import 'package:ente_auth/ui/qr_code_dialog.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
@@ -49,6 +49,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -446,10 +447,30 @@ class _HomePageState extends State<HomePage> {
     if (!isAuthSuccessful) return;
 
     _codeDisplayStore.clearSelection();
+    final qrData = code.rawData
+        .replaceAll('algorithm=Algorithm.', 'algorithm=')
+        .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+        .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+        .replaceAll('algorithm=sha512', 'algorithm=SHA512');
+
     await showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return QrCodeDialog(code: code);
+      builder: (BuildContext dialogContext) {
+        return QrCodeDialog(
+          data: qrData,
+          title: code.account,
+          subtitle: code.issuer,
+          accentColor: accentColor,
+          shareFileName: 'ente_auth_qr_${code.account}.png',
+          shareText: 'QR code for ${code.account}',
+          dialogTitle: context.l10n.qrCode,
+          shareButtonText: context.l10n.share,
+          logoAssetPath: 'assets/qr_logo.png',
+          branding: const QrSvgBranding(
+            assetPath: 'assets/svg/auth-logo.svg',
+            height: 12,
+          ),
+        );
       },
     );
   }

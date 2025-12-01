@@ -616,6 +616,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_qr_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/qr"
+      relative: true
+    source: path
+    version: "0.0.1"
   equatable:
     dependency: "direct main"
     description:
@@ -743,10 +750,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_saver
-      sha256: "017a127de686af2d2fbbd64afea97052d95f2a0f87d19d25b87e097407bf9c1e"
+      sha256: "9d93db09bd4da9e43238f9dd485360fc51a5c138eea5ef5f407ec56e58079ac0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.14"
+    version: "0.3.1"
   firebase_core:
     dependency: "direct main"
     description:

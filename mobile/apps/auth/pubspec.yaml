@@ -45,6 +45,8 @@ dependencies:
     path: ../../packages/network
   ente_qr:
     path: plugins/qr
+  ente_qr_ui:
+    path: ../../packages/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:

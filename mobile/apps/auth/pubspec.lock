@@ -465,6 +465,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_qr_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/qr"
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_strings:
     dependency: "direct main"
     description:
