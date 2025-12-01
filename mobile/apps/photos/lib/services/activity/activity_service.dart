@@ -139,6 +139,7 @@ class ActivityService {
       durations,
       <int>{},
       order: 'ASC',
+      dedupeUploadID: false,
     );
 
     final Set<int> dayKeys = <int>{};
