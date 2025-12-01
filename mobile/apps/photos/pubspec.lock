@@ -623,6 +623,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_photos_rust:
+    dependency: "direct main"
+    description:
+      path: rust_builder
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_rust:
     dependency: "direct main"
     description:
@@ -2306,13 +2313,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.16"
-  rust_lib_photos:
-    dependency: "direct main"
-    description:
-      path: rust_builder
-      relative: true
-    source: path
-    version: "0.0.1"
   rxdart:
     dependency: transitive
     description:

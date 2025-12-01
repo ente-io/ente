@@ -193,7 +193,7 @@ dependencies:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
   rive: 0.14.0-dev.13
-  rust_lib_photos:
+  ente_photos_rust:
     path: rust_builder
   screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
