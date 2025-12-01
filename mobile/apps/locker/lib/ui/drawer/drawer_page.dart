@@ -1,7 +1,9 @@
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:locker/events/user_details_refresh_event.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
@@ -21,6 +23,8 @@ class DrawerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Bus.instance.fire(UserDetailsRefreshEvent());
+
     final hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     if (hasLoggedIn) {
       UserService.instance.getUserDetailsV2().ignore();
@@ -38,6 +42,7 @@ class DrawerPage extends StatelessWidget {
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     final enteTextTheme = getEnteTextTheme(context);
+    const sectionSpacing = SizedBox(height: 8);
     final List<Widget> contents = [];
 
     if (hasLoggedIn) {
@@ -67,7 +72,7 @@ class DrawerPage extends StatelessWidget {
         const UsageCardWidget(),
         const SizedBox(height: 12),
         const LegacyCollectionsTrashWidget(),
-        const SizedBox(height: 12),
+        sectionSpacing,
       ]);
     }
 

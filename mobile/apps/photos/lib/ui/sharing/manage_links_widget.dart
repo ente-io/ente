@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
@@ -20,7 +21,6 @@ import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
-import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -392,9 +392,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       onTap: () async {
                         await showDialog<void>(
                           context: context,
-                          builder: (BuildContext context) {
-                            return QrCodeDialogWidget(
-                              collection: widget.collection!,
+                          builder: (BuildContext dialogContext) {
+                            return QrCodeDialog(
+                              data: urlValue,
+                              title: widget.collection!.displayName,
+                              accentColor: enteColorScheme.primary500,
+                              shareFileName:
+                                  'ente_qr_${widget.collection!.displayName}.png',
+                              shareText:
+                                  'Scan this QR code to view my ${widget.collection!.displayName} album on ente',
+                              dialogTitle: AppLocalizations.of(context).qrCode,
+                              shareButtonText:
+                                  AppLocalizations.of(context).share,
+                              logoAssetPath: 'assets/qr_logo.png',
+                              branding: const QrTextBranding(
+                                text: 'ente',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             );
                           },
                         );

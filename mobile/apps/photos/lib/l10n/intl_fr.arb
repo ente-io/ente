@@ -1617,6 +1617,7 @@
   "legacyInvite": "{email} vous a invité à être un contact de confiance",
   "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance",
   "hideSharedItemsFromHomeGallery": "Masquer les éléments partagés avec vous dans la galerie",
+  "swipeToSelect": "Balayer pour sélectionner",
   "gallery": "Galerie",
   "joinAlbum": "Rejoindre l'album",
   "joinAlbumSubtext": "pour afficher et ajouter vos photos",

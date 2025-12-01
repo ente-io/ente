@@ -9,11 +9,11 @@ import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/components/note_dialog.dart';
@@ -25,6 +25,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
@@ -894,13 +895,31 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (!isAuthSuccessful) {
       return;
     }
-    // ignore: unused_local_variable
-    final Code? code = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ViewQrPage(code: widget.code);
-        },
-      ),
+    final qrData = widget.code.rawData
+        .replaceAll('algorithm=Algorithm.', 'algorithm=')
+        .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+        .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+        .replaceAll('algorithm=sha512', 'algorithm=SHA512');
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return QrCodeDialog(
+          data: qrData,
+          title: widget.code.account,
+          subtitle: widget.code.issuer,
+          accentColor: accentColor,
+          shareFileName: 'ente_auth_qr_${widget.code.account}.png',
+          shareText: 'QR code for ${widget.code.account}',
+          dialogTitle: context.l10n.qrCode,
+          shareButtonText: context.l10n.share,
+          logoAssetPath: 'assets/qr_logo.png',
+          branding: const QrSvgBranding(
+            assetPath: 'assets/svg/auth-logo.svg',
+            height: 12,
+          ),
+        );
+      },
     );
   }
 

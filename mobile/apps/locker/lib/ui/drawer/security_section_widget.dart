@@ -12,7 +12,6 @@ import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/navigation_util.dart";
@@ -60,56 +59,56 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     final l10n = context.l10n;
     final List<Widget> children = [];
-    if (_hasLoggedIn) {
-      children.addAll(
-        [
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: l10n.emailVerificationToggle,
-              makeTextBold: true,
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => UserService.instance.hasEmailMFAEnabled(),
-              onChanged: () async {
-                final hasAuthenticated = await LocalAuthenticationService
-                    .instance
-                    .requestLocalAuthentication(
-                  context,
-                  l10n.authToChangeEmailVerificationSetting,
-                );
-                final isEmailMFAEnabled =
-                    UserService.instance.hasEmailMFAEnabled();
-                if (hasAuthenticated) {
-                  await updateEmailMFA(!isEmailMFAEnabled);
-                }
-              },
-            ),
-          ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.passkey,
-              makeTextBold: true,
-            ),
-            trailingIcon: Icons.chevron_right_outlined,
-            onTap: () async {
-              final hasAuthenticated = await LocalAuthenticationService.instance
-                  .requestLocalAuthentication(
-                context,
-                l10n.authToViewPasskey,
-              );
-              if (hasAuthenticated) {
-                await onPasskeyClick(context);
-              }
-            },
-          ),
-          sectionOptionSpacing,
-        ],
-      );
-    } else {
-      children.add(sectionOptionSpacing);
-    }
+    // if (_hasLoggedIn) {
+    //   children.addAll(
+    //     [
+    //       sectionOptionSpacing,
+    //       MenuItemWidget(
+    //         captionedTextWidget: CaptionedTextWidget(
+    //           title: l10n.emailVerificationToggle,
+    //           makeTextBold: true,
+    //         ),
+    //         trailingWidget: ToggleSwitchWidget(
+    //           value: () => UserService.instance.hasEmailMFAEnabled(),
+    //           onChanged: () async {
+    //             final hasAuthenticated = await LocalAuthenticationService
+    //                 .instance
+    //                 .requestLocalAuthentication(
+    //               context,
+    //               l10n.authToChangeEmailVerificationSetting,
+    //             );
+    //             final isEmailMFAEnabled =
+    //                 UserService.instance.hasEmailMFAEnabled();
+    //             if (hasAuthenticated) {
+    //               await updateEmailMFA(!isEmailMFAEnabled);
+    //             }
+    //           },
+    //         ),
+    //       ),
+    //       sectionOptionSpacing,
+    //       MenuItemWidget(
+    //         captionedTextWidget: CaptionedTextWidget(
+    //           title: context.l10n.passkey,
+    //           makeTextBold: true,
+    //         ),
+    //         trailingIcon: Icons.chevron_right_outlined,
+    //         onTap: () async {
+    //           final hasAuthenticated = await LocalAuthenticationService.instance
+    //               .requestLocalAuthentication(
+    //             context,
+    //             l10n.authToViewPasskey,
+    //           );
+    //           if (hasAuthenticated) {
+    //             await onPasskeyClick(context);
+    //           }
+    //         },
+    //       ),
+    //       sectionOptionSpacing,
+    //     ],
+    //   );
+    // } else {
+    //   children.add(sectionOptionSpacing);
+    // }
     children.addAll([
       sectionOptionSpacing,
       MenuItemWidget(

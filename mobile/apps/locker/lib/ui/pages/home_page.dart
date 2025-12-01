@@ -13,6 +13,7 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/states/user_details_state.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
@@ -499,57 +500,59 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return PopScope(
-      canPop: !isSearchActive && !_isSettingsOpen,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          return;
-        }
+    return UserDetailsStateWidget(
+      child: PopScope(
+        canPop: !isSearchActive && !_isSettingsOpen,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) {
+            return;
+          }
 
-        if (isSearchActive) {
-          _handleClearSearch();
-          return;
-        }
+          if (isSearchActive) {
+            _handleClearSearch();
+            return;
+          }
 
-        if (_isSettingsOpen) {
-          scaffoldKey.currentState!.closeDrawer();
-          return;
-        }
-      },
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: handleKeyEvent,
-        child: Scaffold(
-          key: scaffoldKey,
-          backgroundColor: colorScheme.backgroundBase,
-          drawer: Drawer(
-            width: 428,
+          if (_isSettingsOpen) {
+            scaffoldKey.currentState!.closeDrawer();
+            return;
+          }
+        },
+        child: KeyboardListener(
+          focusNode: FocusNode(),
+          onKeyEvent: handleKeyEvent,
+          child: Scaffold(
+            key: scaffoldKey,
             backgroundColor: colorScheme.backgroundBase,
-            child: _settingsPage,
-          ),
-          drawerEnableOpenDragGesture: !Platform.isAndroid,
-          onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-          appBar: CustomLockerAppBar(
-            scaffoldKey: scaffoldKey,
-            isSearchActive: isSearchActive,
-            searchController: searchController,
-            searchFocusNode: _searchFocusNode,
-            onSearchFocused: _handleSearchFocused,
-            onClearSearch: _handleClearSearch,
-            onSearchChanged: _handleSearchChange,
-          ),
-          body: _buildBody(),
-          floatingActionButton: isSearchActive
-              ? null
-              : FloatingActionButton(
-                  onPressed: _openSavePage,
-                  shape: const CircleBorder(),
-                  backgroundColor: colorScheme.primary700,
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlusSign,
-                    color: Colors.white,
+            drawer: Drawer(
+              width: 428,
+              backgroundColor: colorScheme.backgroundBase,
+              child: _settingsPage,
+            ),
+            drawerEnableOpenDragGesture: !Platform.isAndroid,
+            onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+            appBar: CustomLockerAppBar(
+              scaffoldKey: scaffoldKey,
+              isSearchActive: isSearchActive,
+              searchController: searchController,
+              searchFocusNode: _searchFocusNode,
+              onSearchFocused: _handleSearchFocused,
+              onClearSearch: _handleClearSearch,
+              onSearchChanged: _handleSearchChange,
+            ),
+            body: _buildBody(),
+            floatingActionButton: isSearchActive
+                ? null
+                : FloatingActionButton(
+                    onPressed: _openSavePage,
+                    shape: const CircleBorder(),
+                    backgroundColor: colorScheme.primary700,
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlusSign,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
     );

@@ -5,8 +5,8 @@ import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/debouncer.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 typedef OnChangedCallBack = void Function(bool);
 

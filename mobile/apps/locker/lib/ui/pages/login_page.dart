@@ -273,6 +273,7 @@ class _LoginPageState extends State<LoginPage> {
           'assets/locker-logo-blue.png',
           height: 28,
         ),
+        centerTitle: true,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
         leading: IconButton(

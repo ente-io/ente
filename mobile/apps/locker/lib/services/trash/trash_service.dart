@@ -8,6 +8,7 @@ import "package:ente_events/event_bus.dart";
 import "package:ente_events/models/signed_in_event.dart";
 import 'package:ente_network/network.dart';
 import "package:locker/events/collections_updated_event.dart";
+import "package:locker/events/user_details_refresh_event.dart";
 import 'package:locker/services/collections/collections_db.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -272,6 +273,7 @@ class TrashService {
       // Refresh collections so restored files are immediately available in UI
       await CollectionService.instance.sync();
       Bus.instance.fire(CollectionsUpdatedEvent("file_restore"));
+      Bus.instance.fire(UserDetailsRefreshEvent());
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;

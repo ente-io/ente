@@ -11,6 +11,7 @@ import "package:fast_base58/fast_base58.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
@@ -296,6 +297,7 @@ class CollectionService {
       if (runSync) {
         await TrashService.instance.syncTrash();
         await sync();
+        Bus.instance.fire(UserDetailsRefreshEvent());
       }
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
@@ -475,7 +477,11 @@ class CollectionService {
         for (final file in files) {
           final fileCollections = await getCollectionsForFile(file);
           for (final fileCollection in fileCollections) {
-            await trashFile(file, fileCollection, runSync: false);
+            await trashFile(
+              file,
+              fileCollection,
+              runSync: false,
+            );
           }
         }
       }
@@ -484,6 +490,7 @@ class CollectionService {
 
       await sync();
       await TrashService.instance.syncTrash();
+      Bus.instance.fire(UserDetailsRefreshEvent());
     } catch (e) {
       _logger.severe("Failed to trash collection with files: $e");
       rethrow;

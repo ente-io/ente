@@ -616,6 +616,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_qr_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/qr"
+      relative: true
+    source: path
+    version: "0.0.1"
   equatable:
     dependency: "direct main"
     description:
@@ -2169,6 +2176,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  pretty_qr_code:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "912bf168492c90ee2a20b2997926372eb18adb0f"
+      url: "https://github.com/ente-io/flutter_pretty_qr_fork"
+    source: git
+    version: "3.5.0"
   privacy_screen:
     dependency: "direct main"
     description:
@@ -2242,14 +2258,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  qr_flutter:
-    dependency: "direct main"
-    description:
-      name: qr_flutter
-      sha256: "5095f0fc6e3f71d08adef8feccc8cea4f12eec18a2e31c2e8d82cb6019f4b097"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
   quiver:
     dependency: transitive
     description:
