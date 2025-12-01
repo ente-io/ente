@@ -247,6 +247,7 @@ class BackupSettingsScreen extends StatelessWidget {
         singleBorderRadius: 8,
         alignCaptionedTextToLeft: true,
         isTopBorderRadiusRemoved: true,
+        isBottomBorderRadiusRemoved: flagService.enableMobMultiPart,
         isGestureDetectorDisabled: true,
       ),
     ];
