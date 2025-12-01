@@ -1,8 +1,8 @@
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
-import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
+import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {

@@ -609,8 +609,10 @@ export const tagNumericValue = (
 };
 
 const parseCamera = (tags: RawExifTags) => {
-    const make = tags.exif?.Make?.description?.trim();
-    const model = tags.exif?.Model?.description?.trim();
+    const makeDescription = tags.exif?.Make?.description;
+    const modelDescription = tags.exif?.Model?.description;
+    const make = makeDescription?.trim();
+    const model = modelDescription?.trim();
     if (!make && !model) return undefined;
     return { make, model };
 };

@@ -7,9 +7,9 @@ import type { Location } from "ente-base/types";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
+    fileCameraLabel,
     fileCreationPhotoDate,
     fileFileName,
-    fileCameraLabel,
     fileLocation,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";

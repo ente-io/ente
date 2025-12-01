@@ -510,8 +510,12 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
  * Return a user-friendly string describing the camera used for the file.
  */
 export const fileCameraLabel = (file: EnteFile): string | undefined => {
-    const model = file.pubMagicMetadata?.data?.cameraModel?.trim();
-    if (!model || model.length === 0) return undefined;
+    const pubMetadata = file.pubMagicMetadata?.data;
+    if (!pubMetadata) return undefined;
+    const cameraModel = pubMetadata.cameraModel;
+    if (!cameraModel) return undefined;
+    const model = cameraModel.trim();
+    if (model.length === 0) return undefined;
     return model;
 };
 

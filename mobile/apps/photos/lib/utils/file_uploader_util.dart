@@ -76,7 +76,8 @@ class FileHashData {
 }
 
 String? _extractPrintableExifValue(IfdTag? tag) {
-  final printable = tag?.printable?.trim();
+  final printableValue = tag?.printable;
+  final printable = printableValue?.trim();
   if (printable == null || printable.isEmpty) {
     return null;
   }
