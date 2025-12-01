@@ -579,23 +579,26 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     // Handle thumbnail click to open FileViewer
     const handlePhotoClick = useCallback(
         (fileId: number) => {
-            // Get all files from filesByID sorted by creation time
-            const allFiles = Array.from(filesByID.values()).sort(
-                (a, b) =>
-                    new Date(fileCreationTime(b) / 1000).getTime() -
-                    new Date(fileCreationTime(a) / 1000).getTime(),
-            );
+            // Get only the files that are currently visible in the sidebar
+            const visibleFileIds = new Set(visiblePhotos.map((p) => p.fileId));
+            const visibleFiles = Array.from(filesByID.values())
+                .filter((f) => visibleFileIds.has(f.id))
+                .sort(
+                    (a, b) =>
+                        new Date(fileCreationTime(b) / 1000).getTime() -
+                        new Date(fileCreationTime(a) / 1000).getTime(),
+                );
 
             // Find the index of the clicked file
-            const clickedIndex = allFiles.findIndex((f) => f.id === fileId);
+            const clickedIndex = visibleFiles.findIndex((f) => f.id === fileId);
 
-            if (clickedIndex !== -1 && allFiles.length > 0) {
-                setViewerFiles(allFiles);
+            if (clickedIndex !== -1 && visibleFiles.length > 0) {
+                setViewerFiles(visibleFiles);
                 setCurrentFileIndex(clickedIndex);
                 setOpenFileViewer(true);
             }
         },
-        [filesByID],
+        [filesByID, visiblePhotos],
     );
 
     const handleCloseFileViewer = useCallback(() => {
