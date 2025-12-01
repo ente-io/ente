@@ -720,6 +720,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             ),
             if (focus != null)
               Positioned(
+                key: const ValueKey("focus_indicator"),
                 left: focus.dx - 24,
                 top: focus.dy - 24,
                 child: AnimatedOpacity(
@@ -745,6 +746,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 ),
               ),
             Positioned(
+              key: const ValueKey("zoom_indicator"),
               left: 12,
               top: 88, // keep below top bar so it stays visible
               child: AnimatedOpacity(
