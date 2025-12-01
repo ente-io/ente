@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:camera/camera.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -608,7 +609,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           const Spacer(),
           _RoundIconButton(
             onTap: () => Navigator.of(context).maybePop(),
-            icon: Icons.close,
+            icon: const Icon(Icons.close, color: Colors.white),
             background: Colors.white.withValues(alpha: 0.12),
             size: 44,
           ),
@@ -859,9 +860,11 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                     onTap: (_cameras.length < 2 || _saving || _initializing)
                         ? null
                         : _switchCamera,
-                    icon: Icons.cameraswitch_rounded,
+                    icon: const Icon(
+                      Icons.cameraswitch_rounded,
+                      color: Colors.white,
+                    ),
                     background: Colors.white.withValues(alpha: 0.12),
-                    iconColor: Colors.white,
                     size: 48,
                   ),
                 ),
@@ -891,9 +894,12 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             children: [
               _RoundIconButton(
                 onTap: _saving ? null : _returnToCapture,
-                icon: Icons.add_photo_alternate_outlined,
+                icon: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedImageAdd02,
+                  color: Colors.white,
+                  size: 22,
+                ),
                 background: Colors.white.withValues(alpha: 0.12),
-                iconColor: Colors.white,
                 size: 44,
               ),
               const Spacer(),
@@ -1237,14 +1243,12 @@ class _RoundIconButton extends StatelessWidget {
     required this.onTap,
     required this.icon,
     this.background,
-    this.iconColor,
     this.size = 44,
   });
 
   final VoidCallback? onTap;
-  final IconData icon;
+  final Widget icon;
   final Color? background;
-  final Color? iconColor;
   final double size;
 
   @override
@@ -1258,9 +1262,8 @@ class _RoundIconButton extends StatelessWidget {
           shape: BoxShape.circle,
           color: background ?? Colors.black.withValues(alpha: 0.1),
         ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.white,
+        child: Center(
+          child: icon,
         ),
       ),
     );

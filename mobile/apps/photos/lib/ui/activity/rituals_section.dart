@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
@@ -58,7 +59,10 @@ class RitualsSection extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     minimumSize: const Size(40, 40),
                   ),
-                  icon: const Icon(Icons.add_rounded),
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
+                    size: 22,
+                  ),
                 ),
               ],
             ),
@@ -199,8 +203,8 @@ class _CreateRitualCard extends StatelessWidget {
                     color: colorScheme.fillFaintPressed,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.add_rounded,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
                     color: colorScheme.textBase,
                     size: 22,
                   ),
@@ -381,9 +385,10 @@ class _RitualCard extends StatelessWidget {
                               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.edit_outlined,
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedPencilEdit01,
                                     color: colorScheme.textBase,
+                                    size: 22,
                                   ),
                                   const SizedBox(width: 10),
                                   Text(
@@ -410,9 +415,10 @@ class _RitualCard extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.delete_outline,
+                              const HugeIcon(
+                                icon: HugeIcons.strokeRoundedDelete02,
                                 color: Colors.red,
+                                size: 22,
                               ),
                               const SizedBox(width: 10),
                               Text(
@@ -568,8 +574,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                               },
                                               child: const Padding(
                                                 padding: EdgeInsets.all(6),
-                                                child: Icon(
-                                                  Icons.edit_outlined,
+                                                child: HugeIcon(
+                                                  icon: HugeIcons
+                                                      .strokeRoundedEdit03,
                                                   size: 18,
                                                 ),
                                               ),

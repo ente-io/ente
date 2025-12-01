@@ -5,6 +5,7 @@ import "dart:ui" as ui;
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/service_locator.dart";
@@ -80,7 +81,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 padding: const EdgeInsets.all(8),
                 minimumSize: const Size(40, 40),
               ),
-              icon: const Icon(Icons.add_rounded),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedPlusSign,
+                size: 22,
+              ),
               onPressed: () async {
                 await showRitualEditor(context, ritual: null);
               },
@@ -166,8 +170,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child: Icon(
-                                    Icons.share_outlined,
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedShare08,
                                     size: 22,
                                     color: shareEnabled
                                         ? iconColor
