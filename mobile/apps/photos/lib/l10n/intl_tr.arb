@@ -1389,8 +1389,6 @@
   "appLockDescriptions": "Cihazınızın varsayılan kilit ekranı ile PIN veya parola içeren özel bir kilit ekranı arasında seçim yapın.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Uygulama kilidini etkinleştirmek için lütfen sistem ayarlarınızda cihaz şifresi veya ekran kilidi ayarlayın.",
   "authToViewPasskey": "Geçiş anahtarınızı görüntülemek için lütfen kimlik doğrulaması yapın",
-  "loopVideoOn": "Video Döngüsü Açık",
-  "loopVideoOff": "Video Döngüsü Kapalı",
   "localSyncErrorMessage": "Yerel fotoğraf senkronizasyonu beklenenden daha uzun sürdüğü için bir şeyler ters gitmiş gibi görünüyor. Lütfen destek ekibimize ulaşın",
   "showPerson": "Kişiyi Göster",
   "sort": "Sırala",

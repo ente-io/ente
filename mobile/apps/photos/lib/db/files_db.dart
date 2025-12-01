@@ -1331,6 +1331,21 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  Future<Set<String>> getAllLocalIDsNewerThan(
+    int creationTimeThreshold,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      '''
+      SELECT DISTINCT $columnLocalID
+      FROM $filesTable
+      WHERE $columnCreationTime >= ? AND $columnLocalID IS NOT NULL
+    ''',
+      [creationTimeThreshold],
+    );
+    return rows.map((row) => row[columnLocalID] as String).toSet();
+  }
+
   Future<void> deleteUnSyncedLocalFiles(List<String> localIDs) async {
     final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
@@ -1398,14 +1413,12 @@ class FilesDB with SqlDbBase {
   Future<void> removeFromCollection(int collectionID, List<int> fileIDs) async {
     final db = await instance.sqliteAsyncDB;
     final inParam = fileIDs.join(',');
-    unawaited(
-      db.execute(
-        '''
+    await db.execute(
+      '''
       DELETE FROM $filesTable
       WHERE $columnCollectionID = ? AND $columnUploadedFileID IN ($inParam);
       ''',
-        [collectionID],
-      ),
+      [collectionID],
     );
   }
 

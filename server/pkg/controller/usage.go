@@ -58,17 +58,6 @@ func (c *UsageController) checkAndUpdateCache(ctx context.Context, userID int64,
 }
 
 func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
-	// If app is Locker, limit to MaxLockerFiles files
-	if app == ente.Locker {
-		fileCount, err := c.UserCacheCtrl.GetUserFileCountWithCache(userID, app)
-		if err != nil {
-			return stacktrace.Propagate(err, "failed to fetch locker file count")
-		}
-		if fileCount >= MaxLockerFiles {
-			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
-		}
-	}
-
 	familyAdminID, err := c.UserRepo.GetFamilyAdminID(userID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -95,9 +84,10 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		subscriptionAdminID = userID
 		subscriptionUserIDs = []int64{userID}
 	}
-
+	var lockerUsage *repo.LockerUsage
+	var lUsageErr error
 	if app == ente.Locker {
-		lockerUsage, lUsageErr := c.UsageRepo.GetLockerUsage(ctx, subscriptionUserIDs)
+		lockerUsage, lUsageErr = c.UsageRepo.GetLockerUsage(ctx, subscriptionUserIDs)
 		if lUsageErr != nil {
 			return stacktrace.Propagate(lUsageErr, "failed to fetch locker usage")
 		}
@@ -155,8 +145,17 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		}
 		var eligibleBonus = bonus.GetUsableBonus(subStorage)
 		if newUsage > (subStorage + eligibleBonus) {
-			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
-				fmt.Sprintf("subscription Storage Limit Exceeded (limit %d, usage %d, bonus %d) for admin %d", subStorage, usage, eligibleBonus, subscriptionAdminID))
+			// fetch lockerUsage if it's null. We need to discount locker usage while checking storage limit
+			if lockerUsage == nil && lUsageErr == nil {
+				lockerUsage, lUsageErr = c.UsageRepo.GetLockerUsage(ctx, subscriptionUserIDs)
+				if lUsageErr != nil {
+					return stacktrace.Propagate(lUsageErr, "failed to fetch locker usage")
+				}
+			}
+			if lockerUsage == nil || (newUsage-lockerUsage.TotalUsage) > (subStorage+eligibleBonus) {
+				return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
+					fmt.Sprintf("subscription Storage Limit Exceeded (limit %d, usage %d, bonus %d) for admin %d", subStorage, usage, eligibleBonus, subscriptionAdminID))
+			}
 		}
 	}
 

@@ -102,7 +102,7 @@ Yes, we offer 10 GB of storage for free, forever.
 
 On the free plan, you cannot:
 
-- Share albums or create public links
+- Create public links
 - Set up family plans
 
 All other features work on the free plan, including:
@@ -111,6 +111,7 @@ All other features work on the free plan, including:
 - End-to-end encryption
 - Map view
 - Machine learning (face recognition, magic search)
+- Share albums
 - Background sync
 - Receiving shared albums from others
 
@@ -368,7 +369,7 @@ We support **annual** subscriptions over PayPal.
 
 ### Does Ente accept crypto payments? {#crypto-payment}
 
-Yes! We accept the following cryptocurrencies:
+Yes! We support *annual plans* with crypto payments and accept the following cryptocurrencies:
 
 - **Bitcoin** (BTC)
 - **Ethereum** (ETH)

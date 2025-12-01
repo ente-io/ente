@@ -7,6 +7,7 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
+import log from "ente-base/log";
 import {
     albumsAppOrigin,
     customAPIHost,
@@ -18,6 +19,10 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
+import {
+    JOIN_ALBUM_CONTEXT_KEY,
+    type JoinAlbumContext,
+} from "ente-new/albums/services/join-album";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -42,6 +47,54 @@ const Page: React.FC = () => {
         void (async () => {
             refreshHost();
             const currentURL = new URL(window.location.href);
+
+            // Store join album context immediately if present in URL
+            // This ensures it survives the authentication flow
+            const joinAlbumParam = currentURL.searchParams.get("joinAlbum");
+            if (joinAlbumParam && joinAlbumParam !== "true") {
+                try {
+                    // Format: joinAlbum?=accessToken&jwt=<jwtToken>#collectionKeyHash
+                    const accessToken = joinAlbumParam;
+                    const collectionKeyHash = currentURL.hash.slice(1);
+                    const jwtFromURL = currentURL.searchParams.get("jwt");
+
+                    if (accessToken && collectionKeyHash) {
+                        // Import the necessary functions to convert the collection key
+                        const { extractCollectionKeyFromShareURL } =
+                            await import("ente-gallery/services/share");
+
+                        // Convert the hash to base64 for API calls
+                        const tempURL = new URL(window.location.href);
+                        tempURL.hash = collectionKeyHash;
+                        const collectionKey =
+                            await extractCollectionKeyFromShareURL(tempURL);
+
+                        // Create context from URL parameters
+                        const context: JoinAlbumContext = {
+                            accessToken,
+                            collectionKey,
+                            collectionKeyHash,
+                            collectionID: 0,
+                            ...(jwtFromURL && { accessTokenJWT: jwtFromURL }),
+                        };
+
+                        sessionStorage.setItem(
+                            JOIN_ALBUM_CONTEXT_KEY,
+                            JSON.stringify(context),
+                        );
+                    }
+                } catch (error) {
+                    log.error(
+                        "Failed to store join album context from URL",
+                        error,
+                    );
+                    showMiniDialog({
+                        title: t("error"),
+                        message: t("generic_error_retry"),
+                    });
+                }
+            }
+
             const albumsURL = new URL(albumsAppOrigin());
             currentURL.pathname = router.pathname;
             if (

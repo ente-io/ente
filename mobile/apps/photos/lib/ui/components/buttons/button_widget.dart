@@ -505,7 +505,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }) {
     if (mounted) {
       if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop(ButtonResult(widget.buttonAction, exception));
+        Navigator.of(context).pop(ButtonResult(buttonAction, exception));
       } else if (exception != null) {
         //This is to show the execution was unsuccessful if the dialog is manually
         //closed before the execution completes.

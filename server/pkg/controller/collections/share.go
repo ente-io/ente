@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/utils/array"
@@ -14,7 +16,6 @@ import (
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareRequest) ([]ente.CollectionUser, error) {
@@ -292,6 +293,14 @@ func (c *CollectionController) GetPublicDiff(ctx *gin.Context, sinceTime int64) 
 		if diff[idx].MagicMetadata != nil {
 			diff[idx].MagicMetadata = nil
 		}
+		// For public diffs, treat action markers as deleted and strip action details
+		if diff[idx].Action != nil && !diff[idx].IsDeleted {
+			if *diff[idx].Action == ente.ActionRemove || *diff[idx].Action == ente.ActionDeleteSuggested {
+				diff[idx].IsDeleted = true
+			}
+		}
+		diff[idx].Action = nil
+		diff[idx].ActionUserID = nil
 	}
 	return diff, hasMore, nil
 }

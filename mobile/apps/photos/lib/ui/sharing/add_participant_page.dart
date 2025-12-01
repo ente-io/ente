@@ -145,6 +145,14 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                             .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
                                       )
                                     : const SizedBox.shrink(),
+                                widget.actionTypesToShow.contains(
+                                  ActionTypesToShow.addAdmin,
+                                )
+                                    ? const MenuSectionDescriptionWidget(
+                                        content:
+                                            '(i) Admins can manage photos & participants.',
+                                      )
+                                    : const SizedBox.shrink(),
                               ],
                             ),
                           );
@@ -523,18 +531,19 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     }
   }
 
-  String _adminActionLabel(int count) =>
-      count == 1 ? "Add admin" : "Add admins";
+  String _adminActionLabel(int count) => count == 1
+      ? "(i) Add admin"
+      : "(i) Add admins";
 
   String _adminSuccessMessage(int count) {
     if (count == 0) {
-      return "No admins were added";
+      return "(i) No admins were added";
     }
     if (count == 1) {
-      return "1 admin successfully added";
+      return "(i) 1 admin successfully added";
     }
-    return "$count admins successfully added";
+    return "(i) $count admins successfully added";
   }
 
-  String _adminTitle() => "Add admin";
+  String _adminTitle() => "(i) Add admin";
 }

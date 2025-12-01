@@ -50,6 +50,7 @@ class FlagService {
 
   bool get enableAdminRole => internalUser;
   bool get surfacePublicLink => internalUser;
+  bool get enableDeleteSuggestion => internalUser;
 
   bool get betaUser => flags.betaUser;
 
@@ -85,7 +86,18 @@ class FlagService {
 
   bool get useWidgetV2 => internalUser;
 
+  bool get enableOnlyBackupFuturePhotos => internalUser;
+
   bool get facesTimeline => internalUser;
+  bool get ritualsFlag => internalUser;
+
+  Future<void> tryRefreshFlags() async {
+    try {
+      await _fetch();
+    } catch (e) {
+      debugPrint("Failed to refresh flags: $e");
+    }
+  }
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

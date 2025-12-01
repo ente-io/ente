@@ -16,7 +16,7 @@ type UserAuthRepository struct {
 	DB *sql.DB
 }
 
-const lockerRolloutLimit = 150
+const lockerRolloutLimit = 1150
 
 // AddOTT saves the provided one time token for the specified user
 func (repo *UserAuthRepository) AddOTT(emailHash string, app ente.App, ott string, expirationTime int64) error {

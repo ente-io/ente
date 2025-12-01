@@ -92,10 +92,11 @@ class DataSectionWidget extends StatelessWidget {
           );
         },
       ),
-      if (FeatureFlagService.isInternalUserOrDebugBuild())
+      if (FeatureFlagService.isLocalBackupEnabled()) ...[
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: "${l10n.localBackupSidebarTitle}(i)",
+            title: l10n.localBackupSidebarTitle,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -104,7 +105,8 @@ class DataSectionWidget extends StatelessWidget {
             await _handleLocalBackupClick(context);
           },
         ),
-      if (FeatureFlagService.isInternalUserOrDebugBuild()) sectionOptionSpacing,
+        sectionOptionSpacing,
+      ],
     ]);
     return Column(
       children: children,

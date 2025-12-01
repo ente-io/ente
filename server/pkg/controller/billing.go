@@ -157,27 +157,6 @@ func (c *BillingController) GetActiveSubscription(userID int64) (ente.Subscripti
 	return subscription, nil
 }
 
-// IsActivePayingSubscriber validates if the current user is paying customer with active subscription
-func (c *BillingController) IsActivePayingSubscriber(userID int64) error {
-	subscription, err := c.GetActiveSubscription(userID)
-	var subErr error
-	if err != nil {
-		subErr = stacktrace.Propagate(err, "")
-	} else if !billing.IsActivePaidPlan(subscription) {
-		subErr = ente.ErrSharingDisabledForFreeAccounts
-	}
-	if subErr != nil && (errors.Is(subErr, ente.ErrNoActiveSubscription) || errors.Is(subErr, ente.ErrSharingDisabledForFreeAccounts)) {
-		storage, storeErr := c.StorageBonusRepo.GetPaidAddonSurplusStorage(context.Background(), userID)
-		if storeErr != nil {
-			return storeErr
-		}
-		if *storage > 0 {
-			return nil
-		}
-	}
-	return nil
-}
-
 // HasActiveSelfOrFamilySubscription validates if the user or user's family admin has active subscription
 func (c *BillingController) HasActiveSelfOrFamilySubscription(userID int64, mustBeOnPaidPlan bool) error {
 	var subscriptionUserID int64

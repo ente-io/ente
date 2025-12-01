@@ -95,6 +95,8 @@ const RemoteCGroupData = z.looseObject({
     rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
+    isPinned: z.boolean().nullish().transform(Boolean),
+    hideFromMemories: z.boolean().nullish().transform(Boolean),
 });
 
 /**

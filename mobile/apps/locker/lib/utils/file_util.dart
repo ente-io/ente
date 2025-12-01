@@ -139,7 +139,8 @@ class FileUtil {
 
         // Skip info items for now; they are meant to be viewed in-app.
         if (InfoFileService.instance.isInfoFile(file)) {
-          _logger.fine('Skipping info file download for ${file.displayName}');
+          _logger
+              .fine('Skipping info file download (ID: ${file.uploadedFileID})');
           if (!hasShownInfoSkipToast) {
             hasShownInfoSkipToast = true;
             showToast(
@@ -175,7 +176,7 @@ class FileUtil {
         final message = savedNames.length == 1
             ? '${savedNames.first} saved'
             : '${savedNames.length} files saved';
-        _logger.info('Files saved: $savedPaths');
+        _logger.info('${savedPaths.length} files saved');
         showToast(context, message);
       }
 
@@ -226,7 +227,7 @@ class FileUtil {
     );
 
     if (decryptedFile == null) {
-      throw Exception('Failed to download ${file.displayName}');
+      throw Exception('Failed to download file (ID: ${file.uploadedFileID})');
     }
 
     try {
@@ -283,7 +284,7 @@ class FileUtil {
         mimeType: MimeType.other,
       );
 
-      _logger.info('File saved: $savedPath');
+      _logger.info('File saved successfully');
       return savedPath;
     } catch (e, s) {
       _logger.severe('Failed to save file', e, s);
