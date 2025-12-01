@@ -43,6 +43,7 @@ enum ResultType {
 enum SectionType {
   face,
   magic,
+  ritual,
   wrapped,
   location,
   album,
@@ -63,6 +64,8 @@ extension SectionTypeExtensions on SectionType {
         return "Ente Rewind";
       case SectionType.location:
         return AppLocalizations.of(context).locations;
+      case SectionType.ritual:
+        return "Rituals";
       case SectionType.contacts:
         return AppLocalizations.of(context).contacts;
       case SectionType.album:
@@ -82,6 +85,8 @@ extension SectionTypeExtensions on SectionType {
         return "Check back soon for your 2025 highlights.";
       case SectionType.location:
         return AppLocalizations.of(context).searchLocationEmptySection;
+      case SectionType.ritual:
+        return "Build a ritual to keep your photo habit going.";
       case SectionType.contacts:
         return AppLocalizations.of(context).searchPeopleEmptySection;
       case SectionType.album:
@@ -98,6 +103,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
       case SectionType.magic:
       case SectionType.wrapped:
+      case SectionType.ritual:
       case SectionType.fileTypesAndExtension:
         return false;
       case SectionType.location:
@@ -111,6 +117,7 @@ extension SectionTypeExtensions on SectionType {
       this != SectionType.face &&
       this != SectionType.magic &&
       this != SectionType.wrapped &&
+      this != SectionType.ritual &&
       this != SectionType.contacts;
 
   bool get isEmptyCTAVisible {
@@ -118,6 +125,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
       case SectionType.magic:
       case SectionType.wrapped:
+      case SectionType.ritual:
       case SectionType.fileTypesAndExtension:
         return false;
       case SectionType.location:
@@ -139,6 +147,8 @@ extension SectionTypeExtensions on SectionType {
         return "";
       case SectionType.location:
         return AppLocalizations.of(context).addNew;
+      case SectionType.ritual:
+        return "";
       case SectionType.contacts:
         return AppLocalizations.of(context).invite;
       case SectionType.album:
@@ -158,6 +168,8 @@ extension SectionTypeExtensions on SectionType {
         return null;
       case SectionType.location:
         return Icons.add_location_alt_outlined;
+      case SectionType.ritual:
+        return null;
       case SectionType.contacts:
         return Icons.adaptive.share;
       case SectionType.album:
@@ -182,6 +194,8 @@ extension SectionTypeExtensions on SectionType {
             showAddLocationSheet(context, centerPoint);
           }
         };
+      case SectionType.ritual:
+        return () async {};
       case SectionType.album:
         return () async {
           final result = await showTextInputDialog(
@@ -247,6 +261,8 @@ extension SectionTypeExtensions on SectionType {
         return Future.value(const <SearchResult>[]);
       case SectionType.location:
         return SearchService.instance.getAllLocationTags(limit);
+      case SectionType.ritual:
+        return Future.value(const <SearchResult>[]);
 
       case SectionType.contacts:
         return SearchService.instance.getAllContactsSearchResults(limit);
@@ -266,6 +282,8 @@ extension SectionTypeExtensions on SectionType {
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
       case SectionType.wrapped:
         return [];
+      case SectionType.ritual:
+        return [];
       case SectionType.album:
         return [Bus.instance.on<CollectionUpdatedEvent>()];
       case SectionType.face:
@@ -284,6 +302,8 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.magic:
         return [Bus.instance.on<MagicCacheUpdatedEvent>()];
       case SectionType.wrapped:
+        return [];
+      case SectionType.ritual:
         return [];
       case SectionType.contacts:
         return [Bus.instance.on<PeopleChangedEvent>()];

@@ -12,6 +12,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/activity_banner.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
@@ -115,26 +116,25 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
-                  itemCount: searchTypes.length + 1,
+                  itemCount: searchTypes.length,
                   itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return const ActivityBanner();
-                    }
-                    final sectionIndex = index - 1;
-                    switch (searchTypes[sectionIndex]) {
+                    final sectionType = searchTypes[index];
+                    switch (sectionType) {
                       case SectionType.face:
                         if (!flagService.hasGrantedMLConsent) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(
-                          examples: snapshot.data!.elementAt(sectionIndex)
+                          examples: snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.album:
                         return AlbumsSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
+                      case SectionType.ritual:
+                        return const _RitualsDiscoverySection();
                       case SectionType.wrapped:
                         return ValueListenableBuilder<WrappedEntryState>(
                           valueListenable: wrappedService.stateListenable,
@@ -151,19 +151,19 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                         );
                       case SectionType.location:
                         return LocationsSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.contacts:
                         return const SizedBox.shrink();
                       case SectionType.fileTypesAndExtension:
                         return FileTypeSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
                       case SectionType.magic:
                         return MagicSection(
-                          snapshot.data!.elementAt(sectionIndex)
+                          snapshot.data!.elementAt(index)
                               as List<GenericSearchResult>,
                         );
                     }
@@ -222,6 +222,32 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RitualsDiscoverySection extends StatelessWidget {
+  const _RitualsDiscoverySection();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!flagService.ritualsFlag) {
+      return const SizedBox.shrink();
+    }
+    final textTheme = getEnteTextTheme(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          child: Text(
+            "Rituals",
+            style: textTheme.largeBold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        const ActivityBanner(),
+      ],
     );
   }
 }
