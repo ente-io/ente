@@ -83,7 +83,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               ),
               icon: const HugeIcon(
                 icon: HugeIcons.strokeRoundedPlusSign,
-                size: 22,
+                size: 24,
               ),
               onPressed: () async {
                 await showRitualEditor(context, ritual: null);
@@ -159,8 +159,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                   )
                               : null,
                           child: SizedBox(
-                            width: 44,
-                            height: 44,
+                            width: 48,
+                            height: 48,
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: DecoratedBox(
@@ -172,7 +172,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                   padding: const EdgeInsets.all(8),
                                   child: HugeIcon(
                                     icon: HugeIcons.strokeRoundedShare08,
-                                    size: 22,
+                                    size: 24,
                                     color: shareEnabled
                                         ? iconColor
                                         : Theme.of(context)
