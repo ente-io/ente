@@ -623,5 +623,20 @@
   "chooseIcon": "Choose icon",
   "customOrder": "Custom order",
   "selectAnOption": "Select an option",
-  "todaysLogs": "Today's logs"
+  "todaysLogs": "Today's logs",
+  "importAndOTPGuide": "Export your backup from andOTP using the \"Backup\" option in Settings.\n\nIf your backup is encrypted, you will need to enter the backup password to decrypt it.",
+  "enterPasswordToDecryptAndOTP": "Enter password to decrypt andOTP backup",
+  "failedToDecryptAndOTPBackup": "Failed to decrypt andOTP backup",
+  "andOTPSkippedEntriesTitle": "{count, plural, =1{1 entry skipped} other{{count} entries skipped}}",
+  "@andOTPSkippedEntriesTitle": {
+    "description": "Title showing how many entries were skipped during andOTP import",
+    "placeholders": {
+      "count": {
+        "description": "Number of entries skipped",
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "andOTPSkippedEntriesReason": "These entries use unsupported formats (such as MOTP) and could not be imported."
 }
