@@ -58,6 +58,10 @@ import {
 import type { JourneyPoint } from "../TripLayout/types";
 import { generateNeededThumbnails } from "../TripLayout/utils/dataProcessing";
 
+// ============================================================================
+// Types
+// ============================================================================
+
 interface MapComponents {
     MapContainer: typeof import("react-leaflet").MapContainer;
     TileLayer: typeof import("react-leaflet").TileLayer;
@@ -76,248 +80,35 @@ interface PhotoGroup {
     photos: JourneyPoint[];
 }
 
-interface MapControlsProps {
-    useMap: typeof import("react-leaflet").useMap;
-    onClose: () => void;
+interface MapDataState {
+    mapCenter: [number, number] | null;
+    mapPhotos: JourneyPoint[];
+    filesByID: Map<number, EnteFile>;
+    thumbByFileID: Map<number, string>;
+    isLoading: boolean;
+    error: string | null;
 }
 
-const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => {
-    const baseSx = {
-        bgcolor: (theme: {
-            vars: { palette: { background: { paper: string } } };
-        }) => theme.vars.palette.background.paper,
-        boxShadow: (theme: { shadows: string[] }) => theme.shadows[4],
-        width: 48,
-        height: 48,
-        borderRadius: "16px",
-        transition: "transform 0.2s ease-out",
-        "&:hover": {
-            bgcolor: (theme: {
-                vars: { palette: { background: { paper: string } } };
-            }) => theme.vars.palette.background.paper,
-            transform: "scale(1.05)",
-        },
-    };
-
-    const mergedSx =
-        sx == null
-            ? baseSx
-            : Array.isArray(sx)
-              ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                [baseSx, ...sx]
-              : [baseSx, sx];
-
-    return <IconButton {...props} sx={mergedSx} />;
-};
-
-const MapControls: React.FC<MapControlsProps> = ({ useMap, onClose }) => {
-    const map = useMap();
-
-    const handleZoomIn = () => {
-        map.zoomIn();
-    };
-
-    const handleZoomOut = () => {
-        map.zoomOut();
-    };
-
-    const handleOpenInMaps = () => {
-        const center = map.getCenter();
-        const url = `https://www.google.com/maps?q=${center.lat},${center.lng}&z=${map.getZoom()}`;
-        window.open(url, "_blank", "noopener,noreferrer");
-    };
-
-    return (
-        <>
-            {/* Back button - Top Left */}
-            <FloatingIconButton
-                onClick={onClose}
-                sx={{ position: "absolute", left: 16, top: 16, zIndex: 1000 }}
-            >
-                <ArrowBackIcon />
-            </FloatingIconButton>
-
-            {/* Open in external map - Top Right */}
-            <FloatingIconButton
-                onClick={handleOpenInMaps}
-                sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
-            >
-                <NavigationIcon />
-            </FloatingIconButton>
-
-            {/* Zoom controls - Bottom Right */}
-            <Stack
-                spacing={1}
-                sx={{
-                    position: "absolute",
-                    right: 16,
-                    bottom: 16,
-                    zIndex: 1000,
-                }}
-            >
-                <FloatingIconButton onClick={handleZoomIn}>
-                    <AddIcon />
-                </FloatingIconButton>
-                <FloatingIconButton onClick={handleZoomOut}>
-                    <RemoveIcon />
-                </FloatingIconButton>
-            </Stack>
-        </>
-    );
-};
-
-interface MapViewportListenerProps {
-    useMap: typeof import("react-leaflet").useMap;
-    photos: JourneyPoint[];
-    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+interface FileViewerState {
+    open: boolean;
+    currentIndex: number;
+    files: EnteFile[];
 }
 
-const MapViewportListener: React.FC<MapViewportListenerProps> = ({
-    useMap,
-    photos,
-    onVisiblePhotosChange,
-}) => {
-    const map = useMap();
-    const previousVisibleIds = useRef<string | null>(null);
-    const previousClusterCount = useRef<number | null>(null);
+interface FavoritesState {
+    favoriteFileIDs: Set<number>;
+    pendingFavoriteUpdates: Set<number>;
+    pendingVisibilityUpdates: Set<number>;
+}
 
-    const getClusterCount = useCallback(() => {
-        const container = map.getContainer();
+// ============================================================================
+// Custom Hooks
+// ============================================================================
 
-        return container.querySelectorAll(".marker-cluster").length;
-    }, [map]);
-
-    const updateVisiblePhotos = useCallback(() => {
-        const bounds = map.getBounds();
-        const inView = photos.filter((photo) =>
-            bounds.contains([photo.lat, photo.lng]),
-        );
-        const idsSignature = inView
-            .map((photo) => photo.fileId)
-            .sort((a, b) => a - b)
-            .join(",");
-        const clusterCount = getClusterCount();
-        const clusterChanged = previousClusterCount.current !== clusterCount;
-
-        if (previousVisibleIds.current === idsSignature && !clusterChanged) {
-            return;
-        }
-
-        previousVisibleIds.current = idsSignature;
-        previousClusterCount.current = clusterCount;
-        onVisiblePhotosChange(inView);
-    }, [getClusterCount, map, onVisiblePhotosChange, photos]);
-
-    useEffect(() => {
-        if (!photos.length) {
-            previousVisibleIds.current = "";
-            previousClusterCount.current = getClusterCount();
-            onVisiblePhotosChange([]);
-            return;
-        }
-        updateVisiblePhotos();
-    }, [
-        getClusterCount,
-        map,
-        photos,
-        onVisiblePhotosChange,
-        updateVisiblePhotos,
-    ]);
-
-    useEffect(() => {
-        map.on("moveend", updateVisiblePhotos);
-        map.on("zoomend", updateVisiblePhotos);
-        return () => {
-            map.off("moveend", updateVisiblePhotos);
-            map.off("zoomend", updateVisiblePhotos);
-        };
-    }, [map, updateVisiblePhotos]);
-
-    return null;
-};
-
-export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
-    open,
-    onClose,
-    collectionSummary,
-    activeCollection,
-}) => {
-    const { onGenericError } = useBaseContext();
-
+function useMapComponents() {
     const [mapComponents, setMapComponents] = useState<MapComponents | null>(
         null,
-    ); // for storing the leaflet elements
-
-    const [mapCenter, setMapCenter] = useState<[number, number] | null>(null); //stores the center fo the map for rendering
-
-    const [filesByID, setFilesByID] = useState<Map<number, EnteFile>>(
-        new Map(),
-    ); //maintains a map for the files in view for the thumbnail population
-
-    const [mapPhotos, setMapPhotos] = useState<JourneyPoint[]>([]); //flat list of all geotagged photos, powers the map markers
-    const [thumbByFileID, setThumbByFileID] = useState<Map<number, string>>(
-        new Map(),
-    ); // map storing the file thumbnails against the fileID for showing the file thumbnails in the left sidebar
-    const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
-    const [visiblePhotosWave, setVisiblePhotosWave] = useState(0);
-
-    // FileViewer state
-    const [openFileViewer, setOpenFileViewer] = useState(false);
-    const [currentFileIndex, setCurrentFileIndex] = useState(0);
-    const [viewerFiles, setViewerFiles] = useState<EnteFile[]>([]);
-
-    // Favorite and visibility state for FileViewer
-    const [favoriteFileIDs, setFavoriteFileIDs] = useState<Set<number>>(
-        new Set(),
     );
-    const [pendingFavoriteUpdates, setPendingFavoriteUpdates] = useState<
-        Set<number>
-    >(new Set());
-    const [pendingVisibilityUpdates, setPendingVisibilityUpdates] = useState<
-        Set<number>
-    >(new Set());
-
-    const user = useMemo(() => {
-        try {
-            return ensureLocalUser();
-        } catch {
-            return undefined;
-        }
-    }, []);
-
-    const formatDateLabel = (timestamp: string) =>
-        new Date(timestamp).toLocaleDateString(undefined, {
-            weekday: "long",
-            day: "numeric",
-            month: "short",
-        });
-
-    const photoGroups = useMemo<PhotoGroup[]>(() => {
-        const groups = new Map<string, JourneyPoint[]>();
-        visiblePhotos.forEach((p) => {
-            const dateLabel = formatDateLabel(p.timestamp);
-            if (!groups.has(dateLabel)) {
-                groups.set(dateLabel, []);
-            }
-            groups.get(dateLabel)!.push(p);
-        });
-        return Array.from(groups.entries()).map(([dateLabel, photos]) => ({
-            dateLabel,
-            photos,
-        }));
-    }, [visiblePhotos]);
-
-    const visiblePhotoOrder = useMemo(() => {
-        return new Map(visiblePhotos.map((p, index) => [p.fileId, index]));
-    }, [visiblePhotos]);
-
-    useEffect(() => {
-        setVisiblePhotosWave((wave) => wave + 1);
-    }, [visiblePhotos]);
-
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const optimalZoom = calculateOptimalZoom();
 
     useEffect(() => {
         void Promise.all([
@@ -338,13 +129,163 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             });
     }, []);
 
+    return mapComponents;
+}
+
+function useCurrentUser() {
+    return useMemo(() => {
+        try {
+            return ensureLocalUser();
+        } catch {
+            return undefined;
+        }
+    }, []);
+}
+
+function useMapData(
+    open: boolean,
+    collectionSummary: CollectionSummary,
+    activeCollection: Collection,
+    onGenericError: (e: unknown) => void,
+): MapDataState {
+    const [state, setState] = useState<MapDataState>({
+        mapCenter: null,
+        mapPhotos: [],
+        filesByID: new Map(),
+        thumbByFileID: new Map(),
+        isLoading: false,
+        error: null,
+    });
+
+    const loadAllThumbs = useCallback(
+        async (points: JourneyPoint[], files: EnteFile[]) => {
+            const sortedPoints = [...points].sort(
+                (a, b) =>
+                    new Date(b.timestamp).getTime() -
+                    new Date(a.timestamp).getTime(),
+            );
+
+            const entries = await Promise.all(
+                sortedPoints.map(async (p) => {
+                    if (p.image) return [p.fileId, p.image] as const;
+                    const file = files.find((f) => f.id === p.fileId);
+                    if (!file) return [p.fileId, undefined] as const;
+                    try {
+                        const thumb =
+                            await downloadManager.renderableThumbnailURL(file);
+                        return [p.fileId, thumb] as const;
+                    } catch {
+                        return [p.fileId, undefined] as const;
+                    }
+                }),
+            );
+
+            setState((prev) => ({
+                ...prev,
+                thumbByFileID: new Map(
+                    entries.filter(([, t]) => t !== undefined) as [
+                        number,
+                        string,
+                    ][],
+                ),
+            }));
+        },
+        [],
+    );
+
     useEffect(() => {
         if (!open) return;
-        void loadMapData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, collectionSummary.id, activeCollection.id]);
 
-    // Load favorite file IDs when dialog opens
+        const loadMapData = async () => {
+            setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+            try {
+                const files = await getFilesForCollection(
+                    collectionSummary,
+                    activeCollection,
+                );
+                const locationPoints = extractLocationPoints(files);
+
+                if (!locationPoints.length) {
+                    setState({
+                        mapCenter: null,
+                        filesByID: new Map(),
+                        mapPhotos: [],
+                        thumbByFileID: new Map(),
+                        isLoading: false,
+                        error: null,
+                    });
+                    return;
+                }
+
+                locationPoints.sort(
+                    (a, b) =>
+                        new Date(b.timestamp).getTime() -
+                        new Date(a.timestamp).getTime(),
+                );
+
+                const { thumbnailUpdates } = await generateNeededThumbnails({
+                    photoClusters: [locationPoints],
+                    files,
+                });
+
+                const pointsWithThumbs = locationPoints.map((point) => {
+                    const thumb = thumbnailUpdates.get(point.fileId);
+                    return thumb ? { ...point, image: thumb } : point;
+                });
+
+                setState({
+                    filesByID: new Map(files.map((file) => [file.id, file])),
+                    mapCenter: getMapCenter([], pointsWithThumbs),
+                    mapPhotos: pointsWithThumbs,
+                    thumbByFileID: new Map(),
+                    isLoading: false,
+                    error: null,
+                });
+
+                void loadAllThumbs(pointsWithThumbs, files);
+            } catch (e) {
+                setState((prev) => ({
+                    ...prev,
+                    isLoading: false,
+                    error: t("something_went_wrong"),
+                }));
+                onGenericError(e);
+            }
+        };
+
+        void loadMapData();
+    }, [
+        open,
+        collectionSummary,
+        activeCollection,
+        onGenericError,
+        loadAllThumbs,
+    ]);
+
+    return state;
+}
+
+function useFavorites(
+    open: boolean,
+    user: ReturnType<typeof useCurrentUser>,
+): FavoritesState & {
+    handleToggleFavorite: (file: EnteFile) => Promise<void>;
+    handleFileVisibilityUpdate: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+} {
+    const [favoriteFileIDs, setFavoriteFileIDs] = useState<Set<number>>(
+        new Set(),
+    );
+    const [pendingFavoriteUpdates, setPendingFavoriteUpdates] = useState<
+        Set<number>
+    >(new Set());
+    const [pendingVisibilityUpdates, setPendingVisibilityUpdates] = useState<
+        Set<number>
+    >(new Set());
+
     useEffect(() => {
         if (!open || !user) return;
 
@@ -420,130 +361,109 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         [],
     );
 
-    const loadAllThumbs = async (points: JourneyPoint[], files: EnteFile[]) => {
-        const sortedPoints = [...points].sort(
-            (a, b) =>
-                new Date(b.timestamp).getTime() -
-                new Date(a.timestamp).getTime(),
-        );
-
-        const entries = await Promise.all(
-            sortedPoints.map(async (p) => {
-                if (p.image) return [p.fileId, p.image] as const;
-                const file =
-                    filesByID.get(p.fileId) ??
-                    files.find((f) => f.id === p.fileId);
-                if (!file) return [p.fileId, undefined] as const;
-                try {
-                    const thumb =
-                        await downloadManager.renderableThumbnailURL(file);
-                    return [p.fileId, thumb] as const;
-                } catch {
-                    return [p.fileId, undefined] as const;
-                }
-            }),
-        );
-
-        setThumbByFileID(
-            new Map(
-                entries.filter(([, t]) => t !== undefined) as [
-                    number,
-                    string,
-                ][],
-            ),
-        );
+    return {
+        favoriteFileIDs,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        handleToggleFavorite,
+        handleFileVisibilityUpdate,
     };
+}
 
-    const loadMapData = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const files = await filesForCollection();
+function useFileViewer(
+    filesByID: Map<number, EnteFile>,
+    visiblePhotos: JourneyPoint[],
+): FileViewerState & {
+    handlePhotoClick: (fileId: number) => void;
+    handleClose: () => void;
+} {
+    const [state, setState] = useState<FileViewerState>({
+        open: false,
+        currentIndex: 0,
+        files: [],
+    });
 
-            const locationPoints: JourneyPoint[] = [];
-            files.forEach((file) => {
-                const loc = fileLocation(file);
-                if (!loc) return;
-                locationPoints.push({
-                    lat: loc.latitude,
-                    lng: loc.longitude,
-                    name: fileFileName(file),
-                    country: "",
-                    timestamp: new Date(
-                        fileCreationTime(file) / 1000,
-                    ).toISOString(),
-                    image: "",
-                    fileId: file.id,
+    const handlePhotoClick = useCallback(
+        (fileId: number) => {
+            const visibleFileIds = new Set(visiblePhotos.map((p) => p.fileId));
+            const visibleFiles = Array.from(filesByID.values())
+                .filter((f) => visibleFileIds.has(f.id))
+                .sort(
+                    (a, b) =>
+                        new Date(fileCreationTime(b) / 1000).getTime() -
+                        new Date(fileCreationTime(a) / 1000).getTime(),
+                );
+
+            const clickedIndex = visibleFiles.findIndex((f) => f.id === fileId);
+
+            if (clickedIndex !== -1 && visibleFiles.length > 0) {
+                setState({
+                    files: visibleFiles,
+                    currentIndex: clickedIndex,
+                    open: true,
                 });
-            });
-
-            if (!locationPoints.length) {
-                setMapCenter(null);
-                setFilesByID(new Map());
-                setMapPhotos([]);
-                return;
             }
+        },
+        [filesByID, visiblePhotos],
+    );
 
-            locationPoints.sort(
-                (a, b) =>
-                    new Date(b.timestamp).getTime() -
-                    new Date(a.timestamp).getTime(),
-            );
+    const handleClose = useCallback(() => {
+        setState((prev) => ({ ...prev, open: false }));
+    }, []);
 
-            // Generate thumbnails for all photos
-            const { thumbnailUpdates } = await generateNeededThumbnails({
-                photoClusters: [locationPoints], // Wrap in array for compatibility
-                files,
-            });
+    return { ...state, handlePhotoClick, handleClose };
+}
 
-            const pointsWithThumbs = locationPoints.map((point) => {
-                const thumb = thumbnailUpdates.get(point.fileId);
-                return thumb ? { ...point, image: thumb } : point;
-            });
+function useVisiblePhotos() {
+    const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
+    const [visiblePhotosWave, setVisiblePhotosWave] = useState(0);
 
-            setFilesByID(new Map(files.map((file) => [file.id, file])));
-            setMapCenter(getMapCenter([], pointsWithThumbs));
-            setMapPhotos(pointsWithThumbs);
-            void loadAllThumbs(pointsWithThumbs, files);
-        } catch (e) {
-            setError(t("something_went_wrong"));
-            onGenericError(e);
-        } finally {
-            setIsLoading(false);
-        }
+    useEffect(() => {
+        setVisiblePhotosWave((wave) => wave + 1);
+    }, [visiblePhotos]);
+
+    const photoGroups = useMemo<PhotoGroup[]>(() => {
+        const groups = new Map<string, JourneyPoint[]>();
+        visiblePhotos.forEach((p) => {
+            const dateLabel = formatDateLabel(p.timestamp);
+            if (!groups.has(dateLabel)) {
+                groups.set(dateLabel, []);
+            }
+            groups.get(dateLabel)!.push(p);
+        });
+        return Array.from(groups.entries()).map(([dateLabel, photos]) => ({
+            dateLabel,
+            photos,
+        }));
+    }, [visiblePhotos]);
+
+    const visiblePhotoOrder = useMemo(
+        () => new Map(visiblePhotos.map((p, index) => [p.fileId, index])),
+        [visiblePhotos],
+    );
+
+    return {
+        visiblePhotos,
+        setVisiblePhotos,
+        visiblePhotosWave,
+        photoGroups,
+        visiblePhotoOrder,
     };
+}
 
-    const filesForCollection = async () => {
-        const allFiles = await savedCollectionFiles();
-        const filtered =
-            collectionSummary.type === "hiddenItems"
-                ? await filesForHiddenItems(allFiles)
-                : allFiles.filter(
-                      (file) => file.collectionID === activeCollection.id,
-                  );
-
-        return uniqueFilesByID(filtered);
-    };
-
-    const filesForHiddenItems = async (files: EnteFile[]) => {
-        const hiddenCollections = findDefaultHiddenCollectionIDs(
-            await savedCollections(),
-        );
-        return files.filter((file) => hiddenCollections.has(file.collectionID));
-    };
-
-    // Map to store position -> photo data for cluster icon access
+function useClusterIcon(
+    mapPhotos: JourneyPoint[],
+    thumbByFileID: Map<number, string>,
+) {
     const photosByPosition = useMemo(() => {
         const map = new Map<string, JourneyPoint>();
         mapPhotos.forEach((photo) => {
-            const key = `${photo.lat},${photo.lng}`;
-            map.set(key, photo);
+            map.set(`${photo.lat},${photo.lng}`, photo);
         });
         return map;
     }, [mapPhotos]);
 
-    // Custom cluster icon creator function for react-leaflet-cluster
-    const createClusterCustomIcon = useCallback(
+    return useCallback(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (cluster: any) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -551,7 +471,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const childMarkers = cluster.getAllChildMarkers();
 
-            // Get the first marker with an image as the cluster thumbnail
             let thumbnailUrl = "";
             for (const marker of childMarkers) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
@@ -560,7 +479,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 const key = `${latlng.lat},${latlng.lng}`;
                 const photo = photosByPosition.get(key);
                 if (photo) {
-                    // Use thumbByFileID first, fallback to photo.image
                     const thumb =
                         thumbByFileID.get(photo.fileId) ?? photo.image;
                     if (thumb) {
@@ -575,35 +493,104 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         },
         [photosByPosition, thumbByFileID],
     );
+}
 
-    // Handle thumbnail click to open FileViewer
-    const handlePhotoClick = useCallback(
-        (fileId: number) => {
-            // Get only the files that are currently visible in the sidebar
-            const visibleFileIds = new Set(visiblePhotos.map((p) => p.fileId));
-            const visibleFiles = Array.from(filesByID.values())
-                .filter((f) => visibleFileIds.has(f.id))
-                .sort(
-                    (a, b) =>
-                        new Date(fileCreationTime(b) / 1000).getTime() -
-                        new Date(fileCreationTime(a) / 1000).getTime(),
-                );
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
-            // Find the index of the clicked file
-            const clickedIndex = visibleFiles.findIndex((f) => f.id === fileId);
+function formatDateLabel(timestamp: string): string {
+    return new Date(timestamp).toLocaleDateString(undefined, {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+    });
+}
 
-            if (clickedIndex !== -1 && visibleFiles.length > 0) {
-                setViewerFiles(visibleFiles);
-                setCurrentFileIndex(clickedIndex);
-                setOpenFileViewer(true);
-            }
-        },
-        [filesByID, visiblePhotos],
+async function getFilesForCollection(
+    collectionSummary: CollectionSummary,
+    activeCollection: Collection,
+): Promise<EnteFile[]> {
+    const allFiles = await savedCollectionFiles();
+    const filtered =
+        collectionSummary.type === "hiddenItems"
+            ? await getHiddenFiles(allFiles)
+            : allFiles.filter(
+                  (file) => file.collectionID === activeCollection.id,
+              );
+    return uniqueFilesByID(filtered);
+}
+
+async function getHiddenFiles(files: EnteFile[]): Promise<EnteFile[]> {
+    const hiddenCollections = findDefaultHiddenCollectionIDs(
+        await savedCollections(),
     );
+    return files.filter((file) => hiddenCollections.has(file.collectionID));
+}
 
-    const handleCloseFileViewer = useCallback(() => {
-        setOpenFileViewer(false);
-    }, []);
+function extractLocationPoints(files: EnteFile[]): JourneyPoint[] {
+    return files
+        .map((file) => {
+            const loc = fileLocation(file);
+            if (!loc) return null;
+            return {
+                lat: loc.latitude,
+                lng: loc.longitude,
+                name: fileFileName(file),
+                country: "",
+                timestamp: new Date(
+                    fileCreationTime(file) / 1000,
+                ).toISOString(),
+                image: "",
+                fileId: file.id,
+            };
+        })
+        .filter((point): point is JourneyPoint => point !== null);
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
+    open,
+    onClose,
+    collectionSummary,
+    activeCollection,
+}) => {
+    const { onGenericError } = useBaseContext();
+    const mapComponents = useMapComponents();
+    const user = useCurrentUser();
+    const optimalZoom = calculateOptimalZoom();
+
+    const { mapCenter, mapPhotos, filesByID, thumbByFileID, isLoading, error } =
+        useMapData(open, collectionSummary, activeCollection, onGenericError);
+
+    const {
+        visiblePhotos,
+        setVisiblePhotos,
+        visiblePhotosWave,
+        photoGroups,
+        visiblePhotoOrder,
+    } = useVisiblePhotos();
+
+    const {
+        favoriteFileIDs,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        handleToggleFavorite,
+        handleFileVisibilityUpdate,
+    } = useFavorites(open, user);
+
+    const {
+        open: openFileViewer,
+        currentIndex: currentFileIndex,
+        files: viewerFiles,
+        handlePhotoClick,
+        handleClose: handleCloseFileViewer,
+    } = useFileViewer(filesByID, visiblePhotos);
+
+    const createClusterCustomIcon = useClusterIcon(mapPhotos, thumbByFileID);
 
     const body = useMemo(() => {
         if (isLoading) {
@@ -677,6 +664,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         onClose,
         optimalZoom,
         photoGroups,
+        setVisiblePhotos,
         thumbByFileID,
         visiblePhotoOrder,
         visiblePhotos,
@@ -697,7 +685,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 onToggleFavorite={handleToggleFavorite}
                 onFileVisibilityUpdate={handleFileVisibilityUpdate}
                 onVisualFeedback={() => {
-                    // No-op for map view
+                    /* no-op for map view */
                 }}
                 zIndex={1301}
             />
@@ -721,6 +709,10 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         </>
     );
 };
+
+// ============================================================================
+// Layout Components
+// ============================================================================
 
 interface MapLayoutProps {
     collectionSummary: CollectionSummary;
@@ -759,7 +751,7 @@ function MapLayout({
         <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
             <CollectionSidebar
                 collectionSummary={collectionSummary}
-                visiblePhotos={visiblePhotos}
+                visibleCount={visiblePhotos.length}
                 photoGroups={photoGroups}
                 mapPhotosCount={mapPhotos.length}
                 thumbByFileID={thumbByFileID}
@@ -783,9 +775,13 @@ function MapLayout({
     );
 }
 
+// ============================================================================
+// Sidebar Components
+// ============================================================================
+
 interface CollectionSidebarProps {
     collectionSummary: CollectionSummary;
-    visiblePhotos: JourneyPoint[];
+    visibleCount: number;
     photoGroups: PhotoGroup[];
     mapPhotosCount: number;
     thumbByFileID: Map<number, string>;
@@ -796,7 +792,7 @@ interface CollectionSidebarProps {
 
 function CollectionSidebar({
     collectionSummary,
-    visiblePhotos,
+    visibleCount,
     photoGroups,
     mapPhotosCount,
     thumbByFileID,
@@ -818,9 +814,9 @@ function CollectionSidebar({
             }}
         >
             <SidebarHeader
-                collectionSummary={collectionSummary}
-                visibleCount={visiblePhotos.length}
-                mapPhotosCount={mapPhotosCount}
+                name={collectionSummary.name}
+                visibleCount={visibleCount}
+                missingCount={collectionSummary.fileCount - mapPhotosCount}
             />
             <PhotoList
                 photoGroups={photoGroups}
@@ -834,18 +830,16 @@ function CollectionSidebar({
 }
 
 interface SidebarHeaderProps {
-    collectionSummary: CollectionSummary;
+    name: string;
     visibleCount: number;
-    mapPhotosCount: number;
+    missingCount: number;
 }
 
 function SidebarHeader({
-    collectionSummary,
+    name,
     visibleCount,
-    mapPhotosCount,
+    missingCount,
 }: SidebarHeaderProps) {
-    const missingCount = collectionSummary.fileCount - mapPhotosCount;
-
     return (
         <Box
             sx={{
@@ -854,52 +848,42 @@ function SidebarHeader({
                 mx: -2,
                 px: 2,
                 pt: 2,
+                pb: 2,
                 bgcolor: (theme) => theme.vars.palette.background.paper,
                 zIndex: 3,
-                pb: 2,
             }}
         >
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 1,
-                }}
-            >
-                <Stack>
-                    <Typography variant="h5" sx={{ fontWeight: 700 }} noWrap>
-                        {collectionSummary.name}
-                    </Typography>
-                    <Typography
-                        variant="body"
-                        color="text.secondary"
-                        sx={{
-                            mt: 0.25,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.5,
-                        }}
-                    >
-                        {visibleCount}{" "}
-                        {t("memories", { defaultValue: "memories" })}
-                        {missingCount > 0 && (
-                            <Tooltip
-                                title={`${missingCount} images aren't shown since they don't have the proper location metadata`}
-                                arrow
-                            >
-                                <InfoOutlinedIcon
-                                    sx={{
-                                        fontSize: 16,
-                                        color: "text.muted",
-                                        cursor: "pointer",
-                                    }}
-                                />
-                            </Tooltip>
-                        )}
-                    </Typography>
-                </Stack>
-            </Box>
+            <Stack>
+                <Typography variant="h5" sx={{ fontWeight: 700 }} noWrap>
+                    {name}
+                </Typography>
+                <Typography
+                    variant="body"
+                    color="text.secondary"
+                    sx={{
+                        mt: 0.25,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                    }}
+                >
+                    {visibleCount} {t("memories", { defaultValue: "memories" })}
+                    {missingCount > 0 && (
+                        <Tooltip
+                            title={`${missingCount} images aren't shown since they don't have the proper location metadata`}
+                            arrow
+                        >
+                            <InfoOutlinedIcon
+                                sx={{
+                                    fontSize: 16,
+                                    color: "text.muted",
+                                    cursor: "pointer",
+                                }}
+                            />
+                        </Tooltip>
+                    )}
+                </Typography>
+            </Stack>
         </Box>
     );
 }
@@ -921,7 +905,7 @@ function PhotoList({
 }: PhotoListProps) {
     if (!photoGroups.length) {
         return (
-            <NoVisiblePhotos>
+            <EmptyState>
                 <Typography variant="body" sx={{ fontWeight: 600 }}>
                     {t("no_photos_found_here", {
                         defaultValue: "No photos found here",
@@ -932,61 +916,84 @@ function PhotoList({
                         defaultValue: "Zoom out to see photos",
                     })}
                 </Typography>
-            </NoVisiblePhotos>
+            </EmptyState>
         );
     }
 
     return (
         <Stack spacing={1.5}>
             {photoGroups.map(({ dateLabel, photos }) => (
-                <Stack key={dateLabel} spacing={0.75}>
-                    <Box
-                        sx={{
-                            position: "sticky",
-                            top: 56,
-                            bgcolor: (theme) =>
-                                theme.vars.palette.background.paper,
-                            zIndex: 2,
-                            py: 1.5,
-                            ml: -2,
-                            mr: -2,
-                            pr: 2,
-                        }}
-                    >
-                        <Typography variant="small" color="text.secondary">
-                            {dateLabel}
-                        </Typography>
-                    </Box>
-                    <ThumbRow>
-                        {photos.map((photo, idx) => {
-                            const thumb = thumbByFileID.get(photo.fileId);
-                            const photoOrderIndex =
-                                visiblePhotoOrder.get(photo.fileId) ?? idx;
-                            const animationDelay = photoOrderIndex * 30;
-                            if (!thumb) {
-                                return (
-                                    <PlaceholderThumb
-                                        key={`${photo.fileId}-${visiblePhotosWave}`}
-                                        animationDelay={animationDelay}
-                                    />
-                                );
-                            }
-                            return (
-                                <ThumbImage
-                                    key={`${photo.fileId}-${visiblePhotosWave}`}
-                                    src={thumb}
-                                    alt={t("view_on_map")}
-                                    onClick={() => onPhotoClick(photo.fileId)}
-                                    animationDelay={animationDelay}
-                                />
-                            );
-                        })}
-                    </ThumbRow>
-                </Stack>
+                <PhotoDateGroup
+                    key={dateLabel}
+                    dateLabel={dateLabel}
+                    photos={photos}
+                    thumbByFileID={thumbByFileID}
+                    visiblePhotoOrder={visiblePhotoOrder}
+                    visiblePhotosWave={visiblePhotosWave}
+                    onPhotoClick={onPhotoClick}
+                />
             ))}
         </Stack>
     );
 }
+
+interface PhotoDateGroupProps {
+    dateLabel: string;
+    photos: JourneyPoint[];
+    thumbByFileID: Map<number, string>;
+    visiblePhotoOrder: Map<number, number>;
+    visiblePhotosWave: number;
+    onPhotoClick: (fileId: number) => void;
+}
+
+function PhotoDateGroup({
+    dateLabel,
+    photos,
+    thumbByFileID,
+    visiblePhotoOrder,
+    visiblePhotosWave,
+    onPhotoClick,
+}: PhotoDateGroupProps) {
+    return (
+        <Stack spacing={0.75}>
+            <Box
+                sx={{
+                    position: "sticky",
+                    top: 56,
+                    bgcolor: (theme) => theme.vars.palette.background.paper,
+                    zIndex: 2,
+                    py: 1.5,
+                    ml: -2,
+                    mr: -2,
+                    pr: 2,
+                }}
+            >
+                <Typography variant="small" color="text.secondary">
+                    {dateLabel}
+                </Typography>
+            </Box>
+            <ThumbGrid>
+                {photos.map((photo, idx) => {
+                    const thumb = thumbByFileID.get(photo.fileId);
+                    const delay =
+                        (visiblePhotoOrder.get(photo.fileId) ?? idx) * 30;
+                    return (
+                        <ThumbImage
+                            key={`${photo.fileId}-${visiblePhotosWave}`}
+                            src={thumb}
+                            onClick={() => onPhotoClick(photo.fileId)}
+                            animationDelay={delay}
+                        />
+                    );
+                })}
+            </ThumbGrid>
+        </Stack>
+    );
+}
+
+// ============================================================================
+// Map Components
+// ============================================================================
 
 interface MapCanvasProps {
     mapComponents: MapComponents;
@@ -1036,78 +1043,243 @@ function MapCanvas({
                 chunkedLoading
                 iconCreateFunction={createClusterCustomIcon}
                 maxClusterRadius={80}
-                spiderfyOnMaxZoom={true}
+                spiderfyOnMaxZoom
                 showCoverageOnHover={false}
-                zoomToBoundsOnClick={true}
-                animate={true}
-                animateAddingMarkers={true}
+                zoomToBoundsOnClick
+                animate
+                animateAddingMarkers
                 spiderfyDistanceMultiplier={1.5}
             >
-                {mapPhotos.map((photo) => {
-                    const thumbnailUrl =
-                        thumbByFileID.get(photo.fileId) ?? photo.image;
-                    const icon = createIcon(
-                        thumbnailUrl,
-                        68,
-                        "#f6f6f6",
-                        undefined,
-                        false,
-                    );
-                    return (
-                        <Marker
-                            key={photo.fileId}
-                            position={[photo.lat, photo.lng]}
-                            icon={icon ?? undefined}
-                        />
-                    );
-                })}
+                {mapPhotos.map((photo) => (
+                    <Marker
+                        key={photo.fileId}
+                        position={[photo.lat, photo.lng]}
+                        icon={
+                            createIcon(
+                                thumbByFileID.get(photo.fileId) ?? photo.image,
+                                68,
+                                "#f6f6f6",
+                                undefined,
+                                false,
+                            ) ?? undefined
+                        }
+                    />
+                ))}
             </MarkerClusterGroup>
         </MapContainer>
     );
 }
+
+interface MapControlsProps {
+    useMap: typeof import("react-leaflet").useMap;
+    onClose: () => void;
+}
+
+function MapControls({ useMap, onClose }: MapControlsProps) {
+    const map = useMap();
+
+    const handleOpenInMaps = () => {
+        const center = map.getCenter();
+        const url = `https://www.google.com/maps?q=${center.lat},${center.lng}&z=${map.getZoom()}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+    };
+
+    return (
+        <>
+            <FloatingIconButton
+                onClick={onClose}
+                sx={{ position: "absolute", left: 16, top: 16, zIndex: 1000 }}
+            >
+                <ArrowBackIcon />
+            </FloatingIconButton>
+
+            <FloatingIconButton
+                onClick={handleOpenInMaps}
+                sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
+            >
+                <NavigationIcon />
+            </FloatingIconButton>
+
+            <Stack
+                spacing={1}
+                sx={{
+                    position: "absolute",
+                    right: 16,
+                    bottom: 16,
+                    zIndex: 1000,
+                }}
+            >
+                <FloatingIconButton onClick={() => map.zoomIn()}>
+                    <AddIcon />
+                </FloatingIconButton>
+                <FloatingIconButton onClick={() => map.zoomOut()}>
+                    <RemoveIcon />
+                </FloatingIconButton>
+            </Stack>
+        </>
+    );
+}
+
+interface MapViewportListenerProps {
+    useMap: typeof import("react-leaflet").useMap;
+    photos: JourneyPoint[];
+    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+}
+
+function MapViewportListener({
+    useMap,
+    photos,
+    onVisiblePhotosChange,
+}: MapViewportListenerProps) {
+    const map = useMap();
+    const previousVisibleIds = useRef<string | null>(null);
+    const previousClusterCount = useRef<number | null>(null);
+
+    const getClusterCount = useCallback(
+        () => map.getContainer().querySelectorAll(".marker-cluster").length,
+        [map],
+    );
+
+    const updateVisiblePhotos = useCallback(() => {
+        const bounds = map.getBounds();
+        const inView = photos.filter((p) => bounds.contains([p.lat, p.lng]));
+
+        const idsSignature = inView
+            .map((p) => p.fileId)
+            .sort((a, b) => a - b)
+            .join(",");
+
+        const clusterCount = getClusterCount();
+        const clusterChanged = previousClusterCount.current !== clusterCount;
+
+        if (previousVisibleIds.current === idsSignature && !clusterChanged) {
+            return;
+        }
+
+        previousVisibleIds.current = idsSignature;
+        previousClusterCount.current = clusterCount;
+        onVisiblePhotosChange(inView);
+    }, [getClusterCount, map, onVisiblePhotosChange, photos]);
+
+    useEffect(() => {
+        if (!photos.length) {
+            previousVisibleIds.current = "";
+            previousClusterCount.current = getClusterCount();
+            onVisiblePhotosChange([]);
+            return;
+        }
+        updateVisiblePhotos();
+    }, [getClusterCount, photos, onVisiblePhotosChange, updateVisiblePhotos]);
+
+    useEffect(() => {
+        map.on("moveend", updateVisiblePhotos);
+        map.on("zoomend", updateVisiblePhotos);
+        return () => {
+            map.off("moveend", updateVisiblePhotos);
+            map.off("zoomend", updateVisiblePhotos);
+        };
+    }, [map, updateVisiblePhotos]);
+
+    return null;
+}
+
+// ============================================================================
+// UI Components
+// ============================================================================
+
+const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => {
+    const baseSx = {
+        bgcolor: (theme: {
+            vars: { palette: { background: { paper: string } } };
+        }) => theme.vars.palette.background.paper,
+        boxShadow: (theme: { shadows: string[] }) => theme.shadows[4],
+        width: 48,
+        height: 48,
+        borderRadius: "16px",
+        transition: "transform 0.2s ease-out",
+        "&:hover": {
+            bgcolor: (theme: {
+                vars: { palette: { background: { paper: string } } };
+            }) => theme.vars.palette.background.paper,
+            transform: "scale(1.05)",
+        },
+    };
+
+    const mergedSx =
+        sx == null
+            ? baseSx
+            : Array.isArray(sx)
+              ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                [baseSx, ...sx]
+              : [baseSx, sx];
+
+    return <IconButton {...props} sx={mergedSx} />;
+};
 
 interface CenteredBoxProps extends React.PropsWithChildren {
     onClose?: () => void;
     closeLabel?: string;
 }
 
-const CenteredBox: React.FC<CenteredBoxProps> = ({
-    children,
-    onClose,
-    closeLabel,
-}) => (
-    <Box
-        sx={{
-            width: "100%",
-            height: "100%",
-            minHeight: "420px",
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1,
-            flexDirection: "column",
-            textAlign: "center",
-        }}
-    >
-        {onClose ? (
-            <IconButton
-                aria-label={closeLabel ?? "Close"}
-                onClick={onClose}
-                sx={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    bgcolor: (theme) => theme.vars.palette.background.paper,
-                    boxShadow: (theme) => theme.shadows[2],
-                }}
-            >
-                <CloseIcon />
-            </IconButton>
-        ) : null}
-        {children}
-    </Box>
-);
+function CenteredBox({ children, onClose, closeLabel }: CenteredBoxProps) {
+    return (
+        <Box
+            sx={{
+                width: "100%",
+                height: "100%",
+                minHeight: "420px",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+                flexDirection: "column",
+                textAlign: "center",
+            }}
+        >
+            {onClose && (
+                <IconButton
+                    aria-label={closeLabel ?? "Close"}
+                    onClick={onClose}
+                    sx={{
+                        position: "absolute",
+                        top: 16,
+                        right: 16,
+                        bgcolor: (theme) => theme.vars.palette.background.paper,
+                        boxShadow: (theme) => theme.shadows[2],
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            )}
+            {children}
+        </Box>
+    );
+}
+
+function EmptyState({ children }: React.PropsWithChildren) {
+    return (
+        <Box
+            sx={{
+                minHeight: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                py: 4,
+                color: (theme) => theme.vars.palette.text.secondary,
+                gap: 0.5,
+            }}
+        >
+            {children}
+        </Box>
+    );
+}
+
+// ============================================================================
+// Thumbnail Components
+// ============================================================================
 
 const cascadeFadeIn = keyframes`
     from {
@@ -1120,85 +1292,66 @@ const cascadeFadeIn = keyframes`
     }
 `;
 
-const ThumbRow: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Box
-        sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 0.25,
-            pb: 1,
-            overflow: "hidden",
-        }}
-    >
-        {children}
-    </Box>
-);
+function ThumbGrid({ children }: React.PropsWithChildren) {
+    return (
+        <Box
+            sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 0.25,
+                pb: 1,
+                overflow: "hidden",
+            }}
+        >
+            {children}
+        </Box>
+    );
+}
 
-const NoVisiblePhotos: React.FC<React.PropsWithChildren> = ({ children }) => (
-    <Box
-        sx={{
-            minHeight: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            py: 4,
-            color: (theme) => theme.vars.palette.text.secondary,
-            gap: 0.5,
-        }}
-    >
-        {children}
-    </Box>
-);
-
-const ThumbImage = ({
-    src,
-    alt,
-    onClick,
-    animationDelay,
-}: {
-    src: string;
-    alt: string;
-    onClick?: () => void;
+interface ThumbImageProps {
+    src: string | undefined;
+    onClick: () => void;
     animationDelay: number;
-}) => (
-    <Box
-        component="img"
-        src={src}
-        alt={alt}
-        onClick={onClick}
-        sx={{
-            width: 140,
-            height: 140,
-            objectFit: "cover",
-            borderRadius: 0,
-            flexShrink: 0,
-            border: (theme) => `1px solid ${theme.palette.divider}`,
-            cursor: onClick ? "pointer" : "default",
-            transition: "transform 0.15s ease-in-out",
-            opacity: 0,
-            transformOrigin: "top left",
-            animation: `${cascadeFadeIn} 200ms ease-out forwards`,
-            animationDelay: `${animationDelay}ms`,
-            "&:hover": onClick ? { transform: "scale(1.02)" } : {},
-        }}
-    />
-);
+}
 
-const PlaceholderThumb = ({ animationDelay }: { animationDelay: number }) => (
-    <Box
-        sx={{
-            width: 140,
-            height: 140,
-            borderRadius: 0,
-            flexShrink: 0,
-            bgcolor: (theme) => theme.vars.palette.fill.faint,
-            border: (theme) => `1px solid ${theme.palette.divider}`,
-            opacity: 0,
-            transformOrigin: "top left",
-            animation: `${cascadeFadeIn} 200ms ease-out forwards`,
-            animationDelay: `${animationDelay}ms`,
-        }}
-    />
-);
+function ThumbImage({ src, onClick, animationDelay }: ThumbImageProps) {
+    const baseSx = {
+        width: 140,
+        height: 140,
+        borderRadius: 0,
+        flexShrink: 0,
+        border: (theme: { palette: { divider: string } }) =>
+            `1px solid ${theme.palette.divider}`,
+        opacity: 0,
+        transformOrigin: "top left",
+        animation: `${cascadeFadeIn} 200ms ease-out forwards`,
+        animationDelay: `${animationDelay}ms`,
+    };
+
+    if (!src) {
+        return (
+            <Box
+                sx={{
+                    ...baseSx,
+                    bgcolor: (theme) => theme.vars.palette.fill.faint,
+                }}
+            />
+        );
+    }
+
+    return (
+        <Box
+            component="img"
+            src={src}
+            alt=""
+            onClick={onClick}
+            sx={{
+                ...baseSx,
+                objectFit: "cover",
+                cursor: "pointer",
+                transition: "transform 0.15s ease-in-out",
+                "&:hover": { transform: "scale(1.02)" },
+            }}
+        />
+    );
+}
