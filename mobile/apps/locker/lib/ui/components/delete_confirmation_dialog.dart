@@ -2,7 +2,8 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import 'package:locker/l10n/l10n.dart';
+import "package:locker/l10n/l10n.dart";
+import "package:locker/ui/components/gradient_button.dart";
 
 class DeleteConfirmationResult {
   final ButtonResult buttonResult;
@@ -177,9 +178,8 @@ class _DeleteConfirmationBottomSheetState
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
+                child: GradientButton(
+                  onTap: () {
                     Navigator.of(context).pop(
                       DeleteConfirmationResult(
                         buttonResult: ButtonResult(ButtonAction.first),
@@ -187,19 +187,8 @@ class _DeleteConfirmationBottomSheetState
                       ),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.warning400,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    widget.deleteButtonLabel,
-                    style: textTheme.bodyBold.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
+                  text: widget.deleteButtonLabel,
+                  backgroundColor: colorScheme.warning400,
                 ),
               ),
             ],
