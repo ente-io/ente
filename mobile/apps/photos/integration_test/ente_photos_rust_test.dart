@@ -7,7 +7,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    await RustLib.init();
+    await EntePhotosRust.init();
   });
 
   test('Can call rust function', () {

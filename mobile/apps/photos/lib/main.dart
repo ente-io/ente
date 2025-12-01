@@ -68,7 +68,7 @@ bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await RustLib.init();
+  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();

@@ -1,5 +1,5 @@
 [package]
-name = "rust_lib_photos"
+name = "ente-photos-rust"
 version = "0.0.1"
 edition = "2024"
 
