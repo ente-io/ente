@@ -42,6 +42,7 @@ class DrawerPage extends StatelessWidget {
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.hasConfiguredAccount();
     final enteTextTheme = getEnteTextTheme(context);
+    const sectionSpacing = SizedBox(height: 8);
     final List<Widget> contents = [];
 
     if (hasLoggedIn) {
@@ -71,7 +72,7 @@ class DrawerPage extends StatelessWidget {
         const UsageCardWidget(),
         const SizedBox(height: 12),
         const LegacyCollectionsTrashWidget(),
-        const SizedBox(height: 12),
+        sectionSpacing,
       ]);
     }
 

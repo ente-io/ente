@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/drawer/about_section_widget.dart";
 import "package:locker/ui/drawer/account_section_widget.dart";
+import "package:locker/ui/drawer/security_section_widget.dart";
 import "package:locker/ui/drawer/social_section_widget.dart";
 import "package:locker/ui/drawer/support_section_widget.dart";
 import "package:locker/ui/drawer/theme_switch_widget.dart";
@@ -38,11 +39,10 @@ class SettingsWidgets extends StatelessWidget {
         sectionSpacing,
       ]);
 
-      // TODO(aman): Re-add after app-lock is implemented w/ Locker designs
-      // contents.addAll([
-      //   const SecuritySectionWidget(),
-      //   sectionSpacing,
-      // ]);
+      contents.addAll([
+        const SecuritySectionWidget(),
+        sectionSpacing,
+      ]);
 
       if (Platform.isAndroid ||
           Platform.isWindows ||
