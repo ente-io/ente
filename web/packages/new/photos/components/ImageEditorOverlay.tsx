@@ -81,6 +81,13 @@ export type ImageEditorOverlayProps = ModalVisibilityProps & {
         collection: Collection,
         enteFile: EnteFile,
     ) => void;
+    /**
+     * Optional z-index for the overlay.
+     *
+     * Use this when ImageEditorOverlay needs to appear above other
+     * dialogs/modals.
+     */
+    zIndex?: number;
 };
 
 const filterDefaultValues = {
@@ -105,6 +112,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     onClose,
     file,
     onSaveEditedCopy,
+    zIndex,
 }) => {
     const { showMiniDialog } = useBaseContext();
 
@@ -526,7 +534,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
                 width: "100%",
-                zIndex: "var(--mui-zIndex-modal)",
+                zIndex: zIndex ?? "var(--mui-zIndex-modal)",
             }}
             open
         >

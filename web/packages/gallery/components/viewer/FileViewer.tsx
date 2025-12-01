@@ -908,6 +908,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
+                zIndex={zIndex !== undefined ? zIndex + 1 : undefined}
                 {...{ collectionNameByID }}
             />
             <MoreMenu
@@ -916,6 +917,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 anchorEl={moreMenuAnchorEl}
                 id={moreMenuID}
                 slotProps={{ list: { "aria-labelledby": moreButtonID } }}
+                sx={zIndex !== undefined ? { zIndex: zIndex + 1 } : undefined}
             >
                 {activeAnnotatedFile.annotation.showDownload == "menu" && (
                     <MoreMenuItem onClick={handleDownloadMenuAction}>
@@ -989,6 +991,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 open={openConfirmDelete}
                 onClose={handleConfirmDeleteClose}
                 onConfirm={handleDelete}
+                zIndex={zIndex !== undefined ? zIndex + 1 : undefined}
             />
             {handleSaveEditedCopy && (
                 <ImageEditorOverlay
@@ -996,11 +999,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     onClose={handleImageEditorClose}
                     file={activeAnnotatedFile.file}
                     onSaveEditedCopy={handleSaveEditedCopy}
+                    zIndex={zIndex !== undefined ? zIndex + 1 : undefined}
                 />
             )}
             <Shortcuts
                 open={openShortcuts}
                 onClose={handleShortcutsClose}
+                zIndex={zIndex !== undefined ? zIndex + 1 : undefined}
                 {...{ disableDownload, haveUser }}
             />
         </>
@@ -1058,6 +1063,10 @@ type ConfirmDeleteFileDialogProps = ModalVisibilityProps & {
      * operation completes.
      */
     onConfirm: () => Promise<void>;
+    /**
+     * Optional z-index for the dialog.
+     */
+    zIndex?: number;
 };
 
 /**
@@ -1071,6 +1080,7 @@ const ConfirmDeleteFileDialog: React.FC<ConfirmDeleteFileDialogProps> = ({
     open,
     onClose,
     onConfirm,
+    zIndex,
 }) => {
     const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
 
@@ -1108,6 +1118,7 @@ const ConfirmDeleteFileDialog: React.FC<ConfirmDeleteFileDialogProps> = ({
                         backgroundColor: theme.vars.palette.backdrop.faint,
                     },
                 }),
+                ...(zIndex !== undefined && { zIndex }),
             })}
         >
             <Typography sx={{ color: "text.muted" }}>
@@ -1143,6 +1154,10 @@ type ShortcutsProps = ModalVisibilityProps &
          * `true` if we're running in a context where there is a logged in user.
          */
         haveUser: boolean;
+        /**
+         * Optional z-index for the dialog.
+         */
+        zIndex?: number;
     };
 
 const Shortcuts: React.FC<ShortcutsProps> = ({
@@ -1150,12 +1165,14 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
     onClose,
     disableDownload,
     haveUser,
+    zIndex,
 }) => (
     <Dialog
         {...{ open, onClose }}
         fullWidth
         fullScreen={useIsSmallWidth()}
         slotProps={{ backdrop: { sx: { backdropFilter: "blur(30px)" } } }}
+        sx={zIndex !== undefined ? { zIndex } : undefined}
     >
         <SpacedRow sx={{ pt: 2, px: 2.5 }}>
             <DialogTitle>{t("shortcuts")}</DialogTitle>

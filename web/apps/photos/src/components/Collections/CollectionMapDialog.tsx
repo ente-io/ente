@@ -28,9 +28,15 @@ import {
     fileCreationTime,
     fileFileName,
     fileLocation,
+    ItemVisibility,
 } from "ente-media/file-metadata";
-import { findDefaultHiddenCollectionIDs } from "ente-new/photos/services/collection";
+import {
+    addToFavoritesCollection,
+    findDefaultHiddenCollectionIDs,
+    removeFromFavoritesCollection,
+} from "ente-new/photos/services/collection";
 import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
 import {
     savedCollectionFiles,
     savedCollections,
@@ -77,16 +83,18 @@ interface MapControlsProps {
 
 const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => {
     const baseSx = {
-        bgcolor: (theme: { vars: { palette: { background: { paper: string } } } }) =>
-            theme.vars.palette.background.paper,
+        bgcolor: (theme: {
+            vars: { palette: { background: { paper: string } } };
+        }) => theme.vars.palette.background.paper,
         boxShadow: (theme: { shadows: string[] }) => theme.shadows[4],
         width: 48,
         height: 48,
         borderRadius: "16px",
         transition: "transform 0.2s ease-out",
         "&:hover": {
-            bgcolor: (theme: { vars: { palette: { background: { paper: string } } } }) =>
-                theme.vars.palette.background.paper,
+            bgcolor: (theme: {
+                vars: { palette: { background: { paper: string } } };
+            }) => theme.vars.palette.background.paper,
             transform: "scale(1.05)",
         },
     };
@@ -258,6 +266,17 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
     const [viewerFiles, setViewerFiles] = useState<EnteFile[]>([]);
 
+    // Favorite and visibility state for FileViewer
+    const [favoriteFileIDs, setFavoriteFileIDs] = useState<Set<number>>(
+        new Set(),
+    );
+    const [pendingFavoriteUpdates, setPendingFavoriteUpdates] = useState<
+        Set<number>
+    >(new Set());
+    const [pendingVisibilityUpdates, setPendingVisibilityUpdates] = useState<
+        Set<number>
+    >(new Set());
+
     const user = useMemo(() => {
         try {
             return ensureLocalUser();
@@ -324,6 +343,82 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         void loadMapData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, collectionSummary.id, activeCollection.id]);
+
+    // Load favorite file IDs when dialog opens
+    useEffect(() => {
+        if (!open || !user) return;
+
+        const loadFavorites = async () => {
+            const collections = await savedCollections();
+            const collectionFiles = await savedCollectionFiles();
+
+            for (const collection of collections) {
+                if (
+                    collection.type === "favorites" &&
+                    collection.owner.id === user.id
+                ) {
+                    const favoriteIDs = new Set(
+                        collectionFiles
+                            .filter((f) => f.collectionID === collection.id)
+                            .map((f) => f.id),
+                    );
+                    setFavoriteFileIDs(favoriteIDs);
+                    break;
+                }
+            }
+        };
+
+        void loadFavorites();
+    }, [open, user]);
+
+    const handleToggleFavorite = useCallback(
+        async (file: EnteFile) => {
+            if (!user) return;
+            const fileID = file.id;
+            const isFavorite = favoriteFileIDs.has(fileID);
+
+            setPendingFavoriteUpdates((prev) => new Set(prev).add(fileID));
+            try {
+                const action = isFavorite
+                    ? removeFromFavoritesCollection
+                    : addToFavoritesCollection;
+                await action([file]);
+                setFavoriteFileIDs((prev) => {
+                    const next = new Set(prev);
+                    if (isFavorite) {
+                        next.delete(fileID);
+                    } else {
+                        next.add(fileID);
+                    }
+                    return next;
+                });
+            } finally {
+                setPendingFavoriteUpdates((prev) => {
+                    const next = new Set(prev);
+                    next.delete(fileID);
+                    return next;
+                });
+            }
+        },
+        [user, favoriteFileIDs],
+    );
+
+    const handleFileVisibilityUpdate = useCallback(
+        async (file: EnteFile, visibility: ItemVisibility) => {
+            const fileID = file.id;
+            setPendingVisibilityUpdates((prev) => new Set(prev).add(fileID));
+            try {
+                await updateFilesVisibility([file], visibility);
+            } finally {
+                setPendingVisibilityUpdates((prev) => {
+                    const next = new Set(prev);
+                    next.delete(fileID);
+                    return next;
+                });
+            }
+        },
+        [],
+    );
 
     const loadAllThumbs = async (points: JourneyPoint[], files: EnteFile[]) => {
         const sortedPoints = [...points].sort(
@@ -593,6 +688,11 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 initialIndex={currentFileIndex}
                 files={viewerFiles}
                 user={user}
+                favoriteFileIDs={favoriteFileIDs}
+                pendingFavoriteUpdates={pendingFavoriteUpdates}
+                pendingVisibilityUpdates={pendingVisibilityUpdates}
+                onToggleFavorite={handleToggleFavorite}
+                onFileVisibilityUpdate={handleFileVisibilityUpdate}
                 onVisualFeedback={() => {
                     // No-op for map view
                 }}
