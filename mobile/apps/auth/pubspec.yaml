@@ -117,9 +117,7 @@ dependencies:
   path_provider: ^2.0.11
   pinput: ^5.0.0
   pointycastle: ^3.7.3
-  pretty_qr_code:
-    git:
-      url: https://github.com/ente-io/flutter_pretty_qr_fork
+
   privacy_screen: ^0.0.6
   protobuf: ^4.1.0
   qr_code_scanner: # no package updates on pub.dev

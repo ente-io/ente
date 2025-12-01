@@ -179,6 +179,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
     final double qrSize = min(screenWidth - 80, 300.0);
     final double qrCodeSize =
         max(qrSize - 100, 150.0); // Ensure minimum size of 150
+    final double qrCodeSizeEven = (qrCodeSize / 2).round() * 2.0;
     final enteTextTheme = getEnteTextTheme(context);
     final enteColorScheme = getEnteColorScheme(context);
 
