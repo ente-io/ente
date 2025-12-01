@@ -623,5 +623,6 @@
   "chooseIcon": "Choose icon",
   "customOrder": "Custom order",
   "selectAnOption": "Select an option",
-  "todaysLogs": "Today's logs"
+  "todaysLogs": "Today's logs",
+  "appIcon": "App icon"
 }

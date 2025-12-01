@@ -56,6 +56,7 @@ dependencies:
   expansion_tile_card: ^3.0.0
   ffi: ^2.1.0
   figma_squircle: ^0.6.3
+  launcher_icon_switcher: ^0.0.2
   file_picker: ^10.3.2
   file_saver: ^0.3.1
   fixnum: ^1.1.0
@@ -163,6 +164,7 @@ flutter:
   assets:
     - assets/
     - assets/icons/
+    - assets/launcher_icon/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
