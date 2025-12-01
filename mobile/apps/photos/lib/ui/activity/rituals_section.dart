@@ -336,8 +336,11 @@ class _RitualCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.camera_alt_outlined),
-                    color: colorScheme.textBase,
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCameraAdd01,
+                      color: colorScheme.textBase,
+                      size: 24,
+                    ),
                     style: IconButton.styleFrom(
                       backgroundColor: colorScheme.fillFaint,
                       shape: RoundedRectangleBorder(
@@ -352,7 +355,10 @@ class _RitualCard extends StatelessWidget {
                   PopupMenuButton<String>(
                     padding: EdgeInsets.zero,
                     splashRadius: 20,
-                    icon: const Icon(Icons.more_vert_rounded),
+                    icon: Transform.translate(
+                      offset: const Offset(4, 0),
+                      child: const Icon(Icons.more_vert_rounded),
+                    ),
                     elevation: 0,
                     color: colorScheme.backgroundElevated,
                     surfaceTintColor: colorScheme.backgroundElevated,
