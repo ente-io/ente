@@ -71,6 +71,7 @@ export type SearchSuggestion = { label: string } & (
     | { type: "fileType"; fileType: FileType }
     | { type: "fileName"; fileIDs: number[] }
     | { type: "fileCaption"; fileIDs: number[] }
+    | { type: "camera"; fileIDs: number[] }
     | { type: "date"; dateComponents: SearchDateComponents }
     | { type: "location"; locationTag: LocationTag }
     | { type: "city"; city: City }

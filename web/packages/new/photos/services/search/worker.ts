@@ -9,6 +9,7 @@ import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
     fileFileName,
+    fileCameraLabel,
     fileLocation,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
@@ -144,6 +145,7 @@ const suggestionsForString = (
         collectionSuggestions(re, collections),
         fileNameSuggestion(s, re, searchString, files),
         fileCaptionSuggestion(re, searchString, files),
+        cameraSuggestions(re, searchString, files),
     ].flat(),
 ];
 
@@ -202,6 +204,31 @@ const fileCaptionSuggestion = (
     return fileIDs.length
         ? [{ type: "fileCaption", fileIDs, label: searchString }]
         : [];
+};
+
+const cameraSuggestions = (
+    re: RegExp,
+    _searchString: string,
+    files: EnteFile[],
+): SearchSuggestion[] => {
+    const matches = new Map<string, { label: string; fileIDs: number[] }>();
+    for (const file of files) {
+        const label = fileCameraLabel(file);
+        if (!label || !re.test(label)) continue;
+        const key = label.toLowerCase();
+        const existing = matches.get(key);
+        if (existing) {
+            existing.fileIDs.push(file.id);
+        } else {
+            matches.set(key, { label, fileIDs: [file.id] });
+        }
+    }
+
+    return Array.from(matches.values()).map(({ label, fileIDs }) => ({
+        type: "camera" as const,
+        label,
+        fileIDs,
+    }));
 };
 
 const peopleSuggestions = (
@@ -424,6 +451,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
             return suggestion.fileIDs.includes(file.id);
 
         case "fileCaption":
+        case "camera":
             return suggestion.fileIDs.includes(file.id);
 
         case "date":

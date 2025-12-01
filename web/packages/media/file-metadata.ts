@@ -344,6 +344,8 @@ export interface FilePublicMagicMetadataData {
      * (The owner of such files will be the owner of the collection)
      */
     uploaderName?: string;
+    /** Camera model extracted from metadata. */
+    cameraModel?: string;
     /**
      * Edited latitude of the file
      *
@@ -407,6 +409,7 @@ export const FilePublicMagicMetadataData = z.looseObject({
     h: z.number().nullish().transform(nullToUndefined),
     caption: z.string().nullish().transform(nullToUndefined),
     uploaderName: z.string().nullish().transform(nullToUndefined),
+    cameraModel: z.string().nullish().transform(nullToUndefined),
     lat: z.number().nullish().transform(nullToUndefined),
     long: z.number().nullish().transform(nullToUndefined),
     sv: z.number().nullish().transform(nullToUndefined),
@@ -504,6 +507,15 @@ export const fileLocation = (file: EnteFile): Location | undefined => {
 };
 
 /**
+ * Return a user-friendly string describing the camera used for the file.
+ */
+export const fileCameraLabel = (file: EnteFile): string | undefined => {
+    const model = file.pubMagicMetadata?.data?.cameraModel?.trim();
+    if (!model || model.length === 0) return undefined;
+    return model;
+};
+
+/**
  * Return the duration of the video as a formatted "HH:mm:ss" string (when
  * present) for the given {@link EnteFile}.
  *
@@ -587,6 +599,8 @@ export interface ParsedMetadata {
      * A caption / description attached by the user to the photo.
      */
     description?: string;
+    /** Camera model extracted from metadata (e.g. iPhone 15 Pro). */
+    cameraModel?: string;
 }
 
 /**

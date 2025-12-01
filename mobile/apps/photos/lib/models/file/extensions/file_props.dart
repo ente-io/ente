@@ -49,6 +49,16 @@ extension FilePropsExtn on EnteFile {
 
   String? get uploaderName => pubMagicMetadata?.uploaderName;
 
+  String? get cameraModel => pubMagicMetadata?.cameraModel;
+
+  String? get cameraLabel {
+    final model = cameraModel?.trim();
+    if (model == null || model.isEmpty) {
+      return null;
+    }
+    return model;
+  }
+
   bool get skipIndex => !isUploaded || fileType == FileType.other;
 
   bool canReUpload(int userID) =>

@@ -1,4 +1,5 @@
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
+import CameraIcon from "@mui/icons-material/PhotoCameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
@@ -442,6 +443,8 @@ const iconForOption = (option: SearchOption | undefined) => {
             return <ImageIcon />;
         case "date":
             return <CalendarIcon />;
+        case "camera":
+            return <CameraIcon />;
         case "sidebarAction":
             return <SettingsIcon />;
         case "location":
@@ -654,6 +657,9 @@ const labelForOption = (option: SearchOption) => {
 
         case "fileCaption":
             return t("description");
+
+        case "camera":
+            return t("camera", { defaultValue: "Camera" });
 
         case "date":
             return t("date");

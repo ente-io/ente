@@ -41,11 +41,13 @@ export const parseExif = (tags: RawExifTags) => {
     const creationDate = parseCreationDate(tags);
     const dimensions = parseDimensions(tags);
     const description = parseDescription(tags);
+    const camera = parseCamera(tags);
 
     const metadata: ParsedMetadata = dimensions ?? {};
     if (creationDate) metadata.creationDate = creationDate;
     if (location) metadata.location = location;
     if (description) metadata.description = description;
+    if (camera?.model) metadata.cameraModel = camera.model;
     return metadata;
 };
 
@@ -604,6 +606,13 @@ export const tagNumericValue = (
 ) => {
     const v = tag.value;
     return Array.isArray(v) ? (v[0] ?? 0) / (v[1] ?? 1) : v;
+};
+
+const parseCamera = (tags: RawExifTags) => {
+    const make = tags.exif?.Make?.description?.trim();
+    const model = tags.exif?.Model?.description?.trim();
+    if (!make && !model) return undefined;
+    return { make, model };
 };
 
 /**
