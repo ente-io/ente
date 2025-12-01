@@ -31,14 +31,14 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   }) {
     final appColors = switch (app) {
       EnteApp.auth => (
-          primary700: const Color(0xFFA75CFF),
+          primary700: const Color(0xFF722ED1),
           primary500: const Color(0xFFA75CFF),
-          primary400: const Color(0xFFA75CFF),
-          primary300: const Color(0xFFA75CFF),
-          gradientButtonBgColor: const Color(0xFF531DAB),
+          primary400: const Color(0xFF7A29C1),
+          primary300: const Color(0xFF984DF4),
+          gradientButtonBgColor: const Color(0xFF722ED1),
           gradientButtonBgColors: const [
-            Color(0xFFB37FEB),
-            Color(0xFF22075E),
+            Color(0xFF722ED1),
+            Color(0xFFA75CFF),
           ],
         ),
       EnteApp.locker => (
