@@ -14,7 +14,6 @@ class LockScreenConfig {
   final Color? pinBoxBorderColor;
   final Color? pinBoxBackgroundColor;
   final bool useDynamicColors;
-  final String backgroundImagePath;
 
   const LockScreenConfig({
     required this.titleWidget,
@@ -26,7 +25,6 @@ class LockScreenConfig {
     this.pinBoxBorderColor,
     this.pinBoxBackgroundColor,
     this.useDynamicColors = false,
-    required this.backgroundImagePath,
   });
 
   /// Default configuration for Auth app
@@ -40,7 +38,6 @@ class LockScreenConfig {
     pinBoxBorderColor: Color.fromRGBO(45, 194, 98, 1.0),
     pinBoxBackgroundColor: null,
     useDynamicColors: false,
-    backgroundImagePath: 'assets/loading_photos_background.png',
   );
 
   /// Configuration for Locker app
@@ -54,7 +51,6 @@ class LockScreenConfig {
     pinBoxBorderColor: null,
     pinBoxBackgroundColor: null,
     useDynamicColors: true,
-    backgroundImagePath: 'packages/ente_lock_screen/assets/locker_lockscreen_background.png',
   );
 
   /// Get current configuration based on AppThemeConfig
