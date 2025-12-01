@@ -154,7 +154,6 @@ yarn build:wasm  # builds the WASM package
 ```sh
 cargo install flutter_rust_bridge_codegen
 flutter_rust_bridge_codegen generate
-flutter test
 ```
 
 `flutter_rust_bridge_codegen generate` needs to be run either manually (or in watch mode, `flutter_rust_bridge_codegen generate --watch`) whenever the Rust source changes to get the bindings to update.
@@ -206,7 +205,6 @@ wasm = ["getrandom/js"]
 ## Tests
 
 - **ente-core:** Standard `cargo test` - comprehensive unit tests
-- **ente-rust:** Minimal FRB smoke test in Dart to catch binding drift
-- **ente-photos-rust:** Integration tests for app-specific functionality
+- **ente-photos-rust:** Minimal FRB smoke test in Dart to catch binding drift
 - **ente-wasm:** Vitest tests in web package
 - **Golden fixtures:** Share test vectors across native/FRB/WASM for crypto parity

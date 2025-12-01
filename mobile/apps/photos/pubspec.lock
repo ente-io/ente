@@ -623,6 +623,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_rust:
+    dependency: "direct main"
+    description:
+      path: "../../packages/rust"
+      relative: true
+    source: path
+    version: "0.0.1"
   equatable:
     dependency: "direct main"
     description:

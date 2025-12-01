@@ -1,13 +1,12 @@
+import 'package:ente_rust/ente_rust.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:photos/src/rust/api/urls.dart';
-import 'package:photos/src/rust/frb_generated.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    await RustLib.init();
+    await EnteRust.init();
   });
 
   test('file_download_url integration smoke test', () {
