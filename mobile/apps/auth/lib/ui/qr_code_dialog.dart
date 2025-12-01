@@ -160,36 +160,31 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         // Account name at top center (inside border)
-                        ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxWidth: qrCodeSize + 40,
-                          ),
+                        SizedBox(
+                          width: 225,
                           child: Text(
                             accountName,
-                            style: enteTextTheme.largeBold.copyWith(
-                              color: qrTextColor,
-                              fontSize: 20,
-                            ),
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            style: enteTextTheme.largeBold.copyWith(
+                              color: qrTextColor,
+                              letterSpacing: -0.76,
+                            ),
                           ),
                         ),
                         if (issuerName.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: qrCodeSize,
-                            ),
+                          SizedBox(
+                            width: 175,
                             child: Text(
                               issuerName,
-                              style: enteTextTheme.small.copyWith(
-                                color: qrTextColor.withValues(alpha: 0.7),
-                                fontSize: 14,
-                              ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: enteTextTheme.miniBold.copyWith(
+                                color: qrTextColor.withValues(alpha: 0.6),
+                                letterSpacing: -0.48,
+                              ),
                             ),
                           ),
                         ],
