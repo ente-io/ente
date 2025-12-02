@@ -97,19 +97,20 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (PlatformUtil.isMobile()) ...[
-                          PrimaryRoundedButton(
+                          RoundedButton(
                             label: l10n.importScanQrCode,
                             onPressed: onScanTap,
                             width: double.infinity,
                           ),
                           const SizedBox(height: 12),
-                          SecondaryRoundedButton(
+                          RoundedButton(
                             label: l10n.importEnterSetupKey,
                             onPressed: onManuallySetupTap,
                             width: double.infinity,
+                            type: RoundedButtonType.secondary,
                           ),
                         ] else
-                          PrimaryRoundedButton(
+                          RoundedButton(
                             label: l10n.importEnterSetupKey,
                             onPressed: onManuallySetupTap,
                             width: double.infinity,

@@ -16,6 +16,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
+import 'package:ente_auth/ui/home/widgets/rounded_action_buttons.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/developer_settings_page.dart';
 import 'package:ente_auth/ui/settings/developer_settings_widget.dart';
@@ -161,50 +162,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: GestureDetector(
-                                onTap: _navigateToSignUpPage,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 18,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      l10n.signUp,
-                                      style: textTheme.body.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              child: RoundedButton(
+                                label: l10n.signUp,
+                                onPressed: _navigateToSignUpPage,
+                                type: RoundedButtonType.secondaryInverse,
                               ),
                             ),
                             const SizedBox(width: 6),
                             Expanded(
-                              child: GestureDetector(
-                                onTap: _navigateToSignInPage,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 18,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      l10n.logInLabel,
-                                      style: textTheme.body.copyWith(
-                                        color: accentColor,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              child: RoundedButton(
+                                label: l10n.logInLabel,
+                                onPressed: _navigateToSignInPage,
+                                type: RoundedButtonType.primaryInverse,
                               ),
                             ),
                           ],
