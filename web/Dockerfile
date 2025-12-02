@@ -1,9 +1,9 @@
 # Docs - https://github.com/ente-io/ente/blob/main/web/docs/docker.md
 
-FROM node:22-alpine AS builder
+FROM node:22 AS builder
 
 # Install Rust for building ente-wasm
-RUN apk add --no-cache curl build-base && \
+RUN apt-get update && apt-get install -y curl build-essential && rm -rf /var/lib/apt/lists/* && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target wasm32-unknown-unknown
 ENV PATH="/root/.cargo/bin:${PATH}"
 
