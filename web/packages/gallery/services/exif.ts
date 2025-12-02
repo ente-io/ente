@@ -112,11 +112,12 @@ const parseDates = (tags: RawExifTags) => {
     // dates set to "0000:00:00 00:00:00". Ignore any date whose timestamp is 0
     // so that we try with a subsequent (possibly correct) date in the sequence.
     //
-    // Filter out a known corrupted date value, "4501:01:01 00:00:00".
-    // Certain devices default to this bogus timestamp, so skip it to allow other dates.
-    const valid = (d: ParsedMetadataDate | undefined) => {
+    // Filter out a known corrupted date value, "4501:01:01 00:00:00" when it
+    // comes from XMP metadata. Certain devices write this bogus timestamp to
+    // XMP, so skip it to allow other dates to be used instead.
+    const valid = (d: ParsedMetadataDate | undefined, isXmp = false) => {
         if (!d?.timestamp) return undefined;
-        if (d.dateTime === "4501-01-01T00:00:00.000") return undefined;
+        if (isXmp && d.dateTime === "4501-01-01T00:00:00.000") return undefined;
         return d;
     };
 
@@ -126,17 +127,17 @@ const parseDates = (tags: RawExifTags) => {
 
     return {
         DateTimeOriginal:
-            valid(xmp.DateTimeOriginal) ??
+            valid(xmp.DateTimeOriginal, true) ??
             valid(iptc.DateTimeOriginal) ??
             valid(exif.DateTimeOriginal) ??
-            valid(xmp.DateCreated),
+            valid(xmp.DateCreated, true),
         DateTimeDigitized:
-            valid(xmp.DateTimeDigitized) ??
+            valid(xmp.DateTimeDigitized, true) ??
             valid(iptc.DateTimeDigitized) ??
             valid(exif.DateTimeDigitized) ??
-            valid(xmp.CreateDate),
-        DateTime: valid(xmp.DateTime ?? exif.DateTime ?? xmp.ModifyDate),
-        MetadataDate: valid(xmp.MetadataDate),
+            valid(xmp.CreateDate, true),
+        DateTime: valid(xmp.DateTime, true) ?? valid(exif.DateTime) ?? valid(xmp.ModifyDate, true),
+        MetadataDate: valid(xmp.MetadataDate, true),
     };
 };
 
