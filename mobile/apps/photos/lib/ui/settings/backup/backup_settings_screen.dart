@@ -25,12 +25,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
-  final bool skipFolderSelectionPrompt;
-
-  const BackupSettingsScreen({
-    super.key,
-    this.skipFolderSelectionPrompt = false,
-  });
+  const BackupSettingsScreen({super.key});
 
   static final Debouncer _onlyNewToggleDebouncer = Debouncer(
     const Duration(milliseconds: 500),
@@ -225,13 +220,11 @@ class BackupSettingsScreen extends StatelessWidget {
             if (!hasPermission) {
               return;
             }
-            if (!skipFolderSelectionPrompt) {
-              final shouldProceed = await _maybeHandleFolderSelection(
-                context: context,
-              );
-              if (!shouldProceed) {
-                return;
-              }
+            final shouldProceed = await _maybeHandleFolderSelection(
+              context: context,
+            );
+            if (!shouldProceed) {
+              return;
             }
             final isEnabled = backupPreferenceService.isOnlyNewBackupEnabled;
             if (!isEnabled) {
@@ -239,11 +232,9 @@ class BackupSettingsScreen extends StatelessWidget {
             } else {
               await backupPreferenceService.clearOnlyNewSinceEpoch();
             }
-            if (!skipFolderSelectionPrompt) {
-              _onlyNewToggleDebouncer.run(() async {
-                await SyncService.instance.sync();
-              });
-            }
+            _onlyNewToggleDebouncer.run(() async {
+              await SyncService.instance.sync();
+            });
             if (backupPreferenceService.hasSkippedOnboardingPermission) {
               await backupPreferenceService.setOnboardingPermissionSkipped(
                 false,
