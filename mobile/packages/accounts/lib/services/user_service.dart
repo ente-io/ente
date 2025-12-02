@@ -146,7 +146,7 @@ class UserService {
           showErrorDialog(
             context,
             context.strings.oops,
-            "Registration is temporarily paused",
+            context.strings.lockerExistingUserRequired,
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
@@ -288,7 +288,8 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        await Navigator.of(context)
+            .pushNamedAndRemoveUntil('/', (route) => false);
       } else {
         throw Exception("Log out action failed");
       }
@@ -297,7 +298,8 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        await Navigator.of(context)
+            .pushNamedAndRemoveUntil('/', (route) => false);
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
@@ -532,11 +534,10 @@ class UserService {
         await showErrorDialog(
           context,
           context.strings.oops,
-          'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker',
+          context.strings.lockerExistingUserRequired,
         );
         return;
-      } else if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         await showErrorDialog(
           context,
           "We're out of beta seats for now",
@@ -949,10 +950,9 @@ class UserService {
         showErrorDialog(
           context,
           context.strings.oops,
-          'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker',
+          context.strings.lockerExistingUserRequired,
         );
-      } else if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         // ignore: unawaited_futures
         showErrorDialog(
           context,
