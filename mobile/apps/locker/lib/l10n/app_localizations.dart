@@ -2041,7 +2041,7 @@ abstract class AppLocalizations {
   /// Body shown when uploads fail because the locker already has the maximum file count
   ///
   /// In en, this message translates to:
-  /// **'Your individual or family account has hit the 1000-file limit.'**
+  /// **'You\'ve reached your file limit. Upgrade to a paid plan for more storage.'**
   String get uploadFileCountLimitErrorBody;
 
   /// Toast shown when info items fail to save due to hitting the file count limit
@@ -2284,17 +2284,17 @@ abstract class AppLocalizations {
   /// **'Log in to your Ente account'**
   String get loginToEnteAccount;
 
-  /// No description provided for @unlockLockerPaidPlanTitle.
+  /// No description provided for @unlockLockerNewUserTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unlock Locker with a paid plan.'**
-  String get unlockLockerPaidPlanTitle;
+  /// **'Join Ente to use Locker'**
+  String get unlockLockerNewUserTitle;
 
-  /// No description provided for @unlockLockerPaidPlanBody.
+  /// No description provided for @unlockLockerNewUserBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker'**
-  String get unlockLockerPaidPlanBody;
+  /// **'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.'**
+  String get unlockLockerNewUserBody;
 
   /// No description provided for @checkoutEntePhotos.
   ///
