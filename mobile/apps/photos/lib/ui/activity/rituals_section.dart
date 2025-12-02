@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
@@ -43,7 +44,7 @@ class RitualsSection extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  "Rituals",
+                  context.l10n.ritualsTitle,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const Spacer(),
@@ -154,7 +155,7 @@ class _StarterRitualCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    "Take a photo every day",
+                    context.l10n.ritualDefaultHeatmapTitle,
                     style: getEnteTextTheme(context).body,
                   ),
                 ),
@@ -203,10 +204,12 @@ class _CreateRitualCard extends StatelessWidget {
                     color: colorScheme.fillFaintPressed,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlusSign,
-                    color: colorScheme.textBase,
-                    size: 22,
+                  child: Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlusSign,
+                      color: colorScheme.textBase,
+                      size: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -215,11 +218,11 @@ class _CreateRitualCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Create your own ritual",
+                        context.l10n.ritualCreateYourOwn,
                         style: textTheme.body,
                       ),
                       Text(
-                        "Get daily reminders",
+                        context.l10n.ritualGetDailyReminders,
                         style: textTheme.smallMuted,
                       ),
                     ],
@@ -315,14 +318,14 @@ class _RitualCard extends StatelessWidget {
                       children: [
                         Text(
                           ritual.title.isEmpty
-                              ? "Untitled ritual"
+                              ? context.l10n.ritualUntitled
                               : ritual.title,
                           style: textTheme.body,
                           textHeightBehavior: _tightTextHeightBehavior,
                         ),
                         ritual.albumName == null || ritual.albumName!.isEmpty
                             ? Text(
-                                "Album not set",
+                                context.l10n.ritualAlbumNotSet,
                                 style: textTheme.smallMuted,
                                 textHeightBehavior: _tightTextHeightBehavior,
                               )
@@ -350,7 +353,7 @@ class _RitualCard extends StatelessWidget {
                       minimumSize: const Size(40, 40),
                     ),
                     onPressed: () => _openRitualCamera(context, ritual),
-                    tooltip: "Open ritual camera",
+                    tooltip: context.l10n.ritualOpenCameraTooltip,
                   ),
                   PopupMenuButton<String>(
                     padding: EdgeInsets.zero,
@@ -388,7 +391,7 @@ class _RitualCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
                               child: Row(
                                 children: [
                                   HugeIcon(
@@ -398,7 +401,7 @@ class _RitualCard extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 10),
                                   Text(
-                                    "Edit",
+                                    context.l10n.edit,
                                     style: getEnteTextTheme(context).body,
                                   ),
                                 ],
@@ -428,7 +431,7 @@ class _RitualCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                "Delete",
+                                context.l10n.delete,
                                 style: getEnteTextTheme(context)
                                     .body
                                     .copyWith(color: Colors.red),
@@ -468,10 +471,11 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
 
   await showGeneralDialog(
     context: context,
-    barrierLabel: "Ritual editor",
+    barrierLabel: context.l10n.ritualEditorLabel,
     barrierColor: Colors.black.withValues(alpha: 0.45),
     barrierDismissible: true,
     transitionDuration: const Duration(milliseconds: 240),
+    useRootNavigator: false,
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       final mediaQuery = MediaQuery.of(dialogContext);
       final colorScheme = getEnteColorScheme(dialogContext);
@@ -522,8 +526,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                   children: [
                                     Text(
                                       ritual == null
-                                          ? "New ritual"
-                                          : "Edit ritual",
+                                          ? context.l10n.ritualNew
+                                          : context.l10n.ritualEdit,
                                       style: textTheme.largeBold,
                                     ),
                                     const Spacer(),
@@ -600,7 +604,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                             TextCapitalization.sentences,
                                         onChanged: (_) => setState(() {}),
                                         decoration: InputDecoration(
-                                          hintText: "Enter your ritual",
+                                          hintText:
+                                              context.l10n.ritualEnterPrompt,
                                           filled: true,
                                           fillColor: colorScheme.fillFaint,
                                           contentPadding:
@@ -627,7 +632,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         validator: (value) {
                                           if (value == null ||
                                               value.trim().isEmpty) {
-                                            return "Please enter a description";
+                                            return context
+                                                .l10n.ritualEnterDescription;
                                           }
                                           return null;
                                         },
@@ -636,7 +642,10 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                   ],
                                 ),
                                 const SizedBox(height: 20),
-                                _sectionLabel(context, "Day"),
+                                _sectionLabel(
+                                  context,
+                                  context.l10n.ritualDayLabel,
+                                ),
                                 const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -680,7 +689,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           index++) {
                                         children.add(
                                           _DayCircle(
-                                            label: _weekLabel(index),
+                                            label: _weekLabel(context, index),
                                             selected: days[index],
                                             size: circleSize,
                                             colorScheme: colorScheme,
@@ -720,7 +729,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         const SizedBox(width: 10),
                                         Expanded(
                                           child: Text(
-                                            "Notifications are off. Tap a day to turn them on.",
+                                            context.l10n
+                                                .ritualNotificationsOffHint,
                                             style: textTheme.small.copyWith(
                                               color: colorScheme.textMuted,
                                             ),
@@ -730,7 +740,10 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     ),
                                   )
                                 else ...[
-                                  _sectionLabel(context, "Time"),
+                                  _sectionLabel(
+                                    context,
+                                    context.l10n.ritualTimeLabel,
+                                  ),
                                   const SizedBox(height: 8),
                                   GestureDetector(
                                     onTap: () async {
@@ -780,7 +793,10 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                   ),
                                 ],
                                 const SizedBox(height: 16),
-                                _sectionLabel(context, "Album"),
+                                _sectionLabel(
+                                  context,
+                                  context.l10n.ritualAlbumLabel,
+                                ),
                                 const SizedBox(height: 8),
                                 GestureDetector(
                                   onTap: () async {
@@ -832,8 +848,8 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     },
                                     child: Text(
                                       ritual == null
-                                          ? "Save ritual"
-                                          : "Update ritual",
+                                          ? context.l10n.ritualSave
+                                          : context.l10n.ritualUpdate,
                                       style: textTheme.bodyBold
                                           .copyWith(color: Colors.white),
                                     ),
@@ -870,9 +886,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
   );
 }
 
-String _weekLabel(int index) {
-  const labels = ["S", "M", "T", "W", "T", "F", "S"];
-  return labels[index];
+String _weekLabel(BuildContext context, int index) {
+  final labels = MaterialLocalizations.of(context).narrowWeekdays;
+  return labels[index % labels.length];
 }
 
 Future<Collection?> _pickAlbum(BuildContext context) async {
@@ -931,6 +947,7 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
     final mediaQuery = MediaQuery.of(context);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = context.l10n;
     final trimmedQuery = _controller.text.trim();
     final bool canCreateAlbum = trimmedQuery.isNotEmpty;
     final queryLower = trimmedQuery.toLowerCase();
@@ -984,7 +1001,7 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                   child: Row(
                     children: [
                       Text(
-                        "Select album",
+                        l10n.ritualSelectAlbumTitle,
                         style: textTheme.bodyBold,
                       ),
                       const Spacer(),
@@ -1001,7 +1018,7 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                     controller: _controller,
                     textInputAction: TextInputAction.done,
                     decoration: InputDecoration(
-                      hintText: "Search or create new",
+                      hintText: l10n.ritualSearchOrCreate,
                       prefixIcon: const Icon(Icons.search_rounded),
                       filled: true,
                       fillColor: colorScheme.fillFaint,
@@ -1029,8 +1046,8 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                         ? Center(
                             child: Text(
                               widget.albums.isEmpty
-                                  ? "No albums yet"
-                                  : "No matching albums",
+                                  ? l10n.ritualNoAlbumsYet
+                                  : l10n.ritualNoMatchingAlbums,
                               style: textTheme.small.copyWith(
                                 color: colorScheme.textMuted,
                               ),
@@ -1083,8 +1100,10 @@ class _AlbumPickerSheetState extends State<_AlbumPickerSheet> {
                       onPressed: canCreateAlbum ? createAlbum : null,
                       child: Text(
                         canCreateAlbum
-                            ? 'Create "${trimmedQuery.trim()}"'
-                            : "Create new",
+                            ? l10n.ritualCreateAlbumWithName(
+                                albumName: trimmedQuery,
+                              )
+                            : l10n.ritualCreateNew,
                         style: textTheme.bodyBold.copyWith(
                           color: canCreateAlbum
                               ? Colors.white
@@ -1128,12 +1147,14 @@ class _AlbumPreviewTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Album",
+                  context.l10n.ritualAlbumLabel,
                   style: textTheme.miniMuted,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  album?.displayName ?? fallbackName ?? "Select album",
+                  album?.displayName ??
+                      fallbackName ??
+                      context.l10n.ritualAlbumSelectionPlaceholder,
                   style: textTheme.smallBold,
                 ),
               ],
@@ -1243,8 +1264,10 @@ void _openRitualCamera(BuildContext context, Ritual ritual) {
   final albumId = ritual.albumId;
   if (albumId == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Set an album for this ritual to launch the camera."),
+      SnackBar(
+        content: Text(
+          context.l10n.ritualSetAlbumToLaunchCamera,
+        ),
       ),
     );
     return;
@@ -1310,7 +1333,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
               Row(
                 children: [
                   Text(
-                    "Pick an emoji",
+                    context.l10n.ritualPickEmojiTitle,
                     style: textTheme.bodyBold,
                   ),
                   const Spacer(),
@@ -1359,7 +1382,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
               ),
               const SizedBox(height: 12),
               Text(
-                "Custom (keyboard)",
+                context.l10n.ritualCustomKeyboardLabel,
                 style: textTheme.miniMuted,
               ),
               const SizedBox(height: 6),
@@ -1389,7 +1412,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                         Navigator.of(context).pop();
                       },
                       decoration: InputDecoration(
-                        hintText: "Press to open emoji keyboard",
+                        hintText: context.l10n.ritualEmojiKeyboardHint,
                         filled: true,
                         fillColor: colorScheme.fillFaint,
                         border: OutlineInputBorder(
@@ -1423,7 +1446,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                             Navigator.of(context).pop();
                           },
                     child: Text(
-                      "Use",
+                      context.l10n.ritualEmojiUseAction,
                       style: textTheme.bodyBold.copyWith(color: Colors.white),
                     ),
                   ),

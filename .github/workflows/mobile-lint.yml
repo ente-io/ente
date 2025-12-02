@@ -5,6 +5,8 @@ on:
     pull_request:
         paths:
             - "mobile/apps/photos/**"
+            - "mobile/packages/rust/**"
+            - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 
 env:
@@ -32,17 +34,21 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
-                  
+
             - run: flutter pub get
-                  
+
             - name: Install Rust ${{ env.RUST_VERSION }}
               uses: dtolnay/rust-toolchain@master
               with:
                   toolchain: ${{ env.RUST_VERSION }}
-                  
+
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
-              
+
+            - name: Generate Rust bindings (Core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
+
             - name: Generate Rust bindings
               run: flutter_rust_bridge_codegen generate
 

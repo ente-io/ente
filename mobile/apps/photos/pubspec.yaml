@@ -58,8 +58,12 @@ dependencies:
     path: plugins/ente_crypto
   ente_feature_flag:
     path: plugins/ente_feature_flag
+  ente_photos_rust:
+    path: rust_builder
   ente_qr_ui:
     path: ../../packages/qr
+  ente_rust:
+    path: ../../packages/rust
   equatable: ^2.0.5
   event_bus: ^2.0.0
   exif_reader:
@@ -192,8 +196,6 @@ dependencies:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
   rive: 0.14.0-dev.13
-  rust_lib_photos:
-    path: rust_builder
   screenshot: ^3.0.0
   scrollable_positioned_list: ^0.3.5
   sentry: ^8.14.1
@@ -363,6 +365,11 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: fonts/Montserrat-Bold.ttf
+    - family: Nunito
+      fonts:
+        - asset: fonts/Nunito-Regular.ttf
+        - asset: fonts/Nunito-Black.ttf
+          weight: 900
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
