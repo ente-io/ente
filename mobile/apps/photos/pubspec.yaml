@@ -365,6 +365,11 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: fonts/Montserrat-Bold.ttf
+    - family: Nunito
+      fonts:
+        - asset: fonts/Nunito-Regular.ttf
+        - asset: fonts/Nunito-Black.ttf
+          weight: 900
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

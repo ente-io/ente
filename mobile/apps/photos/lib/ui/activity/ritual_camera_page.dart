@@ -4,6 +4,7 @@ import "dart:io";
 import "package:camera/camera.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -209,7 +210,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       _cameras = _cameras.isEmpty ? await availableCameras() : _cameras;
       if (_cameras.isEmpty) {
         setState(() {
-          _error = "No camera found on this device.";
+          _error = context.l10n.ritualCameraNotFound;
           _initializing = false;
         });
         return;
@@ -246,7 +247,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       });
     } catch (e) {
       setState(() {
-        _error = "Unable to start camera. Please check permissions.";
+        _error = context.l10n.ritualCameraStartError;
         _initializing = false;
       });
     }
@@ -289,7 +290,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       _scrollThumbsToIndex(_captures.length - 1, animate: true);
     } catch (_) {
       if (!mounted) return;
-      showShortToast(context, "Unable to capture photo. Please try again.");
+      showShortToast(context, context.l10n.ritualCaptureError);
     } finally {
       if (mounted) {
         setState(() {
@@ -302,7 +303,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   Future<void> _onShutterTap() async {
     if (_captures.length >= _maxCaptures) {
       if (mounted) {
-        showShortToast(context, "You can add up to $_maxCaptures photos.");
+        showShortToast(
+          context,
+          context.l10n.ritualPhotoLimit(maxPhotos: _maxCaptures),
+        );
       }
       return;
     }
@@ -324,16 +328,16 @@ class _RitualCameraPageState extends State<RitualCameraPage>
 
   Future<void> _onAccept() async {
     if (_captures.isEmpty) {
-      showShortToast(context, "Capture at least one photo first.");
+      showShortToast(context, context.l10n.ritualCaptureAtLeastOne);
       return;
     }
     if (widget.albumId == null) {
       if (!mounted) return;
       final navContext = context;
       ScaffoldMessenger.of(navContext).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            "Ritual album missing. Edit the ritual to set an album.",
+            navContext.l10n.ritualAlbumMissing,
           ),
         ),
       );
@@ -368,7 +372,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       if (!mounted) return;
       showShortToast(
         context,
-        _album == null ? "Added to album" : "Added to ${_album!.displayName}",
+        _album == null
+            ? context.l10n.ritualAddedToAlbum
+            : context.l10n
+                .ritualAddedToAlbumWithName(albumName: _album!.displayName),
       );
       final collection = _album ??
           CollectionsService.instance.getCollectionByID(widget.albumId!);
@@ -390,7 +397,9 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Couldn't add photos to the album: $e"),
+            content: Text(
+              context.l10n.ritualAddToAlbumFailure(error: e.toString()),
+            ),
           ),
         );
       }
@@ -574,7 +583,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   Widget _buildTopBar(EnteTextTheme textTheme) {
     final String title = _ritual?.title.trim().isNotEmpty == true
         ? _ritual!.title.trim()
-        : "Take a photo";
+        : context.l10n.ritualDefaultCameraTitle;
     final String icon = _ritual?.icon.isNotEmpty == true ? _ritual!.icon : "📸";
     return Container(
       color: Colors.black,
@@ -642,7 +651,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _initializing ? null : _initializeCamera,
-              child: const Text("Try again"),
+              child: Text(context.l10n.tryAgain),
             ),
             TextButton(
               onPressed: () async {
@@ -651,7 +660,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                 await routeToPage(context, const ActivityScreen())
                     .whenComplete(_resumePreview);
               },
-              child: const Text("Back to rituals"),
+              child: Text(context.l10n.ritualBackToList),
             ),
           ],
         ),
@@ -783,10 +792,10 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     if (_captures.isEmpty) {
       return Container(
         color: Colors.black,
-        child: const Center(
+        child: Center(
           child: Text(
-            "No photos yet",
-            style: TextStyle(color: Colors.white70),
+            context.l10n.ritualNoPhotosYet,
+            style: const TextStyle(color: Colors.white70),
           ),
         ),
       );
@@ -930,7 +939,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                           const Icon(Icons.check_circle_outline),
                           const SizedBox(width: 8),
                           Text(
-                            "Add to album",
+                            context.l10n.addToAlbum,
                             style: textTheme.bodyBold
                                 .copyWith(color: Colors.black),
                           ),
