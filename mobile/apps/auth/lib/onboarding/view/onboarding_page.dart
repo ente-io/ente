@@ -161,49 +161,48 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFb97dff),
-                                  foregroundColor: accentColor,
-                                  elevation: 0,
+                              child: GestureDetector(
+                                onTap: _navigateToSignUpPage,
+                                child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 18,
                                   ),
-                                  minimumSize: const Size(56, 56),
-                                  shape: RoundedRectangleBorder(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
-                                onPressed: _navigateToSignUpPage,
-                                child: Text(
-                                  l10n.signUp,
-                                  style: textTheme.body.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                  child: Center(
+                                    child: Text(
+                                      l10n.signUp,
+                                      style: textTheme.body.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 6),
                             Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: accentColor,
+                              child: GestureDetector(
+                                onTap: _navigateToSignInPage,
+                                child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 18,
                                   ),
-                                  minimumSize: const Size(56, 56),
-                                  shape: RoundedRectangleBorder(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
-                                onPressed: _navigateToSignInPage,
-                                child: Text(
-                                  l10n.logInLabel,
-                                  style: textTheme.body.copyWith(
-                                    color: accentColor,
-                                    fontWeight: FontWeight.w600,
+                                  child: Center(
+                                    child: Text(
+                                      l10n.logInLabel,
+                                      style: textTheme.body.copyWith(
+                                        color: accentColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

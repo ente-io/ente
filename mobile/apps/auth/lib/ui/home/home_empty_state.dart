@@ -25,6 +25,10 @@ class HomeEmptyStateWidget extends StatelessWidget {
     final bgSvgPath = isDarkTheme
         ? 'assets/svg/empty-state-bg-dark.svg'
         : 'assets/svg/empty-state-bg-light.svg';
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final extraBottomPadding = PlatformUtil.isMobile()
+        ? (bottomPadding > 0 ? bottomPadding : 24.0)
+        : 24.0;
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -32,7 +36,12 @@ class HomeEmptyStateWidget extends StatelessWidget {
         SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            padding: EdgeInsets.only(
+              left: 24,
+              right: 24,
+              top: 24,
+              bottom: extraBottomPadding,
+            ),
             child: Column(
               children: [
                 Expanded(
