@@ -8,7 +8,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/states/user_details_state.dart";
 
 class UsageCardWidget extends StatelessWidget {
-  static const maxFileCount = 1000;
+  static const _defaultMaxFileCount = 100;
 
   const UsageCardWidget({
     super.key,
@@ -22,6 +22,8 @@ class UsageCardWidget extends StatelessWidget {
     final userDetails = inheritedDetails?.userDetails;
     final isCached = inheritedDetails?.isCached ?? false;
 
+    final maxFileCount =
+        userDetails?.getLockerFileLimit() ?? _defaultMaxFileCount;
     final usedCount =
         (userDetails is UserDetails && !isCached) ? userDetails.fileCount : 0;
     final progress = maxFileCount > 0 ? usedCount / maxFileCount : 0.0;
