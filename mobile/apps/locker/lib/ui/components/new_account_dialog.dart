@@ -111,13 +111,7 @@ class _CreateNewAccountBottomSheet extends StatelessWidget {
                     const SizedBox(height: 32),
                     GradientButton(
                       text: buttonLabel,
-                      hugeIcon: icon ??
-                          const HugeIcon(
-                            icon: HugeIcons.strokeRoundedFileUpload,
-                            color: Colors.white,
-                            size: 20,
-                            strokeWidth: 1.9,
-                          ),
+                      hugeIcon: icon,
                       onTap: () {
                         Navigator.of(context).pop(
                           ButtonResult(ButtonAction.first),
