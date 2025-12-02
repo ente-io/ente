@@ -25,7 +25,7 @@ import "package:photos/services/machine_learning/semantic_search/semantic_search
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/src/rust/api/simple.dart";
+import "package:photos/src/rust/api/init.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';

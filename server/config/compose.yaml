@@ -62,7 +62,8 @@ services:
 
   ente-web:
     build:
-      context: ../../web
+      context: ../..
+      dockerfile: web/Dockerfile
     ports:
       - 3000:3000
       - 3001:3001

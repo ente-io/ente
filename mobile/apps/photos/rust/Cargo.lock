@@ -310,6 +310,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente_photos_rust"
+version = "0.0.1"
+dependencies = [
+ "flutter_rust_bridge",
+ "usearch",
+]
+
+[[package]]
 name = "env_filter"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -705,14 +713,6 @@ name = "regex-syntax"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
-
-[[package]]
-name = "rust_lib_photos"
-version = "0.1.0"
-dependencies = [
- "flutter_rust_bridge",
- "usearch",
-]
 
 [[package]]
 name = "rustc-demangle"

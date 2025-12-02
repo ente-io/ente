@@ -12,7 +12,7 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
-import "package:photos/src/rust/frb_generated.dart" show RustLib;
+import "package:photos/src/rust/frb_generated.dart" show EntePhotosRust;
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
@@ -224,7 +224,7 @@ Future<dynamic> isolateFunction(
 Future<void> _ensureRustLoaded() async {
   final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
   if (!loaded) {
-    await RustLib.init();
+    await EntePhotosRust.init();
     _isolateCache["rustLibLoaded"] = true;
   }
 }
@@ -232,7 +232,7 @@ Future<void> _ensureRustLoaded() async {
 void _ensureRustDisposed() {
   final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
   if (loaded) {
-    RustLib.dispose();
+    EntePhotosRust.dispose();
     _isolateCache.remove("rustLibLoaded");
   }
 }
