@@ -122,6 +122,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             final String heatmapEmoji =
                 selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
             final String shareTitle = heatmapTitle;
+            final String shareEmoji = heatmapEmoji;
             final bool shareEnabled = summaryToShare != null;
             return ListView(
               physics: const BouncingScrollPhysics(),
@@ -156,7 +157,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               ? () => _shareActivity(
                                     summaryToShare,
                                     shareTitle,
-                                    emoji: selectedRitual?.icon,
+                                    emoji: shareEmoji,
                                   )
                               : null,
                           child: SizedBox(
@@ -400,80 +401,58 @@ class _ActivityShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    const Color shareBackgroundColor = Color(0xFF08C225);
+    final String shareHeaderTitle =
+        (emoji ?? "").isNotEmpty ? "${emoji!} $title" : title;
     final double maxWidth = math
         .min(
           math.max(MediaQuery.of(context).size.width - 32, 360),
           440,
         )
         .toDouble();
-    return Container(
-      color: Colors.black,
-      padding: const EdgeInsets.all(12),
-      child: Center(
-        child: SizedBox(
-          width: maxWidth,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyBold.copyWith(
-                        fontSize: 20,
-                        height: 1.2,
-                        decoration: TextDecoration.none,
-                        decorationColor: Colors.transparent,
-                        decorationThickness: 0,
-                      ),
+    return Align(
+      alignment: Alignment.topCenter,
+      widthFactor: 1,
+      heightFactor: 1,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          color: shareBackgroundColor,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 48),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      brightness: Brightness.light,
+                      colorScheme: Theme.of(context)
+                          .colorScheme
+                          .copyWith(brightness: Brightness.light),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: ActivityHeatmapCard(
                       summary: summary,
                       compact: true,
                       allowHorizontalScroll: false,
-                      headerTitle: title,
-                      headerEmoji: emoji,
+                      headerTitle: shareHeaderTitle,
+                      headerEmoji: null,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(24),
-                    ),
-                    child: Container(
-                      color: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          "assets/ente_io_green.png",
-                          width: 116,
-                          height: 27,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 24),
+                Image.asset(
+                  "assets/rituals/ente_io_black_white.png",
+                  width: 62,
+                  height: 16,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 12),
+              ],
             ),
           ),
         ),
