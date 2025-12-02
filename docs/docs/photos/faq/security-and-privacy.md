@@ -22,7 +22,7 @@ your files. For technical details, please see our
 
 ### Can Ente see the metadata of my photos and videos? {#can-ente-see-metadata}
 
-No. Just like the photos and videos, all metadata is also end-to-end encrypted.
+No. Just like the photos and videos, all metadata (including exif creation time, location, description etc) is also end-to-end encrypted.
 
 ### How is my data encrypted? {#data-encryption}
 
