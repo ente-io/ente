@@ -1,7 +1,7 @@
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import LinkIcon from "@mui/icons-material/Link";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
@@ -538,7 +538,7 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
+        {attributes.has("userFavorites") && <StarIcon fontSize="small" />}
         {attributes.has("pinned") && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />

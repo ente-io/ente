@@ -1,8 +1,8 @@
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
-import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -93,7 +93,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = (props) => {
         if (attributes.has("archived")) return <ArchiveOutlinedIcon />;
         if (attributes.has("sharedOnlyViaLink")) return <LinkIcon />;
         if (attributes.has("shared")) return <PeopleIcon />;
-        if (attributes.has("userFavorites")) return <FavoriteRoundedIcon />;
+        if (attributes.has("userFavorites")) return <StarIcon fontSize="small" />;
         return <></>;
     };
 

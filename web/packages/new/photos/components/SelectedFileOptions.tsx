@@ -5,8 +5,8 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
+import { StarBorderIcon } from "ente-new/photos/components/icons/StarIcon";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
@@ -350,7 +350,7 @@ const DownloadButton: React.FC<ButtonishProps> = ({ onClick }) => (
 const FavoriteButton: React.FC<ButtonishProps> = ({ onClick }) => (
     <Tooltip title={t("favorite")}>
         <IconButton {...{ onClick }}>
-            <FavoriteBorderIcon />
+            <StarBorderIcon fontSize="small" />
         </IconButton>
     </Tooltip>
 );
