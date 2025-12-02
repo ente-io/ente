@@ -1149,7 +1149,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uploadFileCountLimitErrorToast =>
-      'Action failed. Your individual or family account has hit the 1000-file limit.';
+      'Action failed. You\'ve reached your file limit.';
 
   @override
   String get uploadSubscriptionRequiredErrorBody =>
