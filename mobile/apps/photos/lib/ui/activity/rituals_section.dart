@@ -203,10 +203,12 @@ class _CreateRitualCard extends StatelessWidget {
                     color: colorScheme.fillFaintPressed,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlusSign,
-                    color: colorScheme.textBase,
-                    size: 22,
+                  child: Center(
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlusSign,
+                      color: colorScheme.textBase,
+                      size: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
