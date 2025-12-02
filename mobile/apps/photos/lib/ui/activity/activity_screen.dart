@@ -5,15 +5,14 @@ import "dart:ui" as ui;
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
-import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/activity/rituals_section.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -71,25 +70,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
         title: const Text("Rituals"),
         centerTitle: false,
         actions: [
-          if (_selectedRitual != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.fillFaint,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  minimumSize: const Size(40, 40),
-                ),
-                icon: const Icon(Icons.camera_alt_outlined),
-                onPressed: _selectedRitual != null
-                    ? () => _openRitualCamera(_selectedRitual!)
-                    : null,
-                tooltip: "Open ritual camera",
-              ),
-            ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: IconButton(
@@ -101,7 +81,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 padding: const EdgeInsets.all(8),
                 minimumSize: const Size(40, 40),
               ),
-              icon: const Icon(Icons.add_rounded),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedPlusSign,
+                size: 24,
+              ),
               onPressed: () async {
                 await showRitualEditor(context, ritual: null);
               },
@@ -176,8 +159,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                   )
                               : null,
                           child: SizedBox(
-                            width: 44,
-                            height: 44,
+                            width: 48,
+                            height: 48,
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: DecoratedBox(
@@ -187,9 +170,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child: Icon(
-                                    Icons.share_outlined,
-                                    size: 22,
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedShare08,
+                                    size: 24,
                                     color: shareEnabled
                                         ? iconColor
                                         : Theme.of(context)
@@ -379,25 +362,6 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       },
       generatedAt: summary.generatedAt,
-    );
-  }
-
-  void _openRitualCamera(Ritual ritual) {
-    final albumId = ritual.albumId;
-    if (albumId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Set an album for this ritual to launch the camera."),
-        ),
-      );
-      return;
-    }
-    routeToPage(
-      context,
-      RitualCameraPage(
-        ritualId: ritual.id,
-        albumId: albumId,
-      ),
     );
   }
 }

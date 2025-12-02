@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
@@ -7,6 +8,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/activity_screen.dart";
+import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/collections/album/column_item.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -57,7 +59,10 @@ class RitualsSection extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     minimumSize: const Size(40, 40),
                   ),
-                  icon: const Icon(Icons.add_rounded),
+                  icon: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
+                    size: 22,
+                  ),
                 ),
               ],
             ),
@@ -111,8 +116,10 @@ class _StarterRitualCard extends StatelessWidget {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : Colors.transparent,
-          width: isSelected ? 2 : 0,
+          color: isSelected
+              ? colorScheme.primary500
+              : colorScheme.backgroundElevated2,
+          width: 2,
         ),
       ),
       child: Material(
@@ -175,8 +182,8 @@ class _CreateRitualCard extends StatelessWidget {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.strokeFaint,
-          width: 1,
+          color: colorScheme.backgroundElevated2,
+          width: 2,
         ),
       ),
       child: Material(
@@ -196,8 +203,8 @@ class _CreateRitualCard extends StatelessWidget {
                     color: colorScheme.fillFaintPressed,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    Icons.add_rounded,
+                  child: HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
                     color: colorScheme.textBase,
                     size: 22,
                   ),
@@ -253,8 +260,10 @@ class _RitualCard extends StatelessWidget {
         color: colorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isSelected ? colorScheme.primary500 : Colors.transparent,
-          width: isSelected ? 2 : 0,
+          color: isSelected
+              ? colorScheme.primary500
+              : colorScheme.backgroundElevated2,
+          width: 2,
         ),
       ),
       child: Material(
@@ -325,10 +334,31 @@ class _RitualCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: HugeIcon(
+                      icon: HugeIcons.strokeRoundedCameraAdd01,
+                      color: colorScheme.textBase,
+                      size: 24,
+                    ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: colorScheme.fillFaint,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      minimumSize: const Size(40, 40),
+                    ),
+                    onPressed: () => _openRitualCamera(context, ritual),
+                    tooltip: "Open ritual camera",
+                  ),
                   PopupMenuButton<String>(
                     padding: EdgeInsets.zero,
                     splashRadius: 20,
-                    icon: const Icon(Icons.more_vert_rounded),
+                    icon: Transform.translate(
+                      offset: const Offset(4, 0),
+                      child: const Icon(Icons.more_vert_rounded),
+                    ),
                     elevation: 0,
                     color: colorScheme.backgroundElevated,
                     surfaceTintColor: colorScheme.backgroundElevated,
@@ -361,9 +391,10 @@ class _RitualCard extends StatelessWidget {
                               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.edit_outlined,
+                                  HugeIcon(
+                                    icon: HugeIcons.strokeRoundedPencilEdit01,
                                     color: colorScheme.textBase,
+                                    size: 22,
                                   ),
                                   const SizedBox(width: 10),
                                   Text(
@@ -390,9 +421,10 @@ class _RitualCard extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.delete_outline,
+                              const HugeIcon(
+                                icon: HugeIcons.strokeRoundedDelete02,
                                 color: Colors.red,
+                                size: 22,
                               ),
                               const SizedBox(width: 10),
                               Text(
@@ -548,8 +580,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                               },
                                               child: const Padding(
                                                 padding: EdgeInsets.all(6),
-                                                child: Icon(
-                                                  Icons.edit_outlined,
+                                                child: HugeIcon(
+                                                  icon: HugeIcons
+                                                      .strokeRoundedEdit03,
                                                   size: 18,
                                                 ),
                                               ),
@@ -607,29 +640,62 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                 const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
                                     vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
                                     color: colorScheme.fillFaint,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: List.generate(
-                                      days.length,
-                                      (index) => _DayCircle(
-                                        label: _weekLabel(index),
-                                        selected: days[index],
-                                        colorScheme: colorScheme,
-                                        onTap: () {
-                                          setState(() {
-                                            days[index] = !days[index];
-                                          });
-                                        },
-                                      ),
-                                    ),
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      const double maxCircleSize = 38;
+                                      const double minCircleSize = 20;
+                                      const double minSpacing = 6;
+                                      final double availableWidth =
+                                          constraints.maxWidth;
+
+                                      double circleSize = maxCircleSize;
+                                      double spacing =
+                                          (availableWidth - circleSize * 7) / 8;
+
+                                      if (spacing < minSpacing) {
+                                        spacing = minSpacing;
+                                        circleSize =
+                                            ((availableWidth - (spacing * 8)) /
+                                                    7)
+                                                .clamp(
+                                          minCircleSize,
+                                          maxCircleSize,
+                                        );
+                                        spacing =
+                                            (availableWidth - circleSize * 7) /
+                                                8;
+                                      }
+
+                                      final children = <Widget>[
+                                        SizedBox(width: spacing),
+                                      ];
+                                      for (int index = 0;
+                                          index < days.length;
+                                          index++) {
+                                        children.add(
+                                          _DayCircle(
+                                            label: _weekLabel(index),
+                                            selected: days[index],
+                                            size: circleSize,
+                                            colorScheme: colorScheme,
+                                            onTap: () {
+                                              setState(() {
+                                                days[index] = !days[index];
+                                              });
+                                            },
+                                          ),
+                                        );
+                                        children.add(SizedBox(width: spacing));
+                                      }
+
+                                      return Row(children: children);
+                                    },
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -1134,12 +1200,14 @@ class _DayCircle extends StatelessWidget {
   const _DayCircle({
     required this.label,
     required this.selected,
+    required this.size,
     required this.colorScheme,
     required this.onTap,
   });
 
   final String label;
   final bool selected;
+  final double size;
   final EnteColorScheme colorScheme;
   final VoidCallback onTap;
 
@@ -1150,12 +1218,12 @@ class _DayCircle extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
-        width: 38,
-        height: 38,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color:
               selected ? colorScheme.primary500 : colorScheme.fillFaintPressed,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(size / 2),
         ),
         child: Center(
           child: Text(
@@ -1169,6 +1237,25 @@ class _DayCircle extends StatelessWidget {
       ),
     );
   }
+}
+
+void _openRitualCamera(BuildContext context, Ritual ritual) {
+  final albumId = ritual.albumId;
+  if (albumId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Set an album for this ritual to launch the camera."),
+      ),
+    );
+    return;
+  }
+  routeToPage(
+    context,
+    RitualCameraPage(
+      ritualId: ritual.id,
+      albumId: albumId,
+    ),
+  );
 }
 
 Widget _sectionLabel(BuildContext context, String label) {

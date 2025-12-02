@@ -3,6 +3,7 @@ import "dart:io";
 
 import "package:camera/camera.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
@@ -41,6 +42,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   List<CameraDescription> _cameras = <CameraDescription>[];
   CameraDescription? _activeCamera;
   late final PageController _pageController;
+  late final ScrollController _thumbScrollController;
   Ritual? _ritual;
   _CameraScreenMode _mode = _CameraScreenMode.capture;
   int _selectedIndex = 0;
@@ -51,7 +53,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   String? _error;
   List<XFile> _captures = <XFile>[];
   Collection? _album;
-  int _pointers = 0;
+  bool _isPinching = false;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _currentZoom = 1.0;
@@ -62,6 +64,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   bool _showZoomHint = false;
   static const int _maxCaptures = 20;
   late final VoidCallback _activityListener;
+  static const double _thumbnailSize = 80;
+  static const double _thumbnailSpacing = 12;
 
   void _ensurePageVisible(int index, {bool animate = false}) {
     if (_captures.isEmpty) return;
@@ -89,11 +93,50 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
+  void _scrollThumbsToIndex(int index, {bool animate = true}) {
+    if (_captures.isEmpty) return;
+    final int capped = index.clamp(0, _captures.length - 1);
+    void jump() {
+      if (!_thumbScrollController.hasClients) return;
+      final double itemStart = capped * (_thumbnailSize + _thumbnailSpacing);
+      final double itemEnd = itemStart + _thumbnailSize;
+      const double padding = 20;
+      final double viewport = _thumbScrollController.position.viewportDimension;
+      double newOffset = _thumbScrollController.offset;
+      if (itemStart - padding < newOffset) {
+        newOffset = itemStart - padding;
+      } else if (itemEnd + padding > newOffset + viewport) {
+        newOffset = itemEnd + padding - viewport;
+      }
+      final double maxOffset = _thumbScrollController.position.maxScrollExtent;
+      newOffset = newOffset.clamp(0.0, maxOffset);
+      if ((newOffset - _thumbScrollController.offset).abs() < 0.5) {
+        return;
+      }
+      if (animate) {
+        _thumbScrollController.animateTo(
+          newOffset,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      } else {
+        _thumbScrollController.jumpTo(newOffset);
+      }
+    }
+
+    if (_thumbScrollController.hasClients) {
+      jump();
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) => jump());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _pageController = PageController();
+    _thumbScrollController = ScrollController();
     _activityListener = _syncRitualFromActivity;
     activityService.stateNotifier.addListener(_activityListener);
     _loadAlbum();
@@ -109,6 +152,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     _zoomHintTimer?.cancel();
     _controller?.dispose();
     _pageController.dispose();
+    _thumbScrollController.dispose();
     _cleanupCaptures();
     super.dispose();
   }
@@ -242,6 +286,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         _captures = List<XFile>.from(_captures)..add(capture);
       });
       _ensurePageVisible(_captures.length - 1, animate: true);
+      _scrollThumbsToIndex(_captures.length - 1, animate: true);
     } catch (_) {
       if (!mounted) return;
       showShortToast(context, "Unable to capture photo. Please try again.");
@@ -273,6 +318,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         }
       });
       _ensurePageVisible(_selectedIndex, animate: true);
+      _scrollThumbsToIndex(_selectedIndex, animate: true);
     }
   }
 
@@ -397,6 +443,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     });
     if (_captures.isNotEmpty) {
       _ensurePageVisible(_selectedIndex);
+      _scrollThumbsToIndex(_selectedIndex);
     }
   }
 
@@ -494,11 +541,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                             child: _ThumbnailStrip(
                               captures: _captures,
                               selectedIndex: _selectedIndex,
+                              controller: _thumbScrollController,
                               onSelect: (index) {
                                 setState(() {
                                   _selectedIndex = index;
                                 });
                                 _ensurePageVisible(index);
+                                _scrollThumbsToIndex(index);
                               },
                               onRemove: _removeCapture,
                             ),
@@ -507,6 +556,15 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                       ],
                     ),
             ),
+            if (_mode == _CameraScreenMode.capture && _captures.isNotEmpty)
+              Positioned(
+                right: 16,
+                bottom: 161 + MediaQuery.of(context).padding.bottom,
+                child: _ConfirmChip(
+                  count: _captures.length,
+                  onTap: _enterReview,
+                ),
+              ),
           ],
         ),
       ),
@@ -551,7 +609,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           const Spacer(),
           _RoundIconButton(
             onTap: () => Navigator.of(context).maybePop(),
-            icon: Icons.close,
+            icon: const Icon(Icons.close, color: Colors.white),
             background: Colors.white.withValues(alpha: 0.12),
             size: 44,
           ),
@@ -605,108 +663,117 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     return LayoutBuilder(
       builder: (context, constraints) {
         final mediaOrientation = MediaQuery.of(context).orientation;
-        final double previewAspect = mediaOrientation == Orientation.portrait
-            ? 1 / _controller!.value.aspectRatio
-            : _controller!.value.aspectRatio;
+
+        final Size? rawPreviewSize = _controller!.value.previewSize;
+        final Size fallbackSize =
+            Size(constraints.maxWidth, constraints.maxHeight);
+        final Size viewSize = Size(constraints.maxWidth, constraints.maxHeight);
+        final Size rotatedPreviewSize =
+            mediaOrientation == Orientation.portrait && rawPreviewSize != null
+                ? Size(rawPreviewSize.height, rawPreviewSize.width)
+                : (rawPreviewSize ?? fallbackSize);
+        final FittedSizes fittedSizes = applyBoxFit(
+          BoxFit.cover,
+          rotatedPreviewSize,
+          viewSize,
+        );
+        final Rect previewRect = Alignment.center
+            .inscribe(fittedSizes.destination, Offset.zero & viewSize);
 
         final Offset? focus = _focusPointRel == null
             ? null
             : Offset(
-                _focusPointRel!.dx * constraints.maxWidth,
-                _focusPointRel!.dy * (constraints.maxWidth / previewAspect),
+                previewRect.left + _focusPointRel!.dx * previewRect.width,
+                previewRect.top + _focusPointRel!.dy * previewRect.height,
               );
 
-        final Size previewSize =
-            Size(constraints.maxWidth, constraints.maxWidth / previewAspect);
-
-        return Listener(
-          onPointerDown: (_) => _pointers++,
-          onPointerUp: (_) => _pointers--,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ClipRect(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: previewSize.width,
-                    height: previewSize.height,
-                    child: CameraPreview(
-                      _controller!,
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onScaleStart: _handleScaleStart,
-                        onScaleUpdate: _handleScaleUpdate,
-                        onTapDown: (details) => _onViewFinderTap(
-                          details,
-                          BoxConstraints.tight(previewSize),
-                        ),
-                      ),
-                    ),
-                  ),
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            ClipRect(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: rotatedPreviewSize.width,
+                  height: rotatedPreviewSize.height,
+                  child: CameraPreview(_controller!),
                 ),
               ),
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: CustomPaint(
-                    painter: _GridPainter(),
-                  ),
+            ),
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+                onScaleEnd: _handleScaleEnd,
+                onTapDown: (details) => _onViewFinderTap(
+                  details,
+                  previewRect,
                 ),
               ),
-              if (focus != null)
-                Positioned(
-                  left: focus.dx - 24,
-                  top: focus.dy - 24,
-                  child: AnimatedOpacity(
-                    opacity: _focusPointRel == null ? 0 : 1,
-                    duration: const Duration(milliseconds: 120),
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          width: 2,
-                        ),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: _GridPainter(),
                 ),
+              ),
+            ),
+            if (focus != null)
               Positioned(
-                left: 12,
-                top: 88, // keep below top bar so it stays visible
+                key: const ValueKey("focus_indicator"),
+                left: focus.dx - 24,
+                top: focus.dy - 24,
                 child: AnimatedOpacity(
-                  opacity: _showZoomHint ? 1 : 0,
+                  opacity: _focusPointRel == null ? 0 : 1,
                   duration: const Duration(milliseconds: 120),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "${_currentZoom.toStringAsFixed(1)}x",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        width: 2,
                       ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            Positioned(
+              key: const ValueKey("zoom_indicator"),
+              left: 12,
+              top: 88, // keep below top bar so it stays visible
+              child: AnimatedOpacity(
+                opacity: _showZoomHint ? 1 : 0,
+                duration: const Duration(milliseconds: 120),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    "${_currentZoom.toStringAsFixed(1)}x",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -733,6 +800,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           setState(() {
             _selectedIndex = index;
           });
+          _scrollThumbsToIndex(index);
         },
         itemBuilder: (context, index) {
           final capture = _captures[index];
@@ -764,12 +832,13 @@ class _RitualCameraPageState extends State<RitualCameraPage>
         children: [
           SizedBox(
             width: 96,
-            child: _captures.isEmpty
-                ? const SizedBox.shrink()
-                : _StackedPreview(
-                    captures: _captures,
-                    onTap: _enterReview,
-                  ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: _LatestPreview(
+                captures: _captures,
+                onTap: _enterReview,
+              ),
+            ),
           ),
           Expanded(
             child: Center(
@@ -791,21 +860,14 @@ class _RitualCameraPageState extends State<RitualCameraPage>
                     onTap: (_cameras.length < 2 || _saving || _initializing)
                         ? null
                         : _switchCamera,
-                    icon: Icons.cameraswitch_rounded,
+                    icon: const Icon(
+                      Icons.cameraswitch_rounded,
+                      color: Colors.white,
+                    ),
                     background: Colors.white.withValues(alpha: 0.12),
-                    iconColor: Colors.white,
                     size: 48,
                   ),
                 ),
-                if (_captures.isNotEmpty)
-                  Positioned(
-                    top: -120, // increased gap above switch button
-                    right: 0,
-                    child: _ConfirmChip(
-                      count: _captures.length,
-                      onTap: _enterReview,
-                    ),
-                  ),
               ],
             ),
           ),
@@ -832,9 +894,12 @@ class _RitualCameraPageState extends State<RitualCameraPage>
             children: [
               _RoundIconButton(
                 onTap: _saving ? null : _returnToCapture,
-                icon: Icons.add_photo_alternate_outlined,
+                icon: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedImageAdd02,
+                  color: Colors.white,
+                  size: 22,
+                ),
                 background: Colors.white.withValues(alpha: 0.12),
-                iconColor: Colors.white,
                 size: 44,
               ),
               const Spacer(),
@@ -881,16 +946,27 @@ class _RitualCameraPageState extends State<RitualCameraPage>
 
   void _handleScaleStart(ScaleStartDetails details) {
     if (_controller == null || !_controller!.value.isInitialized) return;
+    _isPinching = details.pointerCount >= 2;
     _baseZoom = _currentZoom;
+  }
+
+  void _handleScaleEnd(ScaleEndDetails details) {
+    _isPinching = false;
   }
 
   Future<void> _handleScaleUpdate(ScaleUpdateDetails details) async {
     if (_controller == null || !_controller!.value.isInitialized) return;
-    // Only respond to pinch gestures (2 pointers) to avoid accidental zooms.
-    if (_pointers != 2) return;
+    if (details.pointerCount < 2) {
+      _isPinching = false;
+      return;
+    }
+    if (!_isPinching) {
+      _isPinching = true;
+      _baseZoom = _currentZoom;
+    }
     final double newZoom =
         (_baseZoom * details.scale).clamp(_minAvailableZoom, _maxAvailableZoom);
-    if (newZoom == _currentZoom) return;
+    if ((newZoom - _currentZoom).abs() < 0.001) return;
     _currentZoom = newZoom;
     try {
       await _controller!.setZoomLevel(_currentZoom);
@@ -902,20 +978,27 @@ class _RitualCameraPageState extends State<RitualCameraPage>
 
   void _onViewFinderTap(
     TapDownDetails details,
-    BoxConstraints constraints,
+    Rect previewRect,
   ) {
     final controller = _controller;
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
+    if (!previewRect.contains(details.localPosition)) {
+      return;
+    }
     final offset = Offset(
-      details.localPosition.dx / constraints.maxWidth,
-      details.localPosition.dy / constraints.maxHeight,
+      (details.localPosition.dx - previewRect.left) / previewRect.width,
+      (details.localPosition.dy - previewRect.top) / previewRect.height,
     );
     try {
-      controller.setExposurePoint(offset);
-      controller.setFocusPoint(offset);
-      _showFocusIndicator(offset);
+      final clamped = Offset(
+        offset.dx.clamp(0.0, 1.0),
+        offset.dy.clamp(0.0, 1.0),
+      );
+      controller.setExposurePoint(clamped);
+      controller.setFocusPoint(clamped);
+      _showFocusIndicator(clamped);
     } catch (_) {
       // Best effort; not all devices support focus/exposure points.
     }
@@ -954,12 +1037,14 @@ class _ThumbnailStrip extends StatelessWidget {
   const _ThumbnailStrip({
     required this.captures,
     required this.selectedIndex,
+    required this.controller,
     required this.onSelect,
     required this.onRemove,
   });
 
   final List<XFile> captures;
   final int selectedIndex;
+  final ScrollController controller;
   final ValueChanged<int> onSelect;
   final ValueChanged<int> onRemove;
 
@@ -970,6 +1055,8 @@ class _ThumbnailStrip extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: captures.length,
+        clipBehavior: Clip.none,
+        controller: controller,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final capture = captures[index];
@@ -987,46 +1074,59 @@ class _ThumbnailStrip extends StatelessWidget {
   }
 }
 
-class _StackedPreview extends StatelessWidget {
-  const _StackedPreview({
-    required this.captures,
-    required this.onTap,
-  });
+class _LatestPreview extends StatelessWidget {
+  const _LatestPreview({required this.captures, required this.onTap});
 
   final List<XFile> captures;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final display = captures.length <= 2
-        ? List<XFile>.from(captures)
-        : captures.sublist(captures.length - 2);
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        height: 64,
-        width: 74,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: display.asMap().entries.map((entry) {
-            final index = entry.key;
-            final capture = entry.value;
-            final double offset = index * 10;
-            return Positioned(
-              left: offset,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(capture.path),
-                  width: 64,
-                  height: 64,
-                  fit: BoxFit.cover,
+    final XFile? lastCapture = captures.isNotEmpty ? captures.last : null;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        final fade = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+        return FadeTransition(
+          opacity: fade,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.94, end: 1.0).animate(fade),
+            child: child,
+          ),
+        );
+      },
+      child: lastCapture == null
+          ? const SizedBox.shrink()
+          : GestureDetector(
+              key: ValueKey(lastCapture.path),
+              onTap: onTap,
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(lastCapture.path),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white, width: 1),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }).toList(),
-        ),
-      ),
+            ),
     );
   }
 }
@@ -1143,14 +1243,12 @@ class _RoundIconButton extends StatelessWidget {
     required this.onTap,
     required this.icon,
     this.background,
-    this.iconColor,
     this.size = 44,
   });
 
   final VoidCallback? onTap;
-  final IconData icon;
+  final Widget icon;
   final Color? background;
-  final Color? iconColor;
   final double size;
 
   @override
@@ -1164,9 +1262,8 @@ class _RoundIconButton extends StatelessWidget {
           shape: BoxShape.circle,
           color: background ?? Colors.black.withValues(alpha: 0.1),
         ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.white,
+        child: Center(
+          child: icon,
         ),
       ),
     );

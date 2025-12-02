@@ -1337,6 +1337,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.0"
+  hugeicons:
+    dependency: "direct main"
+    description:
+      name: hugeicons
+      sha256: "7118b52d96466cdc3394e549ff18e7ff1a92938982777f8feb09e20dca6f6521"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   image:
     dependency: "direct main"
     description:
