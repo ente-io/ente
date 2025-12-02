@@ -209,7 +209,7 @@ name = "ente-core"
 version = "0.0.1"
 
 [[package]]
-name = "ente-rust"
+name = "ente_rust"
 version = "0.0.1"
 dependencies = [
  "ente-core",

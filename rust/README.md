@@ -15,7 +15,7 @@
               ▼                            ▼                            ▼
 ┌───────────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
 │  mobile/packages/rust/    │ │   web/packages/wasm/      │ │      rust/cli/         │
-│    (ente-rust crate)      │ │    (ente-wasm crate)      │ │                        │
+│    (ente_rust crate)      │ │    (ente-wasm crate)      │ │                        │
 │                           │ │                           │ │  (future: when CLI     │
 │  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │   uses ente-core)      │
 │  for all mobile apps      │ │  for all web apps         │ │                        │
@@ -31,7 +31,7 @@
          │
 ┌───────────────────────────┐
 │ mobile/apps/photos/rust/  │
-│  (ente-photos-rust crate) │
+│  (ente_photos_rust crate) │
 │                           │
 │  App-specific #[frb]:     │
 │  usearch, ML, etc.        │
@@ -63,7 +63,7 @@ mobile/packages/rust/       # Shared FRB bindings for all mobile apps
 ├── rust/
 │   ├── src/
 │   │   └── api/            # #[frb] wrappers around ente-core
-│   └── Cargo.toml          # crate name: ente-rust
+│   └── Cargo.toml          # crate name: ente_rust
 ├── lib/                    # Generated Dart bindings
 └── pubspec.yaml            # Flutter plugin package
 
@@ -72,15 +72,15 @@ mobile/apps/photos/rust/    # Photos app-specific FRB bindings
 │   ├── lib.rs
 │   └── api/                # #[frb] app-specific code (usearch, ML)
 │       └── *.rs
-└── Cargo.toml              # crate name: ente-photos-rust
+└── Cargo.toml              # crate name: ente_photos_rust
 ```
 
 **Crates:**
 
 - `ente-core` - shared business logic (pure Rust, no FFI)
 - `ente-wasm` - wasm-bindgen wrappers for web
-- `ente-rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
-- `ente-photos-rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)
+- `ente_rust` - shared FRB wrappers for mobile (Dart class: `EnteRust`)
+- `ente_photos_rust` - Photos app-specific FRB (Dart class: `EntePhotosRust`)
 
 ## Tooling
 
@@ -108,8 +108,8 @@ wasm-pack is installed via npm as a devDependency, so `yarn install` handles it.
 
 Used for Flutter integration. FRB is used on two crates:
 
-- **`ente-rust`** (`mobile/packages/rust/`) - Shared wrappers around `ente-core`, used by multiple mobile apps (Photos, Auth, etc.)
-- **`ente-photos-rust`** (`mobile/apps/photos/rust/`) - Photos app-specific functionality (usearch, ML)
+- **`ente_rust`** (`mobile/packages/rust/`) - Shared wrappers around `ente-core`, used by multiple mobile apps (Photos, Auth, etc.)
+- **`ente_photos_rust`** (`mobile/apps/photos/rust/`) - Photos app-specific functionality (usearch, ML)
 
 Both depend on `ente-core` and use `#[frb]` annotations to generate Dart bindings.
 
@@ -149,7 +149,7 @@ yarn build:wasm  # builds the WASM package
 > cargo watch -w ../rust/core -w packages/wasm/src -s "yarn build:wasm"
 > ```
 
-**ente-rust (mobile/packages/rust/):**
+**ente_rust (mobile/packages/rust/):**
 
 ```sh
 cargo install flutter_rust_bridge_codegen
@@ -158,7 +158,7 @@ flutter_rust_bridge_codegen generate
 
 `flutter_rust_bridge_codegen generate` needs to be run either manually (or in watch mode, `flutter_rust_bridge_codegen generate --watch`) whenever the Rust source changes to get the bindings to update.
 
-**ente-photos-rust (mobile/apps/photos/rust/):**
+**ente_photos_rust (mobile/apps/photos/rust/):**
 
 ```sh
 flutter_rust_bridge_codegen generate
@@ -205,6 +205,6 @@ wasm = ["getrandom/js"]
 ## Tests
 
 - **ente-core:** Standard `cargo test` - comprehensive unit tests
-- **ente-photos-rust:** Minimal FRB smoke test in Dart to catch binding drift
+- **ente_photos_rust:** Minimal FRB smoke test in Dart to catch binding drift
 - **ente-wasm:** Vitest tests in web package
 - **Golden fixtures:** Share test vectors across native/FRB/WASM for crypto parity
