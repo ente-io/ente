@@ -67,13 +67,10 @@ Future<void> _pickAndOTPFile(BuildContext context) async {
 
   try {
     String path = result.files.single.path!;
-    final importResult = await _processAndOTPFile(context, path, progressDialog);
+    final count = await _processAndOTPFile(context, path, progressDialog);
     await progressDialog.hide();
-    if (importResult != null) {
-      await importSuccessDialog(context, importResult.importedCount);
-      if (importResult.skippedEntries.isNotEmpty) {
-        await _showSkippedEntriesDialog(context, importResult.skippedEntries);
-      }
+    if (count != null) {
+      await importSuccessDialog(context, count);
     }
   } catch (e, s) {
     _logger.severe('Exception while processing andOTP import', e, s);
@@ -86,13 +83,6 @@ Future<void> _pickAndOTPFile(BuildContext context) async {
   }
 }
 
-class _ImportResult {
-  final int importedCount;
-  final List<String> skippedEntries;
-
-  _ImportResult({required this.importedCount, required this.skippedEntries});
-}
-
 class _DecryptParams {
   final Uint8List fileBytes;
   final String password;
@@ -100,7 +90,7 @@ class _DecryptParams {
   _DecryptParams({required this.fileBytes, required this.password});
 }
 
-Future<_ImportResult?> _processAndOTPFile(
+Future<int?> _processAndOTPFile(
   BuildContext context,
   String path,
   ProgressDialog dialog,
@@ -154,7 +144,6 @@ Future<_ImportResult?> _processAndOTPFile(
   }
 
   final List<Code> parsedCodes = [];
-  final List<String> skippedEntries = [];
 
   for (var item in entries) {
     final String type = (item['type'] as String).toUpperCase();
@@ -164,16 +153,9 @@ Future<_ImportResult?> _processAndOTPFile(
         ? (label.isNotEmpty ? '$issuer ($label)' : issuer)
         : label;
 
-    // Skip unsupported types (MOTP)
-    if (type == 'MOTP') {
-      skippedEntries.add(displayName.isNotEmpty ? displayName : 'Unknown MOTP');
-      continue;
-    }
-
-    // Validate supported types
+    // Skip unsupported types (e.g., MOTP)
     if (type != 'TOTP' && type != 'HOTP' && type != 'STEAM') {
-      skippedEntries
-          .add(displayName.isNotEmpty ? displayName : 'Unknown ($type)');
+      _logger.warning('Skipping unsupported OTP type: $type for $displayName');
       continue;
     }
 
@@ -208,7 +190,6 @@ Future<_ImportResult?> _processAndOTPFile(
       parsedCodes.add(code);
     } catch (e, s) {
       _logger.warning('Failed to parse andOTP entry: $displayName', e, s);
-      skippedEntries.add(displayName.isNotEmpty ? displayName : 'Parse error');
     }
   }
 
@@ -217,10 +198,7 @@ Future<_ImportResult?> _processAndOTPFile(
   }
   unawaited(AuthenticatorService.instance.onlineSync());
 
-  return _ImportResult(
-    importedCount: parsedCodes.length,
-    skippedEntries: skippedEntries,
-  );
+  return parsedCodes.length;
 }
 
 /// Top-level function for decrypting andOTP backup in a separate isolate.
@@ -285,26 +263,4 @@ String _decryptAndOTPBackup(_DecryptParams params) {
 
   final Uint8List decryptedBytes = cipher.process(ciphertextWithTag);
   return utf8.decode(decryptedBytes);
-}
-
-Future<void> _showSkippedEntriesDialog(
-  BuildContext context,
-  List<String> skippedEntries,
-) async {
-  final l10n = context.l10n;
-  final String entriesList = skippedEntries.join('\n');
-  await showDialogWidget(
-    context: context,
-    title: l10n.andOTPSkippedEntriesTitle(skippedEntries.length),
-    body: '$entriesList\n\n${l10n.andOTPSkippedEntriesReason}',
-    buttons: [
-      ButtonWidget(
-        buttonType: ButtonType.primary,
-        labelText: l10n.ok,
-        isInAlert: true,
-        buttonSize: ButtonSize.large,
-        buttonAction: ButtonAction.first,
-      ),
-    ],
-  );
 }
