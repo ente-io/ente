@@ -751,7 +751,7 @@
   "locker": "Locker",
   "loginToEnteAccount": "Log in to your Ente account",
   "unlockLockerNewUserTitle": "Join Ente to use Locker",
-  "unlockLockerNewUserBody": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+  "unlockLockerNewUserBody": "Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.",
   "checkoutEntePhotos": "Checkout Ente Photos",
   "okay": "Okay",
   "noAccountCta": "I don't have an account",
