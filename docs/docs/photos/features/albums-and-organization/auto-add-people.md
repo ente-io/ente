@@ -1,9 +1,9 @@
 ---
-title: Auto-add people to albums
+title: Auto-add people to albums / Smart albums
 description: Keep an album updated automatically with photos that contain selected people
 ---
 
-# Auto-add people to albums
+# Auto-add people to albums / Smart albums
 
 Automatically add photos of specific people to any album you can edit. Once set up, new matching photos you upload will flow into that album after face recognition indexes them.
 

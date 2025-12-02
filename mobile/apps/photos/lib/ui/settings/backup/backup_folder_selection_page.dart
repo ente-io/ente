@@ -14,7 +14,6 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
-import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -282,9 +281,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       firstButtonOnTap: () async {
         await routeToPage(
           context,
-          const BackupSettingsScreen(skipFolderSelectionPrompt: true),
+          const BackupSettingsScreen(),
         );
-        SyncService.instance.sync().ignore();
       },
       firstButtonType: ButtonType.neutral,
       secondButtonLabel: AppLocalizations.of(context).ok,
