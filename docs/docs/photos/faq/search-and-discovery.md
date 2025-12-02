@@ -253,6 +253,17 @@ Yes! Once the app has grouped faces:
 
 You can then search for photos by person name.
 
+### How can I make face recognition better? {#improve-face-recognition}
+
+You can help improve face grouping by reviewing and confirming suggestions:
+
+1. Open the People section
+2. Tap on a face cluster
+3. Tap "Review suggestions" from the top right menu
+4. Confirm or reject the suggested faces
+
+This helps the app learn and improve grouping accuracy over time.
+
 ## Magic Search
 
 ### What is magic search? {#what-is-magic-search}
