@@ -1,6 +1,5 @@
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import NavigationIcon from "@mui/icons-material/Navigation";
@@ -353,6 +352,7 @@ function useFavorites(
     };
 }
 
+// Encapsulates FileViewer open state, visible file ordering, and click handlers
 function useFileViewer(
     filesByID: Map<number, EnteFile>,
     visiblePhotos: JourneyPoint[],
@@ -368,6 +368,7 @@ function useFileViewer(
 
     const handlePhotoClick = useCallback(
         (fileId: number) => {
+            // Only show files that are currently visible on the map/sidebar
             const visibleFileIds = new Set(visiblePhotos.map((p) => p.fileId));
             const visibleFiles = Array.from(filesByID.values())
                 .filter((f) => visibleFileIds.has(f.id))
@@ -377,6 +378,7 @@ function useFileViewer(
                         new Date(fileCreationTime(a) / 1000).getTime(),
                 );
 
+            // Open the viewer on the clicked file if it exists in the visible list
             const clickedIndex = visibleFiles.findIndex((f) => f.id === fileId);
 
             if (clickedIndex !== -1 && visibleFiles.length > 0) {
@@ -390,6 +392,7 @@ function useFileViewer(
         [filesByID, visiblePhotos],
     );
 
+    // Close handler simply hides the viewer while keeping the file list cached
     const handleClose = useCallback(() => {
         setState((prev) => ({ ...prev, open: false }));
     }, []);
@@ -738,7 +741,7 @@ function MapLayout({
     onPhotoClick,
 }: MapLayoutProps) {
     return (
-        <Box sx={{ display: "flex", height: "100%", width: "100%" }}>
+        <Box sx={{ position: "relative", height: "100%", width: "100%" }}>
             <CollectionSidebar
                 collectionSummary={collectionSummary}
                 visibleCount={visiblePhotos.length}
@@ -748,8 +751,9 @@ function MapLayout({
                 visiblePhotoOrder={visiblePhotoOrder}
                 visiblePhotosWave={visiblePhotosWave}
                 onPhotoClick={onPhotoClick}
+                onClose={onClose}
             />
-            <Box sx={{ flex: 1, position: "relative" }}>
+            <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
                     mapComponents={mapComponents}
                     mapCenter={mapCenter}
@@ -757,7 +761,6 @@ function MapLayout({
                     optimalZoom={optimalZoom}
                     thumbByFileID={thumbByFileID}
                     createClusterCustomIcon={createClusterCustomIcon}
-                    onClose={onClose}
                     onVisiblePhotosChange={onVisiblePhotosChange}
                 />
             </Box>
@@ -778,6 +781,7 @@ interface CollectionSidebarProps {
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
+    onClose: () => void;
 }
 
 function CollectionSidebar({
@@ -789,24 +793,52 @@ function CollectionSidebar({
     visiblePhotoOrder,
     visiblePhotosWave,
     onPhotoClick,
+    onClose,
 }: CollectionSidebarProps) {
     return (
         <Box
             sx={{
-                width: "600px",
-                height: "100%",
+                position: "absolute",
+                // Desktop: left sidebar taking 35% width
+                left: { xs: 0, md: 16 },
+                top: { xs: "auto", md: 16 },
+                bottom: { xs: 0, md: 16 },
+                right: { xs: 0, md: "auto" },
+                width: { xs: "100%", md: "35%" },
+                height: { xs: "40%", md: "auto" },
+                maxWidth: { md: "600px" },
+                minWidth: { md: "450px" },
                 bgcolor: (theme) => theme.vars.palette.background.paper,
-                boxShadow: (theme) => theme.shadows[6],
+                boxShadow: (theme) => theme.shadows[10],
                 display: "flex",
                 flexDirection: "column",
                 overflowY: "auto",
-                padding: 2,
+                padding: { xs: "24px", md: "32px" },
+                // Desktop: rounded corners on all sides; Mobile: only top corners
+                borderRadius: { xs: "24px 24px 0 0", md: "48px" },
+                zIndex: 1000,
+                "&::-webkit-scrollbar": { width: "8px" },
+                "&::-webkit-scrollbar-track": {
+                    background: "transparent",
+                    borderRadius: "48px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                    background: (theme) => theme.palette.divider,
+                    borderRadius: "48px",
+                    "&:hover": {
+                        background: (theme) => theme.palette.text.disabled,
+                    },
+                },
+                scrollbarWidth: "thin",
+                scrollbarColor: (theme) =>
+                    `${theme.palette.divider} transparent`,
             }}
         >
             <SidebarHeader
                 name={collectionSummary.name}
                 visibleCount={visibleCount}
                 missingCount={collectionSummary.fileCount - mapPhotosCount}
+                onClose={onClose}
             />
             <PhotoList
                 photoGroups={photoGroups}
@@ -823,26 +855,39 @@ interface SidebarHeaderProps {
     name: string;
     visibleCount: number;
     missingCount: number;
+    onClose: () => void;
 }
 
 function SidebarHeader({
     name,
     visibleCount,
     missingCount,
+    onClose,
 }: SidebarHeaderProps) {
     return (
         <Box
             sx={{
                 position: "sticky",
-                top: -16,
-                mx: -2,
-                px: 2,
-                pt: 2,
+                top: { xs: -24, md: -32 },
+                mx: { xs: "-24px", md: "-32px" },
+                px: { xs: "24px", md: "32px" },
+                pt: { xs: "24px", md: "0" },
                 pb: 2,
                 bgcolor: (theme) => theme.vars.palette.background.paper,
                 zIndex: 3,
             }}
         >
+            <IconButton
+                aria-label={t("close")}
+                onClick={onClose}
+                sx={{
+                    position: "absolute",
+                    top: { xs: 8, md: 16 },
+                    right: { xs: 8, md: 16 },
+                }}
+            >
+                <CloseIcon />
+            </IconButton>
             <Stack>
                 <Typography variant="h5" sx={{ fontWeight: 700 }} noWrap>
                     {name}
@@ -949,13 +994,13 @@ function PhotoDateGroup({
             <Box
                 sx={{
                     position: "sticky",
-                    top: 56,
+                    top: { xs: 56, md: 72 },
                     bgcolor: (theme) => theme.vars.palette.background.paper,
                     zIndex: 2,
                     py: 1.5,
-                    ml: -2,
-                    mr: -2,
-                    pr: 2,
+                    ml: { xs: "-24px", md: "-32px" },
+                    mr: { xs: "-24px", md: "-32px" },
+                    px: { xs: "0", md: "0" },
                 }}
             >
                 <Typography variant="small" color="text.secondary">
@@ -992,7 +1037,6 @@ interface MapCanvasProps {
     optimalZoom: number;
     thumbByFileID: Map<number, string>;
     createClusterCustomIcon: (cluster: unknown) => unknown;
-    onClose: () => void;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
 }
 
@@ -1003,7 +1047,6 @@ function MapCanvas({
     optimalZoom,
     thumbByFileID,
     createClusterCustomIcon,
-    onClose,
     onVisiblePhotosChange,
 }: MapCanvasProps) {
     const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
@@ -1023,7 +1066,7 @@ function MapCanvas({
                 maxZoom={19}
                 updateWhenZooming
             />
-            <MapControls useMap={useMap} onClose={onClose} />
+            <MapControls useMap={useMap} />
             <MapViewportListener
                 useMap={useMap}
                 photos={mapPhotos}
@@ -1062,10 +1105,9 @@ function MapCanvas({
 
 interface MapControlsProps {
     useMap: typeof import("react-leaflet").useMap;
-    onClose: () => void;
 }
 
-function MapControls({ useMap, onClose }: MapControlsProps) {
+function MapControls({ useMap }: MapControlsProps) {
     const map = useMap();
 
     const handleOpenInMaps = () => {
@@ -1076,13 +1118,6 @@ function MapControls({ useMap, onClose }: MapControlsProps) {
 
     return (
         <>
-            <FloatingIconButton
-                onClick={onClose}
-                sx={{ position: "absolute", left: 16, top: 16, zIndex: 1000 }}
-            >
-                <ArrowBackIcon />
-            </FloatingIconButton>
-
             <FloatingIconButton
                 onClick={handleOpenInMaps}
                 sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
@@ -1306,8 +1341,8 @@ interface ThumbImageProps {
 
 function ThumbImage({ src, onClick, animationDelay }: ThumbImageProps) {
     const baseSx = {
-        width: 140,
-        height: 140,
+        width: { xs: 80, md: 140 },
+        height: { xs: 80, md: 140 },
         borderRadius: 0,
         flexShrink: 0,
         border: (theme: { palette: { divider: string } }) =>
