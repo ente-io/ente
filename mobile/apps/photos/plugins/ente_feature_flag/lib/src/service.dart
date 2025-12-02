@@ -89,7 +89,7 @@ class FlagService {
   bool get enableOnlyBackupFuturePhotos => internalUser;
 
   bool get facesTimeline => internalUser;
-  bool get ritualsFlag => true;
+  bool get ritualsFlag => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {
