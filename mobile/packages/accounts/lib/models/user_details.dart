@@ -35,9 +35,22 @@ class UserDetails {
   static const int _lockerStorageLimitFree = 1 * 1024 * 1024 * 1024; // 1GB
   static const int _lockerStorageLimitPaid = 10 * 1024 * 1024 * 1024; // 10GB
 
-  /// Returns true if user has an active paid subscription
+  /// Returns true if user has paid access (direct subscription, family plan,
+  /// or paid add-ons)
   bool hasPaidSubscription() {
-    return !subscription.isFreePlan() && subscription.isValid();
+    // Direct paid subscription
+    if (!subscription.isFreePlan() && subscription.isValid()) {
+      return true;
+    }
+    // Family plan member
+    if (isPartOfFamily()) {
+      return true;
+    }
+    // Has paid add-ons
+    if (hasPaidAddon()) {
+      return true;
+    }
+    return false;
   }
 
   /// Returns the locker file limit based on subscription status
