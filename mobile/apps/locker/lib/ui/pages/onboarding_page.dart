@@ -195,17 +195,29 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         onTap: _navigateToSignInPage,
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () async {
-                          final result = await showCreateNewAccountDialog(
-                            context,
-                            title: l10n.unlockLockerPaidPlanTitle,
-                            body: l10n.unlockLockerPaidPlanBody,
-                            buttonLabel: l10n.checkoutEntePhotos,
-                            assetPath: "assets/file_lock.png",
-                          );
+                    minimumSize: const Size(double.infinity, 56),
+                  ),
+                  onPressed: _navigateToSignInPage,
+                  child: Text(
+                    l10n.loginToEnteAccount,
+                    style: getEnteTextTheme(context).bodyBold.copyWith(
+                          color: colorScheme.primary700,
+                        ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: TextButton(
+                  onPressed: () async {
+                    final result = await showCreateNewAccountDialog(
+                      context,
+                      title: l10n.unlockLockerNewUserTitle,
+                      body: l10n.unlockLockerNewUserBody,
+                      buttonLabel: l10n.checkoutEntePhotos,
+                      assetPath: "assets/file_lock.png",
+                      icon: const SizedBox.shrink(),
+                    );
 
                           if (result?.action == ButtonAction.first) {
                             await Navigator.of(context).push(

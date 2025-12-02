@@ -111,7 +111,7 @@ Open `Settings > Backup > Free up space > Similar images`, review each group of 
 
 The "Similar images" feature is currently only available on mobile. Desktop only supports exact duplicate detection via `Settings > Deduplicate files`.
 
-### Smart album management
+### Album-linked similarity management
 
 When removing similar images, Ente intelligently handles your albums:
 

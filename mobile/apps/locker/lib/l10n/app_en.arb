@@ -610,17 +610,13 @@
   "@uploadFileCountLimitErrorTitle": {
     "description": "Title shown when uploads fail because the locker already has the maximum file count"
   },
-  "uploadFileCountLimitErrorBody": "Your individual or family account has hit the 1000-file limit.",
+  "uploadFileCountLimitErrorBody": "You've reached your file limit. Upgrade to a paid plan for more storage.",
   "@uploadFileCountLimitErrorBody": {
     "description": "Body shown when uploads fail because the locker already has the maximum file count"
   },
-  "uploadFileCountLimitErrorToast": "Action failed. Your individual or family account has hit the 1000-file limit.",
+  "uploadFileCountLimitErrorToast": "Action failed. You've reached your file limit.",
   "@uploadFileCountLimitErrorToast": {
     "description": "Toast shown when info items fail to save due to hitting the file count limit"
-  },
-  "uploadSubscriptionRequiredErrorBody": "Subscription required to save info items.",
-  "@uploadSubscriptionRequiredErrorBody": {
-    "description": "Message shown when uploads fail because the user does not have an active subscription"
   },
   "uploadFileTooLargeErrorTitle": "File too large",
   "@uploadFileTooLargeErrorTitle": {
@@ -754,8 +750,8 @@
   },
   "locker": "Locker",
   "loginToEnteAccount": "Log in to your Ente account",
-  "unlockLockerPaidPlanTitle": "Unlock Locker with a paid plan.",
-  "unlockLockerPaidPlanBody": "Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker",
+  "unlockLockerNewUserTitle": "Join Ente to use Locker",
+  "unlockLockerNewUserBody": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
   "checkoutEntePhotos": "Checkout Ente Photos",
   "okay": "Okay",
   "noAccountCta": "I don't have an account",

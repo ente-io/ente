@@ -136,6 +136,9 @@ class StringsLocalizationsFa extends StringsLocalizations {
   String get enterPassword => 'رمز عبور را وارد کنید';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'رمز عبور خود را وارد کنید';
 
   @override
@@ -508,6 +511,9 @@ class StringsLocalizationsFa extends StringsLocalizations {
   String get enterPin => 'پین را وارد کنید';
 
   @override
+  String get enterAppLockPin => 'Enter app lock PIN';
+
+  @override
   String get setNewPin => 'پین جدید انتخاب کنید';
 
   @override
@@ -805,4 +811,8 @@ class StringsLocalizationsFa extends StringsLocalizations {
 
   @override
   String get inviteToEnte => 'Invite to Ente';
+
+  @override
+  String get lockerExistingUserRequired =>
+      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
 }

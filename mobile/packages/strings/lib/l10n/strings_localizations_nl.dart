@@ -136,6 +136,9 @@ class StringsLocalizationsNl extends StringsLocalizations {
   String get enterPassword => 'Voer wachtwoord in';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Voer je wachtwoord in';
 
   @override
@@ -511,6 +514,9 @@ class StringsLocalizationsNl extends StringsLocalizations {
   String get enterPin => 'Pin invoeren';
 
   @override
+  String get enterAppLockPin => 'Enter app lock PIN';
+
+  @override
   String get setNewPin => 'Nieuwe pin instellen';
 
   @override
@@ -811,4 +817,8 @@ class StringsLocalizationsNl extends StringsLocalizations {
 
   @override
   String get inviteToEnte => 'Invite to Ente';
+
+  @override
+  String get lockerExistingUserRequired =>
+      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
 }
