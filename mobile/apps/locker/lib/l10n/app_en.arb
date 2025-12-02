@@ -618,10 +618,6 @@
   "@uploadFileCountLimitErrorToast": {
     "description": "Toast shown when info items fail to save due to hitting the file count limit"
   },
-  "uploadSubscriptionRequiredErrorBody": "Subscription required to save info items.",
-  "@uploadSubscriptionRequiredErrorBody": {
-    "description": "Message shown when uploads fail because the user does not have an active subscription"
-  },
   "uploadFileTooLargeErrorTitle": "File too large",
   "@uploadFileTooLargeErrorTitle": {
     "description": "Title shown when uploads fail because the file exceeds the supported size"

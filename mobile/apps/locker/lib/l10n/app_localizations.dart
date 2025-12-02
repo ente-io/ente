@@ -2050,12 +2050,6 @@ abstract class AppLocalizations {
   /// **'Action failed. You\'ve reached your file limit.'**
   String get uploadFileCountLimitErrorToast;
 
-  /// Message shown when uploads fail because the user does not have an active subscription
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription required to save info items.'**
-  String get uploadSubscriptionRequiredErrorBody;
-
   /// Title shown when uploads fail because the file exceeds the supported size
   ///
   /// In en, this message translates to:

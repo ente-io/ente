@@ -1152,10 +1152,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Action failed. You\'ve reached your file limit.';
 
   @override
-  String get uploadSubscriptionRequiredErrorBody =>
-      'Subscription required to save info items.';
-
-  @override
   String get uploadFileTooLargeErrorTitle => 'File too large';
 
   @override
