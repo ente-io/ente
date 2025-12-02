@@ -1,1 +1,3 @@
 build/
+
+lib/strings_localizations*.dart

@@ -169,6 +169,10 @@
   "@enterPassword": {
     "description": "Enter password field label"
   },
+  "enterAppLockPassword": "Enter App lock password",
+  "@enterAppLockPassword": {
+    "description": "Enter App lock password prompt for lock screen"
+  },
   "enterYourPasswordHint": "Enter your password",
   "@enterYourPasswordHint": {
     "description": "Hint for password field"
@@ -627,6 +631,10 @@
   "enterPin": "Enter PIN",
   "@enterPin": {
     "description": "Enter PIN prompt"
+  },
+  "enterAppLockPin": "Enter App lock PIN",
+  "@enterAppLockPin": {
+    "description": "Enter App lock PIN prompt for lock screen"
   },
   "setNewPin": "Set new PIN",
   "@setNewPin": {
