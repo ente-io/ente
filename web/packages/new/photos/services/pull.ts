@@ -5,7 +5,11 @@ import {
 } from "ente-gallery/services/video";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
-import { pullCollectionFiles, pullCollections } from "./collection";
+import {
+    movePendingRemovalActionsToUncategorized,
+    pullCollectionFiles,
+    pullCollections,
+} from "./collection";
 import { isMLSupported, mlSync, pullMLStatus } from "./ml";
 import { searchDataSync } from "./search";
 import { pullSettings } from "./settings";
@@ -108,6 +112,9 @@ export const pullFiles = async (opts?: PullFilesOpts) => {
         opts?.onSetTrashedItems,
         videoPrunePermanentlyDeletedFileIDsIfNeeded,
     );
+    // After trash sync, fetch pending removal actions and move affected files
+    // to the uncategorized collection.
+    await movePendingRemovalActionsToUncategorized(collections);
     if (didUpdateFiles) {
         // TODO: Ok for now since its is only commented for the deduper (gallery
         // does this by providing onDidUpdateCollectionFiles), but still needs
