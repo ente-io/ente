@@ -16,6 +16,15 @@ A short summary list of changes to the Ente Photos mobile and desktop apps. For 
 - Fix OCR for HEIC files on Android
 - Fix continuous loading in map view when no images have location data
 
+## v1.7.16 (desktop) - Nov 2025
+
+- Support Greek translations.
+- Ability to terminate sessions on other devices.
+- Quick access for search: Ctrl/Cmd + K.
+- Search now shows settings.
+- Ability to pin people.
+- Ability to add a photo to an album from the photo viewer menu.
+
 ## v1.2.18 (mobile) - Nov 2025
 
 - **Jump to date** - See surrounding photos for any photo by selecting the jump to date option in the file's info pane.
