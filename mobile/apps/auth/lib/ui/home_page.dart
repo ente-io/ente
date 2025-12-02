@@ -1429,14 +1429,14 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         IconButton(
-          icon: _showSearchBox
-              ? Icon(Icons.clear, color: iconColor, size: 22)
-              : HugeIcon(
-                  icon: HugeIcons.strokeRoundedSearch01,
-                  color: iconColor,
-                  size: 22,
-                  strokeWidth: 1.75,
-                ),
+          icon: HugeIcon(
+            icon: _showSearchBox
+                ? HugeIcons.strokeRoundedCancel01
+                : HugeIcons.strokeRoundedSearch01,
+            color: iconColor,
+            size: 22,
+            strokeWidth: 1.75,
+          ),
           tooltip: l10n.search,
           padding: const EdgeInsets.all(8.0),
           onPressed: () {
