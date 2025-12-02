@@ -189,6 +189,16 @@ class _Heatmap extends StatelessWidget {
       monthLabels[rowIndex] = _monthLabel(firstDay.month);
     }
 
+    final String? bottomMonthLabel = monthLabels[weeks.length - 1];
+    if (bottomMonthLabel != null) {
+      for (final int rowIndex in [0, 1]) {
+        if (rowIndex < weeks.length &&
+            monthLabels[rowIndex] == bottomMonthLabel) {
+          monthLabels.remove(rowIndex);
+        }
+      }
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final double baseMonthLabelWidth = compact ? 28 : 32;
