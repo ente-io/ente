@@ -475,6 +475,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
     barrierColor: Colors.black.withValues(alpha: 0.45),
     barrierDismissible: true,
     transitionDuration: const Duration(milliseconds: 240),
+    useRootNavigator: false,
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
       final mediaQuery = MediaQuery.of(dialogContext);
       final colorScheme = getEnteColorScheme(dialogContext);
