@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
@@ -15,6 +14,7 @@ import 'package:ente_auth/ui/settings/data/import/import_success.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_ui/components/progress_dialog.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:pointycastle/export.dart';
@@ -93,6 +93,13 @@ class _ImportResult {
   _ImportResult({required this.importedCount, required this.skippedEntries});
 }
 
+class _DecryptParams {
+  final Uint8List fileBytes;
+  final String password;
+
+  _DecryptParams({required this.fileBytes, required this.password});
+}
+
 Future<_ImportResult?> _processAndOTPFile(
   BuildContext context,
   String path,
@@ -127,7 +134,10 @@ Future<_ImportResult?> _processAndOTPFile(
         return null;
       }
       await dialog.show();
-      final decryptedContent = _decryptAndOTPBackup(fileBytes, password!);
+      final decryptedContent = await compute(
+        _decryptAndOTPBackup,
+        _DecryptParams(fileBytes: fileBytes, password: password!),
+      );
       entries = jsonDecode(decryptedContent) as List<dynamic>;
     } catch (e, s) {
       _logger.warning("Exception while decrypting andOTP backup", e, s);
@@ -213,7 +223,12 @@ Future<_ImportResult?> _processAndOTPFile(
   );
 }
 
-String _decryptAndOTPBackup(Uint8List fileBytes, String password) {
+/// Top-level function for decrypting andOTP backup in a separate isolate.
+/// Must be top-level (not a method or closure) to work with compute().
+String _decryptAndOTPBackup(_DecryptParams params) {
+  final Uint8List fileBytes = params.fileBytes;
+  final String password = params.password;
+
   // andOTP encrypted file structure:
   // [iterations: 4 bytes][salt: 12 bytes][IV + ciphertext + auth tag]
   const int intLength = 4;
