@@ -56,7 +56,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -1365,11 +1364,11 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: SvgPicture.asset(
-          'assets/svg/menu-icon.svg',
-          width: 24,
-          height: 24,
-          colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+        icon: HugeIcon(
+          icon: HugeIcons.strokeRoundedMenu01,
+          color: iconColor,
+          size: 22,
+          strokeWidth: 1.75,
         ),
         tooltip: l10n.settings,
         onPressed: () {
@@ -1396,6 +1395,20 @@ class _HomePageState extends State<HomePage> {
             ),
       centerTitle: true,
       actions: <Widget>[
+        if (isDesktop)
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedSquareLock02,
+              color: iconColor,
+              size: 22,
+              strokeWidth: 1.75,
+            ),
+            tooltip: l10n.appLock,
+            padding: const EdgeInsets.all(8.0),
+            onPressed: () async {
+              await navigateToLockScreen();
+            },
+          ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SortCodeMenuWidget(
@@ -1415,23 +1428,14 @@ class _HomePageState extends State<HomePage> {
             iconColor: iconColor,
           ),
         ),
-        if (isDesktop)
-          IconButton(
-            icon: const Icon(Icons.lock),
-            tooltip: l10n.appLock,
-            padding: const EdgeInsets.all(8.0),
-            onPressed: () async {
-              await navigateToLockScreen();
-            },
-          ),
         IconButton(
           icon: _showSearchBox
-              ? Icon(Icons.clear, color: iconColor)
-              : SvgPicture.asset(
-                  'assets/svg/search-icon.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+              ? Icon(Icons.clear, color: iconColor, size: 22)
+              : HugeIcon(
+                  icon: HugeIcons.strokeRoundedSearch01,
+                  color: iconColor,
+                  size: 22,
+                  strokeWidth: 1.75,
                 ),
           tooltip: l10n.search,
           padding: const EdgeInsets.all(8.0),

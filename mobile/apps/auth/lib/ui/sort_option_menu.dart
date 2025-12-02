@@ -77,11 +77,12 @@ class SortCodeMenuWidget extends StatelessWidget {
       },
       child: SvgPicture.asset(
         'assets/svg/filter-icon.svg',
-        width: 24,
-        height: 24,
-        colorFilter: iconColor != null
-            ? ColorFilter.mode(iconColor!, BlendMode.srcIn)
-            : null,
+        width: 26,
+        height: 26,
+        colorFilter: ColorFilter.mode(
+          iconColor ?? Theme.of(context).iconTheme.color!,
+          BlendMode.srcIn,
+        ),
       ),
     );
   }
