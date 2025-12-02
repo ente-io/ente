@@ -151,10 +151,6 @@
 /* 4 line caption */
 
 .pswp-ente .pswp__caption {
-    position: absolute;
-    bottom: 0px;
-    right: 0;
-    margin: 20px 24px;
     border-radius: 3px;
     /* Same opacity as the other controls. */
     color: rgb(255 255 255 / 0.85);
@@ -176,10 +172,6 @@
 }
 
 .pswp-ente .pswp__caption.ente-video {
-    /* Add extra offset for video captions so that they do not overlap with the
-       video controls. The constant was picked such that it lay above the media
-       controls. */
-    bottom: 48px;
     /* Adding a caption with a blur backdrop filter above the video element
        contained in a media-controller causes a subtle tint to be overlaid on
        the entire video. This is visible on both Chrome and Firefox as of
@@ -351,14 +343,14 @@ media-settings-menu {
     z-index: 1;
 }
 
-/* Hide the caption when hovering over the video controls (and when the settings
-   menu is open) since they occupy similar real estate as the caption. */
+/* Hide the bottom right controls when hovering over the video controls, when
+   video is playing, or when the settings menu is open. */
 body:has(
     media-time-range[mediapreviewtime],
     media-controller:not([mediapaused]),
     media-settings-menu:not([hidden])
 ) {
-    & .pswp-ente .pswp__caption {
+    & .pswp-ente .pswp__bottom-right-controls {
         display: none;
     }
 }
@@ -395,7 +387,61 @@ body:has(
     opacity: 1;
 }
 
-/* Also hide the caption in video fullscreen mode */
-.pswp-ente.pswp--video-fullscreen .pswp__caption {
+/* Also hide the bottom right controls in video fullscreen mode */
+.pswp-ente.pswp--video-fullscreen .pswp__bottom-right-controls {
     display: none;
+}
+
+/* Bottom right controls container (action buttons + caption) */
+.pswp-ente .pswp__bottom-right-controls {
+    position: absolute;
+    bottom: 20px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+/* Extra offset for video to clear video controls */
+.pswp-ente .pswp__bottom-right-controls:has(.pswp__caption.ente-video) {
+    bottom: 100px;
+}
+
+/* Action buttons row */
+.pswp-ente .pswp__action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.pswp-ente .pswp__action-button {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: rgb(0 0 0 / 0.6);
+    border: 1px solid rgb(255 255 255 / 0.12);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.pswp-ente .pswp__action-button:hover {
+    background-color: rgb(0 0 0 / 0.8);
+}
+
+.pswp-ente .pswp__action-button svg {
+    width: 28px;
+    height: 28px;
+    fill: white;
+}
+
+/* Reduce padding on mobile */
+@media (width < 450px) {
+    .pswp-ente .pswp__bottom-right-controls {
+        bottom: 12px;
+        right: 12px;
+    }
 }

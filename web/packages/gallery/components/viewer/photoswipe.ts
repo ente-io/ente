@@ -22,7 +22,12 @@ import {
     type FileViewerAnnotatedFile,
     type FileViewerProps,
 } from "./FileViewer";
-import { createPSRegisterElementIconHTML, settingsSVGPath } from "./icons";
+import {
+    commentSVGPath,
+    createPSRegisterElementIconHTML,
+    heartSVGPath,
+    settingsSVGPath,
+} from "./icons";
 
 export interface FileViewerPhotoSwipeDelegate {
     /**
@@ -1397,25 +1402,20 @@ export class FileViewerPhotoSwipe {
             });
 
             ui.registerElement({
-                name: "caption",
+                name: "bottom-right-controls",
                 // After the video controls so that we don't get occluded by
                 // them (nb: the caption will hide when the video is playing).
                 order: 31,
                 appendTo: "root",
-                // The caption uses the line-clamp CSS property, which behaves
-                // unexpectedly when we also assign padding to the "p" element
-                // on which we're setting the line clamp: the "clipped" lines
-                // show through in the padding area.
-                //
-                // As a workaround, wrap the p in a div. Set the line-clamp on
-                // the p, and the padding on the div.
-                html: "<div><p></p></div>",
+                html: bottomRightControlsHTML(),
                 onInit: (element, pswp) => {
+                    const captionEl =
+                        element.querySelector<HTMLElement>(".pswp__caption")!;
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
-                        element.querySelector("p")!.innerText = alt ?? "";
-                        element.style.visibility = alt ? "visible" : "hidden";
-                        element.classList.toggle(
+                        captionEl.querySelector("p")!.innerText = alt ?? "";
+                        captionEl.style.display = alt ? "block" : "none";
+                        captionEl.classList.toggle(
                             "ente-video",
                             fileType == FileType.video,
                         );
@@ -1887,6 +1887,28 @@ const livePhotoVideoHTML = (videoURL: string) => `
 <video muted playsinline oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
+`;
+
+/**
+ * HTML for the bottom right controls (action buttons + caption).
+ *
+ * The caption uses the line-clamp CSS property, which behaves unexpectedly
+ * when we also assign padding to the "p" element on which we're setting the
+ * line clamp: the "clipped" lines show through in the padding area.
+ *
+ * As a workaround, wrap the p in a div. Set the line-clamp on the p, and the
+ * padding on the div.
+ */
+const bottomRightControlsHTML = () => `
+<div class="pswp__action-buttons">
+  <button class="pswp__action-button" aria-label="Like">
+    <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} /></svg>
+  </button>
+  <button class="pswp__action-button" aria-label="Comment">
+    <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>
+  </button>
+</div>
+<div class="pswp__caption"><p></p></div>
 `;
 
 const createElementFromHTMLString = (htmlString: string) => {
