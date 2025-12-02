@@ -547,6 +547,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                     onPressed: _openSavePage,
                     shape: const CircleBorder(),
                     backgroundColor: colorScheme.primary700,
+                    elevation: 0,
                     child: const HugeIcon(
                       icon: HugeIcons.strokeRoundedPlusSign,
                       color: Colors.white,
@@ -620,41 +621,33 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final scrollBottomPadding =
-            MediaQuery.of(context).padding.bottom + 120.0;
+        final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 32.0,
-            bottom: scrollBottomPadding,
-          ),
-          child: _recentFiles.isEmpty
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: HomeEmptyStateWidget(),
-                  ),
-                )
-              : SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        RecentsSectionWidget(
-                          collections: _filterOutUncategorized(_collections),
-                          recentFiles: _recentFiles,
-                        ),
-                      ],
-                    ),
-                  ),
+        return _recentFiles.isEmpty
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(),
                 ),
-        );
+              )
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 32.0,
+                  bottom: scrollBottomPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RecentsSectionWidget(
+                      collections: _filterOutUncategorized(_collections),
+                      recentFiles: _recentFiles,
+                    ),
+                  ],
+                ),
+              );
       },
     );
   }
