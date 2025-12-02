@@ -27,6 +27,31 @@ class UserDetails {
     this.bonusData,
   );
 
+  // Locker-specific limits computed client-side based on subscription
+  // Free tier: 100 files, 1GB storage
+  // Paid tier: 1000 files, 10GB storage
+  static const int _lockerFileLimitFree = 100;
+  static const int _lockerFileLimitPaid = 1000;
+  static const int _lockerStorageLimitFree = 1 * 1024 * 1024 * 1024; // 1GB
+  static const int _lockerStorageLimitPaid = 10 * 1024 * 1024 * 1024; // 10GB
+
+  /// Returns true if user has an active paid subscription
+  bool hasPaidSubscription() {
+    return !subscription.isFreePlan() && subscription.isValid();
+  }
+
+  /// Returns the locker file limit based on subscription status
+  int getLockerFileLimit() {
+    return hasPaidSubscription() ? _lockerFileLimitPaid : _lockerFileLimitFree;
+  }
+
+  /// Returns the locker storage limit based on subscription status
+  int getLockerStorageLimit() {
+    return hasPaidSubscription()
+        ? _lockerStorageLimitPaid
+        : _lockerStorageLimitFree;
+  }
+
   bool isPartOfFamily() {
     return familyData?.members?.isNotEmpty ?? false;
   }
