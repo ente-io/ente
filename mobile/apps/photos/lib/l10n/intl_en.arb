@@ -351,7 +351,7 @@
   "removeFromAlbumTitle": "Remove from album?",
   "removeFromAlbum": "Remove from album",
   "itemsWillBeRemovedFromAlbum": "Selected items will be removed from this album",
-  "removeShareItemsWarning": "Some of the items you are removing were added by other people, and you will lose access to them",
+  "removeShareItemsWarning": "Selected photos will not be accessible to any viewer of this album, except the photo owners.",
   "addingToFavorites": "Adding to favorites...",
   "removingFromFavorites": "Removing from favorites...",
   "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
