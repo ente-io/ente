@@ -114,7 +114,7 @@ class _LoginPasswordVerificationPageState
         await _showContactSupportDialog(
           context,
           context.strings.oops,
-          "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+          context.strings.lockerExistingUserRequired,
         );
       } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         await _showContactSupportDialog(

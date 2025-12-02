@@ -146,7 +146,7 @@ class UserService {
           showErrorDialog(
             context,
             context.strings.oops,
-            "Registration is temporarily paused",
+            context.strings.lockerExistingUserRequired,
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
@@ -534,7 +534,7 @@ class UserService {
         await showErrorDialog(
           context,
           context.strings.oops,
-          "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+          context.strings.lockerExistingUserRequired,
         );
         return;
       } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
@@ -950,7 +950,7 @@ class UserService {
         showErrorDialog(
           context,
           context.strings.oops,
-          "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+          context.strings.lockerExistingUserRequired,
         );
       } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         // ignore: unawaited_futures

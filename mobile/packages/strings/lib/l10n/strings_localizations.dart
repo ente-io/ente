@@ -1594,6 +1594,12 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Invite to Ente'**
   String get inviteToEnte;
+
+  /// Error message shown when a user without an Ente account tries to use Locker
+  ///
+  /// In en, this message translates to:
+  /// **'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.'**
+  String get lockerExistingUserRequired;
 }
 
 class _StringsLocalizationsDelegate

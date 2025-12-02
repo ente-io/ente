@@ -772,6 +772,10 @@ class StringsLocalizationsZh extends StringsLocalizations {
 
   @override
   String get inviteToEnte => 'Invite to Ente';
+
+  @override
+  String get lockerExistingUserRequired =>
+      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
 }
 
 /// The translations for Chinese, as used in China (`zh_CN`).

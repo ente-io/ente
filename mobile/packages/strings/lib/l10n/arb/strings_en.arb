@@ -879,5 +879,9 @@
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
-  "inviteToEnte": "Invite to Ente"
+  "inviteToEnte": "Invite to Ente",
+  "lockerExistingUserRequired": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+  "@lockerExistingUserRequired": {
+    "description": "Error message shown when a user without an Ente account tries to use Locker"
+  }
 }
