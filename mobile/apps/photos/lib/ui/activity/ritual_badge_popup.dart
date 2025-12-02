@@ -24,6 +24,26 @@ const Map<int, String> _badgeMessages = {
   30: "30 days in a row! Legendary consistency. Take a bow!",
 };
 
+List<Color> _headingGradientColors(BuildContext context) {
+  final brightness = Theme.of(context).brightness;
+  return brightness == Brightness.dark
+      ? [
+          Colors.white.withValues(alpha: 0.92),
+          Colors.white.withValues(alpha: 0.72),
+        ]
+      : const [
+          Color(0xFF545454),
+          Colors.black,
+        ];
+}
+
+Color _raysColor(BuildContext context) {
+  final brightness = Theme.of(context).brightness;
+  return brightness == Brightness.dark
+      ? _badgeGreen.withValues(alpha: 0.82)
+      : _badgeGreen.withValues(alpha: 1.0);
+}
+
 Future<void> showRitualBadgePopup(
   BuildContext context, {
   required RitualBadgeUnlock badge,
@@ -64,20 +84,8 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
     final mediaQuery = MediaQuery.of(context);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final brightness = Theme.of(context).brightness;
-    final isDarkMode = brightness == Brightness.dark;
-    final headingGradientColors = isDarkMode
-        ? [
-            Colors.white.withValues(alpha: 0.92),
-            Colors.white.withValues(alpha: 0.72),
-          ]
-        : const [
-            Color(0xFF545454),
-            Colors.black,
-          ];
-    final raysColor = isDarkMode
-        ? _badgeGreen.withValues(alpha: 0.82)
-        : _badgeGreen.withValues(alpha: 1.0);
+    final headingGradientColors = _headingGradientColors(context);
+    final raysColor = _raysColor(context);
     final badgeAsset = _badgeAssets[widget.badge.days] ?? _badgeAssets[7]!;
     final badgeMessage =
         _badgeMessages[widget.badge.days] ?? "You're on a roll!";
@@ -330,24 +338,26 @@ class _RitualChip extends StatelessWidget {
   const _RitualChip({
     required this.icon,
     required this.title,
-    this.backgroundColor,
+    this.useDarkTheme = false,
   });
 
   final String icon;
   final String title;
-  final Color? backgroundColor;
+  final bool useDarkTheme;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    final brightness = Theme.of(context).brightness;
+    final colorScheme =
+        useDarkTheme ? darkTheme.colorScheme : getEnteColorScheme(context);
+    final textTheme =
+        useDarkTheme ? darkTheme.textTheme : getEnteTextTheme(context);
+    final brightness =
+        useDarkTheme ? Brightness.dark : Theme.of(context).brightness;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: backgroundColor ??
-            (brightness == Brightness.dark
-                ? colorScheme.backgroundElevated2
-                : Colors.white),
+        color: brightness == Brightness.dark
+            ? colorScheme.backgroundElevated2
+            : Colors.white,
         borderRadius: BorderRadius.circular(50),
         border: Border.all(color: _badgeGreen, width: 2),
         boxShadow: [
@@ -463,129 +473,169 @@ class _RitualBadgeShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final colorScheme = darkTheme.colorScheme;
+    final textTheme = darkTheme.textTheme;
+    final raysColor = _badgeGreen.withValues(alpha: 0.82);
     final badgeAsset = _badgeAssets[badge.days] ?? _badgeAssets[7]!;
-    final badgeMessage =
-        _badgeMessages[badge.days] ?? "You're on a roll! Keep going.";
+    final badgeMessage = _badgeMessages[badge.days] ?? "You're on a roll!";
     final title =
         badge.ritual.title.isEmpty ? "Untitled ritual" : badge.ritual.title;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 420),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(26),
-          child: Container(
-            color: _badgeGreen,
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: SvgPicture.asset(
-                    "assets/rituals/background_rays.svg",
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.white.withValues(alpha: 0.12),
-                      BlendMode.srcIn,
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundElevated,
+            borderRadius: BorderRadius.circular(22),
+            border: Border.all(
+              color: colorScheme.strokeFaint,
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 24,
+                offset: const Offset(0, -6),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Image.asset(
+                  "assets/qr_logo.png",
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: SizedOverflowBox(
+                      size: ui.Size.zero,
+                      alignment: Alignment.center,
+                      child: Transform.translate(
+                        offset: const Offset(0, -80),
+                        child: ShaderMask(
+                          shaderCallback: (Rect bounds) => const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0, 0.16, 0.84, 1],
+                            colors: [
+                              Colors.transparent,
+                              Colors.white,
+                              Colors.white,
+                              Colors.transparent,
+                            ],
+                          ).createShader(bounds),
+                          blendMode: BlendMode.dstIn,
+                          child: SvgPicture.asset(
+                            "assets/rituals/badge_popup_fidgets.svg",
+                            fit: BoxFit.cover,
+                            width: 220,
+                            height: 220,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                Column(
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
+                child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Image.asset(
-                        "assets/qr_logo.png",
-                        width: 56,
-                        height: 56,
+                    const SizedBox(height: 16),
+                    Text(
+                      "New achievement",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: "Nunito",
+                        fontStyle: FontStyle.normal,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.72,
+                        height: 1.15,
+                        color: colorScheme.textBase,
+                        decoration: TextDecoration.none,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Center(
-                      child: Text(
-                        "New achievement",
-                        style: textTheme.h3Bold.copyWith(
-                          color: Colors.white,
-                          fontSize: 22,
-                          letterSpacing: -0.2,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
+                    SvgPicture.asset(
+                      "assets/rituals/green_stroke.svg",
+                      width: 74,
+                      height: 8,
                     ),
-                    const SizedBox(height: 10),
-                    Center(
-                      child: SizedBox(
-                        height: 180,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          clipBehavior: Clip.none,
-                          children: [
-                            SizedBox(
-                              width: 180,
-                              height: 180,
-                              child: OverflowBox(
-                                maxWidth: 820,
-                                maxHeight: 820,
-                                child: Transform.translate(
-                                  offset: const Offset(0, -90),
-                                  child: SvgPicture.asset(
-                                    "assets/rituals/background_rays.svg",
-                                    width: 820,
-                                    height: 820,
-                                    fit: BoxFit.contain,
-                                    colorFilter: ColorFilter.mode(
-                                      Colors.white.withValues(alpha: 0.14),
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
+                    const SizedBox(height: 14),
+                    Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        SizedBox(
+                          width: 220,
+                          height: 240,
+                          child: OverflowBox(
+                            maxWidth: 900,
+                            maxHeight: 900,
+                            child: Transform.translate(
+                              offset: const Offset(0, -100),
+                              child: SvgPicture.asset(
+                                "assets/rituals/background_rays.svg",
+                                width: 900,
+                                height: 900,
+                                fit: BoxFit.contain,
+                                colorFilter: ColorFilter.mode(
+                                  raysColor,
+                                  BlendMode.srcATop,
                                 ),
                               ),
                             ),
-                            Image.asset(
-                              badgeAsset,
-                              width: 166,
-                              height: 166,
-                              fit: BoxFit.contain,
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        Image.asset(
+                          badgeAsset,
+                          width: 184,
+                          height: 184,
+                          fit: BoxFit.contain,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Center(
-                      child: _RitualChip(
-                        icon: badge.ritual.icon.isEmpty
-                            ? "📸"
-                            : badge.ritual.icon,
-                        title: title,
-                        backgroundColor: Colors.white,
-                      ),
+                    _RitualChip(
+                      icon:
+                          badge.ritual.icon.isEmpty ? "📸" : badge.ritual.icon,
+                      title: title,
+                      useDarkTheme: true,
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 32),
                     Text(
                       badgeMessage,
                       textAlign: TextAlign.center,
                       style: textTheme.body.copyWith(
-                        color: Colors.white,
-                        fontSize: 15,
-                        height: 1.35,
+                        fontSize: 18,
+                        height: 1.4,
+                        color: colorScheme.textBase,
                         decoration: TextDecoration.none,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 36),
                     Align(
                       alignment: Alignment.center,
                       child: Image.asset(
-                        "assets/rituals/ente_io_black_white.png",
-                        width: 120,
+                        "assets/ente_io_green.png",
+                        height: 16,
                         fit: BoxFit.contain,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
