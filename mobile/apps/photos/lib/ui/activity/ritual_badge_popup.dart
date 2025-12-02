@@ -64,6 +64,19 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
+    final headingGradientColors = isDarkMode
+        ? [
+            Colors.white.withValues(alpha: 0.92),
+            Colors.white.withValues(alpha: 0.72),
+          ]
+        : const [
+            Color(0xFF545454),
+            Colors.black,
+          ];
+    final raysColor = isDarkMode
+        ? _badgeGreen.withValues(alpha: 0.82)
+        : _badgeGreen.withValues(alpha: 1.0);
     final badgeAsset = _badgeAssets[widget.badge.days] ?? _badgeAssets[7]!;
     final badgeMessage =
         _badgeMessages[widget.badge.days] ?? "You're on a roll!";
@@ -80,7 +93,7 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
           child: Container(
             constraints: const BoxConstraints(maxWidth: 480),
             decoration: BoxDecoration(
-              color: colorScheme.backgroundBase,
+              color: colorScheme.backgroundElevated,
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(22),
               ),
@@ -161,14 +174,11 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
                     children: [
                       const SizedBox(height: 16),
                       ShaderMask(
-                        shaderCallback: (Rect bounds) => const LinearGradient(
+                        shaderCallback: (Rect bounds) => LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          stops: [0.2933, 1],
-                          colors: [
-                            Color(0xFF545454),
-                            Colors.black,
-                          ],
+                          stops: const [0.2933, 1],
+                          colors: headingGradientColors,
                         ).createShader(
                           Rect.fromLTWH(
                             0,
@@ -217,7 +227,7 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
                                   height: 900,
                                   fit: BoxFit.contain,
                                   colorFilter: ColorFilter.mode(
-                                    _badgeGreen.withValues(alpha: 1.0),
+                                    raysColor,
                                     BlendMode.srcATop,
                                   ),
                                 ),
@@ -242,9 +252,9 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
                       Text(
                         badgeMessage,
                         textAlign: TextAlign.center,
-                        style: textTheme.bodyMuted.copyWith(
+                        style: textTheme.body.copyWith(
                           fontSize: 18,
-                          height: null,
+                          height: 1.4,
                         ),
                       ),
                       const SizedBox(height: 36),
