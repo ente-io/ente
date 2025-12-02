@@ -190,6 +190,7 @@ class _BodyState extends State<_Body> {
               return FileAppBar(
                 _files![selectedIndex],
                 _onFileRemoved,
+                _onEditFileRequested,
                 widget.config.mode == DetailPageMode.full,
                 enableFullScreenNotifier: InheritedDetailPageState.of(context)
                     .enableFullScreenNotifier,
@@ -209,7 +210,6 @@ class _BodyState extends State<_Body> {
                 builder: (BuildContext context, int selectedIndex, _) {
                   return FileBottomBar(
                     _files![selectedIndex],
-                    _onEditFileRequested,
                     widget.config.mode == DetailPageMode.minimalistic &&
                         !isGuestView,
                     onFileRemoved: _onFileRemoved,

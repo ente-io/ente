@@ -9,7 +9,6 @@ import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
 
@@ -21,7 +20,6 @@ import 'package:photos/utils/share_util.dart';
 
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
-  final Function(EnteFile) onEditRequested;
   final Function(EnteFile) onFileRemoved;
   final bool showOnlyInfoButton;
   final int? userID;
@@ -30,7 +28,6 @@ class FileBottomBar extends StatefulWidget {
 
   const FileBottomBar(
     this.file,
-    this.onEditRequested,
     this.showOnlyInfoButton, {
     required this.onFileRemoved,
     required this.enableFullScreenNotifier,
@@ -112,27 +109,6 @@ class FileBottomBarState extends State<FileBottomBar> {
     }
 
     if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
-      if (widget.file.fileType == FileType.image ||
-          widget.file.fileType == FileType.livePhoto ||
-          (widget.file.fileType == FileType.video)) {
-        children.add(
-          Tooltip(
-            message: AppLocalizations.of(context).edit,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.tune_outlined,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  widget.onEditRequested(widget.file);
-                },
-              ),
-            ),
-          ),
-        );
-      }
       if (isOwnedByUser) {
         children.add(
           Tooltip(

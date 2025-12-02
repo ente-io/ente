@@ -36,12 +36,14 @@ import "package:photos/utils/magic_util.dart";
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
   final Function(EnteFile) onFileRemoved;
+  final Function(EnteFile) onEditRequested;
   final bool shouldShowActions;
   final ValueNotifier<bool> enableFullScreenNotifier;
 
   const FileAppBar(
     this.file,
     this.onFileRemoved,
+    this.onEditRequested,
     this.shouldShowActions, {
     required this.enableFullScreenNotifier,
     super.key,
@@ -201,6 +203,19 @@ class FileAppBarState extends State<FileAppBar> {
           icon: Platform.isAndroid
               ? Icons.download
               : Icons.cloud_download_outlined,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
+    }
+    // Edit option for images, live photos, and videos
+    if (widget.file.fileType == FileType.image ||
+        widget.file.fileType == FileType.livePhoto ||
+        widget.file.fileType == FileType.video) {
+      items.add(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).edit,
+          value: 11,
+          icon: Icons.tune_outlined,
           iconColor: Theme.of(context).iconTheme.color,
         ),
       );
@@ -374,6 +389,8 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('recreate');
             } else if (value == 10) {
               await _handleAddToAlbum();
+            } else if (value == 11) {
+              widget.onEditRequested(widget.file);
             }
           },
         ),
