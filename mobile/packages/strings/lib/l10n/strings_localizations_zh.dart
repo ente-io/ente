@@ -134,6 +134,9 @@ class StringsLocalizationsZh extends StringsLocalizations {
   String get enterPassword => '输入密码';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => '输入您的密码';
 
   @override
@@ -480,6 +483,9 @@ class StringsLocalizationsZh extends StringsLocalizations {
 
   @override
   String get enterPin => '输入 PIN 码';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => '设置新 PIN 码';

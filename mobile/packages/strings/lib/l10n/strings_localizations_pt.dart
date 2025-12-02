@@ -136,6 +136,9 @@ class StringsLocalizationsPt extends StringsLocalizations {
   String get enterPassword => 'Inserir senha';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Insira sua senha';
 
   @override
@@ -507,6 +510,9 @@ class StringsLocalizationsPt extends StringsLocalizations {
 
   @override
   String get enterPin => 'Inserir PIN';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Definir novo PIN';

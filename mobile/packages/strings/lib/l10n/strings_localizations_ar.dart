@@ -136,6 +136,9 @@ class StringsLocalizationsAr extends StringsLocalizations {
   String get enterPassword => 'أدخل كلمة المرور';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'أدخل كلمة المرور الخاصة بك';
 
   @override
@@ -503,6 +506,9 @@ class StringsLocalizationsAr extends StringsLocalizations {
 
   @override
   String get enterPin => 'أدخل رقم التعريف الشخصي';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'عين رقم تعريف شخصي جديد';

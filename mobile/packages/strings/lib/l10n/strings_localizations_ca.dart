@@ -137,6 +137,9 @@ class StringsLocalizationsCa extends StringsLocalizations {
   String get enterPassword => 'Introdueix la contrasenya';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Introdueix la teva contrasenya';
 
   @override
@@ -510,6 +513,9 @@ class StringsLocalizationsCa extends StringsLocalizations {
 
   @override
   String get enterPin => 'Introdueix el PIN';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Estableix un nou PIN';

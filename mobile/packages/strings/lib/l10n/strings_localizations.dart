@@ -407,6 +407,12 @@ abstract class StringsLocalizations {
   /// **'Enter password'**
   String get enterPassword;
 
+  /// Enter App lock password prompt for lock screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enter app lock password'**
+  String get enterAppLockPassword;
+
   /// Hint for password field
   ///
   /// In en, this message translates to:
@@ -1078,6 +1084,12 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Enter PIN'**
   String get enterPin;
+
+  /// Enter App lock PIN prompt for lock screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enter app lock PIN'**
+  String get enterAppLockPin;
 
   /// Set new PIN title
   ///

@@ -137,6 +137,9 @@ class StringsLocalizationsVi extends StringsLocalizations {
   String get enterPassword => 'Nhập mật khẩu';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Nhập mật khẩu của bạn';
 
   @override
@@ -506,6 +509,9 @@ class StringsLocalizationsVi extends StringsLocalizations {
 
   @override
   String get enterPin => 'Nhập mã PIN';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Đổi mã PIN';

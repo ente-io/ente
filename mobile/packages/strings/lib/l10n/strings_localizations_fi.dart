@@ -136,6 +136,9 @@ class StringsLocalizationsFi extends StringsLocalizations {
   String get enterPassword => 'Syötä salasana';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Syötä salasanasi';
 
   @override
@@ -505,6 +508,9 @@ class StringsLocalizationsFi extends StringsLocalizations {
 
   @override
   String get enterPin => 'Enter PIN';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Set new PIN';

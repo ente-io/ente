@@ -137,6 +137,9 @@ class StringsLocalizationsEl extends StringsLocalizations {
   String get enterPassword => 'Εισάγετε κωδικό πρόσβασης';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Εισάγετε τον κωδικό πρόσβασης σας';
 
   @override
@@ -513,6 +516,9 @@ class StringsLocalizationsEl extends StringsLocalizations {
 
   @override
   String get enterPin => 'Εισαγωγή PIN';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Ορίστε νέο PIN';

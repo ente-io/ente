@@ -137,6 +137,9 @@ class StringsLocalizationsHu extends StringsLocalizations {
   String get enterPassword => 'Adja meg a jelszót';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Adja meg a jelszavát';
 
   @override
@@ -509,6 +512,9 @@ class StringsLocalizationsHu extends StringsLocalizations {
 
   @override
   String get enterPin => 'PIN kód megadása';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Új PIN kód beállítása';

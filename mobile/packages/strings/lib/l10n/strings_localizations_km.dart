@@ -136,6 +136,9 @@ class StringsLocalizationsKm extends StringsLocalizations {
   String get enterPassword => 'វាយបញ្ចូល​ពាក្យ​សម្ងាត់';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Enter your password';
 
   @override
@@ -504,6 +507,9 @@ class StringsLocalizationsKm extends StringsLocalizations {
 
   @override
   String get enterPin => 'វាយបញ្ចូល​លេខ​កូដ PIN';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Set new PIN';

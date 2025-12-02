@@ -136,6 +136,9 @@ class StringsLocalizationsBg extends StringsLocalizations {
   String get enterPassword => 'Въведете парола';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Въведете паролата си';
 
   @override
@@ -510,6 +513,9 @@ class StringsLocalizationsBg extends StringsLocalizations {
 
   @override
   String get enterPin => 'Въведете ПИН код';
+
+  @override
+  String get enterAppLockPin => 'Enter app lock PIN';
 
   @override
   String get setNewPin => 'Задаване на нов ПИН код';

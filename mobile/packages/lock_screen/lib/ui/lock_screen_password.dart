@@ -128,7 +128,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                 SizedBox(height: config.showTitle ? 24 : 0),
                 Text(
                   widget.isChangingLockScreenSettings
-                      ? context.strings.enterPassword
+                      ? context.strings.enterAppLockPassword
                       : context.strings.setNewPassword,
                   textAlign: TextAlign.center,
                   style: textTheme.bodyBold,
