@@ -169,7 +169,7 @@
   "@enterPassword": {
     "description": "Enter password field label"
   },
-  "enterAppLockPassword": "Enter App lock password",
+  "enterAppLockPassword": "Enter app lock password",
   "@enterAppLockPassword": {
     "description": "Enter App lock password prompt for lock screen"
   },
@@ -632,7 +632,7 @@
   "@enterPin": {
     "description": "Enter PIN prompt"
   },
-  "enterAppLockPin": "Enter App lock PIN",
+  "enterAppLockPin": "Enter app lock PIN",
   "@enterAppLockPin": {
     "description": "Enter App lock PIN prompt for lock screen"
   },
