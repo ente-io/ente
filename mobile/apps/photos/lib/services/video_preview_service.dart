@@ -17,6 +17,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import 'package:photos/generated/intl/app_localizations.dart';
@@ -36,6 +37,7 @@ import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
+import "package:photos/utils/file_uploader.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:photos/utils/network_util.dart";
@@ -48,6 +50,7 @@ class VideoPreviewService {
   LinkedHashMap<int, EnteFile> fileQueue = LinkedHashMap();
   final int _maxPreviewSizeLimitForCache = 50 * 1024 * 1024; // 50 MB
   Set<int>? _failureFiles;
+  bool _pausedDueToUpload = false;
 
   bool get _hasQueuedFile => fileQueue.isNotEmpty;
 
@@ -59,7 +62,23 @@ class VideoPreviewService {
         fileMagicService = FileMagicService.instance,
         cacheManager = DefaultCacheManager(),
         videoCacheManager = VideoCacheManager.instance,
-        config = Configuration.instance;
+        config = Configuration.instance {
+    if (flagService.pauseStreamDuringUpload) {
+      _listenToSyncCompletion();
+    }
+  }
+
+  void _listenToSyncCompletion() {
+    Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status == SyncStatus.completedBackup &&
+          isVideoStreamingEnabled &&
+          _pausedDueToUpload) {
+        _logger.info("Sync completed, resuming stream processing");
+        _pausedDueToUpload = false;
+        queueFiles(duration: const Duration(seconds: 2));
+      }
+    });
+  }
 
   VideoPreviewService(
     this.config,
@@ -104,9 +123,13 @@ class VideoPreviewService {
   }
 
   void clearQueue() {
-    // Fire events for all items being cleared
-    for (final entry in _items.entries) {
-      _fireVideoPreviewStateChange(entry.key, PreviewItemStatus.uploaded);
+    // Fire events for all items being cleared so UI can reset
+    // Use paused status when flag is enabled (items will resume), otherwise uploaded
+    final status = flagService.pauseStreamDuringUpload
+        ? PreviewItemStatus.paused
+        : PreviewItemStatus.uploaded;
+    for (final fileId in _items.keys) {
+      _fireVideoPreviewStateChange(fileId, status);
     }
     fileQueue.clear();
     _items.clear();
@@ -280,6 +303,20 @@ class VideoPreviewService {
     // not used currently
     bool forceUpload = false,
   }) async {
+    // Check if file upload is happening before processing video for streaming
+    if (flagService.pauseStreamDuringUpload &&
+        FileUploader.instance.isUploading) {
+      _logger.info(
+        "Pausing video streaming because file upload is in progress",
+      );
+      _pausedDueToUpload = true;
+      uploadingFileId = -1;
+      // Clear queue - will be rebuilt from DB when processing resumes
+      clearQueue();
+      computeController.releaseCompute(stream: true);
+      return;
+    }
+
     final bool isManual =
         await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
     final canStream = _isPermissionGranted();
@@ -287,8 +324,9 @@ class VideoPreviewService {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
+      uploadingFileId = -1;
       computeController.releaseCompute(stream: true);
-      if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
+      // Clear queue - will be rebuilt from DB when processing resumes
       clearQueue();
       return;
     }
@@ -430,8 +468,11 @@ class VideoPreviewService {
         final videoFilters = <String>[];
 
         if (rescaleVideo || needsTonemap) {
-          // scale video to 720p or keep original height if less than 720p
-          videoFilters.add("scale=-2:'min(720,ih)'");
+          // scale smaller dimension to 720p (or keep original if less than 720p)
+          // portrait: scale width to min(720,iw), landscape: scale height to min(720,ih)
+          videoFilters.add(
+            "scale='if(lt(iw,ih),min(720,iw),-2)':'if(lt(iw,ih),-2,min(720,ih))'",
+          );
 
           // reduce fps to 30 if it is more than 30
           if (applyFPS) videoFilters.add("fps=30");
@@ -454,8 +495,8 @@ class VideoPreviewService {
       final command =
           // scaling, fps, tonemapping
           '$filters'
-          // video encoding
-          '${reencodeVideo ? '-c:v libx264 -crf 23 -preset medium ' : '-c:v copy '}'
+          // video encoding with maxrate cap at 2000kbps to preserve smaller bitrates
+          '${reencodeVideo ? '-c:v libx264 -maxrate 2000k -bufsize 4000k ' : '-c:v copy '}'
           // audio encoding
           '-c:a aac -b:a 128k '
           // hls options
@@ -1239,6 +1280,21 @@ class VideoPreviewService {
   }) {
     Future.delayed(duration, () async {
       if (_hasQueuedFile && !forceProcess) return;
+
+      // Don't start streaming if file uploads are in progress
+      if (flagService.pauseStreamDuringUpload &&
+          FileUploader.instance.isUploading) {
+        _logger.info("Skipping stream queue - file upload in progress");
+        _pausedDueToUpload = true;
+        // Clear queue to ensure clean state when resuming
+        clearQueue();
+        return;
+      }
+
+      // Reset flag - streaming is resuming (either from sync listener or other flow)
+      if (flagService.pauseStreamDuringUpload) {
+        _pausedDueToUpload = false;
+      }
 
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
