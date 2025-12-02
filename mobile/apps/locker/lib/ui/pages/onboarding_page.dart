@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
@@ -185,29 +186,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ),
                     ),
                     const SizedBox(height: 48),
-                    Container(
-                      width: double.infinity,
+                    Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: colorScheme.primary700,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 18,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          minimumSize: const Size(double.infinity, 56),
-                        ),
-                        onPressed: _navigateToSignInPage,
-                        child: Text(
-                          l10n.loginToEnteAccount,
-                          style: getEnteTextTheme(context).bodyBold.copyWith(
-                                color: colorScheme.primary700,
-                              ),
-                        ),
+                      child: GradientButton(
+                        text: l10n.loginToEnteAccount,
+                        backgroundColor: Colors.white,
+                        textColor: colorScheme.primary700,
+                        onTap: _navigateToSignInPage,
                       ),
                     ),
                     const SizedBox(height: 16),
