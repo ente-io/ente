@@ -469,131 +469,122 @@ class _RitualBadgeShareCard extends StatelessWidget {
         _badgeMessages[badge.days] ?? "You're on a roll! Keep going.";
     final title =
         badge.ritual.title.isEmpty ? "Untitled ritual" : badge.ritual.title;
-    return Container(
-      color: _badgeGreen,
-      padding: const EdgeInsets.all(20),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
           child: Container(
-            decoration: BoxDecoration(
-              color: _badgeGreen,
-              borderRadius: BorderRadius.circular(26),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: SvgPicture.asset(
-                      "assets/rituals/background_rays.svg",
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.mode(
-                        Colors.white.withValues(alpha: 0.12),
-                        BlendMode.srcIn,
-                      ),
+            color: _badgeGreen,
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: SvgPicture.asset(
+                    "assets/rituals/background_rays.svg",
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.white.withValues(alpha: 0.12),
+                      BlendMode.srcIn,
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Image.asset(
-                            "assets/qr_logo.png",
-                            width: 56,
-                            height: 56,
-                          ),
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Image.asset(
+                        "assets/qr_logo.png",
+                        width: 56,
+                        height: 56,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Center(
+                      child: Text(
+                        "New achievement",
+                        style: textTheme.h3Bold.copyWith(
+                          color: Colors.white,
+                          fontSize: 22,
+                          letterSpacing: -0.2,
+                          decoration: TextDecoration.none,
                         ),
-                        const SizedBox(height: 8),
-                        Center(
-                          child: Text(
-                            "New achievement",
-                            style: textTheme.h3Bold.copyWith(
-                              color: Colors.white,
-                              fontSize: 22,
-                              letterSpacing: -0.2,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Center(
-                          child: SizedBox(
-                            height: 190,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              clipBehavior: Clip.none,
-                              children: [
-                                SizedBox(
-                                  width: 190,
-                                  height: 190,
-                                  child: OverflowBox(
-                                    maxWidth: 900,
-                                    maxHeight: 900,
-                                    child: Transform.translate(
-                                      offset: const Offset(0, -100),
-                                      child: SvgPicture.asset(
-                                        "assets/rituals/background_rays.svg",
-                                        width: 900,
-                                        height: 900,
-                                        fit: BoxFit.contain,
-                                        colorFilter: ColorFilter.mode(
-                                          Colors.white.withValues(alpha: 0.14),
-                                          BlendMode.srcIn,
-                                        ),
-                                      ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: SizedBox(
+                        height: 180,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            SizedBox(
+                              width: 180,
+                              height: 180,
+                              child: OverflowBox(
+                                maxWidth: 820,
+                                maxHeight: 820,
+                                child: Transform.translate(
+                                  offset: const Offset(0, -90),
+                                  child: SvgPicture.asset(
+                                    "assets/rituals/background_rays.svg",
+                                    width: 820,
+                                    height: 820,
+                                    fit: BoxFit.contain,
+                                    colorFilter: ColorFilter.mode(
+                                      Colors.white.withValues(alpha: 0.14),
+                                      BlendMode.srcIn,
                                     ),
                                   ),
                                 ),
-                                Image.asset(
-                                  badgeAsset,
-                                  width: 176,
-                                  height: 176,
-                                  fit: BoxFit.contain,
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                            Image.asset(
+                              badgeAsset,
+                              width: 166,
+                              height: 166,
+                              fit: BoxFit.contain,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        Center(
-                          child: _RitualChip(
-                            icon: badge.ritual.icon.isEmpty
-                                ? "📸"
-                                : badge.ritual.icon,
-                            title: title,
-                            backgroundColor: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          badgeMessage,
-                          textAlign: TextAlign.center,
-                          style: textTheme.body.copyWith(
-                            color: Colors.white,
-                            fontSize: 15,
-                            height: 1.35,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Align(
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            "assets/rituals/ente_io_black_white.png",
-                            width: 120,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: _RitualChip(
+                        icon: badge.ritual.icon.isEmpty
+                            ? "📸"
+                            : badge.ritual.icon,
+                        title: title,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      badgeMessage,
+                      textAlign: TextAlign.center,
+                      style: textTheme.body.copyWith(
+                        color: Colors.white,
+                        fontSize: 15,
+                        height: 1.35,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Image.asset(
+                        "assets/rituals/ente_io_black_white.png",
+                        width: 120,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
