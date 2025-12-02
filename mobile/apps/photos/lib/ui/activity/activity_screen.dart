@@ -12,6 +12,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
+import "package:photos/ui/activity/ritual_badge_popup.dart";
 import "package:photos/ui/activity/rituals_section.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
@@ -194,7 +195,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   headerEmoji: heatmapEmoji,
                 ),
                 if (selectedRitual != null)
-                  AchievementsRow(summary: displaySummary),
+                  AchievementsRow(
+                    summary: displaySummary,
+                    onBadgeTap: (days) => _showDebugBadge(
+                      selectedRitual!,
+                      days,
+                    ),
+                  ),
               ],
             );
           },
@@ -362,6 +369,20 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       },
       generatedAt: summary.generatedAt,
+      ritualLongestStreaks: {ritual.id: longestStreak},
+    );
+  }
+
+  Future<void> _showDebugBadge(Ritual ritual, int days) async {
+    if (!kDebugMode) return;
+    final badge = RitualBadgeUnlock(
+      ritual: ritual,
+      days: days,
+      generatedAt: DateTime.now(),
+    );
+    await showRitualBadgePopup(
+      context,
+      badge: badge,
     );
   }
 }

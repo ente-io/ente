@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:convert";
 import "dart:math";
 
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -28,18 +29,23 @@ class ActivityService {
   late SharedPreferences _preferences;
   Timer? _debounce;
   StreamSubscription<FilesUpdatedEvent>? _filesUpdatedSubscription;
+  Map<String, Set<int>> _seenRitualBadges = {};
+  final Set<String> _recentlyAddedRitualIds = <String>{};
 
   static const _ritualsPrefsKey = "activity_rituals_v1";
+  static const _ritualBadgesPrefsKey = "activity_seen_ritual_badges_v1";
   static const _badgeThresholds = [7, 14, 30];
 
   Future<void> init() async {
     _preferences = ServiceLocator.instance.prefs;
+    _seenRitualBadges = _loadSeenRitualBadges();
     if (!flagService.ritualsFlag) {
       stateNotifier.value = const ActivityState(
         loading: false,
         summary: null,
         rituals: [],
         error: null,
+        pendingBadge: null,
       );
       return;
     }
@@ -73,6 +79,7 @@ class ActivityService {
         summary: null,
         rituals: [],
         error: null,
+        pendingBadge: null,
       );
       return;
     }
@@ -80,6 +87,7 @@ class ActivityService {
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: true,
         error: null,
+        pendingBadge: stateNotifier.value.pendingBadge,
       );
       final rituals = await _loadRituals();
       if (scheduleAllRituals) {
@@ -91,17 +99,21 @@ class ActivityService {
         }
       }
       final summary = await _buildSummary(rituals);
+      final pendingBadge =
+          _resolvePendingBadge(rituals, summary.ritualLongestStreaks);
       stateNotifier.value = ActivityState(
         loading: false,
         summary: summary,
         rituals: rituals,
         error: null,
+        pendingBadge: pendingBadge,
       );
     } catch (e, s) {
       _logger.severe("Failed to refresh activity", e, s);
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: false,
         error: e.toString(),
+        pendingBadge: null,
       );
     }
   }
@@ -117,6 +129,7 @@ class ActivityService {
         badgesUnlocked: _badgeStates(0),
         ritualProgress: {},
         generatedAt: DateTime.now(),
+        ritualLongestStreaks: const {},
       );
     }
     final today = DateTime.now();
@@ -197,9 +210,12 @@ class ActivityService {
     }
 
     final ritualProgress = <String, RitualProgress>{};
+    final ritualLongestStreaks = <String, int>{};
     for (final ritual in rituals) {
       if (ritual.albumId == null) continue;
       final dates = collectionActivity[ritual.albumId] ?? <int>{};
+      final longest = _longestStreakFromDayKeys(dates, cutoffDate);
+      ritualLongestStreaks[ritual.id] = longest;
       ritualProgress[ritual.id] = RitualProgress(
         ritualId: ritual.id,
         completedDays: dates
@@ -216,6 +232,7 @@ class ActivityService {
       badgesUnlocked: _badgeStates(longestStreak),
       ritualProgress: ritualProgress,
       generatedAt: DateTime.now(),
+      ritualLongestStreaks: ritualLongestStreaks,
     );
   }
 
@@ -278,6 +295,9 @@ class ActivityService {
     } else {
       rituals[existingIndex] = ritual;
     }
+    if (isNew || albumChanged) {
+      _recentlyAddedRitualIds.add(ritual.id);
+    }
     await _persistRituals(rituals);
     unawaited(_scheduleRitualNotifications(ritual));
 
@@ -289,6 +309,7 @@ class ActivityService {
         rituals: rituals,
         loading: false,
         error: null,
+        pendingBadge: stateNotifier.value.pendingBadge,
       );
     }
   }
@@ -297,6 +318,9 @@ class ActivityService {
     final rituals = await _loadRituals();
     rituals.removeWhere((r) => r.id == id);
     await _persistRituals(rituals);
+    if (_seenRitualBadges.remove(id) != null) {
+      unawaited(_persistSeenRitualBadges());
+    }
     _logger.info("Clearing scheduled notifications for ritual $id (delete)");
     await NotificationService.instance.clearAllScheduledNotifications(
       containingPayload: "ritualId=$id",
@@ -363,6 +387,123 @@ class ActivityService {
         logSchedule: false,
       );
       scheduled += 1;
+    }
+  }
+
+  Map<String, Set<int>> _loadSeenRitualBadges() {
+    final raw = _preferences.getString(_ritualBadgesPrefsKey);
+    if (raw == null || raw.isEmpty) {
+      return <String, Set<int>>{};
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map) return <String, Set<int>>{};
+      return decoded.map(
+        (key, value) => MapEntry(
+          key as String,
+          Set<int>.from(
+            (value as List<dynamic>? ?? const <int>[]).map(
+              (e) => (e as num).toInt(),
+            ),
+          ),
+        ),
+      );
+    } catch (e, s) {
+      _logger.warning("Failed to decode ritual badge prefs", e, s);
+      return <String, Set<int>>{};
+    }
+  }
+
+  Future<void> _persistSeenRitualBadges() async {
+    final encoded = _seenRitualBadges.map(
+      (key, value) => MapEntry(key, value.toList()),
+    );
+    await _preferences.setString(
+      _ritualBadgesPrefsKey,
+      jsonEncode(encoded),
+    );
+  }
+
+  RitualBadgeUnlock? _resolvePendingBadge(
+    List<Ritual> rituals,
+    Map<String, int> ritualLongestStreaks,
+  ) {
+    _seedSeenBadgesForNewRituals(ritualLongestStreaks);
+    RitualBadgeUnlock? unlock;
+    for (final ritual in rituals) {
+      final longest = ritualLongestStreaks[ritual.id] ?? 0;
+      final seen = _seenRitualBadges[ritual.id] ?? <int>{};
+      final newlyUnlocked = _badgeThresholds
+          .where((t) => longest >= t && !seen.contains(t))
+          .toList();
+      if (newlyUnlocked.isEmpty) continue;
+      final highest = newlyUnlocked.reduce(max);
+      if (unlock == null || highest > unlock.days) {
+        unlock = RitualBadgeUnlock(
+          ritual: ritual,
+          days: highest,
+          generatedAt: DateTime.now(),
+        );
+      }
+    }
+    return unlock;
+  }
+
+  Future<void> markRitualBadgeSeen(String ritualId, int days) async {
+    final seen = _seenRitualBadges[ritualId] ?? <int>{};
+    if (!seen.contains(days)) {
+      _seenRitualBadges[ritualId] = {...seen, days};
+      await _persistSeenRitualBadges();
+    }
+    final state = stateNotifier.value;
+    final pending = state.pendingBadge;
+    if (pending != null &&
+        pending.ritual.id == ritualId &&
+        pending.days == days) {
+      stateNotifier.value = state.copyWith(
+        pendingBadge: null,
+      );
+    }
+  }
+
+  int _longestStreakFromDayKeys(Set<int> dayKeys, DateTime cutoffDate) {
+    if (dayKeys.isEmpty) return 0;
+    int longest = 0;
+    int rolling = 0;
+    for (int offset = 0; offset < 372; offset++) {
+      final day = cutoffDate.add(Duration(days: offset));
+      final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+      if (dayKeys.contains(key)) {
+        rolling += 1;
+        longest = max(longest, rolling);
+      } else {
+        rolling = 0;
+      }
+    }
+    return longest;
+  }
+
+  void _seedSeenBadgesForNewRituals(
+    Map<String, int> ritualLongestStreaks,
+  ) {
+    if (_recentlyAddedRitualIds.isEmpty) return;
+    bool changed = false;
+    for (final ritualId in _recentlyAddedRitualIds) {
+      final longest = ritualLongestStreaks[ritualId] ?? 0;
+      if (longest <= 0) continue;
+      final thresholds =
+          _badgeThresholds.where((threshold) => longest >= threshold);
+      if (thresholds.isEmpty) continue;
+      final seen = _seenRitualBadges[ritualId] ?? <int>{};
+      final updated = {...seen, ...thresholds};
+      if (!setEquals(updated, seen)) {
+        _seenRitualBadges[ritualId] = updated;
+        changed = true;
+      }
+    }
+    _recentlyAddedRitualIds.clear();
+    if (changed) {
+      unawaited(_persistSeenRitualBadges());
     }
   }
 
