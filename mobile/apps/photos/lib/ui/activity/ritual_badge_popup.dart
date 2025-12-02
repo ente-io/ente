@@ -5,6 +5,7 @@ import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/share_util.dart";
@@ -16,12 +17,6 @@ const Map<int, String> _badgeAssets = {
   7: "assets/rituals/7_badge.png",
   14: "assets/rituals/14_badge.png",
   30: "assets/rituals/30_badge.png",
-};
-
-const Map<int, String> _badgeMessages = {
-  7: "7 days down! Consistency looks good on you. Keep going!",
-  14: "14 days in! Your ritual is becoming a habit. Incredible!",
-  30: "30 days in a row! Legendary consistency. Take a bow!",
 };
 
 List<Color> _headingGradientColors(BuildContext context) {
@@ -42,6 +37,19 @@ Color _raysColor(BuildContext context) {
   return brightness == Brightness.dark
       ? _badgeGreen.withValues(alpha: 0.82)
       : _badgeGreen.withValues(alpha: 1.0);
+}
+
+String _badgeMessage(BuildContext context, int days) {
+  switch (days) {
+    case 7:
+      return context.l10n.ritualBadgeMessage7;
+    case 14:
+      return context.l10n.ritualBadgeMessage14;
+    case 30:
+      return context.l10n.ritualBadgeMessage30;
+    default:
+      return context.l10n.ritualBadgeMessageDefault;
+  }
 }
 
 Future<void> showRitualBadgePopup(
@@ -84,13 +92,13 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
     final mediaQuery = MediaQuery.of(context);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final l10n = context.l10n;
     final headingGradientColors = _headingGradientColors(context);
     final raysColor = _raysColor(context);
     final badgeAsset = _badgeAssets[widget.badge.days] ?? _badgeAssets[7]!;
-    final badgeMessage =
-        _badgeMessages[widget.badge.days] ?? "You're on a roll!";
+    final badgeMessage = _badgeMessage(context, widget.badge.days);
     final title = widget.badge.ritual.title.isEmpty
-        ? "Untitled ritual"
+        ? l10n.ritualUntitled
         : widget.badge.ritual.title;
     final double bottomPadding =
         16 + mediaQuery.padding.bottom.clamp(0.0, 16.0).toDouble();
@@ -206,10 +214,10 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
                             ),
                           ),
                           blendMode: BlendMode.srcIn,
-                          child: const Text(
-                            "New achievement",
+                          child: Text(
+                            l10n.ritualBadgeNewTitle,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontFamily: "Nunito",
                               fontStyle: FontStyle.normal,
                               fontSize: 24,
@@ -313,7 +321,9 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
                                       }
                                     },
                               child: Text(
-                                _sharing ? "Preparing..." : "Share",
+                                _sharing
+                                    ? l10n.ritualBadgePreparing
+                                    : l10n.share,
                                 style: textTheme.bodyBold.copyWith(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -456,8 +466,8 @@ Future<void> shareRitualBadge(
     debugPrint("Failed to share ritual badge: $e\n$s");
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Unable to share right now. Please try again."),
+        SnackBar(
+          content: Text(context.l10n.ritualShareUnavailable),
         ),
       );
     }
@@ -475,11 +485,12 @@ class _RitualBadgeShareCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = darkTheme.colorScheme;
     final textTheme = darkTheme.textTheme;
+    final l10n = context.l10n;
     final raysColor = _badgeGreen.withValues(alpha: 0.82);
     final badgeAsset = _badgeAssets[badge.days] ?? _badgeAssets[7]!;
-    final badgeMessage = _badgeMessages[badge.days] ?? "You're on a roll!";
+    final badgeMessage = _badgeMessage(context, badge.days);
     final title =
-        badge.ritual.title.isEmpty ? "Untitled ritual" : badge.ritual.title;
+        badge.ritual.title.isEmpty ? l10n.ritualUntitled : badge.ritual.title;
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
@@ -553,7 +564,7 @@ class _RitualBadgeShareCard extends StatelessWidget {
                   children: [
                     const SizedBox(height: 16),
                     Text(
-                      "New achievement",
+                      l10n.ritualBadgeNewTitle,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontFamily: "Nunito",

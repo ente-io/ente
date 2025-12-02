@@ -7,6 +7,7 @@ import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -47,11 +48,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final l10n = context.l10n;
     final ritualsEnabled = flagService.ritualsFlag;
     if (!ritualsEnabled) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Rituals"),
+          title: Text(l10n.ritualsTitle),
           centerTitle: false,
         ),
         body: Center(
@@ -68,7 +70,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Rituals"),
+        title: Text(l10n.ritualsTitle),
         centerTitle: false,
         actions: [
           Padding(
@@ -89,7 +91,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
               onPressed: () async {
                 await showRitualEditor(context, ritual: null);
               },
-              tooltip: "Add ritual",
+              tooltip: l10n.ritualAddTooltip,
             ),
           ),
         ],
@@ -115,9 +117,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
             final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
             final String heatmapTitle = selectedRitual == null
-                ? "Take a photo every day"
+                ? l10n.ritualDefaultHeatmapTitle
                 : (selectedRitual.title.isEmpty
-                    ? "Untitled ritual"
+                    ? l10n.ritualUntitled
                     : selectedRitual.title);
             final String heatmapEmoji =
                 selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
@@ -146,7 +148,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     child: Row(
                       children: [
                         Text(
-                          "Activity",
+                          l10n.ritualActivityHeading,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const Spacer(),
@@ -290,8 +292,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
       debugPrint("Failed to share activity: $e\n$s");
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Unable to share right now. Please try again."),
+        SnackBar(
+          content: Text(context.l10n.ritualShareUnavailable),
         ),
       );
     } finally {

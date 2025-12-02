@@ -1,5 +1,6 @@
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
 
 class AchievementsRow extends StatelessWidget {
@@ -36,7 +37,7 @@ class AchievementsRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Streaks",
+            context.l10n.ritualStreaksLabel,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),

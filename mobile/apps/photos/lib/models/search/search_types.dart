@@ -65,7 +65,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.location:
         return AppLocalizations.of(context).locations;
       case SectionType.ritual:
-        return "Rituals";
+        return AppLocalizations.of(context).ritualsTitle;
       case SectionType.contacts:
         return AppLocalizations.of(context).contacts;
       case SectionType.album:
@@ -86,7 +86,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.location:
         return AppLocalizations.of(context).searchLocationEmptySection;
       case SectionType.ritual:
-        return "Build a ritual to keep your photo habit going.";
+        return AppLocalizations.of(context).ritualSearchEmpty;
       case SectionType.contacts:
         return AppLocalizations.of(context).searchPeopleEmptySection;
       case SectionType.album:

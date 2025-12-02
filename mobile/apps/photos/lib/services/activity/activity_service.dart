@@ -13,6 +13,7 @@ import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/base/id.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/language_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -360,6 +361,7 @@ class ActivityService {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final baseId = ritual.id.hashCode & 0x7fffffff;
+    final l10n = await LanguageService.locals;
     int scheduled = 0;
     for (int offset = 0;
         offset < _notificationLookaheadDays &&
@@ -383,10 +385,10 @@ class ActivityService {
       }
       await NotificationService.instance.scheduleNotification(
         title,
-        message: "Take a photo now",
+        message: l10n.ritualNotificationMessage,
         id: baseId + scheduled,
         channelID: "ritual_reminders",
-        channelName: "Rituals",
+        channelName: l10n.ritualsTitle,
         payload: Uri(
           scheme: "ente",
           host: "camera",

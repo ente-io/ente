@@ -31,6 +31,7 @@ class ActivityBanner extends StatelessWidget {
 
         final colorScheme = getEnteColorScheme(context);
         final textTheme = getEnteTextTheme(context);
+        final narrowWeekdays = MaterialLocalizations.of(context).narrowWeekdays;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Material(
@@ -86,7 +87,8 @@ class ActivityBanner extends StatelessWidget {
                                   entry.value.hasActivity || hasFire;
                               final bool isToday =
                                   _isSameDay(entry.value.date, today);
-                              final String label = _dayLabel(entry.value.date);
+                              final String label =
+                                  _dayLabel(narrowWeekdays, entry.value.date);
                               final Widget pill = _DayPill(
                                 label: label,
                                 active: active,
@@ -142,9 +144,8 @@ class ActivityBanner extends StatelessWidget {
     );
   }
 
-  String _dayLabel(DateTime date) {
-    const labels = ["S", "M", "T", "W", "T", "F", "S"];
-    return labels[date.weekday % 7];
+  String _dayLabel(List<String> narrowWeekdays, DateTime date) {
+    return narrowWeekdays[date.weekday % narrowWeekdays.length];
   }
 
   bool _isSameDay(DateTime a, DateTime b) {
