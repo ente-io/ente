@@ -45,7 +45,7 @@
 
         <service
             android:name=".QuickTileService"
-            android:icon="@drawable/ic_qs_monochrome"
+            android:icon="@mipmap/launcher_icon"
             android:label="Ente Auth"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:exported="true"

@@ -8,6 +8,9 @@ import app_links
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Set window background to purple (#A75CFF) to prevent white flash
+    self.window?.backgroundColor = UIColor(red: 167.0/255.0, green: 92.0/255.0, blue: 255.0/255.0, alpha: 1.0)
+    
     GeneratedPluginRegistrant.register(with: self)
     super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
