@@ -65,13 +65,13 @@ class ActivityBanner extends StatelessWidget {
                         fit: BoxFit.contain,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           const double baseCell = 30;
                           const double minCell = baseCell * 0.8; // 24
-                          const double maxCell = baseCell * 1.2; // 36
+                          const double maxCell = baseCell * 1.3; // 39
                           const double spacing = 4;
                           double cellWidth =
                               (constraints.maxWidth - (6 * spacing)) / 7;
