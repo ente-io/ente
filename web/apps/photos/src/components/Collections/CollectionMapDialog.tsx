@@ -32,7 +32,6 @@ import {
 } from "ente-media/file-metadata";
 import {
     addToFavoritesCollection,
-    findDefaultHiddenCollectionIDs,
     removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
 import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
@@ -159,14 +158,8 @@ function useMapData(
 
     const loadAllThumbs = useCallback(
         async (points: JourneyPoint[], files: EnteFile[]) => {
-            const sortedPoints = [...points].sort(
-                (a, b) =>
-                    new Date(b.timestamp).getTime() -
-                    new Date(a.timestamp).getTime(),
-            );
-
             const entries = await Promise.all(
-                sortedPoints.map(async (p) => {
+                points.map(async (p) => {
                     if (p.image) return [p.fileId, p.image] as const;
                     const file = files.find((f) => f.id === p.fileId);
                     if (!file) return [p.fileId, undefined] as const;
@@ -200,50 +193,40 @@ function useMapData(
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
             try {
-                const files = await getFilesForCollection(
-                    collectionSummary,
-                    activeCollection,
-                );
+                const files = await getFilesForCollection(activeCollection);
                 const locationPoints = extractLocationPoints(files);
 
-                if (!locationPoints.length) {
+                if (locationPoints.length) {
+                    locationPoints.sort(
+                        (a, b) =>
+                            new Date(b.timestamp).getTime() -
+                            new Date(a.timestamp).getTime(),
+                    );
+
+                    const { thumbnailUpdates } = await generateNeededThumbnails(
+                        { photoClusters: [locationPoints], files },
+                    );
+
+                    const pointsWithThumbs = locationPoints.map((point) => {
+                        const thumb = thumbnailUpdates.get(point.fileId);
+                        return thumb ? { ...point, image: thumb } : point;
+                    });
+
                     setState({
-                        mapCenter: null,
-                        filesByID: new Map(),
-                        mapPhotos: [],
+                        filesByID: new Map(
+                            files.map((file) => [file.id, file]),
+                        ),
+                        mapCenter: getMapCenter([], pointsWithThumbs),
+                        mapPhotos: pointsWithThumbs,
                         thumbByFileID: new Map(),
                         isLoading: false,
                         error: null,
                     });
-                    return;
+
+                    void loadAllThumbs(pointsWithThumbs, files);
                 }
 
-                locationPoints.sort(
-                    (a, b) =>
-                        new Date(b.timestamp).getTime() -
-                        new Date(a.timestamp).getTime(),
-                );
-
-                const { thumbnailUpdates } = await generateNeededThumbnails({
-                    photoClusters: [locationPoints],
-                    files,
-                });
-
-                const pointsWithThumbs = locationPoints.map((point) => {
-                    const thumb = thumbnailUpdates.get(point.fileId);
-                    return thumb ? { ...point, image: thumb } : point;
-                });
-
-                setState({
-                    filesByID: new Map(files.map((file) => [file.id, file])),
-                    mapCenter: getMapCenter([], pointsWithThumbs),
-                    mapPhotos: pointsWithThumbs,
-                    thumbByFileID: new Map(),
-                    isLoading: false,
-                    error: null,
-                });
-
-                void loadAllThumbs(pointsWithThumbs, files);
+                return;
             } catch (e) {
                 setState((prev) => ({
                     ...prev,
@@ -414,6 +397,19 @@ function useFileViewer(
     return { ...state, handlePhotoClick, handleClose };
 }
 
+/**
+ * Manages the lifecycle of the currently visible journey photos and their derived metadata.
+ *
+ * Tracks the ordered list of visible photos, exposes a setter to update them, and maintains a
+ * monotonically increasing “wave” counter that changes whenever the visible photos change—allowing
+ * consumers to detect visibility updates without diffing arrays manually.
+ *
+ * Additionally memoizes:
+ * - `photoGroups`: photos bucketed by formatted date label for grouped rendering.
+ * - `visiblePhotoOrder`: map of photo file IDs to their position in the visible array for O(1) lookups.
+ *
+ * @returns An object containing the visible photos array, setter, wave counter, grouped photos, and ordering map.
+ */
 function useVisiblePhotos() {
     const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
     const [visiblePhotosWave, setVisiblePhotosWave] = useState(0);
@@ -507,45 +503,39 @@ function formatDateLabel(timestamp: string): string {
     });
 }
 
+/**
+ * Loads every file stored in IndexedDB, filters those belonging to the
+ * target collection, removes duplicates by ID, and returns the unique set.
+ */
 async function getFilesForCollection(
-    collectionSummary: CollectionSummary,
     activeCollection: Collection,
 ): Promise<EnteFile[]> {
     const allFiles = await savedCollectionFiles();
-    const filtered =
-        collectionSummary.type === "hiddenItems"
-            ? await getHiddenFiles(allFiles)
-            : allFiles.filter(
-                  (file) => file.collectionID === activeCollection.id,
-              );
+    const filtered = allFiles.filter(
+        (file) => file.collectionID === activeCollection.id,
+    );
     return uniqueFilesByID(filtered);
 }
 
-async function getHiddenFiles(files: EnteFile[]): Promise<EnteFile[]> {
-    const hiddenCollections = findDefaultHiddenCollectionIDs(
-        await savedCollections(),
-    );
-    return files.filter((file) => hiddenCollections.has(file.collectionID));
-}
-
 function extractLocationPoints(files: EnteFile[]): JourneyPoint[] {
-    return files
-        .map((file) => {
-            const loc = fileLocation(file);
-            if (!loc) return null;
-            return {
-                lat: loc.latitude,
-                lng: loc.longitude,
-                name: fileFileName(file),
-                country: "",
-                timestamp: new Date(
-                    fileCreationTime(file) / 1000,
-                ).toISOString(),
-                image: "",
-                fileId: file.id,
-            };
-        })
-        .filter((point): point is JourneyPoint => point !== null);
+    const points: JourneyPoint[] = [];
+
+    for (const file of files) {
+        const loc = fileLocation(file);
+        if (!loc) continue;
+
+        points.push({
+            lat: loc.latitude,
+            lng: loc.longitude,
+            name: fileFileName(file),
+            country: "",
+            timestamp: new Date(fileCreationTime(file) / 1000).toISOString(),
+            image: "",
+            fileId: file.id,
+        });
+    }
+
+    return points;
 }
 
 // ============================================================================
