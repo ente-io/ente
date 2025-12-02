@@ -237,10 +237,10 @@ class LogViewer {
                     logs.push(currentLog);
                 }
 
-                // Check for device info in the message
-                if (logEntry.message.startsWith('Device Info:')) {
+                // Check for device info in the message (only if not already found)
+                if (!this.deviceInfo && logEntry.message.startsWith('Device Info:')) {
                     this.deviceInfo = logEntry.message.substring('Device Info:'.length).trim();
-                } else if (logEntry.message.startsWith('Device RAM:')) {
+                } else if (!this.deviceRAM && logEntry.message.startsWith('Device RAM:')) {
                     this.deviceRAM = logEntry.message.substring('Device RAM:'.length).trim();
                 }
 
