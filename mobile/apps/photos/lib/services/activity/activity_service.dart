@@ -255,6 +255,18 @@ class ActivityService {
     };
   }
 
+  Set<int> _normalizeBadgeSet(Set<int> seen) {
+    if (seen.isEmpty) return <int>{};
+    final valid =
+        seen.where((value) => _badgeThresholds.contains(value)).toSet();
+    if (valid.isEmpty) return <int>{};
+    final highest = valid.reduce(max);
+    return {
+      for (final threshold in _badgeThresholds)
+        if (threshold <= highest) threshold,
+    };
+  }
+
   Future<List<Ritual>> _loadRituals() async {
     final raw = _preferences.getStringList(_ritualsPrefsKey) ?? [];
     return raw
@@ -398,16 +410,25 @@ class ActivityService {
     try {
       final decoded = jsonDecode(raw);
       if (decoded is! Map) return <String, Set<int>>{};
-      return decoded.map(
-        (key, value) => MapEntry(
-          key as String,
-          Set<int>.from(
-            (value as List<dynamic>? ?? const <int>[]).map(
-              (e) => (e as num).toInt(),
-            ),
+      final Map<String, Set<int>> result = {};
+      bool changed = false;
+      for (final entry in decoded.entries) {
+        final rawSet = Set<int>.from(
+          (entry.value as List<dynamic>? ?? const <int>[]).map(
+            (e) => (e as num).toInt(),
           ),
-        ),
-      );
+        );
+        final normalized = _normalizeBadgeSet(rawSet);
+        result[entry.key as String] = normalized;
+        if (!setEquals(rawSet, normalized)) {
+          changed = true;
+        }
+      }
+      if (changed) {
+        _seenRitualBadges = result;
+        unawaited(_persistSeenRitualBadges());
+      }
+      return result;
     } catch (e, s) {
       _logger.warning("Failed to decode ritual badge prefs", e, s);
       return <String, Set<int>>{};
@@ -451,8 +472,11 @@ class ActivityService {
 
   Future<void> markRitualBadgeSeen(String ritualId, int days) async {
     final seen = _seenRitualBadges[ritualId] ?? <int>{};
-    if (!seen.contains(days)) {
-      _seenRitualBadges[ritualId] = {...seen, days};
+    final thresholdsToMark =
+        _badgeThresholds.where((threshold) => threshold <= days);
+    final updated = _normalizeBadgeSet({...seen, ...thresholdsToMark});
+    if (!setEquals(updated, seen)) {
+      _seenRitualBadges[ritualId] = updated;
       await _persistSeenRitualBadges();
     }
     final state = stateNotifier.value;
@@ -495,7 +519,7 @@ class ActivityService {
           _badgeThresholds.where((threshold) => longest >= threshold);
       if (thresholds.isEmpty) continue;
       final seen = _seenRitualBadges[ritualId] ?? <int>{};
-      final updated = {...seen, ...thresholds};
+      final updated = _normalizeBadgeSet({...seen, ...thresholds});
       if (!setEquals(updated, seen)) {
         _seenRitualBadges[ritualId] = updated;
         changed = true;
