@@ -418,42 +418,58 @@ class _ActivityShareCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Container(
           color: shareBackgroundColor,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 48),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Theme(
-                    data: Theme.of(context).copyWith(
-                      brightness: Brightness.light,
-                      colorScheme: Theme.of(context)
-                          .colorScheme
-                          .copyWith(brightness: Brightness.light),
-                    ),
-                    child: ActivityHeatmapCard(
-                      summary: summary,
-                      compact: true,
-                      allowHorizontalScroll: false,
-                      headerTitle: shareHeaderTitle,
-                      headerEmoji: null,
-                    ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 48),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            brightness: Brightness.light,
+                            colorScheme: Theme.of(context)
+                                .colorScheme
+                                .copyWith(brightness: Brightness.light),
+                          ),
+                          child: ActivityHeatmapCard(
+                            summary: summary,
+                            compact: true,
+                            allowHorizontalScroll: false,
+                            headerTitle: shareHeaderTitle,
+                            headerEmoji: null,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Image.asset(
+                        "assets/rituals/ente_io_black_white.png",
+                        width: 62,
+                        height: 16,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                Image.asset(
-                  "assets/rituals/ente_io_black_white.png",
-                  width: 62,
-                  height: 16,
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Image.asset(
+                  "assets/splash-screen-icon.png",
+                  width: 48,
+                  height: 48,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 12),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
