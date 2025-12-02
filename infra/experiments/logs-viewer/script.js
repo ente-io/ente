@@ -18,11 +18,15 @@ class LogViewer {
         this.currentOffset = 0;
         this.pageSize = 100;
         this.isLoading = false;
-        
+
         // Context mode state
         this.isContextMode = false;
         this.contextTargetLog = null;
         this.contextLogs = [];
+
+        // Device information
+        this.deviceInfo = null;
+        this.deviceRAM = null;
 
         this.initializeEventListeners();
     }
@@ -160,11 +164,13 @@ class LogViewer {
     async processZipFile(file) {
         try {
             document.getElementById('loading').style.display = 'block';
-            
+
             const zip = new JSZip();
             const contents = await zip.loadAsync(file);
-            
+
             this.logs = [];
+            this.deviceInfo = null;
+            this.deviceRAM = null;
             let totalLogs = 0;
 
             // Process each file in the zip
@@ -230,7 +236,14 @@ class LogViewer {
                     this.finalizeLogEntry(currentLog, errorDetails);
                     logs.push(currentLog);
                 }
-                
+
+                // Check for device info in the message (only if not already found)
+                if (!this.deviceInfo && logEntry.message.startsWith('Device Info:')) {
+                    this.deviceInfo = logEntry.message.substring('Device Info:'.length).trim();
+                } else if (!this.deviceRAM && logEntry.message.startsWith('Device RAM:')) {
+                    this.deviceRAM = logEntry.message.substring('Device RAM:'.length).trim();
+                }
+
                 currentLog = logEntry;
                 currentLog.filename = filename;
                 errorDetails = [];
@@ -431,9 +444,42 @@ class LogViewer {
     showMainContent() {
         document.getElementById('upload-section').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
-        
+
+        this.updateDeviceInfo();
         this.updateTimelineSection();
         this.updateStats();
+    }
+
+    updateDeviceInfo() {
+        const deviceInfoSection = document.getElementById('device-info-section');
+        if (!deviceInfoSection) return;
+
+        const deviceInfoText = document.getElementById('device-info-text');
+        const deviceRAMText = document.getElementById('device-ram-text');
+
+        // Reset visibility for both items
+        if (deviceInfoText) {
+            deviceInfoText.parentElement.style.display = 'none';
+        }
+        if (deviceRAMText) {
+            deviceRAMText.parentElement.style.display = 'none';
+        }
+
+        if (this.deviceInfo || this.deviceRAM) {
+            if (this.deviceInfo && deviceInfoText) {
+                deviceInfoText.textContent = this.deviceInfo;
+                deviceInfoText.parentElement.style.display = 'flex';
+            }
+
+            if (this.deviceRAM && deviceRAMText) {
+                deviceRAMText.textContent = this.deviceRAM;
+                deviceRAMText.parentElement.style.display = 'flex';
+            }
+
+            deviceInfoSection.style.display = 'flex';
+        } else {
+            deviceInfoSection.style.display = 'none';
+        }
     }
 
     updateTimelineSection() {

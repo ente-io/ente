@@ -1145,15 +1145,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get uploadFileCountLimitErrorBody =>
-      'Your individual or family account has hit the 1000-file limit.';
+      'You\'ve reached your file limit. Upgrade to a paid plan for more storage.';
 
   @override
   String get uploadFileCountLimitErrorToast =>
-      'Action failed. Your individual or family account has hit the 1000-file limit.';
-
-  @override
-  String get uploadSubscriptionRequiredErrorBody =>
-      'Subscription required to save info items.';
+      'Action failed. You\'ve reached your file limit.';
 
   @override
   String get uploadFileTooLargeErrorTitle => 'File too large';
@@ -1307,11 +1303,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Unlock Locker with a paid plan.';
+  String get unlockLockerNewUserTitle => 'Join Ente to use Locker';
 
   @override
-  String get unlockLockerPaidPlanBody =>
-      'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker';
+  String get unlockLockerNewUserBody =>
+      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';

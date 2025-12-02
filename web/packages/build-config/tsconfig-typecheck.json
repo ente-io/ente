@@ -29,8 +29,10 @@
          * > Type 'Float32Array' can only be iterated through when using the
          * > '--downlevelIteration' flag or with a '--target' of 'es2015' or
          * > higher.
+         *
+         > > BigInt literals are not available when targeting lower than ES2020
          */
-        "target": "ES2015",
+        "target": "ES2020",
 
         /*
          * The module system to assume the generated JavaScript will use.

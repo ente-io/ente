@@ -10,6 +10,8 @@ These images expose web apps on 5 ports:
 - `3002` - Albums
 - `3003` - Auth
 - `3004` - Cast
+- `3005` - Share
+- `3006` - Embed
 
 For example, for selectively exposing only the photos web app on your port 8000,
 you could:
@@ -36,4 +38,12 @@ configure your Docker image to connect to it:
 
 ```sh
 docker run -it --rm -e ENTE_API_ORIGIN=https://api.example.org ghcr.io/ente-io/web
+```
+
+### Dockerfile
+
+If you're manually building the Docker image using `web/Dockerfile` instead of using prebuilt `ghcr.io/ente-io/web` image, remember to run the build from the repo root since the context requires both the `web` and `rust` folders.
+
+```sh
+docker build -f web/Dockerfile .
 ```

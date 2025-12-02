@@ -201,8 +201,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         onPressed: () async {
                           final result = await showCreateNewAccountDialog(
                             context,
-                            title: l10n.unlockLockerPaidPlanTitle,
-                            body: l10n.unlockLockerPaidPlanBody,
+                            title: l10n.unlockLockerNewUserTitle,
+                            body: l10n.unlockLockerNewUserBody,
                             buttonLabel: l10n.checkoutEntePhotos,
                             assetPath: "assets/file_lock.png",
                           );

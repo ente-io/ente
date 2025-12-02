@@ -407,6 +407,12 @@ abstract class StringsLocalizations {
   /// **'Enter password'**
   String get enterPassword;
 
+  /// Enter App lock password prompt for lock screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enter app lock password'**
+  String get enterAppLockPassword;
+
   /// Hint for password field
   ///
   /// In en, this message translates to:
@@ -1079,6 +1085,12 @@ abstract class StringsLocalizations {
   /// **'Enter PIN'**
   String get enterPin;
 
+  /// Enter App lock PIN prompt for lock screen
+  ///
+  /// In en, this message translates to:
+  /// **'Enter app lock PIN'**
+  String get enterAppLockPin;
+
   /// Set new PIN title
   ///
   /// In en, this message translates to:
@@ -1594,6 +1606,12 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Invite to Ente'**
   String get inviteToEnte;
+
+  /// Error message shown when a user without an Ente account tries to use Locker
+  ///
+  /// In en, this message translates to:
+  /// **'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.'**
+  String get lockerExistingUserRequired;
 }
 
 class _StringsLocalizationsDelegate

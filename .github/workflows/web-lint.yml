@@ -5,6 +5,7 @@ on:
     pull_request:
         paths:
             - "web/**"
+            - "rust/core/**"
             - ".github/workflows/web-lint.yml"
 
 permissions:
@@ -36,7 +37,11 @@ jobs:
 
             - run: yarn install --frozen-lockfile
 
+            - run: yarn build:wasm
+
             - run: yarn lint
+
+            - run: yarn test:run
 
             - name: Audit dependencies
               run: |
