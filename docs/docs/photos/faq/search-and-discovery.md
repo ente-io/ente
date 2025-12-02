@@ -253,7 +253,7 @@ Yes! Once the app has grouped faces:
 
 You can then search for photos by person name.
 
-### How can I make face recognition better? {#improve-face-recognition}
+### How can I help improve face recognition? {#improve-face-recognition}
 
 You can help improve face grouping by reviewing and confirming suggestions:
 
