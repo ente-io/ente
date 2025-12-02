@@ -166,9 +166,7 @@ class _RitualBadgePopupSheetState extends State<_RitualBadgePopupSheet> {
                               ).createShader(bounds),
                               blendMode: BlendMode.dstIn,
                               child: SvgPicture.asset(
-                                brightness == Brightness.dark
-                                    ? "assets/rituals/badge_popup_fidgets_dark.svg"
-                                    : "assets/rituals/badge_popup_fidgets_light.svg",
+                                "assets/rituals/badge_popup_fidgets.svg",
                                 fit: BoxFit.cover,
                                 width: 220,
                                 height: 220,
