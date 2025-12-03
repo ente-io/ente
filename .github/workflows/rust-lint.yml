@@ -1,10 +1,16 @@
 name: "Lint (rust)"
 
 on:
-    # Run on every pull request (open or push to it) that changes rust/
+    # Run on every pull request (open or push to it) that changes Rust code
+    #
+    # See also: rust-lint-cli.yml
     pull_request:
         paths:
-            - "rust/**"
+            - "rust/core/**"
+            - "mobile/apps/photos/rust/**"
+            - "mobile/packages/rust/rust/**"
+            - "web/packages/wasm/Cargo.*"
+            - "web/packages/wasm/src/**"
             - ".github/workflows/rust-lint.yml"
 
 permissions:
@@ -21,9 +27,6 @@ env:
 jobs:
     lint:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: rust
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -35,10 +38,69 @@ jobs:
                       ~/.cargo/registry
                       ~/.cargo/git
                       target
+                  # This also hashes cli's Cargo.lock, but it's fine for now.
                   key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-            - run: cargo fmt --check
+            - name: Check formatting (core)
+              run: cargo fmt --check
+              working-directory: rust/core
 
-            - run: cargo clippy --all-targets --all-features
+            - name: Run clippy (core)
+              run: cargo clippy
+              working-directory: rust/core
 
-            - run: cargo build
+            - name: Build (core)
+              run: cargo build
+              working-directory: rust/core
+
+            - name: Test (core)
+              run: cargo test
+              working-directory: rust/core
+
+            - name: Check formatting (ente_rust)
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+              working-directory: mobile/packages/rust/rust
+
+            - name: Run clippy (ente_rust)
+              run: cargo clippy
+              working-directory: mobile/packages/rust/rust
+
+            - name: Build (ente_rust)
+              run: cargo build
+              working-directory: mobile/packages/rust/rust
+
+            - name: Test (ente_rust)
+              run: cargo test
+              working-directory: mobile/packages/rust/rust
+
+            - name: Check formatting (ente_photos_rust)
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+              working-directory: mobile/apps/photos/rust
+
+            - name: Run clippy (ente_photos_rust)
+              run: cargo clippy
+              working-directory: mobile/apps/photos/rust
+
+            - name: Build (ente_photos_rust)
+              run: cargo build
+              working-directory: mobile/apps/photos/rust
+
+            - name: Test (ente_photos_rust)
+              run: cargo test
+              working-directory: mobile/apps/photos/rust
+
+            - name: Check formatting (wasm)
+              run: cargo fmt --check
+              working-directory: web/packages/wasm
+
+            - name: Run clippy (wasm)
+              run: cargo clippy
+              working-directory: web/packages/wasm
+
+            - name: Build (wasm)
+              run: cargo build
+              working-directory: web/packages/wasm
+
+            - name: Test (wasm)
+              run: cargo test
+              working-directory: web/packages/wasm
