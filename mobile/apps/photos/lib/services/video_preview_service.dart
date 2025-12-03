@@ -17,8 +17,8 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
+import "package:photos/events/signed_in_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
-import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import 'package:photos/generated/intl/app_localizations.dart';
@@ -67,16 +67,16 @@ class VideoPreviewService {
     if (flagService.pauseStreamDuringUpload) {
       _listenToSyncCompletion();
     }
-    _listenToFirstImport();
+    _listenToSignIn();
   }
 
-  void _listenToFirstImport() {
-    Bus.instance.on<SyncStatusUpdate>().listen((_) {
-      // Set video streaming default for new internal users after first import/bypass
-      if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed() &&
-          serviceLocator.prefs.getBool(_videoStreamingEnabled) == null &&
-          flagService.internalUser) {
-        serviceLocator.prefs.setBool(_videoStreamingEnabled, true).ignore();
+  void _listenToSignIn() {
+    Bus.instance.on<SignedInEvent>().listen((_) {
+      // Set video streaming enabled by default for internal users on sign in
+      if (flagService.internalUser) {
+        serviceLocator.prefs
+            .setBool(_videoStreamingEnabledByDefault, true)
+            .ignore();
       }
     });
   }
@@ -119,9 +119,17 @@ class VideoPreviewService {
   final CacheManager videoCacheManager;
 
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
+  static const String _videoStreamingEnabledByDefault =
+      "videoStreamingEnabledByDefault";
+
+  bool get _isVideoStreamingEnabledByDefault {
+    return serviceLocator.prefs.getBool(_videoStreamingEnabledByDefault) ??
+        false;
+  }
 
   bool get isVideoStreamingEnabled {
-    return serviceLocator.prefs.getBool(_videoStreamingEnabled) ?? false;
+    return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
+        _isVideoStreamingEnabledByDefault;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
