@@ -93,18 +93,7 @@ class FlagService {
 
   bool get pauseStreamDuringUpload => internalUser;
 
-  static const _streamEnabledByDefault = "videoStreamingEnabledByDefault";
-
-  bool get streamEnabledByDefault =>
-      _prefs.getBool(_streamEnabledByDefault) ?? false;
-
-  /// Sets video streaming enabled by default for internal users.
-  /// Should be called after sign in when flags are available.
-  void applyStreamDefault() {
-    if (internalUser && !_prefs.containsKey(_streamEnabledByDefault)) {
-      _prefs.setBool(_streamEnabledByDefault, true).ignore();
-    }
-  }
+  bool get streamEnabledByDefault => internalUser;
 
   Future<void> tryRefreshFlags() async {
     try {
