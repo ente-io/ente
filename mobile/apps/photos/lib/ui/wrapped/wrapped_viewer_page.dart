@@ -14,6 +14,7 @@ import "package:mesh_gradient/mesh_gradient.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/wake_lock_service.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_media_preloader.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
@@ -151,6 +152,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       _didRegisterWillPop = true;
     });
     unawaited(_initBackgroundMusic());
+    EnteWakeLockService.instance.updateWakeLock(
+      enable: true,
+      wakeLockFor: WakeLockFor.rewindViewer,
+    );
   }
 
   @override
@@ -170,6 +175,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     _pageController.dispose();
     unawaited(_playerStateSubscription?.cancel());
     unawaited(_audioPlayer.dispose());
+    EnteWakeLockService.instance.updateWakeLock(
+      enable: false,
+      wakeLockFor: WakeLockFor.rewindViewer,
+    );
     super.dispose();
   }
 
