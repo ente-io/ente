@@ -129,6 +129,9 @@ class LocalSyncService {
       }
       if (!hasCompletedFirstImport()) {
         await _prefs.setBool(kHasCompletedFirstImportKey, true);
+        if (backupPreferenceService.hasSkippedOnboardingPermission) {
+          await backupPreferenceService.setOnboardingPermissionSkipped(false);
+        }
         await _refreshDeviceFolderCountAndCover(isFirstSync: true);
         _logger.info("first gallery import finished");
         Bus.instance
@@ -150,7 +153,7 @@ class LocalSyncService {
         await getDeviceFolderWithCountAndCoverID();
     final bool hasUpdated = await _db.updateDeviceCoverWithCount(
       result,
-      shouldBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
+      shouldBackup: backupPreferenceService.hasSelectedAllFoldersForBackup,
     );
     // do not fire UI update event during first sync. Otherwise the next screen
     // to shop the backup folder is skipped
@@ -253,6 +256,17 @@ class LocalSyncService {
     return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
   }
 
+  /// Treat the first import as "done" when flag-driven flows intentionally
+  /// bypass it (e.g., onboarding skipped or only-new backup). Falls back to the
+  /// stored completion value otherwise.
+  bool hasCompletedFirstImportOrBypassed() {
+    if (hasCompletedFirstImport()) {
+      return true;
+    }
+    return backupPreferenceService.hasSkippedOnboardingPermission ||
+        backupPreferenceService.isOnlyNewBackupEnabled;
+  }
+
   // Warning: resetLocalSync should only be used for testing imported related
   // changes
   Future<void> resetLocalSync() async {
@@ -283,7 +297,7 @@ class LocalSyncService {
       await FilesDB.instance.insertLocalAssets(
         result.item1,
         shouldAutoBackup:
-            Configuration.instance.hasSelectedAllFoldersForBackup(),
+            backupPreferenceService.hasSelectedAllFoldersForBackup,
       );
 
       _logger.info(

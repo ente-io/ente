@@ -37,7 +37,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   int invalidAttemptCount = 0;
   int remainingTimeInSeconds = 0;
   final _lockscreenSetting = LockScreenSettings.instance;
-  late Brightness _platformBrightness;
   // Suppress auto-auth only for the initial manual presentation.
   bool _suppressAutoPrompt = false;
 
@@ -56,8 +55,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
         _showLockScreen(source: "postFrameInit");
       }
     });
-    _platformBrightness =
-        SchedulerBinding.instance.platformDispatcher.platformBrightness;
   }
 
   @override
@@ -82,121 +79,108 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           if (isTimerRunning) return;
           _showLockScreen(source: "tap");
         },
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              opacity: _platformBrightness == Brightness.light ? 0.08 : 0.12,
-              image: const ExactAssetImage(
-                'assets/loading_photos_background.png',
+        child: Center(
+          child: Column(
+            children: [
+              const Spacer(),
+              SizedBox(
+                height: 120,
+                width: 120,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 82,
+                      height: 82,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.grey.shade500.withValues(alpha: 0.2),
+                            Colors.grey.shade50.withValues(alpha: 0.1),
+                            Colors.grey.shade400.withValues(alpha: 0.2),
+                            Colors.grey.shade300.withValues(alpha: 0.4),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorTheme.backgroundBase,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 75,
+                      width: 75,
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(
+                          begin: isTimerRunning ? 0 : 1,
+                          end: isTimerRunning ? _getFractionOfTimeElapsed() : 1,
+                        ),
+                        duration: const Duration(seconds: 1),
+                        builder: (context, value, _) =>
+                            CircularProgressIndicator(
+                          backgroundColor: colorTheme.fillFaintPressed,
+                          value: value,
+                          color: colorTheme.primary400,
+                          strokeWidth: 1.5,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.lock,
+                      size: 30,
+                      color: colorTheme.textBase,
+                    ),
+                  ],
+                ),
               ),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Center(
-            child: Column(
-              children: [
-                const Spacer(),
-                SizedBox(
-                  height: 120,
-                  width: 120,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        width: 82,
-                        height: 82,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.grey.shade500.withValues(alpha: 0.2),
-                              Colors.grey.shade50.withValues(alpha: 0.1),
-                              Colors.grey.shade400.withValues(alpha: 0.2),
-                              Colors.grey.shade300.withValues(alpha: 0.4),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(1.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorTheme.backgroundBase,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 75,
-                        width: 75,
-                        child: TweenAnimationBuilder<double>(
-                          tween: Tween<double>(
-                            begin: isTimerRunning ? 0 : 1,
-                            end: isTimerRunning
-                                ? _getFractionOfTimeElapsed()
-                                : 1,
-                          ),
-                          duration: const Duration(seconds: 1),
-                          builder: (context, value, _) =>
-                              CircularProgressIndicator(
-                            backgroundColor: colorTheme.fillFaintPressed,
-                            value: value,
-                            color: colorTheme.primary400,
-                            strokeWidth: 1.5,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.lock,
-                        size: 30,
-                        color: colorTheme.textBase,
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                isTimerRunning
-                    ? Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Text(
-                            context.strings.tooManyIncorrectAttempts,
-                            style: textTheme.small,
-                          )
-                              .animate(
-                                delay: const Duration(milliseconds: 2000),
-                              )
-                              .fadeOut(
-                                duration: 400.ms,
-                                curve: Curves.easeInOutCirc,
-                              ),
-                          Text(
-                            _formatTime(remainingTimeInSeconds),
-                            style: textTheme.small,
-                          )
-                              .animate(
-                                delay: const Duration(milliseconds: 2250),
-                              )
-                              .fadeIn(
-                                duration: 400.ms,
-                                curve: Curves.easeInOutCirc,
-                              ),
-                        ],
-                      )
-                    : GestureDetector(
-                        onTap: () => _showLockScreen(source: "tap"),
-                        child: Text(
-                          context.strings.tapToUnlock,
+              const Spacer(),
+              isTimerRunning
+                  ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Text(
+                          context.strings.tooManyIncorrectAttempts,
                           style: textTheme.small,
-                        ),
+                        )
+                            .animate(
+                              delay: const Duration(milliseconds: 2000),
+                            )
+                            .fadeOut(
+                              duration: 400.ms,
+                              curve: Curves.easeInOutCirc,
+                            ),
+                        Text(
+                          _formatTime(remainingTimeInSeconds),
+                          style: textTheme.small,
+                        )
+                            .animate(
+                              delay: const Duration(milliseconds: 2250),
+                            )
+                            .fadeIn(
+                              duration: 400.ms,
+                              curve: Curves.easeInOutCirc,
+                            ),
+                      ],
+                    )
+                  : GestureDetector(
+                      onTap: () => _showLockScreen(source: "tap"),
+                      child: Text(
+                        context.strings.tapToUnlock,
+                        style: textTheme.small,
                       ),
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 24),
-                ),
-              ],
-            ),
+                    ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 24),
+              ),
+            ],
           ),
         ),
       ),

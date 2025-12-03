@@ -14,7 +14,6 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
-import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -23,6 +22,7 @@ import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/lock_screen_options.dart';
+import 'package:ente_ui/components/toggle_switch_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 

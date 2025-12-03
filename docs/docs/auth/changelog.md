@@ -5,7 +5,7 @@ description: Release notes of recent updates to Ente Auth
 
 # Changelog - Ente Auth
 
-<!-- A short summary list of changes to the Ente Auth mobile and desktop apps. For a more user-oriented list with screenshots and blog post links, see the [global changelog](https://ente.io/changelog). -->
+A short summary list of changes to the Ente Auth mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
 ## v4.4.10 - Nov 2025
 

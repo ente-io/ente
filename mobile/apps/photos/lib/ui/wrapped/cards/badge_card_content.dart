@@ -196,7 +196,6 @@ class _BadgeVisualAssets {
   static const String consistencyChamp =
       "assets/rewind_badges/consistency_champ.png";
   static const String globetrotter = "assets/rewind_badges/globetrotter.png";
-  static const String petParent = "assets/rewind_badges/pet_parent.png";
   static const String minimalist =
       "assets/rewind_badges/minimalist_shooter.png";
   static const String portraitPro = "assets/rewind_badges/portrait_pro.png";
@@ -458,7 +457,6 @@ const Map<String, String> _kBadgeIllustrations = <String, String>{
   "people_person": _BadgeVisualAssets.peoplePerson,
   "consistency_champ": _BadgeVisualAssets.consistencyChamp,
   "globetrotter": _BadgeVisualAssets.globetrotter,
-  "pet_parent": _BadgeVisualAssets.petParent,
   "minimalist_shooter": _BadgeVisualAssets.minimalist,
   "portrait_pro": _BadgeVisualAssets.portraitPro,
 };

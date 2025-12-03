@@ -107,7 +107,7 @@ class _CustomIconPageState extends State<CustomIconPage> {
     return Scaffold(
       appBar: AppBar(
         title: !_showSearchBox
-            ? const Text('Choose icon')
+            ? Text(l10n.chooseIcon)
             : TextField(
                 autocorrect: false,
                 enableSuggestions: false,

@@ -82,7 +82,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
         final hasSelectedAllForBackup =
-            Configuration.instance.hasSelectedAllFoldersForBackup();
+            backupPreferenceService.hasSelectedAllFoldersForBackup;
         final collectionsToHide =
             CollectionsService.instance.archivedOrHiddenCollectionIds();
         FileLoadResult result;

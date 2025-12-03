@@ -88,6 +88,19 @@ Your entire photo library will sync to this device, and any new photos you back 
 
 Learn more in [Creating an account and logging in](/photos/getting-started/signup).
 
+### How do I manage all devices connected to my account? {#manage-devices}
+
+You can view and manage all devices logged into your Ente account:
+
+1. Open Ente Photos on any device
+2. Go to Settings:
+    - **Web/Desktop**: Settings → Account → Active sessions
+    - **Mobile**: Settings → Security → Active sessions
+3. View all devices where you're currently logged in
+4. To terminate a device, click on it and select **Terminate** from the popup
+
+This is useful if you've lost a device or want to ensure old devices no longer have access to your account.
+
 ### Can I use Ente on both mobile and desktop? {#mobile-and-desktop}
 
 Yes! You can use Ente Photos on as many devices as you want:

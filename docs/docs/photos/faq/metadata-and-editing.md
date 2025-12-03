@@ -216,6 +216,10 @@ Here is a sample of how the JSON looks:
 ```json
 {
     "description": "This will be imported as the caption",
+    "photoTakenTime": {
+        "timestamp": "1613532136",
+        "formatted": "17 Feb 2021, 03:22:16 UTC"
+    },
     "creationTime": {
         "timestamp": "1613532136",
         "formatted": "17 Feb 2021, 03:22:16 UTC"
@@ -231,7 +235,11 @@ Here is a sample of how the JSON looks:
 }
 ```
 
-`photoTakenTime` will be considered as an alias for `creationTime`, and `geoDataExif` will be considered as a fallback for `geoData`.
+Ente writes both timestamp blocks: `photoTakenTime` holds the photo's capture time (the value other apps and Takeout expect), while `creationTime` is kept only for backward compatibility with older exports that relied on it and may be dropped in a future version. When importing, Ente treats `photoTakenTime` as canonical and falls back to `creationTime` if needed. `geoDataExif` will be considered as a fallback for `geoData`.
+
+> [!NOTE]
+>
+> The `creationTime` field is deprecated and will be removed in a future release. Prefer `photoTakenTime`.
 
 ### What happens to file creation time during export? {#file-creation-time}
 

@@ -148,7 +148,14 @@ class _LoginPageState extends State<LoginPage> {
           await showErrorDialog(
             context,
             context.l10n.oops,
-            context.l10n.unlockLockerPaidPlanBody,
+            context.l10n.unlockLockerNewUserBody,
+          );
+        } else if (enteErrCode != null &&
+            enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+          await showErrorDialog(
+            context,
+            "We're out of beta seats for now",
+            "This preview access has reached capacity. We'll be opening it to more users soon.",
           );
         } else {
           await showErrorDialog(
@@ -240,8 +247,8 @@ class _LoginPageState extends State<LoginPage> {
   void _handleSignUp() {
     showCreateNewAccountDialog(
       context,
-      title: context.l10n.unlockLockerPaidPlanTitle,
-      body: context.l10n.unlockLockerPaidPlanBody,
+      title: context.l10n.unlockLockerNewUserTitle,
+      body: context.l10n.unlockLockerNewUserBody,
       buttonLabel: context.l10n.okay,
       assetPath: "assets/file_lock.png",
       icon: const SizedBox.shrink(),
@@ -262,12 +269,11 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
-        title: Text(
-          l10n.locker,
-          style: textTheme.h3Bold.copyWith(
-            color: colorScheme.primary700,
-          ),
+        title: Image.asset(
+          'assets/locker-logo-blue.png',
+          height: 28,
         ),
+        centerTitle: true,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
         leading: IconButton(

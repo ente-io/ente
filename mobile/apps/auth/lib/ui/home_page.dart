@@ -15,11 +15,11 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
@@ -29,6 +29,7 @@ import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
@@ -48,6 +49,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +111,7 @@ class _HomePageState extends State<HomePage> {
     _codeSortKey = PreferenceService.instance.codeSortKey();
     _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
+    LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
     });
@@ -444,12 +447,31 @@ class _HomePageState extends State<HomePage> {
     if (!isAuthSuccessful) return;
 
     _codeDisplayStore.clearSelection();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ViewQrPage(code: code);
-        },
-      ),
+    final qrData = code.rawData
+        .replaceAll('algorithm=Algorithm.', 'algorithm=')
+        .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+        .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+        .replaceAll('algorithm=sha512', 'algorithm=SHA512');
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return QrCodeDialog(
+          data: qrData,
+          title: code.account,
+          subtitle: code.issuer,
+          accentColor: accentColor,
+          shareFileName: 'ente_auth_qr_${code.account}.png',
+          shareText: 'QR code for ${code.account}',
+          dialogTitle: context.l10n.qrCode,
+          shareButtonText: context.l10n.share,
+          logoAssetPath: 'assets/qr_logo.png',
+          branding: const QrSvgBranding(
+            assetPath: 'assets/svg/auth-logo.svg',
+            height: 12,
+          ),
+        );
+      },
     );
   }
 
@@ -963,6 +985,23 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
+                ValueListenableBuilder<Set<String>>(
+                  valueListenable: _codeDisplayStore.selectedCodeIds,
+                  builder: (context, selectedIds, _) {
+                    final Code? code =
+                        _getSingleSelectedCodeWithNote(selectedIds);
+                    if (code == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: _buildMultiSelectNotePreview(
+                        note: code.note.trim(),
+                        isDesktop: false,
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 16),
                 _buildActionButtons(),
               ],
@@ -1168,7 +1207,7 @@ class _HomePageState extends State<HomePage> {
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(newCode);
       }
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     } finally {
       _isImportingFromGallery = false;
     }
@@ -1191,7 +1230,7 @@ class _HomePageState extends State<HomePage> {
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(result.code);
       }
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }
   }
 
@@ -1205,7 +1244,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (code != null) {
       await CodeStore.instance.addCode(code);
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
     }
   }
 
@@ -1404,7 +1443,10 @@ class _HomePageState extends State<HomePage> {
       builder: (context, selectedIds, _) {
         final bool allVisibleSelected =
             visibleIds.isNotEmpty && selectedIds.containsAll(visibleIds);
-        return Container(
+        final Code? singleCode = _getSingleSelectedCodeWithNote(selectedIds);
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
           decoration: BoxDecoration(
             color: isDarkMode
                 ? colorScheme.fillFaint
@@ -1426,39 +1468,75 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           padding: EdgeInsets.fromLTRB(24, 20, 24, 20 + bottomPadding),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Close button and count
-              IconButton(
-                icon: const Icon(Icons.close),
-                tooltip: l10n.cancel,
-                onPressed: () => _codeDisplayStore.clearSelection(),
-                padding: const EdgeInsets.all(12),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (singleCode != null) ...[
+                      Align(
+                        alignment: Alignment.center,
+                        child: _buildMultiSelectNotePreview(
+                          note: singleCode.note.trim(),
+                          isDesktop: true,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '${selectedIds.length} ${l10n.selected}',
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const Spacer(),
-              // Action buttons in center
-              _buildDesktopActionRow(context),
-              const Spacer(),
-              // Select all chip
-              _buildSelectAllChip(
-                context: context,
-                enabled: !allVisibleSelected,
-                onPressed: allVisibleSelected
-                    ? null
-                    : () {
-                        final newSelection = Set<String>.from(visibleIds);
-                        _codeDisplayStore.selectedCodeIds.value = newSelection;
-                        _codeDisplayStore.isSelectionModeActive.value =
-                            newSelection.isNotEmpty;
-                      },
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    tooltip: l10n.cancel,
+                    onPressed: () => _codeDisplayStore.clearSelection(),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${selectedIds.length} ${l10n.selected}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeInOut,
+                    switchOutCurve: Curves.easeInOut,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+                    child: KeyedSubtree(
+                      key: ValueKey<int>(selectedIds.length),
+                      child: _buildDesktopActionRow(context),
+                    ),
+                  ),
+                  const Spacer(),
+                  _buildSelectAllChip(
+                    context: context,
+                    enabled: !allVisibleSelected,
+                    onPressed: allVisibleSelected
+                        ? null
+                        : () {
+                            final newSelection = Set<String>.from(visibleIds);
+                            _codeDisplayStore.selectedCodeIds.value =
+                                newSelection;
+                            _codeDisplayStore.isSelectionModeActive.value =
+                                newSelection.isNotEmpty;
+                          },
+                  ),
+                ],
               ),
             ],
           ),
@@ -1486,14 +1564,13 @@ class _HomePageState extends State<HomePage> {
         final bool showTrashChip = hasTrashedCodes;
         final int itemCount =
             (showAllChip ? 1 : 0) + tags.length + (showTrashChip ? 1 : 0);
-        final bool showAllEmptyHint =
-            showAllChip &&
-                selectedTag.isEmpty &&
-                !_isTrashOpen &&
-                _filteredCodes.isEmpty &&
-                _searchText.isEmpty &&
-                !hasNonTrashedCodes &&
-                hasTrashedCodes;
+        final bool showAllEmptyHint = showAllChip &&
+            selectedTag.isEmpty &&
+            !_isTrashOpen &&
+            _filteredCodes.isEmpty &&
+            _searchText.isEmpty &&
+            !hasNonTrashedCodes &&
+            hasTrashedCodes;
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1582,8 +1659,7 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.only(bottom: 64.0),
                       child: Center(
                         child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 24.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
                           child: Text(
                             l10n.allTabEmptyHint,
                             textAlign: TextAlign.center,
@@ -1610,17 +1686,15 @@ class _HomePageState extends State<HomePage> {
 
                       final code = _filteredCodes[newIndex];
 
-                      return ClipRect(
-                        child: CodeWidget(
-                          key: ValueKey(
-                            '${code.hashCode}_${newIndex}_$_codeSortKey',
-                          ),
-                          code,
-                          isCompactMode: isCompactMode,
-                          sortKey: _codeSortKey,
-                          enableDesktopContextActions: PlatformUtil.isDesktop(),
-                          selectedCodesBuilder: _selectedCodesForContextMenu,
+                      return CodeWidget(
+                        key: ValueKey(
+                          '${code.hashCode}_${newIndex}_$_codeSortKey',
                         ),
+                        code,
+                        isCompactMode: isCompactMode,
+                        sortKey: _codeSortKey,
+                        enableDesktopContextActions: PlatformUtil.isDesktop(),
+                        selectedCodesBuilder: _selectedCodesForContextMenu,
                       );
                     }),
                     itemCount: _filteredCodes.length + indexOffset,
@@ -1964,6 +2038,84 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Code? _getSingleSelectedCodeWithNote(Set<String> selectedIds) {
+    if (selectedIds.length != 1) {
+      return null;
+    }
+    final String key = selectedIds.first;
+    final Code? code =
+        _allCodes?.firstWhereOrNull((element) => element.selectionKey == key);
+    if (code == null || code.note.trim().isEmpty) {
+      return null;
+    }
+    return code;
+  }
+
+  Widget _buildMultiSelectNotePreview({
+    required String note,
+    required bool isDesktop,
+  }) {
+    final trimmedNote = note.trim();
+    if (trimmedNote.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color backgroundColor =
+        isDark ? const Color(0x29A75CFF) : const Color(0xFFFBF8FF);
+    final Color textColor = colorScheme.textBase;
+    final double maxWidth = isDesktop ? 420 : 360;
+    final Widget chip = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(100),
+        onTap: () => _onSelectedNoteTapped(trimmedNote),
+        child: Container(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: ShapeDecoration(
+            color: backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(100),
+            ),
+          ),
+          child: Text(
+            trimmedNote,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              height: 1.25,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return Align(
+      alignment: Alignment.center,
+      heightFactor: 1,
+      child: chip,
+    );
+  }
+
+  void _onSelectedNoteTapped(String note) {
+    if (note.isEmpty) {
+      return;
+    }
+    _codeDisplayStore.clearSelection();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      showNotesDialog(context, note);
+    });
   }
 
   Widget _getFab() {

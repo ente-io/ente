@@ -71,6 +71,7 @@ import {
 import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
+import { SessionsSettings } from "ente-new/photos/components/sidebar/SessionsSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
@@ -123,6 +124,7 @@ import React, {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
     type MouseEventHandler,
 } from "react";
@@ -195,6 +197,7 @@ type AccountAction = Extract<
     SidebarActionID,
     | "account.recoveryKey"
     | "account.twoFactor"
+    | "account.twoFactor.reconfigure"
     | "account.passkeys"
     | "account.changePassword"
     | "account.changeEmail"
@@ -275,22 +278,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         [setWatchFolderView],
     );
 
-    const showCollectionSummaryWithWorkarounds = useCallback(
-        (collectionSummaryID: number, isHidden?: boolean) => {
-            const action = onShowCollectionSummary(
-                collectionSummaryID,
-                isHidden,
-            );
-            return isHidden ? action.then(() => wait(10)) : action;
-        },
-        [onShowCollectionSummary],
-    );
-
     const performSidebarAction = useCallback(
         async (actionID: SidebarActionID) =>
             performSidebarRegistryAction(actionID, {
                 onClose,
-                onShowCollectionSummary: showCollectionSummaryWithWorkarounds,
+                onShowCollectionSummary,
                 onShowPlanSelector,
                 showAccount,
                 showPreferences,
@@ -318,7 +310,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             handleLogout,
             handleOpenWatchFolder,
             onClose,
-            showCollectionSummaryWithWorkarounds,
+            onShowCollectionSummary,
             onShowPlanSelector,
             onShowExport,
             router,
@@ -329,12 +321,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
     );
 
+    // Use refs for callbacks to prevent the effect from re-running when
+    // callback identities change. This is critical because closing the auth
+    // modal causes handleSidebarClose to get a new identity (it depends on
+    // authenticateUserVisibilityProps.open), which cascades to
+    // performSidebarAction, causing this effect to re-run while pendingAction
+    // is still set - reopening the modal.
+    const performSidebarActionRef = useRef(performSidebarAction);
+    const onActionHandledRef = useRef(onActionHandled);
+    useEffect(() => {
+        performSidebarActionRef.current = performSidebarAction;
+        onActionHandledRef.current = onActionHandled;
+    });
+
     useEffect(() => {
         if (!pendingAction) return;
-        void performSidebarAction(pendingAction).finally(() =>
-            onActionHandled?.(pendingAction),
-        );
-    }, [pendingAction, performSidebarAction, onActionHandled]);
+        void performSidebarActionRef
+            .current(pendingAction)
+            .finally(() => onActionHandledRef.current?.(pendingAction));
+    }, [pendingAction]);
 
     return (
         <RootSidebarDrawer open={open} onClose={onClose}>
@@ -893,6 +898,8 @@ const Account: React.FC<AccountProps> = ({
         useModalVisibility();
     const { show: showTwoFactor, props: twoFactorVisibilityProps } =
         useModalVisibility();
+    const { show: showSessions, props: sessionsVisibilityProps } =
+        useModalVisibility();
     const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
         useModalVisibility();
 
@@ -919,6 +926,7 @@ const Account: React.FC<AccountProps> = ({
             case "account.recoveryKey":
                 showRecoveryKey();
                 break;
+            case "account.twoFactor.reconfigure":
             case "account.twoFactor":
                 showTwoFactor();
                 break;
@@ -948,6 +956,11 @@ const Account: React.FC<AccountProps> = ({
         showTwoFactor,
     ]);
 
+    const handleActiveSessions = async () => {
+        await onAuthenticateUser();
+        showSessions();
+    };
+
     return (
         <TitledNestedSidebarDrawer
             {...{ open, onClose }}
@@ -973,6 +986,11 @@ const Account: React.FC<AccountProps> = ({
                     />
                     <RowButtonDivider />
                     <RowButton label={t("passkeys")} onClick={handlePasskeys} />
+                    <RowButtonDivider />
+                    <RowButton
+                        label={t("active_sessions")}
+                        onClick={handleActiveSessions}
+                    />
                 </RowButtonGroup>
                 <RowButtonGroup>
                     <RowButton
@@ -999,6 +1017,10 @@ const Account: React.FC<AccountProps> = ({
             />
             <TwoFactorSettings
                 {...twoFactorVisibilityProps}
+                onRootClose={onRootClose}
+            />
+            <SessionsSettings
+                {...sessionsVisibilityProps}
                 onRootClose={onRootClose}
             />
             <DeleteAccount
@@ -1679,17 +1701,13 @@ const Help: React.FC<HelpProps> = ({
                         onClick={handleSupport}
                     />
                 </RowButtonGroup>
-            </Stack>
-            <Stack sx={{ px: "16px" }}>
-                <RowButton
-                    variant="secondary"
-                    label={
-                        <Typography variant="mini" color="text.muted">
-                            {t("view_logs")}
-                        </Typography>
-                    }
-                    onClick={confirmViewLogs}
-                />
+                <RowButtonGroup>
+                    <RowButton
+                        endIcon={<ChevronRightIcon />}
+                        label={t("view_logs")}
+                        onClick={confirmViewLogs}
+                    />
+                </RowButtonGroup>
                 {isDevBuildAndUser() && (
                     <RowButton
                         variant="secondary"

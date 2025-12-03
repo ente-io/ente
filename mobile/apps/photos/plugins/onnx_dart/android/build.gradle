@@ -53,7 +53,7 @@ android {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
 
-        implementation 'com.microsoft.onnxruntime:onnxruntime-android:latest.release'
+        implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.22.0'
     }
 
     testOptions {

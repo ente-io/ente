@@ -207,13 +207,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             SizedBox(
                               height: 200,
                               width: 200,
-                              child: SvgPicture.asset(
-                                getEnteColorScheme(context).backdropBase ==
-                                        backgroundBaseDark
-                                    ? "assets/icons/legacy-light.svg"
-                                    : "assets/icons/legacy-dark.svg",
-                                width: 156,
-                                height: 152,
+                              child: Image.asset(
+                                "assets/legacy.png",
+                                width: 200,
+                                height: 200,
                               ),
                             ),
                             Text(

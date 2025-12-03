@@ -186,6 +186,9 @@ const EnteColorScheme darkScheme = EnteColorScheme(
 
 const accentColor = Color(0xFFA75CFF);
 
+// QR code container background
+const Color qrBoxColor = Color.fromRGBO(245, 245, 247, 1);
+
 // Background Colors
 const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
@@ -247,10 +250,10 @@ const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
 const Color _primaryGreen = Color.fromRGBO(29, 185, 84, 1);
 
-const Color _primary700 = accentColor;
+const Color _primary700 = Color(0xFF722ED1);
 const Color _primary500 = accentColor;
-const Color _primary400 = accentColor;
-const Color _primary300 = accentColor;
+const Color _primary400 = Color(0xFF7A29C1);
+const Color _primary300 = Color(0xFF984DF4);
 
 const Color _iconButtonBrightColor = Color.fromRGBO(130, 50, 225, 1);
 const Color _iconButtonDarkColor = Color.fromRGBO(255, 150, 16, 1);

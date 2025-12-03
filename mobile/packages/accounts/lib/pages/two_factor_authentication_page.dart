@@ -48,11 +48,14 @@ class _TwoFactorAuthenticationPageState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
 
+    // TODO: Use primary500 instead of strokeMuted once theming is properly
+    // set up for Locker app to show app-specific colors. Currently,
+    // colorScheme.primary500 doesn't work on Locker app.
     final pinPutDecoration = PinTheme(
       height: 45,
       width: 45,
       decoration: BoxDecoration(
-        border: Border.all(color: colorScheme.primary500),
+        border: Border.all(color: colorScheme.strokeMuted),
         borderRadius: BorderRadius.circular(15.0),
       ),
     );
@@ -100,7 +103,7 @@ class _TwoFactorAuthenticationPageState
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
                 border: Border.all(
-                  color: colorScheme.primary500.withOpacity(0.5),
+                  color: colorScheme.strokeMuted.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -109,7 +112,7 @@ class _TwoFactorAuthenticationPageState
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10.0),
                 border: Border.all(
-                  color: colorScheme.primary500.withOpacity(0.5),
+                  color: colorScheme.strokeMuted.withValues(alpha: 0.5),
                 ),
               ),
             ),

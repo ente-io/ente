@@ -86,8 +86,12 @@ class SmartMemoriesService {
       final seenTimes = await _memoriesDB.getSeenTimes();
       _logger.info('seenTimes has ${seenTimes.length} entries $t');
 
-      final persons = await PersonService.instance.getPersons();
-      _logger.info('gotten all ${persons.length} persons $t');
+      final allPersons = await PersonService.instance.getPersons();
+      final persons =
+          allPersons.where((person) => !person.data.hideFromMemories).toList();
+      _logger.info(
+        'gotten all ${persons.length} persons after filtering $t',
+      );
 
       final currentUserEmail = Configuration.instance.getEmail();
       _logger.info('currentUserEmail: $currentUserEmail $t');
@@ -240,7 +244,9 @@ class SmartMemoriesService {
       final MemoriesCache oldCache = args["oldCache"];
       final bool debugSurfaceAll = args["debugSurfaceAll"] ?? false;
       final Map<int, int> seenTimes = args["seenTimes"];
-      final List<PersonEntity> persons = args["persons"];
+      final List<PersonEntity> persons = (args["persons"] as List<PersonEntity>)
+          .where((person) => !person.data.hideFromMemories)
+          .toList();
       final String? currentUserEmail = args["currentUserEmail"];
       final List<City> cities = args["cities"];
       final Map<int, List<FaceWithoutEmbedding>> fileIdToFaces =

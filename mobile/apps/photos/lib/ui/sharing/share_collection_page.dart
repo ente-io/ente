@@ -108,7 +108,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         children.add(
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
-              title: 'Add admin',
+              title: '(i) Add admin',
               makeTextBold: true,
             ),
             leadingIcon: Icons.add,

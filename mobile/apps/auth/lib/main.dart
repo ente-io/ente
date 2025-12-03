@@ -11,6 +11,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
@@ -183,6 +184,9 @@ Future<void> _init(bool bool, {String? via}) async {
   await IconUtils.instance.init();
   await LockScreenSettings.instance.init(
     Configuration.instance,
+    hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+  );
+  await LocalBackupService.instance.init(
     hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
   );
 }

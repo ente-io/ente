@@ -3,31 +3,25 @@ import 'dart:io';
 
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
-import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
-import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
-import 'package:locker/models/selected_collections.dart';
-import 'package:locker/models/ui_section_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
-import "package:locker/ui/collections/collection_flex_grid_view.dart";
-import "package:locker/ui/collections/section_title.dart";
+import "package:locker/states/user_details_state.dart";
 import "package:locker/ui/components/home_empty_state_widget.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
+import "package:locker/ui/drawer/drawer_page.dart";
 import 'package:locker/ui/mixins/search_mixin.dart';
-import 'package:locker/ui/pages/all_collections_page.dart';
 import 'package:locker/ui/pages/save_page.dart';
-import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
+import "package:locker/ui/utils/legacy_utils.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -58,7 +52,6 @@ class CustomLockerAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final hasQuery = searchController.text.isNotEmpty;
     final showClearIcon = isSearchActive || hasQuery;
 
@@ -93,24 +86,30 @@ class CustomLockerAppBar extends StatelessWidget
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onLongPress: () {
-                      sendLogs(
-                        context,
-                        'vishnu@ente.io',
-                        subject: context.l10n.lockerLogs,
-                        body: 'Debug logs for Locker app.\n\n',
-                      );
-                    },
-                    child: Text(
-                      context.l10n.locker,
-                      style: textTheme.h3Bold.copyWith(
-                        color: Colors.white,
-                        fontFamily: 'Montserrat',
+                  Image.asset(
+                    'assets/locker-logo.png',
+                    height: 28,
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: InkWell(
+                      onTap: () => openLegacyPage(context),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: Icon(
+                          Icons.favorite_rounded,
+                          color: colorScheme.primary700,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48),
                 ],
               ),
             ),
@@ -133,7 +132,7 @@ class CustomLockerAppBar extends StatelessWidget
                   decoration: InputDecoration(
                     hintText: context.l10n.searchHint,
                     hintStyle: TextStyle(
-                      color: colorScheme.textMuted,
+                      color: colorScheme.iconColor,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -197,7 +196,7 @@ class HomePage extends UploaderPage {
 
 class _HomePageState extends UploaderPageState<HomePage>
     with TickerProviderStateMixin, SearchMixin {
-  late final _settingsPage = SettingsPage(
+  late final _settingsPage = DrawerPage(
     emailNotifier: UserService.instance.emailValueNotifier,
     scaffoldKey: scaffoldKey,
   );
@@ -207,11 +206,9 @@ class _HomePageState extends UploaderPageState<HomePage>
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
-  late final SelectedCollections _selectedCollections;
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  List<Collection> homeCollections = [];
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -260,14 +257,9 @@ class _HomePageState extends UploaderPageState<HomePage>
     return CollectionSortUtil.filterAndSortCollections(collections);
   }
 
-  List<Collection> getOnEnteCollections(List<Collection> collections) {
-    return _filterOutUncategorized(collections);
-  }
-
   @override
   void initState() {
     super.initState();
-    _selectedCollections = SelectedCollections();
 
     _loadCollections();
 
@@ -322,7 +314,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           _logger
               .info('Received shared media files via stream: ${value.length}');
           for (var file in value) {
-            _logger.info('Shared file: ${file.path}, type: ${file.type}');
+            _logger.info('Shared file received, type: ${file.type}');
           }
           if (value.isNotEmpty) {
             _handleSharedFiles(value);
@@ -353,7 +345,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         _logger
             .info('Found initial shared media files: ${initialMedia.length}');
         for (var file in initialMedia) {
-          _logger.info('Initial shared file: ${file.path}, type: ${file.type}');
+          _logger.info('Initial shared file, type: ${file.type}');
         }
         await _handleSharedFiles(initialMedia);
       } else {
@@ -374,14 +366,14 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     try {
       for (final sharedFile in sharedFiles) {
-        _logger.info('Processing shared file: ${sharedFile.path}');
+        _logger.info('Processing shared file');
         if (sharedFile.path.isNotEmpty) {
           final file = File(sharedFile.path);
           if (await file.exists()) {
-            _logger.info('File exists, uploading: ${sharedFile.path}');
+            _logger.info('File exists, uploading');
             await uploadFiles([file]);
           } else {
-            _logger.warning('Shared file does not exist: ${sharedFile.path}');
+            _logger.warning('Shared file does not exist');
           }
         } else {
           _logger.warning('Shared file has empty path');
@@ -430,7 +422,6 @@ class _HomePageState extends UploaderPageState<HomePage>
 
       if (mounted) {
         setState(() {
-          homeCollections = getOnEnteCollections(sortedCollections);
           _collections = sortedCollections;
           _filteredCollections = _filterOutUncategorized(sortedCollections);
           _filteredFiles = _recentFiles;
@@ -450,7 +441,11 @@ class _HomePageState extends UploaderPageState<HomePage>
   Future<void> _loadRecentFiles(List<Collection> collections) async {
     final allFiles = <EnteFile>[];
 
-    allFiles.addAll(await CollectionService.instance.getAllFiles());
+    for (final collection in collections) {
+      allFiles.addAll(
+        await CollectionService.instance.getFilesInCollection(collection),
+      );
+    }
 
     final uniqueFiles = <EnteFile>[];
     final seenHashes = <String>{};
@@ -495,73 +490,70 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   void _handleClearSearch() {
-    // Clear text and unfocus to properly dismiss search
+    // Clear text and unfocus before dismissing search
     searchController.clear();
     _searchFocusNode.unfocus();
-    // Simulate ESC key to deactivate search state
-    // ignore: prefer_const_constructors
-    final escapeEvent = KeyDownEvent(
-      physicalKey: PhysicalKeyboardKey.escape,
-      logicalKey: LogicalKeyboardKey.escape,
-      timeStamp: const Duration(seconds: 0),
-    );
-    handleKeyEvent(escapeEvent);
+
+    dismissSearch();
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return PopScope(
-      canPop: !isSearchActive && !_isSettingsOpen,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          return;
-        }
+    return UserDetailsStateWidget(
+      child: PopScope(
+        canPop: !isSearchActive && !_isSettingsOpen,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) {
+            return;
+          }
 
-        if (isSearchActive) {
-          _handleClearSearch();
-          return;
-        }
+          if (isSearchActive) {
+            _handleClearSearch();
+            return;
+          }
 
-        if (_isSettingsOpen) {
-          scaffoldKey.currentState!.closeDrawer();
-          return;
-        }
-      },
-      child: KeyboardListener(
-        focusNode: FocusNode(),
-        onKeyEvent: handleKeyEvent,
-        child: Scaffold(
-          key: scaffoldKey,
-          backgroundColor: colorScheme.backgroundBase,
-          drawer: Drawer(
-            width: 428,
+          if (_isSettingsOpen) {
+            scaffoldKey.currentState!.closeDrawer();
+            return;
+          }
+        },
+        child: KeyboardListener(
+          focusNode: FocusNode(),
+          onKeyEvent: handleKeyEvent,
+          child: Scaffold(
+            key: scaffoldKey,
             backgroundColor: colorScheme.backgroundBase,
-            child: _settingsPage,
-          ),
-          drawerEnableOpenDragGesture: !Platform.isAndroid,
-          onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-          appBar: CustomLockerAppBar(
-            scaffoldKey: scaffoldKey,
-            isSearchActive: isSearchActive,
-            searchController: searchController,
-            searchFocusNode: _searchFocusNode,
-            onSearchFocused: _handleSearchFocused,
-            onClearSearch: _handleClearSearch,
-            onSearchChanged: _handleSearchChange,
-          ),
-          body: _buildBody(),
-          floatingActionButton: isSearchActive
-              ? null
-              : FloatingActionButton(
-                  onPressed: _openSavePage,
-                  shape: const CircleBorder(),
-                  backgroundColor: colorScheme.primary700,
-                  child: const HugeIcon(
-                    icon: HugeIcons.strokeRoundedPlusSign,
-                    color: Colors.white,
+            drawer: Drawer(
+              width: 428,
+              backgroundColor: colorScheme.backgroundBase,
+              child: _settingsPage,
+            ),
+            drawerEnableOpenDragGesture: !Platform.isAndroid,
+            onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+            appBar: CustomLockerAppBar(
+              scaffoldKey: scaffoldKey,
+              isSearchActive: isSearchActive,
+              searchController: searchController,
+              searchFocusNode: _searchFocusNode,
+              onSearchFocused: _handleSearchFocused,
+              onClearSearch: _handleClearSearch,
+              onSearchChanged: _handleSearchChange,
+            ),
+            body: _buildBody(),
+            floatingActionButton: isSearchActive
+                ? null
+                : FloatingActionButton(
+                    onPressed: _openSavePage,
+                    shape: const CircleBorder(),
+                    backgroundColor: colorScheme.primary700,
+                    elevation: 0,
+                    child: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlusSign,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
+          ),
         ),
       ),
     );
@@ -629,79 +621,35 @@ class _HomePageState extends UploaderPageState<HomePage>
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final scrollBottomPadding =
-            MediaQuery.of(context).padding.bottom + 120.0;
+        final scrollBottomPadding = MediaQuery.of(context).padding.bottom + 120;
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 16.0,
-            bottom: scrollBottomPadding,
-          ),
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ..._buildCollectionSection(
-                  title: context.l10n.collections,
-                  collections: homeCollections,
-                  viewType: UISectionType.homeCollections,
+        return _recentFiles.isEmpty
+            ? const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: HomeEmptyStateWidget(),
                 ),
-                _buildRecentsSection(),
-              ],
-            ),
-          ),
-        );
+              )
+            : SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 32.0,
+                  bottom: scrollBottomPadding,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RecentsSectionWidget(
+                      collections: _filterOutUncategorized(_collections),
+                      recentFiles: _recentFiles,
+                    ),
+                  ],
+                ),
+              );
       },
     );
-  }
-
-  Widget _buildRecentsSection() {
-    if (_recentFiles.isEmpty) {
-      return const HomeEmptyStateWidget();
-    }
-    return RecentsSectionWidget(
-      collections: _filterOutUncategorized(_collections),
-      recentFiles: _recentFiles,
-    );
-  }
-
-  List<Widget> _buildCollectionSection({
-    required String title,
-    required List<Collection> collections,
-    required UISectionType viewType,
-  }) {
-    final colorScheme = getEnteColorScheme(context);
-    return [
-      SectionOptions(
-        SectionTitle(title: title),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => AllCollectionsPage(
-                viewType: viewType,
-                selectedCollections: _selectedCollections,
-              ),
-            ),
-          );
-        },
-        trailingWidget: IconButtonWidget(
-          icon: Icons.chevron_right,
-          iconButtonType: IconButtonType.secondary,
-          iconColor: colorScheme.textBase,
-        ),
-      ),
-      const SizedBox(height: 12),
-      CollectionFlexGridViewWidget(
-        collections: collections,
-      ),
-      const SizedBox(height: 24),
-    ];
   }
 
   void _openSavePage() {

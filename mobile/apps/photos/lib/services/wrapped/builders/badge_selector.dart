@@ -19,24 +19,9 @@ class WrappedBadgeSelector {
   static const String _kBadgeKeyPortraitPro = "portrait_pro";
   static const String _kBadgeKeyPeoplePerson = "people_person";
   static const String _kBadgeKeyGlobetrotter = "globetrotter";
-  static const String _kBadgeKeyPetParent = "pet_parent";
   static const String _kBadgeKeyMinimalist = "minimalist_shooter";
 
-  static const String _kPetGenericQuery =
-      "A portrait photo of a beloved pet at home";
-  static const Map<String, String> _kPetTypeQueries = <String, String>{
-    "cat": "A close-up photograph of a house cat",
-    "dog": "A close-up photograph of a pet dog",
-  };
-
-  static const double _kPetSimilarityThreshold = 0.24;
-
-  static Set<String> get requiredTextQueries {
-    return <String>{
-      _kPetGenericQuery,
-      ..._kPetTypeQueries.values,
-    };
-  }
+  static Set<String> get requiredTextQueries => const <String>{};
 
   static WrappedBadgeSelection select({
     required WrappedEngineContext context,
@@ -61,7 +46,6 @@ class WrappedBadgeSelector {
     addCandidate(_buildPortraitPro(metrics));
     addCandidate(_buildPeoplePerson(metrics));
     addCandidate(_buildGlobetrotter(metrics));
-    addCandidate(_buildPetParent(metrics));
     addCandidate(_buildMinimalist(metrics));
 
     if (candidates.isEmpty) {
@@ -103,11 +87,6 @@ class WrappedBadgeSelector {
     }).toList(growable: false)
           ..sort(
             (Map<String, Object?> a, Map<String, Object?> b) {
-              final int tierA = a["tier"] as int? ?? 1;
-              final int tierB = b["tier"] as int? ?? 1;
-              if (tierA != tierB) {
-                return tierA.compareTo(tierB);
-              }
               final double scoreA = (a["score"] as num?)?.toDouble() ?? 0;
               final double scoreB = (b["score"] as num?)?.toDouble() ?? 0;
               final int scoreCompare = scoreB.compareTo(scoreA);
@@ -138,9 +117,6 @@ class WrappedBadgeSelector {
   }
 
   static int _badgeComparator(_BadgeCandidate a, _BadgeCandidate b) {
-    if (a.tier != b.tier) {
-      return a.tier.compareTo(b.tier);
-    }
     final int scoreCompare = b.score.compareTo(a.score);
     if (scoreCompare != 0) {
       return scoreCompare;
@@ -160,13 +136,12 @@ class WrappedBadgeSelector {
   static _BadgeCandidate _buildConsistencyChamp(
     _BadgeComputationContext metrics,
   ) {
-    final double streakScore =
-        metrics.longestStreakDays <= 0 ? 0 : metrics.longestStreakDays / 14.0;
-    final double activeRatio = metrics.elapsedDays <= 0
+    final double streakScore = metrics.longestStreakDays <= 0
         ? 0
-        : metrics.daysWithCaptures / metrics.elapsedDays;
+        : metrics.longestStreakDays / 150.0;
+    final double activeRatio = metrics.daysWithCaptures / 365.0;
     final double score = _clamp01(
-      0.6 * _clamp01(streakScore) + 0.4 * _clamp01(activeRatio / 0.5),
+      0.5 * _clamp01(streakScore) + 0.5 * _clamp01(activeRatio),
     );
 
     final bool eligible = metrics.daysWithCaptures >= 15 &&
@@ -174,8 +149,8 @@ class WrappedBadgeSelector {
         metrics.totalCount > 0;
 
     final String subtitle = metrics.longestStreakDays > 0
-        ? "You're the consistency champ—${metrics.longestStreakDays} days without missing a beat."
-        : "You're the consistency champ—the lens stayed alive all year.";
+        ? "You're the consistency champ! ${metrics.longestStreakDays} days without missing a beat."
+        : "You're the consistency champ! The lens stayed alive all year.";
 
     final List<String> chips = <String>[
       "Active days: ${metrics.daysWithCaptures}",
@@ -196,7 +171,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: metrics.daysWithCaptures,
-      tier: 0,
       debugWhy:
           "Streak ${metrics.longestStreakDays}d, active ratio ${metrics.daysWithCaptures}/${metrics.elapsedDays}",
       extras: <String, Object?>{
@@ -219,7 +193,7 @@ class WrappedBadgeSelector {
     final int soloMoments = metrics.peopleStats.soloMoments;
     final double share =
         totalFaceMoments == 0 ? 0 : soloMoments / totalFaceMoments.toDouble();
-    final double score = _clamp01(share / 0.60);
+    final double score = _clamp01(share);
     final int soloPercent = _percentOf(share);
     final bool eligible =
         totalFaceMoments >= 20 && soloMoments >= 12 && score >= 0.5;
@@ -238,7 +212,7 @@ class WrappedBadgeSelector {
       name: "Portrait Pro",
       title: "Portrait Pro",
       subtitle:
-          "You're a portrait pro—$soloPercent% one-on-one moments captured.",
+          "You're a portrait pro! $soloPercent% one-on-one moments captured.",
       emoji: "🎯",
       gradientStart: "#B721FF",
       gradientEnd: "#21D4FD",
@@ -247,7 +221,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: soloMoments,
-      tier: 0,
       debugWhy: "Solo share $soloPercent% ($soloMoments/$totalFaceMoments)",
       extras: <String, Object?>{
         "soloMoments": soloMoments,
@@ -262,19 +235,21 @@ class WrappedBadgeSelector {
     if (!metrics.peopleStats.hasFaceMoments || metrics.totalCount <= 0) {
       return null;
     }
-    final int totalFaceMoments = metrics.peopleStats.totalFaceMoments;
-    if (totalFaceMoments <= 0) {
+    final int totalNamedMoments =
+        metrics.peopleStats.totalNamedFaceMoments;
+    if (totalNamedMoments <= 0) {
       return null;
     }
-    final double share = totalFaceMoments / metrics.totalCount.toDouble();
-    final double score = _clamp01(share / 0.50);
+    final double share =
+        totalNamedMoments / metrics.totalCount.toDouble();
+    final double score = _clamp01(share);
     final int percent = _percentOf(share);
 
-    final bool eligible =
-        metrics.totalCount >= 80 && totalFaceMoments >= 16 && score >= 0.45;
+    final bool eligible = metrics.totalCount >= 80 &&
+        totalNamedMoments >= 16 && score >= 0.30;
 
     final List<String> chips = <String>[
-      "Moments with people: $totalFaceMoments",
+      "Moments with people: $totalNamedMoments",
     ];
 
     final List<MediaRef> heroMedia = metrics.peopleStats.topNamedPeople
@@ -290,7 +265,7 @@ class WrappedBadgeSelector {
       name: "People Person",
       title: "People Person",
       subtitle:
-          "You're a people person—your crew lit up $percent% of your year.",
+          "You're a people person! Your crew lit up $percent% of your year.",
       emoji: "🤝",
       gradientStart: "#F857A6",
       gradientEnd: "#FF5858",
@@ -298,12 +273,11 @@ class WrappedBadgeSelector {
       detailChips: chips,
       score: score,
       eligible: eligible,
-      sampleSize: totalFaceMoments,
-      tier: 0,
+      sampleSize: totalNamedMoments,
       debugWhy:
-          "People coverage $percent% ($totalFaceMoments/${metrics.totalCount})",
+          "People coverage $percent% ($totalNamedMoments/${metrics.totalCount})",
       extras: <String, Object?>{
-        "totalFaceMoments": totalFaceMoments,
+        "totalNamedMoments": totalNamedMoments,
         "totalCount": metrics.totalCount,
       },
     );
@@ -323,21 +297,25 @@ class WrappedBadgeSelector {
       return null;
     }
 
-    final double score = _clamp01(
-      0.6 * _clamp01(uniqueCities / 5.0) +
-          0.4 * _clamp01(uniqueCountries / 3.0),
-    );
+    final int outsidePrimaryCount = placeStats.outsidePrimaryCountryCount;
+    final double outsideShare = metrics.totalCount == 0
+        ? 0
+        : outsidePrimaryCount / metrics.totalCount.toDouble();
+    final double score = _clamp01(outsideShare);
     final bool eligible = geoCount >= 40 &&
         (uniqueCities >= 3 || uniqueCountries >= 2) &&
-        score >= 0.45;
+        score >= 0.25;
 
     final int geoSharePercent =
         metrics.totalCount == 0 ? 0 : _percentOf(geoCount / metrics.totalCount);
+
+    final int awayPercent = _percentOf(outsideShare);
 
     final List<String> chips = <String>[
       "Cities: $uniqueCities",
       "Countries: $uniqueCountries",
       "Geotagged: $geoSharePercent%",
+      "Away from base: $awayPercent%",
     ];
 
     return _BadgeCandidate(
@@ -345,7 +323,7 @@ class WrappedBadgeSelector {
       name: "Globetrotter",
       title: "Globetrotter",
       subtitle:
-          "You're a globetrotter—$uniqueCities cities across $uniqueCountries countries this year.",
+          "You're a globetrotter! $uniqueCities cities across $uniqueCountries countries this year.",
       emoji: "🌍",
       gradientStart: "#00B09B",
       gradientEnd: "#96C93D",
@@ -354,9 +332,8 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: geoCount,
-      tier: 0,
       debugWhy:
-          "$uniqueCities cities, $uniqueCountries countries, share $geoSharePercent%",
+          "$uniqueCities cities, $uniqueCountries countries, outside share $awayPercent%",
       extras: <String, Object?>{
         "uniqueCities": uniqueCities,
         "uniqueCountries": uniqueCountries,
@@ -365,95 +342,23 @@ class WrappedBadgeSelector {
     );
   }
 
-  static _BadgeCandidate? _buildPetParent(
-    _BadgeComputationContext metrics,
-  ) {
-    if (!metrics.hasPetEmbedding || metrics.totalCount == 0) {
-      return null;
-    }
-
-    final int petMatches = metrics.petMatches;
-    final double share = metrics.totalCount == 0
-        ? 0
-        : petMatches / metrics.totalCount.toDouble();
-    final double score = _clamp01(share / 0.25);
-    final int percent = _percentOf(share);
-    final bool eligible = petMatches >= 6 && share >= 0.10;
-
-    if (!eligible) {
-      return _BadgeCandidate(
-        key: _kBadgeKeyPetParent,
-        name: "Pet Parent",
-        title: "Pet Parent",
-        subtitle:
-            "You're a pet parent—$percent% of your shots celebrate your pet.",
-        emoji: "🐾",
-        gradientStart: "#FAD961",
-        gradientEnd: "#F76B1C",
-        mediaRefs:
-            metrics.petSampleMedia.map(MediaRef.new).toList(growable: false),
-        detailChips: <String>[
-          "Pet portraits: $petMatches",
-        ],
-        score: score,
-        eligible: false,
-        sampleSize: petMatches,
-        tier: 0,
-        debugWhy: "Pet share $percent% ($petMatches/${metrics.totalCount})",
-        extras: <String, Object?>{
-          "petMatches": petMatches,
-          "petType": metrics.topPetType ?? "pet",
-        },
-      );
-    }
-
-    final String petType = metrics.topPetType ?? "pet";
-    final String subtitle =
-        "You're a pet parent—$petMatches portraits of your $petType stole the spotlight.";
-
-    return _BadgeCandidate(
-      key: _kBadgeKeyPetParent,
-      name: "Pet Parent",
-      title: "Pet Parent",
-      subtitle: subtitle,
-      emoji: "🐾",
-      gradientStart: "#FAD961",
-      gradientEnd: "#F76B1C",
-      mediaRefs:
-          metrics.petSampleMedia.map(MediaRef.new).toList(growable: false),
-      detailChips: <String>[
-        "Pets in $percent% of your shots",
-      ],
-      score: score,
-      eligible: eligible,
-      sampleSize: petMatches,
-      tier: 0,
-      debugWhy: "Pet share $percent% ($petMatches/${metrics.totalCount})",
-      extras: <String, Object?>{
-        "petMatches": petMatches,
-        "petType": petType,
-      },
-    );
-  }
-
   static _BadgeCandidate _buildMinimalist(
     _BadgeComputationContext metrics,
   ) {
-    final bool eligible = metrics.totalCount > 0 &&
-        metrics.totalCount <= 150 &&
-        metrics.daysWithCaptures >= 12;
+    final bool eligible = metrics.totalCount > 0;
 
     final double volumeScore =
         metrics.totalCount <= 0 ? 0 : 150 / metrics.totalCount;
-    final double activeRatio = metrics.elapsedDays <= 0
+    final double calmDaysRatio = metrics.elapsedDays <= 0
         ? 0
-        : metrics.daysWithCaptures / metrics.elapsedDays;
+        : (metrics.elapsedDays - metrics.daysWithCaptures) /
+            metrics.elapsedDays;
     final double score = _clamp01(
-      0.6 * _clamp01(volumeScore) + 0.4 * _clamp01(activeRatio / 0.5),
+      0.5 * _clamp01(volumeScore) + 0.5 * _clamp01(calmDaysRatio),
     );
 
     final String subtitle =
-        "You're a minimalist shooter—${metrics.totalCount} thoughtful frames over fluff.";
+        "You're a minimalist shooter! ${metrics.daysWithCaptures} intentful days behind the lens.";
     final List<String> chips = <String>[
       "Active days: ${metrics.daysWithCaptures}",
     ];
@@ -471,7 +376,6 @@ class WrappedBadgeSelector {
       score: score,
       eligible: eligible,
       sampleSize: metrics.totalCount,
-      tier: 0,
       debugWhy:
           "Total ${metrics.totalCount}, active days ${metrics.daysWithCaptures}",
       extras: <String, Object?>{
@@ -516,7 +420,6 @@ class _BadgeCandidate {
     required this.score,
     required this.eligible,
     required this.sampleSize,
-    required this.tier,
     required this.debugWhy,
     Map<String, Object?>? extras,
   })  : meta = <String, Object?>{
@@ -524,7 +427,6 @@ class _BadgeCandidate {
           "gradient": <String>[gradientStart, gradientEnd],
           "detailChips": detailChips,
           "score": score,
-          "tier": tier,
           "uploadedFileIDs": mediaRefs
               .map((MediaRef ref) => ref.uploadedFileID)
               .where((int id) => id > 0)
@@ -545,7 +447,6 @@ class _BadgeCandidate {
   final double score;
   final bool eligible;
   final int sampleSize;
-  final int tier;
   final String debugWhy;
   final Map<String, Object?> meta;
   final int deterministicTieBreaker;
@@ -556,7 +457,6 @@ class _BadgeCandidate {
       "name": name,
       "score": score,
       "eligible": eligible,
-      "tier": tier,
       "sampleSize": sampleSize,
       "debugWhy": debugWhy,
       "emoji": emoji,
@@ -579,10 +479,6 @@ class _BadgeComputationContext {
     required this.peopleStats,
     this.placesStats,
     required this.highlightMedia,
-    required this.petMatches,
-    required this.petSampleMedia,
-    required this.topPetType,
-    required this.hasPetEmbedding,
   });
 
   final int year;
@@ -593,10 +489,6 @@ class _BadgeComputationContext {
   final _PeopleDataset peopleStats;
   final _BadgePlaceStats? placesStats;
   final List<MediaRef> highlightMedia;
-  final int petMatches;
-  final List<int> petSampleMedia;
-  final String? topPetType;
-  final bool hasPetEmbedding;
 
   static _BadgeComputationContext fromEngineContext({
     required WrappedEngineContext context,
@@ -620,9 +512,6 @@ class _BadgeComputationContext {
     final _BadgePlaceStats? placeStats =
         placesDataset.totalCount > 0 ? _BadgePlaceStats(placesDataset) : null;
 
-    final _PetDetectionResult petDetection =
-        _PetDetectionResult.fromContext(context);
-
     return _BadgeComputationContext(
       year: context.year,
       totalCount: totalCount,
@@ -632,10 +521,6 @@ class _BadgeComputationContext {
       peopleStats: peopleDataset,
       placesStats: placeStats,
       highlightMedia: highlightIds.map(MediaRef.new).toList(growable: false),
-      petMatches: petDetection.matchCount,
-      petSampleMedia: petDetection.sampleIds,
-      topPetType: petDetection.topPetType,
-      hasPetEmbedding: petDetection.hasEmbeddings,
     );
   }
 
@@ -656,173 +541,87 @@ class _BadgeComputationContext {
 }
 
 class _BadgePlaceStats {
-  _BadgePlaceStats(_PlacesDataset dataset)
-      : totalCount = dataset.totalCount,
-        uniqueCities = dataset.cityClusters.length,
-        uniqueCountries = dataset.cityClusters
-            .map((_PlaceClusterSummary summary) => summary.label?.country)
-            .whereType<String>()
-            .toSet()
-            .length,
-        heroMedia = dataset.cityClusters
-            .expand(
-              (_PlaceClusterSummary cluster) =>
-                  cluster.sampleMediaIds(2, preferDistinctDays: true),
-            )
-            .take(6)
-            .toList(growable: false);
+  _BadgePlaceStats._({
+    required this.totalCount,
+    required this.uniqueCities,
+    required this.uniqueCountries,
+    required this.heroMedia,
+    required this.primaryCountryCount,
+    required this.outsidePrimaryCountryCount,
+  });
+
+  factory _BadgePlaceStats(_PlacesDataset dataset) {
+    final int totalCount = dataset.totalCount;
+    final List<_PlaceClusterSummary> cityClusters = dataset.cityClusters;
+    final int uniqueCities = cityClusters.length;
+    final int uniqueCountries = cityClusters
+        .map((_PlaceClusterSummary summary) => summary.label?.country)
+        .whereType<String>()
+        .toSet()
+        .length;
+    final List<int> heroMedia = cityClusters
+        .expand(
+          (_PlaceClusterSummary cluster) =>
+              cluster.sampleMediaIds(2, preferDistinctDays: true),
+        )
+        .take(6)
+        .toList(growable: false);
+
+    final int primaryCountryCount = _primaryCountryCaptureCount(
+      totalCount: totalCount,
+      clusters: cityClusters,
+    );
+    final int outsidePrimaryCountryCount =
+        math.max(totalCount - primaryCountryCount, 0);
+
+    return _BadgePlaceStats._(
+      totalCount: totalCount,
+      uniqueCities: uniqueCities,
+      uniqueCountries: uniqueCountries,
+      heroMedia: heroMedia,
+      primaryCountryCount: primaryCountryCount,
+      outsidePrimaryCountryCount: outsidePrimaryCountryCount,
+    );
+  }
+
+  static int _primaryCountryCaptureCount({
+    required int totalCount,
+    required List<_PlaceClusterSummary> clusters,
+  }) {
+    if (totalCount <= 0) {
+      return 0;
+    }
+    if (clusters.isEmpty) {
+      return totalCount;
+    }
+    final Map<String, int> histogram = <String, int>{};
+    int accounted = 0;
+    for (final _PlaceClusterSummary cluster in clusters) {
+      final String countryKey;
+      final String? labelCountry = cluster.label?.country;
+      if (labelCountry == null || labelCountry.trim().isEmpty) {
+        countryKey = "_unknown";
+      } else {
+        countryKey = labelCountry;
+      }
+      histogram[countryKey] = (histogram[countryKey] ?? 0) + cluster.totalCount;
+      accounted += cluster.totalCount;
+    }
+    final int uncovered = math.max(totalCount - accounted, 0);
+    if (uncovered > 0) {
+      histogram["_unknown"] = (histogram["_unknown"] ?? 0) + uncovered;
+    }
+    return histogram.values.isEmpty
+        ? totalCount
+        : histogram.values.reduce(math.max);
+  }
 
   final int totalCount;
   final int uniqueCities;
   final int uniqueCountries;
   final List<int> heroMedia;
-}
-
-class _PetDetectionResult {
-  _PetDetectionResult({
-    required this.matchCount,
-    required this.sampleIds,
-    required this.topPetType,
-    required this.hasEmbeddings,
-  });
-
-  final int matchCount;
-  final List<int> sampleIds;
-  final String? topPetType;
-  final bool hasEmbeddings;
-
-  static _PetDetectionResult fromContext(WrappedEngineContext context) {
-    if (context.aesthetics.clipEmbeddings.isEmpty ||
-        !context.aesthetics.textEmbeddings.containsKey(
-          WrappedBadgeSelector._kPetGenericQuery,
-        )) {
-      return _PetDetectionResult(
-        matchCount: 0,
-        sampleIds: const <int>[],
-        topPetType: null,
-        hasEmbeddings: false,
-      );
-    }
-
-    final Map<int, List<double>> clipEmbeddings =
-        context.aesthetics.clipEmbeddings;
-    final Map<String, List<double>> textEmbeddings =
-        context.aesthetics.textEmbeddings;
-
-    final _Embedding petEmbedding = _Embedding.fromList(
-      textEmbeddings[WrappedBadgeSelector._kPetGenericQuery]!,
-    );
-
-    final Map<int, double> scores = <int, double>{};
-
-    clipEmbeddings.forEach((int fileID, List<double> vector) {
-      final _Embedding imageEmbedding = _Embedding.fromList(vector);
-      if (!imageEmbedding.isValid) {
-        return;
-      }
-      final double similarity = _Embedding.cosine(imageEmbedding, petEmbedding);
-      if (similarity >= WrappedBadgeSelector._kPetSimilarityThreshold) {
-        scores[fileID] = similarity;
-      }
-    });
-
-    if (scores.isEmpty) {
-      return _PetDetectionResult(
-        matchCount: 0,
-        sampleIds: const <int>[],
-        topPetType: null,
-        hasEmbeddings: true,
-      );
-    }
-
-    final Map<String, int> petTypeCounts = <String, int>{};
-    WrappedBadgeSelector._kPetTypeQueries.forEach(
-      (String type, String query) {
-        final List<double>? embedding = textEmbeddings[query];
-        if (embedding == null || embedding.isEmpty) {
-          return;
-        }
-        final _Embedding typeEmbedding = _Embedding.fromList(embedding);
-        int count = 0;
-        scores.forEach((int fileID, double _) {
-          final List<double>? imageVector = clipEmbeddings[fileID];
-          if (imageVector == null) {
-            return;
-          }
-          final _Embedding imageEmbedding = _Embedding.fromList(imageVector);
-          if (!imageEmbedding.isValid) {
-            return;
-          }
-          final double similarity =
-              _Embedding.cosine(imageEmbedding, typeEmbedding);
-          if (similarity >= WrappedBadgeSelector._kPetSimilarityThreshold) {
-            count += 1;
-          }
-        });
-        petTypeCounts[type] = count;
-      },
-    );
-
-    String? topPetType;
-    if (petTypeCounts.isNotEmpty) {
-      topPetType = petTypeCounts.entries
-          .reduce(
-            (MapEntry<String, int> a, MapEntry<String, int> b) =>
-                a.value >= b.value ? a : b,
-          )
-          .key;
-    }
-
-    final List<MapEntry<int, double>> sortedEntries = scores.entries.toList()
-      ..sort(
-        (MapEntry<int, double> a, MapEntry<int, double> b) =>
-            b.value.compareTo(a.value),
-      );
-
-    final List<int> sampleIds = sortedEntries
-        .map((MapEntry<int, double> entry) => entry.key)
-        .take(6)
-        .toList(growable: false);
-
-    return _PetDetectionResult(
-      matchCount: scores.length,
-      sampleIds: sampleIds,
-      topPetType: topPetType,
-      hasEmbeddings: true,
-    );
-  }
-}
-
-class _Embedding {
-  _Embedding(this.vector, this.norm);
-
-  final Float32List vector;
-  final double norm;
-
-  bool get isValid => norm > 0 && vector.isNotEmpty;
-
-  factory _Embedding.fromList(List<double> values) {
-    final Float32List data = Float32List.fromList(values);
-    double sum = 0;
-    for (final double value in values) {
-      sum += value * value;
-    }
-    final double norm = sum <= 0 ? 0 : math.sqrt(sum);
-    return _Embedding(data, norm);
-  }
-
-  static double cosine(_Embedding a, _Embedding b) {
-    final int length = math.min(a.vector.length, b.vector.length);
-    double dot = 0;
-    for (int index = 0; index < length; index += 1) {
-      dot += a.vector[index] * b.vector[index];
-    }
-    final double denom = a.norm * b.norm;
-    if (denom <= 0) {
-      return 0;
-    }
-    return dot / denom;
-  }
+  final int primaryCountryCount;
+  final int outsidePrimaryCountryCount;
 }
 
 int _stableHash(String input) {

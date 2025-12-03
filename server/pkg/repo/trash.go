@@ -33,11 +33,11 @@ type FileWithUpdatedAt struct {
 }
 
 type TrashRepository struct {
-	DB           *sql.DB
-	ObjectRepo   *ObjectRepository
-	FileRepo     *FileRepository
-	QueueRepo    *QueueRepository
-	FileLinkRepo *public.FileLinkRepository
+    DB           *sql.DB
+    ObjectRepo   *ObjectRepository
+    FileRepo     *FileRepository
+    QueueRepo    *QueueRepository
+    FileLinkRepo *public.FileLinkRepository
 }
 
 func (t *TrashRepository) InsertItems(ctx context.Context, tx *sql.Tx, userID int64, items []ente.TrashItemRequest) error {
@@ -100,18 +100,20 @@ func (t *TrashRepository) GetDiff(userID int64, sinceTime int64, limit int, app 
 	return convertRowsToTrash(rows)
 }
 
-func (t *TrashRepository) GetFilesWithVersion(userID int64, updateAtTime int64) ([]ente.Trash, error) {
+func (t *TrashRepository) GetFilesWithVersion(userID int64, updateAtTime int64, app ente.App) ([]ente.Trash, error) {
 	rows, err := t.DB.Query(`
-		SELECT t.file_id, t.user_id, t.collection_id, cf.encrypted_key, cf.key_decryption_nonce, 
-		       f.file_decryption_header, f.thumbnail_decryption_header, f.metadata_decryption_header, 
+		SELECT t.file_id, t.user_id, t.collection_id, cf.encrypted_key, cf.key_decryption_nonce,
+		       f.file_decryption_header, f.thumbnail_decryption_header, f.metadata_decryption_header,
 		       f.encrypted_metadata, f.magic_metadata, f.pub_magic_metadata, f.updation_time, f.info,
 		       t.is_deleted, t.is_restored, t.created_at, t.updated_at, t.delete_by
-		FROM trash t 
+		FROM trash t
 		    JOIN collection_files cf ON t.file_id = cf.file_id AND t.collection_id = cf.collection_id
 		    JOIN files f ON  f.file_id = t.file_id
 		                         AND t.user_id = $1
-		                         AND t.updated_at = $2`,
-		userID, updateAtTime)
+		                         AND t.updated_at = $2
+		    JOIN collections c ON c.collection_id = t.collection_id
+		WHERE c.app = $3`,
+		userID, updateAtTime, app)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -320,17 +322,18 @@ func (t *TrashRepository) verifyFilesAreDeleted(ctx context.Context, userID int6
 
 // GetFilesIDsForDeletion for given userID and lastUpdateAt timestamp, returns the fileIDs which are in trash and
 // where last updated_at before lastUpdateAt timestamp.
-func (t *TrashRepository) GetFilesIDsForDeletion(userID int64, lastUpdatedAt int64) ([]int64, error) {
-	rows, err := t.DB.Query(`SELECT file_id FROM trash 
-			WHERE user_id = $1 AND updated_at <= $2 AND is_deleted = FALSE AND is_restored = FALSE`, userID, lastUpdatedAt)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	fileIDs, err := convertRowsToFileId(rows)
-	if err != nil {
-		return nil, stacktrace.Propagate(err, "")
-	}
-	return fileIDs, nil
+func (t *TrashRepository) GetFilesIDsForDeletion(userID int64, lastUpdatedAt int64, app ente.App) ([]int64, error) {
+    rows, err := t.DB.Query(`SELECT t.file_id FROM trash t
+                JOIN collections c ON c.collection_id = t.collection_id
+                WHERE t.user_id = $1 AND t.updated_at <= $2 AND t.is_deleted = FALSE AND t.is_restored = FALSE AND c.app = $3`, userID, lastUpdatedAt, app)
+    if err != nil {
+        return nil, stacktrace.Propagate(err, "")
+    }
+    fileIDs, err := convertRowsToFileId(rows)
+    if err != nil {
+        return nil, stacktrace.Propagate(err, "")
+    }
+    return fileIDs, nil
 }
 
 // GetTimeStampForLatestNonDeletedEntry returns the updated at timestamp for the latest,non-deleted entry in the trash
@@ -441,9 +444,13 @@ order by updated_at ASC limit $2
 	return fileWithUpdatedAt[0 : i+1], nil
 }
 
-func (t *TrashRepository) EmptyTrash(ctx context.Context, userID int64, lastUpdatedAt int64) error {
-	itemID := fmt.Sprintf("%d%s%d", userID, EmptyTrashQueueItemSeparator, lastUpdatedAt)
-	return t.QueueRepo.InsertItem(ctx, TrashEmptyQueue, itemID)
+func (t *TrashRepository) EmptyTrash(ctx context.Context, userID int64, lastUpdatedAt int64, app ente.App) error {
+    itemID := fmt.Sprintf("%d%s%d", userID, EmptyTrashQueueItemSeparator, lastUpdatedAt)
+    queueName := TrashEmptyQueue
+    if app == ente.Locker {
+        queueName = TrashEmptyLockerQueue
+    }
+    return t.QueueRepo.InsertItem(ctx, queueName, itemID)
 }
 
 func (t *TrashRepository) GetTrashUpdatedAt(userID int64) (int64, error) {

@@ -207,6 +207,12 @@ var ErrLockerRegistrationDisabled = &ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLockerRollOutLimit = &ApiError{
+	Code:           LockerRolloutLimit,
+	Message:        "Sorry, locker registration is paused temporarily, please try again later",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 type ErrorCode string
 
 const (
@@ -240,6 +246,8 @@ const (
 
 	// LockerRegistrationDisabled indicates that locker registration is currently disabled
 	LockerRegistrationDisabled ErrorCode = "LOCKER_REGISTRATION_DISABLED"
+
+	LockerRolloutLimit ErrorCode = "LOCKER_ROLLOUT_LIMIT"
 
 	// FileLimitReached indicates the user hit the maximum number of files allowed
 	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"

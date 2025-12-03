@@ -306,7 +306,7 @@
   "share": "Share",
   "shareLink": "Share link",
   "creatingShareLink": "Creating link...",
-  "shareThisLink": "Anyone with this link can access your item.",
+  "shareThisLink": "This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.",
   "copyLink": "Copy link",
   "deleteLink": "Delete link",
   "close": "Close",
@@ -359,6 +359,10 @@
   "suggestFeatures": "Suggest features",
   "reportABug": "Report a bug",
   "reportBug": "Report bug",
+  "logsDialogBodyLocker": "This will send logs to help us debug your issue.",
+  "@logsDialogBodyLocker": {
+    "description": "Dialog body text for sending logs in Locker app (without file name warning)"
+  },
   "social": "Social",
   "rateUsOnStore": "Rate us on {storeName}",
   "blog": "Blog",
@@ -594,6 +598,34 @@
   "legacy": "Legacy",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "uploadError": "Upload error",
+  "uploadStorageLimitErrorTitle": "Storage limit reached",
+  "@uploadStorageLimitErrorTitle": {
+    "description": "Title shown when uploads fail due to running out of storage"
+  },
+  "uploadStorageLimitErrorBody": "You've run out of storage space. Free up space to continue uploading.",
+  "@uploadStorageLimitErrorBody": {
+    "description": "Body shown when uploads fail due to running out of storage"
+  },
+  "uploadFileCountLimitErrorTitle": "File limit reached",
+  "@uploadFileCountLimitErrorTitle": {
+    "description": "Title shown when uploads fail because the locker already has the maximum file count"
+  },
+  "uploadFileCountLimitErrorBody": "You've reached your file limit. Upgrade to a paid plan for more storage.",
+  "@uploadFileCountLimitErrorBody": {
+    "description": "Body shown when uploads fail because the locker already has the maximum file count"
+  },
+  "uploadFileCountLimitErrorToast": "Action failed. You've reached your file limit.",
+  "@uploadFileCountLimitErrorToast": {
+    "description": "Toast shown when info items fail to save due to hitting the file count limit"
+  },
+  "uploadFileTooLargeErrorTitle": "File too large",
+  "@uploadFileTooLargeErrorTitle": {
+    "description": "Title shown when uploads fail because the file exceeds the supported size"
+  },
+  "uploadFileTooLargeErrorBody": "This file is larger than the maximum supported upload size of 10GB.",
+  "@uploadFileTooLargeErrorBody": {
+    "description": "Body shown when uploads fail because the file exceeds the supported size"
+  },
   "tryAdjustingYourSearchQuery": "Try adjusting your search query",
   "noFilesFoundForQuery": "No items found for \"{query}\"",
   "@noFilesFoundForQuery": {
@@ -718,8 +750,8 @@
   },
   "locker": "Locker",
   "loginToEnteAccount": "Log in to your Ente account",
-  "unlockLockerPaidPlanTitle": "Coming soon!",
-  "unlockLockerPaidPlanBody": "Locker is currently available only to paid customers of Ente Photos.",
+  "unlockLockerNewUserTitle": "Join Ente to use Locker",
+  "unlockLockerNewUserBody": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
   "checkoutEntePhotos": "Checkout Ente Photos",
   "okay": "Okay",
   "noAccountCta": "I don't have an account",

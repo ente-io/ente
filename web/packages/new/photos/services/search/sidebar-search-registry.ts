@@ -1,5 +1,6 @@
 import { isDesktop } from "ente-base/app";
 import { isHLSGenerationSupported } from "ente-gallery/services/video";
+import { wait } from "ente-utils/promise";
 import { t } from "i18next";
 import { isMLSupported } from "../ml";
 import { isDevBuildAndUser } from "../settings";
@@ -54,7 +55,13 @@ const sidebarActions = (): SidebarAction[] => {
             id: "account.subscription",
             label: t("subscription"),
             path: [accountCategory, t("subscription")],
-            keywords: ["subscription", "plan", "upgrade", "billing"],
+            keywords: [
+                "subscription",
+                "plan",
+                "upgrade",
+                "billing",
+                "pricings",
+            ],
         },
         {
             id: "shortcuts.uncategorized",
@@ -116,12 +123,7 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("export_data"),
             path: [preferencesCategory, t("export_data")],
             keywords: ["export", "download"],
-        },
-        {
-            id: "utility.logout",
-            label: t("logout"),
-            path: [preferencesCategory, t("logout")],
-            keywords: ["sign out", "signout"],
+            available: () => isDesktop,
         },
         {
             id: "account.recoveryKey",
@@ -134,6 +136,12 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("two_factor"),
             path: [accountCategory, t("two_factor")],
             keywords: ["2fa", "otp", "mfa", "two", "factor", "two factor"],
+        },
+        {
+            id: "account.twoFactor.reconfigure",
+            label: t("reconfigure"),
+            path: [accountCategory, t("two_factor"), t("reconfigure")],
+            keywords: ["reconfigure", "update", "2fa", "two factor"],
         },
         {
             id: "account.passkeys",
@@ -158,6 +166,12 @@ const sidebarActions = (): SidebarAction[] => {
             label: t("delete_account"),
             path: [accountCategory, t("delete_account")],
             keywords: ["delete", "remove"],
+        },
+        {
+            id: "account.sessions",
+            label: t("active_sessions"),
+            path: [accountCategory, t("active_sessions")],
+            keywords: ["sessions", "devices", "logout"],
         },
         {
             id: "preferences.language",
@@ -257,6 +271,12 @@ const sidebarActions = (): SidebarAction[] => {
             keywords: ["test", "upload"],
             available: () => isDevBuildAndUser(),
         },
+        {
+            id: "utility.logout",
+            label: t("logout"),
+            path: [preferencesCategory, t("logout")],
+            keywords: ["sign out", "signout"],
+        },
     ];
 };
 
@@ -292,9 +312,13 @@ export const performSidebarAction = async (
                 .onShowCollectionSummary(ctx.pseudoIDs.archive, false)
                 .then(() => ctx.onClose());
         case "shortcuts.hidden":
-            return ctx
-                .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
-                .then(() => ctx.onClose());
+            return (
+                ctx
+                    .onShowCollectionSummary(ctx.pseudoIDs.hidden, true)
+                    // See: [Note: Workarounds for unactionable ARIA warnings]
+                    .then(() => wait(10))
+                    .then(() => ctx.onClose())
+            );
         case "shortcuts.trash":
             return ctx
                 .onShowCollectionSummary(ctx.pseudoIDs.trash, false)
@@ -330,10 +354,12 @@ export const performSidebarAction = async (
 
         case "account.recoveryKey":
         case "account.twoFactor":
+        case "account.twoFactor.reconfigure":
         case "account.passkeys":
         case "account.changePassword":
         case "account.changeEmail":
         case "account.deleteAccount":
+        case "account.sessions":
             ctx.setPendingAccountAction(actionID);
             ctx.showAccount();
             return Promise.resolve();
@@ -373,12 +399,26 @@ const matchesSearch = (
     path: string[],
     keywords: string[] = [],
 ) => {
+    const searchVariants = getSearchVariants(normalized);
     const haystack = [label, ...path, ...keywords]
         .filter(Boolean)
         .map((s) => s.toLowerCase());
 
-    const re = new RegExp("(^|[\\s.,!?\"'-_])" + escapeRegex(normalized));
+    const re = new RegExp(
+        "(^|[\\s.,!?\"'-_])(" +
+            searchVariants.map((s) => escapeRegex(s)).join("|") +
+            ")",
+    );
     return haystack.some((h) => re.test(h));
+};
+
+const getSearchVariants = (search: string) => {
+    const variants = new Set<string>([search]);
+    if (search.endsWith("ies")) variants.add(search.slice(0, -3) + "y");
+    if (search.endsWith("es")) variants.add(search.slice(0, -2));
+    if (search.endsWith("s")) variants.add(search.slice(0, -1));
+
+    return [...variants].filter((v) => v.length > 1);
 };
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

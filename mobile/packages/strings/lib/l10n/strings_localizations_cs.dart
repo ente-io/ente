@@ -137,6 +137,9 @@ class StringsLocalizationsCs extends StringsLocalizations {
   String get enterPassword => 'Zadejte heslo';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'Zadejte své heslo';
 
   @override
@@ -507,6 +510,9 @@ class StringsLocalizationsCs extends StringsLocalizations {
   String get enterPin => 'Zadejte PIN';
 
   @override
+  String get enterAppLockPin => 'Enter app lock PIN';
+
+  @override
   String get setNewPin => 'Nadra';
 
   @override
@@ -806,4 +812,8 @@ class StringsLocalizationsCs extends StringsLocalizations {
 
   @override
   String get inviteToEnte => 'Invite to Ente';
+
+  @override
+  String get lockerExistingUserRequired =>
+      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
 }
