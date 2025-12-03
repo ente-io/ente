@@ -1145,14 +1145,31 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
 
   Future<void> _initBackgroundMusic() async {
     if (_musicInitializationFuture != null) {
+      _logger.fine("Music init already in progress, reusing existing future");
       return _musicInitializationFuture!;
     }
+    _logger.info("Starting music initialization");
     final Future<void> initFuture = _performBackgroundMusicInit();
     _musicInitializationFuture = initFuture;
     try {
       await initFuture;
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "Unhandled error during music initialization wrapper",
+        error,
+        stackTrace,
+      );
+      _musicLoadFailed = true;
+      if (mounted) {
+        setState(() {
+          _isMusicReady = false;
+        });
+      } else {
+        _isMusicReady = false;
+      }
     } finally {
       if (identical(_musicInitializationFuture, initFuture)) {
+        _logger.fine("Music initialization future completed");
         _musicInitializationFuture = null;
       }
     }
@@ -1161,22 +1178,27 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   Future<void> _performBackgroundMusicInit() async {
     _musicLoadFailed = false;
     try {
+      _logger.fine("Configuring audio session for music");
       await _ensureAudioSessionConfigured();
       const String assetPath = "assets/ente_rewind_2025_music.mp3";
+      _logger.fine("Setting music asset: $assetPath");
       await _audioPlayer.setAsset(
         assetPath,
         preload: true,
       );
+      _logger.fine("Music asset loaded, configuring player");
       await _audioPlayer.setLoopMode(LoopMode.one);
       await _audioPlayer.setShuffleModeEnabled(false);
       await _audioPlayer.setVolume(1.0);
       await _audioPlayer.seek(Duration.zero);
+      _logger.fine("Music player primed; marking ready");
       if (!mounted) {
         return;
       }
       setState(() {
         _isMusicReady = true;
       });
+      _logger.info("Music ready; attempting initial resume");
       await _resumeMusic();
     } catch (error, stackTrace) {
       _musicLoadFailed = true;
@@ -1197,6 +1219,11 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   void _handlePlayerState(PlayerState state) {
+    _logger.finer(
+      "Player state update: processing=${state.processingState} "
+      "playing=${state.playing} ready=$_isMusicReady failed=$_musicLoadFailed "
+      "muted=$_isMusicMuted closing=$_isClosing cards=${_cards.length}",
+    );
     if (_musicLoadFailed || !_isMusicReady) {
       return;
     }
@@ -1229,6 +1256,9 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _pauseMusic() async {
+    _logger.fine(
+      "Pausing music (ready=$_isMusicReady playing=${_audioPlayer.playing})",
+    );
     if (!_isMusicReady) {
       _updateMusicPlaying(false);
       return;
@@ -1249,11 +1279,16 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _resumeMusic() async {
+    _logger.fine(
+      "Resuming music (ready=$_isMusicReady muted=$_isMusicMuted "
+      "cards=${_cards.length})",
+    );
     if (!_isMusicReady || _isMusicMuted || _cards.isEmpty) {
       _updateMusicPlaying(false);
       return;
     }
     try {
+      _logger.finer("Calling audioPlayer.play()");
       final Future<void> playFuture = _audioPlayer.play();
       unawaited(
         playFuture.catchError(
@@ -1279,6 +1314,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   void _syncMusicPlayback() {
+    _logger.finer(
+      "Sync music playback (ready=$_isMusicReady muted=$_isMusicMuted "
+      "cards=${_cards.length})",
+    );
     if (!_isMusicReady || _isMusicMuted || _cards.isEmpty) {
       unawaited(_pauseMusic());
       return;
@@ -1287,6 +1326,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _fadeOutAndStopMusic() async {
+    _logger.fine(
+      "Fading out and stopping music (ready=$_isMusicReady "
+      "failed=$_musicLoadFailed playing=${_audioPlayer.playing})",
+    );
     if (_musicLoadFailed || !_isMusicReady) {
       await _pauseMusic();
       return;
@@ -1337,6 +1380,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<void> _handleMusicToggle() async {
+    _logger.fine(
+      "Music toggle pressed (ready=$_isMusicReady failed=$_musicLoadFailed "
+      "muted=$_isMusicMuted playing=$_isMusicPlaying)",
+    );
     if (_musicLoadFailed) {
       final bool retrySucceeded = await _retryMusicInitialization();
       if (!retrySucceeded && mounted) {
@@ -1362,6 +1409,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
   }
 
   Future<bool> _retryMusicInitialization() async {
+    _logger.info("Retrying music initialization");
     if (mounted) {
       setState(() {
         _isMusicMuted = false;
@@ -1370,10 +1418,17 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
       _isMusicMuted = false;
     }
     await _initBackgroundMusic();
+    _logger.info(
+      "Music retry result: ready=$_isMusicReady failed=$_musicLoadFailed",
+    );
     return !_musicLoadFailed && _isMusicReady;
   }
 
   void _updateMusicPlaying(bool value) {
+    _logger.finer(
+      "Update music playing from $_isMusicPlaying to $value "
+      "(ready=$_isMusicReady muted=$_isMusicMuted failed=$_musicLoadFailed)",
+    );
     if (_isMusicPlaying == value) {
       return;
     }
@@ -1388,12 +1443,15 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
 
   Future<void> _ensureAudioSessionConfigured() async {
     if (_audioSessionConfigured) {
+      _logger.fine("Audio session already configured; skipping");
       return;
     }
     try {
+      _logger.fine("Configuring audio session via audio_session");
       final AudioSession session = await AudioSession.instance;
       await session.configure(const AudioSessionConfiguration.music());
       _audioSessionConfigured = true;
+      _logger.info("Audio session configured for music");
     } catch (error, stackTrace) {
       _logger.fine(
         "Failed to configure audio session for Ente Rewind music",
