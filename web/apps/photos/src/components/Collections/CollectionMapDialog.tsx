@@ -795,6 +795,9 @@ function CollectionSidebar({
     onPhotoClick,
     onClose,
 }: CollectionSidebarProps) {
+    const [isCoverHidden, setIsCoverHidden] = useState(false);
+    const coverRef = useRef<HTMLDivElement>(null);
+
     // Get the first photo's thumbnail as the cover image
     const coverImageUrl = useMemo(() => {
         if (!mapPhotos.length) return undefined;
@@ -808,6 +811,47 @@ function CollectionSidebar({
         if (!firstPhoto) return undefined;
         return thumbByFileID.get(firstPhoto.fileId) ?? firstPhoto.image;
     }, [mapPhotos, thumbByFileID]);
+
+    // Calculate cover stats for the sticky header
+    const coverStats = useMemo(() => {
+        if (!mapPhotos.length) return null;
+
+        const sortedData = [...mapPhotos].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        const lastData = sortedData[sortedData.length - 1];
+        if (!firstData || !lastData) return null;
+
+        const firstDate = new Date(firstData.timestamp);
+        const lastDate = new Date(lastData.timestamp);
+        const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const monthYear = firstDate.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+        });
+
+        return { monthYear, diffDays };
+    }, [mapPhotos]);
+
+    // Detect when cover scrolls out of view
+    useEffect(() => {
+        const cover = coverRef.current;
+        if (!cover) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsCoverHidden(entry ? !entry.isIntersecting : false);
+            },
+            { threshold: 0 },
+        );
+
+        observer.observe(cover);
+        return () => observer.disconnect();
+    }, []);
 
     return (
         <Box
@@ -848,13 +892,60 @@ function CollectionSidebar({
                     `${theme.palette.divider} transparent`,
             }}
         >
-            <MapCover
-                name={collectionSummary.name}
-                mapPhotos={mapPhotos}
-                coverImageUrl={coverImageUrl}
-                visibleCount={visibleCount}
-                onClose={onClose}
-            />
+            <Box ref={coverRef}>
+                <MapCover
+                    name={collectionSummary.name}
+                    mapPhotos={mapPhotos}
+                    coverImageUrl={coverImageUrl}
+                    visibleCount={visibleCount}
+                    onClose={onClose}
+                />
+            </Box>
+
+            {/* Sticky header that appears when cover is scrolled out */}
+            <Box
+                sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10,
+                    bgcolor: (theme) => theme.vars.palette.background.paper,
+                    px: { xs: "24px", md: "32px" },
+                    pt: isCoverHidden ? 3.5 : 0,
+                    pb: isCoverHidden ? 2 : 0,
+                    display: isCoverHidden ? "flex" : "none",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderBottom: (theme) =>
+                        `1px solid ${theme.palette.divider}`,
+                }}
+            >
+                <Stack spacing={0.25}>
+                    <Typography
+                        variant="body"
+                        sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                        noWrap
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                    <Typography variant="small" color="text.secondary">
+                        {coverStats
+                            ? `${coverStats.monthYear} • ${coverStats.diffDays} days • ${visibleCount} memories`
+                            : `${visibleCount} memories`}
+                    </Typography>
+                </Stack>
+                <IconButton
+                    aria-label="Close"
+                    onClick={onClose}
+                    size="small"
+                    sx={{
+                        ml: 1,
+                        bgcolor: (theme) => theme.vars.palette.fill.faint,
+                    }}
+                >
+                    <CloseIcon fontSize="small" />
+                </IconButton>
+            </Box>
+
             <Box
                 sx={{
                     px: { xs: "24px", md: "32px" },
@@ -867,6 +958,7 @@ function CollectionSidebar({
                     visiblePhotoOrder={visiblePhotoOrder}
                     visiblePhotosWave={visiblePhotosWave}
                     onPhotoClick={onPhotoClick}
+                    stickyHeaderVisible={isCoverHidden}
                 />
             </Box>
         </Box>
@@ -879,6 +971,7 @@ interface PhotoListProps {
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
+    stickyHeaderVisible: boolean;
 }
 
 function PhotoList({
@@ -887,6 +980,7 @@ function PhotoList({
     visiblePhotoOrder,
     visiblePhotosWave,
     onPhotoClick,
+    stickyHeaderVisible,
 }: PhotoListProps) {
     if (!photoGroups.length) {
         return (
@@ -916,6 +1010,7 @@ function PhotoList({
                     visiblePhotoOrder={visiblePhotoOrder}
                     visiblePhotosWave={visiblePhotosWave}
                     onPhotoClick={onPhotoClick}
+                    stickyHeaderVisible={stickyHeaderVisible}
                 />
             ))}
         </Stack>
@@ -929,6 +1024,7 @@ interface PhotoDateGroupProps {
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
+    stickyHeaderVisible: boolean;
 }
 
 function PhotoDateGroup({
@@ -938,6 +1034,7 @@ function PhotoDateGroup({
     visiblePhotoOrder,
     visiblePhotosWave,
     onPhotoClick,
+    stickyHeaderVisible,
 }: PhotoDateGroupProps) {
     const [isStuck, setIsStuck] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -958,6 +1055,9 @@ function PhotoDateGroup({
         return () => observer.disconnect();
     }, []);
 
+    // Offset for sticky header when visible
+    const topOffset = stickyHeaderVisible ? "72px" : 0;
+
     return (
         <Stack spacing={0.75}>
             {/* Sentinel element to detect when sticky kicks in */}
@@ -965,7 +1065,7 @@ function PhotoDateGroup({
             <Box
                 sx={{
                     position: "sticky",
-                    top: 0,
+                    top: topOffset,
                     bgcolor: (theme) => theme.vars.palette.background.paper,
                     zIndex: 2,
                     pt: isStuck ? 3 : 1.5,
@@ -973,7 +1073,7 @@ function PhotoDateGroup({
                     ml: { xs: "-24px", md: "-32px" },
                     mr: { xs: "-24px", md: "-32px" },
                     px: { xs: "0", md: "0" },
-                    transition: "padding 0.15s ease-out",
+                    transition: "padding 0.15s ease-out, top 0.2s ease-out",
                 }}
             >
                 <Typography variant="small" color="text.secondary">
