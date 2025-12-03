@@ -16,8 +16,8 @@
 ┌───────────────────────────┐ ┌───────────────────────────┐ ┌────────────────────────┐
 │  mobile/packages/rust/    │ │   web/packages/wasm/      │ │      rust/cli/         │
 │    (ente_rust crate)      │ │    (ente-wasm crate)      │ │                        │
-│                           │ │                           │ │  (future: when CLI     │
-│  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │   uses ente-core)      │
+│                           │ │                           │ │  CLI binary, depends   │
+│  Shared #[frb] wrappers   │ │  #[wasm_bindgen] wrappers │ │  on ente-core          │
 │  for all mobile apps      │ │  for all web apps         │ │                        │
 └───────────────────────────┘ └───────────────────────────┘ └────────────────────────┘
          │    │                            │
@@ -42,9 +42,11 @@
 
 ```
 rust/
-├── src/                    # Existing CLI code (untouched until later)
-│   └── main.rs
-├── Cargo.toml              # Existing CLI Cargo.toml
+├── cli/                    # CLI package
+│   ├── src/
+│   │   └── main.rs
+│   ├── Cargo.toml
+│   └── Cargo.lock
 │
 └── core/                   # Pure Rust business logic
     ├── src/
@@ -169,12 +171,13 @@ flutter test
 
 ### CLI Migration
 
-When CLI should use ente-core:
+A WIP CLI lives in `rust/cli/` and depends on ente-core via path dependency.
 
-1. Move `rust/src/` → `rust/cli/`
-2. Create workspace `Cargo.toml` at `rust/`
-3. CLI depends on ente-core
-4. Gradually replace CLI's own implementations with ente-core calls
+Next steps:
+
+1. Move code from CLI to ente-core, adding tests as we migrate.
+2. Update CLI to use ente-core implementations
+3. Prune CLI dependencies as code moves to core
 
 ### WASM Compatibility
 
