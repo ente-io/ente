@@ -18,6 +18,7 @@ import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import 'package:photos/generated/intl/app_localizations.dart';
@@ -70,9 +71,9 @@ class VideoPreviewService {
   }
 
   void _listenToFirstImport() {
-    Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      // Set video streaming default for new internal users after first import
-      if (event.status == SyncStatus.completedFirstGalleryImport &&
+    Bus.instance.on<SyncStatusUpdate>().listen((_) {
+      // Set video streaming default for new internal users after first import/bypass
+      if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed() &&
           serviceLocator.prefs.getBool(_videoStreamingEnabled) == null &&
           flagService.internalUser) {
         serviceLocator.prefs.setBool(_videoStreamingEnabled, true).ignore();
