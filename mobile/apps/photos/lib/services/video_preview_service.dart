@@ -110,7 +110,8 @@ class VideoPreviewService {
       "videoStreamingEnabledByDefault";
 
   bool get _isStreamingEnabledByDefault =>
-      serviceLocator.prefs.getBool(_videoStreamingEnabledByDefault) ?? false;
+      (serviceLocator.prefs.getBool(_videoStreamingEnabledByDefault) ?? false) &&
+      flagService.streamEnabledByDefault;
 
   bool get isVideoStreamingEnabled {
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
