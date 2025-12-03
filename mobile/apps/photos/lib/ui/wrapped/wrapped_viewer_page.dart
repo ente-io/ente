@@ -58,7 +58,7 @@ const EdgeInsets _kStoryCardInnerPadding = EdgeInsets.fromLTRB(
 const double _kStoryDesignWidth = 380.0;
 const double _kStoryDesignHeight = 700.0;
 const double _kStoryControlReserveHeight = 72.0;
-const double _kStoryControlBottomPadding = 20.0;
+const double _kStoryControlBottomPadding = 8.0;
 
 const double _kStoryControlSize = 48.0;
 const double _kStoryControlIconSize = 24.0;
