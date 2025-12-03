@@ -208,7 +208,7 @@ flutter_launcher_icons:
 
   linux:
     generate: true
-    image_path: "assets/generation-icons/icon-windows-linux.png"
+    image_path: "assets/generation-icons/icon-purple.png"
     icon_size: 256
 
 flutter_native_splash:
