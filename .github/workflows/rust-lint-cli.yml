@@ -39,7 +39,7 @@ jobs:
                       ~/.cargo/registry
                       ~/.cargo/git
                       rust/cli/target
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('rust/cli/Cargo.lock') }}
+                  key: ${{ runner.os }}-cargo-cli-${{ hashFiles('rust/cli/Cargo.lock') }}
 
             - run: cargo fmt --check
 
