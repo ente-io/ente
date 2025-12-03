@@ -136,6 +136,11 @@
     margin-right: 2px;
 }
 
+/* Remove black strokes from top bar icons */
+.pswp-ente .pswp__top-bar .pswp__icn-shadow {
+    stroke-width: 0;
+}
+
 @media (width >= 450px) {
     .pswp-ente .pswp__top-bar .pswp__button {
         margin-left: 8px;
