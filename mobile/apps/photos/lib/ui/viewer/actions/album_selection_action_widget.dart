@@ -6,6 +6,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/selected_albums.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
@@ -59,10 +60,12 @@ class _AlbumSelectionActionWidgetState
       return const SizedBox.shrink();
     }
     final List<SelectionActionButton> items = [];
-    final hasPinnedAlbum =
-        widget.selectedAlbums.albums.any((album) => album.isPinned);
-    final hasUnpinnedAlbum =
-        widget.selectedAlbums.albums.any((album) => !album.isPinned);
+    final hasPinnedAlbum = widget.selectedAlbums.albums.any(
+      (album) => album.isPinned,
+    );
+    final hasUnpinnedAlbum = widget.selectedAlbums.albums.any(
+      (album) => !album.isPinned,
+    );
 
     if (widget.sectionType == UISectionType.homeCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
@@ -158,12 +161,16 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _shareCollection() async {
+    final actions = <ActionTypesToShow>[
+      ActionTypesToShow.addViewer,
+      ActionTypesToShow.addCollaborator,
+    ];
+    if (flagService.enableAdminRole) {
+      actions.add(ActionTypesToShow.addAdmin);
+    }
     await routeToPage(
       context,
-      AddParticipantPage(
-        widget.selectedAlbums.albums.toList(),
-        const [ActionTypesToShow.addViewer, ActionTypesToShow.addCollaborator],
-      ),
+      AddParticipantPage(widget.selectedAlbums.albums.toList(), actions),
     );
     widget.selectedAlbums.clearAll();
   }
@@ -173,8 +180,9 @@ class _AlbumSelectionActionWidgetState
     final List<Collection> nonEmptyCollection = [];
 
     final List errors = [];
-    final List<Collection> selectedAlbums =
-        widget.selectedAlbums.albums.toList(growable: false);
+    final List<Collection> selectedAlbums = widget.selectedAlbums.albums.toList(
+      growable: false,
+    );
     for (final collection in selectedAlbums) {
       if (collection.type == CollectionType.favorites) {
         continue;
@@ -193,10 +201,7 @@ class _AlbumSelectionActionWidgetState
       }
     }
     if (errors.isNotEmpty) {
-      await showGenericErrorDialog(
-        context: context,
-        error: errors.first,
-      );
+      await showGenericErrorDialog(context: context, error: errors.first);
     }
 
     if (nonEmptyCollection.isNotEmpty) {
@@ -220,11 +225,7 @@ class _AlbumSelectionActionWidgetState
         continue;
       }
 
-      await updateOrder(
-        context,
-        collection,
-        collection.isPinned ? 1 : 1,
-      );
+      await updateOrder(context, collection, collection.isPinned ? 1 : 1);
     }
     if (hasFavorites) {
       _showFavToast();
@@ -238,11 +239,7 @@ class _AlbumSelectionActionWidgetState
         continue;
       }
 
-      await updateOrder(
-        context,
-        collection,
-        collection.isPinned ? 0 : 0,
-      );
+      await updateOrder(context, collection, collection.isPinned ? 0 : 0);
     }
     if (hasFavorites) {
       _showFavToast();
@@ -342,8 +339,9 @@ class _AlbumSelectionActionWidgetState
         ),
       ],
       title: AppLocalizations.of(context).leaveSharedAlbum,
-      body: AppLocalizations.of(context)
-          .photosAddedByYouWillBeRemovedFromTheAlbum,
+      body: AppLocalizations.of(
+        context,
+      ).photosAddedByYouWillBeRemovedFromTheAlbum,
     );
     if (actionResult?.action != null && mounted) {
       if (actionResult!.action == ButtonAction.error) {
@@ -359,8 +357,9 @@ class _AlbumSelectionActionWidgetState
 
   void _selectionChangedListener() {
     if (mounted) {
-      hasFavorites = widget.selectedAlbums.albums
-          .any((album) => album.type == CollectionType.favorites);
+      hasFavorites = widget.selectedAlbums.albums.any(
+        (album) => album.type == CollectionType.favorites,
+      );
       setState(() {});
     }
   }

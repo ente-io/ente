@@ -75,6 +75,7 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
     };
 
     final List<int> mediaIds = _collectMediaIds(
+      context: context,
       clusters: topClusters,
       maxCount: _kTopCityMediaCount,
     );
@@ -89,6 +90,8 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 45),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(mediaIds, _kTopCityMediaCount * 2);
 
     final Map<String, Object?> meta = <String, Object?>{
       "year": context.year,
@@ -123,10 +126,7 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -153,6 +153,7 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
     final NumberFormat numberFormat = NumberFormat.decimalPattern();
 
     final List<int> mediaIds = _collectMediaIds(
+      context: context,
       clusters: <_PlaceClusterSummary>[cluster],
       maxCount: _kSpotMediaCount,
       exclude: takenIds,
@@ -177,6 +178,8 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       preferNamedPeople: true,
       minimumSpacing: const Duration(days: 30),
     );
+    final List<int> metaUploadedIDs =
+        buildMetaUploadedIDs(mediaIds, _kSpotMediaCount * 2);
 
     final int sharePercent = _percentOf(
       cluster.totalCount / dataset.totalCount.toDouble(),
@@ -214,10 +217,7 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       meta: meta
         ..addAll(
           <String, Object?>{
-            if (media.isNotEmpty)
-              "uploadedFileIDs": media
-                  .map((MediaRef ref) => ref.uploadedFileID)
-                  .toList(growable: false),
+            if (metaUploadedIDs.isNotEmpty) "uploadedFileIDs": metaUploadedIDs,
           },
         ),
     );
@@ -234,6 +234,7 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
   }
 
   List<int> _collectMediaIds({
+    required WrappedEngineContext context,
     required List<_PlaceClusterSummary> clusters,
     required int maxCount,
     Set<int>? exclude,
@@ -257,6 +258,9 @@ class PlacesCandidateBuilder extends WrappedCandidateBuilder {
       );
       for (final int id in clusterIds) {
         if (id <= 0 || seen.contains(id)) {
+          continue;
+        }
+        if (!context.isSelectableUploadedFileID(id)) {
           continue;
         }
         collected.add(id);

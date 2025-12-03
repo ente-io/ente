@@ -5,11 +5,13 @@ class TitleBarTitleWidget extends StatelessWidget {
   final String? title;
   final bool isTitleH2;
   final IconData? icon;
+  final List<Widget>? trailingWidgets;
   const TitleBarTitleWidget({
     super.key,
     this.title,
     this.isTitleH2 = false,
     this.icon,
+    this.trailingWidgets,
   });
 
   @override
@@ -17,8 +19,9 @@ class TitleBarTitleWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorTheme = getEnteColorScheme(context);
     if (title != null) {
+      Widget titleWidget;
       if (icon != null) {
-        return Row(
+        titleWidget = Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -32,22 +35,31 @@ class TitleBarTitleWidget extends StatelessWidget {
             Icon(icon, size: 20, color: colorTheme.strokeMuted),
           ],
         );
-      }
-      if (isTitleH2) {
-        return Text(
+      } else if (isTitleH2) {
+        titleWidget = Text(
           title!,
           style: textTheme.h2Bold,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         );
       } else {
-        return Text(
+        titleWidget = Text(
           title!,
           style: textTheme.h3Bold,
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         );
       }
+
+      if (trailingWidgets != null && trailingWidgets!.isNotEmpty) {
+        return Row(
+          children: [
+            Expanded(child: titleWidget),
+            ...trailingWidgets!,
+          ],
+        );
+      }
+      return titleWidget;
     }
 
     return const SizedBox.shrink();

@@ -22,76 +22,69 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    return Scaffold(
-      appBar: null,
-      body: Container(
-        color: enteColorScheme.backgroundElevated,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 36,
-            ),
-            Container(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TitleBarTitleWidget(
-                  title: AppLocalizations.of(context).whatsNew,
-                ),
+    return Material(
+      color: enteColorScheme.backgroundElevated,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 36),
+          Container(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TitleBarTitleWidget(
+                title: AppLocalizations.of(context).whatsNew,
               ),
             ),
-            const SizedBox(
-              height: 24,
-            ),
-            Expanded(child: _getChangeLog(context)),
-            const DividerWidget(
-              dividerType: DividerType.solid,
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 16.0,
-                  right: 16,
-                  top: 16,
-                  bottom: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ButtonWidget(
-                      buttonType: ButtonType.trailingIconPrimary,
-                      buttonSize: ButtonSize.large,
-                      labelText: AppLocalizations.of(context).continueLabel,
-                      icon: Icons.arrow_forward_outlined,
-                      onTap: () async {
-                        await updateService.hideChangeLog();
-                        if (mounted && Navigator.of(context).canPop()) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                    const SizedBox(
-                      height: 8,
-                    ),
-                    ButtonWidget(
-                      buttonType: ButtonType.trailingIconSecondary,
-                      buttonSize: ButtonSize.large,
-                      labelText: AppLocalizations.of(context).rateUs,
-                      icon: Icons.favorite_rounded,
-                      iconColor: enteColorScheme.primary500,
-                      onTap: () async {
-                        await updateService.launchReviewUrl();
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    const SizedBox(height: 8),
-                  ],
-                ),
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          Flexible(child: _getChangeLog(context)),
+          const DividerWidget(
+            dividerType: DividerType.solid,
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 16.0,
+                right: 16,
+                top: 16,
+                bottom: 8,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ButtonWidget(
+                    buttonType: ButtonType.trailingIconPrimary,
+                    buttonSize: ButtonSize.large,
+                    labelText: AppLocalizations.of(context).continueLabel,
+                    icon: Icons.arrow_forward_outlined,
+                    onTap: () async {
+                      await updateService.hideChangeLog();
+                      if (mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  ButtonWidget(
+                    buttonType: ButtonType.trailingIconSecondary,
+                    buttonSize: ButtonSize.large,
+                    labelText: AppLocalizations.of(context).rateUs,
+                    icon: Icons.favorite_rounded,
+                    iconColor: enteColorScheme.primary500,
+                    onTap: () async {
+                      await updateService.launchReviewUrl();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -118,6 +111,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         thumbVisibility: true,
         thickness: 2.0,
         child: ListView.builder(
+          shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
             return Padding(

@@ -178,6 +178,7 @@ services:
       - 3002:3002  # Albums
       - 3004:3004  # Cast
       - 3005:3005  # Share
+      - 3006:3006  # Embed
     environment:
       ENTE_API_ORIGIN: http://localhost:8080
       # ENTE_API_ORIGIN: http://192.168.1.42:8080

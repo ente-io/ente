@@ -18,6 +18,7 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 
@@ -382,6 +383,4 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       ),
     );
   }
-
-  routeToPage(BuildContext context, LockScreenAutoLock lockScreenAutoLock) {}
 }

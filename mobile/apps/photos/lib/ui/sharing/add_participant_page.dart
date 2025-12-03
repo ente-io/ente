@@ -23,6 +23,7 @@ import "package:photos/utils/separators_util.dart";
 enum ActionTypesToShow {
   addViewer,
   addCollaborator,
+  addAdmin,
 }
 
 class AddParticipantPage extends StatefulWidget {
@@ -242,45 +243,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   List<Widget> _actionButtons() {
     final widgets = <Widget>[];
-    if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
-      widgets.add(
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
-          labelText: AppLocalizations.of(context)
-              .addViewers(count: _selectedEmails.length),
-          isDisabled: _selectedEmails.isEmpty,
-          onTap: () async {
-            final results = <bool>[];
-            final collections = widget.collections;
-
-            for (String email in _selectedEmails) {
-              bool result = false;
-              for (Collection collection in collections) {
-                result = await collectionActions.addEmailToCollection(
-                  context,
-                  collection,
-                  email,
-                  CollectionParticipantRole.viewer,
-                );
-              }
-              results.add(result);
-            }
-
-            final noOfSuccessfullAdds = results.where((e) => e).length;
-            showToast(
-              context,
-              AppLocalizations.of(context)
-                  .viewersSuccessfullyAdded(count: noOfSuccessfullAdds),
-            );
-
-            if (!results.any((e) => e == false) && mounted) {
-              Navigator.of(context).pop(true);
-            }
-          },
-        ),
-      );
-    }
     if (widget.actionTypesToShow.contains(
       ActionTypesToShow.addCollaborator,
     )) {
@@ -321,6 +283,81 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               AppLocalizations.of(context)
                   .collaboratorsSuccessfullyAdded(count: noOfSuccessfullAdds),
             );
+
+            if (!results.any((e) => e == false) && mounted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+        ),
+      );
+    }
+    if (widget.actionTypesToShow.contains(ActionTypesToShow.addViewer)) {
+      widgets.add(
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          buttonSize: ButtonSize.large,
+          labelText: AppLocalizations.of(context)
+              .addViewers(count: _selectedEmails.length),
+          isDisabled: _selectedEmails.isEmpty,
+          onTap: () async {
+            final results = <bool>[];
+            final collections = widget.collections;
+
+            for (final email in _selectedEmails) {
+              bool result = false;
+              for (final collection in collections) {
+                result = await collectionActions.addEmailToCollection(
+                  context,
+                  collection,
+                  email,
+                  CollectionParticipantRole.viewer,
+                );
+              }
+              results.add(result);
+            }
+
+            final noOfSuccessfullAdds = results.where((e) => e).length;
+            showToast(
+              context,
+              AppLocalizations.of(context)
+                  .viewersSuccessfullyAdded(count: noOfSuccessfullAdds),
+            );
+
+            if (!results.any((e) => e == false) && mounted) {
+              Navigator.of(context).pop(true);
+            }
+          },
+        ),
+      );
+    }
+    if (widget.actionTypesToShow.contains(ActionTypesToShow.addAdmin)) {
+      widgets.add(
+        ButtonWidget(
+          buttonType: widget.actionTypesToShow.length == 1
+              ? ButtonType.primary
+              : ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          labelText: _adminActionLabel(_selectedEmails.length),
+          isDisabled: _selectedEmails.isEmpty,
+          onTap: () async {
+            final results = <bool>[];
+            final collections = widget.collections;
+
+            for (final email in _selectedEmails) {
+              bool result = false;
+              for (final collection in collections) {
+                result = await collectionActions.addEmailToCollection(
+                  context,
+                  collection,
+                  email,
+                  CollectionParticipantRole.admin,
+                );
+              }
+              results.add(result);
+            }
+
+            final successful = results.where((e) => e).length;
+            showToast(context, _adminSuccessMessage(successful));
 
             if (!results.any((e) => e == false) && mounted) {
               Navigator.of(context).pop(true);
@@ -437,12 +474,18 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     if (collections.isEmpty) {
       return [];
     }
+    final Set<String> ownerEmails = {};
 
     for (final Collection collection in collections) {
       for (final User u in collection.sharees) {
         if (u.id != null && u.email.isNotEmpty) {
           existingEmails.add(u.email);
         }
+      }
+      final ownerEmail = collection.owner.email;
+      if (ownerEmail.isNotEmpty) {
+        ownerEmails.add(ownerEmail);
+        existingEmails.add(ownerEmail);
       }
     }
 
@@ -458,6 +501,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             .contains(_textController.text.trim().toLowerCase()),
       );
     }
+    suggestedUsers.removeWhere(
+      (element) => ownerEmails.contains(element.email),
+    );
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
 
     return suggestedUsers;
@@ -466,10 +512,29 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   String _getTitle() {
     if (widget.actionTypesToShow.length > 1) {
       return AppLocalizations.of(context).addParticipants;
-    } else if (widget.actionTypesToShow.first == ActionTypesToShow.addViewer) {
-      return AppLocalizations.of(context).addViewer;
-    } else {
-      return AppLocalizations.of(context).addCollaborator;
+    }
+    switch (widget.actionTypesToShow.first) {
+      case ActionTypesToShow.addViewer:
+        return AppLocalizations.of(context).addViewer;
+      case ActionTypesToShow.addCollaborator:
+        return AppLocalizations.of(context).addCollaborator;
+      case ActionTypesToShow.addAdmin:
+        return _adminTitle();
     }
   }
+
+  String _adminActionLabel(int count) =>
+      count == 1 ? "Add admin" : "Add admins";
+
+  String _adminSuccessMessage(int count) {
+    if (count == 0) {
+      return "No admins were added";
+    }
+    if (count == 1) {
+      return "1 admin successfully added";
+    }
+    return "$count admins successfully added";
+  }
+
+  String _adminTitle() => "Add admin";
 }

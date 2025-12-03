@@ -1,6 +1,6 @@
 import { downloadManager } from "ente-gallery/services/download";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileFileName, fileLocation } from "ente-media/file-metadata";
 import React from "react";
 
 import type { JourneyPoint } from "../types";
@@ -30,17 +30,16 @@ export const processPhotosData = ({
 
     for (const file of files) {
         try {
-            const lat = file.metadata.latitude;
-            const lng = file.metadata.longitude;
+            const location = fileLocation(file);
 
-            if (lat && lng) {
+            if (location) {
                 const cachedLocation = locationDataRef.current.get(file.id);
                 const finalName = cachedLocation?.name || fileFileName(file);
                 const finalCountry = cachedLocation?.country || "Unknown";
 
                 photoData.push({
-                    lat: lat,
-                    lng: lng,
+                    lat: location.latitude,
+                    lng: location.longitude,
                     name: finalName,
                     country: finalCountry,
                     timestamp: new Date(

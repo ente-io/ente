@@ -117,10 +117,12 @@ class PickCenterPointWidget extends StatelessWidget {
                               selectedFiles: selectedFiles,
                               limitSelectionToOne: true,
                               showSelectAll: false,
-                              header: const Padding(
-                                padding: EdgeInsets.all(10),
+                              header: Padding(
+                                padding: const EdgeInsets.all(10),
                                 child: NotificationTipWidget(
-                                  "You can also add a location centered on a photo from the photo's info screen",
+                                  AppLocalizations.of(
+                                    context,
+                                  ).locationPickerTip,
                                 ),
                               ),
                               disablePinnedGroupHeader: true,

@@ -903,13 +903,29 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           "Cannot share collection of type $galleryType",
         );
       }
-      if (Configuration.instance.getUserID() == widget.collection!.owner.id) {
+      final int? userID = Configuration.instance.getUserID();
+      final bool isOwner = userID == collection.owner.id;
+      final bool enableAdminRole = flagService.enableAdminRole;
+      final CollectionParticipantRole role = collection.getRole(userID ?? -1);
+      final bool isAdmin =
+          enableAdminRole && role == CollectionParticipantRole.admin;
+      final bool canManageParticipants = isOwner || isAdmin;
+      if (canManageParticipants) {
+        final bool shouldOpenManageLink =
+            isOwner && isQuickLink && collection.hasLink;
         unawaited(
           routeToPage(
             context,
-            (isQuickLink && (collection.hasLink))
+            shouldOpenManageLink
                 ? ManageSharedLinkWidget(collection: collection)
                 : ShareCollectionPage(collection),
+          ),
+        );
+      } else if (collection.hasLink) {
+        unawaited(
+          routeToPage(
+            context,
+            ShareCollectionPage(collection),
           ),
         );
       } else {

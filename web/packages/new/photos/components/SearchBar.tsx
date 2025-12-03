@@ -27,7 +27,7 @@ import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -74,7 +74,10 @@ export interface SearchBarProps {
     /**
      * Set or clear the selected {@link SearchOption}.
      */
-    onSelectSearchOption: (o: SearchOption | undefined) => void;
+    onSelectSearchOption: (
+        o: SearchOption | undefined,
+        options?: { shouldExitSearchMode?: boolean },
+    ) => void;
     /**
      * Called when the user selects the generic "People" header in the empty
      * state view.
@@ -165,6 +168,20 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
+    // Handle ctrl+K keyboard shortcut to focus search
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for ctrl+K (cmd+K on macOS)
+            if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+                event.preventDefault();
+                selectRef.current?.focus();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
     const handleChange = (value: SearchOption | null) => {
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
@@ -178,7 +195,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         }
 
         // Let our parent know the selection was changed.
-        onSelectSearchOption(nullToUndefined(value));
+        // When selecting an option, we should exit search mode if needed.
+        onSelectSearchOption(nullToUndefined(value), {
+            shouldExitSearchMode: true,
+        });
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
@@ -190,7 +210,19 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action == "input-change") setInputValue(value);
+        if (actionMeta.action == "input-change") {
+            setInputValue(value);
+
+            // If the input is cleared, also clear the selected value.
+            if (value === "") {
+                setValue(null);
+                setInputValue("");
+                // Notify parent but don't exit search mode on mobile
+                onSelectSearchOption(undefined, {
+                    shouldExitSearchMode: false,
+                });
+            }
+        }
     };
 
     const resetSearch = () => {
@@ -201,8 +233,8 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         setValue(null);
         setInputValue("");
 
-        // Let our parent know.
-        onSelectSearchOption(undefined);
+        // Let our parent know and exit search mode entirely.
+        onSelectSearchOption(undefined, { shouldExitSearchMode: true });
     };
 
     const handleSelectPeople = () => {
@@ -324,31 +356,62 @@ const createSelectStyles = (
     clearIndicator: (style) => ({ ...style, display: "none" }),
 });
 
-const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
-    <SelectComponents.Control {...props}>
-        <Stack
-            direction="row"
-            sx={{
-                alignItems: "center",
-                // Fill the entire control (the control uses display flex).
-                flex: 1,
-            }}
-        >
-            <Box
+const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
+    // The shortcut UI element will be shown once the search bar supports searching the settings as well.
+    // const isMac =
+    //     typeof navigator !== "undefined" &&
+    //     navigator.userAgent.toUpperCase().includes("MAC");
+    // const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+
+    // const hasValue =
+    //     props.getValue().length > 0 || props.selectProps.inputValue;
+
+    return (
+        <SelectComponents.Control {...props}>
+            <Stack
+                direction="row"
                 sx={{
-                    display: "inline-flex",
-                    // Match the default padding of the ValueContainer to make
-                    // the icon look properly spaced and aligned.
-                    pl: "8px",
-                    color: "stroke.muted",
+                    alignItems: "center",
+                    // Fill the entire control (the control uses display flex).
+                    flex: 1,
                 }}
             >
-                {iconForOption(props.getValue()[0])}
-            </Box>
-            {children}
-        </Stack>
-    </SelectComponents.Control>
-);
+                <Box
+                    sx={{
+                        display: "inline-flex",
+                        // Match the default padding of the ValueContainer to make
+                        // the icon look properly spaced and aligned.
+                        pl: "8px",
+                        color: "stroke.muted",
+                    }}
+                >
+                    {iconForOption(props.getValue()[0])}
+                </Box>
+                {children}
+                {/* {!hasValue && (
+                    <Box
+                        sx={{
+                            display: ["none", "none", "inline-flex"],
+                            alignItems: "center",
+                            pr: "8px",
+                            color: "text.faint",
+                            fontSize: "12px",
+                            fontFamily: "monospace",
+                            border: "1px solid",
+                            borderColor: "stroke.faint",
+                            borderRadius: "4px",
+                            px: "6px",
+                            py: "2px",
+                            mr: "8px",
+                        }}
+                    >
+                        {shortcutKey}
+                    </Box>
+                )} */}
+            </Stack>
+        </SelectComponents.Control>
+    );
+};
 
 const iconForOption = (option: SearchOption | undefined) => {
     switch (option?.suggestion.type) {

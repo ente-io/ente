@@ -2,6 +2,9 @@
     "name": "share",
     "version": "0.0.0",
     "private": true,
+    "scripts": {
+        "build:post": "rm -f out/404.html"
+    },
     "dependencies": {
         "ente-base": "*",
         "hugeicons-react": "^0.3.0"

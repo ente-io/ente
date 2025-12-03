@@ -1,6 +1,6 @@
 import CheckIcon from "@mui/icons-material/Check";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { Box, IconButton, Typography } from "@mui/material";
+import { Copy01Icon } from "hugeicons-react";
 import React, { useState } from "react";
 
 interface CopyableFieldProps {
@@ -92,7 +92,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                             "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
                         }}
                     >
-                        <ContentCopyIcon fontSize="small" />
+                        <Copy01Icon size={16} />
                     </IconButton>
                 )}
             </Box>

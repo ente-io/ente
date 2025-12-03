@@ -85,7 +85,7 @@ func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) er
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
 func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64, app ente.App) (map[int64][]ente.PublicURL, error) {
-	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_join, pw_nonce, mem_limit, ops_limit FROM 
+	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_join, min_role, pw_nonce, mem_limit, ops_limit FROM 
                                                    public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
 		pq.Array(collectionIDs))
 	if err != nil {
@@ -102,10 +102,16 @@ func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Con
 		var accessToken string
 		var nonce *string
 		var opsLimit, memLimit *int64
-		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &publicUrl.EnableJoin, &nonce, &memLimit, &opsLimit); err != nil {
+		var minRole sql.NullString
+		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &publicUrl.EnableJoin, &minRole, &nonce, &memLimit, &opsLimit); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
 		publicUrl.URL = pcr.GetAlbumUrl(app, accessToken)
+		if minRole.Valid {
+			role := ente.ConvertStringToCollectionParticipantRole(minRole.String)
+			rolePtr := role
+			publicUrl.MinRole = &rolePtr
+		}
 		if nonce != nil {
 			publicUrl.Nonce = nonce
 			publicUrl.MemLimit = memLimit
@@ -121,26 +127,36 @@ func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Con
 // Note: The token could be expired or deviceLimit is already reached
 func (pcr *CollectionLinkRepo) GetActiveCollectionLinkRow(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit, 
-       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_join FROM 
+       is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_join, min_role FROM 
                                                    public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
 		collectionID)
 
 	//defer rows.Close()
 	ret := ente.CollectionLinkRow{}
+	var minRole sql.NullString
 	err := row.Scan(&ret.ID, &ret.CollectionID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
-		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect, &ret.EnableJoin)
+		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect, &ret.EnableJoin, &minRole)
 	if err != nil {
 		return ente.CollectionLinkRow{}, stacktrace.Propagate(err, "")
+	}
+	if minRole.Valid {
+		role := ente.ConvertStringToCollectionParticipantRole(minRole.String)
+		rolePtr := role
+		ret.MinRole = &rolePtr
 	}
 	return ret, nil
 }
 
 // UpdatePublicCollectionToken will update the row for corresponding public collection token
 func (pcr *CollectionLinkRepo) UpdatePublicCollectionToken(ctx context.Context, pct ente.CollectionLinkRow) error {
+	var minRole interface{}
+	if pct.MinRole != nil {
+		minRole = string(*pct.MinRole)
+	}
 	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET valid_till = $1, device_limit = $2, 
-                                    pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_join = $9 
-                                where id = $10`,
-		pct.ValidTill, pct.DeviceLimit, pct.PassHash, pct.Nonce, pct.MemLimit, pct.OpsLimit, pct.EnableDownload, pct.EnableCollect, pct.EnableJoin, pct.ID)
+                                    pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_join = $9, min_role = $10 
+                                where id = $11`,
+		pct.ValidTill, pct.DeviceLimit, pct.PassHash, pct.Nonce, pct.MemLimit, pct.OpsLimit, pct.EnableDownload, pct.EnableCollect, pct.EnableJoin, minRole, pct.ID)
 	return stacktrace.Propagate(err, "failed to update public collection token")
 }
 
