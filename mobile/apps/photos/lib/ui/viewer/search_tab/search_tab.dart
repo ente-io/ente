@@ -235,19 +235,21 @@ class _RitualsDiscoverySection extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final textTheme = getEnteTextTheme(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: Text(
-            AppLocalizations.of(context).ritualsTitle,
-            style: textTheme.largeBold,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              AppLocalizations.of(context).ritualsTitle,
+              style: textTheme.largeBold,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        const ActivityBanner(),
-      ],
+          const ActivityBanner(),
+        ],
+      ),
     );
   }
 }
