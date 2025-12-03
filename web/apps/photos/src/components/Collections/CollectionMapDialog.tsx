@@ -1,7 +1,6 @@
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -10,7 +9,6 @@ import {
     DialogContent,
     IconButton,
     Stack,
-    Tooltip,
     Typography,
     type IconButtonProps,
 } from "@mui/material";
@@ -788,7 +786,6 @@ function CollectionSidebar({
     collectionSummary,
     visibleCount,
     photoGroups,
-    mapPhotosCount,
     thumbByFileID,
     visiblePhotoOrder,
     visiblePhotosWave,
@@ -813,7 +810,8 @@ function CollectionSidebar({
                 display: "flex",
                 flexDirection: "column",
                 overflowY: "auto",
-                padding: { xs: "24px", md: "32px" },
+                px: { xs: "24px", md: "32px" },
+                pb: { xs: "24px", md: "32px" },
                 // Desktop: rounded corners on all sides; Mobile: only top corners
                 borderRadius: { xs: "24px 24px 0 0", md: "48px" },
                 zIndex: 1000,
@@ -837,7 +835,6 @@ function CollectionSidebar({
             <SidebarHeader
                 name={collectionSummary.name}
                 visibleCount={visibleCount}
-                missingCount={collectionSummary.fileCount - mapPhotosCount}
                 onClose={onClose}
             />
             <PhotoList
@@ -854,40 +851,27 @@ function CollectionSidebar({
 interface SidebarHeaderProps {
     name: string;
     visibleCount: number;
-    missingCount: number;
     onClose: () => void;
 }
 
-function SidebarHeader({
-    name,
-    visibleCount,
-    missingCount,
-    onClose,
-}: SidebarHeaderProps) {
+function SidebarHeader({ name, visibleCount, onClose }: SidebarHeaderProps) {
     return (
         <Box
             sx={{
                 position: "sticky",
-                top: { xs: -24, md: -32 },
+                top: { xs: "0", md: "0" },
                 mx: { xs: "-24px", md: "-32px" },
                 px: { xs: "24px", md: "32px" },
-                pt: { xs: "24px", md: "0" },
+                pt: { xs: "24px", md: "32px" },
+                pr: { md: "24px" },
                 pb: 2,
                 bgcolor: (theme) => theme.vars.palette.background.paper,
                 zIndex: 3,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
             }}
         >
-            <IconButton
-                aria-label={t("close")}
-                onClick={onClose}
-                sx={{
-                    position: "absolute",
-                    top: { xs: 8, md: 16 },
-                    right: { xs: 8, md: 16 },
-                }}
-            >
-                <CloseIcon />
-            </IconButton>
             <Stack>
                 <Typography variant="h5" sx={{ fontWeight: 700 }} noWrap>
                     {name}
@@ -903,22 +887,15 @@ function SidebarHeader({
                     }}
                 >
                     {visibleCount} {t("memories", { defaultValue: "memories" })}
-                    {missingCount > 0 && (
-                        <Tooltip
-                            title={`${missingCount} images aren't shown since they don't have the proper location metadata`}
-                            arrow
-                        >
-                            <InfoOutlinedIcon
-                                sx={{
-                                    fontSize: 16,
-                                    color: "text.muted",
-                                    cursor: "pointer",
-                                }}
-                            />
-                        </Tooltip>
-                    )}
                 </Typography>
             </Stack>
+            <IconButton
+                aria-label={t("close")}
+                onClick={onClose}
+                sx={{ bgcolor: "rgba(255, 255, 255, 0.1)" }}
+            >
+                <CloseIcon />
+            </IconButton>
         </Box>
     );
 }
@@ -994,7 +971,7 @@ function PhotoDateGroup({
             <Box
                 sx={{
                     position: "sticky",
-                    top: { xs: 56, md: 72 },
+                    top: { xs: "56px", md: "85px" },
                     bgcolor: (theme) => theme.vars.palette.background.paper,
                     zIndex: 2,
                     py: 1.5,
@@ -1011,7 +988,7 @@ function PhotoDateGroup({
                 {photos.map((photo, idx) => {
                     const thumb = thumbByFileID.get(photo.fileId);
                     const delay =
-                        (visiblePhotoOrder.get(photo.fileId) ?? idx) * 30;
+                        (visiblePhotoOrder.get(photo.fileId) ?? idx) * 15;
                     return (
                         <ThumbImage
                             key={`${photo.fileId}-${visiblePhotosWave}`}
@@ -1321,8 +1298,8 @@ function ThumbGrid({ children }: React.PropsWithChildren) {
     return (
         <Box
             sx={{
-                display: "flex",
-                flexWrap: "wrap",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
                 gap: 0.25,
                 pb: 1,
                 overflow: "hidden",
@@ -1341,10 +1318,9 @@ interface ThumbImageProps {
 
 function ThumbImage({ src, onClick, animationDelay }: ThumbImageProps) {
     const baseSx = {
-        width: { xs: 80, md: 140 },
-        height: { xs: 80, md: 140 },
+        width: "100%",
+        aspectRatio: "1",
         borderRadius: 0,
-        flexShrink: 0,
         border: (theme: { palette: { divider: string } }) =>
             `1px solid ${theme.palette.divider}`,
         opacity: 0,
