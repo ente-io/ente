@@ -64,11 +64,9 @@ cp -r "$BUNDLE_DIR"/* "$STAGING_DIR/usr/share/enteauth/"
 echo -e "${YELLOW}Copying metainfo file...${NC}"
 cp linux/packaging/enteauth.appdata.xml "$STAGING_DIR/usr/share/metainfo/"
 
-# Copy icon to multiple locations for better compatibility
+# Copy icon
 echo -e "${YELLOW}Copying icon...${NC}"
 cp "assets/icons/io.ente.auth.png" "$STAGING_DIR/usr/share/pixmaps/io.ente.auth.png"
-mkdir -p "$STAGING_DIR/usr/share/icons/hicolor/256x256/apps"
-cp "assets/icons/io.ente.auth.png" "$STAGING_DIR/usr/share/icons/hicolor/256x256/apps/io.ente.auth.png"
 
 # Copy desktop file
 echo -e "${YELLOW}Copying desktop file...${NC}"
