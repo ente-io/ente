@@ -140,6 +140,10 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     onViewInfo: (annotatedFile: FileViewerAnnotatedFile) => void;
     /**
+     * Called when the user activates the comments action on a file.
+     */
+    onViewComments: () => void;
+    /**
      * Called when the user activates the download action on a file.
      */
     onDownload: (annotatedFile: FileViewerAnnotatedFile) => void;
@@ -202,6 +206,7 @@ export class FileViewerPhotoSwipe {
         onClose,
         onAnnotate,
         onViewInfo,
+        onViewComments,
         onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
@@ -1416,12 +1421,19 @@ export class FileViewerPhotoSwipe {
                         const captionText = truncateCaptionIfNeeded(alt);
                         captionEl.querySelector("p")!.innerText =
                             captionText ?? "";
-                        captionEl.style.display = captionText ? "block" : "none";
+                        captionEl.style.display = captionText
+                            ? "block"
+                            : "none";
                         captionEl.classList.toggle(
                             "ente-video",
                             fileType == FileType.video,
                         );
                     });
+                    // Wire up click handler for the comment button.
+                    const commentButton = element.querySelector<HTMLElement>(
+                        '.pswp__action-button[aria-label="Comment"]',
+                    );
+                    commentButton?.addEventListener("click", onViewComments);
                 },
             });
         });

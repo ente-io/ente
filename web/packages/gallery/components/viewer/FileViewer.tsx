@@ -54,6 +54,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { CommentsSidebar } from "./CommentsSidebar";
 import {
     fileInfoExifForFile,
     updateItemDataAlt,
@@ -369,6 +370,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     >(undefined);
 
     const [openFileInfo, setOpenFileInfo] = useState(false);
+    const [openComments, setOpenComments] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
@@ -391,6 +393,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             return false;
         });
         setOpenFileInfo(false);
+        setOpenComments(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
@@ -413,6 +416,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleFileInfoClose = useCallback(() => setOpenFileInfo(false), []);
+
+    const handleViewComments = useCallback(() => setOpenComments(true), []);
+
+    const handleCommentsClose = useCallback(() => setOpenComments(false), []);
 
     // Callback invoked when the download action is triggered by activating the
     // download button in the PhotoSwipe bar.
@@ -672,6 +679,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // Don't handle keydowns if any of the viewer's own modals are open.
         if (
             openFileInfo ||
+            openComments ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
@@ -701,6 +709,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         return false;
     }, [
         openFileInfo,
+        openComments,
         moreMenuAnchorEl,
         openImageEditor,
         openConfirmDelete,
@@ -880,6 +889,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 },
                 onAnnotate: handleAnnotate,
                 onViewInfo: handleViewInfo,
+                onViewComments: handleViewComments,
                 onDownload: handleDownloadBarAction,
                 onMore: handleMore,
             });
@@ -909,6 +919,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleClose,
         handleAnnotate,
         handleViewInfo,
+        handleViewComments,
         handleDownloadBarAction,
         handleMore,
     ]);
@@ -954,6 +965,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
                 {...{ collectionNameByID }}
+            />
+            <CommentsSidebar
+                open={openComments}
+                onClose={handleCommentsClose}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
