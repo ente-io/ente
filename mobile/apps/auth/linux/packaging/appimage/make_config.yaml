@@ -16,6 +16,7 @@ categories:
   - Utility
 
 startup_notify: false
+startup_wm_class: io.ente.auth
 
 # You can specify the shared libraries that you want to bundle with your app
 #

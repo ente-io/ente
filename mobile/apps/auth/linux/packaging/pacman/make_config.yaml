@@ -45,3 +45,4 @@ postremove_scripts:
   - fi
 
 startup_notify: false
+startup_wm_class: io.ente.auth
