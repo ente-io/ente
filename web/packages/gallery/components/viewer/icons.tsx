@@ -82,9 +82,22 @@ export const createPSRegisterElementIconHTML = (name: IconKeys) => ({
     outlineID: `pswp__icn-${name}`,
 });
 
-// Favorite is a special case since it consists of two layers.
-const favoriteInner = () =>
-    `${paths.favorite} id="pswp__icn-favorite" />${paths["favorite-fill"]} id="pswp__icn-favorite-fill" />`;
+// Favorite is a special case since it consists of three layers: shadow, outline, and fill.
+// Unlike fill-based icons where PhotoSwipe's shadow mechanism works automatically,
+// stroke-based icons need an explicit shadow path since the inline stroke="white"
+// would override the CSS-applied stroke color for the shadow.
+const favoriteInner = () => {
+    const starPath =
+        "M8.69381 1.56975C9.38617 0.609562 10.7995 0.609562 11.4919 1.56975L13.7114 4.64784C13.9253 4.9445 14.2255 5.16569 14.5699 5.28031L18.1427 6.46961C19.2572 6.84061 19.6939 8.20365 19.0073 9.16808L16.8062 12.2597C16.5941 12.5577 16.4794 12.9156 16.4783 13.2831L16.4669 17.0962C16.4634 18.2857 15.32 19.1281 14.2033 18.764L10.6234 17.5966C10.2784 17.4841 9.90729 17.4841 9.56228 17.5966L5.98245 18.764C4.86575 19.1281 3.72231 18.2857 3.71876 17.0962L3.70737 13.2831C3.70628 12.9156 3.5916 12.5577 3.37946 12.2597L1.17839 9.16808C0.491785 8.20365 0.928537 6.84061 2.04305 6.46961L5.61584 5.28031C5.96017 5.16569 6.26041 4.9445 6.47432 4.64784L8.69381 1.56975Z";
+    const transform = "translate(5.5, 6)";
+    // Shadow path (dark stroke behind the white outline)
+    const shadow = `<path d="${starPath}" fill="none" stroke="#4f4f4f" stroke-width="3.7" transform="${transform}" />`;
+    // Main outline (white stroke)
+    const outline = `${paths.favorite} id="pswp__icn-favorite" />`;
+    // Fill (for favorited state)
+    const fill = `${paths["favorite-fill"]} id="pswp__icn-favorite-fill" />`;
+    return shadow + outline + fill;
+};
 
 // Fullscreen is also a special case since it has two states.
 const fullscreenInner = () =>

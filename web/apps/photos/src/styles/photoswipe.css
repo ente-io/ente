@@ -343,11 +343,10 @@ media-settings-menu {
     z-index: 1;
 }
 
-/* Hide the bottom right controls when hovering over the video controls, when
-   video is playing, or when the settings menu is open. */
+/* Hide the bottom right controls when hovering over the video controls or
+   when the settings menu is open. */
 body:has(
     media-time-range[mediapreviewtime],
-    media-controller:not([mediapaused]),
     media-settings-menu:not([hidden])
 ) {
     & .pswp-ente .pswp__bottom-right-controls {
