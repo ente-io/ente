@@ -5,11 +5,13 @@ on:
     pull_request:
         paths:
             - "mobile/apps/photos/**"
+            - "mobile/packages/rust/**"
+            - "rust/core/**"
             - ".github/workflows/mobile-lint.yml"
 
 env:
     FLUTTER_VERSION: "3.32.8"
-    RUST_VERSION: "1.88.0"
+    RUSTFLAGS: -D warnings
 
 permissions:
     contents: read
@@ -32,18 +34,59 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
-                  
-            - run: flutter pub get
-                  
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@master
+
+            - name: Cache
+              uses: actions/cache@v4
               with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      mobile/packages/rust/rust/target
+                      mobile/apps/photos/rust/target
+                  key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
+
+            - run: flutter pub get
+
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
-              
+
+            - name: Generate Rust bindings (Core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
+
             - name: Generate Rust bindings
               run: flutter_rust_bridge_codegen generate
 
             - run: flutter analyze --no-fatal-infos
+
+            - name: Check formatting (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo build
+
+            - name: Test (ente_rust)
+              working-directory: mobile/packages/rust/rust
+              run: cargo test
+
+            - name: Check formatting (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
+
+            - name: Run clippy (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo build
+
+            - name: Test (ente_photos_rust)
+              working-directory: mobile/apps/photos/rust
+              run: cargo test

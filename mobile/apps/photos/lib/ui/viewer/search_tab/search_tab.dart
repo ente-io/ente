@@ -241,7 +241,7 @@ class _RitualsDiscoverySection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
           child: Text(
-            "Rituals",
+            AppLocalizations.of(context).ritualsTitle,
             style: textTheme.largeBold,
           ),
         ),

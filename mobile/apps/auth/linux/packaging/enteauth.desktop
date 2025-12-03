@@ -2,9 +2,10 @@
 Name=Auth
 GenericName=Ente Authenticator
 Exec=enteauth %U
-Icon=enteauth
+Icon=io.ente.auth
 Type=Application
 Categories=Utility;
 Keywords=Authentication;2FA;
 MimeType=x-scheme-handler/enteauth;
 StartupNotify=false
+StartupWMClass=io.ente.auth
