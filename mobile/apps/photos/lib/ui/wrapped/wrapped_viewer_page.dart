@@ -47,12 +47,18 @@ const EdgeInsets _kStoryCardOuterPadding = EdgeInsets.symmetric(
   horizontal: _kStoryCardOuterHorizontalInset,
   vertical: _kStoryCardOuterVerticalInset,
 );
+
 const EdgeInsets _kStoryCardInnerPadding = EdgeInsets.fromLTRB(
   _kStoryCardInnerHorizontalPadding,
   _kStoryCardInnerTopPadding,
   _kStoryCardInnerHorizontalPadding,
   _kStoryCardInnerBottomPadding,
 );
+
+const double _kStoryDesignWidth = 380.0;
+const double _kStoryDesignHeight = 700.0;
+const double _kStoryControlReserveHeight = 72.0;
+const double _kStoryControlBottomPadding = 20.0;
 
 const double _kStoryControlSize = 48.0;
 const double _kStoryControlIconSize = 24.0;
@@ -681,9 +687,6 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         builder: (BuildContext context) {
           final MediaQueryData baseMediaQuery = MediaQuery.of(context);
           final MediaQueryData clampedMediaQuery = baseMediaQuery.copyWith(
-            // Some widgets still read textScaleFactor directly; keep it locked.
-            // ignore: deprecated_member_use
-            textScaleFactor: 1.0,
             textScaler: const TextScaler.linear(1.0),
           );
           return MediaQuery(
@@ -820,49 +823,65 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
                             right: _kStoryControlHorizontalMarginFromEdge,
                             bottom: bottomPadding +
                                 _kStoryControlBottomMarginFromEdge,
-                            child: GestureDetector(
-                              key: _shareButtonKey,
-                              behavior: HitTestBehavior.translucent,
-                              onTap: _handleShare,
-                              child: Container(
-                                width: _kStoryControlSize,
-                                height: _kStoryControlSize,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: controlBackdropColor,
-                                  shape: BoxShape.circle,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GestureDetector(
+                                  key: _shareButtonKey,
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: _handleShare,
+                                  child: Container(
+                                    width: _kStoryControlSize,
+                                    height: _kStoryControlSize,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: controlBackdropColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.share,
+                                      size: _kStoryControlIconSize,
+                                      color: controlIconColor,
+                                    ),
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.share,
-                                  size: _kStoryControlIconSize,
-                                  color: controlIconColor,
+                                const SizedBox(
+                                  height: _kStoryControlBottomPadding,
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                           Positioned(
                             left: _kStoryControlHorizontalMarginFromEdge,
                             bottom: bottomPadding +
                                 _kStoryControlBottomMarginFromEdge,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.translucent,
-                              onTap: () => unawaited(_handleMusicToggle()),
-                              child: Container(
-                                width: _kStoryControlSize,
-                                height: _kStoryControlSize,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: controlBackdropColor,
-                                  shape: BoxShape.circle,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () => unawaited(_handleMusicToggle()),
+                                  child: Container(
+                                    width: _kStoryControlSize,
+                                    height: _kStoryControlSize,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: controlBackdropColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      (_isMusicMuted || !_isMusicPlaying)
+                                          ? Icons.volume_off
+                                          : Icons.volume_up,
+                                      size: _kStoryControlIconSize,
+                                      color: controlIconColor,
+                                    ),
+                                  ),
                                 ),
-                                child: Icon(
-                                  (_isMusicMuted || !_isMusicPlaying)
-                                      ? Icons.volume_off
-                                      : Icons.volume_up,
-                                  size: _kStoryControlIconSize,
-                                  color: controlIconColor,
+                                const SizedBox(
+                                  height: _kStoryControlBottomPadding,
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ],
