@@ -1592,30 +1592,51 @@ export const movePendingRemovalActionsToUncategorized = async (
     // Group files by collection ID for efficient lookup
     const filesByCollectionID = groupFilesByCollectionID(collectionFiles);
 
-    // Get or create the uncategorized collection
-    const uncategorizedCollection =
-        collections.find((c) => c.type == "uncategorized") ??
-        (await createUncategorizedCollection());
+    // Create a map of collection ID to collection for quick lookup
+    const collectionByID = new Map(collections.map((c) => [c.id, c]));
+
+    // Lazily initialized target collections (only created if needed)
+    let uncategorizedCollection: Collection | undefined;
+    let defaultHiddenCollection: Collection | undefined;
 
     // Process each collection with pending removal actions
     for (const [
         collectionID,
         pendingFileIDs,
     ] of collectionToFileIDs.entries()) {
+        const sourceCollection = collectionByID.get(collectionID);
         const filesInCollection = filesByCollectionID.get(collectionID) ?? [];
-        const filesToMove = filesInCollection.filter(
-            (file) =>
-                pendingFileIDs.has(file.id) &&
-                file.collectionID != uncategorizedCollection.id,
+        const filesToMove = filesInCollection.filter((file) =>
+            pendingFileIDs.has(file.id),
         );
 
         if (!filesToMove.length) continue;
 
-        // Move files to uncategorized collection
-        await moveFromCollection(
-            collectionID,
-            uncategorizedCollection,
-            filesToMove,
-        );
+        // Determine target collection based on whether source is hidden
+        const isSourceHidden =
+            sourceCollection && isHiddenCollection(sourceCollection);
+
+        let targetCollection: Collection;
+        if (isSourceHidden) {
+            // Move files from hidden collections to default hidden collection
+            if (!defaultHiddenCollection) {
+                defaultHiddenCollection =
+                    collections.find(isDefaultHiddenCollection) ??
+                    (await createDefaultHiddenCollection());
+            }
+            targetCollection = defaultHiddenCollection;
+        } else {
+            // Move files from normal collections to uncategorized
+            if (!uncategorizedCollection) {
+                uncategorizedCollection =
+                    collections.find((c) => c.type == "uncategorized") ??
+                    (await createUncategorizedCollection());
+            }
+            targetCollection = uncategorizedCollection;
+        }
+
+        // Move files to target collection (this also removes them from the
+        // source collection, which is the primary goal here)
+        await moveFromCollection(collectionID, targetCollection, filesToMove);
     }
 };
