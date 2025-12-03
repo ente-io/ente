@@ -86,7 +86,7 @@ class FlagService {
 
   bool get useWidgetV2 => internalUser;
 
-  bool get enableOnlyBackupFuturePhotos => internalUser;
+  bool get enableOnlyBackupFuturePhotos => true;
 
   bool get facesTimeline => internalUser;
   bool get ritualsFlag => internalUser;
