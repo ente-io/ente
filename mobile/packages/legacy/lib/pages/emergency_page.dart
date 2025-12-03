@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:ente_configuration/base_configuration.dart";
+import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
 import "package:ente_legacy/pages/select_contact_page.dart";
@@ -17,14 +18,11 @@ import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/menu_section_title.dart";
 import "package:ente_ui/components/notification_widget.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
-import "package:ente_ui/components/title_bar_widget.dart";
-import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/navigation_util.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
-import "package:flutter_svg/svg.dart";
 
 class EmergencyPage extends StatefulWidget {
   final BaseConfiguration config;
@@ -82,11 +80,35 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final List<EmergencyContact> trustedContacts = info?.contacts ?? [];
 
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 48,
+        leadingWidth: 48,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_outlined,
+          ),
+        ),
+      ),
       body: CustomScrollView(
         slivers: [
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: context.strings.legacy,
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TitleBarTitleWidget(
+                title: context.strings.legacy,
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                context.strings.legacyPageDesc,
+                style: getEnteTextTheme(context).smallMuted,
+              ),
             ),
           ),
           if (info == null)
@@ -199,11 +221,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       if (trustedContacts.isEmpty) {
                         return Column(
                           children: [
-                            const SizedBox(height: 20),
-                            Text(
-                              context.strings.legacyPageDesc,
-                              style: getEnteTextTheme(context).body,
-                            ),
                             SizedBox(
                               height: 200,
                               width: 200,
@@ -218,10 +235,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               style: getEnteTextTheme(context).smallMuted,
                             ),
                             const SizedBox(height: 16),
-                            ButtonWidget(
-                              buttonType: ButtonType.primary,
-                              labelText: context.strings.addTrustedContact,
-                              shouldSurfaceExecutionStates: false,
+                            GradientButton(
+                              text: context.strings.addTrustedContact,
                               onTap: () async {
                                 await routeToPage(
                                   context,

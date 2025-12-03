@@ -812,7 +812,7 @@
     }
   },
   "acceptTrustInvite": "Accept invite",
-  "addTrustedContact": "Add Trusted Contact",
+  "addTrustedContact": "Add trusted contact",
   "removeInvite": "Remove invite",
   "rejectRecovery": "Reject recovery",
   "recoveryInitiated": "Recovery initiated",
