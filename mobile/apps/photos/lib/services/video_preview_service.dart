@@ -106,10 +106,38 @@ class VideoPreviewService {
   final CacheManager videoCacheManager;
 
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
+  // Tracks whether we've already determined the default for this user.
+  // Used to distinguish between existing users (who should keep false default)
+  // and new users (who get internal user default).
+  static const String _videoStreamingDefaultApplied =
+      "videoStreamingDefaultApplied";
 
   bool get isVideoStreamingEnabled {
-    return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
-        flagService.internalUser;
+    final stored = serviceLocator.prefs.getBool(_videoStreamingEnabled);
+    if (stored != null) return stored;
+
+    // Check if default was already determined for this user
+    final defaultApplied =
+        serviceLocator.prefs.getBool(_videoStreamingDefaultApplied) ?? false;
+    if (defaultApplied) {
+      // Default was already applied, use old default (false)
+      return false;
+    }
+
+    // First time checking - determine if this is an existing or new user
+    // Existing users have a configured account before this code runs
+    final isExistingUser = config.hasConfiguredAccount();
+    if (isExistingUser) {
+      // Mark as applied and use old default for existing users
+      serviceLocator.prefs.setBool(_videoStreamingDefaultApplied, true).ignore();
+      return false;
+    }
+
+    // New user - apply internal user default and mark as applied
+    final defaultValue = flagService.internalUser;
+    serviceLocator.prefs.setBool(_videoStreamingDefaultApplied, true).ignore();
+    serviceLocator.prefs.setBool(_videoStreamingEnabled, defaultValue).ignore();
+    return defaultValue;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
