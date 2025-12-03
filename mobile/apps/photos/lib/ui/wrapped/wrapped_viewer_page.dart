@@ -187,7 +187,11 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
     if (cardCount <= 1) {
       return 0;
     }
-    return state.resumeIndex.clamp(0, cardCount - 1);
+    final int lastIndex = cardCount - 1;
+    if (state.isComplete && state.resumeIndex >= lastIndex) {
+      return 0;
+    }
+    return state.resumeIndex.clamp(0, lastIndex);
   }
 
   void _handleServiceUpdate(WrappedEntryState next) {
