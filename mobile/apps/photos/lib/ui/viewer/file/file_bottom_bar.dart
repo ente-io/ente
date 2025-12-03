@@ -11,7 +11,6 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
-
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -21,14 +20,12 @@ import 'package:photos/utils/share_util.dart';
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
   final Function(EnteFile) onFileRemoved;
-  final bool showOnlyInfoButton;
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
   final bool isLocalOnlyContext;
 
   const FileBottomBar(
-    this.file,
-    this.showOnlyInfoButton, {
+    this.file, {
     required this.onFileRemoved,
     required this.enableFullScreenNotifier,
     this.userID,
@@ -84,31 +81,15 @@ class FileBottomBarState extends State<FileBottomBar> {
   Widget _getBottomBar() {
     Logger("FileBottomBar")
         .fine("building bottom bar ${widget.file.generatedID}");
+
     final List<Widget> children = [];
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
-    children.add(
-      Tooltip(
-        message: AppLocalizations.of(context).info,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: IconButton(
-            icon: Icon(
-              Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
-              color: Colors.white,
-            ),
-            onPressed: () async {
-              await _displayDetails(widget.file);
-            },
-          ),
-        ),
-      ),
-    );
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
 
-    if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
+    if (widget.file is! TrashFile) {
       if (isOwnedByUser) {
         children.add(
           Tooltip(
@@ -248,9 +229,5 @@ class FileBottomBarState extends State<FileBottomBar> {
         ),
       ),
     );
-  }
-
-  Future<void> _displayDetails(EnteFile file) async {
-    await showDetailsSheet(context, file);
   }
 }
