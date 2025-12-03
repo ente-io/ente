@@ -5,7 +5,7 @@ publisher_url: https://github.com/ente-io/ente
 display_name: Ente Auth
 create_desktop_icon: false
 install_dir_name: "{autopf}\\Ente Auth"
-setup_icon_file: ../../assets/icons/auth-icon.ico
+setup_icon_file: assets/icons/auth-icon.ico
 script_template: inno_setup.iss
 locales:
   - en

@@ -193,6 +193,7 @@ flutter_launcher_icons:
 
   ios: true
   remove_alpha_ios: true
+  image_path_ios: "assets/generation-icons/icon-purple.png"
   image_path_ios_dark_transparent: "assets/generation-icons/icon-ios-foreground.png"
   image_path_ios_tinted_grayscale: "assets/generation-icons/icon-tinted.png"
 
@@ -211,8 +212,8 @@ flutter_launcher_icons:
     icon_size: 256
 
 flutter_native_splash:
-  color: "#FFFFFF"
-  color_dark: "#000000"
+  color: "#A75CFF"
+  color_dark: "#A75CFF"
   image: "assets/generation-icons/splash-icon-ios-padded.png"
   android_gravity: center
   ios_content_mode: center
@@ -230,16 +231,13 @@ flutter_native_splash:
     image: "assets/generation-icons/splash-icon-ios-padded.png"
 
     # Splash screen background color.
-    color: "#FFFFFF"
+    color: "#A75CFF"
 
     # App icon background color.
-    icon_background_color: "#FFFFFF"
-
-    # The branding property allows you to specify an image used as branding in the splash screen.
-    #branding: assets/dart.png
+    icon_background_color: "#A75CFF"
 
     # The image_dark, color_dark, icon_background_color_dark, and branding_dark set values that
     # apply when the device is in dark mode. If they are not specified, the app will use the
     # parameters from above.
-    color_dark: "#000000"
-    icon_background_color_dark: "#000000"
+    color_dark: "#A75CFF"
+    icon_background_color_dark: "#A75CFF"
