@@ -49,6 +49,8 @@
 		<false/>
 		<key>NSCameraUsageDescription</key>
 		<string>Please allow access to camera so that Ente can scan and backup your documents.</string>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Please allow Ente Locker to lock itself with FaceID or TouchID</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Please allow access to your library so that Ente can encrypt and back up your documents.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
