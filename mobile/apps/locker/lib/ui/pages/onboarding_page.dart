@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dots_indicator/dots_indicator.dart';
 import 'package:ente_accounts/pages/login_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
@@ -8,8 +10,10 @@ import "package:ente_ui/pages/web_page.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/configuration.dart';
+import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/new_account_dialog.dart";
 import 'package:locker/ui/pages/home_page.dart';
 
@@ -22,9 +26,84 @@ class OnboardingPage extends StatefulWidget {
 
 class _OnboardingPageState extends State<OnboardingPage> {
   static const kDeveloperModeTapCountThreshold = 7;
+  static const _featureCount = 3;
+  static const _autoScrollInterval = Duration(seconds: 4);
 
-  double _featureIndex = 0;
+  late final PageController _pageController;
+  Timer? _autoScrollTimer;
+
   int _developerModeTapCount = 0;
+  int _activeDotIndex = 0;
+  int _currentPage = 0;
+  bool _autoScrollDisabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    const initialPage = _featureCount * 1000;
+    _pageController = PageController(initialPage: initialPage);
+    _pageController.addListener(_handlePageControllerScroll);
+    _currentPage = initialPage;
+    _activeDotIndex = _currentPage % _featureCount;
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _stopAutoScroll();
+    _pageController.removeListener(_handlePageControllerScroll);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    if (_autoScrollDisabled) {
+      return;
+    }
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(_autoScrollInterval, (_) {
+      if (!_pageController.hasClients) {
+        return;
+      }
+      final nextPage = _currentPage + 1;
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _stopAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = null;
+  }
+
+  void _handlePageControllerScroll() {
+    if (!_pageController.hasClients) {
+      return;
+    }
+    if (_pageController.position.userScrollDirection != ScrollDirection.idle) {
+      _autoScrollDisabled = true;
+      _stopAutoScroll();
+    }
+  }
+
+  void _animateToFeature(int index) {
+    if (!_pageController.hasClients) {
+      return;
+    }
+    final base = _currentPage - (_currentPage % _featureCount);
+    final targetPage = base + index;
+    if (targetPage == _currentPage) {
+      return;
+    }
+    _pageController.animateToPage(
+      targetPage,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +112,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: colorScheme.primary700,
+      appBar: AppBar(
+        leading: const SizedBox(),
+        title: Image.asset("assets/locker-logo.png", height: 24),
+        backgroundColor: colorScheme.primary700,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+      ),
       body: GestureDetector(
         onTap: () async {
           _developerModeTapCount++;
@@ -57,109 +144,98 @@ class _OnboardingPageState extends State<OnboardingPage> {
             }
           }
         },
-        child: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        const Padding(padding: EdgeInsets.all(12)),
-                        Image.asset(
-                          'assets/locker-logo.png',
-                          height: 28,
-                        ),
-                        const Padding(padding: EdgeInsets.all(28)),
-                        _getFeatureSlider(context),
-                        const Padding(padding: EdgeInsets.all(12)),
-                        DotsIndicator(
-                          dotsCount: 3,
-                          position: _featureIndex.toInt(),
-                          decorator: DotsDecorator(
-                            activeColor: Colors.white,
-                            color: Colors.white.withValues(alpha: 0.32),
-                            activeShape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 28),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _getFeatureSlider(context),
+                          const SizedBox(height: 12),
+                          DotsIndicator(
+                            dotsCount: _featureCount,
+                            position: _activeDotIndex,
+                            decorator: DotsDecorator(
+                              activeColor: Colors.white,
+                              color: Colors.white.withValues(alpha: 0.32),
+                              activeShape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              size: const Size(10, 10),
+                              activeSize: const Size(20, 10),
+                              spacing: const EdgeInsets.all(6),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            size: const Size(10, 10),
-                            activeSize: const Size(20, 10),
-                            spacing: const EdgeInsets.all(6),
+                            onTap: (index) {
+                              _autoScrollDisabled = true;
+                              _stopAutoScroll();
+                              _animateToFeature(index);
+                            },
                           ),
-                        ),
-                        const Padding(padding: EdgeInsets.all(28)),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: colorScheme.primary700,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 18,
+                    const SizedBox(height: 48),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: GradientButton(
+                        text: l10n.loginToEnteAccount,
+                        backgroundColor: Colors.white,
+                        textColor: colorScheme.primary700,
+                        onTap: _navigateToSignInPage,
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    minimumSize: const Size(double.infinity, 56),
-                  ),
-                  onPressed: _navigateToSignInPage,
-                  child: Text(
-                    l10n.loginToEnteAccount,
-                    style: getEnteTextTheme(context).bodyBold.copyWith(
-                          color: colorScheme.primary700,
-                        ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: () async {
-                    final result = await showCreateNewAccountDialog(
-                      context,
-                      title: l10n.unlockLockerNewUserTitle,
-                      body: l10n.unlockLockerNewUserBody,
-                      buttonLabel: l10n.checkoutEntePhotos,
-                      assetPath: "assets/file_lock.png",
-                      icon: const SizedBox.shrink(),
-                    );
+                    const SizedBox(height: 16),
+                    Center(
+                      child: TextButton(
+                        onPressed: () async {
+                          final result = await showCreateNewAccountDialog(
+                            context,
+                            title: l10n.unlockLockerNewUserTitle,
+                            body: l10n.unlockLockerNewUserBody,
+                            buttonLabel: l10n.checkoutEntePhotos,
+                            assetPath: "assets/file_lock.png",
+                          );
 
-                    if (result?.action == ButtonAction.first) {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) {
-                            return WebPage(
-                              l10n.checkoutEntePhotos,
-                              "https://ente.io/",
+                          if (result?.action == ButtonAction.first) {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) {
+                                  return WebPage(
+                                    l10n.checkoutEntePhotos,
+                                    "https://ente.io/",
+                                  );
+                                },
+                              ),
                             );
-                          },
+                          }
+                        },
+                        child: Text(
+                          l10n.noAccountCta,
+                          style: getEnteTextTheme(context).bodyBold.copyWith(
+                                color: Colors.white,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
                         ),
-                      );
-                    }
-                  },
-                  child: Text(
-                    l10n.noAccountCta,
-                    style: getEnteTextTheme(context).bodyBold.copyWith(
-                          color: Colors.white,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.white,
-                        ),
-                  ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               ),
-              const Padding(padding: EdgeInsets.all(20)),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -167,27 +243,29 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Widget _getFeatureSlider(BuildContext context) {
     final l10n = context.l10n;
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 420),
-      child: PageView(
-        children: [
-          FeatureItemWidget(
-            "assets/onboarding_lock.png",
-            l10n.featureSaveImportant,
-          ),
-          FeatureItemWidget(
-            "assets/onboarding_file.png",
-            l10n.featurePassAutomatically,
-          ),
-          FeatureItemWidget(
-            "assets/onboarding_share.png",
-            l10n.featureShareAnytime,
-          ),
-        ],
+    final features = [
+      ("assets/onboarding_lock.png", l10n.featureSaveImportant),
+      ("assets/onboarding_file.png", l10n.featurePassAutomatically),
+      ("assets/onboarding_share.png", l10n.featureShareAnytime),
+    ];
+
+    return SizedBox(
+      height: 320,
+      child: PageView.builder(
+        controller: _pageController,
+        itemBuilder: (context, index) {
+          final feature = features[index % features.length];
+          return FeatureItemWidget(
+            feature.$1,
+            feature.$2,
+          );
+        },
         onPageChanged: (index) {
           setState(() {
-            _featureIndex = double.parse(index.toString());
+            _currentPage = index;
+            _activeDotIndex = index % _featureCount;
           });
+          _startAutoScroll();
         },
       ),
     );

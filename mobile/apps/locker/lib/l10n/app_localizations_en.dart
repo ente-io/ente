@@ -1307,7 +1307,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unlockLockerNewUserBody =>
-      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
+      'Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';
