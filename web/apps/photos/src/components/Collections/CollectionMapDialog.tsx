@@ -48,6 +48,8 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-cluster";
 import {
     calculateOptimalZoom,
     createIcon,
@@ -59,18 +61,6 @@ import { generateNeededThumbnails } from "../TripLayout/utils/dataProcessing";
 // ============================================================================
 // Types
 // ============================================================================
-
-/**
- * Type definitions for the CollectionMapDialog component and its dependencies
- */
-
-interface MapComponents {
-    MapContainer: typeof import("react-leaflet").MapContainer;
-    TileLayer: typeof import("react-leaflet").TileLayer;
-    Marker: typeof import("react-leaflet").Marker;
-    useMap: typeof import("react-leaflet").useMap;
-    MarkerClusterGroup: typeof import("react-leaflet-cluster").default;
-}
 
 interface CollectionMapDialogProps extends ModalVisibilityProps {
     collectionSummary: CollectionSummary;
@@ -108,37 +98,6 @@ interface FavoritesState {
 // ============================================================================
 
 /**
- * Dynamically loads map-related React components (Leaflet) to avoid SSR issues
- * Responsibility: Lazy load map dependencies only when needed
- */
-function useMapComponents() {
-    const [mapComponents, setMapComponents] = useState<MapComponents | null>(
-        null,
-    );
-
-    useEffect(() => {
-        void Promise.all([
-            import("react-leaflet"),
-            import("react-leaflet-cluster"),
-        ])
-            .then(([leaflet, cluster]) =>
-                setMapComponents({
-                    MapContainer: leaflet.MapContainer,
-                    TileLayer: leaflet.TileLayer,
-                    Marker: leaflet.Marker,
-                    useMap: leaflet.useMap,
-                    MarkerClusterGroup: cluster.default,
-                }),
-            )
-            .catch((e: unknown) => {
-                console.error("Failed to load map components", e);
-            });
-    }, []);
-
-    return mapComponents;
-}
-
-/**
  * Retrieves the current authenticated user
  * Responsibility: Provide user context for favorite/visibility operations
  */
@@ -150,54 +109,6 @@ function useCurrentUser() {
             return undefined;
         }
     }, []);
-}
-
-/**
- * Animates a counter value with smooth easing
- * Responsibility: Provide smooth number transitions for UI counters
- */
-function useAnimatedCounter(targetValue: number, duration = 500) {
-    const [displayValue, setDisplayValue] = useState(targetValue);
-    const previousValue = useRef(targetValue);
-    const animationFrameRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        const startValue = previousValue.current;
-        const difference = targetValue - startValue;
-
-        if (difference === 0) return;
-
-        const startTime = performance.now();
-
-        const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-
-            // Ease out cubic for smooth deceleration
-            const easeOut = 1 - Math.pow(1 - progress, 3);
-            const currentValue = Math.round(startValue + difference * easeOut);
-
-            setDisplayValue(currentValue);
-
-            if (progress < 1) {
-                animationFrameRef.current = requestAnimationFrame(animate);
-            } else {
-                previousValue.current = targetValue;
-                animationFrameRef.current = null;
-            }
-        };
-
-        animationFrameRef.current = requestAnimationFrame(animate);
-
-        // Cleanup: cancel animation frame on unmount or when dependencies change
-        return () => {
-            if (animationFrameRef.current !== null) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-        };
-    }, [targetValue, duration]);
-
-    return displayValue;
 }
 
 /**
@@ -259,7 +170,7 @@ function useMapData(
 
             try {
                 const files = await getFilesForCollection(activeCollection);
-                const locationPoints = extractLocationPoints(files);
+                const locationPoints = extractLocationPoints(files); // transforms the files into JourneyData[]
 
                 if (locationPoints.length) {
                     const sortedPoints = sortPhotosByTimestamp(locationPoints);
@@ -355,25 +266,19 @@ function useFavorites(
     }, [open, user]);
 
     // Helper to add/remove from Set immutably - avoids recreating Set when unnecessary
-    const addToSet = useCallback(
-        (set: Set<number>, id: number) => {
-            if (set.has(id)) return set;
-            const next = new Set(set);
-            next.add(id);
-            return next;
-        },
-        [],
-    );
+    const addToSet = useCallback((set: Set<number>, id: number) => {
+        if (set.has(id)) return set;
+        const next = new Set(set);
+        next.add(id);
+        return next;
+    }, []);
 
-    const removeFromSet = useCallback(
-        (set: Set<number>, id: number) => {
-            if (!set.has(id)) return set;
-            const next = new Set(set);
-            next.delete(id);
-            return next;
-        },
-        [],
-    );
+    const removeFromSet = useCallback((set: Set<number>, id: number) => {
+        if (!set.has(id)) return set;
+        const next = new Set(set);
+        next.delete(id);
+        return next;
+    }, []);
 
     const handleToggleFavorite = useCallback(
         async (file: EnteFile) => {
@@ -395,7 +300,9 @@ function useFavorites(
                         : addToSet(prev, fileID),
                 );
             } finally {
-                setPendingFavoriteUpdates((prev) => removeFromSet(prev, fileID));
+                setPendingFavoriteUpdates((prev) =>
+                    removeFromSet(prev, fileID),
+                );
             }
         },
         [user, favoriteFileIDs, addToSet, removeFromSet],
@@ -654,7 +561,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     activeCollection,
 }) => {
     const { onGenericError } = useBaseContext();
-    const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const optimalZoom = calculateOptimalZoom();
 
@@ -706,16 +612,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             );
         }
 
-        if (!mapComponents) {
-            return (
-                <CenteredBox>
-                    <Typography variant="body" color="text.secondary">
-                        {t("loading")}
-                    </Typography>
-                </CenteredBox>
-            );
-        }
-
         if (!mapPhotos.length || !mapCenter) {
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
@@ -738,7 +634,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 thumbByFileID={thumbByFileID}
                 visiblePhotoOrder={visiblePhotoOrder}
                 visiblePhotosWave={visiblePhotosWave}
-                mapComponents={mapComponents}
                 mapCenter={mapCenter}
                 optimalZoom={optimalZoom}
                 createClusterCustomIcon={createClusterCustomIcon}
@@ -754,7 +649,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         handlePhotoClick,
         isLoading,
         mapCenter,
-        mapComponents,
         mapPhotos,
         onClose,
         optimalZoom,
@@ -821,7 +715,6 @@ interface MapLayoutProps {
     thumbByFileID: Map<number, string>;
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
-    mapComponents: MapComponents;
     mapCenter: [number, number];
     optimalZoom: number;
     createClusterCustomIcon: (cluster: unknown) => unknown;
@@ -838,7 +731,6 @@ function MapLayout({
     thumbByFileID,
     visiblePhotoOrder,
     visiblePhotosWave,
-    mapComponents,
     mapCenter,
     optimalZoom,
     createClusterCustomIcon,
@@ -861,7 +753,6 @@ function MapLayout({
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
-                    mapComponents={mapComponents}
                     mapCenter={mapCenter}
                     mapPhotos={mapPhotos}
                     optimalZoom={optimalZoom}
@@ -911,9 +802,6 @@ function CollectionSidebar({
     );
     const coverRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
-
-    // Animated counter for memories
-    const animatedCount = useAnimatedCounter(visibleCount, 400);
 
     // Reset current date when scrolled back to top
     const handleScroll = useCallback(() => {
@@ -1048,8 +936,8 @@ function CollectionSidebar({
                     </Typography>
                     <Typography variant="small" color="text.secondary">
                         {(currentDateLabel ?? photoGroups[0]?.dateLabel)
-                            ? `${currentDateLabel ?? photoGroups[0]?.dateLabel} • ${animatedCount} memories`
-                            : `${animatedCount} memories`}
+                            ? `${currentDateLabel ?? photoGroups[0]?.dateLabel} • ${visibleCount} memories`
+                            : `${visibleCount} memories`}
                     </Typography>
                 </Stack>
                 <IconButton
@@ -1236,7 +1124,6 @@ const PhotoDateGroup = React.memo(function PhotoDateGroup({
  * Responsibility: Display interactive map with photo markers and handle viewport changes
  */
 interface MapCanvasProps {
-    mapComponents: MapComponents;
     mapCenter: [number, number];
     mapPhotos: JourneyPoint[];
     optimalZoom: number;
@@ -1246,7 +1133,6 @@ interface MapCanvasProps {
 }
 
 const MapCanvas = React.memo(function MapCanvas({
-    mapComponents,
     mapCenter,
     mapPhotos,
     optimalZoom,
@@ -1254,9 +1140,6 @@ const MapCanvas = React.memo(function MapCanvas({
     createClusterCustomIcon,
     onVisiblePhotosChange,
 }: MapCanvasProps) {
-    const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
-        mapComponents;
-
     // Memoize marker icons to prevent recreation on every render
     // Key: fileId, Value: Leaflet icon instance
     const markerIcons = useMemo(() => {
@@ -1285,9 +1168,8 @@ const MapCanvas = React.memo(function MapCanvas({
                 maxZoom={19}
                 updateWhenZooming
             />
-            <MapControls useMap={useMap} />
+            <MapControls />
             <MapViewportListener
-                useMap={useMap}
                 photos={mapPhotos}
                 onVisiblePhotosChange={onVisiblePhotosChange}
             />
@@ -1318,13 +1200,7 @@ const MapCanvas = React.memo(function MapCanvas({
  * Floating map control buttons (open in Maps, zoom in/out)
  * Responsibility: Provide map navigation and external link controls
  */
-interface MapControlsProps {
-    useMap: typeof import("react-leaflet").useMap;
-}
-
-const MapControls = React.memo(function MapControls({
-    useMap,
-}: MapControlsProps) {
+const MapControls = React.memo(function MapControls() {
     const map = useMap();
 
     const handleOpenInMaps = useCallback(() => {
@@ -1370,13 +1246,11 @@ const MapControls = React.memo(function MapControls({
  * Responsibility: Track map bounds and notify parent of visible photos when viewport changes
  */
 interface MapViewportListenerProps {
-    useMap: typeof import("react-leaflet").useMap;
     photos: JourneyPoint[];
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
 }
 
 function MapViewportListener({
-    useMap,
     photos,
     onVisiblePhotosChange,
 }: MapViewportListenerProps) {
@@ -1794,10 +1668,7 @@ const ThumbImage = React.memo(function ThumbImage({
     return (
         <Box
             onClick={onClick}
-            sx={{
-                ...thumbImageContainerBaseSx,
-                ...animationSx,
-            }}
+            sx={{ ...thumbImageContainerBaseSx, ...animationSx }}
         >
             <Box component="img" src={src} alt="" sx={thumbImgSx} />
         </Box>
