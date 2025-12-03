@@ -952,100 +952,48 @@ function CollectionSidebar({
                 />
             </Box>
 
-            {/* Sticky header - Dynamic Island style pill */}
+            {/* Sticky header */}
             <Box
                 sx={{
                     position: "sticky",
                     top: 0,
                     zIndex: 10,
+                    bgcolor: (theme) => theme.vars.palette.background.paper,
+                    px: { xs: "24px", md: "32px" },
                     pt: { xs: 2, md: 4 },
-                    pb: { xs: 1.5, md: 3 },
-                    px: { xs: 1.5, md: 2.5 },
-                    display: isCoverHidden ? "block" : "none",
-                    background:
-                        "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 100%)",
+                    pb: 2,
+                    display: isCoverHidden ? "flex" : "none",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    borderBottom: (theme) =>
+                        `1px solid ${theme.palette.divider}`,
                 }}
             >
-                <Box
+                <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography
+                        variant="body"
+                        sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                        noWrap
+                    >
+                        {collectionSummary.name}
+                    </Typography>
+                    <Typography variant="small" color="text.secondary">
+                        {(currentDateLabel ?? photoGroups[0]?.dateLabel)
+                            ? `${currentDateLabel ?? photoGroups[0]?.dateLabel} • ${animatedCount} memories`
+                            : `${animatedCount} memories`}
+                    </Typography>
+                </Stack>
+                <IconButton
+                    aria-label="Close"
+                    onClick={onClose}
+                    size="small"
                     sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        bgcolor: "#1a1a1a",
-                        borderRadius: { xs: "28px", md: "36px" },
-                        px: { xs: 1.5, md: 2 },
-                        py: { xs: 1, md: 1.5 },
-                        boxShadow:
-                            "0 12px 40px -4px rgba(0, 0, 0, 0.6), 0 4px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)",
-                        animation: `${dynamicIslandAppear} 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
-                        transformOrigin: "top center",
-                        gap: { xs: 1, md: 1.5 },
+                        ml: 1,
+                        bgcolor: (theme) => theme.vars.palette.fill.faint,
                     }}
                 >
-                    {/* Cover image avatar */}
-                    <Box
-                        sx={{
-                            width: { xs: 40, md: 56 },
-                            height: { xs: 40, md: 56 },
-                            borderRadius: "50%",
-                            overflow: "hidden",
-                            flexShrink: 0,
-                            bgcolor: "rgba(255, 255, 255, 0.1)",
-                        }}
-                    >
-                        {coverImageUrl && (
-                            <Box
-                                component="img"
-                                src={coverImageUrl}
-                                alt=""
-                                sx={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                }}
-                            />
-                        )}
-                    </Box>
-                    <Stack spacing={0.125} sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography
-                            variant="body"
-                            sx={{
-                                fontWeight: 600,
-                                lineHeight: 1.2,
-                                color: "white",
-                                fontSize: { xs: "16px", md: "16px" },
-                            }}
-                            noWrap
-                        >
-                            {collectionSummary.name}
-                        </Typography>
-                        <Typography
-                            variant="small"
-                            sx={{
-                                color: "rgba(255, 255, 255, 0.7)",
-                                fontSize: { xs: "13px", md: "13px" },
-                            }}
-                        >
-                            {currentDateLabel
-                                ? `${currentDateLabel} • ${animatedCount} memories`
-                                : `${animatedCount} memories`}
-                        </Typography>
-                    </Stack>
-                    <IconButton
-                        aria-label="Close"
-                        onClick={onClose}
-                        size="small"
-                        sx={{
-                            ml: { xs: 0.5, md: 1.5 },
-                            p: { xs: 0.75, md: 1 },
-                            color: "white",
-                            bgcolor: "rgba(255, 255, 255, 0.15)",
-                            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.25)" },
-                        }}
-                    >
-                        <CloseIcon sx={{ fontSize: { xs: 16, md: 20 } }} />
-                    </IconButton>
-                </Box>
+                    <CloseIcon fontSize="small" />
+                </IconButton>
             </Box>
 
             <Box
@@ -1062,6 +1010,7 @@ function CollectionSidebar({
                     visiblePhotosWave={visiblePhotosWave}
                     onPhotoClick={onPhotoClick}
                     onDateVisible={handleDateVisible}
+                    scrollContainerRef={sidebarRef}
                 />
             </Box>
         </Box>
@@ -1075,6 +1024,7 @@ interface PhotoListProps {
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
     onDateVisible?: (dateLabel: string) => void;
+    scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 function PhotoList({
@@ -1084,6 +1034,7 @@ function PhotoList({
     visiblePhotosWave,
     onPhotoClick,
     onDateVisible,
+    scrollContainerRef,
 }: PhotoListProps) {
     if (!photoGroups.length) {
         return (
@@ -1114,6 +1065,7 @@ function PhotoList({
                     visiblePhotosWave={visiblePhotosWave}
                     onPhotoClick={onPhotoClick}
                     onDateVisible={onDateVisible}
+                    scrollContainerRef={scrollContainerRef}
                 />
             ))}
         </Stack>
@@ -1128,6 +1080,7 @@ interface PhotoDateGroupProps {
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
     onDateVisible?: (dateLabel: string) => void;
+    scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 function PhotoDateGroup({
@@ -1138,31 +1091,38 @@ function PhotoDateGroup({
     visiblePhotosWave,
     onPhotoClick,
     onDateVisible,
+    scrollContainerRef,
 }: PhotoDateGroupProps) {
     const headerRef = useRef<HTMLDivElement>(null);
 
     // Track when this date group's header scrolls out of view at the top
     useEffect(() => {
         const header = headerRef.current;
+        const scrollContainer = scrollContainerRef?.current;
         if (!header || !onDateVisible) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
                 // When header is not intersecting (scrolled past top), this date is "current"
-                if (
-                    entry &&
-                    !entry.isIntersecting &&
-                    entry.boundingClientRect.top < 0
-                ) {
-                    onDateVisible(dateLabel);
+                if (entry && !entry.isIntersecting) {
+                    const rect = entry.boundingClientRect;
+                    const rootRect = scrollContainer?.getBoundingClientRect();
+                    const topThreshold = rootRect?.top ?? 0;
+                    if (rect.top < topThreshold + 100) {
+                        onDateVisible(dateLabel);
+                    }
                 }
             },
-            { threshold: 0 },
+            {
+                threshold: 0,
+                root: scrollContainer ?? null,
+                rootMargin: "-100px 0px 0px 0px",
+            },
         );
 
         observer.observe(header);
         return () => observer.disconnect();
-    }, [dateLabel, onDateVisible]);
+    }, [dateLabel, onDateVisible, scrollContainerRef]);
 
     return (
         <Stack spacing={0.75}>
@@ -1539,12 +1499,13 @@ function MapCover({
     );
 }
 
-const CoverContainer = styled(Box)({
+const CoverContainer = styled(Box)(({ theme }) => ({
     width: "100%",
     flexShrink: 0,
     padding: "16px",
     paddingBottom: "8px",
-});
+    [theme.breakpoints.down("md")]: { padding: "8px", paddingBottom: "4px" },
+}));
 
 const CoverImageContainer = styled(Box)({
     aspectRatio: "16/9",
@@ -1597,21 +1558,6 @@ const CoverSubtitle = styled(Typography)({
 // ============================================================================
 // Thumbnail Components
 // ============================================================================
-
-const dynamicIslandAppear = keyframes`
-    0% {
-        opacity: 0;
-        transform: scale(0.85) translateY(-8px);
-    }
-    50% {
-        opacity: 1;
-        transform: scale(1.02) translateY(0);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-`;
 
 const cascadeFadeIn = keyframes`
     from {
