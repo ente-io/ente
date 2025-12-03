@@ -8,7 +8,9 @@ import {
     Dialog,
     DialogContent,
     IconButton,
+    Skeleton,
     Stack,
+    styled,
     Typography,
     type IconButtonProps,
 } from "@mui/material";
@@ -744,7 +746,7 @@ function MapLayout({
                 collectionSummary={collectionSummary}
                 visibleCount={visiblePhotos.length}
                 photoGroups={photoGroups}
-                mapPhotosCount={mapPhotos.length}
+                mapPhotos={mapPhotos}
                 thumbByFileID={thumbByFileID}
                 visiblePhotoOrder={visiblePhotoOrder}
                 visiblePhotosWave={visiblePhotosWave}
@@ -774,7 +776,7 @@ interface CollectionSidebarProps {
     collectionSummary: CollectionSummary;
     visibleCount: number;
     photoGroups: PhotoGroup[];
-    mapPhotosCount: number;
+    mapPhotos: JourneyPoint[];
     thumbByFileID: Map<number, string>;
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
@@ -786,12 +788,27 @@ function CollectionSidebar({
     collectionSummary,
     visibleCount,
     photoGroups,
+    mapPhotos,
     thumbByFileID,
     visiblePhotoOrder,
     visiblePhotosWave,
     onPhotoClick,
     onClose,
 }: CollectionSidebarProps) {
+    // Get the first photo's thumbnail as the cover image
+    const coverImageUrl = useMemo(() => {
+        if (!mapPhotos.length) return undefined;
+        // Sort by timestamp to get the most recent photo for the cover
+        const sorted = [...mapPhotos].sort(
+            (a, b) =>
+                new Date(b.timestamp).getTime() -
+                new Date(a.timestamp).getTime(),
+        );
+        const firstPhoto = sorted[0];
+        if (!firstPhoto) return undefined;
+        return thumbByFileID.get(firstPhoto.fileId) ?? firstPhoto.image;
+    }, [mapPhotos, thumbByFileID]);
+
     return (
         <Box
             sx={{
@@ -810,8 +827,7 @@ function CollectionSidebar({
                 display: "flex",
                 flexDirection: "column",
                 overflowY: "auto",
-                px: { xs: "24px", md: "32px" },
-                pb: { xs: "24px", md: "32px" },
+                overflowX: "hidden",
                 // Desktop: rounded corners on all sides; Mobile: only top corners
                 borderRadius: { xs: "24px 24px 0 0", md: "48px" },
                 zIndex: 1000,
@@ -832,70 +848,27 @@ function CollectionSidebar({
                     `${theme.palette.divider} transparent`,
             }}
         >
-            <SidebarHeader
+            <MapCover
                 name={collectionSummary.name}
+                mapPhotos={mapPhotos}
+                coverImageUrl={coverImageUrl}
                 visibleCount={visibleCount}
                 onClose={onClose}
             />
-            <PhotoList
-                photoGroups={photoGroups}
-                thumbByFileID={thumbByFileID}
-                visiblePhotoOrder={visiblePhotoOrder}
-                visiblePhotosWave={visiblePhotosWave}
-                onPhotoClick={onPhotoClick}
-            />
-        </Box>
-    );
-}
-
-interface SidebarHeaderProps {
-    name: string;
-    visibleCount: number;
-    onClose: () => void;
-}
-
-function SidebarHeader({ name, visibleCount, onClose }: SidebarHeaderProps) {
-    return (
-        <Box
-            sx={{
-                position: "sticky",
-                top: { xs: "0", md: "0" },
-                mx: { xs: "-24px", md: "-32px" },
-                px: { xs: "24px", md: "32px" },
-                pt: { xs: "24px", md: "32px" },
-                pr: { md: "24px" },
-                pb: 2,
-                bgcolor: (theme) => theme.vars.palette.background.paper,
-                zIndex: 3,
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-            }}
-        >
-            <Stack>
-                <Typography variant="h5" sx={{ fontWeight: 700 }} noWrap>
-                    {name}
-                </Typography>
-                <Typography
-                    variant="body"
-                    color="text.secondary"
-                    sx={{
-                        mt: 0.25,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                    }}
-                >
-                    {visibleCount} {t("memories", { defaultValue: "memories" })}
-                </Typography>
-            </Stack>
-            <IconButton
-                aria-label={t("close")}
-                onClick={onClose}
-                sx={{ bgcolor: "rgba(255, 255, 255, 0.1)" }}
+            <Box
+                sx={{
+                    px: { xs: "24px", md: "32px" },
+                    pb: { xs: "24px", md: "32px" },
+                }}
             >
-                <CloseIcon />
-            </IconButton>
+                <PhotoList
+                    photoGroups={photoGroups}
+                    thumbByFileID={thumbByFileID}
+                    visiblePhotoOrder={visiblePhotoOrder}
+                    visiblePhotosWave={visiblePhotosWave}
+                    onPhotoClick={onPhotoClick}
+                />
+            </Box>
         </Box>
     );
 }
@@ -966,18 +939,41 @@ function PhotoDateGroup({
     visiblePhotosWave,
     onPhotoClick,
 }: PhotoDateGroupProps) {
+    const [isStuck, setIsStuck] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const sentinel = sentinelRef.current;
+        if (!sentinel) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                // When sentinel is not visible (scrolled past), the header is stuck
+                setIsStuck(entry ? !entry.isIntersecting : false);
+            },
+            { threshold: 0 },
+        );
+
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <Stack spacing={0.75}>
+            {/* Sentinel element to detect when sticky kicks in */}
+            <Box ref={sentinelRef} sx={{ height: 0, visibility: "hidden" }} />
             <Box
                 sx={{
                     position: "sticky",
-                    top: { xs: "56px", md: "85px" },
+                    top: 0,
                     bgcolor: (theme) => theme.vars.palette.background.paper,
                     zIndex: 2,
-                    py: 1.5,
+                    pt: isStuck ? 3 : 1.5,
+                    pb: isStuck ? 2 : 1.5,
                     ml: { xs: "-24px", md: "-32px" },
                     mr: { xs: "-24px", md: "-32px" },
                     px: { xs: "0", md: "0" },
+                    transition: "padding 0.15s ease-out",
                 }}
             >
                 <Typography variant="small" color="text.secondary">
@@ -1243,13 +1239,7 @@ function CenteredBox({ children, onClose, closeLabel }: CenteredBoxProps) {
                 <IconButton
                     aria-label={closeLabel ?? "Close"}
                     onClick={onClose}
-                    sx={{
-                        position: "absolute",
-                        top: 16,
-                        right: 16,
-                        bgcolor: (theme) => theme.vars.palette.background.paper,
-                        boxShadow: (theme) => theme.shadows[2],
-                    }}
+                    sx={{ position: "absolute", top: 16, right: 16 }}
                 >
                     <CloseIcon />
                 </IconButton>
@@ -1278,6 +1268,174 @@ function EmptyState({ children }: React.PropsWithChildren) {
         </Box>
     );
 }
+
+// ============================================================================
+// Map Cover Component
+// ============================================================================
+
+interface MapCoverProps {
+    name: string;
+    mapPhotos: JourneyPoint[];
+    coverImageUrl: string | undefined;
+    visibleCount: number;
+    onClose: () => void;
+}
+
+function MapCover({
+    name,
+    mapPhotos,
+    coverImageUrl,
+    visibleCount,
+    onClose,
+}: MapCoverProps) {
+    const coverStats = useMemo(() => {
+        if (!mapPhotos.length) return null;
+
+        const sortedData = [...mapPhotos].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        const lastData = sortedData[sortedData.length - 1];
+        if (!firstData || !lastData) return null;
+
+        const firstDate = new Date(firstData.timestamp);
+        const lastDate = new Date(lastData.timestamp);
+        const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const monthYear = firstDate.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+        });
+
+        // Count unique locations based on lat/lng
+        const uniqueLocations = new Set(
+            mapPhotos.map(
+                (point) => `${point.lat.toFixed(3)},${point.lng.toFixed(3)}`,
+            ),
+        );
+        const locationCount = uniqueLocations.size;
+
+        return { monthYear, diffDays, locationCount };
+    }, [mapPhotos]);
+
+    return (
+        <CoverContainer>
+            <CoverImageContainer>
+                {coverImageUrl ? (
+                    <>
+                        <img
+                            src={coverImageUrl}
+                            alt="Cover"
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                            }}
+                        />
+                        <CoverGradientOverlay />
+                    </>
+                ) : (
+                    <Skeleton
+                        variant="rectangular"
+                        width="100%"
+                        height="100%"
+                        sx={{ bgcolor: "rgba(128, 128, 128, 0.2)" }}
+                    />
+                )}
+
+                <CoverCloseButton aria-label="Close" onClick={onClose}>
+                    <CloseIcon sx={{ fontSize: 20 }} />
+                </CoverCloseButton>
+
+                <CoverContentContainer>
+                    {coverImageUrl && coverStats ? (
+                        <>
+                            <CoverTitle>{name}</CoverTitle>
+                            <CoverSubtitle>
+                                {coverStats.monthYear} • {coverStats.diffDays}{" "}
+                                days • {visibleCount} memories
+                            </CoverSubtitle>
+                        </>
+                    ) : (
+                        <>
+                            <Skeleton
+                                variant="text"
+                                width="180px"
+                                height="32px"
+                                sx={{ bgcolor: "rgba(255,255,255,0.3)" }}
+                            />
+                            <Skeleton
+                                variant="text"
+                                width="220px"
+                                height="20px"
+                                sx={{ bgcolor: "rgba(255,255,255,0.2)" }}
+                            />
+                        </>
+                    )}
+                </CoverContentContainer>
+            </CoverImageContainer>
+        </CoverContainer>
+    );
+}
+
+const CoverContainer = styled(Box)({
+    width: "100%",
+    flexShrink: 0,
+    padding: "16px",
+    paddingBottom: "8px",
+});
+
+const CoverImageContainer = styled(Box)({
+    aspectRatio: "16/9",
+    position: "relative",
+    overflow: "hidden",
+    backgroundColor: "#333",
+    borderRadius: "36px 36px 24px 24px",
+    marginTop: "2px",
+});
+
+const CoverGradientOverlay = styled(Box)({
+    position: "absolute",
+    inset: 0,
+    background:
+        "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 35%, transparent 60%, rgba(0,0,0,0.75))",
+});
+
+const CoverCloseButton = styled(IconButton)({
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    color: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+});
+
+const CoverContentContainer = styled(Box)({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: "24px",
+    paddingLeft: "18px",
+    color: "white",
+});
+
+const CoverTitle = styled(Typography)({
+    fontSize: "22px",
+    fontWeight: "bold",
+    marginBottom: "6px",
+    lineHeight: 1.2,
+});
+
+const CoverSubtitle = styled(Typography)({
+    color: "rgba(255, 255, 255, 0.85)",
+    fontSize: "14px",
+    fontWeight: "500",
+});
 
 // ============================================================================
 // Thumbnail Components
