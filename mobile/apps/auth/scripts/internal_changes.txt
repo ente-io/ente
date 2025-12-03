@@ -1,1 +1,3 @@
+- Prateek: New Auth icon & splash
+- Prateek: Fix linux icon not assigned by setting startup wm class
 - Prateek: Revamped QR code dialog with new design, shared package for auth and photos, dark mode support, and responsive layout
