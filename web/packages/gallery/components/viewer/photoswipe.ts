@@ -1413,8 +1413,10 @@ export class FileViewerPhotoSwipe {
                         element.querySelector<HTMLElement>(".pswp__caption")!;
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
-                        captionEl.querySelector("p")!.innerText = alt ?? "";
-                        captionEl.style.display = alt ? "block" : "none";
+                        const captionText = truncateCaptionIfNeeded(alt);
+                        captionEl.querySelector("p")!.innerText =
+                            captionText ?? "";
+                        captionEl.style.display = captionText ? "block" : "none";
                         captionEl.classList.toggle(
                             "ente-video",
                             fileType == FileType.video,
@@ -1890,7 +1892,7 @@ const livePhotoVideoHTML = (videoURL: string) => `
 `;
 
 /**
- * HTML for the bottom right controls (action buttons + caption).
+ * HTML for the bottom controls (caption on left, action buttons on right).
  *
  * The caption uses the line-clamp CSS property, which behaves unexpectedly
  * when we also assign padding to the "p" element on which we're setting the
@@ -1900,6 +1902,7 @@ const livePhotoVideoHTML = (videoURL: string) => `
  * padding on the div.
  */
 const bottomRightControlsHTML = () => `
+<div class="pswp__caption"><p></p></div>
 <div class="pswp__action-buttons">
   <button class="pswp__action-button" aria-label="Like">
     <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} /></svg>
@@ -1908,8 +1911,17 @@ const bottomRightControlsHTML = () => `
     <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>
   </button>
 </div>
-<div class="pswp__caption"><p></p></div>
 `;
+
+/**
+ * Truncate caption text to 154 characters.
+ */
+const truncateCaptionIfNeeded = (text: string | undefined) => {
+    if (!text) return text;
+    const maxLength = 154;
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "…";
+};
 
 const createElementFromHTMLString = (htmlString: string) => {
     const template = document.createElement("template");
