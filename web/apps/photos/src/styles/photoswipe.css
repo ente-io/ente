@@ -518,7 +518,7 @@ body:has(
     height: 56px;
     border-radius: 50%;
     background-color: rgb(0 0 0 / 0.6);
-    border: 1px solid rgb(255 255 255 / 0.12);
+    border: 1px solid rgb(255 255 255 / 0.2);
     cursor: pointer;
     display: flex;
     align-items: center;
