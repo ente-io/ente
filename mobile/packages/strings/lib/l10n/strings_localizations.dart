@@ -1394,7 +1394,7 @@ abstract class StringsLocalizations {
   /// No description provided for @addTrustedContact.
   ///
   /// In en, this message translates to:
-  /// **'Add Trusted Contact'**
+  /// **'Add trusted contact'**
   String get addTrustedContact;
 
   /// No description provided for @removeInvite.
@@ -1612,6 +1612,30 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.'**
   String get lockerExistingUserRequired;
+
+  /// No description provided for @chooseFromAnExistingContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from an existing contact'**
+  String get chooseFromAnExistingContact;
+
+  /// No description provided for @chooseARecoveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a recovery time'**
+  String get chooseARecoveryTime;
+
+  /// No description provided for @addContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get addContact;
+
+  /// No description provided for @nDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String nDays(int count);
 }
 
 class _StringsLocalizationsDelegate

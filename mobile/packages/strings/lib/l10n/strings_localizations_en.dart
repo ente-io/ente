@@ -681,7 +681,7 @@ class StringsLocalizationsEn extends StringsLocalizations {
   String get acceptTrustInvite => 'Accept invite';
 
   @override
-  String get addTrustedContact => 'Add Trusted Contact';
+  String get addTrustedContact => 'Add trusted contact';
 
   @override
   String get removeInvite => 'Remove invite';
@@ -815,4 +815,18 @@ class StringsLocalizationsEn extends StringsLocalizations {
   @override
   String get lockerExistingUserRequired =>
       'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
+
+  @override
+  String get chooseFromAnExistingContact => 'Choose from an existing contact';
+
+  @override
+  String get chooseARecoveryTime => 'Choose a recovery time';
+
+  @override
+  String get addContact => 'Add contact';
+
+  @override
+  String nDays(int count) {
+    return '$count days';
+  }
 }
