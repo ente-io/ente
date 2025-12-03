@@ -148,7 +148,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       decoration: InputDecoration(
         fillColor: colorScheme.fillFaint,
         filled: true,
-        hintText: context.strings.enterNameOrEmailToShareWith,
+        hintText: context.strings.enterEmail,
         hintStyle: TextStyle(color: colorScheme.textMuted),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -190,7 +190,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.strings.addAnExistingContact,
+          context.strings.chooseFromAnExistingContact,
           style: textTheme.bodyMuted,
         ),
         const SizedBox(height: 12),
@@ -255,7 +255,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.strings.chooseRecoveryTime,
+          context.strings.chooseARecoveryTime,
           style: textTheme.bodyMuted,
         ),
         const SizedBox(height: 12),
@@ -307,7 +307,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
   Widget _buildAddContactButton(EnteTextTheme textTheme) {
     final bool canAdd = selectedEmail.isNotEmpty || _emailIsValid;
     return GradientButton(
-      text: context.strings.addContact,
+      text: context.strings.addTrustedContact,
       onTap: canAdd ? _onAddContactTap : null,
     );
   }
@@ -379,15 +379,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       return;
     }
     final emailToAdd = selectedEmail.isNotEmpty ? selectedEmail : _email;
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return VerifyIdentityDialog(
-          self: false,
-          email: emailToAdd,
-          config: widget.config,
-        );
-      },
+    await showVerifyIdentitySheet(
+      context,
+      self: false,
+      email: emailToAdd,
+      config: widget.config,
     );
   }
 
@@ -409,10 +405,6 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       );
     }
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
-
-    suggestedUsers.add(
-      User(email: "amanraj@gmail.com"),
-    );
 
     return suggestedUsers;
   }
