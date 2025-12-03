@@ -11,7 +11,6 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
-    RUST_VERSION: "1.88.0"
     RUSTFLAGS: -D warnings
 
 permissions:
@@ -47,12 +46,6 @@ jobs:
                   key: ${{ runner.os }}-cargo-mobile-${{ hashFiles('mobile/**/Cargo.lock') }}
 
             - run: flutter pub get
-
-            - name: Install Rust ${{ env.RUST_VERSION }}
-              uses: dtolnay/rust-toolchain@master
-              with:
-                  toolchain: ${{ env.RUST_VERSION }}
-                  components: rustfmt, clippy
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
