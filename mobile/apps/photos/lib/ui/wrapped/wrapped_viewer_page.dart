@@ -681,6 +681,9 @@ class _WrappedViewerPageState extends State<WrappedViewerPage>
         builder: (BuildContext context) {
           final MediaQueryData baseMediaQuery = MediaQuery.of(context);
           final MediaQueryData clampedMediaQuery = baseMediaQuery.copyWith(
+            // Some widgets still read textScaleFactor directly; keep it locked.
+            // ignore: deprecated_member_use
+            textScaleFactor: 1.0,
             textScaler: const TextScaler.linear(1.0),
           );
           return MediaQuery(
