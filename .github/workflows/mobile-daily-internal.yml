@@ -8,7 +8,6 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
-    RUST_VERSION: "1.88.0"
 
 permissions:
     contents: read
