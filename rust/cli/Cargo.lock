@@ -684,6 +684,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente-core"
+version = "0.0.1"
+
+[[package]]
 name = "ente-rs"
 version = "0.0.1"
 dependencies = [
@@ -694,6 +698,7 @@ dependencies = [
  "config",
  "dialoguer",
  "dirs",
+ "ente-core",
  "env_logger",
  "futures",
  "hex",
