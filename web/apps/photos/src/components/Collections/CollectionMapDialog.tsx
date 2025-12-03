@@ -140,6 +140,43 @@ function useCurrentUser() {
     }, []);
 }
 
+function useAnimatedCounter(targetValue: number, duration: number = 500) {
+    const [displayValue, setDisplayValue] = useState(targetValue);
+    const previousValue = useRef(targetValue);
+
+    useEffect(() => {
+        const startValue = previousValue.current;
+        const difference = targetValue - startValue;
+
+        if (difference === 0) return;
+
+        const startTime = performance.now();
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Ease out cubic for smooth deceleration
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            const currentValue = Math.round(
+                startValue + difference * easeOut,
+            );
+
+            setDisplayValue(currentValue);
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                previousValue.current = targetValue;
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }, [targetValue, duration]);
+
+    return displayValue;
+}
+
 function useMapData(
     open: boolean,
     collectionSummary: CollectionSummary,
@@ -796,7 +833,30 @@ function CollectionSidebar({
     onClose,
 }: CollectionSidebarProps) {
     const [isCoverHidden, setIsCoverHidden] = useState(false);
+    const [currentDateLabel, setCurrentDateLabel] = useState<string | null>(
+        null,
+    );
     const coverRef = useRef<HTMLDivElement>(null);
+    const sidebarRef = useRef<HTMLDivElement>(null);
+
+    // Animated counter for memories
+    const animatedCount = useAnimatedCounter(visibleCount, 400);
+
+    // Reset current date when scrolled back to top
+    const handleScroll = useCallback(() => {
+        const sidebar = sidebarRef.current;
+        if (!sidebar) return;
+
+        // If scrolled near the top, clear the current date label
+        if (sidebar.scrollTop < 50) {
+            setCurrentDateLabel(null);
+        }
+    }, []);
+
+    // Handle date visibility callback from PhotoDateGroup
+    const handleDateVisible = useCallback((dateLabel: string) => {
+        setCurrentDateLabel(dateLabel);
+    }, []);
 
     // Get the first photo's thumbnail as the cover image
     const coverImageUrl = useMemo(() => {
@@ -855,6 +915,8 @@ function CollectionSidebar({
 
     return (
         <Box
+            ref={sidebarRef}
+            onScroll={handleScroll}
             sx={{
                 position: "absolute",
                 // Desktop: left sidebar taking 35% width
@@ -917,48 +979,97 @@ function CollectionSidebar({
                 />
             </Box>
 
-            {/* Sticky header that appears when cover is scrolled out */}
+            {/* Sticky header - Dynamic Island style pill */}
             <Box
                 sx={{
                     position: "sticky",
                     top: 0,
                     zIndex: 10,
-                    bgcolor: (theme) => theme.vars.palette.background.paper,
-                    px: { xs: "24px", md: "32px" },
-                    pt: isCoverHidden ? 3.5 : 0,
-                    pb: isCoverHidden ? 2 : 0,
-                    display: isCoverHidden ? "flex" : "none",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    borderBottom: (theme) =>
-                        `1px solid ${theme.palette.divider}`,
+                    pt: 4,
+                    pb: 3,
+                    px: { xs: 2, md: 2.5 },
+                    display: isCoverHidden ? "block" : "none",
+                    background:
+                        "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 100%)",
                 }}
             >
-                <Stack spacing={0.25}>
-                    <Typography
-                        variant="body"
-                        sx={{ fontWeight: 600, lineHeight: 1.2 }}
-                        noWrap
-                    >
-                        {collectionSummary.name}
-                    </Typography>
-                    <Typography variant="small" color="text.secondary">
-                        {coverStats
-                            ? `${coverStats.monthYear} • ${coverStats.diffDays} days • ${visibleCount} memories`
-                            : `${visibleCount} memories`}
-                    </Typography>
-                </Stack>
-                <IconButton
-                    aria-label="Close"
-                    onClick={onClose}
-                    size="small"
+                <Box
                     sx={{
-                        ml: 1,
-                        bgcolor: (theme) => theme.vars.palette.fill.faint,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        bgcolor: "#1a1a1a",
+                        borderRadius: "36px",
+                        px: 2,
+                        py: 1.5,
+                        boxShadow:
+                            "0 12px 40px -4px rgba(0, 0, 0, 0.6), 0 4px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+                        animation: `${dynamicIslandAppear} 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
+                        transformOrigin: "top center",
+                        gap: 1.5,
                     }}
                 >
-                    <CloseIcon fontSize="small" />
-                </IconButton>
+                    {/* Cover image avatar */}
+                    <Box
+                        sx={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            flexShrink: 0,
+                            bgcolor: "rgba(255, 255, 255, 0.1)",
+                        }}
+                    >
+                        {coverImageUrl && (
+                            <Box
+                                component="img"
+                                src={coverImageUrl}
+                                alt=""
+                                sx={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                }}
+                            />
+                        )}
+                    </Box>
+                    <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography
+                            variant="body"
+                            sx={{
+                                fontWeight: 600,
+                                lineHeight: 1.2,
+                                color: "white",
+                            }}
+                            noWrap
+                        >
+                            {collectionSummary.name}
+                        </Typography>
+                        <Typography
+                            variant="small"
+                            sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                        >
+                            {currentDateLabel
+                                ? `${currentDateLabel} • ${animatedCount} memories`
+                                : coverStats
+                                  ? `${coverStats.monthYear} • ${coverStats.diffDays} days • ${animatedCount} memories`
+                                  : `${animatedCount} memories`}
+                        </Typography>
+                    </Stack>
+                    <IconButton
+                        aria-label="Close"
+                        onClick={onClose}
+                        size="small"
+                        sx={{
+                            ml: 1.5,
+                            color: "white",
+                            bgcolor: "rgba(255, 255, 255, 0.15)",
+                            "&:hover": { bgcolor: "rgba(255, 255, 255, 0.25)" },
+                        }}
+                    >
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                </Box>
             </Box>
 
             <Box
@@ -974,7 +1085,7 @@ function CollectionSidebar({
                     visiblePhotoOrder={visiblePhotoOrder}
                     visiblePhotosWave={visiblePhotosWave}
                     onPhotoClick={onPhotoClick}
-                    stickyHeaderVisible={isCoverHidden}
+                    onDateVisible={handleDateVisible}
                 />
             </Box>
         </Box>
@@ -987,7 +1098,7 @@ interface PhotoListProps {
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
-    stickyHeaderVisible: boolean;
+    onDateVisible?: (dateLabel: string) => void;
 }
 
 function PhotoList({
@@ -996,7 +1107,7 @@ function PhotoList({
     visiblePhotoOrder,
     visiblePhotosWave,
     onPhotoClick,
-    stickyHeaderVisible,
+    onDateVisible,
 }: PhotoListProps) {
     if (!photoGroups.length) {
         return (
@@ -1026,7 +1137,7 @@ function PhotoList({
                     visiblePhotoOrder={visiblePhotoOrder}
                     visiblePhotosWave={visiblePhotosWave}
                     onPhotoClick={onPhotoClick}
-                    stickyHeaderVisible={stickyHeaderVisible}
+                    onDateVisible={onDateVisible}
                 />
             ))}
         </Stack>
@@ -1040,7 +1151,7 @@ interface PhotoDateGroupProps {
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
     onPhotoClick: (fileId: number) => void;
-    stickyHeaderVisible: boolean;
+    onDateVisible?: (dateLabel: string) => void;
 }
 
 function PhotoDateGroup({
@@ -1050,48 +1161,36 @@ function PhotoDateGroup({
     visiblePhotoOrder,
     visiblePhotosWave,
     onPhotoClick,
-    stickyHeaderVisible,
+    onDateVisible,
 }: PhotoDateGroupProps) {
-    const [isStuck, setIsStuck] = useState(false);
-    const sentinelRef = useRef<HTMLDivElement>(null);
+    const headerRef = useRef<HTMLDivElement>(null);
 
+    // Track when this date group's header scrolls out of view at the top
     useEffect(() => {
-        const sentinel = sentinelRef.current;
-        if (!sentinel) return;
+        const header = headerRef.current;
+        if (!header || !onDateVisible) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                // When sentinel is not visible (scrolled past), the header is stuck
-                setIsStuck(entry ? !entry.isIntersecting : false);
+                // When header is not intersecting (scrolled past top), this date is "current"
+                if (
+                    entry &&
+                    !entry.isIntersecting &&
+                    entry.boundingClientRect.top < 0
+                ) {
+                    onDateVisible(dateLabel);
+                }
             },
             { threshold: 0 },
         );
 
-        observer.observe(sentinel);
+        observer.observe(header);
         return () => observer.disconnect();
-    }, []);
-
-    // Offset for sticky header when visible (must match sticky header height + buffer)
-    const topOffset = stickyHeaderVisible ? "85px" : 0;
+    }, [dateLabel, onDateVisible]);
 
     return (
         <Stack spacing={0.75}>
-            {/* Sentinel element to detect when sticky kicks in */}
-            <Box ref={sentinelRef} sx={{ height: 0, visibility: "hidden" }} />
-            <Box
-                sx={{
-                    position: "sticky",
-                    top: topOffset,
-                    bgcolor: (theme) => theme.vars.palette.background.paper,
-                    zIndex: 2,
-                    pt: isStuck ? 3 : 1.5,
-                    pb: isStuck ? 2 : 1.5,
-                    ml: { xs: "-24px", md: "-32px" },
-                    mr: { xs: "-24px", md: "-32px" },
-                    px: { xs: "0", md: "0" },
-                    transition: "padding 0.15s ease-out",
-                }}
-            >
+            <Box ref={headerRef} sx={{ pt: 1.5, pb: 1.5 }}>
                 <Typography variant="small" color="text.secondary">
                     {dateLabel}
                 </Typography>
@@ -1557,6 +1656,21 @@ const CoverSubtitle = styled(Typography)({
 // Thumbnail Components
 // ============================================================================
 
+const dynamicIslandAppear = keyframes`
+    0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(-8px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02) translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+`;
+
 const cascadeFadeIn = keyframes`
     from {
         opacity: 0;
@@ -1616,17 +1730,45 @@ function ThumbImage({ src, onClick, animationDelay }: ThumbImageProps) {
 
     return (
         <Box
-            component="img"
-            src={src}
-            alt=""
             onClick={onClick}
             sx={{
-                ...baseSx,
-                objectFit: "cover",
+                position: "relative",
+                width: "100%",
+                aspectRatio: "1",
                 cursor: "pointer",
-                transition: "transform 0.15s ease-in-out",
-                "&:hover": { transform: "scale(1.02)" },
+                overflow: "hidden",
+                opacity: 0,
+                animation: `${cascadeFadeIn} 200ms ease-out forwards`,
+                animationDelay: `${animationDelay}ms`,
+                "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%)",
+                    opacity: 0,
+                    transition: "opacity 0.3s ease-out",
+                    pointerEvents: "none",
+                },
+                "&:hover::after": {
+                    opacity: 1,
+                },
             }}
-        />
+        >
+            <Box
+                component="img"
+                src={src}
+                alt=""
+                sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                }}
+            />
+        </Box>
     );
 }
