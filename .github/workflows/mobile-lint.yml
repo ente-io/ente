@@ -52,6 +52,7 @@ jobs:
               uses: dtolnay/rust-toolchain@master
               with:
                   toolchain: ${{ env.RUST_VERSION }}
+                  components: rustfmt, clippy
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
