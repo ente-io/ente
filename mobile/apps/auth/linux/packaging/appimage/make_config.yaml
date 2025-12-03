@@ -4,7 +4,7 @@ license: GPLv3
 
 metainfo: linux/packaging/enteauth.appdata.xml
 
-icon: assets/icons/io.ente.auth.png
+icon: assets/generation-icons/icon-windows-linux.png
 
 keywords:
   - Authentication
