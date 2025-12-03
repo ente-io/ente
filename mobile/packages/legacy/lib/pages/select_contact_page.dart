@@ -52,7 +52,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
   String selectedEmail = "";
   String _email = "";
   bool _emailIsValid = false;
-  int _selectedRecoveryDays = 30;
+  int _selectedRecoveryDays = 14;
   late final Logger _logger = Logger("AddContactBottomSheet");
 
   final textFieldFocusNode = FocusNode();
@@ -89,7 +89,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(colorScheme, textTheme),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 _buildEmailInputRow(colorScheme),
                 if (suggestedUsers.isNotEmpty) ...[
                   const SizedBox(height: 20),
@@ -103,7 +103,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                 _buildRecoveryTimeSection(colorScheme, textTheme),
                 const SizedBox(height: 20),
                 _buildAddContactButton(textTheme),
-                const SizedBox(height: 12),
+                const SizedBox(height: 20),
                 _buildVerifyLink(textTheme),
               ],
             ),
@@ -191,7 +191,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       children: [
         Text(
           context.strings.addAnExistingContact,
-          style: textTheme.bodyBold,
+          style: textTheme.bodyMuted,
         ),
         const SizedBox(height: 12),
         Container(
@@ -256,16 +256,17 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       children: [
         Text(
           context.strings.chooseRecoveryTime,
-          style: textTheme.bodyBold,
+          style: textTheme.bodyMuted,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildRecoveryChip(30, colorScheme, textTheme),
+            _buildRecoveryChip(7, colorScheme, textTheme),
             const SizedBox(width: 12),
             _buildRecoveryChip(14, colorScheme, textTheme),
             const SizedBox(width: 12),
-            _buildRecoveryChip(7, colorScheme, textTheme),
+            _buildRecoveryChip(30, colorScheme, textTheme),
           ],
         ),
       ],
@@ -285,7 +286,10 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20.0,
+          vertical: 16.0,
+        ),
         decoration: BoxDecoration(
           color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
           borderRadius: BorderRadius.circular(14),
@@ -343,6 +347,8 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
   }
 
   Widget _buildVerifyLink(EnteTextTheme textTheme) {
+    final bool canAdd = selectedEmail.isNotEmpty || _emailIsValid;
+
     return Center(
       child: GestureDetector(
         onTap: _onVerifyTap,
@@ -350,9 +356,13 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           context.strings.verifyIDLabel,
           textAlign: TextAlign.center,
           style: textTheme.body.copyWith(
-            color: getEnteColorScheme(context).primary700,
+            color: canAdd
+                ? getEnteColorScheme(context).primary700
+                : getEnteColorScheme(context).textMuted,
             decoration: TextDecoration.underline,
-            decorationColor: getEnteColorScheme(context).primary700,
+            decorationColor: canAdd
+                ? getEnteColorScheme(context).primary700
+                : getEnteColorScheme(context).textMuted,
           ),
         ),
       ),
