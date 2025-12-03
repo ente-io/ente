@@ -8,7 +8,6 @@ import {
     Dialog,
     DialogContent,
     IconButton,
-    Skeleton,
     Stack,
     styled,
     Typography,
@@ -48,8 +47,6 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-cluster";
 import {
     calculateOptimalZoom,
     createIcon,
@@ -93,9 +90,54 @@ interface FavoritesState {
     pendingVisibilityUpdates: Set<number>;
 }
 
+/**
+ * Dynamically loaded map components to avoid SSR issues with Leaflet
+ */
+interface MapComponents {
+    MapContainer: typeof import("react-leaflet").MapContainer;
+    TileLayer: typeof import("react-leaflet").TileLayer;
+    Marker: typeof import("react-leaflet").Marker;
+    useMap: typeof import("react-leaflet").useMap;
+    MarkerClusterGroup: typeof import("react-leaflet-cluster").default;
+}
+
 // ============================================================================
 // Custom Hooks
 // ============================================================================
+
+/**
+ * Dynamically loads map-related React components (Leaflet) to avoid SSR issues
+ * Responsibility: Lazy load map dependencies only when needed (window must exist)
+ */
+function useMapComponents() {
+    const [mapComponents, setMapComponents] = useState<MapComponents | null>(
+        null,
+    );
+
+    useEffect(() => {
+        // Only load on client-side where window exists
+        if (typeof window === "undefined") return;
+
+        void Promise.all([
+            import("react-leaflet"),
+            import("react-leaflet-cluster"),
+        ])
+            .then(([leaflet, cluster]) =>
+                setMapComponents({
+                    MapContainer: leaflet.MapContainer,
+                    TileLayer: leaflet.TileLayer,
+                    Marker: leaflet.Marker,
+                    useMap: leaflet.useMap,
+                    MarkerClusterGroup: cluster.default,
+                }),
+            )
+            .catch((e: unknown) => {
+                console.error("Failed to load map components", e);
+            });
+    }, []);
+
+    return mapComponents;
+}
 
 /**
  * Retrieves the current authenticated user
@@ -481,13 +523,14 @@ function useClusterIcon(
 // ============================================================================
 
 /**
- * Extracts thumbnail URL from either the thumbByFileID map or the photo's embedded image
+ * Extracts thumbnail URL - prioritizes photo.image (loaded first with mapPhotos),
+ * then falls back to thumbByFileID (loaded afterward with higher quality thumbs)
  */
 function getPhotoThumbnail(
     photo: JourneyPoint,
     thumbByFileID: Map<number, string>,
 ): string | undefined {
-    return thumbByFileID.get(photo.fileId) ?? photo.image;
+    return photo.image || thumbByFileID.get(photo.fileId);
 }
 
 /**
@@ -561,6 +604,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     activeCollection,
 }) => {
     const { onGenericError } = useBaseContext();
+    const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const optimalZoom = calculateOptimalZoom();
 
@@ -612,6 +656,15 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             );
         }
 
+        // Wait for map components to load (they're dynamically imported)
+        if (!mapComponents) {
+            return (
+                <CenteredBox>
+                    <ActivityIndicator size="28px" />
+                </CenteredBox>
+            );
+        }
+
         if (!mapPhotos.length || !mapCenter) {
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
@@ -634,6 +687,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 thumbByFileID={thumbByFileID}
                 visiblePhotoOrder={visiblePhotoOrder}
                 visiblePhotosWave={visiblePhotosWave}
+                mapComponents={mapComponents}
                 mapCenter={mapCenter}
                 optimalZoom={optimalZoom}
                 createClusterCustomIcon={createClusterCustomIcon}
@@ -649,6 +703,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         handlePhotoClick,
         isLoading,
         mapCenter,
+        mapComponents,
         mapPhotos,
         onClose,
         optimalZoom,
@@ -715,6 +770,7 @@ interface MapLayoutProps {
     thumbByFileID: Map<number, string>;
     visiblePhotoOrder: Map<number, number>;
     visiblePhotosWave: number;
+    mapComponents: MapComponents;
     mapCenter: [number, number];
     optimalZoom: number;
     createClusterCustomIcon: (cluster: unknown) => unknown;
@@ -731,6 +787,7 @@ function MapLayout({
     thumbByFileID,
     visiblePhotoOrder,
     visiblePhotosWave,
+    mapComponents,
     mapCenter,
     optimalZoom,
     createClusterCustomIcon,
@@ -753,6 +810,7 @@ function MapLayout({
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
+                    mapComponents={mapComponents}
                     mapCenter={mapCenter}
                     mapPhotos={mapPhotos}
                     optimalZoom={optimalZoom}
@@ -819,14 +877,17 @@ function CollectionSidebar({
         setCurrentDateLabel(dateLabel);
     }, []);
 
-    // Get the first photo's thumbnail as the cover image
-    // Note: mapPhotos are already sorted by timestamp (newest first)
+    // Get cover image: prioritize collection's coverFile, fallback to first photo
+    const coverFile = collectionSummary.coverFile;
     const coverImageUrl = useMemo(() => {
-        if (!mapPhotos.length) return undefined;
-        const firstPhoto = mapPhotos[0];
-        if (!firstPhoto) return undefined;
-        return getPhotoThumbnail(firstPhoto, thumbByFileID);
-    }, [mapPhotos, thumbByFileID]);
+        const coverThumb = coverFile && thumbByFileID.get(coverFile.id);
+        if (coverThumb) return coverThumb;
+
+        const fallbackPhoto = mapPhotos[0];
+        return fallbackPhoto
+            ? getPhotoThumbnail(fallbackPhoto, thumbByFileID)
+            : undefined;
+    }, [coverFile, mapPhotos, thumbByFileID]);
 
     // Detect when cover scrolls out of view
     useEffect(() => {
@@ -1124,6 +1185,7 @@ const PhotoDateGroup = React.memo(function PhotoDateGroup({
  * Responsibility: Display interactive map with photo markers and handle viewport changes
  */
 interface MapCanvasProps {
+    mapComponents: MapComponents;
     mapCenter: [number, number];
     mapPhotos: JourneyPoint[];
     optimalZoom: number;
@@ -1133,6 +1195,7 @@ interface MapCanvasProps {
 }
 
 const MapCanvas = React.memo(function MapCanvas({
+    mapComponents,
     mapCenter,
     mapPhotos,
     optimalZoom,
@@ -1140,6 +1203,9 @@ const MapCanvas = React.memo(function MapCanvas({
     createClusterCustomIcon,
     onVisiblePhotosChange,
 }: MapCanvasProps) {
+    const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
+        mapComponents;
+
     // Memoize marker icons to prevent recreation on every render
     // Key: fileId, Value: Leaflet icon instance
     const markerIcons = useMemo(() => {
@@ -1168,8 +1234,9 @@ const MapCanvas = React.memo(function MapCanvas({
                 maxZoom={19}
                 updateWhenZooming
             />
-            <MapControls />
+            <MapControls useMap={useMap} />
             <MapViewportListener
+                useMap={useMap}
                 photos={mapPhotos}
                 onVisiblePhotosChange={onVisiblePhotosChange}
             />
@@ -1200,7 +1267,13 @@ const MapCanvas = React.memo(function MapCanvas({
  * Floating map control buttons (open in Maps, zoom in/out)
  * Responsibility: Provide map navigation and external link controls
  */
-const MapControls = React.memo(function MapControls() {
+interface MapControlsProps {
+    useMap: typeof import("react-leaflet").useMap;
+}
+
+const MapControls = React.memo(function MapControls({
+    useMap,
+}: MapControlsProps) {
     const map = useMap();
 
     const handleOpenInMaps = useCallback(() => {
@@ -1246,11 +1319,13 @@ const MapControls = React.memo(function MapControls() {
  * Responsibility: Track map bounds and notify parent of visible photos when viewport changes
  */
 interface MapViewportListenerProps {
+    useMap: typeof import("react-leaflet").useMap;
     photos: JourneyPoint[];
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
 }
 
 function MapViewportListener({
+    useMap,
     photos,
     onVisiblePhotosChange,
 }: MapViewportListenerProps) {
@@ -1435,58 +1510,26 @@ const MapCover = React.memo(function MapCover({
     return (
         <CoverContainer>
             <CoverImageContainer>
-                {coverImageUrl ? (
-                    <>
-                        <img
-                            src={coverImageUrl}
-                            alt="Cover"
-                            style={{
-                                position: "absolute",
-                                inset: 0,
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                            }}
-                        />
-                        <CoverGradientOverlay />
-                    </>
-                ) : (
-                    <Skeleton
-                        variant="rectangular"
-                        width="100%"
-                        height="100%"
-                        sx={{ bgcolor: "rgba(128, 128, 128, 0.2)" }}
-                    />
-                )}
+                <img
+                    src={coverImageUrl}
+                    alt="Cover"
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                    }}
+                />
+                <CoverGradientOverlay />
 
                 <CoverCloseButton aria-label="Close" onClick={onClose}>
                     <CloseIcon sx={{ fontSize: 20 }} />
                 </CoverCloseButton>
 
                 <CoverContentContainer>
-                    {coverImageUrl ? (
-                        <>
-                            <CoverTitle>{name}</CoverTitle>
-                            <CoverSubtitle>
-                                {visibleCount} memories
-                            </CoverSubtitle>
-                        </>
-                    ) : (
-                        <>
-                            <Skeleton
-                                variant="text"
-                                width="180px"
-                                height="32px"
-                                sx={{ bgcolor: "rgba(255,255,255,0.3)" }}
-                            />
-                            <Skeleton
-                                variant="text"
-                                width="220px"
-                                height="20px"
-                                sx={{ bgcolor: "rgba(255,255,255,0.2)" }}
-                            />
-                        </>
-                    )}
+                    <CoverTitle>{name}</CoverTitle>
+                    <CoverSubtitle>{visibleCount} memories</CoverSubtitle>
                 </CoverContentContainer>
             </CoverImageContainer>
         </CoverContainer>
@@ -1501,14 +1544,15 @@ const CoverContainer = styled(Box)(({ theme }) => ({
     [theme.breakpoints.down("md")]: { padding: "8px", paddingBottom: "4px" },
 }));
 
-const CoverImageContainer = styled(Box)({
+const CoverImageContainer = styled(Box)(({ theme }) => ({
     aspectRatio: "16/9",
     position: "relative",
     overflow: "hidden",
     backgroundColor: "#333",
     borderRadius: "36px 36px 24px 24px",
     marginTop: "2px",
-});
+    [theme.breakpoints.down("md")]: { borderRadius: "20px 20px 20px 20px" },
+}));
 
 const CoverGradientOverlay = styled(Box)({
     position: "absolute",
