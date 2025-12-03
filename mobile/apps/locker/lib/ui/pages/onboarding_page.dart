@@ -163,6 +163,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           DotsIndicator(
                             dotsCount: _featureCount,
                             position: _activeDotIndex,
+                            animate: true,
+                            animationDuration:
+                                const Duration(milliseconds: 300),
                             decorator: DotsDecorator(
                               activeColor: Colors.white,
                               color: Colors.white.withValues(alpha: 0.32),
@@ -176,11 +179,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               activeSize: const Size(20, 10),
                               spacing: const EdgeInsets.all(6),
                             ),
-                            onTap: (index) {
-                              _autoScrollDisabled = true;
-                              _stopAutoScroll();
-                              _animateToFeature(index);
-                            },
+                            onTap: _animateToFeature,
                           ),
                         ],
                       ),
