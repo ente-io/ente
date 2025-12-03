@@ -147,15 +147,11 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
       (c) => !c.type.canDelete || idToFileTimeStamp.containsKey(c.id),
     );
     int failedCount = 0;
-    for (int i = 0; i < collections.length; i++) {
+    final int totalCount = collections.length;
+    final int totalDigits = totalCount.toString().length;
+
+    for (int i = 0; i < totalCount; i++) {
       if (mounted && !_isCancelled) {
-        final String currentlyDeleting = (i + 1)
-            .toString()
-            .padLeft(collections.length.toString().length, '0');
-        _deleteProgress.value = AppLocalizations.of(context).deleteProgress(
-          currentlyDeleting: currentlyDeleting,
-          totalCount: collections.length,
-        );
         try {
           await CollectionsService.instance.trashEmptyCollection(
             collections[i],
@@ -164,6 +160,17 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         } catch (_) {
           failedCount++;
         }
+        if (!mounted || _isCancelled) {
+          return;
+        }
+        final int current = i + 1;
+        final String currentlyDeleting =
+            current.toString().padLeft(totalDigits, '0');
+
+        _deleteProgress.value = AppLocalizations.of(context).deleteProgress(
+          currentlyDeleting: currentlyDeleting,
+          totalCount: totalCount,
+        );
       }
     }
     if (failedCount > 0) {

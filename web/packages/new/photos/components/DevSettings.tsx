@@ -18,7 +18,7 @@ import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface DevSettingsProps {
@@ -151,7 +151,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <Link
-                                        href="https://help.ente.io/self-hosting/guides/custom-server/"
+                                        href="https://ente.io/help/self-hosting/guides/custom-server/"
                                         target="_blank"
                                         rel="noopener"
                                     >

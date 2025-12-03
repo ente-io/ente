@@ -74,6 +74,7 @@ used for Compose and quickstart for ease of use.)
 | -------------------- | ------------------------------------------------------- | -------------------------- |
 | `apps.public-albums` | Albums app base endpoint for public sharing             | `https://albums.ente.io`   |
 | `apps.cast`          | Cast app base endpoint                                  | `https://cast.ente.io`     |
+| `apps.embed-albums`  | Embed app base endpoint for embedded sharing            | `https://embed.ente.io`    |
 | `apps.accounts`      | Accounts app base endpoint (used for passkey-based 2FA) | `https://accounts.ente.io` |
 
 ### Database
@@ -198,6 +199,7 @@ smtp:
 | Variable                                     | Description                                   | Default |
 | -------------------------------------------- | --------------------------------------------- | ------- |
 | `internal.silent`                            | Suppress external effects (e.g. email alerts) | `false` |
+| `internal.trusted-client-ip-header`          | Request header trusted by gin’s `TrustedPlatform` when the server runs behind a proxy (leave empty to use gin’s default order: X-Forwarded-For, X-Real-IP, remote addr) |         |
 | `internal.health-check-url`                  | External healthcheck URL                      |         |
 | `internal.hardcoded-ott`                     | Predefined OTPs for testing                   |         |
 | `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs          | `[]`    |

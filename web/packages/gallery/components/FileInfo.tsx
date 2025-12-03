@@ -67,10 +67,6 @@ import {
 import { FileType } from "ente-media/file-type";
 import { FileDateTimePicker } from "ente-new/photos/components/FileDateTimePicker";
 import { FilePeopleList } from "ente-new/photos/components/PeopleList";
-import {
-    confirmDisableMapsDialogAttributes,
-    confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog-attributes";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     updateFileCaption,
@@ -197,8 +193,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onSelectCollection,
     onSelectPerson,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-
     const { mapEnabled } = useSettingsSnapshot();
 
     const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
@@ -242,16 +236,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             didCancel = true;
         };
     }, [file, open]);
-
-    const openEnableMapConfirmationDialog = () =>
-        showMiniDialog(
-            confirmEnableMapsDialogAttributes(() => updateMapEnabled(true)),
-        );
-
-    const openDisableMapConfirmationDialog = () =>
-        showMiniDialog(
-            confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
-        );
 
     const handleSelectFace = ({ personID, faceID }: AnnotatedFaceID) => {
         log.info(`Selected person ${personID} for faceID ${faceID}`);
@@ -316,9 +300,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     </Link>
                                 ) : (
                                     <LinkButtonUndecorated
-                                        onClick={
-                                            openDisableMapConfirmationDialog
-                                        }
+                                        onClick={() => updateMapEnabled(false)}
                                     >
                                         {t("disable_map")}
                                     </LinkButtonUndecorated>
@@ -335,9 +317,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             <MapBox
                                 location={location}
                                 mapEnabled={mapEnabled}
-                                openUpdateMapConfirmationDialog={
-                                    openEnableMapConfirmationDialog
-                                }
                             />
                         )}
                     </>
@@ -873,14 +852,9 @@ const openStreetMapLink = ({ latitude, longitude }: Location) =>
 interface MapBoxProps {
     location: Location;
     mapEnabled: boolean;
-    openUpdateMapConfirmationDialog: () => void;
 }
 
-const MapBox: React.FC<MapBoxProps> = ({
-    location,
-    mapEnabled,
-    openUpdateMapConfirmationDialog,
-}) => {
+const MapBox: React.FC<MapBoxProps> = ({ location, mapEnabled }) => {
     const urlTemplate = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
     const attribution =
         '&copy; <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -917,7 +891,7 @@ const MapBox: React.FC<MapBoxProps> = ({
         <MapBoxContainer ref={mapBoxContainerRef} />
     ) : (
         <MapBoxEnableContainer>
-            <ChipButton onClick={openUpdateMapConfirmationDialog}>
+            <ChipButton onClick={() => updateMapEnabled(true)}>
                 {t("enable_map")}
             </ChipButton>
         </MapBoxEnableContainer>

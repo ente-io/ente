@@ -210,6 +210,7 @@ export const GalleryBarAndListHeader: React.FC<
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
+                onRemotePull={onRemotePull}
             />
             <CollectionShare
                 {...collectionShareVisibilityProps}

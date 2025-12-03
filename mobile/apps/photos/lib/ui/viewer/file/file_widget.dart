@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/viewer/file/video_widget.dart";
 import "package:photos/ui/viewer/file/zoomable_live_image_new.dart";
 
@@ -9,7 +10,7 @@ class FileWidget extends StatelessWidget {
   final EnteFile file;
   final String tagPrefix;
   final Function(bool)? shouldDisableScroll;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
   final BoxDecoration? backgroundDecoration;
   final bool? autoPlay;
   final bool? isFromMemories;

@@ -52,6 +52,11 @@ export type FileListWithViewerProps = {
      * progress of user-initiated download, and to cancel it if needed.
      */
     onAddSaveGroup: AddSaveGroup;
+
+    onAddFileToCollection?: (
+        file: EnteFile,
+        sourceCollectionSummaryID?: number,
+    ) => void;
 } & Pick<
     FileListProps,
     | "mode"
@@ -121,6 +126,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onMarkTempDeleted,
     onSelectCollection,
     onSelectPerson,
+    onAddFileToCollection,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -229,6 +235,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onDownload={handleDownload}
                 onDelete={handleDelete}
                 onSaveEditedImageCopy={handleSaveEditedImageCopy}
+                onAddFileToCollection={onAddFileToCollection}
+                activeCollectionID={activeCollectionID}
             />
         </Container>
     );

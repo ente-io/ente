@@ -27,7 +27,7 @@ type UsageController struct {
 	UploadResultCache map[int64]bool
 }
 
-const MaxLockerFiles = 10000
+const MaxLockerFiles = 1000
 const hundredMBInBytes = 100 * 1024 * 1024
 
 // CanUploadFile returns error if the file of given size (with StorageOverflowAboveSubscriptionLimit buffer) can be
@@ -59,11 +59,12 @@ func (c *UsageController) checkAndUpdateCache(ctx context.Context, userID int64,
 func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size *int64, app ente.App) error {
 	// If app is Locker, limit to MaxLockerFiles files
 	if app == ente.Locker {
-		// Get file count
-		if fileCount, err := c.UserCacheCtrl.GetUserFileCountWithCache(userID, app); err != nil {
-			if fileCount >= MaxLockerFiles {
-				return stacktrace.Propagate(ente.ErrFileLimitReached, "")
-			}
+		fileCount, err := c.UserCacheCtrl.GetUserFileCountWithCache(userID, app)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to fetch locker file count")
+		}
+		if fileCount >= MaxLockerFiles {
+			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
 		}
 	}
 
@@ -135,12 +136,13 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		}
 		var eligibleBonus = bonus.GetUsableBonus(subStorage)
 		if newUsage > (subStorage + eligibleBonus) {
-			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "")
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
+				fmt.Sprintf("subscription Storage Limit Exceeded (limit %d, usage %d, bonus %d) for admin %d", subStorage, usage, eligibleBonus, subscriptionAdminID))
 		}
 	}
 
 	// Get particular member's storage and check if the file size is larger than the size of the storage allocated
-	// to the Member and fail if its too large.
+	// to the Member and fail if it's too large.
 	if subscriptionAdminID != userID && memberStorageLimit != nil {
 		memberUsage, memberUsageErr := c.UsageRepo.GetUsage(userID)
 		if memberUsageErr != nil {

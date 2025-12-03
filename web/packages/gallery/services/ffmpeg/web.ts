@@ -4,7 +4,7 @@ import { newID } from "ente-base/id";
 import log from "ente-base/log";
 import type { FFmpegCommand } from "ente-base/types/ipc";
 import { PromiseQueue } from "ente-utils/promise";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,

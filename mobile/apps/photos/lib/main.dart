@@ -29,6 +29,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
@@ -48,6 +49,7 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
+import 'package:rive/rive.dart' as rive;
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _logger = Logger("main");
@@ -67,6 +69,7 @@ void main() async {
   debugRepaintRainbowEnabled = false;
   await RustLib.init();
   WidgetsFlutterBinding.ensureInitialized();
+  await rive.RiveNative.init();
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
@@ -74,16 +77,10 @@ void main() async {
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0x00010000),
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
 
-  unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
-  );
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -133,61 +130,96 @@ Future<void> runBackgroundTask(
   TimeLogger tlog, {
   String mode = 'normal',
 }) async {
+  // Check if foreground is recently active to avoid conflicts
+  final isRunningInFG = await _isRunningInForeground();
+
+  // If FG was active in last 30 seconds, skip BG work
+  if (isRunningInFG) {
+    _logger.info(
+      "[BG TASK] Foreground recently active, skipping background work",
+    );
+    return;
+  }
+
+  _logger.info(
+    "[BG TASK] No recent foreground activity, proceeding with background work",
+  );
+
+  // Mark BG as active
+
   await _runMinimally(taskId, tlog);
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  try {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await _scheduleHeartBeat(prefs, true);
 
-  await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration init $tlog");
+    await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration done $tlog");
 
-  // App LifeCycle
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
+    // App LifeCycle
+    AppLifecycleService.instance.init(prefs);
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
-  // Crypto rel.
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
+    // Crypto rel.
+    await Computer.shared().turnOn(workersCount: 4);
+    CryptoUtil.init();
 
-  // Init Network Utils
-  await NetworkClient.instance.init(packageInfo);
+    // Init Network Utils
+    await NetworkClient.instance.init(packageInfo);
 
-  // Global Services
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
+    // Global Services
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
 
-  await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init $tlog");
+    await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init done $tlog");
 
-  // Upload & Sync Related
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
+    // Upload & Sync Related
+    await FileUploader.instance.init(prefs, true);
+    LocalFileUpdateService.instance.init(prefs);
+    await LocalSyncService.instance.init(prefs);
+    RemoteSyncService.instance.init(prefs);
+    await SyncService.instance.init(prefs);
 
-  // Misc Services
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
+    // Misc Services
+    await UserService.instance.init();
+    NotificationService.instance.init(prefs);
 
-  // Begin Execution
-  // only runs for android
-  updateService.showUpdateNotification().ignore();
-  await _sync('bgTaskActiveProcess');
+    // Begin Execution
+    // only runs for android
+    _logger.info("[BG TASK] update notification");
+    updateService.showUpdateNotification().ignore();
+    _logger.info("[BG TASK] sync starting");
+    await _sync('bgTaskActiveProcess');
+    _logger.info("[BG TASK] sync completed");
 
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-  // only runs for android
-  await _homeWidgetSync(true);
+    _logger.info("[BG TASK] locale fetch");
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+    // only runs for android
+    _logger.info("[BG TASK] home widget sync");
+    await _homeWidgetSync(true);
 
-  // await MLService.instance.init();
-  // await PersonService.init(entityService, MLDataDB.instance, prefs);
-  // await MLService.instance.runAllML(force: true);
-  await smartAlbumsService.syncSmartAlbums();
+    // await MLService.instance.init();
+    // await PersonService.init(entityService, MLDataDB.instance, prefs);
+    // await MLService.instance.runAllML(force: true);
+    _logger.info("[BG TASK] smart albums sync");
+    await smartAlbumsService.syncSmartAlbums();
+
+    _logger.info("[BG TASK] $taskId completed");
+  } catch (e, s) {
+    _logger.severe("[BG TASK] $taskId error", e, s);
+  }
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
@@ -282,12 +314,18 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
+    await PersonService.init(entityService, MLDataDB.instance, preferences);
+    await FacesTimelineService.instance.init();
+    if (flagService.facesTimeline) {
+      FacesTimelineService.instance
+          .queueFullRecompute(trigger: "startup")
+          .ignore();
+    } else {
+      _logger.info("Faces timeline disabled via feature flag");
+    }
     EnteWakeLockService.instance.init(preferences);
+    wrappedService.scheduleInitialLoad();
+    await localSettings.initSwipeToSelectDefault();
     logLocalSettings();
     initComplete = true;
     _stopHearBeat = true;
@@ -308,6 +346,7 @@ void logLocalSettings() {
     'Gallery grid size': localSettings.getPhotoGridSize(),
     'Video streaming enabled':
         VideoPreviewService.instance.isVideoStreamingEnabled,
+    'Swipe to select enabled': localSettings.isSwipeToSelectEnabled,
   };
 
   final formattedSettings =

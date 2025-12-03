@@ -101,8 +101,9 @@ Future<DirectoryStat> getDirectoryStat(
         size += fileSize;
         fileNameToSize[entity.uri.pathSegments.last] = fileSize;
       } else if (entity is Directory) {
-        final DirectoryStat subDirStat =
-            await getDirectoryStat(Directory(entity.path));
+        final DirectoryStat subDirStat = await getDirectoryStat(
+          Directory(entity.path),
+        );
         subDirectories.add(subDirStat);
         size += subDirStat.size;
       }
@@ -121,7 +122,11 @@ Future<void> deleteDirectoryContents(String directoryPath) async {
 
   // Iterate through the list and delete each file or directory
   for (final fileOrDirectory in contents) {
-    await fileOrDirectory.delete();
+    if (fileOrDirectory is Directory) {
+      await fileOrDirectory.delete(recursive: true);
+    } else {
+      await fileOrDirectory.delete();
+    }
   }
 }
 

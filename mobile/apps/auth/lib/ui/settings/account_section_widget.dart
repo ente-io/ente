@@ -13,7 +13,6 @@ import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +48,6 @@ class AccountSectionWidget extends StatelessWidget {
             context,
             l10n.authToChangeYourEmail,
           );
-          await PlatformUtil.refocusWindows();
           if (hasAuthenticated) {
             // ignore: unawaited_futures
             showDialog(

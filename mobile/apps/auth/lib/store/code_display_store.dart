@@ -14,6 +14,96 @@ class CodeDisplayStore {
 
   late CodeStore _codeStore;
 
+  final ValueNotifier<bool> isSelectionModeActive = ValueNotifier(false);
+  final ValueNotifier<Set<String>> selectedCodeIds = ValueNotifier(<String>{});
+
+  // toggles the selection status of a code
+  void toggleSelection(String codeId) {
+    final newSelection = Set<String>.from(selectedCodeIds.value);
+
+    if (newSelection.contains(codeId)) {
+      newSelection.remove(codeId);
+    } else {
+      newSelection.add(codeId);
+    }
+
+    selectedCodeIds.value =
+        newSelection; //if we selected atleast one code, then we're in selection mode.. else: exit selection mode
+    isSelectionModeActive.value = newSelection.isNotEmpty;
+  }
+
+  //method to clear the entire selection
+  void clearSelection() {
+    selectedCodeIds.value = <String>{};
+    isSelectionModeActive.value = false;
+  }
+
+  /// Reconciles current selections with the provided list of codes.
+  ///
+  /// This ensures selection state remains valid when:
+  /// - Codes transition from local to synced (rawData → generatedID)
+  /// - Codes are deleted or removed from the list
+  /// - Codes are marked with errors and become invalid for selection
+  ///
+  /// **How it works:**
+  /// 1. Builds a set of valid selection keys from non-error codes
+  /// 2. Creates a remapping table for old keys (rawData, old generatedID) → new keys
+  /// 3. Updates current selection by keeping valid keys and remapping changed keys
+  /// 4. Removes selections for codes that no longer exist or have errors
+  ///
+  /// **Performance:** O(n + m) where n = number of codes, m = number of selected items
+  ///
+  /// **Example scenario:**
+  /// ```dart
+  /// // User selects code with rawData="abc123" (not yet synced)
+  /// selectedCodeIds = {"abc123"}
+  ///
+  /// // After sync, code gets generatedID=42
+  /// // reconcileSelections maps "abc123" → "42"
+  /// selectedCodeIds = {"42"}  // Selection preserved!
+  /// ```
+  void reconcileSelections(Iterable<Code> codes) {
+    final currentSelection = selectedCodeIds.value;
+    if (currentSelection.isEmpty) {
+      return;
+    }
+
+    // Build lookup structures in a single pass - O(n)
+    final validKeys = <String>{};
+    final keyRemapping = <String, String>{};
+
+    for (final code in codes) {
+      if (code.hasError) {
+        continue;
+      }
+
+      final key = code.selectionKey;
+      validKeys.add(key);
+
+      // Map old keys to current key to handle transitions
+      keyRemapping[code.rawData] = key;
+      final generatedID = code.generatedID;
+      if (generatedID != null) {
+        keyRemapping[generatedID.toString()] = key;
+      }
+    }
+
+    // Update selection in one pass - O(m)
+    final updatedSelection = currentSelection
+        .map(
+          (oldKey) =>
+              validKeys.contains(oldKey) ? oldKey : keyRemapping[oldKey],
+        )
+        .whereType<String>()
+        .toSet();
+
+    // Only update if selection changed
+    if (updatedSelection != currentSelection) {
+      selectedCodeIds.value = updatedSelection;
+      isSelectionModeActive.value = updatedSelection.isNotEmpty;
+    }
+  }
+
   Future<void> init() async {
     _codeStore = CodeStore.instance;
   }

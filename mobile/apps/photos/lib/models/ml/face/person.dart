@@ -92,6 +92,7 @@ class PersonData {
     String? birthDate,
     String? email,
     int? userID,
+    List<String>? rejectedFaceIDs,
   }) {
     return PersonData(
       name: name ?? this.name,
@@ -101,6 +102,8 @@ class PersonData {
       birthDate: birthDate ?? this.birthDate,
       email: email ?? this.email,
       userID: userID ?? this.userID,
+      rejectedFaceIDs:
+          rejectedFaceIDs ?? List<String>.from(this.rejectedFaceIDs),
     );
   }
 

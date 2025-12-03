@@ -7,7 +7,7 @@ import {
     type EnteFile,
 } from "ente-media/file";
 import { fileCreationTime } from "ente-media/file-metadata";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { getCollectionByID } from "./collection";
 import {
     savedTrashItemCollectionKeys,

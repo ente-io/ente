@@ -120,10 +120,16 @@ class CollectionsService {
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
+    _logger.info("[COLLECTIONS] Starting sync");
+
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime);
+    _logger.info(
+      "[COLLECTIONS] Fetched ${fetchedCollections.length} collections from API",
+    );
     watch.log("remote fetch collections ${fetchedCollections.length}");
+
     if (fetchedCollections.isEmpty) {
       return;
     }
@@ -151,6 +157,7 @@ class CollectionsService {
           ? collection.updationTime
           : maxUpdationTime;
     }
+
     if (shouldFireDeleteEvent) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -159,14 +166,19 @@ class CollectionsService {
         ),
       );
     }
+
     await _updateDB(updatedCollections);
     await _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
+    _logger.info("[COLLECTIONS] Updated ${updatedCollections.length} in DB");
+
     for (final collection in fetchedCollections) {
       _cacheLocalPathAndCollection(collection);
     }
+
     _logger.info("Collections synced");
     watch.log("${fetchedCollections.length} collection cached refreshed ");
+
     if (fetchedCollections.isNotEmpty) {
       Bus.instance.fire(
         CollectionUpdatedEvent(
@@ -374,6 +386,7 @@ class CollectionsService {
     }
     if (includedShared || includeCollab) {
       allowedRoles.add(CollectionParticipantRole.collaborator);
+      allowedRoles.add(CollectionParticipantRole.admin);
     }
     final int userID = _config.getUserID()!;
     return _collectionIDToCollections.values
@@ -816,9 +829,13 @@ class CollectionsService {
     final PublicURL url = c.publicURLs.firstOrNull!;
     Uri publicUrl = Uri.parse(url.url);
 
-    // Replace with custom domain if configured
+    final int? currentUserID = Configuration.instance.getUserID();
+    final bool isOwner = currentUserID != null && currentUserID == c.owner.id;
     final String customDomain = flagService.customDomain;
-    if (customDomain.isNotEmpty) {
+    final bool applyCustomDomain = isOwner && customDomain.isNotEmpty;
+
+    // Replace with custom domain if configured for the owner
+    if (applyCustomDomain) {
       publicUrl = publicUrl.replace(
         host: customDomain,
         scheme: "https",
@@ -836,12 +853,48 @@ class CollectionsService {
 
     // Handle IDN domains - if the host was percent-encoded by Uri.replace,
     // decode it for user-friendly display
-    if (customDomain.isNotEmpty && publicUrl.host.contains('%')) {
+    if (applyCustomDomain && publicUrl.host.contains('%')) {
       final decodedHost = Uri.decodeComponent(publicUrl.host);
       finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
     }
 
     return "$finalUrl#$collectionKey";
+  }
+
+  String getEmbedHtml(Collection c) {
+    final PublicURL url = c.publicURLs.firstOrNull!;
+    Uri publicUrl = Uri.parse(url.url);
+
+    // Replace with embed URL if configured
+    final String embedUrl = flagService.embedUrl;
+    if (embedUrl.isNotEmpty) {
+      final Uri embedUri = Uri.parse(embedUrl);
+      publicUrl = publicUrl.replace(
+        host: embedUri.host,
+        scheme: embedUri.scheme,
+        port: embedUri.hasPort
+            ? embedUri.port
+            : (embedUri.scheme == 'https' ? 443 : 80),
+      );
+    }
+
+    // Get the collection key for the URL fragment
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(c.id),
+    );
+
+    // Build the final URL
+    String finalUrl = publicUrl.toString();
+
+    // Handle IDN domains - if the host was percent-encoded by Uri.replace,
+    // decode it for user-friendly display
+    if (embedUrl.isNotEmpty && publicUrl.host.contains('%')) {
+      final decodedHost = Uri.decodeComponent(publicUrl.host);
+      finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
+    }
+
+    final String embedHtmlUrl = "$finalUrl#$collectionKey";
+    return '<iframe src="$embedHtmlUrl" width="800" height="600" frameborder="0" allowfullscreen></iframe>';
   }
 
   Uint8List _getAndCacheDecryptedKey(

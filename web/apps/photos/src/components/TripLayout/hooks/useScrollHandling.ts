@@ -1,4 +1,3 @@
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { useCallback, useEffect, useMemo } from "react";
 
 import type { JourneyPoint } from "../types";
@@ -24,21 +23,7 @@ export interface UseScrollHandlingParams {
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
     setTargetZoom: (zoom: number | null) => void;
-    previousSuperClusterStateRef: React.RefObject<{
-        isInSuperCluster: boolean;
-        superClusterIndex: number | null;
-    }>;
-    superClusterInfo: {
-        superClusters: {
-            lat: number;
-            lng: number;
-            clusterCount: number;
-            clustersInvolved: number[];
-            image: string;
-        }[];
-        clusterToSuperClusterMap: Map<number, number>;
-    };
-    scrollProgress: number;
+    isMobileOrTablet: boolean;
 }
 
 export const useScrollHandling = ({
@@ -54,11 +39,8 @@ export const useScrollHandling = ({
     setHasUserScrolled,
     setScrollProgress,
     setTargetZoom,
-    previousSuperClusterStateRef,
-    superClusterInfo,
-    scrollProgress,
+    isMobileOrTablet,
 }: UseScrollHandlingParams) => {
-    const isTouchDevice = useIsTouchscreen();
     // Update location positions callback
     const updatePositions = useCallback(() => {
         updateLocationPositions({
@@ -78,10 +60,8 @@ export const useScrollHandling = ({
             setHasUserScrolled,
             setScrollProgress,
             previousActiveLocationRef,
-            isTouchDevice,
+            isMobileOrTablet,
             setTargetZoom,
-            previousSuperClusterStateRef,
-            superClusterInfo,
         });
     }, [
         timelineRef,
@@ -92,10 +72,8 @@ export const useScrollHandling = ({
         setHasUserScrolled,
         setScrollProgress,
         previousActiveLocationRef,
-        isTouchDevice,
+        isMobileOrTablet,
         setTargetZoom,
-        previousSuperClusterStateRef,
-        superClusterInfo,
     ]);
 
     // Throttled scroll handler
@@ -112,9 +90,10 @@ export const useScrollHandling = ({
                 locationIndex,
                 photoClusters,
                 locationPositions,
+                isMobileOrTablet,
             });
         },
-        [timelineRef, photoClusters, locationPositions],
+        [timelineRef, photoClusters, locationPositions, isMobileOrTablet],
     );
 
     // Marker click handler
@@ -131,9 +110,9 @@ export const useScrollHandling = ({
                 setScrollProgress,
                 setHasUserScrolled,
                 scrollTimelineToLocation: scrollToLocation,
-                isTouchDevice,
-                superClusterInfo,
-                scrollProgress,
+                isMobileOrTablet,
+                setTargetZoom,
+                previousActiveLocationRef,
             });
         },
         [
@@ -144,9 +123,9 @@ export const useScrollHandling = ({
             setScrollProgress,
             setHasUserScrolled,
             scrollToLocation,
-            isTouchDevice,
-            superClusterInfo,
-            scrollProgress,
+            isMobileOrTablet,
+            setTargetZoom,
+            previousActiveLocationRef,
         ],
     );
 

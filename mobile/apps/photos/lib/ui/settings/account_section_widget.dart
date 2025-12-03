@@ -180,7 +180,7 @@ class AccountSectionWidget extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             // ignore: unawaited_futures
-            launchUrlString("https://help.ente.io/photos/migration/export/");
+            launchUrlString("https://ente.io/help/photos/migration/export/");
           },
         ),
         sectionOptionSpacing,

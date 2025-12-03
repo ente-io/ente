@@ -161,16 +161,18 @@ class PersonService {
     w?.log("Got DB person cluster info");
     final persons = await getPersonsMap();
     w?.log("Got persons");
+    int orphanMappingsRemoved = 0;
     for (var personID in dbPersonClusterInfo.keys) {
       final person = persons[personID];
       if (person == null) {
         logger.severe("Person $personID not found");
+        await _removeOrphanedLocalPerson(personID);
+        orphanMappingsRemoved++;
         continue;
       }
-      final personData = person.data;
       final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
-      if (_shouldUpdateRemotePerson(personData, dbPersonCluster)) {
+      if (_shouldUpdateRemotePerson(person.data, dbPersonCluster)) {
         final personData = person.data;
         personData.assigned = dbPersonCluster.entries
             .map(
@@ -184,6 +186,11 @@ class PersonService {
             .ignore();
         personData.logStats();
       }
+    }
+    if (orphanMappingsRemoved > 0) {
+      logger.warning(
+        "Removed $orphanMappingsRemoved orphaned local person mappings during reconcile",
+      );
     }
     w?.log("Reconciled clusters for ${persons.length} persons");
   }
@@ -313,7 +320,7 @@ class PersonService {
     // Safety check to make sure we haven't created an empty cluster now, if so delete it
     for (final emptyClusterID in emptiedClusters) {
       personData.assigned
-          .removeWhere((element) => element.id != emptyClusterID);
+          .removeWhere((element) => element.id == emptyClusterID);
       await faceMLDataDB.removeClusterToPerson(
         personID: person.remoteID,
         clusterID: emptyClusterID,
@@ -377,6 +384,20 @@ class PersonService {
     }
 
     final entities = await entityService.getEntities(EntityType.cgroup);
+    final remotePersonIDs = entities.map((e) => e.id).toSet();
+    final localPersonMappings = await faceMLDataDB.getPersonToClusterIDs();
+    int removedOrphans = 0;
+    for (final localPersonID in localPersonMappings.keys) {
+      if (!remotePersonIDs.contains(localPersonID)) {
+        removedOrphans++;
+        await _removeOrphanedLocalPerson(localPersonID);
+      }
+    }
+    if (removedOrphans > 0) {
+      logger.info(
+        "Removed $removedOrphans orphaned local person mappings during sync",
+      );
+    }
     // todo: (neerajg) perf change, this can be expensive to do on every sync
     // especially when we have a lot of people. We should only do this when the
     // last sync time is updated for cgroup entity type. To avoid partial update,
@@ -552,5 +573,12 @@ class PersonService {
     final result = await entityService.addOrUpdate(type, jsonMap, id: id);
     _lastCacheRefreshTime = 0; // Invalidate cache
     return result;
+  }
+
+  Future<void> _removeOrphanedLocalPerson(String personID) async {
+    logger.warning(
+      "Removing local ML mappings for person $personID because entity no longer exists",
+    );
+    await faceMLDataDB.removePerson(personID);
   }
 }

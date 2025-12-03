@@ -7,7 +7,7 @@ import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/l10n/l10n.dart'; 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
@@ -74,6 +74,7 @@ void main() async {
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
+    await windowManager.setPreventClose(true);
     WindowOptions windowOptions = WindowOptions(
       size: WindowListenerService.instance.getWindowSize(),
       maximumSize: const Size(8192, 8192),
@@ -116,7 +117,7 @@ Future<void> _runInForeground() async {
         darkTheme: darkThemeData,
         savedThemeMode: savedThemeMode,
         localeListResolutionCallback: localResolutionCallBack,
-        localizationsDelegates:  const [
+        localizationsDelegates: const [
           ...StringsLocalizations.localizationsDelegates,
           ...AppLocalizations.localizationsDelegates,
         ],
@@ -169,11 +170,19 @@ Future<void> _init(bool bool, {String? via}) async {
   await CodeDisplayStore.instance.init();
   await Configuration.instance.init([AuthenticatorDB.instance]);
   await Network.instance.init(Configuration.instance);
-  await UserService.instance.init(Configuration.instance, const HomePage());
+  await UserService.instance.init(
+    Configuration.instance,
+    const HomePage(),
+    clientPackageName: 'io.ente.auth',
+    passkeyRedirectUrl: 'enteauth://passkey',
+  );
   await AuthenticatorService.instance.init();
   await BillingService.instance.init();
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
-  await LockScreenSettings.instance.init(Configuration.instance);
+  await LockScreenSettings.instance.init(
+    Configuration.instance,
+    hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+  );
 }

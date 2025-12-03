@@ -24,7 +24,31 @@ class Network {
     }
     final packageInfo = await PackageInfo.fromPlatform();
     final version = packageInfo.version;
-    final packageName = packageInfo.packageName;
+    String packageName = packageInfo.packageName;
+
+    // Fix package name for auth app on Windows/Linux only
+    // On Linux, packageInfo returns "ente_auth" from pubspec.yaml (via version.json)
+    // On Windows, packageInfo returns "Ente Auth" from Runner.rc InternalName field
+    // We need to normalize both to "io.ente.auth" to match Android/iOS/macOS
+    if (Platform.isWindows || Platform.isLinux) {
+      if (packageName == 'ente_auth' || packageName == 'Ente Auth') {
+        packageName = 'io.ente.auth';
+      }
+    }
+
+    // Validate package name for production endpoint
+    // This ensures we catch any edge cases where the package name is still incorrect
+    if (configuration.isEnteProduction()) {
+      if (!packageName.startsWith('io.ente.')) {
+        throw Exception(
+          'Invalid client package name "$packageName" for production endpoint. '
+          'Expected package name to start with "io.ente." but got "$packageName". '
+          'This indicates the package name normalization failed. '
+          'Please check the platform-specific configuration.',
+        );
+      }
+    }
+
     final endpoint = configuration.getHttpEndpoint();
 
     _dio = Dio(

@@ -3,12 +3,12 @@
 Help and documentation for Ente's products.
 
 You can find the live version of these at
-**[help.ente.io](https://help.ente.io)**.
+**[ente.io/help](https://ente.io/help)**.
 
 ## Quick edits
 
 You can edit these files directly on GitHub and open a pull request.
-[help.ente.io](https://help.ente.io) will automatically get updated with your
+[ente.io/help](https://ente.io/help) will automatically get updated with your
 changes in a few minutes after your pull request is merged.
 
 ## Running locally

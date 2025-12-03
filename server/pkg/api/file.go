@@ -81,7 +81,6 @@ func (h *FileHandler) CreateMetaFile(c *gin.Context) {
 	}
 	file.UpdationTime = time.Microseconds()
 
-	// get an ente.App from the ?app= query parameter with a default of photos
 	enteApp := auth.GetApp(c)
 	file.OwnerID = userID
 	file.IsDeleted = false
@@ -151,6 +150,23 @@ func (h *FileHandler) GetUploadURLs(c *gin.Context) {
 	})
 }
 
+// GetUploadURLV2 returns a single upload URL that enforces checksum + content-length headers
+func (h *FileHandler) GetUploadURLV2(c *gin.Context) {
+	enteApp := auth.GetApp(c)
+	userID := auth.GetUserID(c.Request.Header)
+	var req ente.UploadURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	url, err := h.Controller.GetUploadURLWithMetadata(c, userID, req, enteApp)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, url)
+}
+
 // GetMultipartUploadURLs returns an array of PartUpload PresignedURLs
 func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 	enteApp := auth.GetApp(c)
@@ -165,6 +181,23 @@ func (h *FileHandler) GetMultipartUploadURLs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"urls": urls,
 	})
+}
+
+// GetMultipartUploadURLV2 returns multipart upload URLs for a single object with enforced metadata
+func (h *FileHandler) GetMultipartUploadURLV2(c *gin.Context) {
+	enteApp := auth.GetApp(c)
+	userID := auth.GetUserID(c.Request.Header)
+	var req ente.MultipartUploadURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	upload, err := h.Controller.GetMultipartUploadURLWithMetadata(c, userID, req, enteApp)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, upload)
 }
 
 // Get redirects the request to the file location

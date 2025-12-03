@@ -10,7 +10,7 @@ import { apiURL, uploaderOrigin } from "ente-base/origins";
 import { RemoteEnteFile, type RemoteFileMetadata } from "ente-media/file";
 import type { RemoteMagicMetadata } from "ente-media/magic-metadata";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * A pre-signed URL alongwith the associated object key that is later used to
@@ -45,11 +45,56 @@ const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
  */
 export const fetchUploadURLs = async (countHint: number) => {
     const count = Math.min(50, countHint * 2);
-    const res = await fetch(await apiURL("/files/upload-urls", { count }), {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/files/upload-urls", { count, ts: Date.now() }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     return ObjectUploadURLResponse.parse(await res.json()).urls;
+};
+
+export const fetchUploadURLWithMetadata = async ({
+    contentLength,
+    contentMd5,
+}: {
+    contentLength: number;
+    contentMd5: string;
+}) => {
+    const headers = new Headers(await authenticatedRequestHeaders());
+    headers.set("Content-Type", "application/json");
+    const res = await fetch(
+        await apiURL("/files/upload-url", { ts: Date.now() }),
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ contentLength, contentMD5: contentMd5 }),
+        },
+    );
+    ensureOk(res);
+    return ObjectUploadURL.parse(await res.json());
+};
+
+export const fetchMultipartUploadURLsWithMetadata = async ({
+    contentLength,
+    partLength,
+    partMd5s,
+}: {
+    contentLength: number;
+    partLength: number;
+    partMd5s: string[];
+}) => {
+    const headers = new Headers(await authenticatedRequestHeaders());
+    headers.set("Content-Type", "application/json");
+    const res = await fetch(
+        await apiURL("/files/multipart-upload-url", { ts: Date.now() }),
+        {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ contentLength, partLength, partMd5s }),
+        },
+    );
+    ensureOk(res);
+    return MultipartUploadURLs.parse(await res.json());
 };
 
 /**
@@ -61,7 +106,10 @@ export const fetchPublicAlbumsUploadURLs = async (
 ) => {
     const count = Math.min(50, countHint * 2);
     const res = await fetch(
-        await apiURL("/public-collection/upload-urls", { count }),
+        await apiURL("/public-collection/upload-urls", {
+            count,
+            ts: Date.now(),
+        }),
         { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);
@@ -113,7 +161,7 @@ const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
 export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
     const count = uploadPartCount;
     const res = await fetch(
-        await apiURL("/files/multipart-upload-urls", { count }),
+        await apiURL("/files/multipart-upload-urls", { count, ts: Date.now() }),
         { headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
@@ -129,7 +177,10 @@ export const fetchPublicAlbumsMultipartUploadURLs = async (
 ) => {
     const count = uploadPartCount;
     const res = await fetch(
-        await apiURL("/public-collection/multipart-upload-urls", { count }),
+        await apiURL("/public-collection/multipart-upload-urls", {
+            count,
+            ts: Date.now(),
+        }),
         { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);
@@ -146,15 +197,29 @@ export const fetchPublicAlbumsMultipartUploadURLs = async (
  *
  * @param retrier A function to wrap the request in retries if needed.
  */
+interface PutFileOptions {
+    contentMd5?: string;
+}
+
+interface PutPartOptions {
+    contentMd5?: string;
+}
+
 export const putFile = async (
     fileUploadURL: string,
     fileData: Uint8Array,
     retrier: HTTPRequestRetrier,
+    options?: PutFileOptions,
 ) =>
     retrier(() =>
         fetch(fileUploadURL, {
             method: "PUT",
-            headers: publicRequestHeaders(),
+            headers: {
+                ...publicRequestHeaders(),
+                ...(options?.contentMd5 && {
+                    "Content-MD5": options.contentMd5,
+                }),
+            },
             body: fileData,
         }),
     );
@@ -166,11 +231,18 @@ export const putFileViaWorker = async (
     fileUploadURL: string,
     fileData: Uint8Array,
     retrier: HTTPRequestRetrier,
+    options?: PutFileOptions,
 ) =>
     retrier(async () =>
         fetch(`${await uploaderOrigin()}/file-upload`, {
             method: "PUT",
-            headers: { ...publicRequestHeaders(), "UPLOAD-URL": fileUploadURL },
+            headers: {
+                ...publicRequestHeaders(),
+                "UPLOAD-URL": fileUploadURL,
+                ...(options?.contentMd5 && {
+                    "CONTENT-MD5": options.contentMd5,
+                }),
+            },
             body: fileData,
         }),
     );
@@ -197,11 +269,17 @@ export const putFilePart = async (
     partUploadURL: string,
     partData: Uint8Array,
     retrier: HTTPRequestRetrier,
+    options?: PutPartOptions,
 ) => {
     const res = await retrier(() =>
         fetch(partUploadURL, {
             method: "PUT",
-            headers: publicRequestHeaders(),
+            headers: {
+                ...publicRequestHeaders(),
+                ...(options?.contentMd5 && {
+                    "Content-MD5": options.contentMd5,
+                }),
+            },
             body: partData,
         }),
     );
@@ -215,12 +293,19 @@ export const putFilePartViaWorker = async (
     partUploadURL: string,
     partData: Uint8Array,
     retrier: HTTPRequestRetrier,
+    options?: PutPartOptions,
 ) => {
     const origin = await uploaderOrigin();
     const res = await retrier(() =>
         fetch(`${origin}/multipart-upload`, {
             method: "PUT",
-            headers: { ...publicRequestHeaders(), "UPLOAD-URL": partUploadURL },
+            headers: {
+                ...publicRequestHeaders(),
+                "UPLOAD-URL": partUploadURL,
+                ...(options?.contentMd5 && {
+                    "CONTENT-MD5": options.contentMd5,
+                }),
+            },
             body: partData,
         }),
     );

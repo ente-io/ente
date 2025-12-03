@@ -17,10 +17,10 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
-	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/email"
+	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -528,7 +528,7 @@ func (c *StripeController) UpdateSubscriptionCancellationStatus(userID int64, sh
 	}
 	_, err = client.Subscriptions.Update(subscription.OriginalTransactionID, params)
 	if err != nil {
-		return ente.Subscription{}, stacktrace.Propagate(err, "")
+		return ente.Subscription{}, c.handleStripeError(err, userID, "UpdateSubscriptionCancellationStatus")
 	}
 	if shouldCancel {
 		err = c.CommonBillCtrl.OnSubscriptionCancelled(userID)
@@ -558,7 +558,7 @@ func (c *StripeController) GetStripeCustomerPortal(userID int64, redirectRootURL
 	}
 	ps, err := client.BillingPortalSessions.New(params)
 	if err != nil {
-		return "", stacktrace.Propagate(err, "")
+		return "", c.handleStripeError(err, userID, "GetStripeCustomerPortal")
 	}
 	return ps.URL, nil
 }
@@ -744,4 +744,58 @@ func isSEPASubscription(stripeSubscription stripe.Subscription) bool {
 		log.Info("No default payment method found")
 	}
 	return isSEPA
+}
+
+// handleStripeError processes Stripe errors, sends Discord alerts for invalid_request_error,
+// and returns user-friendly errors to prevent 5xx responses
+func (c *StripeController) handleStripeError(err error, userID int64, context string) error {
+	if err == nil {
+		return nil
+	}
+
+	stripeError, ok := err.(*stripe.Error)
+	if !ok {
+		// Not a Stripe error, propagate as-is
+		return stacktrace.Propagate(err, "")
+	}
+
+	// Check if it's an invalid_request_error
+	if stripeError.Type == stripe.ErrorTypeInvalidRequest {
+		// Send Discord alert with details
+		alertMsg := fmt.Sprintf(
+			"🚨 Stripe Invalid Request Error\n"+
+				"**Context:** %s\n"+
+				"**User ID:** %d\n"+
+				"**Error Code:** %s\n"+
+				"**Message:** %s\n"+
+				"**Status:** %d\n"+
+				"**Request ID:** %s",
+			context,
+			userID,
+			stripeError.Code,
+			stripeError.Msg,
+			stripeError.HTTPStatusCode,
+			stripeError.RequestID,
+		)
+		c.DiscordController.Notify(alertMsg)
+
+		// Return user-friendly error based on error code
+		var userMsg string
+		switch stripeError.Code {
+		case stripe.ErrorCodeResourceMissing:
+			userMsg = "The requested resource no longer exists. Please create a new subscription or contact support."
+		default:
+			// For other invalid_request_error codes, use the Stripe message if available
+			if stripeError.Msg != "" {
+				userMsg = fmt.Sprintf("Unable to process request: %s", stripeError.Msg)
+			} else {
+				userMsg = "Unable to process your request. Please contact support if the issue persists."
+			}
+		}
+
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(userMsg), "")
+	}
+
+	// For other Stripe errors, propagate as-is
+	return stacktrace.Propagate(err, "")
 }

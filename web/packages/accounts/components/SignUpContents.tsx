@@ -40,7 +40,7 @@ import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import React, { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { PasswordStrengthHint } from "./PasswordStrength";
 import {
     AccountsPageFooter,

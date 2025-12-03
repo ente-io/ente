@@ -11,12 +11,6 @@ interface GeocodingResponse {
     }[];
 }
 
-// Geocoding cache to avoid repeated API calls
-export const geocodingCache = new Map<
-    string,
-    { place: string; country: string }
->();
-
 // Icon cache to avoid recreating identical icons
 export const iconCache = new Map<string, import("leaflet").DivIcon>();
 
@@ -47,25 +41,18 @@ export const throttle = <T extends (...args: unknown[]) => void>(
     };
 };
 
-// Reverse geocoding function using Stadia Maps with caching
+// Reverse geocoding function using Stadia Maps
 export const getLocationName = async (
     lat: number,
     lng: number,
 ): Promise<{ place: string; country: string }> => {
-    // Round coordinates to 3 decimal places for cache key (~100m precision)
-    const roundedLat = Math.round(lat * 1000) / 1000;
-    const roundedLng = Math.round(lng * 1000) / 1000;
-    const cacheKey = `${roundedLat},${roundedLng}`;
-
-    // Check cache first
-    const cached = geocodingCache.get(cacheKey);
-    if (cached) {
-        return cached;
-    }
-
     try {
+        // Round coordinates to 1 decimal place for geocoding
+        const roundedLat = Math.round(lat * 10) / 10;
+        const roundedLng = Math.round(lng * 10) / 10;
+
         const response = await fetch(
-            `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
+            `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${roundedLat}&point.lon=${roundedLng}`,
         );
 
         if (!response.ok) {
@@ -97,14 +84,9 @@ export const getLocationName = async (
             result = { place: "Unknown", country: "Unknown" };
         }
 
-        // Cache the result
-        geocodingCache.set(cacheKey, result);
         return result;
     } catch {
         // Fallback on error
-        const fallbackResult = { place: "Unknown", country: "Unknown" };
-        // Cache the fallback to avoid repeated failures
-        geocodingCache.set(cacheKey, fallbackResult);
-        return fallbackResult;
+        return { place: "Unknown", country: "Unknown" };
     }
 };

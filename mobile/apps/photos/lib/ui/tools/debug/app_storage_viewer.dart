@@ -187,9 +187,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             },
                             itemCount: paths.length,
                           ),
-                          const SizedBox(
-                            height: 24,
-                          ),
+                          const SizedBox(height: 24),
                           MenuItemWidget(
                             leadingIcon: Icons.delete_sweep_outlined,
                             captionedTextWidget: CaptionedTextWidget(
@@ -202,9 +200,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             onTap: () async {
                               for (var pathItem in paths) {
                                 if (pathItem.allowCacheClear) {
-                                  await deleteDirectoryContents(
-                                    pathItem.path,
-                                  );
+                                  await deleteDirectoryContents(pathItem.path);
                                 }
                               }
                               if (!Platform.isAndroid) {
@@ -212,15 +208,17 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                                   iosTempDirectoryPath,
                                 );
                               }
+                              // Small delay to allow file system to sync
+                              await Future.delayed(
+                                const Duration(milliseconds: 300),
+                              );
                               _refreshCounterKey++;
                               if (mounted) {
                                 setState(() => {});
                               }
                             },
                           ),
-                          const SizedBox(
-                            height: 24,
-                          ),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ],

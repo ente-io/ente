@@ -194,16 +194,24 @@ class SyncService {
   }
 
   Future<void> _doSync() async {
+    _logger.info("[SYNC] Starting local sync");
     await _localSyncService.sync();
+
     if (_localSyncService.hasCompletedFirstImport()) {
+      _logger.info("[SYNC] Starting remote sync");
       await _remoteSyncService.sync();
+
       final shouldSync = await _localSyncService.syncAll();
       if (shouldSync) {
+        _logger.info("[SYNC] Starting second remote sync");
         await _remoteSyncService.sync();
       }
+
       if (!isProcessBg) {
         await smartAlbumsService.syncSmartAlbums();
       }
+    } else {
+      _logger.info("[SYNC] First import not completed, skipping remote");
     }
   }
 

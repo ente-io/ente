@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/onboarding/view/onboarding_page.dart'; 
+import 'package:ente_auth/onboarding/view/onboarding_page.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -25,7 +25,6 @@ import 'package:ente_auth/ui/settings/theme_switch_widget.dart';
 import 'package:ente_auth/ui/settings/title_bar_widget.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
-import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -97,7 +96,7 @@ class SettingsPage extends StatelessWidget {
           onTap: () async {
             ButtonResult? result = await showChoiceActionSheet(
               context,
-              title: context.l10n.warning,
+              title: context.l10n.note,
               body: context.l10n.sigInBackupReminder,
               secondButtonLabel: context.l10n.singIn,
               secondButtonAction: ButtonAction.second,
@@ -118,7 +117,6 @@ class SettingsPage extends StatelessWidget {
                     context,
                     context.l10n.authToInitiateSignIn,
                   );
-                  await PlatformUtil.refocusWindows();
                   if (!hasAuthenticated) {
                     return;
                   }

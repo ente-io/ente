@@ -14,31 +14,6 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
 
     return (
         <PhotoFanContainer>
-            {cluster.length === 2 && cluster[1] && (
-                <PhotoFrameTwo
-                    onClick={() =>
-                        cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)
-                    }
-                >
-                    <BackgroundLoadingBox />
-                    <ImageWrapper sx={{ transform: "skewY(-8deg) scale(1.1)" }}>
-                        {cluster[1].image && cluster[1].image.trim() !== "" && (
-                            <img
-                                src={cluster[1].image}
-                                alt={cluster[1].name}
-                                style={{
-                                    position: "absolute",
-                                    inset: 0,
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    zIndex: 1,
-                                }}
-                            />
-                        )}
-                    </ImageWrapper>
-                </PhotoFrameTwo>
-            )}
             {cluster.length >= 3 && (
                 <>
                     {cluster[1] && (
@@ -124,6 +99,7 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                         <LoadingBox />
                     )}
 
+                    {cluster.length === 2 && <CountBadge>+1</CountBadge>}
                     {cluster.length > 3 && (
                         <CountBadge>+{cluster.length - 3}</CountBadge>
                     )}
@@ -155,13 +131,6 @@ const PhotoFrame = styled(Box)(() => ({
     overflow: "hidden",
     cursor: "pointer",
 }));
-
-const PhotoFrameTwo = styled(PhotoFrame)({
-    transform: "translateX(33px) skewY(8deg)",
-    top: "50%",
-    left: "0",
-    marginTop: "-103.5px",
-});
 
 const PhotoFrameLeft = styled(PhotoFrame)({
     transform: "translateX(-33px) skewY(-8deg)",

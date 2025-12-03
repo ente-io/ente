@@ -191,6 +191,10 @@ class StringsLocalizationsMl extends StringsLocalizations {
   String get noDeleteAccountAction => 'No, delete account';
 
   @override
+  String get deleteAccountWarning =>
+      'This will delete your Ente Auth, Ente Photos and Ente Locker account.';
+
+  @override
   String get initiateAccountDeleteTitle =>
       'Please authenticate to initiate account deletion';
 
@@ -662,6 +666,14 @@ class StringsLocalizationsMl extends StringsLocalizations {
 
   @override
   String get trustedContacts => 'Trusted contacts';
+
+  @override
+  String legacyInvite(String email) {
+    return '$email has invited you to be a trusted contact';
+  }
+
+  @override
+  String get acceptTrustInvite => 'Accept invite';
 
   @override
   String get addTrustedContact => 'Add Trusted Contact';

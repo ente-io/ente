@@ -3,9 +3,12 @@ import "dart:io";
 import 'dart:typed_data';
 
 import "package:computer/computer.dart";
+import "package:convert/convert.dart";
+import "package:crypto/crypto.dart";
 import "package:ente_crypto/src/models/derived_key_result.dart";
 import "package:ente_crypto/src/models/encryption_result.dart";
 import "package:ente_crypto/src/models/errors.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:logging/logging.dart";
 
@@ -86,7 +89,7 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
 // This implementation is refactored to simplify the logic to make it easier to
 // maintain and reason about.
 // Rolling out this version 2 in phases to ensure stability
-Future<EncryptionResult> chachaEncryptFileV2(Map<String, dynamic> args) async {
+Future<FileEncryptResult> chachaEncryptFileV2(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("chachaEncryptFileV2");
   final sourceFile = File(args["sourceFilePath"]);
@@ -123,7 +126,7 @@ Future<EncryptionResult> chachaEncryptFileV2(Map<String, dynamic> args) async {
     bytesRead += bufferBytes.length;
     if (bufferBytes.length != chunkSize) {
       throw Exception(
-        "Expected to read $chunkSize bytes, but got ${bufferBytes.length} bytes",
+        "V2 $kPartialReadErrorTag $chunkSize bytes, but got ${bufferBytes.length} bytes, sourceFileLength: $sourceFileLength",
       );
     }
     // Set final tag only after confirming we've read all expected data
@@ -152,11 +155,14 @@ Future<EncryptionResult> chachaEncryptFileV2(Map<String, dynamic> args) async {
             .toString(),
   );
 
-  return EncryptionResult(key: key, header: initPushResult.header);
+  return FileEncryptResult(
+    key: key,
+    header: initPushResult.header,
+  );
 }
 
 // Encrypts a given file, in chunks of encryptionChunkSize
-Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
+Future<FileEncryptResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
   final logger = Logger("ChaChaEncryptV1");
   final sourceFile = File(args["sourceFilePath"]);
@@ -177,6 +183,11 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
     }
     final buffer = await inputFile.read(chunkSize);
+    if (buffer.length != chunkSize) {
+      throw Exception(
+        "$kPartialReadErrorTag to read $chunkSize bytes, but got ${buffer.length} bytes, sourceFileLength: $sourceFileLength",
+      );
+    }
     bytesRead += chunkSize;
     final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
       initPushResult.state,
@@ -194,7 +205,261 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
             .toString(),
   );
 
-  return EncryptionResult(key: key, header: initPushResult.header);
+  return FileEncryptResult(
+    key: key,
+    header: initPushResult.header,
+  );
+}
+
+// Encrypts a file with MD5 calculation and real-time verification
+Future<FileEncryptResult> chachaEncryptFileWithVerification(
+  Map<String, dynamic> args,
+) async {
+  final encryptionStartTime = DateTime.now();
+  final logger = Logger("ChaChaEncryptWithMD5");
+  final sourceFile = File(args["sourceFilePath"]);
+  final destinationFile = File(args["destinationFilePath"]);
+  final int? multiPartChunkSizeInBytes = args["multiPartChunkSizeInBytes"];
+  final sourceFileLength = await sourceFile.length();
+
+  logger.info("Encrypting file of size $sourceFileLength");
+  if (multiPartChunkSizeInBytes != null) {
+    logger.info("Using multipart chunk size: $multiPartChunkSizeInBytes bytes");
+  }
+
+  // Use openSync for simpler, predictable chunk reading
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
+
+  // Use streaming write
+  final outSink = destinationFile.openWrite(mode: FileMode.writeOnly);
+
+  final key = args["key"] ?? Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
+  final initPushResult =
+      Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+
+  // Initialize verification state
+  final verifyPullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+    initPushResult.header,
+    key,
+  );
+
+  // MD5 setup
+  AccumulatorSink<Digest>? fullAccumulator;
+  ChunkedConversionSink<List<int>>? fullMd5Sink;
+  AccumulatorSink<Digest>? partAccumulator;
+  ChunkedConversionSink<List<int>>? partMd5Sink;
+
+  final List<String> partMd5s = [];
+  final BytesBuilder partBuffer = BytesBuilder();
+
+  if (multiPartChunkSizeInBytes == null) {
+    fullAccumulator = AccumulatorSink<Digest>();
+    fullMd5Sink = md5.startChunkedConversion(fullAccumulator);
+  } else {
+    partAccumulator = AccumulatorSink<Digest>();
+    partMd5Sink = md5.startChunkedConversion(partAccumulator);
+  }
+
+  var bytesRead = 0;
+  var totalEncryptedBytes = 0;
+  var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
+  var chunkIndex = 0;
+
+  try {
+    while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+      chunkIndex++;
+      var chunkSize = encryptionChunkSize;
+      if (bytesRead + chunkSize >= sourceFileLength) {
+        chunkSize = sourceFileLength - bytesRead;
+        tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
+      }
+
+      final buffer = await inputFile.read(chunkSize);
+      if (buffer.length != chunkSize) {
+        throw Exception(
+          "$kPartialReadErrorTag to read $chunkSize bytes, but got ${buffer.length} bytes",
+        );
+      }
+
+      bytesRead += chunkSize;
+
+      // Encrypt
+      final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
+        initPushResult.state,
+        buffer,
+        null,
+        tag,
+      );
+
+      // Verify with optimized comparison
+      try {
+        final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+          verifyPullState,
+          encryptedData,
+          null,
+        );
+
+        // Use fast comparison
+        if (!_uint8listEquals(pullResult.m, buffer)) {
+          throw Exception(
+            "$kBitFlipErrorTag Data corruption detected at chunk $chunkIndex",
+          );
+        }
+
+        if (pullResult.tag != tag) {
+          throw Exception(
+            "$kBitFlipErrorTag Tag mismatch at chunk $chunkIndex",
+          );
+        }
+      } catch (e) {
+        await inputFile.close();
+        await outSink.close();
+        await destinationFile.delete();
+        if (e.toString().startsWith(kBitFlipErrorTag)) {
+          rethrow;
+        }
+        throw Exception(
+          "$kBitFlipErrorTag Verification failed at chunk $chunkIndex: $e",
+        );
+      }
+
+      // Handle MD5 calculation and disk writes
+      totalEncryptedBytes += encryptedData.length;
+
+      if (multiPartChunkSizeInBytes == null) {
+        // Single-part: stream MD5 and write directly
+        fullMd5Sink!.add(encryptedData);
+        outSink.add(encryptedData);
+      } else {
+        // Multi-part: buffer data and flush at exact part boundaries
+        partBuffer.add(encryptedData);
+
+        final bool isLastChunk =
+            tag == Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
+
+        // Flush complete parts from buffer
+        while (partBuffer.length >= multiPartChunkSizeInBytes) {
+          final partBytes =
+              partBuffer.toBytes().sublist(0, multiPartChunkSizeInBytes);
+
+          // Calculate MD5 for this part
+          partMd5Sink!.add(partBytes);
+          partMd5Sink.close();
+          final digest = partAccumulator!.events.single;
+          partMd5s.add(base64.encode(digest.bytes));
+
+          logger.info(
+            "Part ${partMd5s.length}: $multiPartChunkSizeInBytes bytes",
+          );
+
+          // Write to disk
+          outSink.add(partBytes);
+
+          // Keep remaining bytes for next part
+          final remaining =
+              partBuffer.toBytes().sublist(multiPartChunkSizeInBytes);
+          partBuffer.clear();
+          partBuffer.add(remaining);
+
+          // Start new MD5 for next part (if not last)
+          if (!isLastChunk || partBuffer.isNotEmpty) {
+            partAccumulator = AccumulatorSink<Digest>();
+            partMd5Sink = md5.startChunkedConversion(partAccumulator);
+          }
+        }
+
+        // Handle last chunk (remaining data < partSize)
+        if (isLastChunk && partBuffer.isNotEmpty) {
+          final lastPartBytes = partBuffer.toBytes();
+
+          // Calculate MD5 for last part
+          partMd5Sink!.add(lastPartBytes);
+          partMd5Sink.close();
+          final digest = partAccumulator!.events.single;
+          partMd5s.add(base64.encode(digest.bytes));
+
+          // Write to disk
+          outSink.add(lastPartBytes);
+          partBuffer.clear();
+        }
+      }
+    }
+
+    await inputFile.close();
+
+    // Finalize MD5
+    String? finalFileMd5;
+    if (multiPartChunkSizeInBytes == null && fullMd5Sink != null) {
+      fullMd5Sink.close();
+      final digest = fullAccumulator!.events.single;
+      finalFileMd5 = base64.encode(digest.bytes);
+      logger.info("File MD5: $finalFileMd5");
+    }
+
+    // Ensure all data is written
+    await outSink.flush();
+    await outSink.close();
+
+    final encryptionTimeSeconds = (DateTime.now().millisecondsSinceEpoch -
+            encryptionStartTime.millisecondsSinceEpoch) /
+        1000;
+    final partsInfo =
+        multiPartChunkSizeInBytes != null ? " Parts: ${partMd5s.length}" : "";
+    debugPrint(
+      "FileEncryption: Time: ${encryptionTimeSeconds}s "
+      "Total encrypted: $totalEncryptedBytes bytes$partsInfo",
+    );
+
+    return FileEncryptResult(
+      key: key,
+      header: initPushResult.header,
+      fileMd5: finalFileMd5,
+      partMd5s: multiPartChunkSizeInBytes != null && partMd5s.isNotEmpty
+          ? partMd5s
+          : null,
+      partSize: multiPartChunkSizeInBytes,
+    );
+  } catch (e) {
+    try {
+      await inputFile.close();
+    } catch (_) {}
+    try {
+      await outSink.close();
+    } catch (_) {}
+    if (await destinationFile.exists()) {
+      try {
+        await destinationFile.delete();
+      } catch (_) {}
+    }
+    rethrow;
+  }
+}
+
+// Fast equality check for Uint8List
+bool _uint8listEquals(Uint8List a, Uint8List b) {
+  if (identical(a, b)) return true;
+  if (a.length != b.length) return false;
+
+  final len = a.length;
+  int i = 0;
+
+  // Compare 8 bytes at a time for speed
+  while (i + 7 < len) {
+    final va =
+        a.buffer.asByteData().getUint64(a.offsetInBytes + i, Endian.little);
+    final vb =
+        b.buffer.asByteData().getUint64(b.offsetInBytes + i, Endian.little);
+    if (va != vb) return false;
+    i += 8;
+  }
+
+  // Remaining bytes
+  while (i < len) {
+    if (a[i] != b[i]) return false;
+    i++;
+  }
+
+  return true;
 }
 
 Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
@@ -256,6 +521,113 @@ Uint8List chachaDecryptData(Map<String, dynamic> args) {
     null,
   );
   return pullResult.m;
+}
+
+Future<void> chachaVerifyFile(Map<String, dynamic> args) async {
+  try {
+    // Step 1: Decrypt the file key using collection key
+    final encryptedKey = Sodium.base642bin(args["encFileKey"]);
+    final nonce = Sodium.base642bin(args["encFileNonce"]);
+    final fileKey = Sodium.cryptoSecretboxOpenEasy(
+      encryptedKey,
+      nonce,
+      args["parentCollectionKey"],
+    );
+
+    // Step 2: Verify file can be decrypted
+    final header = Sodium.base642bin(args["encFileHeaders"]);
+    final encFile = File(args["encFilePath"]);
+
+    if (!await encFile.exists()) {
+      throw Exception(
+        "$kVerificationErrorTag: Encrypted file does not exist at path: ${args["encFilePath"]}",
+      );
+    }
+
+    final encFileLength = await encFile.length();
+    if (encFileLength == 0) {
+      throw Exception("$kVerificationErrorTag: Encrypted file is empty");
+    }
+
+    final inputFile = encFile.openSync(mode: FileMode.read);
+
+    try {
+      // Initialize decryption
+      final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+        header,
+        fileKey,
+      );
+
+      // Determine number of chunks to verify
+      // -1 means verify entire file
+      final int chunkLimit = args["chunkLimit"] ?? 1;
+      final bool verifyEntireFile = chunkLimit == -1;
+      final chunksToVerify = verifyEntireFile
+          ? 999999999
+          : chunkLimit; // Large number for entire file
+
+      var bytesRead = 0;
+      var chunksVerified = 0;
+
+      while (chunksVerified < chunksToVerify) {
+        // Calculate chunk size
+        final remainingBytes = encFileLength - bytesRead;
+        if (remainingBytes <= 0) {
+          break; // No more data to verify
+        }
+
+        final chunkSize = remainingBytes < decryptionChunkSize
+            ? remainingBytes
+            : decryptionChunkSize;
+
+        // Read chunk
+        final buffer = await inputFile.read(chunkSize);
+        if (buffer.isEmpty) {
+          break; // End of file
+        }
+
+        bytesRead += buffer.length;
+        chunksVerified++;
+
+        // Attempt to decrypt - this will throw if decryption fails
+        try {
+          final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+            pullState,
+            buffer,
+            null,
+          );
+
+          // If this was the final tag, we've verified the entire file
+          if (pullResult.tag ==
+              Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+            break;
+          }
+        } catch (e) {
+          // Crypto error during pull operation
+          throw Exception(
+            "$kVerificationErrorTag: Decryption verification failed at chunk $chunksVerified. "
+            "File cannot be decrypted with the provided keys. "
+            "This may indicate corruption during encryption or incorrect keys.",
+          );
+        }
+      }
+    } finally {
+      inputFile.closeSync();
+    }
+  } catch (e) {
+    // If it's already tagged, just rethrow
+    if (e.toString().contains(kVerificationErrorTag)) {
+      rethrow;
+    }
+    // For key decryption errors
+    if (e.toString().contains("crypto_secretbox_open_easy")) {
+      throw Exception(
+        "$kVerificationErrorTag: Failed to decrypt file key. Invalid collection key or corrupted key data.",
+      );
+    }
+    // For other unexpected errors
+    throw Exception("$kVerificationErrorTag: Verification failed: $e");
+  }
 }
 
 class CryptoUtil {
@@ -389,7 +761,7 @@ class CryptoUtil {
   // randomly generated nonce using XChaCha20 (w Poly1305 MAC), and writes it
   // to the destinationFilePath.
   // If a key is not provided, one is generated and returned.
-  static Future<EncryptionResult> encryptFile(
+  static Future<FileEncryptResult> encryptFile(
     String sourceFilePath,
     String destinationFilePath, {
     Uint8List? key,
@@ -398,18 +770,20 @@ class CryptoUtil {
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
-    return _computer.compute(
-      chachaEncryptFile,
-      param: args,
-      taskName: "encryptFile",
-    );
+    return _computer
+        .compute<Map<String, dynamic>, FileEncryptResult>(
+          chachaEncryptFile,
+          param: args,
+          taskName: "encryptFile",
+        )
+        .unwrapExceptionInComputer();
   }
 
   // Encrypts the file at sourceFilePath, with the key (if provided) and a
   // randomly generated nonce using XChaCha20 (w Poly1305 MAC), and writes it
   // to the destinationFilePath.
   // If a key is not provided, one is generated and returned.
-  static Future<EncryptionResult> encryptFileV2(
+  static Future<FileEncryptResult> encryptFileV2(
     String sourceFilePath,
     String destinationFilePath, {
     Uint8List? key,
@@ -423,6 +797,29 @@ class CryptoUtil {
       param: args,
       taskName: "encryptFileV2",
     );
+  }
+
+  // Encrypts the file with MD5 calculation and real-time verification
+  static Future<FileEncryptResult> encryptFileWithMD5(
+    String sourceFilePath,
+    String destinationFilePath, {
+    Uint8List? key,
+    int? multiPartChunkSizeInBytes,
+  }) {
+    final args = <String, dynamic>{};
+    args["sourceFilePath"] = sourceFilePath;
+    args["destinationFilePath"] = destinationFilePath;
+    args["key"] = key;
+    if (multiPartChunkSizeInBytes != null) {
+      args["multiPartChunkSizeInBytes"] = multiPartChunkSizeInBytes;
+    }
+    return _computer
+        .compute<Map<String, dynamic>, FileEncryptResult>(
+          chachaEncryptFileWithVerification,
+          param: args,
+          taskName: "encryptFileWithMD5",
+        )
+        .unwrapExceptionInComputer();
   }
 
   // Decrypts the file at sourceFilePath, with the given key and header using
@@ -440,11 +837,42 @@ class CryptoUtil {
     args["key"] = key;
     return _computer
         .compute(
-          chachaDecryptFile,
+      chachaDecryptFile,
+      param: args,
+      taskName: "decryptFile",
+    )
+        .catchError((e) {
+      if (e.toString().contains(kStreamPullError)) {
+        throw StreamPullErr("decryptFile", e);
+      } else {
+        throw e;
+      }
+    });
+  }
+
+  static Future<void> decryptVerify(
+    String encFilePath,
+    String encFileHeaders,
+    String encFileKey,
+    String encFileNonce,
+    Uint8List parentCollectionKey, {
+    int chunkLimit = -1,
+  }) {
+    final args = <String, dynamic>{
+      "encFilePath": encFilePath,
+      "encFileHeaders": encFileHeaders,
+      "encFileKey": encFileKey,
+      "encFileNonce": encFileNonce,
+      "parentCollectionKey": parentCollectionKey,
+      "chunkLimit": chunkLimit,
+    };
+    return _computer
+        .compute(
+          chachaVerifyFile,
           param: args,
-          taskName: "decryptFile",
+          taskName: "decryptVerify",
         )
-        .catchError((e) => throw CryptoErr("decryptFile", e));
+        .unwrapExceptionInComputer();
   }
 
   // Generates and returns a 256-bit key.
@@ -606,5 +1034,41 @@ class CryptoUtil {
       },
       taskName: "fileHash",
     );
+  }
+
+  /// Estimates the encrypted size for a given plaintext size.
+  /// Takes into account the ChaCha20-Poly1305 overhead per chunk.
+  static int estimateEncryptedSize(int plainTextSize) {
+    if (plainTextSize <= 0) {
+      return 0;
+    }
+
+    final int chunkOverhead = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
+    final int fullChunks = plainTextSize ~/ encryptionChunkSize;
+    final int lastChunkSize = plainTextSize % encryptionChunkSize;
+
+    int estimatedSize = fullChunks * (encryptionChunkSize + chunkOverhead);
+    if (lastChunkSize > 0) {
+      estimatedSize += lastChunkSize + chunkOverhead;
+    }
+
+    return estimatedSize;
+  }
+
+  /// Validates that the plaintext and ciphertext sizes match for streaming encryption.
+  /// Returns true if the sizes are valid for chunked ChaCha20-Poly1305 encryption.
+  ///
+  /// Each chunk adds 17 bytes (Sodium.cryptoSecretstreamXchacha20poly1305Abytes) overhead.
+  /// For a 4MB chunk size, the encrypted size is 4MB + 17 bytes per chunk.
+  static bool validateStreamEncryptionSizes(
+    int plainTextSize,
+    int cipherTextSize,
+  ) {
+    if (plainTextSize <= 0 || cipherTextSize <= 0) {
+      return false;
+    }
+
+    final int expectedCipherTextSize = estimateEncryptedSize(plainTextSize);
+    return expectedCipherTextSize == cipherTextSize;
   }
 }

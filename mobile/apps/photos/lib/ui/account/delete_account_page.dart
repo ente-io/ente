@@ -67,6 +67,17 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
+                  AppLocalizations.of(context).deleteAccountWarning,
+                  style: getEnteTextTheme(context).body.copyWith(
+                        color: colorScheme.warning700,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
                   AppLocalizations.of(context).askDeleteReason,
                   style: getEnteTextTheme(context).body,
                 ),

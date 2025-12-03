@@ -11,6 +11,7 @@
   "invalidEmailAddress": "Invalid email address",
   "enterValidEmail": "Please enter a valid email address.",
   "deleteAccount": "Delete account",
+  "deleteAccountWarning": "This will delete your Ente Auth, Ente Photos and Ente Locker account.",
   "askDeleteReason": "What is the main reason you are deleting your account?",
   "deleteAccountFeedbackPrompt": "We are sorry to see you go. Please share your feedback to help us improve.",
   "feedback": "Feedback",
@@ -34,6 +35,16 @@
   "password": "Password",
   "confirmPassword": "Confirm password",
   "activeSessions": "Active sessions",
+  "ocrProcessingOverlayMessage": "Detecting text...",
+  "ocrLoadingIndicatorLabel": "Detecting Text",
+  "ocrSelectionHint": "Swipe or double tap to select just what you need",
+  "ocrNoTextDetected": "No text detected",
+  "ocrRetryButtonLabel": "Retry",
+  "ocrModelsNetworkRequiredError": "Network connection required to download OCR models on first use",
+  "ocrModelsPrepareFailed": "Could not prepare OCR models",
+  "ocrImageNotFoundError": "Image file not found",
+  "ocrImageDecodeFailedError": "Could not read image file",
+  "ocrGenericDetectError": "Could not detect text in image",
   "oops": "Oops",
   "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
   "thisWillLogYouOutOfThisDevice": "This will log you out of this device!",
@@ -107,6 +118,10 @@
   "enterYourPassword": "Enter your password",
   "welcomeBack": "Welcome back!",
   "contactSupport": "Contact support",
+  "locationPickerTip": "You can also add a location centered on a photo from the photo's info screen",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Incorrect password",
   "pleaseTryAgain": "Please try again",
   "recreatePasswordTitle": "Recreate password",
@@ -186,6 +201,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
@@ -244,6 +260,7 @@
   "sendLink": "Send link",
   "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
+  "copyEmbedHtml": "Copy embed HTML",
   "linkHasExpired": "Link has expired",
   "publicLinkEnabled": "Public link enabled",
   "shareALink": "Share a link",
@@ -1175,8 +1192,8 @@
     "description": "Label for the map view"
   },
   "maps": "Maps",
+  "mapsPrivacyNotice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
   "enableMaps": "Enable Maps",
-  "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
   "quickLinks": "Quick links",
   "selectItemsToAdd": "Select items to add",
   "addSelected": "Add selected",
@@ -1594,8 +1611,8 @@
   },
   "legacyInvite": "{email} has invited you to be a trusted contact",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
-  "useDifferentPlayerInfo": "Having trouble playing this video? Long press here to try a different player.",
   "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "swipeToSelect": "Swipe to select",
   "gallery": "Gallery",
   "joinAlbum": "Join album",
   "joinAlbumSubtext": "to view and add your photos",
@@ -1806,7 +1823,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.",
   "layout": "Layout",
   "day": "Day",
-  "peopleAutoAddDesc": "Select the people you want to automatically add to the album",
   "undo": "Undo",
   "redo": "Redo",
   "filter": "Filter",
@@ -1838,6 +1854,18 @@
   "addedToStreamRecreationQueue": "Added to stream recreation queue",
   "videoPreviewAlreadyExists": "Video preview already exists",
   "videoAlreadyInQueue": "Video file already present in the queue",
+  "videoExportFailed": "Video creation failed. Please try again.",
+  "videoExportSuccess": "Video successfully created at {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Added to queue",
   "creatingStream": "Creating stream",
   "similarImages": "Similar images",
@@ -1938,14 +1966,115 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Similar images",
-  "cLDesc1": "We are introducing a new ML-based system to detect similar images, using which you can cleanup your library. Available in Settings -> Backup -> Free up space",
-  "cLTitle2": "Video streaming enhancements",
-  "cLDesc2": "You can now manually trigger stream generation for videos directly from the app. We have also added a new video streaming settings screen which will show you what percentage of your videos have been processed for streaming",
-  "cLTitle3": "Performance improvements",
-  "cLDesc3": "Multiple under the hood improvements, including better cache usage and a smoother scroll experience",
+  "cLTitle1": "Jump to date",
+  "cLDesc1": "See surrounding photos for any photo by selecting the jump to date option in the file's info pane.",
+  "cLTitle2": "Faster video editor",
+  "cLDesc2": "Video editor was revamped to both drastically improve its speed when editing larger videos, and also improve the UX.",
+  "cLTitle3": "New memories",
+  "cLDesc3": "\"Playful kids\", \"Winter adventures\", \"Neon nights\", and more.",
+  "cLTitle4": "Landscape gallery and more",
+  "cLDesc4": "Support for landscape layout in the app's main gallery. Show persons without any associated photos instead of filtering them out. Improve video aspect detection when shared from external apps.",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
-  }
+  },
+  "peopleAutoAddDesc": "Automatically add photos of the selected people to this album",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
+  },
+  "festivities": "Festive cheer",
+  "snowAdventures": "Winter adventures",
+  "waterfalls": "Chasing waterfalls",
+  "wildlife": "Into the wild",
+  "flowers": "Blooming beauties",
+  "nightLights": "Neon nights",
+  "architecture": "Design icons",
+  "autumnColors": "Autumn splendor",
+  "desertDreams": "Desert dreams",
+  "stargazing": "Under the stars",
+  "lakeside": "Lakeside calm",
+  "rainyDays": "Rainy day feels",
+  "sportsAction": "Game on",
+  "streetArt": "Street art stories",
+  "familyMoments": "Family time",
+  "fireworks": "Firework finale",
+  "historicSites": "Echoes of history",
+  "tropicalParadise": "Tropical escapes",
+  "forestTrails": "Forest strolls",
+  "citySunsets": "City sunset glow",
+  "colorfulMarkets": "Vibrant markets",
+  "cozyCafes": "Cozy cafe corners",
+  "vintageVibes": "Vintage vibes",
+  "aerialViews": "Aerial perspectives",
+  "artisticPortraits": "Artful portraits",
+  "streetFood": "Street food bites",
+  "riverCruises": "River cruise views",
+  "facesTimelineBannerTitle": "Memory Lane",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "See {name}'s photos across the years",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Memory lane",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} was {count, plural, one {{count} year old} other {{count} years old}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {# year ago} other {# years ago}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Video sharing coming soon",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Previous",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Next",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Play",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pause",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Faces timeline is preparing...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
+  "playfulKids": "Playful kids",
+  "coastalCliffs": "Cliffs by the sea"
 }

@@ -39,7 +39,12 @@ class NetworkClient {
       ),
     );
 
-    _enteDio.httpClientAdapter = NativeAdapter();
+    // Only use NativeAdapter on iOS. On Android, Cronet (used by NativeAdapter)
+    // doesn't work in background tasks on Android 15, causing CronetException
+    // during background sync. Use default adapter on Android instead.
+    if (Platform.isIOS) {
+      _enteDio.httpClientAdapter = NativeAdapter();
+    }
 
     _setupInterceptors(endpoint);
 

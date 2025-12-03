@@ -1,5 +1,5 @@
 import { getKV, getKVN, setKV } from "ente-base/kv";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { type EntityType } from ".";
 import { RemoteUserEntityKey } from "./remote";
 

@@ -20,6 +20,27 @@ export default {
     },
 } satisfies ExportedHandler;
 
+// Strict allowlist of upload destinations. Expand as needed.
+const ALLOWED_UPLOAD_HOSTS = new Set<string>([
+    // Example: Backblaze B2 S3-compatible bucket endpoint
+    "ente-prod-eu.s3.eu-central-003.backblazeb2.com",
+]);
+
+const isAllowedUploadURL = (uploadURL: string) => {
+    try {
+        const url = new URL(uploadURL);
+        // Enforce HTTPS, no credentials, and an allowlisted host.
+        if (url.protocol !== "https:") return false;
+        if (url.username || url.password) return false;
+        // Only default HTTPS port; signed URLs should not need a custom port.
+        if (url.port && url.port !== "443") return false;
+        if (!ALLOWED_UPLOAD_HOSTS.has(url.hostname)) return false;
+        return true;
+    } catch {
+        return false;
+    }
+};
+
 const handleOPTIONS = (request: Request) => {
     const origin = request.headers.get("Origin");
     if (!isAllowedOrigin(origin)) console.warn("Unknown origin", origin);
@@ -28,7 +49,7 @@ const handleOPTIONS = (request: Request) => {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, PUT, OPTIONS",
             "Access-Control-Allow-Headers":
-                "Content-Type, UPLOAD-URL, X-Client-Package, X-Client-Version",
+                "Content-Type, Content-MD5, UPLOAD-URL, X-Client-Package, X-Client-Version",
             "Access-Control-Expose-Headers": "X-Request-Id, CF-Ray",
             "Access-Control-Max-Age": "86400",
         },
@@ -60,6 +81,19 @@ const handlePOSTOrPUT = async (request: Request) => {
         console.error("No uploadURL provided");
         return new Response(null, { status: 400 });
     }
+    if (!isAllowedUploadURL(uploadURL)) {
+        console.warn("Blocked uploadURL due to allowlist", uploadURL);
+        return new Response(JSON.stringify({ error: "host not whitelisted" }), {
+            status: 400,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Expose-Headers": "X-Request-Id, CF-Ray",
+            },
+        });
+    }
+
+    const forwardHeaders = buildForwardHeaders(request);
 
     let response: Response;
     switch (url.pathname) {
@@ -67,12 +101,14 @@ const handlePOSTOrPUT = async (request: Request) => {
             response = await fetch(uploadURL, {
                 method: request.method,
                 body: request.body,
+                headers: forwardHeaders,
             });
             break;
         case "/multipart-upload":
             response = await fetch(uploadURL, {
                 method: request.method,
                 body: request.body,
+                headers: forwardHeaders,
             });
             if (response.ok) {
                 const etag = response.headers.get("etag");
@@ -80,7 +116,11 @@ const handlePOSTOrPUT = async (request: Request) => {
                     console.log("No etag in response", response);
                     response = new Response(null, { status: 500 });
                 } else {
-                    response = new Response(JSON.stringify({ etag }));
+                    response = new Response(JSON.stringify({ etag }), {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
                 }
             }
             break;
@@ -106,4 +146,25 @@ const handlePOSTOrPUT = async (request: Request) => {
         "X-Request-Id, CF-Ray",
     );
     return response;
+};
+
+const buildForwardHeaders = (
+    request: Request,
+): Record<string, string> | undefined => {
+    const headers: Record<string, string> = {};
+    const contentMd5 =
+        request.headers.get("CONTENT-MD5") ??
+        request.headers.get("Content-MD5");
+    if (contentMd5) {
+        headers["Content-MD5"] = contentMd5;
+    }
+    const contentLength = request.headers.get("Content-Length");
+    if (contentLength) {
+        headers["Content-Length"] = contentLength;
+    }
+    const contentType = request.headers.get("Content-Type");
+    if (contentType) {
+        headers["Content-Type"] = contentType;
+    }
+    return Object.keys(headers).length ? headers : undefined;
 };

@@ -78,10 +78,12 @@ const ChangelogContent: React.FC = () => {
 
     return (
         <Stack sx={{ gap: 2, mb: 1 }}>
-            <Typography variant="h6">{ut("Light mode ✨")}</Typography>
+            <Typography variant="h6">
+                {ut("Enhanced album sharing and organization")}
+            </Typography>
             <Typography sx={{ color: "text.muted" }}>
                 {ut(
-                    "The much requested light mode is here. The app will automatically switch between the light and dark theme based on your OS settings. You can manually override this is Preferences.",
+                    "Share public albums with your custom domain. Choose from new layouts including grouped, continuous, and trip views. Album management is now faster with ability to quickly create a new album and search functionality in selection dialogs.",
                 )}
             </Typography>
         </Stack>

@@ -18,7 +18,7 @@ This key can be used to bypass Ente 2FA in case you are locked out.
 
 Another option is to use a separate account for Ente Auth.
 
-Also, taking exporting the encrypted backup is also another good way to reduce
+Also, exporting the encrypted backup is another good way to reduce
 the risk (you can easily import the encrypted backup without signing in).
 
 Ente also offers [Legacy](/photos/features/legacy/) (emergency contacts) and support for [Passkeys](/photos/features/passkeys). Both help reduce the risk of being locked out of your Ente account.

@@ -485,7 +485,7 @@ export type GalleryAction =
     | { type: "enterSearchMode"; searchSuggestion?: SearchSuggestion }
     | { type: "updatingSearchResults" }
     | { type: "setSearchResults"; searchResults: EnteFile[] }
-    | { type: "exitSearch" };
+    | { type: "exitSearch"; shouldExitSearchMode?: boolean };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -1139,15 +1139,20 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 isRecomputingSearchResults: false,
             });
 
-        case "exitSearch":
+        case "exitSearch": {
+            // Only exit search mode if explicitly requested (defaults to true for backward compatibility)
+            const shouldExitSearchMode = action.shouldExitSearchMode ?? true;
             return stateByUpdatingFilteredFiles({
                 ...state,
                 searchResults: undefined,
                 searchSuggestion: undefined,
                 isRecomputingSearchResults: false,
                 pendingSearchSuggestions: [],
-                isInSearchMode: false,
+                isInSearchMode: shouldExitSearchMode
+                    ? false
+                    : state.isInSearchMode,
             });
+        }
     }
 };
 

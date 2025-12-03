@@ -12,8 +12,6 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/debug/local_thumbnail_config_screen.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class DebugSectionWidget extends StatefulWidget {
   const DebugSectionWidget({super.key});
@@ -35,6 +33,27 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Disable internal user features",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.isInternalUserDisabled,
+            onChanged: () async {
+              final newValue = !localSettings.isInternalUserDisabled;
+              await localSettings.setInternalUserDisabled(newValue);
+              setState(() {});
+              showShortToast(
+                context,
+                newValue
+                    ? "Internal user disabled. Restart app."
+                    : "Internal user enabled. Restart app.",
+              );
+            },
+          ),
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
@@ -77,21 +96,6 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
               );
             },
           ),
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Local thumbnail queue config",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await routeToPage(
-              context,
-              const LocalThumbnailConfigScreen(),
-            );
-          },
         ),
         sectionOptionSpacing,
         MenuItemWidget(

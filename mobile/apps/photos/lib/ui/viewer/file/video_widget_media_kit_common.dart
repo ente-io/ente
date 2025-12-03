@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:media_kit_video/media_kit_video.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
@@ -14,7 +15,7 @@ import "package:photos/utils/standalone/debouncer.dart";
 class VideoWidget extends StatefulWidget {
   final EnteFile file;
   final VideoController controller;
-  final Function(bool)? playbackCallback;
+  final FullScreenRequestCallback? playbackCallback;
   final bool isFromMemories;
   final void Function() onStreamChange;
   final bool isPreviewPlayer;
@@ -51,7 +52,10 @@ class _VideoWidgetState extends State<VideoWidget> {
       if (isPlaying && !_isSeekingNotifier.value) {
         _hideControlsDebouncer.run(() async {
           showControlsNotifier.value = false;
-          widget.playbackCallback?.call(true);
+          widget.playbackCallback?.call(
+            true,
+            FullScreenRequestReason.playbackStateChange,
+          );
         });
       }
     });
@@ -76,7 +80,10 @@ class _VideoWidgetState extends State<VideoWidget> {
       if (widget.controller.player.state.playing) {
         _hideControlsDebouncer.run(() async {
           showControlsNotifier.value = false;
-          widget.playbackCallback?.call(true);
+          widget.playbackCallback?.call(
+            true,
+            FullScreenRequestReason.playbackStateChange,
+          );
         });
       }
     }
@@ -107,12 +114,16 @@ class _VideoWidgetState extends State<VideoWidget> {
                             if (widget.playbackCallback != null) {
                               widget.playbackCallback!(
                                 !showControlsNotifier.value,
+                                FullScreenRequestReason.userInteraction,
                               );
                             }
                           },
                     onLongPress: () {
                       if (widget.isFromMemories) {
-                        widget.playbackCallback?.call(false);
+                        widget.playbackCallback?.call(
+                          false,
+                          FullScreenRequestReason.userInteraction,
+                        );
                         if (widget.controller.player.state.playing) {
                           widget.controller.player.pause();
                         }
@@ -120,7 +131,10 @@ class _VideoWidgetState extends State<VideoWidget> {
                     },
                     onLongPressUp: () {
                       if (widget.isFromMemories) {
-                        widget.playbackCallback?.call(true);
+                        widget.playbackCallback?.call(
+                          true,
+                          FullScreenRequestReason.userInteraction,
+                        );
                         if (!widget.controller.player.state.playing) {
                           widget.controller.player.play();
                         }

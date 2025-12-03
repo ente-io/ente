@@ -9,7 +9,6 @@ import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/components/dialogs.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/email_util.dart';
-import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
 
 class DeleteAccountPage extends StatelessWidget {
@@ -121,6 +120,18 @@ class DeleteAccountPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  context.strings.deleteAccountWarning,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w800,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ],
           ),
         ),
@@ -150,8 +161,6 @@ class DeleteAccountPage extends StatelessWidget {
       context,
       context.strings.initiateAccountDeleteTitle,
     );
-
-    await PlatformUtil.refocusWindows();
 
     if (hasAuthenticated) {
       final choice = await showChoiceDialogOld(

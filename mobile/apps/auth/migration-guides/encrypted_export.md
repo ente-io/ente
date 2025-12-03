@@ -1,2 +1,2 @@
 Moved to
-[help.ente.io/auth/migration-guides/export](https://help.ente.io/auth/migration-guides/export/)
+[ente.io/help/auth/migration-guides/export](https://ente.io/help/auth/migration-guides/export/)

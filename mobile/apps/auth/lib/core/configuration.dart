@@ -32,6 +32,7 @@ class Configuration extends BaseConfiguration {
     );
     sqfliteFfiInit();
     await _initOfflineAccount();
+    await _initOnlineAccount();
   }
 
   Future<void> _initOfflineAccount() async {
@@ -39,6 +40,24 @@ class Configuration extends BaseConfiguration {
       key: offlineAuthSecretKey,
     );
   }
+
+  Future<void> _initOnlineAccount() async {
+    if (hasConfiguredAccount()) {
+      _authSecretKey = await _secureStorage.read(
+        key: authSecretKeyKey,
+      );
+    }
+  }
+
+  @override
+  // This includes both base keys (key, secretKey) and auth-specific keys.
+  List<String> get secureStorageKeys => [
+        BaseConfiguration.keyKey,
+        BaseConfiguration.secretKeyKey,
+        authSecretKeyKey,
+        // Note: offlineAuthSecretKey is intentionally not included here
+        // as it persists across logouts
+      ];
 
   @override
   Future<void> logout({bool autoLogout = false}) async {

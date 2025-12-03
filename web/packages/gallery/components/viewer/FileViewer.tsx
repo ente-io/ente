@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -161,6 +162,11 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     disableDownload?: boolean;
     /**
+     * If true then the fullscreen button is shown as a primary action button
+     * in the toolbar instead of being hidden in the more menu.
+     */
+    showFullscreenButton?: boolean;
+    /**
      * `true` when we are viewing files in an album that the user does not own.
      */
     isInIncomingSharedCollection?: boolean;
@@ -275,6 +281,15 @@ export type FileViewerProps = ModalVisibilityProps & {
      * documentation about the parameters.
      */
     onSaveEditedImageCopy?: ImageEditorOverlayProps["onSaveEditedCopy"];
+
+    onAddFileToCollection?: (
+        file: EnteFile,
+        sourceCollectionSummaryID?: number,
+    ) => void;
+    /**
+     * The ID of the currently active collection, if any (e.g., when viewing an album).
+     */
+    activeCollectionID?: number;
 } & Pick<
         FileInfoProps,
         "collectionNameByID" | "onSelectCollection" | "onSelectPerson"
@@ -290,6 +305,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     files,
     initialIndex,
     disableDownload,
+    showFullscreenButton,
     isInIncomingSharedCollection,
     isInTrashSection,
     isInHiddenSection,
@@ -308,6 +324,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onSaveEditedImageCopy,
+    onAddFileToCollection,
+    activeCollectionID,
 }) => {
     const { onGenericError } = useBaseContext();
 
@@ -462,6 +480,23 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             ])
             .catch(onGenericError);
     }, [onGenericError, handleMoreMenuCloseIfNeeded, activeAnnotatedFile]);
+
+    const handleAddFileToCollection = useMemo(() => {
+        if (!onAddFileToCollection || !activeAnnotatedFile) return undefined;
+        return () => {
+            handleMoreMenuCloseIfNeeded();
+            const sourceSummaryID = fileNormalCollectionIDs
+                ?.get(activeAnnotatedFile.file.id)
+                ?.find((id) => id === activeCollectionID);
+            onAddFileToCollection(activeAnnotatedFile.file, sourceSummaryID);
+        };
+    }, [
+        onAddFileToCollection,
+        handleMoreMenuCloseIfNeeded,
+        fileNormalCollectionIDs,
+        activeAnnotatedFile,
+        activeCollectionID,
+    ]);
 
     const handleEditImage = useMemo(() => {
         return onSaveEditedImageCopy
@@ -634,14 +669,36 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
 
     const shouldIgnoreKeyboardEvent = useCallback(() => {
-        // Don't handle keydowns if any of the modals are open.
-        return (
+        // Don't handle keydowns if any of the viewer's own modals are open.
+        if (
             openFileInfo ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
             openShortcuts
-        );
+        ) {
+            return true;
+        }
+
+        // Also ignore keydowns if keyboard focus is inside an editable field
+        // (e.g., when the CollectionSelector dialog's search TextField is focused)
+        const activeElement = document.activeElement as HTMLElement | null;
+        if (activeElement) {
+            const tagName = activeElement.tagName;
+            const role = activeElement.getAttribute("role");
+            if (
+                tagName === "INPUT" ||
+                tagName === "TEXTAREA" ||
+                tagName === "SELECT" ||
+                activeElement.isContentEditable ||
+                role === "textbox" ||
+                role === "combobox"
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }, [
         openFileInfo,
         moreMenuAnchorEl,
@@ -786,10 +843,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         if (!files.length) {
             // If there are no more files left, close the viewer.
             handleClose();
-        } else {
+        } else if (open && activeAnnotatedFile) {
+            // Only refresh if the viewer is still open and we have an active file.
+            // This prevents race conditions when navigating away (e.g., when clicking
+            // the navigate button in AlbumAddedNotification while the viewer is open).
             psRef.current?.refreshSlideOnFilesUpdateIfNeeded();
         }
-    }, [handleClose, files]);
+    }, [handleClose, files, open, activeAnnotatedFile]);
 
     useEffect(() => {
         // This effect might get triggered when the none of the files that were
@@ -813,6 +873,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
+                showFullscreenButton,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -843,6 +904,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         user,
         initialIndex,
         disableDownload,
+        showFullscreenButton,
         haveUser,
         handleClose,
         handleAnnotate,
@@ -927,6 +989,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         )}
                     </MoreMenuItem>
                 )}
+                {handleAddFileToCollection &&
+                    activeAnnotatedFile.annotation.isOwnFile && (
+                        <MoreMenuItem onClick={handleAddFileToCollection}>
+                            <MoreMenuItemTitle>
+                                {t("add_to_album")}
+                            </MoreMenuItemTitle>
+                            <AddIcon />
+                        </MoreMenuItem>
+                    )}
                 {canCopyImage() && (
                     <MoreMenuItem onClick={handleCopyImage}>
                         <MoreMenuItemTitle>
@@ -936,6 +1007,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         <ContentCopyIcon sx={{ "&&": { fontSize: "18px" } }} />
                     </MoreMenuItem>
                 )}
+
                 {activeAnnotatedFile.annotation.showEditImage && (
                     <MoreMenuItem onClick={handleEditImage}>
                         <MoreMenuItemTitle>{t("edit_image")}</MoreMenuItemTitle>

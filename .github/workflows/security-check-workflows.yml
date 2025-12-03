@@ -1,0 +1,62 @@
+name: Security - Check Workflows
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+
+jobs:
+  check-pull-request-target:
+    runs-on: ubuntu-latest
+    environment:
+      name: workflow-security-review
+      # This requires admin approval in repository settings
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for pull_request_target in modified workflows
+        run: |
+          # Get list of modified workflow files
+          MODIFIED_WORKFLOWS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^\.github/workflows/.*\.yml$' || true)
+
+          if [ -z "$MODIFIED_WORKFLOWS" ]; then
+            echo "No workflow files modified"
+            exit 0
+          fi
+
+          echo "Checking modified workflows: $MODIFIED_WORKFLOWS"
+
+          # Check if any modified workflow introduces pull_request_target
+          VIOLATIONS=""
+          for file in $MODIFIED_WORKFLOWS; do
+            if git show HEAD:$file | grep -q "pull_request_target:"; then
+              # Check if it existed in base branch
+              if git show origin/${{ github.base_ref }}:$file 2>/dev/null | grep -q "pull_request_target:"; then
+                echo "✓ $file: pull_request_target already existed (allowed)"
+              else
+                echo "✗ $file: NEW pull_request_target trigger detected!"
+                VIOLATIONS="$VIOLATIONS\n- $file"
+              fi
+            fi
+          done
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo ""
+            echo "❌ ERROR: New pull_request_target triggers detected in:$VIOLATIONS"
+            echo ""
+            echo "pull_request_target is a security-sensitive trigger that:"
+            echo "- Runs in the context of the base repository"
+            echo "- Has access to repository secrets"
+            echo "- Can be exploited by malicious PRs"
+            echo ""
+            echo "If you need to add pull_request_target, please:"
+            echo "1. Discuss with maintainers first"
+            echo "2. Ensure proper security measures are in place"
+            echo "3. Get explicit approval before merging"
+            exit 1
+          fi
+
+          echo "✓ No new pull_request_target triggers detected"

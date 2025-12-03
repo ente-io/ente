@@ -18,6 +18,7 @@ import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/components/title_bar_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 
@@ -131,12 +132,6 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       await _lockScreenSettings.setAppLockEnabled(false);
     }
     await _lockScreenSettings.removePinAndPassword();
-    if (PlatformUtil.isMobile()) {
-      await _lockScreenSettings.setHideAppContent(!appLock);
-      setState(() {
-        hideAppContent = _lockScreenSettings.getShouldHideAppContent();
-      });
-    }
     await _initializeSettings();
     setState(() {
       appLock = !appLock;
@@ -336,52 +331,46 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                             ),
                                           )
                                         : const SizedBox.shrink(),
-                                    PlatformUtil.isMobile()
-                                        ? Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const SizedBox(height: 24),
-                                              MenuItemWidget(
-                                                captionedTextWidget:
-                                                    CaptionedTextWidget(
-                                                  title: context
-                                                      .strings.hideContent,
-                                                ),
-                                                alignCaptionedTextToLeft: true,
-                                                singleBorderRadius: 8,
-                                                menuItemColor:
-                                                    colorTheme.fillFaint,
-                                                trailingWidget:
-                                                    ToggleSwitchWidget(
-                                                  value: () => hideAppContent,
-                                                  onChanged: () =>
-                                                      _onHideContent(),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 14,
-                                                  left: 14,
-                                                  right: 12,
-                                                ),
-                                                child: Text(
-                                                  Platform.isAndroid
-                                                      ? context.strings
-                                                          .hideContentDescriptionAndroid
-                                                      : context.strings
-                                                          .hideContentDescriptioniOS,
-                                                  style: textTheme.miniFaint,
-                                                  textAlign: TextAlign.left,
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : const SizedBox.shrink(),
                                   ],
                                 )
                               : const SizedBox.shrink(),
                         ),
+                        PlatformUtil.isMobile()
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: appLock ? 24 : 8),
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: context.strings.hideContent,
+                                    ),
+                                    alignCaptionedTextToLeft: true,
+                                    singleBorderRadius: 8,
+                                    menuItemColor: colorTheme.fillFaint,
+                                    trailingWidget: ToggleSwitchWidget(
+                                      value: () => hideAppContent,
+                                      onChanged: () => _onHideContent(),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 14,
+                                      left: 14,
+                                      right: 12,
+                                    ),
+                                    child: Text(
+                                      Platform.isAndroid
+                                          ? context.strings
+                                              .hideContentDescriptionAndroid
+                                          : context.strings
+                                              .hideContentDescriptioniOS,
+                                      style: textTheme.miniFaint,
+                                      textAlign: TextAlign.left,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -394,6 +383,4 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       ),
     );
   }
-
-  routeToPage(BuildContext context, LockScreenAutoLock lockScreenAutoLock) {}
 }

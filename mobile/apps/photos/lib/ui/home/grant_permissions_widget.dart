@@ -106,7 +106,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         ),
         child: OutlinedButton(
           key: const ValueKey("grantPermissionButton"),
-          child: Text(AppLocalizations.of(context).grantPermission),
+          child: Text(AppLocalizations.of(context).continueLabel),
           onPressed: () async {
             try {
               final state =

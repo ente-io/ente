@@ -10,19 +10,18 @@
 	<dict>
 		<key>NSExtensionAttributes</key>
         <dict>
+            <key>PHSupportedMediaTypes</key>
+               <array>
+                   <string>Video</string>
+                   <string>Image</string>
+               </array>
             <key>NSExtensionActivationRule</key>
-            <string>SUBQUERY (
-                extensionItems,
-                $extensionItem,
-                SUBQUERY (
-                    $extensionItem.attachments,
-                    $attachment,
-                    ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.data" AND
-                    !(ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.text" OR
-                    ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.plain-text" OR
-                    ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.utf8-plain-text")
-                ).@count == 1
-            ).@count == 1</string>
+            <dict>
+                <key>NSExtensionActivationSupportsImageWithMaxCount</key>
+                <integer>100</integer>
+				<key>NSExtensionActivationSupportsFileWithMaxCount</key>
+				<integer>100</integer>
+            </dict>
         </dict>
 		<key>NSExtensionMainStoryboard</key>
 		<string>MainInterface</string>

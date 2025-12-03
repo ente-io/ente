@@ -101,7 +101,7 @@ class _MapViewState extends State<MapView> {
             },
           ),
           children: [
-            const OSMFranceTileLayer(),
+            const OSMTileLayer(),
             MarkerClusterLayerWidget(
               options: MarkerClusterLayerOptions(
                 alignment: Alignment.topCenter,
@@ -136,7 +136,7 @@ class _MapViewState extends State<MapView> {
               padding: EdgeInsets.only(
                 bottom: widget.bottomSheetDraggableAreaHeight,
               ),
-              child: OSMFranceTileAttributes(
+              child: OSMTileAttributes(
                 options: widget.mapAttributionOptions,
               ),
             ),

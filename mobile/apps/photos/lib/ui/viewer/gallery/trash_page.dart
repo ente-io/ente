@@ -13,6 +13,7 @@ import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import 'package:photos/utils/delete_file_util.dart';
@@ -58,44 +59,46 @@ class TrashPage extends StatelessWidget {
       initialFiles: null,
     );
 
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            appBarType,
-            AppLocalizations.of(context).trash,
-            _selectedFiles,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              appBarType,
+              AppLocalizations.of(context).trash,
+              _selectedFiles,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              const BottomShadowWidget(
-                offsetDy: 20,
-              ),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                height: filesAreSelected ? 0 : 80,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 100),
-                  opacity: filesAreSelected ? 0.0 : 1.0,
-                  curve: Curves.easeIn,
-                  child: IgnorePointer(
-                    ignoring: filesAreSelected,
-                    child: const SafeArea(
-                      minimum: EdgeInsets.only(bottom: 6),
-                      child: BottomButtonsWidget(),
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                const BottomShadowWidget(
+                  offsetDy: 20,
+                ),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  height: filesAreSelected ? 0 : 80,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 100),
+                    opacity: filesAreSelected ? 0.0 : 1.0,
+                    curve: Curves.easeIn,
+                    child: IgnorePointer(
+                      ignoring: filesAreSelected,
+                      child: const SafeArea(
+                        minimum: EdgeInsets.only(bottom: 6),
+                        child: BottomButtonsWidget(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              FileSelectionOverlayBar(GalleryType.trash, _selectedFiles),
-            ],
+                FileSelectionOverlayBar(GalleryType.trash, _selectedFiles),
+              ],
+            ),
           ),
         ),
       ),

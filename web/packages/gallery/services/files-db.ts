@@ -69,7 +69,7 @@ import {
 import type { MagicMetadata } from "ente-media/magic-metadata";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
 import localForage from "localforage";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 if (haveWindow()) {
     localForage.config({

@@ -1,6 +1,6 @@
 import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
 import { nullishToZero } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Zod schema of the mutable metadatum objects that we send to or receive from

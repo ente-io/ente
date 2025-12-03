@@ -6,15 +6,15 @@
         "bip39": "^3.1.0",
         "ente-base": "*",
         "fast-srp-hap": "^2.0.4",
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
         "react-otp-input": "^3.1.1",
-        "uuid": "^11.1.0",
+        "uuid": "^13.0.0",
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@types/react": "^19.1.8",
-        "@types/react-dom": "^19.1.6",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
         "@types/zxcvbn": "^4.4.5",
         "ente-build-config": "*"
     }

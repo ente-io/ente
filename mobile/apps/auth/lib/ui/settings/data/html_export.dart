@@ -48,7 +48,13 @@ Future<String> generateQRImageBase64(String data) async {
 }
 
 Future<String> generateOTPEntryHtml(Code code, BuildContext context) async {
-  final qrBase64 = await generateQRImageBase64(code.rawData);
+  // Capitalize algorithm for Google Authenticator compatibility in QR codes
+  final qrData = code.rawData
+      .replaceAll('algorithm=Algorithm.', 'algorithm=')
+      .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+      .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+      .replaceAll('algorithm=sha512', 'algorithm=SHA512');
+  final qrBase64 = await generateQRImageBase64(qrData);
   String notes = code.display.note;
   if (notes.isNotEmpty) {
     notes = '<p class="group">Note: <b>$notes</b></p>';

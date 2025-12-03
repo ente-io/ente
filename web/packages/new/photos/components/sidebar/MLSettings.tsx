@@ -105,7 +105,7 @@ export const EnableML: React.FC<EnableMLProps> = ({
     showMagicSearchHint,
 }) => {
     const moreDetails = () =>
-        openURL("https://help.ente.io/photos/features/machine-learning");
+        openURL("https://ente.io/help/photos/features/machine-learning");
 
     return (
         <Stack sx={{ gap: "32px", py: "20px", px: 2 }}>

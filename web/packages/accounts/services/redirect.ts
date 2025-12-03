@@ -9,7 +9,8 @@ export const appHomeRoute: string = {
     accounts: "/passkeys",
     auth: "/auth",
     cast: "/" /* The cast app doesn't use this, this is an arbitrary value. */,
-    locker: "/" /* The locker app also doesn't use this. */,
+    embed: "/" /* The embed app doesn't use this either. */,
+    share: "/" /* The locker public app also doesn't use this. */,
     photos: "/gallery",
 }[appName];
 

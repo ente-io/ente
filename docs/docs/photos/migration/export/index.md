@@ -66,4 +66,5 @@ If you run into any issues during your data export, please reach out to
 
 Note that we also provide a
 [CLI tool](https://github.com/ente-io/ente/tree/main/cli#export) to export your
-data.
+data. You can find more information about the export in the
+[export FAQ](/photos/faq/advanced-features).

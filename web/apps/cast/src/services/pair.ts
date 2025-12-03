@@ -4,7 +4,7 @@ import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
 import { wait } from "ente-utils/promise";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export interface Registration {
     /** A pairing code shown on the screen. A client can use this to connect. */

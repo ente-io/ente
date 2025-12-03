@@ -190,20 +190,7 @@ func (h *PublicCollectionHandler) VerifyPassword(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// ReportAbuse captures abuse report for a public collection
-func (h *PublicCollectionHandler) ReportAbuse(c *gin.Context) {
-	var req ente.AbuseReportRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	err := h.Controller.ReportAbuse(c, req)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Status(http.StatusOK)
-}
+// ReportAbuse endpoint removed
 
 // GetDiff returns the diff within a collection since a timestamp
 func (h *PublicCollectionHandler) GetDiff(c *gin.Context) {

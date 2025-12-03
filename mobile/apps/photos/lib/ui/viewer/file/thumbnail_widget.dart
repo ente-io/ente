@@ -99,20 +99,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (!mounted && _localThumbnailQueueTaskId != null) {
         if (widget.thumbnailSize == thumbnailLargeSize) {
           largeLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
-          _logger.info(
-            "Cancelled large thumbnail task: $_localThumbnailQueueTaskId",
-          );
         } else if (widget.thumbnailSize == thumbnailSmallSize) {
           smallLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
-          _logger.info(
-            "Cancelled small thumbnail task: $_localThumbnailQueueTaskId",
-          );
         }
       }
       // Cancel request only if the widget has been unmounted
       if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
-        _logger.info("Cancelled thumbnail request for " + widget.file.tag);
       }
     });
   }
@@ -129,9 +122,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final TaskQueue<String> largeLocalThumbnailQueue = _initLargeQueue();
 
   static TaskQueue<String> _initSmallQueue() {
-    final maxConcurrent = localSettings.smallQueueMaxConcurrent;
-    final timeoutSeconds = localSettings.smallQueueTimeoutSeconds;
-    final maxSize = localSettings.smallQueueMaxSize;
+    final maxConcurrent = flagService.internalUser ? 45 : 15;
+    const timeoutSeconds = 60;
+    const maxSize = 200;
 
     _logger.info(
       "Initializing Small Local Thumbnail Queue - "
@@ -140,15 +133,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
     return TaskQueue<String>(
       maxConcurrentTasks: maxConcurrent,
-      taskTimeout: Duration(seconds: timeoutSeconds),
+      taskTimeout: const Duration(seconds: timeoutSeconds),
       maxQueueSize: maxSize,
     );
   }
 
   static TaskQueue<String> _initLargeQueue() {
-    final maxConcurrent = localSettings.largeQueueMaxConcurrent;
-    final timeoutSeconds = localSettings.largeQueueTimeoutSeconds;
-    final maxSize = localSettings.largeQueueMaxSize;
+    final maxConcurrent = flagService.internalUser ? 15 : 5;
+    const timeoutSeconds = 60;
+    const maxSize = 200;
 
     _logger.info(
       "Initializing Large Local Thumbnail Queue - "
@@ -157,7 +150,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
     return TaskQueue<String>(
       maxConcurrentTasks: maxConcurrent,
-      taskTimeout: Duration(seconds: timeoutSeconds),
+      taskTimeout: const Duration(seconds: timeoutSeconds),
       maxQueueSize: maxSize,
     );
   }

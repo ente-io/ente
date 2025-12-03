@@ -95,7 +95,7 @@ class DataSectionWidget extends StatelessWidget {
       if (FeatureFlagService.isInternalUserOrDebugBuild())
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: l10n.localBackupSidebarTitle + "(i)",
+            title: "${l10n.localBackupSidebarTitle}(i)",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,

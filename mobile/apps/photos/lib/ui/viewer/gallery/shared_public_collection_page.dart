@@ -23,6 +23,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -136,30 +137,32 @@ class _SharedPublicCollectionPageState
       sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
     );
 
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            galleryType,
-            widget.c.collection.displayName,
-            _selectedFiles,
-            collection: widget.c.collection,
-            files: widget.files,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              galleryType,
+              widget.c.collection.displayName,
+              _selectedFiles,
+              collection: widget.c.collection,
+              files: widget.files,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                galleryType,
-                _selectedFiles,
-                collection: widget.c.collection,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  galleryType,
+                  _selectedFiles,
+                  collection: widget.c.collection,
+                ),
+              ],
+            ),
           ),
         ),
       ),

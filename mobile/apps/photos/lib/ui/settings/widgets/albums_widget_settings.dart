@@ -122,7 +122,7 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
               flexibleSpaceTitle: TitleBarTitleWidget(
                 title: AppLocalizations.of(context).albums,
               ),
-              expandedHeight: MediaQuery.textScalerOf(context).scale(120),
+              expandedHeight: MediaQuery.textScalerOf(context).scale(136),
               flexibleSpaceCaption: hasInstalledAny
                   ? AppLocalizations.of(context).albumsWidgetDesc
                   : context.l10n.addAlbumWidgetPrompt,

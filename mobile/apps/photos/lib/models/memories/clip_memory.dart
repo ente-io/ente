@@ -11,7 +11,36 @@ enum ClipMemoryType {
   moon,
   onTheRoad,
   food,
-  pets
+  pets,
+  festivities,
+  snowAdventures,
+  waterfalls,
+  wildlife,
+  flowers,
+  nightLights,
+  architecture,
+  autumnColors,
+  desertDreams,
+  stargazing,
+  lakeside,
+  rainyDays,
+  sportsAction,
+  streetArt,
+  familyMoments,
+  fireworks,
+  historicSites,
+  tropicalParadise,
+  forestTrails,
+  citySunsets,
+  colorfulMarkets,
+  cozyCafes,
+  vintageVibes,
+  aerialViews,
+  artisticPortraits,
+  streetFood,
+  riverCruises,
+  playfulKids,
+  coastalCliffs,
 }
 
 ClipMemoryType clipMemoryTypeFromString(String type) {
@@ -34,6 +63,64 @@ ClipMemoryType clipMemoryTypeFromString(String type) {
       return ClipMemoryType.food;
     case "pets":
       return ClipMemoryType.pets;
+    case "festivities":
+      return ClipMemoryType.festivities;
+    case "snowAdventures":
+      return ClipMemoryType.snowAdventures;
+    case "waterfalls":
+      return ClipMemoryType.waterfalls;
+    case "wildlife":
+      return ClipMemoryType.wildlife;
+    case "flowers":
+      return ClipMemoryType.flowers;
+    case "nightLights":
+      return ClipMemoryType.nightLights;
+    case "architecture":
+      return ClipMemoryType.architecture;
+    case "autumnColors":
+      return ClipMemoryType.autumnColors;
+    case "desertDreams":
+      return ClipMemoryType.desertDreams;
+    case "stargazing":
+      return ClipMemoryType.stargazing;
+    case "lakeside":
+      return ClipMemoryType.lakeside;
+    case "rainyDays":
+      return ClipMemoryType.rainyDays;
+    case "sportsAction":
+      return ClipMemoryType.sportsAction;
+    case "streetArt":
+      return ClipMemoryType.streetArt;
+    case "familyMoments":
+      return ClipMemoryType.familyMoments;
+    case "fireworks":
+      return ClipMemoryType.fireworks;
+    case "historicSites":
+      return ClipMemoryType.historicSites;
+    case "tropicalParadise":
+      return ClipMemoryType.tropicalParadise;
+    case "forestTrails":
+      return ClipMemoryType.forestTrails;
+    case "citySunsets":
+      return ClipMemoryType.citySunsets;
+    case "colorfulMarkets":
+      return ClipMemoryType.colorfulMarkets;
+    case "cozyCafes":
+      return ClipMemoryType.cozyCafes;
+    case "vintageVibes":
+      return ClipMemoryType.vintageVibes;
+    case "aerialViews":
+      return ClipMemoryType.aerialViews;
+    case "artisticPortraits":
+      return ClipMemoryType.artisticPortraits;
+    case "streetFood":
+      return ClipMemoryType.streetFood;
+    case "riverCruises":
+      return ClipMemoryType.riverCruises;
+    case "playfulKids":
+      return ClipMemoryType.playfulKids;
+    case "coastalCliffs":
+      return ClipMemoryType.coastalCliffs;
     default:
       throw ArgumentError("Invalid people memory type: $type");
   }
@@ -59,6 +146,64 @@ String clipQuery(ClipMemoryType clipMemoryType) {
       return "Photo of delicious looking food";
     case ClipMemoryType.pets:
       return "Photo of cute pets";
+    case ClipMemoryType.festivities:
+      return "Photo capturing a joyful celebration or festival";
+    case ClipMemoryType.snowAdventures:
+      return "Photo of a cozy winter adventure in the snow";
+    case ClipMemoryType.waterfalls:
+      return "Photo of a majestic waterfall cascading through nature";
+    case ClipMemoryType.wildlife:
+      return "Photo of a magnificent wild animal in its natural habitat";
+    case ClipMemoryType.flowers:
+      return "Photo of vibrant blooming flowers in a garden";
+    case ClipMemoryType.nightLights:
+      return "Photo of dazzling city lights glowing at night";
+    case ClipMemoryType.architecture:
+      return "Photo showcasing striking architectural design or landmark";
+    case ClipMemoryType.autumnColors:
+      return "Photo of trees glowing with vibrant autumn colors";
+    case ClipMemoryType.desertDreams:
+      return "Photo of sweeping desert dunes under golden light";
+    case ClipMemoryType.stargazing:
+      return "Photo of a brilliant night sky filled with stars or the Milky Way";
+    case ClipMemoryType.lakeside:
+      return "Photo of a serene lake reflecting the surrounding landscape";
+    case ClipMemoryType.rainyDays:
+      return "Photo capturing the cozy mood of a rainy day";
+    case ClipMemoryType.sportsAction:
+      return "Photo of thrilling sports action frozen in motion";
+    case ClipMemoryType.streetArt:
+      return "Photo showcasing vibrant street art or graffiti murals";
+    case ClipMemoryType.familyMoments:
+      return "Photo capturing heartwarming moments with family";
+    case ClipMemoryType.fireworks:
+      return "Photo of dazzling fireworks bursting in the sky";
+    case ClipMemoryType.historicSites:
+      return "Photo of an awe-inspiring historical monument or landmark";
+    case ClipMemoryType.tropicalParadise:
+      return "Photo of a dreamy tropical paradise with turquoise water and palm trees";
+    case ClipMemoryType.forestTrails:
+      return "Photo of a peaceful forest trail bathed in soft light";
+    case ClipMemoryType.citySunsets:
+      return "Photo of a vibrant sunset casting colors over a city skyline";
+    case ClipMemoryType.colorfulMarkets:
+      return "Photo of a bustling market overflowing with colorful stalls";
+    case ClipMemoryType.cozyCafes:
+      return "Photo of a cozy cafe scene with warm ambience";
+    case ClipMemoryType.vintageVibes:
+      return "Photo with a charming vintage aesthetic or retro details";
+    case ClipMemoryType.aerialViews:
+      return "Photo captured from above showing sweeping aerial views";
+    case ClipMemoryType.artisticPortraits:
+      return "Photo of an expressive artistic portrait";
+    case ClipMemoryType.streetFood:
+      return "Photo of mouthwatering street food being prepared or served";
+    case ClipMemoryType.riverCruises:
+      return "Photo of a scenic river cruise or boat drifting along the water";
+    case ClipMemoryType.playfulKids:
+      return "Photo capturing joyful kids playing and laughing";
+    case ClipMemoryType.coastalCliffs:
+      return "Photo of dramatic coastal cliffs meeting the sea";
   }
 }
 
@@ -82,6 +227,64 @@ String clipTitle(AppLocalizations locals, ClipMemoryType clipMemoryType) {
       return locals.food;
     case ClipMemoryType.pets:
       return locals.pets;
+    case ClipMemoryType.festivities:
+      return locals.festivities;
+    case ClipMemoryType.snowAdventures:
+      return locals.snowAdventures;
+    case ClipMemoryType.waterfalls:
+      return locals.waterfalls;
+    case ClipMemoryType.wildlife:
+      return locals.wildlife;
+    case ClipMemoryType.flowers:
+      return locals.flowers;
+    case ClipMemoryType.nightLights:
+      return locals.nightLights;
+    case ClipMemoryType.architecture:
+      return locals.architecture;
+    case ClipMemoryType.autumnColors:
+      return locals.autumnColors;
+    case ClipMemoryType.desertDreams:
+      return locals.desertDreams;
+    case ClipMemoryType.stargazing:
+      return locals.stargazing;
+    case ClipMemoryType.lakeside:
+      return locals.lakeside;
+    case ClipMemoryType.rainyDays:
+      return locals.rainyDays;
+    case ClipMemoryType.sportsAction:
+      return locals.sportsAction;
+    case ClipMemoryType.streetArt:
+      return locals.streetArt;
+    case ClipMemoryType.familyMoments:
+      return locals.familyMoments;
+    case ClipMemoryType.fireworks:
+      return locals.fireworks;
+    case ClipMemoryType.historicSites:
+      return locals.historicSites;
+    case ClipMemoryType.tropicalParadise:
+      return locals.tropicalParadise;
+    case ClipMemoryType.forestTrails:
+      return locals.forestTrails;
+    case ClipMemoryType.citySunsets:
+      return locals.citySunsets;
+    case ClipMemoryType.colorfulMarkets:
+      return locals.colorfulMarkets;
+    case ClipMemoryType.cozyCafes:
+      return locals.cozyCafes;
+    case ClipMemoryType.vintageVibes:
+      return locals.vintageVibes;
+    case ClipMemoryType.aerialViews:
+      return locals.aerialViews;
+    case ClipMemoryType.artisticPortraits:
+      return locals.artisticPortraits;
+    case ClipMemoryType.streetFood:
+      return locals.streetFood;
+    case ClipMemoryType.riverCruises:
+      return locals.riverCruises;
+    case ClipMemoryType.playfulKids:
+      return locals.playfulKids;
+    case ClipMemoryType.coastalCliffs:
+      return locals.coastalCliffs;
   }
 }
 

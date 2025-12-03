@@ -25,6 +25,7 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
+import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -41,12 +42,14 @@ class DetailPageConfiguration {
   final int selectedIndex;
   final String tagPrefix;
   final DetailPageMode mode;
+  final bool isLocalOnlyContext;
 
   DetailPageConfiguration(
     this.files,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
+    this.isLocalOnlyContext = false,
   });
 
   DetailPageConfiguration copyWith({
@@ -54,26 +57,44 @@ class DetailPageConfiguration {
     GalleryLoader? asyncLoader,
     int? selectedIndex,
     String? tagPrefix,
+    bool? isLocalOnlyContext,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
+      isLocalOnlyContext: isLocalOnlyContext ?? this.isLocalOnlyContext,
     );
   }
 }
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   final DetailPageConfiguration config;
 
   const DetailPage(this.config, {super.key});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  final _enableFullScreenNotifier = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _enableFullScreenNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Separating body to a different widget to avoid
     // unnecessary reinitialization of the InheritedDetailPageState
     // when the body is rebuilt, which can reset state stored in it.
-    return InheritedDetailPageState(child: _Body(config));
+    return InheritedDetailPageState(
+      enableFullScreenNotifier: _enableFullScreenNotifier,
+      child: _Body(widget.config),
+    );
   }
 }
 
@@ -196,9 +217,26 @@ class _BodyState extends State<_Body> {
                     enableFullScreenNotifier:
                         InheritedDetailPageState.of(context)
                             .enableFullScreenNotifier,
+                    isLocalOnlyContext: widget.config.isLocalOnlyContext,
                   );
                 },
                 valueListenable: _selectedIndexNotifier,
+              ),
+              ValueListenableBuilder(
+                valueListenable: _selectedIndexNotifier,
+                builder: (BuildContext context, int selectedIndex, _) {
+                  return TextDetectionOverlayButton(
+                    file: _files![selectedIndex],
+                    enableFullScreenNotifier:
+                        InheritedDetailPageState.of(context)
+                            .enableFullScreenNotifier,
+                    isGuestView: isGuestView,
+                    showOnlyInfoButton:
+                        widget.config.mode == DetailPageMode.minimalistic &&
+                            !isGuestView,
+                    userID: Configuration.instance.getUserID(),
+                  );
+                },
               ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
@@ -286,10 +324,12 @@ class _BodyState extends State<_Body> {
               });
             }
           },
-          playbackCallback: (isPlaying) {
+          playbackCallback: (shouldEnable, reason) {
             Future.delayed(Duration.zero, () {
-              InheritedDetailPageState.of(context)
-                  .toggleFullScreen(shouldEnable: isPlaying);
+              InheritedDetailPageState.of(context).requestFullScreen(
+                shouldEnable: shouldEnable,
+                reason: reason,
+              );
             });
           },
           backgroundDecoration: const BoxDecoration(color: Colors.black),
@@ -297,7 +337,7 @@ class _BodyState extends State<_Body> {
         return GestureDetector(
           onTap: () {
             file.fileType != FileType.video
-                ? InheritedDetailPageState.of(context).toggleFullScreen()
+                ? InheritedDetailPageState.of(context).toggleFullScreenByUser()
                 : null;
           },
           child: fileContent,

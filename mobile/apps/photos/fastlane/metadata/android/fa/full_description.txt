@@ -1,36 +1,36 @@
-ente is a simple app to backup and share your photos and videos.
+اِنت، اپلیکیشنی ساده برای پشتیبان‌گیری و اشتراک‌گذاری عکس‌ها و ویدیوهای شماست.
 
-If you've been looking for a privacy-friendly alternative to Google Photos, you've come to the right place. With ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+اگر به دنبال جایگزینی با احترام به حریم خصوصی برای Google Photos بوده‌اید، به جای درستی آمده‌اید. با اِنت، داده‌های شما به‌صورت رمزگذاری سرتاسری (E2EE) ذخیره می‌شوند. یعنی فقط شما می‌توانید آن‌ها را ببینید.
 
-We have open-source apps across Android, iOS, web and desktop, and your photos will seamlessly sync between all of them in an end-to-end encrypted (e2ee) manner.
+ما اپلیکیشن‌های متن‌باز برای اندروید، iOS، وب و دسکتاپ داریم، و عکس‌های شما به‌صورت یکپارچه و با رمزگذاری سرتاسری (E2EE) میان همه‌ی آن‌ها همگام‌سازی می‌شوند.
 
 ente also makes it simple to share your albums with your loved ones, even if they aren't on ente. You can share publicly viewable links, where they can view your album and collaborate by adding photos to it, even without an account or app.
 
-Your encrypted data is replicated to 3 different locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+Your encrypted data is replicated to 3 different locations, including a fall-out shelter in Paris. ما اهمیت حفظ خاطرات شما را جدی می‌گیریم و نگهداری آن‌ها برای نسل‌های آینده را آسان می‌کنیم.
 
 We are here to make the safest photos app ever, come join our journey!
 
 FEATURES
 - Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Collaborative albums, so you can pool together photos after a trip
+- پلن‌های خانوادگی، تا بتوانید فضای ذخیره‌سازی را با خانواده خود به اشتراک بگذارید
+- آلبوم‌های مشترک، تا بتوانید بعد از سفر عکس‌ها را با هم جمع‌آوری کنید
 - Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password
-- Ability to free up space, by removing files that have been safely backed up
+- لینک‌های آلبوم، که می‌توان آن‌ها را با رمز عبور محافظت کرد
+- امکان آزادسازی فضا با حذف فایل‌هایی که به‌طور ایمن پشتیبان‌گیری شده‌اند
 - Human support, because you're worth it
 - Descriptions, so you can caption your memories and find them easily
 - Image editor, to add finishing touches
 - Favorite, hide and relive your memories, for they are precious
 - One-click import from Google, Apple, your hard drive and more
 - Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
+- احراز هویت دو مرحله‌ای، سه مرحله‌ای و بیومتریک
 - and a LOT more!
 
-PERMISSIONS
+دسترسی‌ها
 ente requests for certain permissions to serve the purpose of a photo storage provider, which can be reviewed here: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
 PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+ما پلن‌های همیشه رایگان ارائه نمی‌دهیم، زیرا برای ما مهم است که پایدار بمانیم و در طول زمان دوام بیاوریم. در عوض، ما پلن‌های مقرون‌به‌صرفه‌ای ارائه می‌دهیم که می‌توانید آزادانه با خانواده خود به اشتراک بگذارید. You can find more information at ente.io.
 
 SUPPORT
 We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.

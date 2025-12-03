@@ -19,6 +19,7 @@ class FormTextInputWidget extends StatefulWidget {
   final bool autofocus;
   final int? maxLength;
   final bool showValidationErrors;
+  final bool shouldUseTextInputWidget;
 
   const FormTextInputWidget({
     super.key,
@@ -35,6 +36,7 @@ class FormTextInputWidget extends StatefulWidget {
     this.autofocus = false,
     this.maxLength,
     this.showValidationErrors = false,
+    this.shouldUseTextInputWidget = true,
   });
 
   @override
@@ -73,7 +75,8 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
   bool get _canUseTextInputWidget {
     return widget.suffixIcon == null &&
         (widget.maxLines ?? 1) == 1 &&
-        widget.enabled;
+        widget.enabled &&
+        widget.shouldUseTextInputWidget;
   }
 
   @override
@@ -104,8 +107,11 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
         ] else ...[
           // Custom implementation for advanced features
           if (widget.labelText.isNotEmpty) ...[
-            Text(widget.labelText),
-            const SizedBox(height: 4),
+            Text(
+              widget.labelText,
+              style: textTheme.body,
+            ),
+            const SizedBox(height: 8),
           ],
           ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -127,7 +133,7 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
                 decoration: InputDecoration(
                   hintText: widget.hintText,
                   hintStyle:
-                      textTheme.body.copyWith(color: colorScheme.textMuted),
+                      textTheme.body.copyWith(color: colorScheme.textFaint),
                   filled: true,
                   fillColor: colorScheme.fillFaint,
                   contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),

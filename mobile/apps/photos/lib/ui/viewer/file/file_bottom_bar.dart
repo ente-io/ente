@@ -26,6 +26,7 @@ class FileBottomBar extends StatefulWidget {
   final bool showOnlyInfoButton;
   final int? userID;
   final ValueNotifier<bool> enableFullScreenNotifier;
+  final bool isLocalOnlyContext;
 
   const FileBottomBar(
     this.file,
@@ -34,6 +35,7 @@ class FileBottomBar extends StatefulWidget {
     required this.onFileRemoved,
     required this.enableFullScreenNotifier,
     this.userID,
+    this.isLocalOnlyContext = false,
     super.key,
   });
 
@@ -220,6 +222,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       context,
       file,
       onFileRemoved: widget.onFileRemoved,
+      isLocalOnlyContext: widget.isLocalOnlyContext,
     );
   }
 

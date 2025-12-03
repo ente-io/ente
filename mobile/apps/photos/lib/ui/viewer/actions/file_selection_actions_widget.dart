@@ -92,6 +92,7 @@ class _FileSelectionActionsWidgetState
 
   @override
   void initState() {
+    super.initState();
     //User ID will be null if the user is not logged in (links-in-app)
     currentUserID = Configuration.instance.getUserID() ?? -1;
 
@@ -100,7 +101,9 @@ class _FileSelectionActionsWidgetState
     collectionActions = CollectionActions(CollectionsService.instance);
     isCollectionOwner =
         widget.collection != null && widget.collection!.isOwner(currentUserID);
-    super.initState();
+    if (widget.selectedFiles.files.isNotEmpty) {
+      _selectFileChangeListener();
+    }
   }
 
   @override

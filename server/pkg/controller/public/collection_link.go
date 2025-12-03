@@ -4,14 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller"
-	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/controller"
 	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/repo"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"github.com/ente-io/museum/pkg/utils/auth"
-	"github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -19,16 +18,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var AllowedReasons = map[string]string{
-	"COPYRIGHT":         "Copyright Infringement",
-	"MALICIOUS_CONTENT": "Malicious Content",
-}
-
 const (
-	AccessTokenLength = 8
-	// AutoDisableAbuseThreshold indicates minimum number of abuse reports post which the access token is
-	// automatically disabled
-	AutoDisableAbuseThreshold = 3
+	AccessTokenLength = 10
 
 	// DeviceLimitThreshold represents number of unique devices which can access a shared collection. (ip + user agent)
 	// is treated as unique device
@@ -37,16 +28,6 @@ const (
 	DeviceLimitThresholdMultiplier = 10
 
 	DeviceLimitWarningThreshold = 2000
-
-	AbuseAlertSubject = "[Alert] Abuse report received against your album on Ente"
-
-	AbuseAlertTeamSubject = "Abuse report received"
-
-	AbuseLimitExceededSubject = "[Alert] Too many abuse reports received against your album on Ente"
-
-	AbuseAlertTemplate = "report_alert.html"
-
-	AbuseLimitExceededTemplate = "report_limit_exceeded_alert.html"
 )
 
 // CollectionLinkController controls share collection operations
@@ -61,37 +42,44 @@ type CollectionLinkController struct {
 }
 
 func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
-	accessToken := shortuuid.New()[0:AccessTokenLength]
 	app := auth.GetApp(ctx)
-	err := c.CollectionLinkRepo.
-		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
-	if err != nil {
-		if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
-			collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID}, app)
-			if err2 != nil {
-				return ente.PublicURL{}, stacktrace.Propagate(err2, "")
-			}
-			if publicUrls, ok := collectionToPubUrlMap[req.CollectionID]; ok {
-				if len(publicUrls) > 0 {
-					return publicUrls[0], nil
+	for attempt := 0; attempt < 5; attempt++ {
+		accessToken := shortuuid.New()[0:AccessTokenLength]
+		err := c.CollectionLinkRepo.
+			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
+		if errors.Is(err, ente.ErrAccessTokenInUse) {
+			continue
+		}
+		if err != nil {
+			if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
+				collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID}, app)
+				if err2 != nil {
+					return ente.PublicURL{}, stacktrace.Propagate(err2, "")
 				}
+				if publicUrls, ok := collectionToPubUrlMap[req.CollectionID]; ok {
+					if len(publicUrls) > 0 {
+						return publicUrls[0], nil
+					}
+				}
+				// ideally we should never reach here
+				return ente.PublicURL{}, stacktrace.NewError("Unexpected state")
 			}
-			// ideally we should never reach here
-			return ente.PublicURL{}, stacktrace.NewError("Unexpected state")
-		} else {
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
+
+		response := ente.PublicURL{
+			URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
+			ValidTill:       req.ValidTill,
+			DeviceLimit:     req.DeviceLimit,
+			EnableDownload:  true,
+			EnableCollect:   req.EnableCollect,
+			PasswordEnabled: false,
+			MinRole:         nil,
+		}
+		return response, nil
 	}
 
-	response := ente.PublicURL{
-		URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
-		ValidTill:       req.ValidTill,
-		DeviceLimit:     req.DeviceLimit,
-		EnableDownload:  true,
-		EnableCollect:   req.EnableCollect,
-		PasswordEnabled: false,
-	}
-	return response, nil
+	return ente.PublicURL{}, stacktrace.Propagate(ente.ErrAccessTokenInUse, "failed to generate unique access token for collection link")
 }
 
 func (c *CollectionLinkController) GetActiveCollectionLinkToken(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
@@ -157,6 +145,11 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 	if req.EnableJoin != nil {
 		publicCollectionToken.EnableJoin = *req.EnableJoin
 	}
+	if req.MinRole != nil {
+		role := *req.MinRole
+		rolePtr := role
+		publicCollectionToken.MinRole = &rolePtr
+	}
 	err = c.CollectionLinkRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
@@ -169,6 +162,7 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
 		EnableJoin:      publicCollectionToken.EnableJoin,
+		MinRole:         publicCollectionToken.MinRole,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
 		Nonce:           publicCollectionToken.Nonce,
 		MemLimit:        publicCollectionToken.MemLimit,
@@ -191,74 +185,6 @@ func (c *CollectionLinkController) VerifyPassword(ctx *gin.Context, req ente.Ver
 
 func (c *CollectionLinkController) ValidateJWTToken(ctx *gin.Context, jwtToken string, passwordHash string) error {
 	return validateJWTToken(c.JwtSecret, jwtToken, passwordHash)
-}
-
-// ReportAbuse captures abuse report for a publicly shared collection.
-// It will also disable the accessToken for the collection if total abuse reports for the said collection
-// reaches AutoDisableAbuseThreshold
-func (c *CollectionLinkController) ReportAbuse(ctx *gin.Context, req ente.AbuseReportRequest) error {
-	accessContext := auth.MustGetPublicAccessContext(ctx)
-	readableReason, found := AllowedReasons[req.Reason]
-	if !found {
-		return stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("unexpected reason %s", req.Reason))
-	}
-	logrus.WithField("collectionID", accessContext.CollectionID).Error("CRITICAL: received abuse report")
-
-	err := c.CollectionLinkRepo.RecordAbuseReport(ctx, accessContext, req.URL, req.Reason, req.Details)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	count, err := c.CollectionLinkRepo.GetAbuseReportCount(ctx, accessContext)
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	c.onAbuseReportReceived(accessContext.CollectionID, req, readableReason, count)
-	if count >= AutoDisableAbuseThreshold {
-		logrus.WithFields(logrus.Fields{
-			"collectionID": accessContext.CollectionID,
-		}).Warn("disabling accessTokens for shared collection due to multiple abuse reports")
-		return stacktrace.Propagate(c.Disable(ctx, accessContext.CollectionID), "")
-	}
-	return nil
-}
-
-func (c *CollectionLinkController) onAbuseReportReceived(collectionID int64, report ente.AbuseReportRequest, readableReason string, abuseCount int64) {
-	collection, err := c.CollectionRepo.Get(collectionID)
-	if err != nil {
-		logrus.Error("Could not get collection for abuse report")
-		return
-	}
-	user, err := c.UserRepo.Get(collection.Owner.ID)
-	if err != nil {
-		logrus.Error("Could not get owner for abuse report")
-		return
-	}
-	comment := report.Details.Comment
-	if comment == "" {
-		comment = "None"
-	}
-	err = email.SendTemplatedEmail([]string{user.Email}, "abuse@ente.io", "abuse@ente.io", AbuseAlertSubject, AbuseAlertTemplate, map[string]interface{}{
-		"AlbumLink": report.URL,
-		"Reason":    readableReason,
-		"Comments":  comment,
-	}, nil)
-	if err != nil {
-		logrus.Error("Error sending abuse notification ", err)
-	}
-	if abuseCount >= AutoDisableAbuseThreshold {
-		err = email.SendTemplatedEmail([]string{user.Email}, "abuse@ente.io", "abuse@ente.io", AbuseLimitExceededSubject, AbuseLimitExceededTemplate, nil, nil)
-		if err != nil {
-			logrus.Error("Error sending abuse limit exceeded notification ", err)
-		}
-	}
-	err = email.SendTemplatedEmail([]string{"team@ente.io"}, "abuse@ente.io", "abuse@ente.io", AbuseAlertTeamSubject, AbuseAlertTemplate, map[string]interface{}{
-		"AlbumLink": report.URL,
-		"Reason":    readableReason,
-		"Comments":  comment,
-	}, nil)
-	if err != nil {
-		logrus.Error("Error notifying team about abuse ", err)
-	}
 }
 
 func (c *CollectionLinkController) HandleAccountDeletion(ctx context.Context, userID int64, logger *logrus.Entry) error {

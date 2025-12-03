@@ -62,11 +62,6 @@ class SocialSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          AppLocalizations.of(context).matrix,
-          "https://ente.io/matrix/",
-        ),
-        sectionOptionSpacing,
-        SocialsMenuItemWidget(
           AppLocalizations.of(context).discord,
           "https://ente.io/discord",
         ),

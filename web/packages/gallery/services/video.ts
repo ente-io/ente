@@ -19,7 +19,7 @@ import { gunzip, gzip } from "ente-new/photos/utils/gzip";
 import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
 import { wait } from "ente-utils/promise";
-import { z } from "zod/v4";
+import { z } from "zod";
 import {
     initiateGenerateHLS,
     readVideoStream,

@@ -7,6 +7,7 @@ import 'package:ente_lock_screen/ui/lock_screen_password.dart';
 import 'package:ente_lock_screen/ui/lock_screen_pin.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_ui/utils/toast_util.dart';
+import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +24,9 @@ class LocalAuthenticationService {
 
   Future<bool> requestLocalAuthentication(
     BuildContext context,
-    String infoMessage,
-  ) async {
+    String infoMessage, {
+    bool refocusWindows = true,
+  }) async {
     if (kDebugMode) {
       // if last auth time is less than 60 seconds, don't ask for auth again
       if (lastAuthTime != 0 &&
@@ -43,6 +45,9 @@ class LocalAuthenticationService {
       AppLock.of(context)!.setEnabled(
         await LockScreenSettings.instance.shouldShowLockScreen(),
       );
+      if (refocusWindows) {
+        await PlatformUtil.refocusWindows();
+      }
       if (!result) {
         showToast(context, infoMessage);
         return false;

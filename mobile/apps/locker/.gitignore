@@ -52,3 +52,6 @@ fastlane/report.xml
 android/app/build/
 
 devtools_options.yaml
+
+# Generated localization files
+lib/l10n/app_localizations*.dart

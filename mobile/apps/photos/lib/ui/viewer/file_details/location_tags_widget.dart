@@ -15,11 +15,11 @@ import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
-import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/image_marker.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/map/map_view.dart";
 import "package:photos/ui/map/tile/layers.dart";
+import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/location/add_location_sheet.dart';
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -299,15 +299,18 @@ class _InfoMapState extends State<InfoMap> {
                               GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () async {
-                                  unawaited(
-                                    requestForMapEnable(context).then((value) {
-                                      if (value) {
-                                        setState(() {
-                                          _hasEnabledMap = true;
-                                        });
-                                      }
-                                    }),
-                                  );
+                                  try {
+                                    await flagService.setMapEnabled(true);
+                                    setState(() {
+                                      _hasEnabledMap = true;
+                                    });
+                                  } catch (e) {
+                                    showShortToast(
+                                      context,
+                                      AppLocalizations.of(context)
+                                          .somethingWentWrong,
+                                    );
+                                  }
                                 },
                                 child: Center(
                                   child: Text(

@@ -6,7 +6,7 @@ import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -18,6 +18,10 @@ class UploadState {
      * `true` if the workers should be disabled for uploads.
      */
     shouldDisableCFUploadProxy = false;
+    /**
+     * `true` if uploads should include checksum metadata.
+     */
+    checksumProtectedUploadsEnabled = false;
 }
 
 /** State shared by the functions in this module. See {@link UploadState}. */
@@ -434,6 +438,7 @@ export type UploadPhase =
 
 export type UploadResult =
     | { type: "unsupported" }
+    | { type: "zeroSize" }
     | { type: "tooLarge" }
     | { type: "largerThanAvailableStorage" }
     | { type: "blocked" }
@@ -482,6 +487,19 @@ export const updateShouldDisableCFUploadProxy = async (
 ) => {
     _state.shouldDisableCFUploadProxy =
         savedPreference || (await computeShouldDisableCFUploadProxy());
+};
+
+/**
+ * Return `true` if uploads should include checksum metadata.
+ */
+export const areChecksumProtectedUploadsEnabled = () =>
+    _state.checksumProtectedUploadsEnabled;
+
+/**
+ * Update the in-memory value controlling checksum protected uploads.
+ */
+export const updateChecksumProtectedUploadsEnabled = (enabled: boolean) => {
+    _state.checksumProtectedUploadsEnabled = enabled;
 };
 
 const computeShouldDisableCFUploadProxy = async () => {

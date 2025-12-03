@@ -113,13 +113,12 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 		return stacktrace.Propagate(ente.ErrTooManyBadRequest, msg)
 	}
 
-	err = c.UserAuthRepo.AddOTT(emailHash, auth.GetApp(context), ott, time.Microseconds()+OTTValidityDurationInMicroSeconds)
+	err = c.UserAuthRepo.AddOTT(emailHash, app, ott, time.Microseconds()+OTTValidityDurationInMicroSeconds)
 	if !hasHardcodedOTT {
 		// ignore error for AddOTT for hardcode OTT. This is to avoid error when unique OTT check fails at db layer
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
-		log.Info("Added ott for " + emailHash + ": " + ott)
 		err = emailOTT(app, email, ott, purpose, mobile)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
@@ -148,6 +147,10 @@ func (c *UserController) validateSendOTT(ctx *gin.Context, email string, purpose
 		if err := c.isEmailAlreadyUsed(email); err != nil {
 			return err
 		}
+	}
+	app := auth.GetApp(ctx)
+	if app == ente.Locker && purpose == ente.SignUpOTTPurpose {
+		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, "signup ott restricted for locker")
 	}
 	isSignUpComplete, err := c.isSignUpComplete(email)
 	if err != nil {
@@ -233,7 +236,6 @@ func (c *UserController) verifyEmailOtt(context *gin.Context, email string, ott 
 	}
 
 	otts, err := c.UserAuthRepo.GetValidOTTs(emailHash, app)
-	log.Infof("Valid ott (app: %s) for %s are %s", app, emailHash, strings.Join(otts, ","))
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -355,7 +357,27 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
+func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) error {
+	if app != ente.Locker {
+		return nil
+	}
+	const restrictionMsg = "locker is restricted to paid users currently"
+	if err := c.BillingController.HasActiveSelfOrFamilySubscription(userID, true); err != nil {
+		if !errors.Is(err, ente.ErrNoActiveSubscription) && !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			log.WithError(err).Error("locker access: failed to verify active subscription status")
+		}
+		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, restrictionMsg)
+	}
+	if err := c.UserAuthRepo.EnsureLockerRolloutAccess(userID); err != nil {
+		return stacktrace.Propagate(err, "locker access: rollout check failed")
+	}
+	return nil
+}
+
 func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token string, ip string, userAgent string) error {
+	if err := c.ensureLockerPaidAccess(userID, app); err != nil {
+		return err
+	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to insert token")
@@ -410,10 +432,14 @@ func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) 
 // source indicates where the user came from.  It can be nil.
 func (c *UserController) onVerificationSuccess(context *gin.Context, email string, source *string) (ente.EmailAuthorizationResponse, error) {
 	isTwoFactorEnabled := false
+	app := auth.GetApp(context)
 
 	userID, err := c.UserRepo.GetUserIDWithEmail(email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			if app == ente.Locker {
+				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, "locker signup is restricted to paid users")
+			}
 			if viper.GetBool("internal.disable-registration") {
 				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 			} else {
@@ -475,7 +501,10 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
-			err = c.UserAuthRepo.AddToken(userID, auth.GetApp(context), token,
+			if lockerErr := c.ensureLockerPaidAccess(userID, app); lockerErr != nil {
+				return ente.EmailAuthorizationResponse{}, lockerErr
+			}
+			err = c.UserAuthRepo.AddToken(userID, app, token,
 				network.GetClientIP(context), context.Request.UserAgent())
 			if err != nil {
 				return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -485,11 +514,12 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	encryptedToken, err := crypto.GetEncryptedToken(token, keyAttributes.PublicKey)
+	var encryptedToken string
+	encryptedToken, err = crypto.GetEncryptedTokenNative(token, keyAttributes.PublicKey)
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
-	err = c.AddTokenAndNotify(userID, auth.GetApp(context), token,
+	err = c.AddTokenAndNotify(userID, app, token,
 		network.GetClientIP(context), context.Request.UserAgent())
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")

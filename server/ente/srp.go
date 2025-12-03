@@ -91,6 +91,7 @@ type SRPSessionEntity struct {
 	SRP_A        string
 	IsVerified   bool
 	AttemptCount int32
+	IsFake       bool
 }
 
 type SRPAuthEntity struct {

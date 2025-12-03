@@ -278,6 +278,7 @@ const notUploadedFileCount = (
     c += finishedUploads.get("largerThanAvailableStorage")?.length ?? 0;
     c += finishedUploads.get("tooLarge")?.length ?? 0;
     c += finishedUploads.get("unsupported")?.length ?? 0;
+    c += finishedUploads.get("zeroSize")?.length ?? 0;
     return c;
 };
 
@@ -363,6 +364,11 @@ function UploadProgressDialog() {
                         resultType="unsupported"
                         sectionTitle={t("unsupported_files")}
                         sectionInfo={t("unsupported_files_hint")}
+                    />
+                    <ResultSection
+                        resultType="zeroSize"
+                        sectionTitle={t("zero_size_files")}
+                        sectionInfo={t("zero_size_files_hint")}
                     />
                     <ResultSection
                         resultType="tooLarge"

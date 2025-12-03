@@ -1,6 +1,6 @@
 import { downloadManager } from "ente-gallery/services/download";
 import { type EnteFile } from "ente-media/file";
-import { fileFileName } from "ente-media/file-metadata";
+import { fileFileName, fileLocation } from "ente-media/file-metadata";
 import React from "react";
 
 import type { JourneyPoint } from "../types";
@@ -30,17 +30,16 @@ export const processPhotosData = ({
 
     for (const file of files) {
         try {
-            const lat = file.metadata.latitude;
-            const lng = file.metadata.longitude;
+            const location = fileLocation(file);
 
-            if (lat && lng) {
+            if (location) {
                 const cachedLocation = locationDataRef.current.get(file.id);
                 const finalName = cachedLocation?.name || fileFileName(file);
                 const finalCountry = cachedLocation?.country || "Unknown";
 
                 photoData.push({
-                    lat: lat,
-                    lng: lng,
+                    lat: location.latitude,
+                    lng: location.longitude,
                     name: finalName,
                     country: finalCountry,
                     timestamp: new Date(
@@ -85,8 +84,9 @@ export const fetchLocationNames = async ({
         return { updatedPhotos };
     }
 
-    for (const cluster of photoClusters) {
-        if (cluster.length === 0) continue;
+    // Create all geocoding promises at once for parallel execution
+    const geocodingPromises = photoClusters.map(async (cluster) => {
+        if (cluster.length === 0) return null;
 
         const avgLat =
             cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
@@ -95,21 +95,32 @@ export const fetchLocationNames = async ({
 
         try {
             const locationInfo = await getLocationName(avgLat, avgLng);
-
-            cluster.forEach((photo) => {
-                updatedPhotos.set(photo.fileId, {
-                    name: locationInfo.place,
-                    country: locationInfo.country,
-                });
-                locationDataRef.current.set(photo.fileId, {
-                    name: locationInfo.place,
-                    country: locationInfo.country,
-                });
-            });
+            return { cluster, locationInfo };
         } catch {
-            // Silently ignore processing errors for individual files
+            // Return null on error, will be filtered out
+            return null;
         }
-    }
+    });
+
+    // Execute all geocoding requests in parallel
+    const results = await Promise.all(geocodingPromises);
+
+    // Process results and update maps
+    results.forEach((result) => {
+        if (!result) return; // Skip failed requests
+
+        const { cluster, locationInfo } = result;
+        cluster.forEach((photo) => {
+            updatedPhotos.set(photo.fileId, {
+                name: locationInfo.place,
+                country: locationInfo.country,
+            });
+            locationDataRef.current.set(photo.fileId, {
+                name: locationInfo.place,
+                country: locationInfo.country,
+            });
+        });
+    });
 
     return { updatedPhotos };
 };

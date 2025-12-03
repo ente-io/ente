@@ -13,6 +13,8 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -102,49 +104,81 @@ class _SearchResultPageState extends State<SearchResultPage> {
           : null,
     );
 
-    return GalleryFilesState(
-      child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: _searchFilterDataProvider,
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90.0),
-            child: GalleryAppBarWidget(
-              SearchResultPage.appBarType,
-              widget.searchResult.name(),
-              _selectedFiles,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: InheritedSearchFilterDataWrapper(
+          searchFilterDataProvider: _searchFilterDataProvider,
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(90.0),
+              child: widget.enableGrouping
+                  ? GalleryAppBarWidget(
+                      SearchResultPage.appBarType,
+                      widget.searchResult.name(),
+                      _selectedFiles,
+                    )
+                  : _AppBarWithBoundary(
+                      child: GalleryAppBarWidget(
+                        SearchResultPage.appBarType,
+                        widget.searchResult.name(),
+                        _selectedFiles,
+                      ),
+                    ),
             ),
-          ),
-          body: SelectionState(
-            selectedFiles: _selectedFiles,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Builder(
-                  builder: (context) {
-                    return ValueListenableBuilder(
-                      valueListenable: InheritedSearchFilterData.of(context)
-                          .searchFilterDataProvider!
-                          .isSearchingNotifier,
-                      builder: (context, value, _) {
-                        return value
-                            ? HierarchicalSearchGallery(
-                                tagPrefix: widget.tagPrefix,
-                                selectedFiles: _selectedFiles,
-                              )
-                            : gallery;
-                      },
-                    );
-                  },
-                ),
-                FileSelectionOverlayBar(
-                  SearchResultPage.overlayType,
-                  _selectedFiles,
-                ),
-              ],
+            body: SelectionState(
+              selectedFiles: _selectedFiles,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Builder(
+                    builder: (context) {
+                      return ValueListenableBuilder(
+                        valueListenable: InheritedSearchFilterData.of(context)
+                            .searchFilterDataProvider!
+                            .isSearchingNotifier,
+                        builder: (context, value, _) {
+                          return value
+                              ? HierarchicalSearchGallery(
+                                  tagPrefix: widget.tagPrefix,
+                                  selectedFiles: _selectedFiles,
+                                )
+                              : gallery;
+                        },
+                      );
+                    },
+                  ),
+                  FileSelectionOverlayBar(
+                    SearchResultPage.overlayType,
+                    _selectedFiles,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Wrapper widget that reports the app bar as top boundary for auto-scroll
+/// when file grouping is disabled
+class _AppBarWithBoundary extends StatefulWidget {
+  final Widget child;
+
+  const _AppBarWithBoundary({required this.child});
+
+  @override
+  State<_AppBarWithBoundary> createState() => _AppBarWithBoundaryState();
+}
+
+class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
+    with BoundaryReporter {
+  @override
+  Widget build(BuildContext context) {
+    return boundaryWidget(
+      position: BoundaryPosition.top,
+      child: widget.child,
     );
   }
 }

@@ -109,19 +109,23 @@ Future<void> sendLogs(
   );
 }
 
-Future<void> openSupportPage(
-  String? subject,
-  String? body,
-) async {
-  const url = "https://github.com/ente-io/ente/discussions/new?category=q-a";
+Future<void> openSupportPage(String? subject, String? body) async {
+  final baseSupportUri = Uri.https(
+    "github.com",
+    "/ente-io/ente/discussions/new",
+    {"category": "q-a"},
+  );
+  final queryParameters =
+      Map<String, String>.from(baseSupportUri.queryParameters);
   if (subject != null && body != null) {
-    await launchUrl(
-      Uri.parse(
-        "$url&title=$subject&body=$body",
-      ),
-    );
-  } else {
-    await launchUrl(Uri.parse(url));
+    queryParameters["title"] = subject;
+    queryParameters["body"] = body;
+  }
+  final supportUri = baseSupportUri.replace(queryParameters: queryParameters);
+
+  final launched = await launchUrl(supportUri);
+  if (!launched) {
+    _logger.warning("Failed to open support discussions at $supportUri");
   }
   // final String zipFilePath = await getZippedLogsFile(context);
   // final Email email = Email(

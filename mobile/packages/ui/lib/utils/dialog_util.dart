@@ -147,7 +147,7 @@ Future<ButtonResult?> showGenericErrorDialog({
             PlatformUtil.openWebView(
               context,
               context.strings.faq,
-              "https://help.ente.io/auth/troubleshooting/windows-login",
+              "https://ente.io/help/auth/troubleshooting/windows-login",
             );
           },
         ),
@@ -158,7 +158,7 @@ Future<ButtonResult?> showGenericErrorDialog({
         onTap: () async {
           await sendLogs(
             context,
-            context.strings.contactSupport,
+            "support@ente.io",
             postShare: () {},
           );
         },

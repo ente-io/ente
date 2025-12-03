@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
+import 'package:convert/convert.dart';
+import "package:crypto/crypto.dart";
 import "package:dio/dio.dart";
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -380,4 +383,27 @@ Set<int> filesToUploadedFileIDs(List<EnteFile> files) {
     }
   }
   return uploadedFileIDs;
+}
+
+Future<String> computeSha1(String filePath) async {
+  final file = File(filePath);
+  final input = file.openRead();
+  final hash = await sha1.bind(input).first;
+  return hash.toString();
+}
+
+/// Computes the MD5 hash of a file or a portion of it.
+///
+/// [filePath] - Path to the file
+/// [start] - Optional starting byte position for partial hash computation
+/// [end] - Optional ending byte position for partial hash computation
+///
+/// Returns base64-encoded MD5 hash suitable for HTTP Content-MD5 header.
+Future<String> computeMd5(String filePath, {int? start, int? end}) async {
+  final file = File(filePath);
+  final output = AccumulatorSink<Digest>();
+  final input = md5.startChunkedConversion(output);
+  await file.openRead(start, end).forEach(input.add);
+  input.close();
+  return base64Encode(output.events.single.bytes);
 }

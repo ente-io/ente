@@ -7,7 +7,7 @@ Cloudflare Pages using GitHub workflows.
 
 - Automated staging deployments `*.ente.sh` of `main` daily 3:00 PM IST.
 
-- [help.ente.io](https://help.ente.io) gets deployed whenever a PR that changes
+- [ente.io/help](https://ente.io/help) gets deployed whenever a PR that changes
   anything inside `docs/` gets merged to `main`.
 
 - Production or staging deployments can made manually by triggering the
@@ -33,7 +33,7 @@ deployments, and the action that triggers them:
 | [accounts.ente.io](https://accounts.ente.io) | Production | Daily deploy of `main`                      |
 | [cast.ente.io](https://cast.ente.io)         | Production | Daily deploy of `main`                      |
 | [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
-| [help.ente.io](https://help.ente.io)         | Production | Changes in `docs/` on push to `main`        |
+| [ente.io/help](https://ente.io/help)         | Production | Changes in `docs/` on push to `main`        |
 | [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
 | [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Daily deploy of `main`                      |
 | [auth.ente.sh](https://auth.ente.sh)         | Preview    | Daily deploy of `main`                      |
@@ -127,4 +127,4 @@ to point to these deployments from our user facing DNS names.
 As a concrete example, the GitHub workflow that deploys `docs/` passes "help" as
 the branch name. The resulting deployment is available at "help.ente.pages.dev".
 Finally, we add a custom domain to point to it from
-[help.ente.io](https://help.ente.io).
+[ente.io/help](https://ente.io/help).

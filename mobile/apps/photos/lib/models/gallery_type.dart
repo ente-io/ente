@@ -304,7 +304,9 @@ extension GalleryAppBarExtn on GalleryType {
       return true;
     }
     if (this == GalleryType.sharedCollection) {
-      return c?.getRole(userID) == CollectionParticipantRole.collaborator;
+      final role = c?.getRole(userID);
+      return role == CollectionParticipantRole.collaborator ||
+          role == CollectionParticipantRole.admin;
     }
     return false;
   }

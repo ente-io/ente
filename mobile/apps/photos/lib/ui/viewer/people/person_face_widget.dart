@@ -1,6 +1,7 @@
 import "dart:typed_data";
 
-import 'package:flutter/widgets.dart';
+import "package:flutter/foundation.dart" show kDebugMode;
+import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -45,6 +46,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     with AutomaticKeepAliveClientMixin {
   Future<Uint8List?>? faceCropFuture;
   EnteFile? fileForFaceCrop;
+  String? _personName;
+  bool _showingFallback = false;
+  bool _fallbackEverUsed = false;
 
   bool get isPerson => widget.personId != null;
 
@@ -54,18 +58,24 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   @override
   void initState() {
     super.initState();
-    faceCropFuture = _getFaceCrop();
+    faceCropFuture = _loadFaceCrop();
   }
 
   @override
   void dispose() {
-    super.dispose();
     if (fileForFaceCrop != null) {
       checkStopTryingToGenerateFaceThumbnails(
         fileForFaceCrop!.uploadedFileID!,
         useFullFile: widget.useFullFile,
       );
+      if (_fallbackEverUsed) {
+        checkStopTryingToGenerateFaceThumbnails(
+          fileForFaceCrop!.uploadedFileID!,
+          useFullFile: false,
+        );
+      }
     }
+    super.dispose();
   }
 
   @override
@@ -77,7 +87,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     return FutureBuilder<Uint8List?>(
       future: faceCropFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           final ImageProvider imageProvider = MemoryImage(snapshot.data!);
           return Stack(
             fit: StackFit.expand,
@@ -86,25 +96,93 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
                 image: imageProvider,
                 fit: BoxFit.cover,
               ),
+              if (kDebugMode && _showingFallback)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      "(T)",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
-        } else {
-          if (snapshot.hasError) {
-            _logger.severe(
-              "Error getting cover face for person",
-              snapshot.error,
-              snapshot.stackTrace,
-            );
-          }
+        }
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            snapshot.connectionState == ConnectionState.active) {
           return EnteLoadingWidget(
             color: getEnteColorScheme(context).fillMuted,
           );
         }
+        if (snapshot.hasError) {
+          _logger.severe(
+            "Error getting cover face for person",
+            snapshot.error,
+            snapshot.stackTrace,
+          );
+        } else {
+          _logger.severe(
+            "faceCropFuture is null, no cover face found for person or cluster.",
+          );
+        }
+        return _EmptyPersonThumbnail(
+          initial: isPerson ? _personName : null,
+        );
       },
     );
   }
 
-  Future<Uint8List?> _getFaceCrop() async {
+  Future<Uint8List?> _loadFaceCrop() async {
+    if (!widget.useFullFile) {
+      final Uint8List? thumbnailCrop =
+          await _getFaceCrop(useFullFile: widget.useFullFile);
+      if (thumbnailCrop != null) {
+        _fallbackEverUsed = true;
+      }
+      _showingFallback = false;
+      return thumbnailCrop;
+    }
+
+    final Uint8List? fullCrop =
+        await _getFaceCrop(useFullFile: widget.useFullFile);
+    if (fullCrop != null) {
+      _showingFallback = false;
+      return fullCrop;
+    }
+
+    final String personOrClusterId = widget.personId ?? widget.clusterID!;
+    _logger.warning(
+      "Full face crop unavailable for $personOrClusterId, attempting thumbnail fallback.",
+    );
+
+    final Uint8List? fallbackCrop = await _getFaceCrop(useFullFile: false);
+    if (fallbackCrop != null) {
+      _showingFallback = true;
+      _fallbackEverUsed = true;
+      return fallbackCrop;
+    }
+
+    _logger.warning(
+      "Thumbnail fallback also unavailable for $personOrClusterId.",
+    );
+    return null;
+  }
+
+  Future<Uint8List?> _getFaceCrop({required bool useFullFile}) async {
     try {
       final String personOrClusterId = widget.personId ?? widget.clusterID!;
       final tryInMemoryCachedCrop =
@@ -120,6 +198,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           );
           return null;
         }
+        _personName = personEntity.data.name;
         fixedFaceID = personEntity.data.avatarFaceID;
       }
       fixedFaceID ??=
@@ -197,10 +276,11 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       final cropMap = await getCachedFaceCrops(
         fileForFaceCrop,
         [face],
-        useFullFile: widget.useFullFile,
+        useFullFile: useFullFile,
         personOrClusterID: personOrClusterId,
         useTempCache: false,
       );
+      this.fileForFaceCrop = fileForFaceCrop;
       final result = cropMap?[face.faceID];
       if (result == null) {
         _logger.severe(
@@ -217,5 +297,55 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       widget.onErrorCallback?.call();
       return null;
     }
+  }
+}
+
+class _EmptyPersonThumbnail extends StatelessWidget {
+  final String? initial;
+
+  const _EmptyPersonThumbnail({
+    this.initial,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final trimmed = initial?.trim();
+    final hasInitial = trimmed != null && trimmed.isNotEmpty;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.fillFaint,
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: hasInitial
+            ? LayoutBuilder(
+                builder: (context, constraints) {
+                  final shortestSide = constraints.biggest.shortestSide.isFinite
+                      ? constraints.biggest.shortestSide
+                      : 0;
+                  final fontSize = shortestSide > 0
+                      ? shortestSide * 0.42
+                      : textTheme.h2.fontSize ?? 24;
+                  return Text(
+                    trimmed.substring(0, 1).toUpperCase(),
+                    style: textTheme.h2Bold.copyWith(
+                      color: colorScheme.textMuted,
+                      fontSize: fontSize,
+                      height: 1,
+                    ),
+                  );
+                },
+              )
+            : Icon(
+                Icons.person_outline,
+                color: colorScheme.strokeMuted,
+              ),
+      ),
+    );
   }
 }

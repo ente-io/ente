@@ -34,7 +34,7 @@ import {
 import { PromiseQueue } from "ente-utils/promise";
 import { nullToUndefined } from "ente-utils/transform";
 import i18n from "i18next";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { savedCollectionFiles, savedCollections } from "./photos-fdb";
 
 // TODO: Audit the uses of these constants
@@ -1535,6 +1535,11 @@ const getGoogleLikeMetadataFile = (
     const modificationTime = Math.floor(metadata.modificationTime / 1e6);
     const result: Record<string, unknown> = {
         title: fileExportName,
+        photoTakenTime: {
+            timestamp: `${creationTime}`,
+            formatted: dateTimeFormatter.format(creationTime * 1000),
+        },
+        // Deprecated, future versions will not write this field.
         creationTime: {
             timestamp: `${creationTime}`,
             formatted: dateTimeFormatter.format(creationTime * 1000),

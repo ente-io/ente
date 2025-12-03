@@ -117,17 +117,20 @@ class AlbumRowItemWidget extends StatelessWidget {
                               return Hero(
                                 tag: heroTag,
                                 transitionOnUserGestures: true,
-                                child: isSelected
-                                    ? ColorFiltered(
-                                        colorFilter: ColorFilter.mode(
-                                          Colors.black.withValues(
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    thumbnailWidget,
+                                    if (isSelected)
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withValues(
                                             alpha: 0.4,
                                           ),
-                                          BlendMode.darken,
                                         ),
-                                        child: thumbnailWidget,
-                                      )
-                                    : thumbnailWidget,
+                                      ),
+                                  ],
+                                ),
                               );
                             } else {
                               return Container(

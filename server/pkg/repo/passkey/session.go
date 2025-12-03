@@ -10,7 +10,9 @@ func (r *Repository) getWebAuthnSessionByID(sessionID uuid.UUID) (session *ente.
 	session = &ente.WebAuthnSession{}
 
 	err = r.DB.QueryRow(`
-		SELECT
+		DELETE FROM webauthn_sessions
+		WHERE id = $1
+		RETURNING
 			id,
 			challenge,
 			user_id,
@@ -19,8 +21,6 @@ func (r *Repository) getWebAuthnSessionByID(sessionID uuid.UUID) (session *ente.
 			user_verification_requirement,
 			extensions,
 			created_at
-		FROM webauthn_sessions
-		WHERE id = $1
 	`, sessionID).Scan(
 		&session.ID,
 		&session.Challenge,

@@ -22,12 +22,13 @@ class GalleryFilesState extends InheritedWidget {
     _galleryFiles!.remove(file);
   }
 
+  List<EnteFile>? get galleryFilesOrNull => _galleryFiles;
+
   List<EnteFile> get galleryFiles {
-    if (_galleryFiles == null) {
-      throw Exception(
-        "Gallery files not set yet. Should be set in the gallery widget",
-      );
-    }
+    assert(
+      _galleryFiles != null,
+      "Gallery files not set yet. Should be set in the gallery widget",
+    );
     return _galleryFiles!;
   }
 

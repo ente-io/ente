@@ -237,6 +237,10 @@
   "@noDeleteAccountAction": {
     "description": "Button to proceed with account deletion"
   },
+  "deleteAccountWarning": "This will delete your Ente Auth, Ente Photos and Ente Locker account.",
+  "@deleteAccountWarning": {
+    "description": "Warning message shown before account deletion"
+  },
   "initiateAccountDeleteTitle": "Please authenticate to initiate account deletion",
   "@initiateAccountDeleteTitle": {
     "description": "Title for authentication dialog before account deletion"
@@ -790,6 +794,16 @@
   "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
   "legacyAccounts": "Legacy accounts",
   "trustedContacts": "Trusted contacts",
+  "legacyInvite": "{email} has invited you to be a trusted contact",
+  "@legacyInvite": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "family@example.com"
+      }
+    }
+  },
+  "acceptTrustInvite": "Accept invite",
   "addTrustedContact": "Add Trusted Contact",
   "removeInvite": "Remove invite",
   "rejectRecovery": "Reject recovery",

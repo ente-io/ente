@@ -4,6 +4,7 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+
 import {
     Box,
     Button,
@@ -49,12 +50,18 @@ import {
     useIsTouchscreen,
 } from "ente-base/components/utils/hooks";
 import { useBaseContext } from "ente-base/context";
+import { isDevBuild } from "ente-base/env";
 import {
     isHTTP401Error,
     isHTTPErrorWithStatus,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
+import {
+    albumsAppOrigin,
+    isCustomAlbumsAppOrigin,
+    shouldOnlyServeAlbumsApp,
+} from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
@@ -130,6 +137,8 @@ export default function PublicCollectionGallery() {
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string | undefined>(undefined);
 
+    const isRedirectingToAlbumsAppRef = useRef<boolean>(false);
+
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
     const router = useRouter();
@@ -147,6 +156,32 @@ export default function PublicCollectionGallery() {
             },
             cancel: false,
         });
+
+    /**
+     * Check if we need to redirect Trip albums from custom domains to albums.ente.io
+     * Returns true if a redirect was initiated, false otherwise.
+     * Reason: custom domains do not support the Trip layout fully
+     */
+    const checkAndRedirectForTripAlbum = (collection: Collection): boolean => {
+        if (
+            collection.pubMagicMetadata?.data.layout === "trip" &&
+            shouldOnlyServeAlbumsApp
+        ) {
+            const currentURL = new URL(window.location.href);
+            const albumsURL = new URL(albumsAppOrigin());
+
+            if (currentURL.host !== albumsURL.host) {
+                isRedirectingToAlbumsAppRef.current = true;
+
+                albumsURL.search = currentURL.search;
+                albumsURL.hash = currentURL.hash;
+
+                window.location.href = albumsURL.href;
+                return true;
+            }
+        }
+        return false;
+    };
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -176,8 +211,11 @@ export default function PublicCollectionGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    window.location.href = "https://ente.io";
-                    redirectingToWebsite = true;
+                    // Only redirect to ente.io if this is NOT a custom/self-hosted instance
+                    if (!isCustomAlbumsAppOrigin) {
+                        window.location.href = "https://ente.io";
+                        redirectingToWebsite = true;
+                    }
                 }
                 if (!t || !ck) {
                     return;
@@ -187,6 +225,10 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
+                    if (checkAndRedirectForTripAlbum(collection)) {
+                        return;
+                    }
+
                     setReferralCode(
                         (await savedLastPublicCollectionReferralCode()) ?? "",
                     );
@@ -209,7 +251,10 @@ export default function PublicCollectionGallery() {
                 void updateShouldDisableCFUploadProxy();
                 await publicAlbumsRemotePull();
             } finally {
-                if (!redirectingToWebsite) {
+                if (
+                    !redirectingToWebsite &&
+                    !isRedirectingToAlbumsAppRef.current
+                ) {
                     setLoading(false);
                 }
             }
@@ -233,6 +278,11 @@ export default function PublicCollectionGallery() {
         try {
             const { collection, referralCode: userReferralCode } =
                 await pullCollection(accessToken, collectionKey.current!);
+
+            if (checkAndRedirectForTripAlbum(collection)) {
+                return;
+            }
+
             setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
@@ -315,7 +365,9 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             hideLoadingBar();
-            setLoading(false);
+            if (!isRedirectingToAlbumsAppRef.current) {
+                setLoading(false);
+            }
         }
     }, [showLoadingBar, hideLoadingBar, onGenericError]);
 
@@ -391,6 +443,8 @@ export default function PublicCollectionGallery() {
             : undefined;
     }, [publicCollection]);
 
+    const shouldShowReferralBanner = isDevBuild || !isCustomAlbumsAppOrigin;
+
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
     };
@@ -416,13 +470,16 @@ export default function PublicCollectionGallery() {
     );
 
     const fileListFooter = useMemo<FileListHeaderOrFooter>(() => {
-        const props = { referralCode, onAddPhotos };
+        const props = {
+            referralCode: shouldShowReferralBanner ? referralCode : undefined,
+            onAddPhotos,
+        };
         return {
             component: <FileListFooter {...props} />,
             height: fileListFooterHeightForProps(props),
             extendToInlineEdges: true,
         };
-    }, [referralCode, onAddPhotos]);
+    }, [referralCode, onAddPhotos, shouldShowReferralBanner]);
 
     if (loading && (!publicFiles || !credentials.current)) {
         return <LoadingIndicator />;

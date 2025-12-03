@@ -36,6 +36,8 @@ class MultipartInfo {
   final int encFileSize;
   final MultipartUploadURLs urls;
   final MultipartStatus status;
+  final String? fileMd5;
+  final List<String>? partMd5s;
 
   MultipartInfo({
     this.partUploadStatus,
@@ -44,6 +46,8 @@ class MultipartInfo {
     this.status = MultipartStatus.pending,
     required this.encFileSize,
     required this.urls,
+    this.fileMd5,
+    this.partMd5s,
   });
 }
 
@@ -59,10 +63,14 @@ class MultipartUploadURLs {
   });
 
   factory MultipartUploadURLs.fromMap(Map<String, dynamic> map) {
+    final dynamic raw = map.containsKey("urls") ? map["urls"] : map;
+    if (raw is! Map<String, dynamic>) {
+      throw ArgumentError("Invalid multipart upload url payload: $map");
+    }
     return MultipartUploadURLs(
-      objectKey: map["urls"]["objectKey"],
-      partsURLs: (map["urls"]["partURLs"] as List).cast<String>(),
-      completeURL: map["urls"]["completeURL"],
+      objectKey: raw["objectKey"] as String,
+      partsURLs: (raw["partURLs"] as List).cast<String>(),
+      completeURL: raw["completeURL"] as String,
     );
   }
 }

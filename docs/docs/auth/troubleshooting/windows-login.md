@@ -16,7 +16,6 @@ To update the Trusted Root Certificates on Windows, you can use the `certutil`
 command. Here are the steps to do so:
 
 1. **Open Command Prompt as Administrator**:
-
     - Press `Windows + X` and select `Command Prompt (Admin)` or
       `Windows PowerShell (Admin)`.
 

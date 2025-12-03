@@ -54,6 +54,7 @@ const MobileTripStartedContainer = styled(Box)({
     justifyContent: "center",
     height: "40svh",
     scrollSnapAlign: "start",
+    scrollSnapStop: "always",
     padding: "0",
     overflow: "visible",
 });

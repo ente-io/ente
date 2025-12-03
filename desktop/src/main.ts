@@ -525,6 +525,10 @@ const uniqueSavePath = (dirPath: string, fileName: string) => {
  * requests" button in the sidebar (to open our GitHub repository), or when they
  * click the "Support" button to send an email to support.
  *
+ * Security: Only allow http/https/mailto schemes to be opened externally.
+ * Disallow other protocols (e.g. custom OS handlers) to avoid potential RCE
+ * vectors on some platforms when delegating to the OS via shell.openExternal.
+ *
  * @param webContents The renderer to configure.
  */
 const allowExternalLinks = (webContents: WebContents) =>
@@ -539,11 +543,29 @@ const allowExternalLinks = (webContents: WebContents) =>
     // Returning `action` "deny" accomplishes this.
     webContents.setWindowOpenHandler(({ url }) => {
         if (!url.startsWith(rendererURL)) {
-            // This does not work in Ubuntu currently: mailto links seem to just
-            // get ignored, and HTTP links open in the text editor instead of in
-            // the browser.
-            // https://github.com/electron/electron/issues/31485
-            void shell.openExternal(url);
+            // Only allow http/https/mailto external links for safety.
+            const isAllowedScheme = (() => {
+                try {
+                    const u = new URL(url);
+                    return (
+                        u.protocol === "http:" ||
+                        u.protocol === "https:" ||
+                        u.protocol === "mailto:"
+                    );
+                } catch {
+                    return false;
+                }
+            })();
+
+            if (isAllowedScheme) {
+                // This does not work in Ubuntu currently: mailto links seem to just
+                // get ignored, and HTTP links open in the text editor instead of in
+                // the browser.
+                // https://github.com/electron/electron/issues/31485
+                void shell.openExternal(url);
+            } else {
+                log.warn(`Blocked external open for disallowed scheme: ${url}`);
+            }
             return { action: "deny" };
         } else {
             return { action: "allow" };

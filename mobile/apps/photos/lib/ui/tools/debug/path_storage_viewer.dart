@@ -17,11 +17,7 @@ class PathStorageItem {
   final String title;
   final bool allowCacheClear;
 
-  PathStorageItem.name(
-    this.path,
-    this.title, {
-    this.allowCacheClear = false,
-  });
+  PathStorageItem.name(this.path, this.title, {this.allowCacheClear = false});
 }
 
 class PathStorageViewer extends StatefulWidget {
@@ -44,22 +40,36 @@ class PathStorageViewer extends StatefulWidget {
 
 class _PathStorageViewerState extends State<PathStorageViewer> {
   final Logger _logger = Logger((_PathStorageViewerState).toString());
+  late Future<DirectoryStat> _statFuture;
 
   @override
   void initState() {
     super.initState();
+    _statFuture = getDirectoryStat(Directory(widget.item.path));
+  }
+
+  @override
+  void didUpdateWidget(PathStorageViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Refresh the future when the widget updates (key changes)
+    if (oldWidget.item.path != widget.item.path ||
+        oldWidget.key != widget.key) {
+      _statFuture = getDirectoryStat(Directory(widget.item.path));
+    }
   }
 
   void _safeRefresh() async {
     if (mounted) {
-      setState(() => {});
+      setState(() {
+        _statFuture = getDirectoryStat(Directory(widget.item.path));
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DirectoryStat>(
-      future: getDirectoryStat(Directory(widget.item.path)),
+      future: _statFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _buildMenuItemWidget(snapshot.data, null);
@@ -90,9 +100,9 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
               padding: const EdgeInsets.only(left: 12.0),
               child: Text(
                 formatBytes(stat.size),
-                style: getEnteTextTheme(context)
-                    .small
-                    .copyWith(color: getEnteColorScheme(context).textFaint),
+                style: getEnteTextTheme(
+                  context,
+                ).small.copyWith(color: getEnteColorScheme(context).textFaint),
               ),
             )
           : SizedBox.fromSize(

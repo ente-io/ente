@@ -231,4 +231,4 @@ The keys and values supported by this configuration file are documented in
 >
 > If your mobile app is able to connect to your self hosted instance but is not
 able to view or upload images, see
-[help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).
+[ente.io/help/self-hosting/guides/configuring-s3](https://ente.io/help/self-hosting/guides/configuring-s3).

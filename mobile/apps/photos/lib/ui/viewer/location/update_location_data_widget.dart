@@ -78,8 +78,8 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             },
           ),
           children: const [
-            OSMFranceTileLayer(),
-            OSMFranceTileAttributes(),
+            OSMTileLayer(),
+            OSMTileAttributes(),
           ],
         ),
         Positioned(
@@ -241,6 +241,9 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
   initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         showSelectLocationText = true;
       });

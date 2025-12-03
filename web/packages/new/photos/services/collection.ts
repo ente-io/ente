@@ -36,7 +36,7 @@ import {
     encryptMagicMetadata,
 } from "ente-media/magic-metadata";
 import { splitByPredicate } from "ente-utils/array";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { batched, type UpdateMagicMetadataRequest } from "./file";
 import {
     removeCollectionIDLastSyncTime,

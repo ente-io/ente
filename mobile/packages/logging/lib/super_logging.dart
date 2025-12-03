@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:core';
 import 'dart:io';
 
+import "package:dio/dio.dart";
 import 'package:ente_logging/tunneled_transport.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -38,12 +39,25 @@ extension SuperString on String {
 
 extension SuperLogRecord on log.LogRecord {
   String toPrettyString([String? extraLines]) {
-    final header = "[$loggerName] [$level] [$time]";
+    final header = "[$loggerName][$level] [$time]";
 
     var msg = "$header $message";
 
     if (error != null) {
-      msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
+      if (error is DioException) {
+        final e = error as DioException;
+        final String? id = e.requestOptions.headers['x-request-id'] as String?;
+        if (id != null) {
+          msg += "\n⤷ id: $id ";
+        }
+        if (e.response?.data != null) {
+          msg += "\n⤷ type: ${e.type}\n⤷ error: ${e.response?.data}";
+        } else {
+          msg += "\n⤷ type: ${e.type}\n⤷ error: $error";
+        }
+      } else {
+        msg += "\n⤷ type: ${error.runtimeType}\n⤷ error: $error";
+      }
     }
     if (stackTrace != null) {
       msg += "\n⤷ trace: $stackTrace";

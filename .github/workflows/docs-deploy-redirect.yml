@@ -1,0 +1,31 @@
+name: "Deploy (help.ente.io redirect)"
+
+on:
+    # Run when the redirect file changes
+    push:
+        branches: [main]
+        paths:
+            - "infra/services/help-redir/**"
+            - ".github/workflows/docs-deploy-redirect.yml"
+    # Also allow manually running the workflow
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Deploy redirect to help.ente.io
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  # Deploy the redirect file to the existing ente project's help branch
+                  # This will replace the current help.ente.io content with just redirects
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=help infra/services/help-redir

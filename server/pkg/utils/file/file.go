@@ -42,15 +42,26 @@ func FreeSpace(path string) (uint64, error) {
 // and write a file of size.
 // This function keeps a buffer of 2 GB free space in its calculations.
 func EnsureSufficientSpace(size int64) error {
+	if size < 0 {
+		return fmt.Errorf("invalid file size: %d (must be non-negative)", size)
+	}
+
 	free, err := FreeSpace("/")
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to fetch free space")
 	}
 
 	gb := uint64(1024) * 1024 * 1024
-	need := uint64(size) + (2 * gb)
+	bufferSpace := 2 * gb
+	
+	// Check for potential overflow before addition
+	if uint64(size) > (^uint64(0) - bufferSpace) {
+		return fmt.Errorf("file size too large: %d bytes", size)
+	}
+	
+	need := uint64(size) + bufferSpace
 	if free < need {
-		return fmt.Errorf("insufficient space on disk (need %d bytes, free %d bytes)", size, free)
+		return fmt.Errorf("insufficient space on disk (need %d bytes, free %d bytes)", need, free)
 	}
 
 	return nil

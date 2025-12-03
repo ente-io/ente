@@ -54,9 +54,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 4. Enable repo git hooks `git config core.hooksPath hooks`
 
-5. If using Visual Studio Code, add the [Flutter
-   Intl](https://marketplace.visualstudio.com/items?itemName=localizely.flutter-intl)
-   extension
+5. Run `flutter pub get` to install dependencies and generate localization files
 
 6. On Android:
 
@@ -72,6 +70,17 @@ Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
 
 VSCode users might find it useful to copy [docs/vscode](docs/vscode) into a top
 level `.vscode`.
+
+## 📝 Localization
+
+This project uses Flutter's built-in localization system configured via `l10n.yaml`.
+
+- Localization files are auto-generated when you run `flutter pub get`
+- The base localization file is `lib/l10n/intl_en.arb`
+- Generated code appears in `lib/generated/intl/`
+- To manually regenerate: `flutter gen-l10n`
+
+See [docs/translations.md](docs/translations.md) for contributing translations.
 
 ## 🏙️ Attributions
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/export/ente.dart'; 
+import 'package:ente_auth/models/export/ente.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -115,23 +115,24 @@ Future<void> _requestForEncryptionPassword(
 }
 
 Future<void> _showExportWarningDialog(BuildContext context, String type) async {
-  await showChoiceActionSheet(
+  final result = await showChoiceActionSheet(
     context,
     title: context.l10n.warning,
     body: context.l10n.exportWarningDesc,
     isCritical: true,
-    firstButtonOnTap: () async {
-      if (type == "html") {
-        final data = await generateHtml(context);
-        await _exportCodes(context, data, type);
-      } else {
-        final data = await _getAuthDataForExport();
-        await _exportCodes(context, data, type);
-      }
-    },
     secondButtonLabel: context.l10n.cancel,
     firstButtonLabel: context.l10n.iUnderStand,
   );
+
+  if (result?.action == ButtonAction.first) {
+    if (type == "html") {
+      final data = await generateHtml(context);
+      await _exportCodes(context, data, type);
+    } else {
+      final data = await _getAuthDataForExport();
+      await _exportCodes(context, data, type);
+    }
+  }
 }
 
 Future<void> _exportCodes(
@@ -144,7 +145,6 @@ Future<void> _exportCodes(
   String exportFileName = 'ente-auth-codes-$formattedDate';
   final hasAuthenticated = await LocalAuthenticationService.instance
       .requestLocalAuthentication(context, context.l10n.authToExportCodes);
-  await PlatformUtil.refocusWindows();
   if (!hasAuthenticated) {
     return;
   }
