@@ -17,7 +17,6 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
-import "package:photos/events/signed_in_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/events/video_preview_state_changed_event.dart";
 import "package:photos/events/video_streaming_changed.dart";
@@ -67,18 +66,6 @@ class VideoPreviewService {
     if (flagService.pauseStreamDuringUpload) {
       _listenToSyncCompletion();
     }
-    _listenToSignIn();
-  }
-
-  void _listenToSignIn() {
-    Bus.instance.on<SignedInEvent>().listen((_) {
-      // Set video streaming enabled by default for internal users on sign in
-      if (flagService.internalUser) {
-        serviceLocator.prefs
-            .setBool(_videoStreamingEnabledByDefault, true)
-            .ignore();
-      }
-    });
   }
 
   void _listenToSyncCompletion() {
