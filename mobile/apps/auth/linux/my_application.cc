@@ -122,18 +122,11 @@ static gboolean my_application_local_command_line(GApplication *application, gch
 // Implements GApplication::startup.
 static void my_application_startup(GApplication *application)
 {
-  G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
+  // MyApplication* self = MY_APPLICATION(object);
 
-  // Set default window icon from bundled assets
-  gchar *exe_path = g_file_read_link("/proc/self/exe", nullptr);
-  if (exe_path != nullptr) {
-    gchar *exe_dir = g_path_get_dirname(exe_path);
-    gchar *icon_path = g_build_filename(exe_dir, "data", "flutter_assets", "assets", "icons", "auth-icon.png", nullptr);
-    gtk_window_set_default_icon_from_file(icon_path, nullptr);
-    g_free(icon_path);
-    g_free(exe_dir);
-    g_free(exe_path);
-  }
+  // Perform any actions required at application startup.
+
+  G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
 }
 
 // Implements GApplication::shutdown.
