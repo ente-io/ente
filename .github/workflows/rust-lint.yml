@@ -7,8 +7,8 @@ on:
     pull_request:
         paths:
             - "rust/core/**"
-            - "mobile/apps/photos/rust/**"
             - "mobile/packages/rust/rust/**"
+            - "mobile/apps/photos/rust/**"
             - "web/packages/wasm/Cargo.*"
             - "web/packages/wasm/src/**"
             - ".github/workflows/rust-lint.yml"
@@ -37,70 +37,73 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      target
+                      rust/core/target
+                      mobile/packages/rust/rust/target
+                      mobile/apps/photos/rust/target
+                      web/packages/wasm/target
                   # This also hashes cli's Cargo.lock, but it's fine for now.
                   key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
             - name: Check formatting (core)
-              run: cargo fmt --check
               working-directory: rust/core
+              run: cargo fmt --check
 
             - name: Run clippy (core)
-              run: cargo clippy
               working-directory: rust/core
+              run: cargo clippy --all-targets --all-features
 
             - name: Build (core)
-              run: cargo build
               working-directory: rust/core
+              run: cargo build
 
             - name: Test (core)
-              run: cargo test
               working-directory: rust/core
+              run: cargo test
 
             - name: Check formatting (ente_rust)
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
               working-directory: mobile/packages/rust/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
 
             - name: Run clippy (ente_rust)
-              run: cargo clippy
               working-directory: mobile/packages/rust/rust
+              run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_rust)
-              run: cargo build
               working-directory: mobile/packages/rust/rust
+              run: cargo build
 
             - name: Test (ente_rust)
-              run: cargo test
               working-directory: mobile/packages/rust/rust
+              run: cargo test
 
             - name: Check formatting (ente_photos_rust)
-              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
               working-directory: mobile/apps/photos/rust
+              run: cargo fmt -- src/frb_generated.rs && cargo fmt --check
 
             - name: Run clippy (ente_photos_rust)
-              run: cargo clippy
               working-directory: mobile/apps/photos/rust
+              run: cargo clippy --all-targets --all-features
 
             - name: Build (ente_photos_rust)
-              run: cargo build
               working-directory: mobile/apps/photos/rust
+              run: cargo build
 
             - name: Test (ente_photos_rust)
-              run: cargo test
               working-directory: mobile/apps/photos/rust
+              run: cargo test
 
             - name: Check formatting (wasm)
-              run: cargo fmt --check
               working-directory: web/packages/wasm
+              run: cargo fmt --check
 
             - name: Run clippy (wasm)
-              run: cargo clippy
               working-directory: web/packages/wasm
+              run: cargo clippy --all-targets --all-features
 
             - name: Build (wasm)
-              run: cargo build
               working-directory: web/packages/wasm
+              run: cargo build
 
             - name: Test (wasm)
-              run: cargo test
               working-directory: web/packages/wasm
+              run: cargo test

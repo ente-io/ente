@@ -1,4 +1,4 @@
-name: "Lint (rust)"
+name: "Lint (rust cli)"
 
 on:
     # Run on every pull request (open or push to it) that changes rust/cli/ related files.
@@ -8,7 +8,7 @@ on:
     # work is happening on the lighter-weight core.
     pull_request:
         paths:
-            - "rust/**"
+            - "rust/cli/**"
             - ".github/workflows/rust-lint-cli.yml"
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: rust
+                working-directory: rust/cli
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -38,7 +38,7 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      target
+                      rust/cli/target
                   key: ${{ runner.os }}-cargo-${{ hashFiles('rust/cli/Cargo.lock') }}
 
             - run: cargo fmt --check
