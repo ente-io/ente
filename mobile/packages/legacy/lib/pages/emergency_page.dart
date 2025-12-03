@@ -4,7 +4,8 @@ import "package:ente_configuration/base_configuration.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
-import "package:ente_legacy/pages/select_contact_page.dart";
+import "package:ente_legacy/pages/select_contact_page.dart"
+    show showAddContactBottomSheet;
 import "package:ente_legacy/services/emergency_service.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_strings/ente_strings.dart";
@@ -20,7 +21,6 @@ import "package:ente_ui/components/notification_widget.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
-import "package:ente_utils/navigation_util.dart";
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 
@@ -238,15 +238,14 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             GradientButton(
                               text: context.strings.addTrustedContact,
                               onTap: () async {
-                                await routeToPage(
+                                final result = await showAddContactBottomSheet(
                                   context,
-                                  AddContactPage(
-                                    info!,
-                                    config: widget.config,
-                                  ),
-                                  forceCustomPageRoute: true,
+                                  emergencyInfo: info!,
+                                  config: widget.config,
                                 );
-                                unawaited(_fetchData());
+                                if (result == true) {
+                                  unawaited(_fetchData());
+                                }
                               },
                             ),
                           ],
@@ -263,15 +262,14 @@ class _EmergencyPageState extends State<EmergencyPage> {
                         surfaceExecutionStates: false,
                         menuItemColor: getEnteColorScheme(context).fillFaint,
                         onTap: () async {
-                          await routeToPage(
+                          final result = await showAddContactBottomSheet(
                             context,
-                            AddContactPage(
-                              info!,
-                              config: widget.config,
-                            ),
-                            forceCustomPageRoute: true,
+                            emergencyInfo: info!,
+                            config: widget.config,
                           );
-                          unawaited(_fetchData());
+                          if (result == true) {
+                            unawaited(_fetchData());
+                          }
                         },
                         isTopBorderRadiusRemoved: trustedContacts.isNotEmpty,
                         singleBorderRadius: 8,
