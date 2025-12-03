@@ -140,7 +140,7 @@ function useCurrentUser() {
     }, []);
 }
 
-function useAnimatedCounter(targetValue: number, duration: number = 500) {
+function useAnimatedCounter(targetValue: number, duration = 500) {
     const [displayValue, setDisplayValue] = useState(targetValue);
     const previousValue = useRef(targetValue);
 
@@ -158,9 +158,7 @@ function useAnimatedCounter(targetValue: number, duration: number = 500) {
 
             // Ease out cubic for smooth deceleration
             const easeOut = 1 - Math.pow(1 - progress, 3);
-            const currentValue = Math.round(
-                startValue + difference * easeOut,
-            );
+            const currentValue = Math.round(startValue + difference * easeOut);
 
             setDisplayValue(currentValue);
 
@@ -872,31 +870,6 @@ function CollectionSidebar({
         return thumbByFileID.get(firstPhoto.fileId) ?? firstPhoto.image;
     }, [mapPhotos, thumbByFileID]);
 
-    // Calculate cover stats for the sticky header
-    const coverStats = useMemo(() => {
-        if (!mapPhotos.length) return null;
-
-        const sortedData = [...mapPhotos].sort(
-            (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
-        );
-        const firstData = sortedData[0];
-        const lastData = sortedData[sortedData.length - 1];
-        if (!firstData || !lastData) return null;
-
-        const firstDate = new Date(firstData.timestamp);
-        const lastDate = new Date(lastData.timestamp);
-        const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const monthYear = firstDate.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-        });
-
-        return { monthYear, diffDays };
-    }, [mapPhotos]);
-
     // Detect when cover scrolls out of view
     useEffect(() => {
         const cover = coverRef.current;
@@ -925,7 +898,7 @@ function CollectionSidebar({
                 bottom: { xs: 0, md: 16 },
                 right: { xs: 0, md: "auto" },
                 width: { xs: "100%", md: "35%" },
-                height: { xs: "40%", md: "auto" },
+                height: { xs: "50%", md: "auto" },
                 maxWidth: { md: "600px" },
                 minWidth: { md: "450px" },
                 bgcolor: (theme) => theme.vars.palette.background.paper,
@@ -985,9 +958,9 @@ function CollectionSidebar({
                     position: "sticky",
                     top: 0,
                     zIndex: 10,
-                    pt: 4,
-                    pb: 3,
-                    px: { xs: 2, md: 2.5 },
+                    pt: { xs: 2, md: 4 },
+                    pb: { xs: 1.5, md: 3 },
+                    px: { xs: 1.5, md: 2.5 },
                     display: isCoverHidden ? "block" : "none",
                     background:
                         "linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 100%)",
@@ -999,21 +972,21 @@ function CollectionSidebar({
                         justifyContent: "space-between",
                         alignItems: "center",
                         bgcolor: "#1a1a1a",
-                        borderRadius: "36px",
-                        px: 2,
-                        py: 1.5,
+                        borderRadius: { xs: "28px", md: "36px" },
+                        px: { xs: 1.5, md: 2 },
+                        py: { xs: 1, md: 1.5 },
                         boxShadow:
                             "0 12px 40px -4px rgba(0, 0, 0, 0.6), 0 4px 16px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)",
                         animation: `${dynamicIslandAppear} 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards`,
                         transformOrigin: "top center",
-                        gap: 1.5,
+                        gap: { xs: 1, md: 1.5 },
                     }}
                 >
                     {/* Cover image avatar */}
                     <Box
                         sx={{
-                            width: 56,
-                            height: 56,
+                            width: { xs: 40, md: 56 },
+                            height: { xs: 40, md: 56 },
                             borderRadius: "50%",
                             overflow: "hidden",
                             flexShrink: 0,
@@ -1033,13 +1006,14 @@ function CollectionSidebar({
                             />
                         )}
                     </Box>
-                    <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
+                    <Stack spacing={0.125} sx={{ minWidth: 0, flex: 1 }}>
                         <Typography
                             variant="body"
                             sx={{
                                 fontWeight: 600,
                                 lineHeight: 1.2,
                                 color: "white",
+                                fontSize: { xs: "16px", md: "16px" },
                             }}
                             noWrap
                         >
@@ -1047,13 +1021,14 @@ function CollectionSidebar({
                         </Typography>
                         <Typography
                             variant="small"
-                            sx={{ color: "rgba(255, 255, 255, 0.7)" }}
+                            sx={{
+                                color: "rgba(255, 255, 255, 0.7)",
+                                fontSize: { xs: "13px", md: "13px" },
+                            }}
                         >
                             {currentDateLabel
                                 ? `${currentDateLabel} • ${animatedCount} memories`
-                                : coverStats
-                                  ? `${coverStats.monthYear} • ${coverStats.diffDays} days • ${animatedCount} memories`
-                                  : `${animatedCount} memories`}
+                                : `${animatedCount} memories`}
                         </Typography>
                     </Stack>
                     <IconButton
@@ -1061,13 +1036,14 @@ function CollectionSidebar({
                         onClick={onClose}
                         size="small"
                         sx={{
-                            ml: 1.5,
+                            ml: { xs: 0.5, md: 1.5 },
+                            p: { xs: 0.75, md: 1 },
                             color: "white",
                             bgcolor: "rgba(255, 255, 255, 0.15)",
                             "&:hover": { bgcolor: "rgba(255, 255, 255, 0.25)" },
                         }}
                     >
-                        <CloseIcon fontSize="small" />
+                        <CloseIcon sx={{ fontSize: { xs: 16, md: 20 } }} />
                     </IconButton>
                 </Box>
             </Box>
@@ -1498,43 +1474,10 @@ interface MapCoverProps {
 
 function MapCover({
     name,
-    mapPhotos,
     coverImageUrl,
     visibleCount,
     onClose,
 }: MapCoverProps) {
-    const coverStats = useMemo(() => {
-        if (!mapPhotos.length) return null;
-
-        const sortedData = [...mapPhotos].sort(
-            (a, b) =>
-                new Date(a.timestamp).getTime() -
-                new Date(b.timestamp).getTime(),
-        );
-        const firstData = sortedData[0];
-        const lastData = sortedData[sortedData.length - 1];
-        if (!firstData || !lastData) return null;
-
-        const firstDate = new Date(firstData.timestamp);
-        const lastDate = new Date(lastData.timestamp);
-        const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        const monthYear = firstDate.toLocaleDateString("en-US", {
-            month: "long",
-            year: "numeric",
-        });
-
-        // Count unique locations based on lat/lng
-        const uniqueLocations = new Set(
-            mapPhotos.map(
-                (point) => `${point.lat.toFixed(3)},${point.lng.toFixed(3)}`,
-            ),
-        );
-        const locationCount = uniqueLocations.size;
-
-        return { monthYear, diffDays, locationCount };
-    }, [mapPhotos]);
-
     return (
         <CoverContainer>
             <CoverImageContainer>
@@ -1567,12 +1510,11 @@ function MapCover({
                 </CoverCloseButton>
 
                 <CoverContentContainer>
-                    {coverImageUrl && coverStats ? (
+                    {coverImageUrl ? (
                         <>
                             <CoverTitle>{name}</CoverTitle>
                             <CoverSubtitle>
-                                {coverStats.monthYear} • {coverStats.diffDays}{" "}
-                                days • {visibleCount} memories
+                                {visibleCount} memories
                             </CoverSubtitle>
                         </>
                     ) : (
@@ -1753,9 +1695,7 @@ function ThumbImage({ src, onClick, animationDelay }: ThumbImageProps) {
                     transition: "opacity 0.3s ease-out",
                     pointerEvents: "none",
                 },
-                "&:hover::after": {
-                    opacity: 1,
-                },
+                "&:hover::after": { opacity: 1 },
             }}
         >
             <Box
