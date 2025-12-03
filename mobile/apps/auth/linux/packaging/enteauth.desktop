@@ -2,7 +2,7 @@
 Name=Auth
 GenericName=Ente Authenticator
 Exec=enteauth %U
-Icon=enteauth
+Icon=io.ente.auth
 Type=Application
 Categories=Utility;
 Keywords=Authentication;2FA;
