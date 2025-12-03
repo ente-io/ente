@@ -45,7 +45,11 @@ function(APPLY_STANDARD_SETTINGS TARGET)
   # FIXME: workaround for tray_manager deprecation issue:
   target_compile_options(${TARGET} PRIVATE -Wno-error=deprecated-declarations) # Allow deprecated warnings
   # FIXME: workaround for flutter_secure_storage_linux json.hpp literal operator issue:
-  target_compile_options(${TARGET} PRIVATE -Wno-error=deprecated-literal-operator)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(${TARGET} PRIVATE -Wno-error=deprecated-literal-operator)
+  elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${TARGET} PRIVATE -Wno-deprecated-literal-operator)
+  endif()
   target_compile_options(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:-O3>")
   target_compile_definitions(${TARGET} PRIVATE "$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
 endfunction()
