@@ -44,6 +44,17 @@ jobs:
                   # This also hashes cli's Cargo.lock, but it's fine for now.
                   key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings (ente_rust)
+              working-directory: mobile/packages/rust
+              run: flutter_rust_bridge_codegen generate
+
+            - name: Generate Rust bindings (ente_photos_rust)
+              working-directory: mobile/apps/photos
+              run: flutter_rust_bridge_codegen generate
+
             - name: Check formatting (core)
               working-directory: rust/core
               run: cargo fmt --check
