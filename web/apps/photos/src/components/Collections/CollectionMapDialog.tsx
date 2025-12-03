@@ -890,6 +890,21 @@ function CollectionSidebar({
                 scrollbarWidth: "thin",
                 scrollbarColor: (theme) =>
                     `${theme.palette.divider} transparent`,
+                // Bottom gradient overlay
+                "&::after": {
+                    content: '""',
+                    position: "sticky",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: "150px",
+                    background:
+                        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0) 100%)",
+                    pointerEvents: "none",
+                    flexShrink: 0,
+                    marginTop: "-100px",
+                    borderRadius: { xs: "0", md: "0 0 48px 48px" },
+                },
             }}
         >
             <Box ref={coverRef}>
@@ -950,6 +965,7 @@ function CollectionSidebar({
                 sx={{
                     px: { xs: "24px", md: "32px" },
                     pb: { xs: "24px", md: "32px" },
+                    position: "relative",
                 }}
             >
                 <PhotoList
@@ -1055,8 +1071,8 @@ function PhotoDateGroup({
         return () => observer.disconnect();
     }, []);
 
-    // Offset for sticky header when visible
-    const topOffset = stickyHeaderVisible ? "72px" : 0;
+    // Offset for sticky header when visible (must match sticky header height + buffer)
+    const topOffset = stickyHeaderVisible ? "85px" : 0;
 
     return (
         <Stack spacing={0.75}>
@@ -1073,7 +1089,7 @@ function PhotoDateGroup({
                     ml: { xs: "-24px", md: "-32px" },
                     mr: { xs: "-24px", md: "-32px" },
                     px: { xs: "0", md: "0" },
-                    transition: "padding 0.15s ease-out, top 0.2s ease-out",
+                    transition: "padding 0.15s ease-out",
                 }}
             >
                 <Typography variant="small" color="text.secondary">
