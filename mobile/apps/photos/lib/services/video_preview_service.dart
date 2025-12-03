@@ -106,17 +106,10 @@ class VideoPreviewService {
   final CacheManager videoCacheManager;
 
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
-  static const String _videoStreamingEnabledByDefault =
-      "videoStreamingEnabledByDefault";
-
-  bool get _isVideoStreamingEnabledByDefault {
-    return serviceLocator.prefs.getBool(_videoStreamingEnabledByDefault) ??
-        false;
-  }
 
   bool get isVideoStreamingEnabled {
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
-        _isVideoStreamingEnabledByDefault;
+        flagService.streamEnabledByDefault;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {

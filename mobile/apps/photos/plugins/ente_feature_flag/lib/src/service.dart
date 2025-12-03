@@ -93,6 +93,19 @@ class FlagService {
 
   bool get pauseStreamDuringUpload => internalUser;
 
+  static const _streamEnabledByDefault = "videoStreamingEnabledByDefault";
+
+  bool get streamEnabledByDefault =>
+      _prefs.getBool(_streamEnabledByDefault) ?? false;
+
+  /// Sets video streaming enabled by default for internal users.
+  /// Should be called after sign in when flags are available.
+  void applyStreamDefault() {
+    if (internalUser && !_prefs.containsKey(_streamEnabledByDefault)) {
+      _prefs.setBool(_streamEnabledByDefault, true).ignore();
+    }
+  }
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
@@ -137,11 +150,6 @@ class FlagService {
       final remoteFlags = RemoteFlags.fromMap(response.data);
       await _prefs.setString("remote_flags", remoteFlags.toJson());
       _flags = remoteFlags;
-      // Set video streaming default for internal users (only once)
-      if (internalUser &&
-          !_prefs.containsKey("videoStreamingEnabledByDefault")) {
-        _prefs.setBool("videoStreamingEnabledByDefault", true).ignore();
-      }
     } catch (e) {
       debugPrint("Failed to sync feature flags $e");
     } finally {

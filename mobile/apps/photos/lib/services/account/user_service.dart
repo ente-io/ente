@@ -419,6 +419,7 @@ class UserService {
         }
         await dialog.hide();
         await flagService.tryRefreshFlags();
+        flagService.applyStreamDefault();
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(AccountConfiguredEvent());
       }
@@ -806,6 +807,7 @@ class UserService {
             keyEncryptionKey: keyEncryptionKey,
           );
           await flagService.tryRefreshFlags();
+          flagService.applyStreamDefault();
           Configuration.instance.resetVolatilePassword();
           page = const HomeWidget();
         } else {
