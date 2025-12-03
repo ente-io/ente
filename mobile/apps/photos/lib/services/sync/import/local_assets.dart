@@ -155,9 +155,31 @@ Future<List<AssetPathEntity>> _getGalleryList({
   }
 
   if (updateFromTime != null && updateToTime != null) {
+    // Clamp timestamps to valid DateTime range to handle corrupted file dates
+    // Valid DateTime range in milliseconds: -8640000000000000 to 8640000000000000
+    // For microseconds (input), multiply by 1000
+    const maxValidMicroseconds = 8640000000000000000; // ~275760 AD
+    const minValidMicroseconds = -8640000000000000000; // ~271821 BC
+
+    final clampedFromTime = updateFromTime.clamp(
+      minValidMicroseconds,
+      maxValidMicroseconds,
+    );
+    final clampedToTime = updateToTime.clamp(
+      minValidMicroseconds,
+      maxValidMicroseconds,
+    );
+
+    if (clampedFromTime != updateFromTime || clampedToTime != updateToTime) {
+      _logger.warning(
+        'Clamped invalid timestamp values: fromTime=$updateFromTime (clamped to $clampedFromTime), '
+        'toTime=$updateToTime (clamped to $clampedToTime)',
+      );
+    }
+
     filterOptionGroup.updateTimeCond = DateTimeCond(
-      min: DateTime.fromMillisecondsSinceEpoch(updateFromTime ~/ 1000),
-      max: DateTime.fromMillisecondsSinceEpoch(updateToTime ~/ 1000),
+      min: DateTime.fromMillisecondsSinceEpoch(clampedFromTime ~/ 1000),
+      max: DateTime.fromMillisecondsSinceEpoch(clampedToTime ~/ 1000),
     );
   }
   filterOptionGroup.containsPathModified = containsModifiedPath;
@@ -229,24 +251,32 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
   final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
     localIDs.add(entity.id);
-    final createMs = _safeGetMilliseconds(
-      entity.createDateTime,
-      entity.id,
-      entity.title,
-      'createDateTime',
-    );
-    final modifiedMs = _safeGetMilliseconds(
-      entity.modifiedDateTime,
-      entity.id,
-      entity.title,
-      'modifiedDateTime',
-    );
-    final bool assetCreatedOrUpdatedAfterGivenTime =
-        max(createMs, modifiedMs) >= (fromTime / ~1000);
-    if (!alreadySeenLocalIDs.contains(entity.id) &&
-        assetCreatedOrUpdatedAfterGivenTime) {
-      final file = await EnteFile.fromAsset(pathEntity.name, entity);
-      files.add(file);
+    try {
+      final createMs = _safeGetMilliseconds(
+        entity.createDateTime,
+        entity.id,
+        entity.title,
+        'createDateTime',
+      );
+      final modifiedMs = _safeGetMilliseconds(
+        entity.modifiedDateTime,
+        entity.id,
+        entity.title,
+        'modifiedDateTime',
+      );
+      final bool assetCreatedOrUpdatedAfterGivenTime =
+          max(createMs, modifiedMs) >= (fromTime / ~1000);
+      if (!alreadySeenLocalIDs.contains(entity.id) &&
+          assetCreatedOrUpdatedAfterGivenTime) {
+        final file = await EnteFile.fromAsset(pathEntity.name, entity);
+        files.add(file);
+      }
+    } on InvalidDateTimeError catch (e) {
+      // Skip files with invalid timestamps instead of failing the entire sync
+      _logger.warning(
+        'Skipping file with invalid timestamp: ${e.toString()}',
+      );
+      continue;
     }
   }
   return Tuple2(localIDs, files);
