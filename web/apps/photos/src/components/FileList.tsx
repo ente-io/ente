@@ -1,6 +1,5 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import { Box, Checkbox, Typography, styled } from "@mui/material";
 import Avatar from "components/Avatar";
 import type { LocalUser } from "ente-accounts/services/user";
@@ -13,6 +12,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
+import { StarIcon } from "ente-new/photos/components/icons/StarIcon";
 import {
     LoadingThumbnail,
     StaticThumbnail,

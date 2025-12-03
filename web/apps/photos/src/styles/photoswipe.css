@@ -501,7 +501,10 @@ body:has(
 }
 
 /* Hide gradient overlay when description is not present */
-.pswp-ente .pswp__bottom-right-controls:has(.pswp__caption[style*="display: none"])::before {
+.pswp-ente
+    .pswp__bottom-right-controls:has(
+        .pswp__caption[style*="display: none"]
+    )::before {
     display: none;
 }
 
