@@ -16,7 +16,7 @@ enum AppIcon {
   ),
   iconLight("Light", "IconLight", "assets/launcher_icon/icon-light.png"),
   iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png"),
-  iconOG("OG", "IconOG", "assets/launcher_icon/icon-og.png");
+  iconOG("Shield", "IconOG", "assets/launcher_icon/icon-og.png");
 
   final String name;
   final String id;
