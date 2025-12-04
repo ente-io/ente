@@ -1,3 +1,5 @@
+- Prateek: Redesigned empty home screen with new layout, new icons in app bar
+- Prateek: Update primary color to new darker one
 - Prateek: New Auth icon & splash
 - Prateek: Fix linux icon not assigned by setting startup wm class
 - Prateek: Revamped QR code dialog with new design, shared package for auth and photos, dark mode support, and responsive layout
