@@ -83,7 +83,7 @@ class SubscriptionRequiredDialog extends StatelessWidget {
                   // );
                   Navigator.of(context).pop();
                 },
-                text: l10n.subscribe,
+                text: l10n.ok,
               ),
             ),
           ],
