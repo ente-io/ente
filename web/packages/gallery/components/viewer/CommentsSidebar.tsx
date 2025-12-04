@@ -273,7 +273,7 @@ const mockComments: Comment[] = [
             userName: "Shanthy",
         },
         parentCommentID: "12",
-        isDeleted: false,
+        isDeleted: true,
         userID: 3,
         createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 120000,
         updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 120000,
@@ -663,21 +663,21 @@ const mockComments: Comment[] = [
         parentCommentID: "35",
         isDeleted: false,
         userID: 5,
-        createdAt: Date.now() - 20 * 60 * 1000,
-        updatedAt: Date.now() - 20 * 60 * 1000,
+        createdAt: Date.now() - 45 * 60 * 1000,
+        updatedAt: Date.now() - 45 * 60 * 1000,
     },
     {
         id: "42",
         collectionID: 1,
         fileID: 1,
         encData: {
-            text: "You want to wake up in the morning and think the future is going to be great - and that's what being a spacefaring civilization is all about. It's about believing in the future and thinking that the future will be better than the past. And I can't think of anything more exciting than going out there and being among the stars.",
+            text: "You want to wake up in the morning and think the future is going to be great - and that's what being a spacefaring civilization is all about.\n\nIt's about believing in the future and thinking that the future will be better than the past.\n\nAnd I can't think of anything more exciting than going out there and being among the stars.",
             userName: "Elon",
         },
         isDeleted: false,
         userID: 5,
-        createdAt: Date.now() - 19 * 60 * 1000,
-        updatedAt: Date.now() - 19 * 60 * 1000,
+        createdAt: Date.now() - 43 * 60 * 1000,
+        updatedAt: Date.now() - 43 * 60 * 1000,
     },
     {
         id: "43",
@@ -689,8 +689,22 @@ const mockComments: Comment[] = [
         },
         isDeleted: false,
         userID: 5,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+        createdAt: Date.now() - 30 * 60 * 1000,
+        updatedAt: Date.now() - 30 * 60 * 1000,
+    },
+    {
+        id: "44",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Haha.",
+            userName: "Anand",
+        },
+        parentCommentID: "42",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 5 * 60 * 1000,
+        updatedAt: Date.now() - 5 * 60 * 1000,
     },
 ];
 
@@ -718,10 +732,16 @@ const getParentComment = (
 
 /**
  * Truncates comment text to first 100 characters of the first line.
+ * Adds "..." if multiline or if first line exceeds 100 chars.
  */
 const truncateCommentText = (text: string): string => {
-    const firstLine = text.split("\n")[0] ?? text;
-    return firstLine.length > 100 ? firstLine.slice(0, 100) + "..." : firstLine;
+    const lines = text.split("\n");
+    const firstLine = lines[0] ?? text;
+    const isMultiline = lines.length > 1;
+    if (firstLine.length > 100) {
+        return firstLine.slice(0, 100) + "...";
+    }
+    return isMultiline ? firstLine + "..." : firstLine;
 };
 
 // =============================================================================
@@ -771,23 +791,37 @@ interface QuotedReplyProps {
  */
 const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
     <QuotedReplyContainer isOwn={isOwn}>
-        <Typography
-            sx={{
-                fontWeight: 600,
-                fontSize: 12,
-                color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
-            }}
-        >
-            {parentComment.encData.userName}
-        </Typography>
-        <Typography
-            sx={{
-                fontSize: 12,
-                color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
-            }}
-        >
-            {parentComment.encData.text}
-        </Typography>
+        {parentComment.isDeleted ? (
+            <Typography
+                sx={{
+                    fontSize: 12,
+                    fontStyle: "italic",
+                    color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
+                }}
+            >
+                (deleted)
+            </Typography>
+        ) : (
+            <>
+                <Typography
+                    sx={{
+                        fontWeight: 600,
+                        fontSize: 12,
+                        color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
+                    }}
+                >
+                    {parentComment.encData.userName}
+                </Typography>
+                <Typography
+                    sx={{
+                        fontSize: 12,
+                        color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
+                    }}
+                >
+                    {truncateCommentText(parentComment.encData.text)}
+                </Typography>
+            </>
+        )}
     </QuotedReplyContainer>
 );
 
@@ -836,16 +870,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setReplyingTo(commentToReply);
     };
 
-    // Sort all comments by timestamp
-    const sortedComments = [...mockComments].sort(
-        (a, b) => a.createdAt - b.createdAt,
-    );
+    // Filter out deleted comments and sort by timestamp
+    const sortedComments = [...mockComments]
+        .filter((c) => !c.isDeleted)
+        .sort((a, b) => a.createdAt - b.createdAt);
 
     return (
         <SidebarDrawer open={open} onClose={onClose} anchor="right">
             <Header>
                 <Typography sx={{ color: "#000", fontWeight: 600 }}>
-                    {`${mockComments.length} ${t("comments")}`}
+                    {`${sortedComments.length} ${t("comments")}`}
                 </Typography>
                 <CloseButton onClick={onClose}>
                     <CloseIcon sx={{ fontSize: 22 }} />
@@ -941,7 +975,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             }}
                         >
                             <Typography sx={{ fontSize: 12, color: "#666" }}>
-                                Replying to {replyingTo.encData.userName}...
+                                Replying to{" "}
+                                {replyingTo.userID === CURRENT_USER_ID
+                                    ? "me"
+                                    : replyingTo.encData.userName}
+                                ...
                             </Typography>
                             <Typography
                                 sx={{
@@ -1100,7 +1138,7 @@ const CommentBubbleWrapper = styled(Box)<{
     justifyContent: isOwn ? "flex-end" : "flex-start",
     width: "100%",
     marginTop: isFirstOwn ? 64 : 0,
-    marginBottom: isOwn ? (isLastOwn ? 24 : 8) : isLastOwn ? 48 : 24,
+    marginBottom: isOwn ? 24 : isLastOwn ? 48 : 24,
     paddingRight: isOwn ? 52 : 0,
     paddingLeft: isOwn ? 0 : 28,
 }));
