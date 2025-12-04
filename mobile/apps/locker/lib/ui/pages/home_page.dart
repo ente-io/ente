@@ -81,6 +81,7 @@ class CustomLockerAppBar extends StatelessWidget
                         child: HugeIcon(
                           icon: HugeIcons.strokeRoundedMenu01,
                           color: Colors.white,
+                          strokeWidth: 2.25,
                         ),
                       ),
                     ),
