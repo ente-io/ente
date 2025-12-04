@@ -114,6 +114,7 @@ export const createIcon = (
     const triangleHeight = 12;
     const pinHeight = pinSize + triangleHeight;
     const hasImage = imageSrc && imageSrc.trim() !== "";
+    const badgeOverflow = 6; // How much the badge pops out
 
     // Create cache key based on all parameters including border radius and triangle size
     const cacheKey = `icon_${imageSrc}_${size}_${borderColor}_${isReached}_${triangleHeight}_${clusterCount}`;
@@ -143,6 +144,7 @@ export const createIcon = (
                 position: relative;
                 cursor: pointer;
                 filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+                overflow: visible;
             ">
               <div style="
                   width: ${pinSize}px;
@@ -183,26 +185,30 @@ export const createIcon = (
                     </style>
                   `
                 }
-                ${
-                    badgeLabel
-                        ? `<div style="
+              </div>
+              ${
+                  badgeLabel
+                      ? `<div style="
                           position: absolute;
-                          top: 6px;
-                          right: 6px;
+                          top: -${badgeOverflow}px;
+                          right: -${badgeOverflow}px;
                           background: #22c55e;
                           color: #ffffff;
-                          border-radius: 4px;
+                          border-radius: 6px;
                           padding: 4px 6px;
                           font-size: 11px;
                           font-weight: 700;
                           line-height: 1;
-                          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                          z-index: 1;
                         ">
                           ${badgeLabel}
-                        </div>`
-                        : ""
-                }
-              </div>
+                        </div>
+                        <style>
+                          .leaflet-marker-icon.custom-pin-marker { overflow: visible !important; }
+                        </style>`
+                      : ""
+              }
               <div style="
                   position: absolute;
                   bottom: 0;
@@ -217,7 +223,7 @@ export const createIcon = (
             </div>
         `,
         className: "custom-pin-marker",
-        iconSize: [pinSize, pinHeight],
+        iconSize: [pinSize + badgeOverflow, pinHeight + badgeOverflow],
         iconAnchor: [pinSize / 2, pinHeight],
         popupAnchor: [0, -pinHeight],
     });
