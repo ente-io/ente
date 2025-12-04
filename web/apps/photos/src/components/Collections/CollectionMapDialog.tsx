@@ -906,61 +906,7 @@ function CollectionSidebar({
     }, []);
 
     return (
-        <Box
-            ref={sidebarRef}
-            onScroll={handleScroll}
-            sx={{
-                position: "absolute",
-                // Desktop: left sidebar taking 35% width
-                left: { xs: 0, md: 16 },
-                top: { xs: "auto", md: 16 },
-                bottom: { xs: 0, md: 16 },
-                right: { xs: 0, md: "auto" },
-                width: { xs: "100%", md: "35%" },
-                height: { xs: "50%", md: "auto" },
-                maxWidth: { md: "600px" },
-                minWidth: { md: "450px" },
-                bgcolor: (theme) => theme.vars.palette.background.paper,
-                boxShadow: (theme) => theme.shadows[10],
-                display: "flex",
-                flexDirection: "column",
-                overflowY: "auto",
-                overflowX: "hidden",
-                // Desktop: rounded corners on all sides; Mobile: only top corners
-                borderRadius: { xs: "24px 24px 0 0", md: "48px" },
-                zIndex: 1000,
-                "&::-webkit-scrollbar": { width: "8px" },
-                "&::-webkit-scrollbar-track": {
-                    background: "transparent",
-                    borderRadius: "48px",
-                },
-                "&::-webkit-scrollbar-thumb": {
-                    background: (theme) => theme.palette.divider,
-                    borderRadius: "48px",
-                    "&:hover": {
-                        background: (theme) => theme.palette.text.disabled,
-                    },
-                },
-                scrollbarWidth: "thin",
-                scrollbarColor: (theme) =>
-                    `${theme.palette.divider} transparent`,
-                // Bottom gradient overlay
-                "&::after": {
-                    content: '""',
-                    position: "sticky",
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: "150px",
-                    background:
-                        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0) 100%)",
-                    pointerEvents: "none",
-                    flexShrink: 0,
-                    marginTop: "-100px",
-                    borderRadius: { xs: "0", md: "0 0 48px 48px" },
-                },
-            }}
-        >
+        <SidebarContainer ref={sidebarRef} onScroll={handleScroll}>
             <Box ref={coverRef}>
                 <MapCover
                     name={collectionSummary.name}
@@ -971,22 +917,7 @@ function CollectionSidebar({
             </Box>
 
             {/* Sticky header */}
-            <Box
-                sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 10,
-                    bgcolor: (theme) => theme.vars.palette.background.paper,
-                    px: { xs: "24px", md: "32px" },
-                    pt: { xs: 2, md: 4 },
-                    pb: 2,
-                    display: isCoverHidden ? "flex" : "none",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    borderBottom: (theme) =>
-                        `1px solid ${theme.palette.divider}`,
-                }}
-            >
+            <StickyHeader isVisible={isCoverHidden}>
                 <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
                     <Typography
                         variant="body"
@@ -1012,15 +943,9 @@ function CollectionSidebar({
                 >
                     <CloseIcon fontSize="small" />
                 </IconButton>
-            </Box>
+            </StickyHeader>
 
-            <Box
-                sx={{
-                    px: { xs: "24px", md: "32px" },
-                    pb: { xs: "24px", md: "32px" },
-                    position: "relative",
-                }}
-            >
+            <PhotoListContainer>
                 <PhotoList
                     photoGroups={photoGroups}
                     thumbByFileID={thumbByFileID}
@@ -1030,8 +955,8 @@ function CollectionSidebar({
                     onDateVisible={handleDateVisible}
                     scrollContainerRef={sidebarRef}
                 />
-            </Box>
-        </Box>
+            </PhotoListContainer>
+        </SidebarContainer>
     );
 }
 
@@ -1434,20 +1359,7 @@ interface CenteredBoxProps extends React.PropsWithChildren {
 
 function CenteredBox({ children, onClose, closeLabel }: CenteredBoxProps) {
     return (
-        <Box
-            sx={{
-                width: "100%",
-                height: "100%",
-                minHeight: "420px",
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1,
-                flexDirection: "column",
-                textAlign: "center",
-            }}
-        >
+        <CenteredBoxContainer>
             {onClose && (
                 <IconButton
                     aria-label={closeLabel ?? "Close"}
@@ -1458,7 +1370,7 @@ function CenteredBox({ children, onClose, closeLabel }: CenteredBoxProps) {
                 </IconButton>
             )}
             {children}
-        </Box>
+        </CenteredBoxContainer>
     );
 }
 
@@ -1467,23 +1379,7 @@ function CenteredBox({ children, onClose, closeLabel }: CenteredBoxProps) {
  * Responsibility: Display empty state message when no photos match filters
  */
 function EmptyState({ children }: React.PropsWithChildren) {
-    return (
-        <Box
-            sx={{
-                minHeight: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                py: 4,
-                color: (theme) => theme.vars.palette.text.secondary,
-                gap: 0.5,
-            }}
-        >
-            {children}
-        </Box>
-    );
+    return <EmptyStateContainer>{children}</EmptyStateContainer>;
 }
 
 // ============================================================================
@@ -1592,6 +1488,126 @@ const CoverSubtitle = styled(Typography)({
     fontSize: "14px",
     fontWeight: "500",
 });
+
+// ============================================================================
+// Sidebar Styled Components
+// ============================================================================
+
+const SidebarContainer = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    left: 0,
+    top: "auto",
+    bottom: 0,
+    right: 0,
+    width: "100%",
+    height: "50%",
+    backgroundColor: theme.vars.palette.background.paper,
+    boxShadow: theme.shadows[10],
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
+    overflowX: "hidden",
+    borderRadius: "24px 24px 0 0",
+    zIndex: 1000,
+    "&::-webkit-scrollbar": { width: "8px" },
+    "&::-webkit-scrollbar-track": {
+        background: "transparent",
+        borderRadius: "48px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+        background: theme.palette.divider,
+        borderRadius: "48px",
+        "&:hover": { background: theme.palette.text.disabled },
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: `${theme.palette.divider} transparent`,
+    "&::after": {
+        content: '""',
+        position: "sticky",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: "150px",
+        background:
+            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0) 100%)",
+        pointerEvents: "none",
+        flexShrink: 0,
+        marginTop: "-100px",
+        borderRadius: "0",
+    },
+    [theme.breakpoints.up("md")]: {
+        left: 16,
+        top: 16,
+        bottom: 16,
+        right: "auto",
+        width: "35%",
+        height: "auto",
+        maxWidth: "600px",
+        minWidth: "450px",
+        borderRadius: "48px",
+        "&::after": { borderRadius: "0 0 48px 48px" },
+    },
+}));
+
+const StickyHeader = styled(Box, {
+    shouldForwardProp: (prop) => prop !== "isVisible",
+})<{ isVisible: boolean }>(({ theme, isVisible }) => ({
+    position: "sticky",
+    top: 0,
+    zIndex: 10,
+    backgroundColor: theme.vars.palette.background.paper,
+    paddingLeft: "24px",
+    paddingRight: "24px",
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+    display: isVisible ? "flex" : "none",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    [theme.breakpoints.up("md")]: {
+        paddingLeft: "32px",
+        paddingRight: "32px",
+        paddingTop: theme.spacing(4),
+    },
+}));
+
+const PhotoListContainer = styled(Box)(({ theme }) => ({
+    paddingLeft: "24px",
+    paddingRight: "24px",
+    paddingBottom: "24px",
+    position: "relative",
+    [theme.breakpoints.up("md")]: {
+        paddingLeft: "32px",
+        paddingRight: "32px",
+        paddingBottom: "32px",
+    },
+}));
+
+const CenteredBoxContainer = styled(Box)({
+    width: "100%",
+    height: "100%",
+    minHeight: "420px",
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    flexDirection: "column",
+    textAlign: "center",
+});
+
+const EmptyStateContainer = styled(Box)(({ theme }) => ({
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+    color: theme.vars.palette.text.secondary,
+    gap: theme.spacing(0.5),
+}));
 
 // ============================================================================
 // Thumbnail Components
