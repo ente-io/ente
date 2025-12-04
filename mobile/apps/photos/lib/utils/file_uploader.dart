@@ -312,6 +312,7 @@ class FileUploader {
   void _removeAndSkip(FileUploadItem entry, [Error? error]) {
     final localId = entry.file.localID;
     if (localId == null) {
+      entry.completer.completeError(error ?? SilentlyCancelUploadsError());
       return;
     }
     _queue.remove(localId);
@@ -405,7 +406,7 @@ class FileUploader {
           );
         }
         _removeAndSkip(pendingEntry);
-        _pollQueue();
+        Future.microtask(() => _pollQueue());
         return;
       }
       if (pendingEntry != null) {
