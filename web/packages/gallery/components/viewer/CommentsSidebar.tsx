@@ -4,6 +4,8 @@ import {
     Box,
     Drawer,
     IconButton,
+    Menu,
+    MenuItem,
     Stack,
     styled,
     TextField,
@@ -70,6 +72,22 @@ const HeartIcon: React.FC = () => (
     </svg>
 );
 
+const DeleteIcon: React.FC = () => (
+    <svg
+        width="13"
+        height="15"
+        viewBox="0 0 13 15"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M11.5 2.83203L11.0869 9.51543C10.9813 11.223 10.9285 12.0768 10.5005 12.6906C10.2889 12.9941 10.0165 13.2502 9.70047 13.4427C9.0614 13.832 8.206 13.832 6.49513 13.832C4.78208 13.832 3.92553 13.832 3.28603 13.442C2.96987 13.2492 2.69733 12.9926 2.48579 12.6886C2.05792 12.0738 2.0063 11.2188 1.90307 9.50883L1.5 2.83203M0.5 2.83333H12.5M9.2038 2.83333L8.74873 1.89449C8.4464 1.27084 8.2952 0.959013 8.03447 0.76454C7.97667 0.7214 7.9154 0.683027 7.85133 0.6498C7.5626 0.5 7.21607 0.5 6.523 0.5C5.81253 0.5 5.45733 0.5 5.16379 0.65608C5.09873 0.690673 5.03665 0.7306 4.97819 0.775447C4.71443 0.9778 4.56709 1.30103 4.27241 1.94751L3.86861 2.83333M4.83203 10.166V6.16602M8.16797 10.166V6.16602"
+            stroke="#131313"
+            strokeLinecap="round"
+        />
+    </svg>
+);
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -78,11 +96,7 @@ interface Comment {
     id: string;
     collectionID: number;
     fileID?: number;
-    encData: {
-        text: string;
-        userName: string;
-        userAvatar?: string;
-    };
+    encData: { text: string; userName: string; userAvatar?: string };
     parentCommentID?: string;
     isDeleted: boolean;
     userID: number;
@@ -282,10 +296,7 @@ const mockComments: Comment[] = [
         id: "14",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "HAHAHA okay fair point",
-            userName: "Anand",
-        },
+        encData: { text: "HAHAHA okay fair point", userName: "Anand" },
         parentCommentID: "13",
         isDeleted: false,
         userID: CURRENT_USER_ID,
@@ -296,10 +307,7 @@ const mockComments: Comment[] = [
         id: "15",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "Quality over quantity right?",
-            userName: "Vishnu",
-        },
+        encData: { text: "Quality over quantity right?", userName: "Vishnu" },
         parentCommentID: "13",
         isDeleted: false,
         userID: 1,
@@ -421,10 +429,7 @@ const mockComments: Comment[] = [
         id: "24",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "I'll create one tonight",
-            userName: "Anand",
-        },
+        encData: { text: "I'll create one tonight", userName: "Anand" },
         parentCommentID: "23",
         isDeleted: false,
         userID: CURRENT_USER_ID,
@@ -475,10 +480,7 @@ const mockComments: Comment[] = [
         id: "28",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "I have a lot of thoughts okay!!",
-            userName: "Priya",
-        },
+        encData: { text: "I have a lot of thoughts okay!!", userName: "Priya" },
         parentCommentID: "27",
         isDeleted: false,
         userID: 4,
@@ -489,10 +491,7 @@ const mockComments: Comment[] = [
         id: "29",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "That's what we love about you",
-            userName: "Anand",
-        },
+        encData: { text: "That's what we love about you", userName: "Anand" },
         parentCommentID: "28",
         isDeleted: false,
         userID: CURRENT_USER_ID,
@@ -545,10 +544,7 @@ const mockComments: Comment[] = [
         id: "33",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "The chaos is what makes it fun",
-            userName: "Vishnu",
-        },
+        encData: { text: "The chaos is what makes it fun", userName: "Vishnu" },
         parentCommentID: "32",
         isDeleted: false,
         userID: 1,
@@ -600,10 +596,7 @@ const mockComments: Comment[] = [
         id: "37",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "She has a point actually",
-            userName: "Vishnu",
-        },
+        encData: { text: "She has a point actually", userName: "Vishnu" },
         parentCommentID: "36",
         isDeleted: false,
         userID: 1,
@@ -656,10 +649,7 @@ const mockComments: Comment[] = [
         id: "41",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "Occupy Mars",
-            userName: "Elon",
-        },
+        encData: { text: "Occupy Mars", userName: "Elon" },
         parentCommentID: "35",
         isDeleted: false,
         userID: 5,
@@ -683,10 +673,7 @@ const mockComments: Comment[] = [
         id: "43",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "The stars await.",
-            userName: "Elon",
-        },
+        encData: { text: "The stars await.", userName: "Elon" },
         isDeleted: false,
         userID: 5,
         createdAt: Date.now() - 30 * 60 * 1000,
@@ -696,10 +683,7 @@ const mockComments: Comment[] = [
         id: "44",
         collectionID: 1,
         fileID: 1,
-        encData: {
-            text: "Haha.",
-            userName: "Anand",
-        },
+        encData: { text: "Haha.", userName: "Anand" },
         parentCommentID: "42",
         isDeleted: false,
         userID: CURRENT_USER_ID,
@@ -852,12 +836,20 @@ export type CommentsSidebarProps = ModalVisibilityProps;
 /**
  * A sidebar panel for displaying and managing comments on a file.
  */
+interface ContextMenuState {
+    comment: Comment;
+    anchorEl: HTMLElement;
+}
+
 export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     open,
     onClose,
 }) => {
     const [comment, setComment] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
+    const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(
+        null,
+    );
 
     const handleSend = () => {
         if (!comment.trim()) return;
@@ -870,6 +862,35 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setReplyingTo(commentToReply);
     };
 
+    const handleContextMenu = (
+        e: React.MouseEvent,
+        targetComment: Comment,
+        bubbleElement: HTMLElement,
+    ) => {
+        e.preventDefault();
+        setContextMenu({ comment: targetComment, anchorEl: bubbleElement });
+    };
+
+    const handleCloseContextMenu = () => {
+        setContextMenu(null);
+    };
+
+    const handleContextMenuAction = (action: "like" | "reply" | "delete") => {
+        if (!contextMenu) return;
+        switch (action) {
+            case "like":
+                // TODO: Like comment
+                break;
+            case "reply":
+                handleReply(contextMenu.comment);
+                break;
+            case "delete":
+                // TODO: Delete comment
+                break;
+        }
+        setContextMenu(null);
+    };
+
     // Filter out deleted comments and sort by timestamp
     const sortedComments = [...mockComments]
         .filter((c) => !c.isDeleted)
@@ -877,153 +898,223 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
     return (
         <SidebarDrawer open={open} onClose={onClose} anchor="right">
-            <Header>
-                <Typography sx={{ color: "#000", fontWeight: 600 }}>
-                    {`${sortedComments.length} ${t("comments")}`}
-                </Typography>
-                <CloseButton onClick={onClose}>
-                    <CloseIcon sx={{ fontSize: 22 }} />
-                </CloseButton>
-            </Header>
+            <DrawerContentWrapper>
+                {contextMenu && (
+                    <ContextMenuOverlay onClick={handleCloseContextMenu} />
+                )}
+                <Header>
+                    <Typography sx={{ color: "#000", fontWeight: 600 }}>
+                        {`${sortedComments.length} ${t("comments")}`}
+                    </Typography>
+                    <CloseButton onClick={onClose}>
+                        <CloseIcon sx={{ fontSize: 22 }} />
+                    </CloseButton>
+                </Header>
 
-            <CommentsContainer>
-                {sortedComments.map((comment, index) => {
-                    const commentIsOwn = comment.userID === CURRENT_USER_ID;
-                    const prevComment = sortedComments[index - 1];
-                    const nextComment = sortedComments[index + 1];
+                <CommentsContainer>
+                    {sortedComments.map((comment, index) => {
+                        const commentIsOwn = comment.userID === CURRENT_USER_ID;
+                        const prevComment = sortedComments[index - 1];
+                        const nextComment = sortedComments[index + 1];
 
-                    // 10 minutes in milliseconds
-                    const GROUP_TIME_THRESHOLD = 10 * 60 * 1000;
+                        // 10 minutes in milliseconds
+                        const GROUP_TIME_THRESHOLD = 10 * 60 * 1000;
 
-                    // Comments are in same sequence if same user AND within 10 minutes
-                    const isSameSequenceAsPrev =
-                        prevComment &&
-                        prevComment.userID === comment.userID &&
-                        comment.createdAt - prevComment.createdAt <=
-                            GROUP_TIME_THRESHOLD;
-                    const isSameSequenceAsNext =
-                        nextComment &&
-                        nextComment.userID === comment.userID &&
-                        nextComment.createdAt - comment.createdAt <=
-                            GROUP_TIME_THRESHOLD;
+                        // Comments are in same sequence if same user AND within 10 minutes
+                        const isSameSequenceAsPrev =
+                            prevComment &&
+                            prevComment.userID === comment.userID &&
+                            comment.createdAt - prevComment.createdAt <=
+                                GROUP_TIME_THRESHOLD;
+                        const isSameSequenceAsNext =
+                            nextComment &&
+                            nextComment.userID === comment.userID &&
+                            nextComment.createdAt - comment.createdAt <=
+                                GROUP_TIME_THRESHOLD;
 
-                    const isFirstInSequence = !isSameSequenceAsPrev;
-                    const isLastInSequence = !isSameSequenceAsNext;
-                    const showHeader = isFirstInSequence && !commentIsOwn;
-                    const parentComment = comment.parentCommentID
-                        ? getParentComment(comment.parentCommentID, mockComments)
-                        : undefined;
+                        const isFirstInSequence = !isSameSequenceAsPrev;
+                        const isLastInSequence = !isSameSequenceAsNext;
+                        const showHeader = isFirstInSequence && !commentIsOwn;
+                        const parentComment = comment.parentCommentID
+                            ? getParentComment(
+                                  comment.parentCommentID,
+                                  mockComments,
+                              )
+                            : undefined;
 
-                    const showOwnTimestamp =
-                        commentIsOwn &&
-                        !!prevComment &&
-                        prevComment.userID !== CURRENT_USER_ID;
+                        const showOwnTimestamp =
+                            commentIsOwn &&
+                            !!prevComment &&
+                            prevComment.userID !== CURRENT_USER_ID;
 
-                    return (
-                        <React.Fragment key={comment.id}>
-                            {showHeader && (
-                                <CommentHeader
-                                    userName={comment.encData.userName}
-                                    timestamp={comment.createdAt}
-                                />
-                            )}
-                            {showOwnTimestamp && (
-                                <OwnTimestamp>
-                                    {formatTimeAgo(comment.createdAt)}
-                                </OwnTimestamp>
-                            )}
-                            <CommentBubbleWrapper
-                                isOwn={commentIsOwn}
-                                isFirstOwn={
-                                    !showOwnTimestamp &&
-                                    commentIsOwn &&
-                                    !!prevComment &&
-                                    prevComment.userID !== CURRENT_USER_ID
-                                }
-                                isLastOwn={isLastInSequence}
-                            >
-                                <CommentBubbleInner>
-                                    <CommentBubble isOwn={commentIsOwn}>
-                                        {parentComment && (
-                                            <QuotedReply
-                                                parentComment={parentComment}
-                                                isOwn={commentIsOwn}
+                        return (
+                            <React.Fragment key={comment.id}>
+                                {showHeader && (
+                                    <CommentHeader
+                                        userName={comment.encData.userName}
+                                        timestamp={comment.createdAt}
+                                    />
+                                )}
+                                {showOwnTimestamp && (
+                                    <OwnTimestamp>
+                                        {formatTimeAgo(comment.createdAt)}
+                                    </OwnTimestamp>
+                                )}
+                                <CommentBubbleWrapper
+                                    isOwn={commentIsOwn}
+                                    isFirstOwn={
+                                        !showOwnTimestamp &&
+                                        commentIsOwn &&
+                                        !!prevComment &&
+                                        prevComment.userID !== CURRENT_USER_ID
+                                    }
+                                    isLastOwn={isLastInSequence}
+                                    isHighlighted={
+                                        contextMenu?.comment.id === comment.id
+                                    }
+                                >
+                                    <CommentBubbleInner
+                                        onContextMenu={(e) => {
+                                            const bubbleElement =
+                                                e.currentTarget.querySelector<HTMLElement>(
+                                                    "[data-comment-bubble]",
+                                                );
+                                            if (bubbleElement) {
+                                                handleContextMenu(
+                                                    e,
+                                                    comment,
+                                                    bubbleElement,
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        <CommentBubble
+                                            isOwn={commentIsOwn}
+                                            data-comment-bubble
+                                        >
+                                            {parentComment && (
+                                                <QuotedReply
+                                                    parentComment={
+                                                        parentComment
+                                                    }
+                                                    isOwn={commentIsOwn}
+                                                />
+                                            )}
+                                            <CommentText isOwn={commentIsOwn}>
+                                                {comment.encData.text}
+                                            </CommentText>
+                                        </CommentBubble>
+                                        {!contextMenu && (
+                                            <CommentActions
+                                                onReply={() =>
+                                                    handleReply(comment)
+                                                }
                                             />
                                         )}
-                                        <CommentText isOwn={commentIsOwn}>
-                                            {comment.encData.text}
-                                        </CommentText>
-                                    </CommentBubble>
-                                    <CommentActions
-                                        onReply={() => handleReply(comment)}
-                                    />
-                                </CommentBubbleInner>
-                            </CommentBubbleWrapper>
-                        </React.Fragment>
-                    );
-                })}
-            </CommentsContainer>
-
-            <InputContainer>
-                {replyingTo && (
-                    <ReplyingToBar>
-                        <Box
-                            sx={{
-                                borderLeft: "3px solid #ccc",
-                                paddingLeft: "10px",
-                                paddingRight: "24px",
-                            }}
+                                    </CommentBubbleInner>
+                                </CommentBubbleWrapper>
+                            </React.Fragment>
+                        );
+                    })}
+                    <StyledMenu
+                        anchorEl={contextMenu?.anchorEl}
+                        open={Boolean(contextMenu)}
+                        onClose={handleCloseContextMenu}
+                        anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
+                        }}
+                        transformOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                        }}
+                    >
+                        <StyledMenuItem
+                            onClick={() => handleContextMenuAction("like")}
                         >
-                            <Typography sx={{ fontSize: 12, color: "#666" }}>
-                                Replying to{" "}
-                                {replyingTo.userID === CURRENT_USER_ID
-                                    ? "me"
-                                    : replyingTo.encData.userName}
-                                ...
-                            </Typography>
-                            <Typography
+                            <HeartIcon />
+                            <span>Like</span>
+                        </StyledMenuItem>
+                        <StyledMenuItem
+                            onClick={() => handleContextMenuAction("reply")}
+                        >
+                            <ReplyIcon />
+                            <span>Reply</span>
+                        </StyledMenuItem>
+                        <StyledMenuItem
+                            onClick={() => handleContextMenuAction("delete")}
+                        >
+                            <DeleteIcon />
+                            <span>Delete</span>
+                        </StyledMenuItem>
+                    </StyledMenu>
+                </CommentsContainer>
+
+                <InputContainer>
+                    {replyingTo && (
+                        <ReplyingToBar>
+                            <Box
                                 sx={{
-                                    fontSize: 14,
-                                    color: "#000",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
+                                    borderLeft: "3px solid #ccc",
+                                    paddingLeft: "10px",
+                                    paddingRight: "24px",
                                 }}
                             >
-                                {truncateCommentText(replyingTo.encData.text)}
-                            </Typography>
-                        </Box>
-                        <IconButton
-                            size="small"
-                            onClick={() => setReplyingTo(null)}
-                            sx={{
-                                position: "absolute",
-                                top: 8,
-                                right: 8,
-                                color: "#666",
-                                p: 0.5,
-                            }}
-                        >
-                            <CloseIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                    </ReplyingToBar>
-                )}
-                <InputWrapper>
-                    <StyledTextField
-                        fullWidth
-                        multiline
-                        minRows={1}
-                        autoFocus
-                        placeholder="Say something nice!"
-                        variant="standard"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                    />
-                </InputWrapper>
-                <SendButton onClick={handleSend}>
-                    <SendIcon />
-                </SendButton>
-            </InputContainer>
+                                <Typography
+                                    sx={{ fontSize: 12, color: "#666" }}
+                                >
+                                    Replying to{" "}
+                                    {replyingTo.userID === CURRENT_USER_ID
+                                        ? "me"
+                                        : replyingTo.encData.userName}
+                                    ...
+                                </Typography>
+                                <Typography
+                                    sx={{
+                                        fontSize: 14,
+                                        color: "#000",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    {truncateCommentText(
+                                        replyingTo.encData.text,
+                                    )}
+                                </Typography>
+                            </Box>
+                            <IconButton
+                                size="small"
+                                onClick={() => setReplyingTo(null)}
+                                sx={{
+                                    position: "absolute",
+                                    top: 8,
+                                    right: 8,
+                                    color: "#666",
+                                    p: 0.5,
+                                }}
+                            >
+                                <CloseIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                        </ReplyingToBar>
+                    )}
+                    <InputWrapper>
+                        <StyledTextField
+                            fullWidth
+                            multiline
+                            minRows={1}
+                            autoFocus
+                            placeholder="Say something nice!"
+                            variant="standard"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                        />
+                    </InputWrapper>
+                    <SendButton onClick={handleSend}>
+                        <SendIcon />
+                    </SendButton>
+                </InputContainer>
+            </DrawerContentWrapper>
         </SidebarDrawer>
     );
 };
@@ -1055,9 +1146,15 @@ const SidebarDrawer = styled(Drawer)(() => ({
             borderRadius: 0,
         },
     },
-    "& .MuiBackdrop-root": {
-        backgroundColor: "transparent",
-    },
+    "& .MuiBackdrop-root": { backgroundColor: "transparent" },
+}));
+
+const DrawerContentWrapper = styled(Box)(() => ({
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
+    minHeight: 0,
 }));
 
 const Header = styled(Stack)(() => ({
@@ -1071,9 +1168,7 @@ const CloseButton = styled(IconButton)(() => ({
     backgroundColor: "#F5F5F7",
     color: "#000",
     padding: "8px",
-    "&:hover": {
-        backgroundColor: "#E5E5E7",
-    },
+    "&:hover": { backgroundColor: "#E5E5E7" },
 }));
 
 const CommentsContainer = styled(Box)(() => ({
@@ -1081,12 +1176,9 @@ const CommentsContainer = styled(Box)(() => ({
     overflow: "auto",
     marginBottom: 16,
     marginRight: -24,
-    "&::-webkit-scrollbar": {
-        width: "6px",
-    },
-    "&::-webkit-scrollbar-track": {
-        background: "transparent",
-    },
+    position: "relative",
+    "&::-webkit-scrollbar": { width: "6px" },
+    "&::-webkit-scrollbar-track": { background: "transparent" },
     "&::-webkit-scrollbar-thumb": {
         background: "rgba(0, 0, 0, 0.2)",
         borderRadius: "3px",
@@ -1115,10 +1207,7 @@ const Separator = styled(Typography)(() => ({
     marginLeft: -4,
 }));
 
-const Timestamp = styled(Typography)(() => ({
-    color: "#666",
-    fontSize: 12,
-}));
+const Timestamp = styled(Typography)(() => ({ color: "#666", fontSize: 12 }));
 
 const OwnTimestamp = styled(Typography)(() => ({
     color: "#666",
@@ -1133,7 +1222,8 @@ const CommentBubbleWrapper = styled(Box)<{
     isOwn: boolean;
     isFirstOwn?: boolean;
     isLastOwn?: boolean;
-}>(({ isOwn, isFirstOwn, isLastOwn }) => ({
+    isHighlighted?: boolean;
+}>(({ isOwn, isFirstOwn, isLastOwn, isHighlighted }) => ({
     display: "flex",
     justifyContent: isOwn ? "flex-end" : "flex-start",
     width: "100%",
@@ -1141,6 +1231,8 @@ const CommentBubbleWrapper = styled(Box)<{
     marginBottom: isOwn ? 24 : isLastOwn ? 48 : 24,
     paddingRight: isOwn ? 52 : 0,
     paddingLeft: isOwn ? 0 : 28,
+    position: "relative",
+    zIndex: isHighlighted ? 11 : "auto",
 }));
 
 const CommentBubbleInner = styled(Box)(() => ({
@@ -1206,36 +1298,23 @@ const InputWrapper = styled(Box)(() => ({
     padding: "8px 48px 8px 16px",
     maxHeight: "300px",
     overflow: "auto",
-    "&::-webkit-scrollbar": {
-        width: "8px",
-    },
-    "&::-webkit-scrollbar-track": {
-        background: "transparent",
-    },
+    "&::-webkit-scrollbar": { width: "8px" },
+    "&::-webkit-scrollbar-track": { background: "transparent" },
     "&::-webkit-scrollbar-thumb": {
         background: "rgba(0, 0, 0, 0.3)",
         borderRadius: "4px",
     },
-    "&::-webkit-scrollbar-thumb:hover": {
-        background: "rgba(0, 0, 0, 0.5)",
-    },
+    "&::-webkit-scrollbar-thumb:hover": { background: "rgba(0, 0, 0, 0.5)" },
     scrollbarWidth: "thin",
     scrollbarColor: "rgba(0, 0, 0, 0.3) transparent",
 }));
 
 const StyledTextField = styled(TextField)(() => ({
-    "& .MuiInput-root": {
-        "&::before, &::after": {
-            display: "none",
-        },
-    },
+    "& .MuiInput-root": { "&::before, &::after": { display: "none" } },
     "& .MuiInputBase-input": {
         padding: 0,
         color: "#000",
-        "&::placeholder": {
-            color: "#666",
-            opacity: 1,
-        },
+        "&::placeholder": { color: "#666", opacity: 1 },
     },
 }));
 
@@ -1246,7 +1325,44 @@ const SendButton = styled(IconButton)(() => ({
     color: "#000",
     width: 42,
     height: 42,
-    "&:hover": {
-        backgroundColor: "rgba(0, 0, 0, 0.1)",
+    "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
+}));
+
+// Context Menu
+const ContextMenuOverlay = styled(Box)(() => ({
+    position: "absolute",
+    top: -24,
+    left: -24,
+    right: -24,
+    bottom: -32,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    zIndex: 10,
+    borderRadius: "36px",
+    "@media (max-width: 450px)": {
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: 0,
     },
+}));
+
+const StyledMenu = styled(Menu)(() => ({
+    "& .MuiPaper-root": {
+        backgroundColor: "#fff",
+        borderRadius: "12px",
+        boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+        minWidth: "140px",
+    },
+    "& .MuiList-root": { padding: "8px 0" },
+}));
+
+const StyledMenuItem = styled(MenuItem)(() => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "12px 16px",
+    color: "#131313",
+    fontSize: 14,
+    "&:hover": { backgroundColor: "#F5F5F7" },
 }));
