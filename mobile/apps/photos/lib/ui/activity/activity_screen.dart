@@ -5,15 +5,16 @@ import "dart:ui" as ui;
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/activity/achievements_row.dart";
 import "package:photos/ui/activity/activity_heatmap_card.dart";
-import "package:photos/ui/activity/ritual_camera_page.dart";
+import "package:photos/ui/activity/ritual_badge_popup.dart";
 import "package:photos/ui/activity/rituals_section.dart";
-import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
@@ -47,11 +48,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final l10n = context.l10n;
     final ritualsEnabled = flagService.ritualsFlag;
     if (!ritualsEnabled) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text("Rituals"),
+          title: Text(l10n.ritualsTitle),
           centerTitle: false,
         ),
         body: Center(
@@ -68,28 +70,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Rituals"),
+        title: Text(l10n.ritualsTitle),
         centerTitle: false,
         actions: [
-          if (_selectedRitual != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.fillFaint,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  minimumSize: const Size(40, 40),
-                ),
-                icon: const Icon(Icons.camera_alt_outlined),
-                onPressed: _selectedRitual != null
-                    ? () => _openRitualCamera(_selectedRitual!)
-                    : null,
-                tooltip: "Open ritual camera",
-              ),
-            ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: IconButton(
@@ -101,11 +84,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 padding: const EdgeInsets.all(8),
                 minimumSize: const Size(40, 40),
               ),
-              icon: const Icon(Icons.add_rounded),
+              icon: const HugeIcon(
+                icon: HugeIcons.strokeRoundedPlusSign,
+                size: 24,
+              ),
               onPressed: () async {
                 await showRitualEditor(context, ritual: null);
               },
-              tooltip: "Add ritual",
+              tooltip: l10n.ritualAddTooltip,
             ),
           ),
         ],
@@ -131,13 +117,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
             final summaryToShare = displaySummary;
             final iconColor = Theme.of(context).iconTheme.color;
             final String heatmapTitle = selectedRitual == null
-                ? "Take a photo every day"
+                ? l10n.ritualDefaultHeatmapTitle
                 : (selectedRitual.title.isEmpty
-                    ? "Untitled ritual"
+                    ? l10n.ritualUntitled
                     : selectedRitual.title);
             final String heatmapEmoji =
                 selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
             final String shareTitle = heatmapTitle;
+            final String shareEmoji = heatmapEmoji;
             final bool shareEnabled = summaryToShare != null;
             return ListView(
               physics: const BouncingScrollPhysics(),
@@ -161,7 +148,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     child: Row(
                       children: [
                         Text(
-                          "Activity",
+                          l10n.ritualActivityHeading,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const Spacer(),
@@ -172,12 +159,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
                               ? () => _shareActivity(
                                     summaryToShare,
                                     shareTitle,
-                                    emoji: selectedRitual?.icon,
+                                    emoji: shareEmoji,
                                   )
                               : null,
                           child: SizedBox(
-                            width: 44,
-                            height: 44,
+                            width: 48,
+                            height: 48,
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: DecoratedBox(
@@ -187,9 +174,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
-                                  child: Icon(
-                                    Icons.share_outlined,
-                                    size: 22,
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedShare08,
+                                    size: 24,
                                     color: shareEnabled
                                         ? iconColor
                                         : Theme.of(context)
@@ -211,7 +198,13 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   headerEmoji: heatmapEmoji,
                 ),
                 if (selectedRitual != null)
-                  AchievementsRow(summary: displaySummary),
+                  AchievementsRow(
+                    summary: displaySummary,
+                    onBadgeTap: (days) => _showDebugBadge(
+                      selectedRitual!,
+                      days,
+                    ),
+                  ),
               ],
             );
           },
@@ -299,8 +292,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
       debugPrint("Failed to share activity: $e\n$s");
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Unable to share right now. Please try again."),
+        SnackBar(
+          content: Text(context.l10n.ritualShareUnavailable),
         ),
       );
     } finally {
@@ -379,25 +372,20 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ),
       },
       generatedAt: summary.generatedAt,
+      ritualLongestStreaks: {ritual.id: longestStreak},
     );
   }
 
-  void _openRitualCamera(Ritual ritual) {
-    final albumId = ritual.albumId;
-    if (albumId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Set an album for this ritual to launch the camera."),
-        ),
-      );
-      return;
-    }
-    routeToPage(
+  Future<void> _showDebugBadge(Ritual ritual, int days) async {
+    if (!kDebugMode) return;
+    final badge = RitualBadgeUnlock(
+      ritual: ritual,
+      days: days,
+      generatedAt: DateTime.now(),
+    );
+    await showRitualBadgePopup(
       context,
-      RitualCameraPage(
-        ritualId: ritual.id,
-        albumId: albumId,
-      ),
+      badge: badge,
     );
   }
 }
@@ -415,81 +403,75 @@ class _ActivityShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    const Color shareBackgroundColor = Color(0xFF08C225);
+    final String shareHeaderTitle =
+        (emoji ?? "").isNotEmpty ? "${emoji!} $title" : title;
     final double maxWidth = math
         .min(
           math.max(MediaQuery.of(context).size.width - 32, 360),
           440,
         )
         .toDouble();
-    return Container(
-      color: Colors.black,
-      padding: const EdgeInsets.all(12),
-      child: Center(
-        child: SizedBox(
-          width: maxWidth,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-                    child: Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyBold.copyWith(
-                        fontSize: 20,
-                        height: 1.2,
-                        decoration: TextDecoration.none,
-                        decorationColor: Colors.transparent,
-                        decorationThickness: 0,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: ActivityHeatmapCard(
-                      summary: summary,
-                      compact: true,
-                      allowHorizontalScroll: false,
-                      headerTitle: title,
-                      headerEmoji: emoji,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(24),
-                    ),
-                    child: Container(
-                      color: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 12,
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          "assets/ente_io_green.png",
-                          width: 116,
-                          height: 27,
-                          fit: BoxFit.contain,
+    return Align(
+      alignment: Alignment.topCenter,
+      widthFactor: 1,
+      heightFactor: 1,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          color: shareBackgroundColor,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 48),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            brightness: Brightness.light,
+                            colorScheme: Theme.of(context)
+                                .colorScheme
+                                .copyWith(brightness: Brightness.light),
+                          ),
+                          child: ActivityHeatmapCard(
+                            summary: summary,
+                            compact: true,
+                            allowHorizontalScroll: false,
+                            headerTitle: shareHeaderTitle,
+                            headerEmoji: null,
+                          ),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      Image.asset(
+                        "assets/rituals/ente_io_black_white.png",
+                        width: 62,
+                        height: 16,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Image.asset(
+                  "assets/splash-screen-icon.png",
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -78,10 +78,10 @@ class _FileSelectionActionsWidgetState
   late FilesSplit split;
   late CollectionActions collectionActions;
   late bool isCollectionOwner;
-  static const String _suggestDeleteLabel = "(i) Suggest delete";
+  static const String _suggestDeleteLabel = "(i) Suggest deletion";
   static const String _suggestDeleteDialogTitle = "(i) Suggest deletion";
   static const String _suggestDeleteDialogBody =
-      "(i) This sends the owner a suggestion to remove these files. They will not be deleted automatically; the owner must manually review and approve the suggestion before anything is removed.";
+      "(i) Selected photos will be removed from this album. Photo owners will also get a suggestion to review and delete the photos";
   static const String _suggestDeleteSentMessage = "(i) Delete suggestion sent.";
   // _cachedCollectionForSharedLink is primarily used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting

@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## v1.7.16 (unreleased)
+## v1.7.17 (unreleased)
+
+- .
+
+## v1.7.16
 
 - Support Greek translations.
 - Ability to terminate sessions on other devices.

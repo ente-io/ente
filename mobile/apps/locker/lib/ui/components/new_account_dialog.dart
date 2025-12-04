@@ -3,6 +3,7 @@ import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/ui/components/gradient_button.dart";
 
 Future<ButtonResult?> showCreateNewAccountDialog(
   BuildContext context, {
@@ -10,7 +11,7 @@ Future<ButtonResult?> showCreateNewAccountDialog(
   required String body,
   required String buttonLabel,
   required String assetPath,
-  Widget? icon,
+  HugeIcon? icon,
 }) {
   return showModalBottomSheet<ButtonResult>(
     context: context,
@@ -33,7 +34,7 @@ class _CreateNewAccountBottomSheet extends StatelessWidget {
   final String body;
   final String buttonLabel;
   final String assetPath;
-  final Widget? icon;
+  final HugeIcon? icon;
 
   const _CreateNewAccountBottomSheet({
     required this.title,
@@ -108,36 +109,14 @@ class _CreateNewAccountBottomSheet extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 56,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop(
-                            ButtonResult(ButtonAction.first),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.primary700,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        icon: icon ??
-                            const HugeIcon(
-                              icon: HugeIcons.strokeRoundedFileUpload,
-                              color: Colors.white,
-                              size: 20,
-                              strokeWidth: 1.9,
-                            ),
-                        label: Text(
-                          buttonLabel,
-                          style: textTheme.bodyBold.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                    GradientButton(
+                      text: buttonLabel,
+                      hugeIcon: icon,
+                      onTap: () {
+                        Navigator.of(context).pop(
+                          ButtonResult(ButtonAction.first),
+                        );
+                      },
                     ),
                   ],
                 ),

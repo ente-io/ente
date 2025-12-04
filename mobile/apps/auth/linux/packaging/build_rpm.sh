@@ -66,7 +66,7 @@ cp linux/packaging/enteauth.appdata.xml "$STAGING_DIR/usr/share/metainfo/"
 
 # Copy icon
 echo -e "${YELLOW}Copying icon...${NC}"
-cp "$BUNDLE_DIR/data/flutter_assets/assets/icons/auth-icon.png" "$STAGING_DIR/usr/share/pixmaps/enteauth.png"
+cp "assets/icons/io.ente.auth.png" "$STAGING_DIR/usr/share/pixmaps/io.ente.auth.png"
 
 # Copy desktop file
 echo -e "${YELLOW}Copying desktop file...${NC}"

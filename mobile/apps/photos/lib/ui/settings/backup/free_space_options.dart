@@ -266,7 +266,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   MenuItemWidget(
                                     captionedTextWidget:
                                         const CaptionedTextWidget(
-                                      title: "(i) Review delete suggestions",
+                                      title: "(i) Delete Suggestions",
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingWidget: Icon(
@@ -288,7 +288,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     alignment: Alignment.centerLeft,
                                     child: MenuSectionDescriptionWidget(
                                       content:
-                                          "See files that others have suggested you can delete.",
+                                          "Review files that have been suggested for deletion.",
                                     ),
                                   ),
                                 if (flagService.internalUser)

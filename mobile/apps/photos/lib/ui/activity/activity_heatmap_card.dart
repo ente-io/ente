@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:photos/models/activity/activity_models.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -115,7 +116,18 @@ class _Heatmap extends StatelessWidget {
   Widget build(BuildContext context) {
     final renderDays =
         days.length > 365 ? days.sublist(days.length - 365) : days;
-    final dayHeader = ["", "M", "", "W", "", "F", ""];
+    final materialLocalizations = MaterialLocalizations.of(context);
+    final dayHeader = [
+      "",
+      materialLocalizations.narrowWeekdays[1],
+      "",
+      materialLocalizations.narrowWeekdays[3],
+      "",
+      materialLocalizations.narrowWeekdays[5],
+      "",
+    ];
+    final monthFormatter =
+        DateFormat.MMM(Localizations.localeOf(context).toString());
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
     final DateTime firstDay = renderDays.isNotEmpty
@@ -180,13 +192,23 @@ class _Heatmap extends StatelessWidget {
       final rowIndex = daysSinceStart ~/ 7;
       final key = _monthKey(day.date);
       if (seenMonths.contains(key)) continue;
-      monthLabels[rowIndex] = _monthLabel(day.date.month);
+      monthLabels[rowIndex] = _monthLabel(monthFormatter, day.date.month);
       seenMonths.add(key);
     }
 
     if (monthLabels.isEmpty) {
       final rowIndex = firstDay.difference(gridStart).inDays ~/ 7;
-      monthLabels[rowIndex] = _monthLabel(firstDay.month);
+      monthLabels[rowIndex] = _monthLabel(monthFormatter, firstDay.month);
+    }
+
+    final String? bottomMonthLabel = monthLabels[weeks.length - 1];
+    if (bottomMonthLabel != null) {
+      for (final int rowIndex in [0, 1]) {
+        if (rowIndex < weeks.length &&
+            monthLabels[rowIndex] == bottomMonthLabel) {
+          monthLabels.remove(rowIndex);
+        }
+      }
     }
 
     return LayoutBuilder(
@@ -340,22 +362,8 @@ class _Heatmap extends StatelessWidget {
     );
   }
 
-  String _monthLabel(int month) {
-    const labels = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return labels[month - 1];
+  String _monthLabel(DateFormat formatter, int month) {
+    return formatter.format(DateTime(2024, month));
   }
 
   String _monthKey(DateTime date) => "${date.year}-${date.month}";

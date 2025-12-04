@@ -31,7 +31,7 @@ class _WrappedRewindBannerButtonState extends State<WrappedRewindBannerButton> {
     super.initState();
     _riveFileLoader = rive.FileLoader.fromAsset(
       "assets/ente_rewind_banner.riv",
-      riveFactory: rive.Factory.rive,
+      riveFactory: rive.Factory.flutter,
     );
   }
 

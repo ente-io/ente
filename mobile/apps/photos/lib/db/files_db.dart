@@ -855,6 +855,7 @@ class FilesDB with SqlDbBase {
     Set<int> ignoredCollectionIDs, {
     int? visibility,
     String order = 'ASC',
+    bool dedupeUploadID = true,
   }) async {
     if (durations.isEmpty) {
       return <EnteFile>[];
@@ -879,7 +880,10 @@ class FilesDB with SqlDbBase {
     final files = convertToFiles(results);
     return applyDBFilters(
       files,
-      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
+      DBFilterOptions(
+        ignoredCollectionIDs: ignoredCollectionIDs,
+        dedupeUploadID: dedupeUploadID,
+      ),
     );
   }
 

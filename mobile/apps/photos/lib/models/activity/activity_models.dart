@@ -19,6 +19,7 @@ class ActivitySummary {
   final Map<int, bool> badgesUnlocked;
   final Map<String, RitualProgress> ritualProgress;
   final DateTime generatedAt;
+  final Map<String, int> ritualLongestStreaks;
 
   const ActivitySummary({
     required this.last365Days,
@@ -28,6 +29,7 @@ class ActivitySummary {
     required this.badgesUnlocked,
     required this.ritualProgress,
     required this.generatedAt,
+    required this.ritualLongestStreaks,
   });
 
   bool get hasSevenDayFire => last7Days.every((d) => d.hasActivity);
@@ -137,12 +139,14 @@ class ActivityState {
   final ActivitySummary? summary;
   final List<Ritual> rituals;
   final String? error;
+  final RitualBadgeUnlock? pendingBadge;
 
   const ActivityState({
     required this.loading,
     required this.summary,
     required this.rituals,
     required this.error,
+    required this.pendingBadge,
   });
 
   factory ActivityState.loading() => const ActivityState(
@@ -150,6 +154,7 @@ class ActivityState {
         summary: null,
         rituals: [],
         error: null,
+        pendingBadge: null,
       );
 
   ActivityState copyWith({
@@ -157,12 +162,26 @@ class ActivityState {
     ActivitySummary? summary,
     List<Ritual>? rituals,
     String? error,
+    RitualBadgeUnlock? pendingBadge,
   }) {
     return ActivityState(
       loading: loading ?? this.loading,
       summary: summary ?? this.summary,
       rituals: rituals ?? this.rituals,
       error: error,
+      pendingBadge: pendingBadge,
     );
   }
+}
+
+class RitualBadgeUnlock {
+  const RitualBadgeUnlock({
+    required this.ritual,
+    required this.days,
+    required this.generatedAt,
+  });
+
+  final Ritual ritual;
+  final int days;
+  final DateTime generatedAt;
 }

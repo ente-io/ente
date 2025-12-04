@@ -1,4 +1,5 @@
 import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_utils/ente_utils.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
@@ -84,11 +85,7 @@ class _CollectionsItem extends StatelessWidget {
   }
 
   Future<void> _openCollections(BuildContext context) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AllCollectionsPage(),
-      ),
-    );
+    await routeToPage(context, const AllCollectionsPage());
   }
 }
 
@@ -147,11 +144,7 @@ class _TrashItem extends StatelessWidget {
   Future<void> _openTrash(BuildContext context) async {
     final trashFiles = await TrashService.instance.getTrashFiles();
     if (!context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => TrashPage(trashFiles: trashFiles),
-      ),
-    );
+    await routeToPage(context, TrashPage(trashFiles: trashFiles));
   }
 }
 

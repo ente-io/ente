@@ -26,6 +26,7 @@ import 'package:photos/utils/standalone/debouncer.dart';
 
 class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
+
   static final Debouncer _onlyNewToggleDebouncer = Debouncer(
     const Duration(milliseconds: 500),
     leading: true,
@@ -228,15 +229,12 @@ class BackupSettingsScreen extends StatelessWidget {
             final isEnabled = backupPreferenceService.isOnlyNewBackupEnabled;
             if (!isEnabled) {
               await backupPreferenceService.setOnlyNewSinceNow();
-              _onlyNewToggleDebouncer.run(() async {
-                await SyncService.instance.sync();
-              });
             } else {
               await backupPreferenceService.clearOnlyNewSinceEpoch();
-              _onlyNewToggleDebouncer.run(() async {
-                await SyncService.instance.sync();
-              });
             }
+            _onlyNewToggleDebouncer.run(() async {
+              await SyncService.instance.sync();
+            });
             if (backupPreferenceService.hasSkippedOnboardingPermission) {
               await backupPreferenceService.setOnboardingPermissionSkipped(
                 false,
@@ -247,6 +245,7 @@ class BackupSettingsScreen extends StatelessWidget {
         singleBorderRadius: 8,
         alignCaptionedTextToLeft: true,
         isTopBorderRadiusRemoved: true,
+        isBottomBorderRadiusRemoved: flagService.enableMobMultiPart,
         isGestureDetectorDisabled: true,
       ),
     ];
@@ -319,8 +318,8 @@ class BackupSettingsScreen extends StatelessWidget {
       ],
       title: "Only backup new photos",
       body: hasAllFoldersSelected
-          ? "All folders are currently selected for backup.\nYou can manually select folders you want to backup or continue for now, and change your folder selection later."
-          : "No folders are currently selected for backup.\nYou can manually select folders you want to backup or continue for now, and change your folder selection later.",
+          ? "All folders are currently selected for backup.\n\nYou can continue for now, or update selected folders."
+          : "No folders are currently selected for backup.\n\nYou can continue for now, or update selected folders.",
     );
 
     if (result?.action == null || result!.action == ButtonAction.cancel) {
