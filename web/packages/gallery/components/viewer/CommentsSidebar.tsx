@@ -880,6 +880,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         ? getParentComment(comment.parentCommentID, mockComments)
                         : undefined;
 
+                    const showOwnTimestamp =
+                        commentIsOwn &&
+                        !!prevComment &&
+                        prevComment.userID !== CURRENT_USER_ID;
+
                     return (
                         <React.Fragment key={comment.id}>
                             {showHeader && (
@@ -888,9 +893,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     timestamp={comment.createdAt}
                                 />
                             )}
+                            {showOwnTimestamp && (
+                                <OwnTimestamp>
+                                    {formatTimeAgo(comment.createdAt)}
+                                </OwnTimestamp>
+                            )}
                             <CommentBubbleWrapper
                                 isOwn={commentIsOwn}
                                 isFirstOwn={
+                                    !showOwnTimestamp &&
                                     commentIsOwn &&
                                     !!prevComment &&
                                     prevComment.userID !== CURRENT_USER_ID
@@ -986,7 +997,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 // Drawer & Layout
 const SidebarDrawer = styled(Drawer)(() => ({
     "& .MuiDrawer-paper": {
-        width: "500px",
+        width: "23vw",
+        minWidth: "520px",
         maxWidth: "calc(100% - 32px)",
         height: "calc(100% - 32px)",
         margin: "16px",
@@ -998,6 +1010,7 @@ const SidebarDrawer = styled(Drawer)(() => ({
         flexDirection: "column",
         "@media (max-width: 450px)": {
             width: "100%",
+            minWidth: "unset",
             maxWidth: "100%",
             height: "100%",
             margin: 0,
@@ -1069,6 +1082,14 @@ const Timestamp = styled(Typography)(() => ({
     fontSize: 12,
 }));
 
+const OwnTimestamp = styled(Typography)(() => ({
+    color: "#666",
+    fontSize: 12,
+    textAlign: "right",
+    marginBottom: 4,
+    paddingRight: 52,
+}));
+
 // Comment Bubbles
 const CommentBubbleWrapper = styled(Box)<{
     isOwn: boolean;
@@ -1090,7 +1111,7 @@ const CommentBubbleInner = styled(Box)(() => ({
 }));
 
 const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
-    backgroundColor: isOwn ? "#1DB954" : "#F0F0F0",
+    backgroundColor: isOwn ? "#0DAF35" : "#F0F0F0",
     borderRadius: isOwn ? "20px 6px 20px 20px" : "6px 20px 20px 20px",
     padding: "20px 40px 20px 20px",
     width: "fit-content",
