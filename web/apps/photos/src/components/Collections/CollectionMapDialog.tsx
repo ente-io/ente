@@ -1,6 +1,7 @@
 import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
@@ -1063,57 +1064,60 @@ function CollectionSidebar({
     }, []);
 
     return (
-        <SidebarContainer ref={sidebarRef} onScroll={handleScroll}>
-            <Box ref={coverRef}>
-                <MapCover
-                    name={collectionSummary.name}
-                    coverImageUrl={coverImageUrl}
-                    visibleCount={visibleCount}
-                    onClose={onClose}
-                />
-            </Box>
+        <SidebarWrapper>
+            <SidebarContainer ref={sidebarRef} onScroll={handleScroll}>
+                <Box ref={coverRef}>
+                    <MapCover
+                        name={collectionSummary.name}
+                        coverImageUrl={coverImageUrl}
+                        visibleCount={visibleCount}
+                        onClose={onClose}
+                    />
+                </Box>
 
-            {/* Sticky header */}
-            <StickyHeader isVisible={isCoverHidden}>
-                <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography
-                        variant="body"
-                        sx={{ fontWeight: 600, lineHeight: 1.2 }}
-                        noWrap
+                {/* Sticky header */}
+                <StickyHeader isVisible={isCoverHidden}>
+                    <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography
+                            variant="body"
+                            sx={{ fontWeight: 600, lineHeight: 1.2 }}
+                            noWrap
+                        >
+                            {collectionSummary.name}
+                        </Typography>
+                        <Typography variant="small" color="text.secondary">
+                            {(currentDateLabel ?? photoGroups[0]?.dateLabel)
+                                ? `${currentDateLabel ?? photoGroups[0]?.dateLabel} • ${visibleCount} memories`
+                                : `${visibleCount} memories`}
+                        </Typography>
+                    </Stack>
+                    <IconButton
+                        aria-label="Close"
+                        onClick={onClose}
+                        size="small"
+                        sx={{
+                            ml: 1,
+                            bgcolor: (theme) => theme.vars.palette.fill.faint,
+                        }}
                     >
-                        {collectionSummary.name}
-                    </Typography>
-                    <Typography variant="small" color="text.secondary">
-                        {(currentDateLabel ?? photoGroups[0]?.dateLabel)
-                            ? `${currentDateLabel ?? photoGroups[0]?.dateLabel} • ${visibleCount} memories`
-                            : `${visibleCount} memories`}
-                    </Typography>
-                </Stack>
-                <IconButton
-                    aria-label="Close"
-                    onClick={onClose}
-                    size="small"
-                    sx={{
-                        ml: 1,
-                        bgcolor: (theme) => theme.vars.palette.fill.faint,
-                    }}
-                >
-                    <CloseIcon fontSize="small" />
-                </IconButton>
-            </StickyHeader>
+                        <CloseIcon fontSize="small" />
+                    </IconButton>
+                </StickyHeader>
 
-            <PhotoListContainer>
-                <PhotoList
-                    photoGroups={photoGroups}
-                    thumbByFileID={thumbByFileID}
-                    visiblePhotoOrder={visiblePhotoOrder}
-                    visiblePhotosWave={visiblePhotosWave}
-                    onPhotoClick={onPhotoClick}
-                    onDateVisible={handleDateVisible}
-                    scrollContainerRef={sidebarRef}
-                />
-            </PhotoListContainer>
-        </SidebarContainer>
+                <PhotoListContainer>
+                    <PhotoList
+                        photoGroups={photoGroups}
+                        thumbByFileID={thumbByFileID}
+                        visiblePhotoOrder={visiblePhotoOrder}
+                        visiblePhotosWave={visiblePhotosWave}
+                        onPhotoClick={onPhotoClick}
+                        onDateVisible={handleDateVisible}
+                        scrollContainerRef={sidebarRef}
+                    />
+                </PhotoListContainer>
+            </SidebarContainer>
+            <SidebarGradient />
+        </SidebarWrapper>
     );
 }
 
@@ -1311,7 +1315,7 @@ const MapCanvas = React.memo(function MapCanvas({
             style={{ width: "100%", height: "100%" }}
         >
             <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                attribution=""
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 maxZoom={19}
                 updateWhenZooming
@@ -1347,7 +1351,7 @@ const MapCanvas = React.memo(function MapCanvas({
 });
 
 /**
- * Floating map control buttons (open in Maps, zoom in/out)
+ * Floating map control buttons (open in Maps, zoom in/out, attribution)
  * Responsibility: Provide map navigation and external link controls
  */
 interface MapControlsProps {
@@ -1358,6 +1362,7 @@ const MapControls = React.memo(function MapControls({
     useMap,
 }: MapControlsProps) {
     const map = useMap();
+    const [showAttribution, setShowAttribution] = useState(false);
 
     const handleOpenInMaps = useCallback(() => {
         const center = map.getCenter();
@@ -1367,6 +1372,10 @@ const MapControls = React.memo(function MapControls({
 
     const handleZoomIn = useCallback(() => map.zoomIn(), [map]);
     const handleZoomOut = useCallback(() => map.zoomOut(), [map]);
+    const toggleAttribution = useCallback(
+        () => setShowAttribution((prev) => !prev),
+        [],
+    );
 
     return (
         <>
@@ -1393,9 +1402,56 @@ const MapControls = React.memo(function MapControls({
                     <RemoveIcon />
                 </FloatingIconButton>
             </Stack>
+
+            {/* Hide Leaflet attribution watermark */}
+            <style>{`.leaflet-control-attribution { display: none !important; }`}</style>
+
+            {/* Attribution info button */}
+            <Box sx={{ position: "absolute", left: 12, bottom: 12, zIndex: 1000 }}>
+                {showAttribution && (
+                    <AttributionPopup>
+                        <Typography variant="mini" color="text.primary">
+                            <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>Leaflet</a>
+                            {" | © "}
+                            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>OpenStreetMap</a>
+                        </Typography>
+                    </AttributionPopup>
+                )}
+                <IconButton
+                    onClick={toggleAttribution}
+                    size="small"
+                    sx={{
+                        width: 24,
+                        height: 24,
+                        opacity: 0.4,
+                        "&:hover": {
+                            opacity: 0.7,
+                        },
+                    }}
+                >
+                    <InfoOutlinedIcon sx={{ fontSize: 14, color: "#fff" }} />
+                </IconButton>
+            </Box>
         </>
     );
 });
+
+const AttributionPopup = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    bottom: 44,
+    left: 0,
+    backgroundColor: theme.vars.palette.background.paper,
+    padding: "8px 12px",
+    borderRadius: "8px",
+    boxShadow: theme.shadows[4],
+    whiteSpace: "nowrap",
+    "& a": {
+        textDecoration: "underline",
+        "&:hover": {
+            opacity: 0.8,
+        },
+    },
+}));
 
 /**
  * Listens to map viewport changes and updates visible photos
@@ -1651,7 +1707,7 @@ const CoverSubtitle = styled(Typography)({
 // Sidebar Styled Components
 // ============================================================================
 
-const SidebarContainer = styled(Box)(({ theme }) => ({
+const SidebarWrapper = styled(Box)(({ theme }) => ({
     position: "absolute",
     left: 0,
     top: "auto",
@@ -1659,6 +1715,23 @@ const SidebarContainer = styled(Box)(({ theme }) => ({
     right: 0,
     width: "100%",
     height: "50%",
+    zIndex: 1000,
+    [theme.breakpoints.up("md")]: {
+        left: 16,
+        top: 16,
+        bottom: 16,
+        right: "auto",
+        width: "35%",
+        height: "auto",
+        maxWidth: "600px",
+        minWidth: "450px",
+    },
+}));
+
+const SidebarContainer = styled(Box)(({ theme }) => ({
+    position: "relative",
+    width: "100%",
+    height: "100%",
     backgroundColor: theme.vars.palette.background.paper,
     boxShadow: theme.shadows[10],
     display: "flex",
@@ -1666,7 +1739,6 @@ const SidebarContainer = styled(Box)(({ theme }) => ({
     overflowY: "auto",
     overflowX: "hidden",
     borderRadius: "24px 24px 0 0",
-    zIndex: 1000,
     "&::-webkit-scrollbar": { width: "8px" },
     "&::-webkit-scrollbar-track": {
         background: "transparent",
@@ -1679,31 +1751,24 @@ const SidebarContainer = styled(Box)(({ theme }) => ({
     },
     scrollbarWidth: "thin",
     scrollbarColor: `${theme.palette.divider} transparent`,
-    "&::after": {
-        content: '""',
-        position: "sticky",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: "150px",
-        background:
-            "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0) 100%)",
-        pointerEvents: "none",
-        flexShrink: 0,
-        marginTop: "-100px",
-        borderRadius: "0",
-    },
     [theme.breakpoints.up("md")]: {
-        left: 16,
-        top: 16,
-        bottom: 16,
-        right: "auto",
-        width: "35%",
-        height: "auto",
-        maxWidth: "600px",
-        minWidth: "450px",
         borderRadius: "48px",
-        "&::after": { borderRadius: "0 0 48px 48px" },
+    },
+}));
+
+const SidebarGradient = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "80px",
+    background:
+        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0) 100%)",
+    pointerEvents: "none",
+    borderRadius: "0",
+    [theme.breakpoints.up("md")]: {
+        height: "150px",
+        borderRadius: "0 0 48px 48px",
     },
 }));
 
