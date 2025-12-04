@@ -71,6 +71,10 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Increment version code for build
               run: |
                   CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
@@ -275,6 +279,10 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Create artifacts directory
               run: mkdir artifacts
 
@@ -347,6 +355,10 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
 
             - name: Install code signing dependencies
               run: |

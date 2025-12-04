@@ -1,1 +1,4 @@
 build/
+
+# Generated localization files
+lib/l10n/strings_localizations*.dart
