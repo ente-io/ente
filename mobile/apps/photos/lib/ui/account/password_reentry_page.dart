@@ -11,7 +11,6 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
-import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -156,7 +155,6 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     await dialog.hide();
     Configuration.instance.resetVolatilePassword();
     await flagService.tryRefreshFlags();
-    VideoPreviewService.instance.applyStreamDefault();
     Bus.instance.fire(SubscriptionPurchasedEvent());
     unawaited(
       Navigator.of(context).pushAndRemoveUntil(

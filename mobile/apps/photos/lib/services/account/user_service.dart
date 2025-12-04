@@ -32,7 +32,6 @@ import 'package:photos/models/user_details.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/video_preview_service.dart";
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/ott_verification_page.dart';
 import "package:photos/ui/account/passkey_page.dart";
@@ -420,7 +419,6 @@ class UserService {
         }
         await dialog.hide();
         await flagService.tryRefreshFlags();
-        VideoPreviewService.instance.applyStreamDefault();
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(AccountConfiguredEvent());
       }
@@ -808,7 +806,6 @@ class UserService {
             keyEncryptionKey: keyEncryptionKey,
           );
           await flagService.tryRefreshFlags();
-          VideoPreviewService.instance.applyStreamDefault();
           Configuration.instance.resetVolatilePassword();
           page = const HomeWidget();
         } else {

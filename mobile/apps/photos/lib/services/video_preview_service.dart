@@ -106,25 +106,10 @@ class VideoPreviewService {
   final CacheManager videoCacheManager;
 
   static const String _videoStreamingEnabled = "videoStreamingEnabled";
-  static const String _videoStreamingEnabledByDefault =
-      "videoStreamingEnabledByDefault";
-
-  bool get _isStreamingEnabledByDefault =>
-      (serviceLocator.prefs.getBool(_videoStreamingEnabledByDefault) ?? false) &&
-      flagService.streamEnabledByDefault;
 
   bool get isVideoStreamingEnabled {
     return serviceLocator.prefs.getBool(_videoStreamingEnabled) ??
-        _isStreamingEnabledByDefault;
-  }
-
-  /// Sets video streaming enabled by default for internal users.
-  /// Should be called after sign in when flags are available.
-  void applyStreamDefault() {
-    if (flagService.streamEnabledByDefault &&
-        !serviceLocator.prefs.containsKey(_videoStreamingEnabledByDefault)) {
-      serviceLocator.prefs.setBool(_videoStreamingEnabledByDefault, true).ignore();
-    }
+        flagService.streamEnabledByDefault;
   }
 
   Future<void> setIsVideoStreamingEnabled(bool value) async {
