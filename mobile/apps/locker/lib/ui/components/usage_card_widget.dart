@@ -77,10 +77,14 @@ class UsageCardWidget extends StatelessWidget {
                               color: Colors.white,
                             ),
                           )
-                        : EnteLoadingWidget(
-                            size: 12,
-                            padding: 0,
-                            color: Colors.white.withValues(alpha: 0.6),
+                        : const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: EnteLoadingWidget(
+                              size: 14,
+                              padding: 0,
+                              color: Colors.white,
+                            ),
                           ),
                   ],
                 ),

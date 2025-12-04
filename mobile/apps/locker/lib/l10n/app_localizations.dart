@@ -2287,7 +2287,7 @@ abstract class AppLocalizations {
   /// No description provided for @unlockLockerNewUserBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.'**
+  /// **'Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.'**
   String get unlockLockerNewUserBody;
 
   /// No description provided for @checkoutEntePhotos.

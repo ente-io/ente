@@ -4,7 +4,7 @@ license: GPLv3
 
 metainfo: linux/packaging/enteauth.appdata.xml
 
-icon: assets/icons/auth-icon.png
+icon: assets/icons/io.ente.auth.png
 
 keywords:
   - Authentication
@@ -16,6 +16,7 @@ categories:
   - Utility
 
 startup_notify: false
+startup_wm_class: io.ente.auth
 
 # You can specify the shared libraries that you want to bundle with your app
 #

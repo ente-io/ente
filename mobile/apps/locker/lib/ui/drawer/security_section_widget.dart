@@ -114,7 +114,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.appLock,
-          makeTextBold: true,
         ),
         surfaceExecutionStates: false,
         trailingIcon: Icons.chevron_right_outlined,

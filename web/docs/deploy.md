@@ -5,20 +5,11 @@ Cloudflare Pages using GitHub workflows.
 
 - Automated production deployments of `main` daily 8:00 AM IST.
 
-- Automated staging deployments `*.ente.sh` of `main` daily 3:00 PM IST.
-
 - [ente.io/help](https://ente.io/help) gets deployed whenever a PR that changes
   anything inside `docs/` gets merged to `main`.
 
-- Production or staging deployments can made manually by triggering the
-  corresponding workflow. There is variant to deploy a single app to production
-  using the `web-deploy-one.yml` workflow, and a variant to deploy any one of
-  the apps to `preview.ente.sh` (see below).
-
-These GitHub workflows use the various `yarn deploy:*` commands. For example,
-`yarn deploy:photos` will open a PR to merge the current `main` onto
-`deploy/photos`, which'll trigger the deployment workflow, which'll build and
-publish to [web.ente.io](https://web.ente.io).
+- Production deployments can made manually by triggering the
+  corresponding workflow.
 
 ## Deployments
 
@@ -35,12 +26,6 @@ deployments, and the action that triggers them:
 | [payments.ente.io](https://payments.ente.io) | Production | Daily deploy of `main`                      |
 | [ente.io/help](https://ente.io/help)         | Production | Changes in `docs/` on push to `main`        |
 | [staff.ente.sh](https://staff.ente.sh)       | Production | Changes in `infra/staff` on push to `main`  |
-| [accounts.ente.sh](https://accounts.ente.sh) | Preview    | Daily deploy of `main`                      |
-| [auth.ente.sh](https://auth.ente.sh)         | Preview    | Daily deploy of `main`                      |
-| [cast.ente.sh](https://cast.ente.sh)         | Preview    | Daily deploy of `main`                      |
-| [payments.ente.sh](https://payments.ente.sh) | Preview    | Daily deploy of `main`                      |
-| [photos.ente.sh](https://photos.ente.sh)     | Preview    | Daily deploy of `main`                      |
-| [preview.ente.sh](https://preview.ente.sh)   | Preview    | Manually triggered                          |
 
 ### Other subdomains
 
@@ -53,19 +38,6 @@ Apart from this, there are also some other deployments:
 
 - `family.ente.io` is currently in a separate repository (Enhancement: bring it
   in here).
-
-### Preview deployments
-
-To trigger a preview deployment, manually trigger the "Deploy preview (web)"
-workflow from the Actions tab on GitHub. You'll need to select the app to build,
-and the branch to use. This'll then build the specified app (e.g. "photos") from
-that branch, and deploy it to [preview.ente.sh](https://preview.ente.sh).
-
-The workflow can also be triggered using GitHub's CLI, gh. e.g.
-
-```sh
-gh workflow run web-preview -F app=cast --ref my-branch
-```
 
 ---
 
