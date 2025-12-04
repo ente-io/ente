@@ -98,61 +98,599 @@ interface Comment {
 // Mock current user ID (for determining if comment is from current user)
 const CURRENT_USER_ID = 2;
 
-// Mock data matching the screenshot
+// Mock data - realistic discussion between 4 friends about a Goa trip photo
 const mockComments: Comment[] = [
     {
         id: "1",
         collectionID: 1,
         fileID: 1,
         encData: {
-            text: "Great photo!",
+            text: "Omg this photo is amazing! The sunset colors are unreal",
             userName: "Vishnu",
         },
         isDeleted: false,
         userID: 1,
-        createdAt: Date.now() - 5 * 60 * 1000,
-        updatedAt: Date.now() - 5 * 60 * 1000,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
     },
     {
         id: "2",
         collectionID: 1,
         fileID: 1,
         encData: {
-            text: "forgot that u had hair at that time",
-            userName: "Vishnu",
+            text: "I know right! Took me forever to get the timing right",
+            userName: "Anand",
         },
+        parentCommentID: "1",
         isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 5 * 60 * 1000,
-        updatedAt: Date.now() - 5 * 60 * 1000,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 30000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 30000,
     },
     {
         id: "3",
         collectionID: 1,
         fileID: 1,
         encData: {
-            text: "haha! dont talk about that",
-            userName: "Me",
+            text: "Remember how we almost missed this because Priya couldn't find her sandals",
+            userName: "Vishnu",
         },
-        parentCommentID: "2",
         isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 5 * 60 * 1000,
-        updatedAt: Date.now() - 5 * 60 * 1000,
+        userID: 1,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 60000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 60000,
     },
     {
         id: "4",
         collectionID: 1,
         fileID: 1,
         encData: {
-            text: "hahaha!!!!!",
+            text: "HEY those sandals were expensive okay! I wasn't leaving them behind",
+            userName: "Priya",
+        },
+        parentCommentID: "3",
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 120000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 120000,
+    },
+    {
+        id: "5",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "They were like 200 rupees from the beach stall lmao",
             userName: "Shanthy",
         },
-        parentCommentID: "2",
+        parentCommentID: "3",
         isDeleted: false,
         userID: 3,
-        createdAt: Date.now() - 3 * 60 * 1000,
-        updatedAt: Date.now() - 3 * 60 * 1000,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 180000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 180000,
+    },
+    {
+        id: "6",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Lol I remember that! We were literally running to the beach",
+            userName: "Anand",
+        },
+        parentCommentID: "3",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 240000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 240000,
+    },
+    {
+        id: "7",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Still expensive!! And they were cute",
+            userName: "Priya",
+        },
+        parentCommentID: "5",
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 300000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 300000,
+    },
+    {
+        id: "8",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Worth it though, look at this shot! Best photo from the whole trip imo",
+            userName: "Anand",
+        },
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 360000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 360000,
+    },
+    {
+        id: "9",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Agreed! Can you send me the full res version? Want to print it",
+            userName: "Shanthy",
+        },
+        parentCommentID: "8",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 420000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 420000,
+    },
+    {
+        id: "10",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Yeah I'll share the album link with everyone later today",
+            userName: "Anand",
+        },
+        parentCommentID: "9",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 480000,
+        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 480000,
+    },
+    {
+        id: "11",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Who took this btw? The composition is so good",
+            userName: "Priya",
+        },
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
+    },
+    {
+        id: "12",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "That would be me actually! Was experimenting with the angles",
+            userName: "Anand",
+        },
+        parentCommentID: "11",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 60000,
+        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 60000,
+    },
+    {
+        id: "13",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Don't let it go to your head, you also took 47 blurry photos that day",
+            userName: "Shanthy",
+        },
+        parentCommentID: "12",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 120000,
+        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 120000,
+    },
+    {
+        id: "14",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "HAHAHA okay fair point",
+            userName: "Anand",
+        },
+        parentCommentID: "13",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 180000,
+        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 180000,
+    },
+    {
+        id: "15",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Quality over quantity right?",
+            userName: "Vishnu",
+        },
+        parentCommentID: "13",
+        isDeleted: false,
+        userID: 1,
+        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 240000,
+        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 240000,
+    },
+    {
+        id: "16",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Exactly! At least I got this one perfect",
+            userName: "Anand",
+        },
+        parentCommentID: "15",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 300000,
+        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 300000,
+    },
+    {
+        id: "17",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "We need to plan another trip soon. I miss Goa already",
+            userName: "Priya",
+        },
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 23 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 23 * 60 * 60 * 1000,
+    },
+    {
+        id: "18",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Same! Maybe December? End of year trip?",
+            userName: "Shanthy",
+        },
+        parentCommentID: "17",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 22 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 22 * 60 * 60 * 1000,
+    },
+    {
+        id: "19",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "December works for me! But not Goa again, somewhere new?",
+            userName: "Anand",
+        },
+        parentCommentID: "18",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 21 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 21 * 60 * 60 * 1000,
+    },
+    {
+        id: "20",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Ooh how about Kerala? Always wanted to go there",
+            userName: "Vishnu",
+        },
+        parentCommentID: "19",
+        isDeleted: false,
+        userID: 1,
+        createdAt: Date.now() - 20 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 20 * 60 * 60 * 1000,
+    },
+    {
+        id: "21",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "YES Kerala! Backwaters and houseboats!",
+            userName: "Priya",
+        },
+        parentCommentID: "20",
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 19 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 19 * 60 * 60 * 1000,
+    },
+    {
+        id: "22",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "I've been wanting to try the houseboat thing for ages",
+            userName: "Anand",
+        },
+        parentCommentID: "20",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 18 * 60 * 60 * 1000 + 30000,
+        updatedAt: Date.now() - 18 * 60 * 60 * 1000 + 30000,
+    },
+    {
+        id: "23",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "I'm in! Let's make a group to plan this properly",
+            userName: "Shanthy",
+        },
+        parentCommentID: "20",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 18 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 18 * 60 * 60 * 1000,
+    },
+    {
+        id: "24",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "I'll create one tonight",
+            userName: "Anand",
+        },
+        parentCommentID: "23",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 17 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 17 * 60 * 60 * 1000,
+    },
+    {
+        id: "25",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Wait can we go back to how good this photo is though",
+            userName: "Priya",
+        },
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 12 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 12 * 60 * 60 * 1000,
+    },
+    {
+        id: "26",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "The way the light hits the water is so pretty",
+            userName: "Priya",
+        },
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 12 * 60 * 60 * 1000 + 30000,
+        updatedAt: Date.now() - 12 * 60 * 60 * 1000 + 30000,
+    },
+    {
+        id: "27",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Priya sending 3 messages in a row as usual",
+            userName: "Shanthy",
+        },
+        parentCommentID: "26",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 11 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 11 * 60 * 60 * 1000,
+    },
+    {
+        id: "28",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "I have a lot of thoughts okay!!",
+            userName: "Priya",
+        },
+        parentCommentID: "27",
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 10 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 10 * 60 * 60 * 1000,
+    },
+    {
+        id: "29",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "That's what we love about you",
+            userName: "Anand",
+        },
+        parentCommentID: "28",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 9 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 9 * 60 * 60 * 1000,
+    },
+    {
+        id: "30",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Aww thanks! See Shanthy, some people appreciate me",
+            userName: "Priya",
+        },
+        parentCommentID: "29",
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 8 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 8 * 60 * 60 * 1000,
+    },
+    {
+        id: "31",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "I appreciate you too, just in a bullying way",
+            userName: "Shanthy",
+        },
+        parentCommentID: "30",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 7 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 7 * 60 * 60 * 1000,
+    },
+    {
+        id: "32",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "This is why our friend group works lol",
+            userName: "Anand",
+        },
+        parentCommentID: "31",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 6 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 6 * 60 * 60 * 1000,
+    },
+    {
+        id: "33",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "The chaos is what makes it fun",
+            userName: "Vishnu",
+        },
+        parentCommentID: "32",
+        isDeleted: false,
+        userID: 1,
+        createdAt: Date.now() - 5 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 5 * 60 * 60 * 1000,
+    },
+    {
+        id: "34",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Okay but seriously, this should be our group photo",
+            userName: "Shanthy",
+        },
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 3 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 3 * 60 * 60 * 1000,
+    },
+    {
+        id: "35",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Wait we're not even in the photo though",
+            userName: "Anand",
+        },
+        parentCommentID: "34",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 2 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 2 * 60 * 60 * 1000,
+    },
+    {
+        id: "36",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "That's the best part, no faces just vibes",
+            userName: "Shanthy",
+        },
+        parentCommentID: "35",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 1 * 60 * 60 * 1000,
+        updatedAt: Date.now() - 1 * 60 * 60 * 1000,
+    },
+    {
+        id: "37",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "She has a point actually",
+            userName: "Vishnu",
+        },
+        parentCommentID: "36",
+        isDeleted: false,
+        userID: 1,
+        createdAt: Date.now() - 75 * 60 * 1000,
+        updatedAt: Date.now() - 75 * 60 * 1000,
+    },
+    {
+        id: "38",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Okay I'm convinced, vibes > faces",
+            userName: "Anand",
+        },
+        parentCommentID: "36",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 70 * 60 * 1000,
+        updatedAt: Date.now() - 70 * 60 * 1000,
+    },
+    {
+        id: "39",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Fine fine, approved as official group photo",
+            userName: "Priya",
+        },
+        parentCommentID: "36",
+        isDeleted: false,
+        userID: 4,
+        createdAt: Date.now() - 65 * 60 * 1000,
+        updatedAt: Date.now() - 65 * 60 * 1000,
+    },
+    {
+        id: "40",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Motion passed unanimously! I'll set it as the album cover",
+            userName: "Anand",
+        },
+        parentCommentID: "39",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 60 * 60 * 1000,
+        updatedAt: Date.now() - 60 * 60 * 1000,
+    },
+    {
+        id: "41",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Occupy Mars",
+            userName: "Elon",
+        },
+        parentCommentID: "35",
+        isDeleted: false,
+        userID: 5,
+        createdAt: Date.now() - 20 * 60 * 1000,
+        updatedAt: Date.now() - 20 * 60 * 1000,
+    },
+    {
+        id: "42",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "You want to wake up in the morning and think the future is going to be great - and that's what being a spacefaring civilization is all about. It's about believing in the future and thinking that the future will be better than the past. And I can't think of anything more exciting than going out there and being among the stars.",
+            userName: "Elon",
+        },
+        isDeleted: false,
+        userID: 5,
+        createdAt: Date.now() - 19 * 60 * 1000,
+        updatedAt: Date.now() - 19 * 60 * 1000,
+    },
+    {
+        id: "43",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "The stars await.",
+            userName: "Elon",
+        },
+        isDeleted: false,
+        userID: 5,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
     },
 ];
 
@@ -176,6 +714,14 @@ const getParentComment = (
 ): Comment | undefined => {
     if (!parentID) return undefined;
     return comments.find((c) => c.id === parentID);
+};
+
+/**
+ * Truncates comment text to first 100 characters of the first line.
+ */
+const truncateCommentText = (text: string): string => {
+    const firstLine = text.split("\n")[0] ?? text;
+    return firstLine.length > 100 ? firstLine.slice(0, 100) + "..." : firstLine;
 };
 
 // =============================================================================
@@ -264,124 +810,6 @@ const CommentActions: React.FC<CommentActionsProps> = ({ onReply }) => (
 );
 
 // =============================================================================
-// Comment Type Components
-// =============================================================================
-
-interface RootCommentProps {
-    comment: Comment;
-    onReply: (comment: Comment) => void;
-}
-
-/**
- * A top-level comment (not a reply to another comment).
- * Shows header with avatar, username, timestamp, then the comment bubble.
- */
-const RootComment: React.FC<RootCommentProps> = ({ comment, onReply }) => (
-    <CommentBubbleWrapper isOwn={false}>
-        <CommentBubbleInner>
-            <CommentBubble isOwn={false}>
-                <CommentText isOwn={false}>{comment.encData.text}</CommentText>
-            </CommentBubble>
-            <CommentActions onReply={() => onReply(comment)} />
-        </CommentBubbleInner>
-    </CommentBubbleWrapper>
-);
-
-interface ReplyCommentProps {
-    comment: Comment;
-    parentComment?: Comment;
-    isOwn: boolean;
-    onReply: (comment: Comment) => void;
-}
-
-/**
- * A reply comment. Can be from current user (right-aligned, green)
- * or from another user (left-aligned, gray).
- */
-const ReplyComment: React.FC<ReplyCommentProps> = ({
-    comment,
-    parentComment,
-    isOwn,
-    onReply,
-}) => (
-    <ReplyContainer>
-        {!isOwn && (
-            <CommentHeader
-                userName={comment.encData.userName}
-                timestamp={comment.createdAt}
-            />
-        )}
-        {isOwn && <OwnTimestamp>{formatTimeAgo(comment.createdAt)}</OwnTimestamp>}
-        <CommentBubbleWrapper isOwn={isOwn}>
-            <CommentBubbleInner>
-                <CommentBubble isOwn={isOwn}>
-                    {parentComment && (
-                        <QuotedReply
-                            parentComment={parentComment}
-                            isOwn={isOwn}
-                        />
-                    )}
-                    <CommentText isOwn={isOwn}>
-                        {comment.encData.text}
-                    </CommentText>
-                </CommentBubble>
-                <CommentActions onReply={() => onReply(comment)} />
-            </CommentBubbleInner>
-        </CommentBubbleWrapper>
-    </ReplyContainer>
-);
-
-interface CommentThreadProps {
-    rootComments: Comment[];
-    allComments: Comment[];
-    userName: string;
-    timestamp: number;
-    onReply: (comment: Comment) => void;
-}
-
-/**
- * A thread of comments from a single user, including any replies.
- * Groups consecutive comments from the same user under one header.
- */
-const CommentThread: React.FC<CommentThreadProps> = ({
-    rootComments,
-    allComments,
-    userName,
-    timestamp,
-    onReply,
-}) => (
-    <ThreadContainer>
-        <CommentHeader userName={userName} timestamp={timestamp} />
-        {rootComments.map((comment) => {
-            const replies = allComments.filter(
-                (r) => r.parentCommentID === comment.id,
-            );
-            return (
-                <Box key={comment.id}>
-                    <RootComment comment={comment} onReply={onReply} />
-                    {replies.map((reply) => {
-                        const isOwn = reply.userID === CURRENT_USER_ID;
-                        const parent = getParentComment(
-                            reply.parentCommentID,
-                            allComments,
-                        );
-                        return (
-                            <ReplyComment
-                                key={reply.id}
-                                comment={reply}
-                                parentComment={parent}
-                                isOwn={isOwn}
-                                onReply={onReply}
-                            />
-                        );
-                    })}
-                </Box>
-            );
-        })}
-    </ThreadContainer>
-);
-
-// =============================================================================
 // Main Component
 // =============================================================================
 
@@ -408,21 +836,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setReplyingTo(commentToReply);
     };
 
-    // Group consecutive root comments by same user
-    const groupedComments = mockComments.reduce<
-        { user: Comment; comments: Comment[] }[]
-    >((acc, comment) => {
-        // Skip replies - they'll be shown inline with their parent
-        if (comment.parentCommentID) return acc;
-
-        const lastGroup = acc[acc.length - 1];
-        if (lastGroup && lastGroup.user.userID === comment.userID) {
-            lastGroup.comments.push(comment);
-        } else {
-            acc.push({ user: comment, comments: [comment] });
-        }
-        return acc;
-    }, []);
+    // Sort all comments by timestamp
+    const sortedComments = [...mockComments].sort(
+        (a, b) => a.createdAt - b.createdAt,
+    );
 
     return (
         <SidebarDrawer open={open} onClose={onClose} anchor="right">
@@ -436,29 +853,107 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             </Header>
 
             <CommentsContainer>
-                {groupedComments.map((group) => (
-                    <CommentThread
-                        key={group.user.id}
-                        rootComments={group.comments}
-                        allComments={mockComments}
-                        userName={group.user.encData.userName}
-                        timestamp={group.user.createdAt}
-                        onReply={handleReply}
-                    />
-                ))}
+                {sortedComments.map((comment, index) => {
+                    const commentIsOwn = comment.userID === CURRENT_USER_ID;
+                    const prevComment = sortedComments[index - 1];
+                    const nextComment = sortedComments[index + 1];
+
+                    // 10 minutes in milliseconds
+                    const GROUP_TIME_THRESHOLD = 10 * 60 * 1000;
+
+                    // Comments are in same sequence if same user AND within 10 minutes
+                    const isSameSequenceAsPrev =
+                        prevComment &&
+                        prevComment.userID === comment.userID &&
+                        comment.createdAt - prevComment.createdAt <=
+                            GROUP_TIME_THRESHOLD;
+                    const isSameSequenceAsNext =
+                        nextComment &&
+                        nextComment.userID === comment.userID &&
+                        nextComment.createdAt - comment.createdAt <=
+                            GROUP_TIME_THRESHOLD;
+
+                    const isFirstInSequence = !isSameSequenceAsPrev;
+                    const isLastInSequence = !isSameSequenceAsNext;
+                    const showHeader = isFirstInSequence && !commentIsOwn;
+                    const parentComment = comment.parentCommentID
+                        ? getParentComment(comment.parentCommentID, mockComments)
+                        : undefined;
+
+                    return (
+                        <React.Fragment key={comment.id}>
+                            {showHeader && (
+                                <CommentHeader
+                                    userName={comment.encData.userName}
+                                    timestamp={comment.createdAt}
+                                />
+                            )}
+                            <CommentBubbleWrapper
+                                isOwn={commentIsOwn}
+                                isFirstOwn={
+                                    commentIsOwn &&
+                                    !!prevComment &&
+                                    prevComment.userID !== CURRENT_USER_ID
+                                }
+                                isLastOwn={isLastInSequence}
+                            >
+                                <CommentBubbleInner>
+                                    <CommentBubble isOwn={commentIsOwn}>
+                                        {parentComment && (
+                                            <QuotedReply
+                                                parentComment={parentComment}
+                                                isOwn={commentIsOwn}
+                                            />
+                                        )}
+                                        <CommentText isOwn={commentIsOwn}>
+                                            {comment.encData.text}
+                                        </CommentText>
+                                    </CommentBubble>
+                                    <CommentActions
+                                        onReply={() => handleReply(comment)}
+                                    />
+                                </CommentBubbleInner>
+                            </CommentBubbleWrapper>
+                        </React.Fragment>
+                    );
+                })}
             </CommentsContainer>
 
             <InputContainer>
                 {replyingTo && (
                     <ReplyingToBar>
-                        <Typography sx={{ fontSize: 12, color: "#666" }}>
-                            Replying to{" "}
-                            <strong>{replyingTo.encData.userName}</strong>
-                        </Typography>
+                        <Box
+                            sx={{
+                                borderLeft: "3px solid #ccc",
+                                paddingLeft: "10px",
+                                paddingRight: "24px",
+                            }}
+                        >
+                            <Typography sx={{ fontSize: 12, color: "#666" }}>
+                                Replying to {replyingTo.encData.userName}...
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    fontSize: 14,
+                                    color: "#000",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                }}
+                            >
+                                {truncateCommentText(replyingTo.encData.text)}
+                            </Typography>
+                        </Box>
                         <IconButton
                             size="small"
                             onClick={() => setReplyingTo(null)}
-                            sx={{ color: "#666", p: 0.5 }}
+                            sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                                color: "#666",
+                                p: 0.5,
+                            }}
                         >
                             <CloseIcon sx={{ fontSize: 16 }} />
                         </IconButton>
@@ -574,35 +1069,24 @@ const Timestamp = styled(Typography)(() => ({
     fontSize: 12,
 }));
 
-const OwnTimestamp = styled(Typography)(() => ({
-    color: "#666",
-    fontSize: 12,
-    textAlign: "right",
-    marginBottom: 4,
-    paddingRight: 52,
-}));
-
 // Comment Bubbles
-const ThreadContainer = styled(Box)(() => ({
-    marginBottom: 24,
-}));
-
-const ReplyContainer = styled(Box)(() => ({
-    marginTop: 12,
-}));
-
-const CommentBubbleWrapper = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
+const CommentBubbleWrapper = styled(Box)<{
+    isOwn: boolean;
+    isFirstOwn?: boolean;
+    isLastOwn?: boolean;
+}>(({ isOwn, isFirstOwn, isLastOwn }) => ({
     display: "flex",
     justifyContent: isOwn ? "flex-end" : "flex-start",
     width: "100%",
-    paddingBottom: 28,
+    marginTop: isFirstOwn ? 64 : 0,
+    marginBottom: isOwn ? (isLastOwn ? 24 : 8) : isLastOwn ? 48 : 24,
     paddingRight: isOwn ? 52 : 0,
     paddingLeft: isOwn ? 0 : 28,
 }));
 
 const CommentBubbleInner = styled(Box)(() => ({
     position: "relative",
-    maxWidth: "85%",
+    maxWidth: 320,
 }));
 
 const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
@@ -621,7 +1105,7 @@ const CommentText = styled(Typography)<{ isOwn: boolean }>(({ isOwn }) => ({
 const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
     borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
     paddingLeft: 10,
-    marginBottom: 8,
+    marginBottom: 16,
 }));
 
 // Actions
@@ -655,11 +1139,8 @@ const InputContainer = styled(Box)(() => ({
 }));
 
 const ReplyingToBar = styled(Box)(() => ({
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "8px 16px",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+    position: "relative",
+    padding: "20px 16px 8px 16px",
 }));
 
 const InputWrapper = styled(Box)(() => ({
