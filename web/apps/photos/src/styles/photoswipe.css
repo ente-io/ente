@@ -120,6 +120,17 @@
     transform: scale(0.85);
 }
 
+/* When counter is hidden (single photo), give zoom button the left margin */
+.pswp-ente.pswp--one-slide .pswp__top-bar .pswp__button--zoom {
+    margin-left: 4px;
+}
+
+@media (width >= 450px) {
+    .pswp-ente.pswp--one-slide .pswp__top-bar .pswp__button--zoom {
+        margin-left: 28px;
+    }
+}
+
 .pswp-ente .pswp__preloader {
     transform: translate(-2px, 2px);
 }
