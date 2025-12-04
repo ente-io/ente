@@ -1338,13 +1338,7 @@ const ContextMenuOverlay = styled(Box)(() => ({
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     zIndex: 10,
     borderRadius: "36px",
-    "@media (max-width: 450px)": {
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        borderRadius: 0,
-    },
+    "@media (max-width: 450px)": { borderRadius: 0 },
 }));
 
 const StyledMenu = styled(Menu)(() => ({
