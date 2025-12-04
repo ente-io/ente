@@ -1464,4 +1464,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String fileCount(String used, String max) {
     return '$used / $max';
   }
+
+  @override
+  String get sorry => 'Sorry';
+
+  @override
+  String get subscribe => 'Subscribe';
+
+  @override
+  String get subscriptionRequiredForSharing =>
+      'You need an active paid subscription to enable sharing.';
 }

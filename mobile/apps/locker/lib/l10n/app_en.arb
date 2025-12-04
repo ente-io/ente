@@ -850,5 +850,8 @@
         "example": "1,000"
       }
     }
-  }
+  },
+  "sorry": "Sorry",
+  "subscribe": "Subscribe",
+  "subscriptionRequiredForSharing": "You need a paid subscription to share links"
 }
