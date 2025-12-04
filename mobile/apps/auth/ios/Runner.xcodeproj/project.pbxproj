@@ -360,8 +360,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = IconLight;
-				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = IconDark;
+				ASSETCATALOG_COMPILER_APPICON_NAME = IconDefault;
+				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = "IconLight IconDark IconOG";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -440,8 +440,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = IconLight;
-				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = IconDark;
+				ASSETCATALOG_COMPILER_APPICON_NAME = IconDefault;
+				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = "IconLight IconDark IconOG";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -521,8 +521,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = IconLight;
-				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = IconDark;
+				ASSETCATALOG_COMPILER_APPICON_NAME = IconDefault;
+				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = "IconLight IconDark IconOG";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -601,8 +601,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = IconLight;
-				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = IconDark;
+				ASSETCATALOG_COMPILER_APPICON_NAME = IconDefault;
+				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = "IconLight IconDark IconOG";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
@@ -682,8 +682,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = IconLight;
-				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = IconDark;
+				ASSETCATALOG_COMPILER_APPICON_NAME = IconDefault;
+				"ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES[sdk=*]" = "IconLight IconDark IconOG";
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;

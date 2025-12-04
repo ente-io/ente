@@ -9,8 +9,14 @@ import 'package:launcher_icon_switcher/launcher_icon_switcher.dart';
 import 'package:logging/logging.dart';
 
 enum AppIcon {
-  iconLight("Default", "IconLight", "assets/launcher_icon/icon-light.png"),
-  iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png");
+  iconDefault(
+    "Default",
+    "IconDefault",
+    "assets/launcher_icon/icon-default.png",
+  ),
+  iconLight("Light", "IconLight", "assets/launcher_icon/icon-light.png"),
+  iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png"),
+  iconOG("OG", "IconOG", "assets/launcher_icon/icon-og.png");
 
   final String name;
   final String id;
@@ -37,7 +43,7 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
     super.initState();
     _iconSwitcher.initialize(
       AppIcon.values.map((e) => e.id).toList(),
-      AppIcon.iconLight.id,
+      AppIcon.iconDefault.id,
     );
     _iconSwitcher.getCurrentIcon().then(
       (icon) {
