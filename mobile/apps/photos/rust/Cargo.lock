@@ -310,6 +310,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ente_photos_rust"
+version = "0.0.1"
+dependencies = [
+ "flutter_rust_bridge",
+ "usearch",
+]
+
+[[package]]
 name = "env_filter"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -707,14 +715,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
-name = "rust_lib_photos"
-version = "0.1.0"
-dependencies = [
- "flutter_rust_bridge",
- "usearch",
-]
-
-[[package]]
 name = "rustc-demangle"
 version = "0.1.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -839,9 +839,9 @@ checksum = "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af"
 
 [[package]]
 name = "usearch"
-version = "2.19.1"
+version = "2.21.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "afa869be4baf62146b39700da30b235b06f58d2c03b7e073a8e2b57e0f511aa9"
+checksum = "1e98bf7a95537e9393055eaadcfa39ca7a7da0ed032f1d21b769c91bda21ea98"
 dependencies = [
  "cxx",
  "cxx-build",

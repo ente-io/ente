@@ -489,7 +489,5 @@
   "chooseBackupLocation": "یک محل پشتیبان‌گیری انتخاب نمایید",
   "loadDefaultLocation": "بارگذاری مکان پیش‌فرض...",
   "couldNotDetermineLocation": "نشانی جغرافیایی مشخص نیست...",
-  "saveBackup": "ذخیره پشتیبان",
-  "changeLocation": "تغییر مکان",
-  "changeCurrentLocation": "تغییر مکان کنونی"
+  "saveBackup": "ذخیره پشتیبان"
 }

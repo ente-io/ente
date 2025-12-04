@@ -576,6 +576,7 @@
   "currentBackupFolder": "Current backup folder:",
   "selectFolder": "Select folder",
   "selectFolderToContinue": "Select a folder to continue",
+  "iosOnMyDeviceNotSupported": "\"On My iPhone\" cannot be used directly. Please select or create a folder inside it.",
   "done": "Done",
   "addNew": "Add new",
   "selected": "selected",

@@ -1315,7 +1315,7 @@ class _LoadingScreenState extends State<_LoadingScreen> {
     super.initState();
     _analysisAnimationLoader = rive.FileLoader.fromAsset(
       'assets/ducky_analyze_files.riv',
-      riveFactory: rive.Factory.rive,
+      riveFactory: rive.Factory.flutter,
     );
     _startTextCycling();
   }

@@ -3,9 +3,20 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloseIcon from "@mui/icons-material/Close";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Link, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    DialogTitle,
+    IconButton,
+    Link,
+    Paper,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
 import type { AddToAlbumPhase } from "components/AlbumAddedNotification";
 import { AlbumAddedNotification } from "components/AlbumAddedNotification";
 import { AuthenticateUser } from "components/AuthenticateUser";
@@ -30,6 +41,7 @@ import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
+import { FilledIconButton } from "ente-base/components/mui";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "ente-base/components/utils/dialog";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
@@ -48,6 +60,10 @@ import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { type ItemVisibility } from "ente-media/file-metadata";
+import {
+    hasPendingAlbumToJoin,
+    processPendingAlbumJoin,
+} from "ente-new/albums/services/join-album";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -112,7 +128,10 @@ import {
     filterSearchableFiles,
     updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
-import type { SearchOption } from "ente-new/photos/services/search/types";
+import {
+    type SearchOption,
+    type SidebarActionID,
+} from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
     redirectToCustomerPortal,
@@ -167,6 +186,10 @@ const Page: React.FC = () => {
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [albumJoinedToast, setAlbumJoinedToast] = useState<{
+        open: boolean;
+        albumId?: number;
+    }>({ open: false });
 
     /**
      * Tracks a pending file addition operation.
@@ -212,6 +235,9 @@ const Page: React.FC = () => {
     const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
         undefined,
     );
+    const [pendingSidebarAction, setPendingSidebarAction] = useState<
+        SidebarActionID | undefined
+    >(undefined);
 
     /**
      * The last time (epoch milliseconds) when we prompted the user for their
@@ -248,13 +274,46 @@ const Page: React.FC = () => {
     }>({ open: false, phase: "processing" });
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
+    const onAuthenticateCancelCallback = useRef<(() => void) | undefined>(
+        undefined,
+    );
 
     const authenticateUser = useCallback(
         () =>
-            new Promise<void>((resolve) => {
+            new Promise<void>((resolve, reject) => {
                 onAuthenticateCallback.current = resolve;
+                onAuthenticateCancelCallback.current = reject;
                 showAuthenticateUser();
             }),
+        [],
+    );
+
+    const handleCloseAuthenticateUser = useCallback(() => {
+        authenticateUserVisibilityProps.onClose();
+        // Reject the pending authentication promise so the caller knows
+        // authentication was cancelled (e.g., user clicked backdrop).
+        if (onAuthenticateCancelCallback.current) {
+            onAuthenticateCancelCallback.current();
+            onAuthenticateCancelCallback.current = undefined;
+        }
+    }, [authenticateUserVisibilityProps.onClose]);
+
+    const handleAuthenticate = useCallback(() => {
+        // Clear the cancel callback first since authentication succeeded.
+        onAuthenticateCancelCallback.current = undefined;
+        // Then resolve the promise.
+        if (onAuthenticateCallback.current) {
+            onAuthenticateCallback.current();
+            onAuthenticateCallback.current = undefined;
+        }
+    }, []);
+
+    const handleSidebarClose = useCallback(() => {
+        sidebarVisibilityProps.onClose();
+    }, [sidebarVisibilityProps.onClose]);
+
+    const handleSidebarActionHandled = useCallback(
+        () => setPendingSidebarAction(undefined),
         [],
     );
 
@@ -358,8 +417,34 @@ const Page: React.FC = () => {
                 trashItems: await savedTrashItems(),
             });
 
-            // Fetch data from remote.
+            // Check for pending album join BEFORE fetching data
+            let joinedAlbumId: number | null = null;
+
+            if (hasPendingAlbumToJoin()) {
+                try {
+                    const joinedCollectionId = await processPendingAlbumJoin();
+                    if (joinedCollectionId) {
+                        joinedAlbumId = joinedCollectionId;
+                    }
+                } catch (error) {
+                    log.error("Failed to join album", error);
+                    showMiniDialog({
+                        title: t("error"),
+                        message:
+                            t("album_join_failed") +
+                            ": " +
+                            (error as Error).message,
+                    });
+                }
+            }
+
+            // Fetch data from remote (this will include the newly joined album if any)
             await remotePull();
+
+            // Now that data is loaded, show the toast if we joined an album
+            if (joinedAlbumId) {
+                setAlbumJoinedToast({ open: true, albumId: joinedAlbumId });
+            }
 
             // Clear the first load message if needed.
             setIsFirstLoad(false);
@@ -836,6 +921,13 @@ const Page: React.FC = () => {
                     type: "showPerson",
                     personID: searchOption.suggestion.person.id,
                 });
+            } else if (type == "sidebarAction") {
+                setPendingSidebarAction(searchOption.suggestion.actionID);
+                showSidebar();
+
+                const shouldExitSearchMode =
+                    options?.shouldExitSearchMode ?? true;
+                dispatch({ type: "exitSearch", shouldExitSearchMode });
             } else {
                 dispatch({
                     type: "enterSearchMode",
@@ -896,14 +988,22 @@ const Page: React.FC = () => {
             isHiddenCollectionSummary: boolean | undefined,
         ) => {
             const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
+
             if (
                 isHiddenCollectionSummary &&
                 barMode != "hidden-albums" &&
                 Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
             ) {
-                await authenticateUser();
-                lastAuthenticationForHiddenTimestamp.current = Date.now();
+                try {
+                    await authenticateUser();
+                    lastAuthenticationForHiddenTimestamp.current = Date.now();
+                } catch {
+                    // User cancelled authentication (e.g., clicked backdrop).
+                    // Don't proceed to show the collection.
+                    return;
+                }
             }
+
             handleShowCollectionSummaryWithID(collectionSummaryID);
         },
         [authenticateUser, handleShowCollectionSummaryWithID, barMode],
@@ -1248,10 +1348,13 @@ const Page: React.FC = () => {
             />
             <Sidebar
                 {...sidebarVisibilityProps}
+                onClose={handleSidebarClose}
                 normalCollectionSummaries={normalCollectionSummaries}
                 uncategorizedCollectionSummaryID={
                     state.uncategorizedCollectionSummaryID
                 }
+                pendingAction={pendingSidebarAction}
+                onActionHandled={handleSidebarActionHandled}
                 onShowPlanSelector={showPlanSelector}
                 onShowCollectionSummary={handleSidebarShowCollectionSummary}
                 onShowExport={showExport}
@@ -1316,8 +1419,9 @@ const Page: React.FC = () => {
             )}
             <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
             <AuthenticateUser
-                {...authenticateUserVisibilityProps}
-                onAuthenticate={onAuthenticateCallback.current!}
+                open={authenticateUserVisibilityProps.open}
+                onClose={handleCloseAuthenticateUser}
+                onAuthenticate={handleAuthenticate}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}
@@ -1333,6 +1437,51 @@ const Page: React.FC = () => {
                 }}
                 onSubmit={handleAlbumNameSubmit}
             />
+            <Snackbar
+                open={albumJoinedToast.open}
+                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            >
+                <Paper sx={{ width: "min(360px, 100svw)" }}>
+                    <DialogTitle>
+                        <Stack
+                            direction="row"
+                            sx={{
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Box>
+                                <Typography variant="h3">
+                                    {t("joined_album")}
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" sx={{ gap: 1 }}>
+                                <FilledIconButton
+                                    onClick={() => {
+                                        if (albumJoinedToast.albumId) {
+                                            dispatch({
+                                                type: "showCollectionSummary",
+                                                collectionSummaryID:
+                                                    albumJoinedToast.albumId,
+                                            });
+                                        }
+                                        setAlbumJoinedToast({ open: false });
+                                    }}
+                                >
+                                    <ArrowForwardIcon />
+                                </FilledIconButton>
+                                <FilledIconButton
+                                    onClick={() =>
+                                        setAlbumJoinedToast({ open: false })
+                                    }
+                                >
+                                    <CloseIcon />
+                                </FilledIconButton>
+                            </Stack>
+                        </Stack>
+                    </DialogTitle>
+                </Paper>
+            </Snackbar>
             <AlbumAddedNotification
                 open={addToAlbumProgress.open}
                 onClose={() =>

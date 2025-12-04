@@ -197,7 +197,10 @@ class SyncService {
     _logger.info("[SYNC] Starting local sync");
     await _localSyncService.sync();
 
-    if (_localSyncService.hasCompletedFirstImport()) {
+    final bool allowRemoteSync =
+        _localSyncService.hasCompletedFirstImportOrBypassed();
+
+    if (allowRemoteSync) {
       _logger.info("[SYNC] Starting remote sync");
       await _remoteSyncService.sync();
 

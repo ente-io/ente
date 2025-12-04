@@ -533,6 +533,5 @@
   "errorGenericTitle": "Įvyko klaida",
   "errorGenericBody": "Importuojant įvyko netikėta klaida.",
   "localBackupSettingsTitle": "Vietinė atsarginė kopija",
-  "localBackupSidebarTitle": "Vietinė atsarginė kopija",
-  "enableAutomaticBackups": "Įjungti automatinį atsarginių kopijų kūrimą"
+  "localBackupSidebarTitle": "Vietinė atsarginė kopija"
 }

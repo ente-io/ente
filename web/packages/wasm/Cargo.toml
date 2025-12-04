@@ -1,0 +1,11 @@
+[package]
+name = "ente-wasm"
+version = "0.0.1"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ente-core = { path = "../../../rust/core" }
+wasm-bindgen = "0.2"

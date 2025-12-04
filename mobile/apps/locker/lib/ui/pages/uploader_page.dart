@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/core/errors.dart';
+import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/l10n/l10n.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -149,6 +151,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           await Future.wait(futures);
 
           onFileUploadComplete();
+          Bus.instance.fire(UserDetailsRefreshEvent());
 
           await CollectionService.instance.sync().catchError((e) {
             _logger.warning('Background sync failed after upload', e);

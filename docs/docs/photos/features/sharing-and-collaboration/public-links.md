@@ -43,14 +43,6 @@ Create a shareable link without creating an album first:
 4. Configure options
 5. Share the link
 
-**On web/desktop:**
-
-1. Select one or more photos
-2. Click the share icon
-3. Select "Create quick link"
-4. Configure options
-5. Share the link
-
 **How it works:** Ente creates a special hidden album behind the scenes and adds your selected photos to it. The link works exactly like a regular public link - recipients see an album with the photos you selected.
 
 **Managing quick links:**
@@ -137,8 +129,21 @@ Let people who open the link in their Ente app add the shared album to their acc
 
 #### How joining works
 
-- When creating a public link, by default the **Allow joining album** option is enabled.
-- When the link is opened on a mobile device which also has the Ente Photos mobile app installed, then the OS will show an option to reopen the link in the mobile app, where there will be a banner to join the link.
+When creating a public link, by default the **Allow joining album** option is enabled.
+
+**On desktop:**
+
+To join a public album, click the "Join album" button, sign in or sign up, and you'll be added to the album.
+
+**On mobile:**
+
+When you open the link on a mobile which also has the Ente Photos mobile app installed:
+
+- Ideally, you'll be automatically redirected to the app, where you'll see a banner to join the album
+- If not automatically redirected, the OS will show an option to reopen the link in the mobile app
+- If neither happened, tap the "Join album" button on the page to open the app and join the album
+
+If the Ente Photos mobile app is not installed, click the "Join album" button, sign in or sign up, and you'll be added to the album.
 
 > [!NOTE]
 >

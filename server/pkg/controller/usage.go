@@ -27,9 +27,13 @@ type UsageController struct {
 	UploadResultCache map[int64]bool
 }
 
-const MaxLockerFiles = 1000
+// Locker limits by subscription tier
+const lockerFreeFileLimit = 100
+const lockerPaidFileLimit = 1000
+const lockerFreeStorageLimit = 1 * 1024 * 1024 * 1024  // 1 GiB
+const lockerPaidStorageLimit = 10 * 1024 * 1024 * 1024 // 10 GiB
+
 const hundredMBInBytes = 100 * 1024 * 1024
-const lockerFamilyStorageLimit = 10 * 1024 * 1024 * 1024 // 10 GiB
 
 // CanUploadFile returns error if the file of given size (with StorageOverflowAboveSubscriptionLimit buffer) can be
 // uploaded or not. If size is not passed, it validates if current usage is less than subscription storage.
@@ -91,16 +95,34 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		if lUsageErr != nil {
 			return stacktrace.Propagate(lUsageErr, "failed to fetch locker usage")
 		}
+
+		// Determine if user has paid subscription for tiered limits
+		isPaidUser := false
+		if err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(subscriptionAdminID, true); err == nil {
+			isPaidUser = true
+		}
+
+		// Apply tiered file and storage limits
+		maxFiles := int64(lockerFreeFileLimit)
+		maxStorage := int64(lockerFreeStorageLimit)
+		if isPaidUser {
+			maxFiles = int64(lockerPaidFileLimit)
+			maxStorage = int64(lockerPaidStorageLimit)
+		}
+
+		// Check file count limit
+		if lockerUsage.TotalFileCount >= maxFiles {
+			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
+		}
+
+		// Check storage limit
 		projectedLockerUsage := lockerUsage.TotalUsage
 		if size != nil {
 			projectedLockerUsage += *size
 		}
-		if lockerUsage.TotalFileCount >= MaxLockerFiles {
-			return stacktrace.Propagate(&ente.ErrFileLimitReached, "")
-		}
-		if projectedLockerUsage >= lockerFamilyStorageLimit {
+		if projectedLockerUsage >= maxStorage {
 			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
-				fmt.Sprintf("locker family storage limit exceeded (limit %d, usage %d)", lockerFamilyStorageLimit, projectedLockerUsage))
+				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", maxStorage, projectedLockerUsage))
 		}
 	}
 

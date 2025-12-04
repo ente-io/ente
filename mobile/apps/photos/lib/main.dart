@@ -68,7 +68,7 @@ bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
-  await RustLib.init();
+  await EntePhotosRust.init();
   WidgetsFlutterBinding.ensureInitialized();
   await rive.RiveNative.init();
   MediaKit.ensureInitialized();
@@ -299,6 +299,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
+
+    _logger.info("ActivityService init $tlog");
+    await activityService.init();
+    _logger.info("ActivityService init done $tlog");
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();

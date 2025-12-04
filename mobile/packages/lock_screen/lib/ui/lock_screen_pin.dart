@@ -184,7 +184,7 @@ class _LockScreenPinState extends State<LockScreenPin> {
             SizedBox(height: config.showTitle ? 24 : 0),
             Text(
               widget.isChangingLockScreenSettings
-                  ? context.strings.enterPin
+                  ? context.strings.enterAppLockPin
                   : context.strings.setNewPin,
               style: textTheme.bodyBold,
             ),

@@ -11,6 +11,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
@@ -43,10 +44,8 @@ final _logger = Logger("main");
 Future<void> initSystemTray() async {
   if (PlatformUtil.isMobile()) return;
   String path = Platform.isWindows
-      ? 'assets/icons/auth-icon.ico'
-      : Platform.isMacOS
-          ? 'assets/icons/auth-icon-monochrome.png'
-          : 'assets/icons/auth-icon.png';
+      ? 'assets/icons/auth-icon-monochrome.ico'
+      : 'assets/icons/auth-icon-monochrome.png';
   await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
@@ -183,6 +182,9 @@ Future<void> _init(bool bool, {String? via}) async {
   await IconUtils.instance.init();
   await LockScreenSettings.instance.init(
     Configuration.instance,
+    hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
+  );
+  await LocalBackupService.instance.init(
     hasOptedForOfflineMode: Configuration.instance.hasOptedForOfflineMode(),
   );
 }

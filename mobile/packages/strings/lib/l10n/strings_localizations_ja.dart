@@ -135,6 +135,9 @@ class StringsLocalizationsJa extends StringsLocalizations {
   String get enterPassword => 'パスワードを入力';
 
   @override
+  String get enterAppLockPassword => 'Enter app lock password';
+
+  @override
   String get enterYourPasswordHint => 'パスワードを入力してください';
 
   @override
@@ -490,6 +493,9 @@ class StringsLocalizationsJa extends StringsLocalizations {
   String get enterPin => 'PINを入力してください';
 
   @override
+  String get enterAppLockPin => 'Enter app lock PIN';
+
+  @override
   String get setNewPin => '新しいPINを設定';
 
   @override
@@ -782,4 +788,8 @@ class StringsLocalizationsJa extends StringsLocalizations {
 
   @override
   String get inviteToEnte => 'Invite to Ente';
+
+  @override
+  String get lockerExistingUserRequired =>
+      'Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.';
 }

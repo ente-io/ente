@@ -1617,6 +1617,7 @@
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
   "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "swipeToSelect": "Zum Auswählen wischen",
   "gallery": "Galerie",
   "joinAlbum": "Album beitreten",
   "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",

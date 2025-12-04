@@ -169,6 +169,10 @@
   "@enterPassword": {
     "description": "Enter password field label"
   },
+  "enterAppLockPassword": "Enter app lock password",
+  "@enterAppLockPassword": {
+    "description": "Enter App lock password prompt for lock screen"
+  },
   "enterYourPasswordHint": "Enter your password",
   "@enterYourPasswordHint": {
     "description": "Hint for password field"
@@ -628,6 +632,10 @@
   "@enterPin": {
     "description": "Enter PIN prompt"
   },
+  "enterAppLockPin": "Enter app lock PIN",
+  "@enterAppLockPin": {
+    "description": "Enter App lock PIN prompt for lock screen"
+  },
   "setNewPin": "Set new PIN",
   "@setNewPin": {
     "description": "Set new PIN title"
@@ -879,5 +887,9 @@
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
-  "inviteToEnte": "Invite to Ente"
+  "inviteToEnte": "Invite to Ente",
+  "lockerExistingUserRequired": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
+  "@lockerExistingUserRequired": {
+    "description": "Error message shown when a user without an Ente account tries to use Locker"
+  }
 }

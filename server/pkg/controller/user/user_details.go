@@ -165,5 +165,6 @@ func (c *UserController) GetDetailsV2(ctx *gin.Context, userID int64, fetchMemor
 			result.FamilyData = familyData
 		}
 	}
+
 	return result, nil
 }

@@ -165,11 +165,11 @@ jobs:
                   ./linux/packaging/build_rpm.sh
                   mv dist/*/*.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
                   # APPIMAGE
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  flutter_distributor package --platform=linux --targets=appimage --skip-clean
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  fastforge package --platform=linux --targets=appimage --skip-clean
                   mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
                   # DEB
-                  flutter_distributor package --platform=linux --targets=deb --skip-clean
+                  fastforge package --platform=linux --targets=deb --skip-clean
                   mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-x86_64.deb
 
             - name: Generate checksums
@@ -222,10 +222,9 @@ jobs:
             - name: Build Windows installer
               run: |
                   flutter config --enable-windows-desktop
-                  # dart pub global activate flutter_distributor
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
                   choco install innosetup -y
-                  flutter_distributor.bat package --platform=windows --targets=exe --skip-clean
+                  fastforge.bat package --platform=windows --targets=exe --skip-clean
                   shopt -s globstar
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
               shell: bash
@@ -330,8 +329,8 @@ jobs:
             - name: Build macOS DMG
               run: |
                   flutter config --enable-macos-desktop
-                  dart pub global activate flutter_distributor
-                  flutter_distributor package --platform=macos --targets=dmg --skip-clean
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  fastforge package --platform=macos --targets=dmg --skip-clean
                   mv dist/**/*-macos.dmg artifacts/ente-${{ github.ref_name }}.dmg
 
             - name: Code sign DMG
