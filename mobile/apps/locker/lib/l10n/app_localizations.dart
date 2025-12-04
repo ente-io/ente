@@ -2533,7 +2533,7 @@ abstract class AppLocalizations {
   /// No description provided for @subscriptionRequiredForSharing.
   ///
   /// In en, this message translates to:
-  /// **'You need an active paid subscription to enable sharing.'**
+  /// **'You need a paid subscription to share links'**
   String get subscriptionRequiredForSharing;
 }
 

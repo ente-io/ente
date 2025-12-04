@@ -1473,5 +1473,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionRequiredForSharing =>
-      'You need an active paid subscription to enable sharing.';
+      'You need a paid subscription to share links';
 }
