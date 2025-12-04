@@ -29,6 +29,8 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
   final _logger = Logger("_AppIconSelectionScreenState");
   final _iconSwitcher = LauncherIconSwitcher();
   String? _currentIcon;
+  // ignore: prefer_final_fields
+  bool _isChangingIcon = false;
 
   @override
   void initState() {
@@ -101,6 +103,10 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
   }
 
   Future<void> _changeIcon(String icon) async {
+    if (_isChangingIcon) return;
+    setState(() {
+      _isChangingIcon = true;
+    });
     try {
       _logger.info("Changing icon to $icon");
       await _iconSwitcher.setIcon(icon);
@@ -110,6 +116,10 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
       });
     } catch (error, stackTrace) {
       _logger.severe("Error changing icon", error, stackTrace);
+    } finally {
+      setState(() {
+        _isChangingIcon = false;
+      });
     }
   }
 }
