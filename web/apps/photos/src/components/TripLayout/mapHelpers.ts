@@ -99,9 +99,9 @@ export const calculateOptimalZoom = (): number => {
 // Function to create icon with specific image and progress styling
 export const createIcon = (
     imageSrc: string,
-    size = 70,
+    size = 40,
     borderColor = "#ffffff",
-    clusterCount?: number,
+    _clusterCount?: number,
     isReached = false,
 ): import("leaflet").DivIcon | null => {
     const leaflet = getLeaflet();
@@ -110,120 +110,98 @@ export const createIcon = (
         return null;
     }
 
-    const pinSize = size;
-    const triangleHeight = 12;
-    const pinHeight = pinSize + triangleHeight;
+    const pinSize = size + 16; // Make it square and bigger
+    const triangleHeight = size <= 30 ? 7 : 10; // Smaller triangle for mobile
+    const pinHeight = pinSize + triangleHeight + 2; // Add space for triangle
     const hasImage = imageSrc && imageSrc.trim() !== "";
-    const badgeOverflow = 6; // How much the badge pops out
+
+    // Adjust border radius for smaller mobile markers
+    const outerBorderRadius = size <= 30 ? 14 : 16;
+    const innerBorderRadius = size <= 30 ? 10 : 12;
 
     // Create cache key based on all parameters including border radius and triangle size
-    const cacheKey = `icon_${imageSrc}_${size}_${borderColor}_${isReached}_${triangleHeight}_${clusterCount}`;
+    const cacheKey = `icon_${imageSrc}_${size}_${borderColor}_${isReached}_${outerBorderRadius}_${innerBorderRadius}_${triangleHeight}`;
 
     const cachedIcon = iconCache.get(cacheKey);
     if (cachedIcon) {
         return cachedIcon;
     }
 
-    const badgeLabel =
-        clusterCount && clusterCount > 1
-            ? clusterCount >= 2000
-                ? `${Math.floor((clusterCount - 1) / 1000)}K+`
-                : clusterCount >= 1000
-                  ? "1K+"
-                  : clusterCount > 999
-                    ? `${Math.floor(clusterCount / 100)}00+`
-                    : `${clusterCount}`
-            : null;
-    const backgroundColor = isReached ? "#22c55e" : "#f6f6f6";
-    const border = `2px solid ${borderColor}`;
     const icon = leaflet.divIcon({
         html: `
-            <div class="photo-pin${isReached ? " reached" : ""}" style="
-                width: ${pinSize}px;
-                height: ${pinHeight}px;
-                position: relative;
-                cursor: pointer;
-                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
-                overflow: visible;
-            ">
+        <div class="photo-pin${isReached ? " reached" : ""}" style="
+          width: ${pinSize}px;
+          height: ${pinHeight}px;
+          position: relative;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        ">
+          <!-- Main rounded rectangle container -->
+          <div style="
+            width: ${pinSize}px;
+            height: ${pinSize}px;
+            border-radius: ${outerBorderRadius}px;
+            background: ${isReached ? "#22c55e" : "white"};
+            border: 2px solid ${isReached ? "#22c55e" : borderColor};
+            padding: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+          "
+          onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
+          onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
+          >
+            ${
+                hasImage
+                    ? `
+              <!-- Image inside the rounded rectangle -->
+              <img
+                src="${imageSrc}"
+                style="
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  border-radius: ${innerBorderRadius}px;
+                "
+                alt="Location"
+              />
+            `
+                    : `
+              <!-- Loading skeleton when no image -->
               <div style="
-                  width: ${pinSize}px;
-                  height: ${pinSize}px;
-                  border-radius: 6px;
-                  background: ${backgroundColor};
-                  border: ${border};
-                  overflow: hidden;
-                  position: relative;
-              ">
-                ${
-                    hasImage
-                        ? `
-                    <img
-                      src="${imageSrc}"
-                      style="
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                        display: block;
-                      "
-                      alt="Location"
-                    />
-                  `
-                        : `
-                    <div style="
-                      width: 100%;
-                      height: 100%;
-                      background: linear-gradient(90deg, #f8f8f8 25%, #f0f0f0 50%, #f8f8f8 75%);
-                      background-size: 200% 100%;
-                      animation: shimmer 1.4s ease infinite;
-                    "></div>
-                    <style>
-                      @keyframes shimmer {
-                        0% { background-position: 200% 0; }
-                        100% { background-position: -200% 0; }
-                      }
-                    </style>
-                  `
-                }
-              </div>
-              ${
-                  badgeLabel
-                      ? `<div style="
-                          position: absolute;
-                          top: -${badgeOverflow}px;
-                          right: -${badgeOverflow}px;
-                          background: #22c55e;
-                          color: #ffffff;
-                          border-radius: 6px;
-                          padding: 4px 6px;
-                          font-size: 11px;
-                          font-weight: 700;
-                          line-height: 1;
-                          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-                          z-index: 1;
-                        ">
-                          ${badgeLabel}
-                        </div>
-                        <style>
-                          .leaflet-marker-icon.custom-pin-marker { overflow: visible !important; }
-                        </style>`
-                      : ""
-              }
-              <div style="
-                  position: absolute;
-                  bottom: 0;
-                  left: 50%;
-                  transform: translate(-50%, 0);
-                  width: 0;
-                  height: 0;
-                  border-left: ${triangleHeight / 1.4}px solid transparent;
-                  border-right: ${triangleHeight / 1.4}px solid transparent;
-                  border-top: ${triangleHeight}px solid ${backgroundColor};
+                width: 100%;
+                height: 100%;
+                border-radius: ${innerBorderRadius}px;
+                animation: skeleton-pulse 1.5s ease-in-out infinite;
               "></div>
-            </div>
-        `,
+              <style>
+                @keyframes skeleton-pulse {
+                  0% { background-color: #ffffff; }
+                  50% { background-color: #f0f0f0; }
+                  100% { background-color: #ffffff; }
+                }
+              </style>
+            `
+            }
+          </div>
+          
+          <!-- Triangle at the bottom -->
+          <div style="
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: ${triangleHeight}px solid transparent;
+            border-right: ${triangleHeight}px solid transparent;
+            border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+            transition: border-top-color 0.3s ease;
+          "></div>
+        </div>
+      `,
         className: "custom-pin-marker",
-        iconSize: [pinSize + badgeOverflow, pinHeight + badgeOverflow],
+        iconSize: [pinSize, pinHeight],
         iconAnchor: [pinSize / 2, pinHeight],
         popupAnchor: [0, -pinHeight],
     });

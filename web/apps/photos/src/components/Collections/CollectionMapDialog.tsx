@@ -51,7 +51,6 @@ import React, {
 } from "react";
 import {
     calculateOptimalZoom,
-    createIcon,
     getMapCenter,
 } from "../TripLayout/mapHelpers";
 import type { JourneyPoint } from "../TripLayout/types";
@@ -474,6 +473,163 @@ function useVisiblePhotos() {
 }
 
 /**
+ * Creates a marker icon for individual photos (no badge)
+ * Used only in CollectionMapDialog for consistent styling
+ */
+function createMarkerIcon(
+    imageSrc: string,
+    size: number,
+): import("leaflet").DivIcon | null {
+    if (typeof window === "undefined") return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const leaflet = require("leaflet") as typeof import("leaflet");
+
+    const pinSize = size;
+    const triangleHeight = 12;
+    const pinHeight = pinSize + triangleHeight;
+    const hasImage = imageSrc && imageSrc.trim() !== "";
+
+    return leaflet.divIcon({
+        html: `
+            <div class="photo-pin" style="
+                width: ${pinSize}px;
+                height: ${pinHeight}px;
+                position: relative;
+                cursor: pointer;
+                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+            ">
+              <div style="
+                  width: ${pinSize}px;
+                  height: ${pinSize}px;
+                  border-radius: 6px;
+                  background: #f6f6f6;
+                  border: 2px solid #ffffff;
+                  overflow: hidden;
+                  position: relative;
+              ">
+                ${
+                    hasImage
+                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Location" />`
+                        : `<div style="width:100%;height:100%;background:linear-gradient(90deg,#f8f8f8 25%,#f0f0f0 50%,#f8f8f8 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;"></div>
+                           <style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>`
+                }
+              </div>
+              <div style="
+                  position: absolute;
+                  bottom: 0;
+                  left: 50%;
+                  transform: translate(-50%, 0);
+                  width: 0;
+                  height: 0;
+                  border-left: ${triangleHeight / 1.4}px solid transparent;
+                  border-right: ${triangleHeight / 1.4}px solid transparent;
+                  border-top: ${triangleHeight}px solid #f6f6f6;
+              "></div>
+            </div>
+        `,
+        className: "collection-marker",
+        iconSize: [pinSize, pinHeight],
+        iconAnchor: [pinSize / 2, pinHeight],
+        popupAnchor: [0, -pinHeight],
+    });
+}
+
+/**
+ * Creates a cluster icon with badge popping out of the container
+ * Used only in CollectionMapDialog for cluster markers
+ */
+function createClusterIcon(
+    imageSrc: string,
+    size: number,
+    clusterCount: number,
+): import("leaflet").DivIcon | null {
+    if (typeof window === "undefined") return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const leaflet = require("leaflet") as typeof import("leaflet");
+
+    const pinSize = size;
+    const triangleHeight = 12;
+    const pinHeight = pinSize + triangleHeight;
+    const hasImage = imageSrc && imageSrc.trim() !== "";
+    const badgeOverflow = 6;
+
+    const badgeLabel =
+        clusterCount >= 2000
+            ? `${Math.floor((clusterCount - 1) / 1000)}K+`
+            : clusterCount >= 1000
+              ? "1K+"
+              : clusterCount > 999
+                ? `${Math.floor(clusterCount / 100)}00+`
+                : `${clusterCount}`;
+
+    return leaflet.divIcon({
+        html: `
+            <div class="photo-pin" style="
+                width: ${pinSize}px;
+                height: ${pinHeight}px;
+                position: relative;
+                cursor: pointer;
+                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+                overflow: visible;
+            ">
+              <div style="
+                  width: ${pinSize}px;
+                  height: ${pinSize}px;
+                  border-radius: 6px;
+                  background: #f6f6f6;
+                  border: 2px solid #ffffff;
+                  overflow: hidden;
+                  position: relative;
+              ">
+                ${
+                    hasImage
+                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Location" />`
+                        : `<div style="width:100%;height:100%;background:linear-gradient(90deg,#f8f8f8 25%,#f0f0f0 50%,#f8f8f8 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;"></div>
+                           <style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>`
+                }
+              </div>
+              <div style="
+                  position: absolute;
+                  top: -${badgeOverflow}px;
+                  right: -${badgeOverflow}px;
+                  background: #22c55e;
+                  color: #ffffff;
+                  border-radius: 6px;
+                  padding: 4px 6px;
+                  font-size: 11px;
+                  font-weight: 700;
+                  line-height: 1;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                  z-index: 1;
+              ">
+                  ${badgeLabel}
+              </div>
+              <style>
+                .leaflet-marker-icon.collection-cluster-marker { overflow: visible !important; }
+              </style>
+              <div style="
+                  position: absolute;
+                  bottom: 0;
+                  left: 50%;
+                  transform: translate(-50%, 0);
+                  width: 0;
+                  height: 0;
+                  border-left: ${triangleHeight / 1.4}px solid transparent;
+                  border-right: ${triangleHeight / 1.4}px solid transparent;
+                  border-top: ${triangleHeight}px solid #f6f6f6;
+              "></div>
+            </div>
+        `,
+        className: "collection-cluster-marker",
+        iconSize: [pinSize + badgeOverflow, pinHeight + badgeOverflow],
+        iconAnchor: [pinSize / 2, pinHeight],
+        popupAnchor: [0, -pinHeight],
+    });
+}
+
+/**
  * Creates custom icons for map marker clusters with thumbnails
  * Responsibility: Generate cluster icons showing photo thumbnail and count
  */
@@ -493,7 +649,7 @@ function useClusterIcon(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (cluster: any) => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-            const count = cluster.getChildCount();
+            const count: number = cluster.getChildCount();
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             const childMarkers = cluster.getAllChildMarkers();
 
@@ -513,8 +669,7 @@ function useClusterIcon(
                 }
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            return createIcon(thumbnailUrl, 68, "#f6f6f6", count, false);
+            return createClusterIcon(thumbnailUrl, 68, count);
         },
         [photosByPosition, thumbByFileID],
     );
@@ -1136,13 +1291,13 @@ const MapCanvas = React.memo(function MapCanvas({
     // Memoize marker icons to prevent recreation on every render
     // Key: fileId, Value: Leaflet icon instance
     const markerIcons = useMemo(() => {
-        const icons = new Map<number, ReturnType<typeof createIcon>>();
+        const icons = new Map<
+            number,
+            ReturnType<typeof createMarkerIcon>
+        >();
         for (const photo of mapPhotos) {
             const thumbnail = getPhotoThumbnail(photo, thumbByFileID);
-            icons.set(
-                photo.fileId,
-                createIcon(thumbnail ?? "", 68, "#f6f6f6", undefined, false),
-            );
+            icons.set(photo.fileId, createMarkerIcon(thumbnail ?? "", 68));
         }
         return icons;
     }, [mapPhotos, thumbByFileID]);
