@@ -52,13 +52,11 @@ or managing your secrets, please use our mobile or desktop app.
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from the `mobile/` directory, run `melos bootstrap`
    - **Using Flutter directly:** Run `flutter pub get`
 
-4. Generate localization files with `flutter gen-l10n`
-
-5. For Android, [setup your
+4. For Android, [setup your
    keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
    and run `flutter build apk --release --flavor independent`
 
-6. For iOS, run `flutter build ios`
+5. For iOS, run `flutter build ios`
 
 ## ⚙️ Develop
 
