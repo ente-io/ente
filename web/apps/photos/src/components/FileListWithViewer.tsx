@@ -57,6 +57,12 @@ export type FileListWithViewerProps = {
         file: EnteFile,
         sourceCollectionSummaryID?: number,
     ) => void;
+    /**
+     * Optional z-index for the FileViewer dialog.
+     *
+     * Use this when FileViewer needs to appear above other dialogs/modals.
+     */
+    fileViewerZIndex?: number;
 } & Pick<
     FileListProps,
     | "mode"
@@ -127,6 +133,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onAddFileToCollection,
+    fileViewerZIndex,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -214,6 +221,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 isInTrashSection={
                     activeCollectionID == PseudoCollectionID.trash
                 }
+                zIndex={fileViewerZIndex}
                 {...{
                     user,
                     files,

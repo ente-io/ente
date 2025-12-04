@@ -1,4 +1,3 @@
-import { keyframes } from "@emotion/react";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -18,7 +17,6 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
-import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadManager } from "ente-gallery/services/download";
 import { uniqueFilesByID } from "ente-gallery/utils/file";
 import { type Collection } from "ente-media/collection";
@@ -40,9 +38,9 @@ import {
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
 import { t } from "i18next";
-import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet/dist/leaflet.css";
 import React, {
     useCallback,
     useEffect,
@@ -50,10 +48,8 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {
-    calculateOptimalZoom,
-    getMapCenter,
-} from "../TripLayout/mapHelpers";
+import { FileListWithViewer } from "../FileListWithViewer";
+import { calculateOptimalZoom, getMapCenter } from "../TripLayout/mapHelpers";
 import type { JourneyPoint } from "../TripLayout/types";
 import { generateNeededThumbnails } from "../TripLayout/utils/dataProcessing";
 
@@ -66,11 +62,6 @@ interface CollectionMapDialogProps extends ModalVisibilityProps {
     activeCollection: Collection;
 }
 
-interface PhotoGroup {
-    dateLabel: string;
-    photos: JourneyPoint[];
-}
-
 interface MapDataState {
     mapCenter: [number, number] | null;
     mapPhotos: JourneyPoint[];
@@ -78,12 +69,6 @@ interface MapDataState {
     thumbByFileID: Map<number, string>;
     isLoading: boolean;
     error: string | null;
-}
-
-interface FileViewerState {
-    open: boolean;
-    currentIndex: number;
-    files: EnteFile[];
 }
 
 interface FavoritesState {
@@ -377,100 +362,16 @@ function useFavorites(
 }
 
 /**
- * Manages file viewer state including open/close and file navigation
- * Responsibility: Handle photo clicks, prepare sorted file list for viewer, manage viewer open state
- */
-function useFileViewer(
-    filesByID: Map<number, EnteFile>,
-    visiblePhotos: JourneyPoint[],
-): FileViewerState & {
-    handlePhotoClick: (fileId: number) => void;
-    handleClose: () => void;
-} {
-    const [state, setState] = useState<FileViewerState>({
-        open: false,
-        currentIndex: 0,
-        files: [],
-    });
-
-    const handlePhotoClick = useCallback(
-        (fileId: number) => {
-            // Only show files that are currently visible on the map/sidebar
-            // Note: visiblePhotos are already sorted by timestamp
-            const visibleFiles = visiblePhotos
-                .map((p) => filesByID.get(p.fileId))
-                .filter((f): f is EnteFile => f !== undefined);
-
-            // Open the viewer on the clicked file if it exists in the visible list
-            const clickedIndex = visibleFiles.findIndex((f) => f.id === fileId);
-
-            if (clickedIndex !== -1 && visibleFiles.length > 0) {
-                setState({
-                    files: visibleFiles,
-                    currentIndex: clickedIndex,
-                    open: true,
-                });
-            }
-        },
-        [filesByID, visiblePhotos],
-    );
-
-    // Close handler simply hides the viewer while keeping the file list cached
-    const handleClose = useCallback(() => {
-        setState((prev) => ({ ...prev, open: false }));
-    }, []);
-
-    return { ...state, handlePhotoClick, handleClose };
-}
-
-/**
- * Manages the lifecycle of the currently visible journey photos and their derived metadata.
+ * Manages the lifecycle of the currently visible journey photos.
  *
- * Tracks the ordered list of visible photos, exposes a setter to update them, and maintains a
- * monotonically increasing “wave” counter that changes whenever the visible photos change—allowing
- * consumers to detect visibility updates without diffing arrays manually.
+ * Tracks the ordered list of visible photos and exposes a setter to update them.
  *
- * Additionally memoizes:
- * - `photoGroups`: photos bucketed by formatted date label for grouped rendering.
- * - `visiblePhotoOrder`: map of photo file IDs to their position in the visible array for O(1) lookups.
- *
- * @returns An object containing the visible photos array, setter, wave counter, grouped photos, and ordering map.
+ * @returns An object containing the visible photos array and setter.
  */
 function useVisiblePhotos() {
     const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
-    const [visiblePhotosWave, setVisiblePhotosWave] = useState(0);
 
-    useEffect(() => {
-        setVisiblePhotosWave((wave) => wave + 1);
-    }, [visiblePhotos]);
-
-    const photoGroups = useMemo<PhotoGroup[]>(() => {
-        const groups = new Map<string, JourneyPoint[]>();
-        visiblePhotos.forEach((p) => {
-            const dateLabel = formatDateLabel(p.timestamp);
-            if (!groups.has(dateLabel)) {
-                groups.set(dateLabel, []);
-            }
-            groups.get(dateLabel)!.push(p);
-        });
-        return Array.from(groups.entries()).map(([dateLabel, photos]) => ({
-            dateLabel,
-            photos,
-        }));
-    }, [visiblePhotos]);
-
-    const visiblePhotoOrder = useMemo(
-        () => new Map(visiblePhotos.map((p, index) => [p.fileId, index])),
-        [visiblePhotos],
-    );
-
-    return {
-        visiblePhotos,
-        setVisiblePhotos,
-        visiblePhotosWave,
-        photoGroups,
-        visiblePhotoOrder,
-    };
+    return { visiblePhotos, setVisiblePhotos };
 }
 
 /**
@@ -702,17 +603,6 @@ function sortPhotosByTimestamp(photos: JourneyPoint[]): JourneyPoint[] {
 }
 
 /**
- * Formats a timestamp string into a human-readable date label
- */
-function formatDateLabel(timestamp: string): string {
-    return new Date(timestamp).toLocaleDateString(undefined, {
-        weekday: "long",
-        day: "numeric",
-        month: "short",
-    });
-}
-
-/**
  * Loads every file stored in IndexedDB, filters those belonging to the
  * target collection, removes duplicates by ID, and returns the unique set.
  */
@@ -769,13 +659,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const { mapCenter, mapPhotos, filesByID, thumbByFileID, isLoading, error } =
         useMapData(open, activeCollection, onGenericError);
 
-    const {
-        visiblePhotos,
-        setVisiblePhotos,
-        visiblePhotosWave,
-        photoGroups,
-        visiblePhotoOrder,
-    } = useVisiblePhotos();
+    const { visiblePhotos, setVisiblePhotos } = useVisiblePhotos();
 
     const {
         favoriteFileIDs,
@@ -785,15 +669,34 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         handleFileVisibilityUpdate,
     } = useFavorites(open, user);
 
-    const {
-        open: openFileViewer,
-        currentIndex: currentFileIndex,
-        files: viewerFiles,
-        handlePhotoClick,
-        handleClose: handleCloseFileViewer,
-    } = useFileViewer(filesByID, visiblePhotos);
-
     const createClusterCustomIcon = useClusterIcon(mapPhotos, thumbByFileID);
+
+    // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
+    const visibleFiles = useMemo(() => {
+        return visiblePhotos
+            .map((p) => filesByID.get(p.fileId))
+            .filter((f): f is EnteFile => f !== undefined);
+    }, [visiblePhotos, filesByID]);
+
+    // No-op handlers for FileListWithViewer
+    const handleRemotePull = useCallback(() => Promise.resolve(), []);
+    const handleVisualFeedback = useCallback(() => {
+        /* no-op */
+    }, []);
+
+    // Empty selection state since we don't support selection in map view
+    const emptySelected = useMemo(
+        () => ({
+            ownCount: 0,
+            count: 0,
+            context: undefined,
+            collectionID: activeCollection.id,
+        }),
+        [activeCollection.id],
+    );
+    const noOpSetSelected = useCallback(() => {
+        /* no-op */
+    }, []);
 
     const body = useMemo(() => {
         if (isLoading) {
@@ -840,75 +743,68 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             <MapLayout
                 collectionSummary={collectionSummary}
                 visiblePhotos={visiblePhotos}
-                photoGroups={photoGroups}
+                visibleFiles={visibleFiles}
                 mapPhotos={mapPhotos}
                 thumbByFileID={thumbByFileID}
-                visiblePhotoOrder={visiblePhotoOrder}
-                visiblePhotosWave={visiblePhotosWave}
                 mapComponents={mapComponents}
                 mapCenter={mapCenter}
                 optimalZoom={optimalZoom}
                 createClusterCustomIcon={createClusterCustomIcon}
                 onClose={onClose}
                 onVisiblePhotosChange={setVisiblePhotos}
-                onPhotoClick={handlePhotoClick}
-            />
-        );
-    }, [
-        collectionSummary,
-        createClusterCustomIcon,
-        error,
-        handlePhotoClick,
-        isLoading,
-        mapCenter,
-        mapComponents,
-        mapPhotos,
-        onClose,
-        optimalZoom,
-        photoGroups,
-        setVisiblePhotos,
-        thumbByFileID,
-        visiblePhotoOrder,
-        visiblePhotos,
-        visiblePhotosWave,
-    ]);
-
-    return (
-        <>
-            <FileViewer
-                open={openFileViewer}
-                onClose={handleCloseFileViewer}
-                initialIndex={currentFileIndex}
-                files={viewerFiles}
                 user={user}
                 favoriteFileIDs={favoriteFileIDs}
                 pendingFavoriteUpdates={pendingFavoriteUpdates}
                 pendingVisibilityUpdates={pendingVisibilityUpdates}
                 onToggleFavorite={handleToggleFavorite}
                 onFileVisibilityUpdate={handleFileVisibilityUpdate}
-                onVisualFeedback={() => {
-                    /* no-op for map view */
-                }}
-                zIndex={1301}
+                onRemotePull={handleRemotePull}
+                onVisualFeedback={handleVisualFeedback}
+                selected={emptySelected}
+                setSelected={noOpSetSelected}
             />
+        );
+    }, [
+        collectionSummary,
+        createClusterCustomIcon,
+        emptySelected,
+        error,
+        favoriteFileIDs,
+        handleFileVisibilityUpdate,
+        handleRemotePull,
+        handleToggleFavorite,
+        handleVisualFeedback,
+        isLoading,
+        mapCenter,
+        mapComponents,
+        mapPhotos,
+        noOpSetSelected,
+        onClose,
+        optimalZoom,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        setVisiblePhotos,
+        thumbByFileID,
+        user,
+        visibleFiles,
+        visiblePhotos,
+    ]);
 
-            <Dialog fullScreen open={open} onClose={onClose}>
-                <Box
-                    sx={{
-                        position: "relative",
-                        width: "100vw",
-                        height: "100vh",
-                        bgcolor: "background.default",
-                    }}
-                >
-                    <DialogContent
-                        sx={{ padding: "0 !important", height: "100%" }}
-                    >
-                        {body}
-                    </DialogContent>
-                </Box>
-            </Dialog>
-        </>
+    return (
+        <Dialog fullScreen open={open} onClose={onClose}>
+            <Box
+                sx={{
+                    position: "relative",
+                    width: "100vw",
+                    height: "100vh",
+                    bgcolor: "background.default",
+                }}
+            >
+                <DialogContent sx={{ padding: "0 !important", height: "100%" }}>
+                    {body}
+                </DialogContent>
+            </Box>
+        </Dialog>
     );
 };
 
@@ -923,48 +819,77 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 interface MapLayoutProps {
     collectionSummary: CollectionSummary;
     visiblePhotos: JourneyPoint[];
-    photoGroups: PhotoGroup[];
+    visibleFiles: EnteFile[];
     mapPhotos: JourneyPoint[];
     thumbByFileID: Map<number, string>;
-    visiblePhotoOrder: Map<number, number>;
-    visiblePhotosWave: number;
     mapComponents: MapComponents;
     mapCenter: [number, number];
     optimalZoom: number;
     createClusterCustomIcon: (cluster: unknown) => unknown;
     onClose: () => void;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
-    onPhotoClick: (fileId: number) => void;
+    user: ReturnType<typeof useCurrentUser>;
+    favoriteFileIDs: Set<number>;
+    pendingFavoriteUpdates: Set<number>;
+    pendingVisibilityUpdates: Set<number>;
+    onToggleFavorite: (file: EnteFile) => Promise<void>;
+    onFileVisibilityUpdate: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+    onRemotePull: () => Promise<void>;
+    onVisualFeedback: () => void;
+    selected: {
+        ownCount: number;
+        count: number;
+        context: undefined;
+        collectionID: number;
+    };
+    setSelected: () => void;
 }
 
 function MapLayout({
     collectionSummary,
     visiblePhotos,
-    photoGroups,
+    visibleFiles,
     mapPhotos,
     thumbByFileID,
-    visiblePhotoOrder,
-    visiblePhotosWave,
     mapComponents,
     mapCenter,
     optimalZoom,
     createClusterCustomIcon,
     onClose,
     onVisiblePhotosChange,
-    onPhotoClick,
+    user,
+    favoriteFileIDs,
+    pendingFavoriteUpdates,
+    pendingVisibilityUpdates,
+    onToggleFavorite,
+    onFileVisibilityUpdate,
+    onRemotePull,
+    onVisualFeedback,
+    selected,
+    setSelected,
 }: MapLayoutProps) {
     return (
         <Box sx={{ position: "relative", height: "100%", width: "100%" }}>
             <CollectionSidebar
                 collectionSummary={collectionSummary}
                 visibleCount={visiblePhotos.length}
-                photoGroups={photoGroups}
+                visibleFiles={visibleFiles}
                 mapPhotos={mapPhotos}
                 thumbByFileID={thumbByFileID}
-                visiblePhotoOrder={visiblePhotoOrder}
-                visiblePhotosWave={visiblePhotosWave}
-                onPhotoClick={onPhotoClick}
                 onClose={onClose}
+                user={user}
+                favoriteFileIDs={favoriteFileIDs}
+                pendingFavoriteUpdates={pendingFavoriteUpdates}
+                pendingVisibilityUpdates={pendingVisibilityUpdates}
+                onToggleFavorite={onToggleFavorite}
+                onFileVisibilityUpdate={onFileVisibilityUpdate}
+                onRemotePull={onRemotePull}
+                onVisualFeedback={onVisualFeedback}
+                selected={selected}
+                setSelected={setSelected}
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
@@ -986,55 +911,54 @@ function MapLayout({
 // ============================================================================
 
 /**
- * Sidebar displaying collection details and photo thumbnails
- * Responsibility: Show collection cover, sticky header with date, scrollable photo grid
+ * Sidebar displaying collection details and photo thumbnails using FileListWithViewer
+ * Responsibility: Show collection cover, header, and file list with integrated viewer
  */
 interface CollectionSidebarProps {
     collectionSummary: CollectionSummary;
     visibleCount: number;
-    photoGroups: PhotoGroup[];
+    visibleFiles: EnteFile[];
     mapPhotos: JourneyPoint[];
     thumbByFileID: Map<number, string>;
-    visiblePhotoOrder: Map<number, number>;
-    visiblePhotosWave: number;
-    onPhotoClick: (fileId: number) => void;
     onClose: () => void;
+    user: ReturnType<typeof useCurrentUser>;
+    favoriteFileIDs: Set<number>;
+    pendingFavoriteUpdates: Set<number>;
+    pendingVisibilityUpdates: Set<number>;
+    onToggleFavorite: (file: EnteFile) => Promise<void>;
+    onFileVisibilityUpdate: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+    onRemotePull: () => Promise<void>;
+    onVisualFeedback: () => void;
+    selected: {
+        ownCount: number;
+        count: number;
+        context: undefined;
+        collectionID: number;
+    };
+    setSelected: () => void;
 }
 
 function CollectionSidebar({
     collectionSummary,
     visibleCount,
-    photoGroups,
+    visibleFiles,
     mapPhotos,
     thumbByFileID,
-    visiblePhotoOrder,
-    visiblePhotosWave,
-    onPhotoClick,
     onClose,
+    user,
+    favoriteFileIDs,
+    pendingFavoriteUpdates,
+    pendingVisibilityUpdates,
+    onToggleFavorite,
+    onFileVisibilityUpdate,
+    onRemotePull,
+    onVisualFeedback,
+    selected,
+    setSelected,
 }: CollectionSidebarProps) {
-    const [isCoverHidden, setIsCoverHidden] = useState(false);
-    const [currentDateLabel, setCurrentDateLabel] = useState<string | null>(
-        null,
-    );
-    const coverRef = useRef<HTMLDivElement>(null);
-    const sidebarRef = useRef<HTMLDivElement>(null);
-
-    // Reset current date when scrolled back to top
-    const handleScroll = useCallback(() => {
-        const sidebar = sidebarRef.current;
-        if (!sidebar) return;
-
-        // If scrolled near the top, clear the current date label
-        if (sidebar.scrollTop < 50) {
-            setCurrentDateLabel(null);
-        }
-    }, []);
-
-    // Handle date visibility callback from PhotoDateGroup
-    const handleDateVisible = useCallback((dateLabel: string) => {
-        setCurrentDateLabel(dateLabel);
-    }, []);
-
     // Get cover image: prioritize collection's coverFile, fallback to first photo
     const coverFile = collectionSummary.coverFile;
     const coverImageUrl = useMemo(() => {
@@ -1047,220 +971,62 @@ function CollectionSidebar({
             : undefined;
     }, [coverFile, mapPhotos, thumbByFileID]);
 
-    // Detect when cover scrolls out of view
-    useEffect(() => {
-        const cover = coverRef.current;
-        if (!cover) return;
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsCoverHidden(entry ? !entry.isIntersecting : false);
-            },
-            { threshold: 0 },
-        );
-
-        observer.observe(cover);
-        return () => observer.disconnect();
-    }, []);
+    // No-op for onAddSaveGroup since we don't support download in map view
+    const handleAddSaveGroup = useCallback(
+        () => () => {
+            /* no-op */
+        },
+        [],
+    );
 
     return (
         <SidebarWrapper>
-            <SidebarContainer ref={sidebarRef} onScroll={handleScroll}>
-                <Box ref={coverRef}>
-                    <MapCover
-                        name={collectionSummary.name}
-                        coverImageUrl={coverImageUrl}
-                        visibleCount={visibleCount}
-                        onClose={onClose}
-                    />
-                </Box>
-
-                {/* Sticky header */}
-                <StickyHeader isVisible={isCoverHidden}>
-                    <Stack spacing={0.25} sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography
-                            variant="body"
-                            sx={{ fontWeight: 600, lineHeight: 1.2 }}
-                            noWrap
-                        >
-                            {collectionSummary.name}
-                        </Typography>
-                        <Typography variant="small" color="text.secondary">
-                            {(currentDateLabel ?? photoGroups[0]?.dateLabel)
-                                ? `${currentDateLabel ?? photoGroups[0]?.dateLabel} • ${visibleCount} memories`
-                                : `${visibleCount} memories`}
-                        </Typography>
-                    </Stack>
-                    <IconButton
-                        aria-label="Close"
-                        onClick={onClose}
-                        size="small"
-                        sx={{
-                            ml: 1,
-                            bgcolor: (theme) => theme.vars.palette.fill.faint,
-                        }}
-                    >
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                </StickyHeader>
-
-                <PhotoListContainer>
-                    <PhotoList
-                        photoGroups={photoGroups}
-                        thumbByFileID={thumbByFileID}
-                        visiblePhotoOrder={visiblePhotoOrder}
-                        visiblePhotosWave={visiblePhotosWave}
-                        onPhotoClick={onPhotoClick}
-                        onDateVisible={handleDateVisible}
-                        scrollContainerRef={sidebarRef}
-                    />
-                </PhotoListContainer>
+            <SidebarContainer>
+                <MapCover
+                    name={collectionSummary.name}
+                    coverImageUrl={coverImageUrl}
+                    visibleCount={visibleCount}
+                    onClose={onClose}
+                />
+                <FileListContainer>
+                    {visibleFiles.length > 0 ? (
+                        <FileListWithViewer
+                            files={visibleFiles}
+                            user={user}
+                            favoriteFileIDs={favoriteFileIDs}
+                            pendingFavoriteUpdates={pendingFavoriteUpdates}
+                            pendingVisibilityUpdates={pendingVisibilityUpdates}
+                            onToggleFavorite={onToggleFavorite}
+                            onFileVisibilityUpdate={onFileVisibilityUpdate}
+                            onRemotePull={onRemotePull}
+                            onVisualFeedback={onVisualFeedback}
+                            onAddSaveGroup={handleAddSaveGroup}
+                            enableDownload={false}
+                            activeCollectionID={collectionSummary.id}
+                            selected={selected}
+                            setSelected={setSelected}
+                            fileViewerZIndex={1301}
+                        />
+                    ) : (
+                        <EmptyState>
+                            <Typography variant="body" sx={{ fontWeight: 600 }}>
+                                {t("no_photos_found_here", {
+                                    defaultValue: "No photos found here",
+                                })}
+                            </Typography>
+                            <Typography variant="small" color="text.secondary">
+                                {t("zoom_out_to_see_photos", {
+                                    defaultValue: "Zoom out to see photos",
+                                })}
+                            </Typography>
+                        </EmptyState>
+                    )}
+                </FileListContainer>
             </SidebarContainer>
             <SidebarGradient />
         </SidebarWrapper>
     );
 }
-
-/**
- * Renders the list of photo groups or empty state
- * Responsibility: Display grouped photos or show "no photos" message
- */
-interface PhotoListProps {
-    photoGroups: PhotoGroup[];
-    thumbByFileID: Map<number, string>;
-    visiblePhotoOrder: Map<number, number>;
-    visiblePhotosWave: number;
-    onPhotoClick: (fileId: number) => void;
-    onDateVisible?: (dateLabel: string) => void;
-    scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
-}
-
-function PhotoList({
-    photoGroups,
-    thumbByFileID,
-    visiblePhotoOrder,
-    visiblePhotosWave,
-    onPhotoClick,
-    onDateVisible,
-    scrollContainerRef,
-}: PhotoListProps) {
-    if (!photoGroups.length) {
-        return (
-            <EmptyState>
-                <Typography variant="body" sx={{ fontWeight: 600 }}>
-                    {t("no_photos_found_here", {
-                        defaultValue: "No photos found here",
-                    })}
-                </Typography>
-                <Typography variant="small" color="text.secondary">
-                    {t("zoom_out_to_see_photos", {
-                        defaultValue: "Zoom out to see photos",
-                    })}
-                </Typography>
-            </EmptyState>
-        );
-    }
-
-    return (
-        <Stack spacing={1.5}>
-            {photoGroups.map(({ dateLabel, photos }) => (
-                <PhotoDateGroup
-                    key={dateLabel}
-                    dateLabel={dateLabel}
-                    photos={photos}
-                    thumbByFileID={thumbByFileID}
-                    visiblePhotoOrder={visiblePhotoOrder}
-                    visiblePhotosWave={visiblePhotosWave}
-                    onPhotoClick={onPhotoClick}
-                    onDateVisible={onDateVisible}
-                    scrollContainerRef={scrollContainerRef}
-                />
-            ))}
-        </Stack>
-    );
-}
-
-/**
- * Renders a date-grouped section of photos with intersection observer for sticky header
- * Responsibility: Display date header and thumbnail grid, notify parent when scrolled into view
- */
-interface PhotoDateGroupProps {
-    dateLabel: string;
-    photos: JourneyPoint[];
-    thumbByFileID: Map<number, string>;
-    visiblePhotoOrder: Map<number, number>;
-    visiblePhotosWave: number;
-    onPhotoClick: (fileId: number) => void;
-    onDateVisible?: (dateLabel: string) => void;
-    scrollContainerRef?: React.RefObject<HTMLDivElement | null>;
-}
-
-const PhotoDateGroup = React.memo(function PhotoDateGroup({
-    dateLabel,
-    photos,
-    thumbByFileID,
-    visiblePhotoOrder,
-    visiblePhotosWave,
-    onPhotoClick,
-    onDateVisible,
-    scrollContainerRef,
-}: PhotoDateGroupProps) {
-    const headerRef = useRef<HTMLDivElement>(null);
-
-    // Track when this date group's header scrolls out of view at the top
-    useEffect(() => {
-        const header = headerRef.current;
-        const scrollContainer = scrollContainerRef?.current;
-        if (!header || !onDateVisible) return;
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                // When header is not intersecting (scrolled past top), this date is "current"
-                if (entry && !entry.isIntersecting) {
-                    const rect = entry.boundingClientRect;
-                    const rootRect = scrollContainer?.getBoundingClientRect();
-                    const topThreshold = rootRect?.top ?? 0;
-                    if (rect.top < topThreshold + 100) {
-                        onDateVisible(dateLabel);
-                    }
-                }
-            },
-            {
-                threshold: 0,
-                root: scrollContainer ?? null,
-                rootMargin: "-100px 0px 0px 0px",
-            },
-        );
-
-        observer.observe(header);
-        return () => observer.disconnect();
-    }, [dateLabel, onDateVisible, scrollContainerRef]);
-
-    return (
-        <Stack spacing={0.75}>
-            <Box ref={headerRef} sx={{ pt: 1.5, pb: 1.5 }}>
-                <Typography variant="small" color="text.secondary">
-                    {dateLabel}
-                </Typography>
-            </Box>
-            <ThumbGrid>
-                {photos.map((photo, idx) => {
-                    const thumb = thumbByFileID.get(photo.fileId);
-                    const delay =
-                        (visiblePhotoOrder.get(photo.fileId) ?? idx) * 15;
-                    return (
-                        <ThumbImage
-                            key={`${photo.fileId}-${visiblePhotosWave}`}
-                            src={thumb}
-                            onClick={() => onPhotoClick(photo.fileId)}
-                            animationDelay={delay}
-                        />
-                    );
-                })}
-            </ThumbGrid>
-        </Stack>
-    );
-});
 
 // ============================================================================
 // Map Components
@@ -1295,10 +1061,7 @@ const MapCanvas = React.memo(function MapCanvas({
     // Memoize marker icons to prevent recreation on every render
     // Key: fileId, Value: Leaflet icon instance
     const markerIcons = useMemo(() => {
-        const icons = new Map<
-            number,
-            ReturnType<typeof createMarkerIcon>
-        >();
+        const icons = new Map<number, ReturnType<typeof createMarkerIcon>>();
         for (const photo of mapPhotos) {
             const thumbnail = getPhotoThumbnail(photo, thumbByFileID);
             icons.set(photo.fileId, createMarkerIcon(thumbnail ?? "", 68));
@@ -1407,13 +1170,34 @@ const MapControls = React.memo(function MapControls({
             <style>{`.leaflet-control-attribution { display: none !important; }`}</style>
 
             {/* Attribution info button */}
-            <Box sx={{ position: "absolute", left: 12, bottom: 12, zIndex: 1000 }}>
+            <Box
+                sx={{
+                    position: "absolute",
+                    left: 12,
+                    bottom: 12,
+                    zIndex: 1000,
+                }}
+            >
                 {showAttribution && (
                     <AttributionPopup>
                         <Typography variant="mini" color="text.primary">
-                            <a href="https://leafletjs.com" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>Leaflet</a>
+                            <a
+                                href="https://leafletjs.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "inherit" }}
+                            >
+                                Leaflet
+                            </a>
                             {" | © "}
-                            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>OpenStreetMap</a>
+                            <a
+                                href="https://www.openstreetmap.org/copyright"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "inherit" }}
+                            >
+                                OpenStreetMap
+                            </a>
                         </Typography>
                     </AttributionPopup>
                 )}
@@ -1424,9 +1208,7 @@ const MapControls = React.memo(function MapControls({
                         width: 24,
                         height: 24,
                         opacity: 0.4,
-                        "&:hover": {
-                            opacity: 0.7,
-                        },
+                        "&:hover": { opacity: 0.7 },
                     }}
                 >
                     <InfoOutlinedIcon sx={{ fontSize: 14, color: "#fff" }} />
@@ -1445,12 +1227,7 @@ const AttributionPopup = styled(Box)(({ theme }) => ({
     borderRadius: "8px",
     boxShadow: theme.shadows[4],
     whiteSpace: "nowrap",
-    "& a": {
-        textDecoration: "underline",
-        "&:hover": {
-            opacity: 0.8,
-        },
-    },
+    "& a": { textDecoration: "underline", "&:hover": { opacity: 0.8 } },
 }));
 
 /**
@@ -1736,24 +1513,9 @@ const SidebarContainer = styled(Box)(({ theme }) => ({
     boxShadow: theme.shadows[10],
     display: "flex",
     flexDirection: "column",
-    overflowY: "auto",
-    overflowX: "hidden",
+    overflow: "hidden",
     borderRadius: "24px 24px 0 0",
-    "&::-webkit-scrollbar": { width: "8px" },
-    "&::-webkit-scrollbar-track": {
-        background: "transparent",
-        borderRadius: "48px",
-    },
-    "&::-webkit-scrollbar-thumb": {
-        background: theme.palette.divider,
-        borderRadius: "48px",
-        "&:hover": { background: theme.palette.text.disabled },
-    },
-    scrollbarWidth: "thin",
-    scrollbarColor: `${theme.palette.divider} transparent`,
-    [theme.breakpoints.up("md")]: {
-        borderRadius: "48px",
-    },
+    [theme.breakpoints.up("md")]: { borderRadius: "48px" },
 }));
 
 const SidebarGradient = styled(Box)(({ theme }) => ({
@@ -1772,38 +1534,14 @@ const SidebarGradient = styled(Box)(({ theme }) => ({
     },
 }));
 
-const StickyHeader = styled(Box, {
-    shouldForwardProp: (prop) => prop !== "isVisible",
-})<{ isVisible: boolean }>(({ theme, isVisible }) => ({
-    position: "sticky",
-    top: 0,
-    zIndex: 10,
-    backgroundColor: theme.vars.palette.background.paper,
-    paddingLeft: "24px",
-    paddingRight: "24px",
-    paddingTop: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
-    display: isVisible ? "flex" : "none",
-    justifyContent: "space-between",
-    alignItems: "center",
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    [theme.breakpoints.up("md")]: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-        paddingTop: theme.spacing(4),
-    },
-}));
-
-const PhotoListContainer = styled(Box)(({ theme }) => ({
-    paddingLeft: "24px",
-    paddingRight: "24px",
-    paddingBottom: "24px",
-    position: "relative",
-    [theme.breakpoints.up("md")]: {
-        paddingLeft: "32px",
-        paddingRight: "32px",
-        paddingBottom: "32px",
-    },
+const FileListContainer = styled(Box)(({ theme }) => ({
+    flex: 1,
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    paddingLeft: "16px",
+    paddingRight: "16px",
+    [theme.breakpoints.up("md")]: { paddingLeft: "24px", paddingRight: "24px" },
 }));
 
 const CenteredBoxContainer = styled(Box)({
@@ -1831,129 +1569,3 @@ const EmptyStateContainer = styled(Box)(({ theme }) => ({
     color: theme.vars.palette.text.secondary,
     gap: theme.spacing(0.5),
 }));
-
-// ============================================================================
-// Thumbnail Components
-// ============================================================================
-
-/**
- * Animation for thumbnails appearing in sequence
- */
-const cascadeFadeIn = keyframes`
-    from {
-        opacity: 0;
-        transform: translate3d(0, 8px, 0) scale(0.99);
-    }
-    to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
-    }
-`;
-
-/**
- * Grid container for thumbnail images
- * Responsibility: Layout thumbnails in a responsive grid
- */
-function ThumbGrid({ children }: React.PropsWithChildren) {
-    return (
-        <Box
-            sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
-                gap: 0.25,
-                pb: 1,
-                overflow: "hidden",
-            }}
-        >
-            {children}
-        </Box>
-    );
-}
-
-/**
- * Individual thumbnail image with animation and hover effects
- * Responsibility: Display a single thumbnail with staggered fade-in animation
- */
-interface ThumbImageProps {
-    src: string | undefined;
-    onClick: () => void;
-    animationDelay: number;
-}
-
-// Static styles moved outside component to prevent recreation on every render
-const thumbPlaceholderBaseSx = {
-    width: "100%",
-    aspectRatio: "1",
-    borderRadius: 0,
-    border: (theme: { palette: { divider: string } }) =>
-        `1px solid ${theme.palette.divider}`,
-    opacity: 0,
-    transformOrigin: "top left",
-} as const;
-
-const thumbImageContainerBaseSx = {
-    position: "relative",
-    width: "100%",
-    aspectRatio: "1",
-    cursor: "pointer",
-    overflow: "hidden",
-    opacity: 0,
-    "&::after": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background:
-            "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%)",
-        opacity: 0,
-        transition: "opacity 0.3s ease-out",
-        pointerEvents: "none",
-    },
-    "&:hover::after": { opacity: 1 },
-} as const;
-
-const thumbImgSx = {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    border: (theme: { palette: { divider: string } }) =>
-        `1px solid ${theme.palette.divider}`,
-} as const;
-
-const ThumbImage = React.memo(function ThumbImage({
-    src,
-    onClick,
-    animationDelay,
-}: ThumbImageProps) {
-    // Only animation-related styles need to be dynamic
-    const animationSx = useMemo(
-        () => ({
-            animation: `${cascadeFadeIn} 200ms ease-out forwards`,
-            animationDelay: `${animationDelay}ms`,
-        }),
-        [animationDelay],
-    );
-
-    if (!src) {
-        return (
-            <Box
-                sx={{
-                    ...thumbPlaceholderBaseSx,
-                    ...animationSx,
-                    bgcolor: (theme) => theme.vars.palette.fill.faint,
-                }}
-            />
-        );
-    }
-
-    return (
-        <Box
-            onClick={onClick}
-            sx={{ ...thumbImageContainerBaseSx, ...animationSx }}
-        >
-            <Box component="img" src={src} alt="" sx={thumbImgSx} />
-        </Box>
-    );
-});
