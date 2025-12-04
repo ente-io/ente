@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import {
+    Avatar,
     Box,
     Drawer,
     IconButton,
@@ -11,6 +12,10 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
 import React, { useState } from "react";
+
+// =============================================================================
+// Icons
+// =============================================================================
 
 const SendIcon: React.FC = () => (
     <svg
@@ -28,6 +33,358 @@ const SendIcon: React.FC = () => (
     </svg>
 );
 
+const ReplyIcon: React.FC = () => (
+    <svg
+        width="12"
+        height="9"
+        viewBox="0 0 12 9"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M4.5241 0.242677C4.62341 0.34442 4.67919 0.482337 4.67919 0.626134C4.67919 0.76993 4.62341 0.907847 4.5241 1.00959L1.89369 3.70102H7.68483C8.3587 3.70102 9.35854 3.9036 10.2042 4.52653C11.0775 5.17045 11.7507 6.23762 11.7507 7.86116C11.7507 8.00507 11.6948 8.14309 11.5953 8.24485C11.4959 8.34661 11.361 8.40378 11.2203 8.40378C11.0797 8.40378 10.9448 8.34661 10.8453 8.24485C10.7459 8.14309 10.69 8.00507 10.69 7.86116C10.69 6.59069 10.1844 5.84982 9.58481 5.40776C8.95761 4.94544 8.18899 4.78627 7.68483 4.78627H1.89369L4.5241 7.4777C4.5762 7.52738 4.61799 7.58728 4.64698 7.65384C4.67597 7.72041 4.69155 7.79226 4.69281 7.86512C4.69406 7.93798 4.68096 8.01035 4.65429 8.07791C4.62762 8.14548 4.58792 8.20686 4.53756 8.25839C4.4872 8.30991 4.42722 8.35053 4.36118 8.37782C4.29515 8.40512 4.22442 8.41852 4.15321 8.41723C4.082 8.41595 4.01178 8.4 3.94673 8.37034C3.88167 8.34068 3.82313 8.29792 3.77457 8.24461L0.23908 4.6271C0.139767 4.52536 0.0839844 4.38744 0.0839844 4.24364C0.0839844 4.09985 0.139767 3.96193 0.23908 3.86019L3.77457 0.242677C3.87401 0.141061 4.0088 0.0839844 4.14934 0.0839844C4.28987 0.0839844 4.42466 0.141061 4.5241 0.242677Z"
+            fill="#131313"
+            stroke="#131313"
+            strokeWidth="0.166667"
+        />
+    </svg>
+);
+
+const HeartIcon: React.FC = () => (
+    <svg
+        width="16"
+        height="14"
+        viewBox="0 0 16 14"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M6.63749 12.3742C4.66259 10.885 0.75 7.4804 0.75 4.41664C0.75 2.39161 2.22368 0.75 4.25 0.75C5.3 0.75 6.35 1.10294 7.75 2.51469C9.15 1.10294 10.2 0.75 11.25 0.75C13.2763 0.75 14.75 2.39161 14.75 4.41664C14.75 7.4804 10.8374 10.885 8.86251 12.3742C8.19793 12.8753 7.30207 12.8753 6.63749 12.3742Z"
+            stroke="#131313"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
+// =============================================================================
+// Types
+// =============================================================================
+
+interface Comment {
+    id: string;
+    collectionID: number;
+    fileID?: number;
+    encData: {
+        text: string;
+        userName: string;
+        userAvatar?: string;
+    };
+    parentCommentID?: string;
+    isDeleted: boolean;
+    userID: number;
+    anonUserID?: string;
+    createdAt: number;
+    updatedAt: number;
+}
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+// Mock current user ID (for determining if comment is from current user)
+const CURRENT_USER_ID = 2;
+
+// Mock data matching the screenshot
+const mockComments: Comment[] = [
+    {
+        id: "1",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Great photo!",
+            userName: "Vishnu",
+        },
+        isDeleted: false,
+        userID: 1,
+        createdAt: Date.now() - 5 * 60 * 1000,
+        updatedAt: Date.now() - 5 * 60 * 1000,
+    },
+    {
+        id: "2",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "forgot that u had hair at that time",
+            userName: "Vishnu",
+        },
+        isDeleted: false,
+        userID: 1,
+        createdAt: Date.now() - 5 * 60 * 1000,
+        updatedAt: Date.now() - 5 * 60 * 1000,
+    },
+    {
+        id: "3",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "haha! dont talk about that",
+            userName: "Me",
+        },
+        parentCommentID: "2",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 5 * 60 * 1000,
+        updatedAt: Date.now() - 5 * 60 * 1000,
+    },
+    {
+        id: "4",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "hahaha!!!!!",
+            userName: "Shanthy",
+        },
+        parentCommentID: "2",
+        isDeleted: false,
+        userID: 3,
+        createdAt: Date.now() - 3 * 60 * 1000,
+        updatedAt: Date.now() - 3 * 60 * 1000,
+    },
+];
+
+// =============================================================================
+// Utility Functions
+// =============================================================================
+
+const formatTimeAgo = (timestamp: number): string => {
+    const diff = Date.now() - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+};
+
+const getParentComment = (
+    parentID: string | undefined,
+    comments: Comment[],
+): Comment | undefined => {
+    if (!parentID) return undefined;
+    return comments.find((c) => c.id === parentID);
+};
+
+// =============================================================================
+// Shared Comment Components
+// =============================================================================
+
+interface CommentHeaderProps {
+    userName: string;
+    timestamp: number;
+    avatarSize?: number;
+}
+
+/**
+ * Header component showing avatar, username, and timestamp.
+ * Used consistently for both root comments and replies.
+ */
+const CommentHeader: React.FC<CommentHeaderProps> = ({
+    userName,
+    timestamp,
+    avatarSize = 32,
+}) => (
+    <CommentHeaderContainer>
+        <Avatar
+            sx={{
+                width: avatarSize,
+                height: avatarSize,
+                fontSize: 14,
+                bgcolor: "#E0E0E0",
+                color: "#666",
+            }}
+        >
+            {userName[0]}
+        </Avatar>
+        <UserName>{userName}</UserName>
+        <Separator>•</Separator>
+        <Timestamp>{formatTimeAgo(timestamp)}</Timestamp>
+    </CommentHeaderContainer>
+);
+
+interface QuotedReplyProps {
+    parentComment: Comment;
+    isOwn: boolean;
+}
+
+/**
+ * Shows the quoted parent comment inside a reply bubble.
+ */
+const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
+    <QuotedReplyContainer isOwn={isOwn}>
+        <Typography
+            sx={{
+                fontWeight: 600,
+                fontSize: 12,
+                color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
+            }}
+        >
+            {parentComment.encData.userName}
+        </Typography>
+        <Typography
+            sx={{
+                fontSize: 12,
+                color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
+            }}
+        >
+            {parentComment.encData.text}
+        </Typography>
+    </QuotedReplyContainer>
+);
+
+interface CommentActionsProps {
+    onReply: () => void;
+}
+
+/**
+ * Action buttons (like, reply) shown below comment bubbles.
+ */
+const CommentActions: React.FC<CommentActionsProps> = ({ onReply }) => (
+    <ActionsContainer>
+        <ActionButton>
+            <HeartIcon />
+        </ActionButton>
+        <ActionButton onClick={onReply}>
+            <ReplyIcon />
+        </ActionButton>
+    </ActionsContainer>
+);
+
+// =============================================================================
+// Comment Type Components
+// =============================================================================
+
+interface RootCommentProps {
+    comment: Comment;
+    onReply: (comment: Comment) => void;
+}
+
+/**
+ * A top-level comment (not a reply to another comment).
+ * Shows header with avatar, username, timestamp, then the comment bubble.
+ */
+const RootComment: React.FC<RootCommentProps> = ({ comment, onReply }) => (
+    <CommentBubbleWrapper isOwn={false}>
+        <CommentBubbleInner>
+            <CommentBubble isOwn={false}>
+                <CommentText isOwn={false}>{comment.encData.text}</CommentText>
+            </CommentBubble>
+            <CommentActions onReply={() => onReply(comment)} />
+        </CommentBubbleInner>
+    </CommentBubbleWrapper>
+);
+
+interface ReplyCommentProps {
+    comment: Comment;
+    parentComment?: Comment;
+    isOwn: boolean;
+    onReply: (comment: Comment) => void;
+}
+
+/**
+ * A reply comment. Can be from current user (right-aligned, green)
+ * or from another user (left-aligned, gray).
+ */
+const ReplyComment: React.FC<ReplyCommentProps> = ({
+    comment,
+    parentComment,
+    isOwn,
+    onReply,
+}) => (
+    <ReplyContainer>
+        {!isOwn && (
+            <CommentHeader
+                userName={comment.encData.userName}
+                timestamp={comment.createdAt}
+            />
+        )}
+        {isOwn && <OwnTimestamp>{formatTimeAgo(comment.createdAt)}</OwnTimestamp>}
+        <CommentBubbleWrapper isOwn={isOwn}>
+            <CommentBubbleInner>
+                <CommentBubble isOwn={isOwn}>
+                    {parentComment && (
+                        <QuotedReply
+                            parentComment={parentComment}
+                            isOwn={isOwn}
+                        />
+                    )}
+                    <CommentText isOwn={isOwn}>
+                        {comment.encData.text}
+                    </CommentText>
+                </CommentBubble>
+                <CommentActions onReply={() => onReply(comment)} />
+            </CommentBubbleInner>
+        </CommentBubbleWrapper>
+    </ReplyContainer>
+);
+
+interface CommentThreadProps {
+    rootComments: Comment[];
+    allComments: Comment[];
+    userName: string;
+    timestamp: number;
+    onReply: (comment: Comment) => void;
+}
+
+/**
+ * A thread of comments from a single user, including any replies.
+ * Groups consecutive comments from the same user under one header.
+ */
+const CommentThread: React.FC<CommentThreadProps> = ({
+    rootComments,
+    allComments,
+    userName,
+    timestamp,
+    onReply,
+}) => (
+    <ThreadContainer>
+        <CommentHeader userName={userName} timestamp={timestamp} />
+        {rootComments.map((comment) => {
+            const replies = allComments.filter(
+                (r) => r.parentCommentID === comment.id,
+            );
+            return (
+                <Box key={comment.id}>
+                    <RootComment comment={comment} onReply={onReply} />
+                    {replies.map((reply) => {
+                        const isOwn = reply.userID === CURRENT_USER_ID;
+                        const parent = getParentComment(
+                            reply.parentCommentID,
+                            allComments,
+                        );
+                        return (
+                            <ReplyComment
+                                key={reply.id}
+                                comment={reply}
+                                parentComment={parent}
+                                isOwn={isOwn}
+                                onReply={onReply}
+                            />
+                        );
+                    })}
+                </Box>
+            );
+        })}
+    </ThreadContainer>
+);
+
+// =============================================================================
+// Main Component
+// =============================================================================
+
 export type CommentsSidebarProps = ModalVisibilityProps;
 
 /**
@@ -38,78 +395,101 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     onClose,
 }) => {
     const [comment, setComment] = useState("");
+    const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
 
     const handleSend = () => {
         if (!comment.trim()) return;
-
         // TODO: Call API to store comment
         setComment("");
+        setReplyingTo(null);
     };
 
+    const handleReply = (commentToReply: Comment) => {
+        setReplyingTo(commentToReply);
+    };
+
+    // Group consecutive root comments by same user
+    const groupedComments = mockComments.reduce<
+        { user: Comment; comments: Comment[] }[]
+    >((acc, comment) => {
+        // Skip replies - they'll be shown inline with their parent
+        if (comment.parentCommentID) return acc;
+
+        const lastGroup = acc[acc.length - 1];
+        if (lastGroup && lastGroup.user.userID === comment.userID) {
+            lastGroup.comments.push(comment);
+        } else {
+            acc.push({ user: comment, comments: [comment] });
+        }
+        return acc;
+    }, []);
+
     return (
-        <CommentsSidebarDrawer open={open} onClose={onClose} anchor="right">
-            <Stack
-                direction="row"
-                sx={{
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    mb: 2,
-                }}
-            >
+        <SidebarDrawer open={open} onClose={onClose} anchor="right">
+            <Header>
                 <Typography sx={{ color: "#000", fontWeight: 600 }}>
-                    {`12 ${t("comments")}`}
+                    {`${mockComments.length} ${t("comments")}`}
                 </Typography>
-                <IconButton
-                    onClick={onClose}
-                    sx={{
-                        backgroundColor: "#F5F5F7",
-                        color: "#000",
-                        padding: "8px",
-                        "&:hover": {
-                            backgroundColor: "#E5E5E7",
-                        },
-                    }}
-                >
+                <CloseButton onClick={onClose}>
                     <CloseIcon sx={{ fontSize: 22 }} />
-                </IconButton>
-            </Stack>
-            <Stack sx={{ flex: 1 }}>
-                {/* Comments content will go here */}
-            </Stack>
-            <CommentInputContainer>
-                <CommentInputWrapper>
-                    <CommentInput
+                </CloseButton>
+            </Header>
+
+            <CommentsContainer>
+                {groupedComments.map((group) => (
+                    <CommentThread
+                        key={group.user.id}
+                        rootComments={group.comments}
+                        allComments={mockComments}
+                        userName={group.user.encData.userName}
+                        timestamp={group.user.createdAt}
+                        onReply={handleReply}
+                    />
+                ))}
+            </CommentsContainer>
+
+            <InputContainer>
+                {replyingTo && (
+                    <ReplyingToBar>
+                        <Typography sx={{ fontSize: 12, color: "#666" }}>
+                            Replying to{" "}
+                            <strong>{replyingTo.encData.userName}</strong>
+                        </Typography>
+                        <IconButton
+                            size="small"
+                            onClick={() => setReplyingTo(null)}
+                            sx={{ color: "#666", p: 0.5 }}
+                        >
+                            <CloseIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
+                    </ReplyingToBar>
+                )}
+                <InputWrapper>
+                    <StyledTextField
                         fullWidth
                         multiline
                         minRows={1}
+                        autoFocus
                         placeholder="Say something nice!"
                         variant="standard"
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                     />
-                </CommentInputWrapper>
-                <IconButton
-                    sx={{
-                        position: "absolute",
-                        right: 12,
-                        bottom: 8.5,
-                        color: "#000",
-                        width: 42,
-                        height: 42,
-                        "&:hover": {
-                            backgroundColor: "rgba(0, 0, 0, 0.1)",
-                        },
-                    }}
-                    onClick={handleSend}
-                >
+                </InputWrapper>
+                <SendButton onClick={handleSend}>
                     <SendIcon />
-                </IconButton>
-            </CommentInputContainer>
-        </CommentsSidebarDrawer>
+                </SendButton>
+            </InputContainer>
+        </SidebarDrawer>
     );
 };
 
-const CommentsSidebarDrawer = styled(Drawer)(() => ({
+// =============================================================================
+// Styled Components
+// =============================================================================
+
+// Drawer & Layout
+const SidebarDrawer = styled(Drawer)(() => ({
     "& .MuiDrawer-paper": {
         width: "500px",
         maxWidth: "calc(100% - 32px)",
@@ -117,9 +497,10 @@ const CommentsSidebarDrawer = styled(Drawer)(() => ({
         margin: "16px",
         borderRadius: "36px",
         backgroundColor: "#fff",
-        padding: "32px",
+        padding: "24px 24px 32px 24px",
         boxShadow: "none",
-        // Mobile view: full screen, no margin, no rounded corners
+        display: "flex",
+        flexDirection: "column",
         "@media (max-width: 450px)": {
             width: "100%",
             maxWidth: "100%",
@@ -128,22 +509,160 @@ const CommentsSidebarDrawer = styled(Drawer)(() => ({
             borderRadius: 0,
         },
     },
-    // No backdrop overlay
     "& .MuiBackdrop-root": {
         backgroundColor: "transparent",
     },
 }));
 
-const CommentInputContainer = styled(Box)(() => ({
+const Header = styled(Stack)(() => ({
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 48,
+}));
+
+const CloseButton = styled(IconButton)(() => ({
+    backgroundColor: "#F5F5F7",
+    color: "#000",
+    padding: "8px",
+    "&:hover": {
+        backgroundColor: "#E5E5E7",
+    },
+}));
+
+const CommentsContainer = styled(Box)(() => ({
+    flex: 1,
+    overflow: "auto",
+    marginBottom: 16,
+    marginRight: -24,
+    "&::-webkit-scrollbar": {
+        width: "6px",
+    },
+    "&::-webkit-scrollbar-track": {
+        background: "transparent",
+    },
+    "&::-webkit-scrollbar-thumb": {
+        background: "rgba(0, 0, 0, 0.2)",
+        borderRadius: "3px",
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
+}));
+
+// Comment Header
+const CommentHeaderContainer = styled(Box)(() => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+}));
+
+const UserName = styled(Typography)(() => ({
+    fontWeight: 600,
+    color: "#000",
+    fontSize: 14,
+}));
+
+const Separator = styled(Typography)(() => ({
+    color: "#666",
+    fontSize: 12,
+    marginLeft: -4,
+}));
+
+const Timestamp = styled(Typography)(() => ({
+    color: "#666",
+    fontSize: 12,
+}));
+
+const OwnTimestamp = styled(Typography)(() => ({
+    color: "#666",
+    fontSize: 12,
+    textAlign: "right",
+    marginBottom: 4,
+    paddingRight: 52,
+}));
+
+// Comment Bubbles
+const ThreadContainer = styled(Box)(() => ({
+    marginBottom: 24,
+}));
+
+const ReplyContainer = styled(Box)(() => ({
+    marginTop: 12,
+}));
+
+const CommentBubbleWrapper = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
+    display: "flex",
+    justifyContent: isOwn ? "flex-end" : "flex-start",
+    width: "100%",
+    paddingBottom: 28,
+    paddingRight: isOwn ? 52 : 0,
+    paddingLeft: isOwn ? 0 : 28,
+}));
+
+const CommentBubbleInner = styled(Box)(() => ({
+    position: "relative",
+    maxWidth: "85%",
+}));
+
+const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
+    backgroundColor: isOwn ? "#1DB954" : "#F0F0F0",
+    borderRadius: isOwn ? "20px 6px 20px 20px" : "6px 20px 20px 20px",
+    padding: "20px 40px 20px 20px",
+    width: "fit-content",
+}));
+
+const CommentText = styled(Typography)<{ isOwn: boolean }>(({ isOwn }) => ({
+    color: isOwn ? "#fff" : "#000",
+    fontSize: 14,
+    whiteSpace: "pre-wrap",
+}));
+
+const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
+    borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
+    paddingLeft: 10,
+    marginBottom: 8,
+}));
+
+// Actions
+const ActionsContainer = styled(Box)(() => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 9999,
+    padding: "10px 14px",
+    border: "2px solid #fff",
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    transform: "translate(50%, 50%)",
+}));
+
+const ActionButton = styled(Box)(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+}));
+
+// Input Area
+const InputContainer = styled(Box)(() => ({
     position: "relative",
     backgroundColor: "#F3F3F3",
     borderRadius: "20px",
-    border: "2px solid rgba(0, 0, 0, 0.008)",
-    margin: "-16px",
-    marginTop: 0,
+    margin: "0 -8px -16px -8px",
 }));
 
-const CommentInputWrapper = styled(Box)(() => ({
+const ReplyingToBar = styled(Box)(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "8px 16px",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+}));
+
+const InputWrapper = styled(Box)(() => ({
     padding: "8px 48px 8px 16px",
     maxHeight: "300px",
     overflow: "auto",
@@ -164,7 +683,7 @@ const CommentInputWrapper = styled(Box)(() => ({
     scrollbarColor: "rgba(0, 0, 0, 0.3) transparent",
 }));
 
-const CommentInput = styled(TextField)(() => ({
+const StyledTextField = styled(TextField)(() => ({
     "& .MuiInput-root": {
         "&::before, &::after": {
             display: "none",
@@ -177,5 +696,17 @@ const CommentInput = styled(TextField)(() => ({
             color: "#666",
             opacity: 1,
         },
+    },
+}));
+
+const SendButton = styled(IconButton)(() => ({
+    position: "absolute",
+    right: 12,
+    bottom: 8.5,
+    color: "#000",
+    width: 42,
+    height: 42,
+    "&:hover": {
+        backgroundColor: "rgba(0, 0, 0, 0.1)",
     },
 }));
