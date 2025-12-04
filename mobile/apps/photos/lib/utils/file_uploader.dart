@@ -37,6 +37,7 @@ import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/sync/device_folder_selection_cache.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
@@ -167,7 +168,11 @@ class FileUploader {
 
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
-  Future<EnteFile> upload(EnteFile file, int collectionID) {
+  Future<EnteFile> upload(
+    EnteFile file,
+    int collectionID, {
+    String? queueSource,
+  }) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] FileUploader.upload() called for ${file.title} "
       "(localID: ${file.localID}, collectionID: $collectionID, "
@@ -189,7 +194,12 @@ class FileUploader {
         "(queue size before: ${_queue.length})",
       );
       final completer = Completer<EnteFile>();
-      _queue[localID] = FileUploadItem(file, collectionID, completer);
+      _queue[localID] = FileUploadItem(
+        file,
+        collectionID,
+        completer,
+        queueSource: queueSource,
+      );
       _allBackups[localID] = BackupItem(
         status: BackupItemStatus.inQueue,
         file: file,
@@ -296,6 +306,20 @@ class FileUploader {
     _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 
+  void _removeAndSkip(FileUploadItem entry, [Error? error]) {
+    final localId = entry.file.localID;
+    if (localId == null) {
+      return;
+    }
+    _queue.remove(localId);
+    _allBackups.remove(localId);
+    if (_totalCountInUploadSession > 0) {
+      _totalCountInUploadSession--;
+    }
+    Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    entry.completer.completeError(error ?? SilentlyCancelUploadsError());
+  }
+
   void _pollQueue() {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _pollQueue() called. Queue size: ${_queue.length}, "
@@ -362,6 +386,25 @@ class FileUploader {
           _logger.internalInfo("[UPLOAD-DEBUG] No non-video entry available");
         }
       }
+      if (pendingEntry != null &&
+          flagService.enableBackupFolderSync &&
+          !isProcessBg &&
+          pendingEntry.queueSource != null &&
+          !DeviceFolderSelectionCache.instance
+              .isSelected(pendingEntry.queueSource!)) {
+        final localId = pendingEntry.file.localID;
+        if (localId != null) {
+          unawaited(
+            FilesDB.instance.cleanupByLocalIDAndCollection(
+              localId,
+              pendingEntry.collectionID,
+            ),
+          );
+        }
+        _removeAndSkip(pendingEntry);
+        _pollQueue();
+        return;
+      }
       if (pendingEntry != null) {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Starting upload for ${pendingEntry.file.title}. "
@@ -375,6 +418,7 @@ class FileUploader {
         _encryptAndUploadFileToCollection(
           pendingEntry.file,
           pendingEntry.collectionID,
+          queueSource: pendingEntry.queueSource,
         );
         _logger.internalInfo(
           "[UPLOAD-DEBUG] _encryptAndUploadFileToCollection() initiated for ${pendingEntry.file.title}",
@@ -396,6 +440,7 @@ class FileUploader {
   Future<EnteFile?> _encryptAndUploadFileToCollection(
     EnteFile file,
     int collectionID, {
+    String? queueSource,
     bool forcedUpload = false,
   }) async {
     _logger.internalInfo(
@@ -413,6 +458,14 @@ class FileUploader {
     );
     final localID = file.localID!;
     try {
+      if (flagService.enableBackupFolderSync &&
+          !isProcessBg &&
+          queueSource != null &&
+          !DeviceFolderSelectionCache.instance.isSelected(queueSource)) {
+        await FilesDB.instance
+            .cleanupByLocalIDAndCollection(localID, collectionID);
+        throw BackupFolderDeselectedError();
+      }
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Calling _tryToUpload() for ${file.title} with ${kFileUploadTimeout.inSeconds}s timeout...",
       );
@@ -434,7 +487,13 @@ class FileUploader {
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       return uploadedFile;
     } catch (e) {
-      if (e is LockAlreadyAcquiredError) {
+      if (e is BackupFolderDeselectedError) {
+        final entry = _queue[localID];
+        if (entry != null) {
+          _removeAndSkip(entry, e);
+        }
+        return null;
+      } else if (e is LockAlreadyAcquiredError) {
         _queue[localID]!.status = UploadStatus.inBackground;
         _allBackups[localID] = _allBackups[localID]!
             .copyWith(status: BackupItemStatus.inBackground);
@@ -1768,12 +1827,14 @@ class FileUploadItem {
   final EnteFile file;
   final int collectionID;
   final Completer<EnteFile> completer;
+  final String? queueSource;
   UploadStatus status;
 
   FileUploadItem(
     this.file,
     this.collectionID,
     this.completer, {
+    this.queueSource,
     this.status = UploadStatus.notStarted,
   });
 }

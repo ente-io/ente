@@ -12,25 +12,26 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
-import "package:photos/events/diff_sync_complete_event.dart";
+import 'package:photos/events/diff_sync_complete_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import "package:photos/extensions/logger_extension.dart";
-import "package:photos/main.dart" show isProcessBg;
+import 'package:photos/extensions/logger_extension.dart';
+import 'package:photos/main.dart' show isProcessBg;
 import 'package:photos/models/device_collection.dart';
-import "package:photos/models/file/extensions/file_props.dart";
+import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/upload_strategy.dart';
-import "package:photos/service_locator.dart";
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
-import "package:photos/services/language_service.dart";
+import 'package:photos/services/language_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
-import "package:photos/services/notification_service.dart";
+import 'package:photos/services/notification_service.dart';
+import 'package:photos/services/sync/device_folder_selection_cache.dart';
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -82,8 +83,12 @@ class RemoteSyncService {
 
   RemoteSyncService._privateConstructor();
 
-  void init(SharedPreferences preferences) {
+  Future<void> init(SharedPreferences preferences) async {
     _prefs = preferences;
+
+    if (flagService.enableBackupFolderSync) {
+      await DeviceFolderSelectionCache.instance.init();
+    }
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
@@ -453,9 +458,16 @@ class RemoteSyncService {
   Future<void> updateDeviceFolderSyncStatus(
     Map<String, bool> syncStatusUpdate,
   ) async {
+    final cache = DeviceFolderSelectionCache.instance;
     final Set<int> oldCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     await _db.updateDevicePathSyncStatus(syncStatusUpdate);
+    if (flagService.enableBackupFolderSync) {
+      if (!cache.isInitialized) {
+        await cache.init();
+      }
+      cache.update(syncStatusUpdate);
+    }
     final Set<int> newCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
@@ -548,6 +560,10 @@ class RemoteSyncService {
     final collection =
         await _collectionsService.getOrCreateForPath(deviceCollection.name);
     await _db.updateDeviceCollection(deviceCollection.id, collection.id);
+    if (flagService.enableBackupFolderSync) {
+      DeviceFolderSelectionCache.instance
+          .setCollectionIdMapping(collection.id, deviceCollection.id);
+    }
     return collection.id;
   }
 
@@ -651,6 +667,8 @@ class RemoteSyncService {
       );
     }
     final List<Future> futures = [];
+    final bool enableBackupFolderSync =
+        flagService.enableBackupFolderSync && !isProcessBg;
 
     _logger.internalInfo(
       "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
@@ -680,7 +698,16 @@ class RemoteSyncService {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
         );
-        _uploadFile(file, collectionID, futures);
+        final queueSource = enableBackupFolderSync
+            ? DeviceFolderSelectionCache.instance
+                .getPathIdForCollectionId(collectionID)
+            : null;
+        _uploadFile(
+          file,
+          collectionID,
+          futures,
+          queueSource: queueSource,
+        );
         queuedCount++;
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Successfully queued file ${file.title} ($queuedCount queued so far)",
@@ -848,13 +875,20 @@ class RemoteSyncService {
     return hasUploaded;
   }
 
-  void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
+  void _uploadFile(
+    EnteFile file,
+    int collectionID,
+    List<Future> futures, {
+    String? queueSource,
+  }) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
       "(localID: ${file.localID}, collectionID: $collectionID). "
       "Calling FileUploader.upload()...",
     );
-    final future = _uploader.upload(file, collectionID).then((uploadedFile) {
+    final future = _uploader
+        .upload(file, collectionID, queueSource: queueSource)
+        .then((uploadedFile) {
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Upload completed successfully for ${uploadedFile.title}",
       );
@@ -910,6 +944,12 @@ class RemoteSyncService {
     EnteFile file,
   ) {
     if (error == null) {
+      return;
+    }
+    if (error is BackupFolderDeselectedError) {
+      return;
+    }
+    if (error is SilentlyCancelUploadsError) {
       return;
     }
     if (error is InvalidFileError) {

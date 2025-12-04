@@ -67,6 +67,8 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
+  bool get enableBackupFolderSync => internalUser;
+
   bool get enableUploadV2 => ((flags.serverApiFlag & _uploadV2Flag) != 0);
 
   bool get enableVectorDb => hasGrantedMLConsent;

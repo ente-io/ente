@@ -1419,6 +1419,41 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  Future<void> cleanupByLocalIDAndCollection(
+    String localId,
+    int collectionId,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final existsInOtherCollection = (await db.getAll(
+      '''
+      SELECT 1 FROM $filesTable
+      WHERE $columnLocalID = ? AND $columnCollectionID != ?
+      LIMIT 1;
+      ''',
+      [localId, collectionId],
+    ))
+        .isNotEmpty;
+
+    if (existsInOtherCollection) {
+      await db.execute(
+        '''
+        DELETE FROM $filesTable WHERE $columnLocalID = ? AND $columnCollectionID = ?
+        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+        ''',
+        [localId, collectionId],
+      );
+    } else {
+      await db.execute(
+        '''
+        UPDATE $filesTable SET $columnCollectionID = NULL
+        WHERE $columnLocalID = ? AND $columnCollectionID = ?
+        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+        ''',
+        [localId, collectionId],
+      );
+    }
+  }
+
   Future<Set<String>> getLocalIDsPresentInEntries(
     List<EnteFile> existingFiles,
     int collectionID,
