@@ -93,6 +93,8 @@ class FlagService {
 
   bool get pauseStreamDuringUpload => internalUser;
 
+  bool get streamEnabledByDefault => internalUser;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
