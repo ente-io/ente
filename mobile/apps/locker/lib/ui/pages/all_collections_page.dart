@@ -44,7 +44,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   @override
   void initState() {
     super.initState();
-    _loadCollections();
+    _loadCollections(showLoading: true);
     _collectionsUpdatedSub =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       if (!mounted) return;

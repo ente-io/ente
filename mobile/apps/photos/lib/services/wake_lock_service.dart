@@ -6,6 +6,7 @@ enum WakeLockFor {
   fasterBackupsOniOSByKeepingScreenAwake,
   machineLearningSettingsScreen,
   handlingMediaKitEdgeCase,
+  rewindViewer,
 }
 
 /// Use this wrapper to use wakelock. This class makes sure that the wakelock

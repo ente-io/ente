@@ -21,7 +21,6 @@ import "package:locker/ui/drawer/drawer_page.dart";
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/save_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
-import "package:locker/ui/utils/legacy_utils.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -89,26 +88,6 @@ class CustomLockerAppBar extends StatelessWidget
                   Image.asset(
                     'assets/locker-logo.png',
                     height: 28,
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InkWell(
-                      onTap: () => openLegacyPage(context),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
-                        ),
-                        child: Icon(
-                          Icons.favorite_rounded,
-                          color: colorScheme.primary700,
-                          size: 20,
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),

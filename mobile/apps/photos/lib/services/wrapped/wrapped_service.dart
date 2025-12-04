@@ -110,8 +110,7 @@ class WrappedService {
         );
         updateResult(cached);
         if (_shouldScheduleDailyRecompute(cached)) {
-          _logger
-              .info("Scheduling daily Wrapped recompute for $_kWrappedYear");
+          _logger.info("Scheduling daily Wrapped recompute for $_kWrappedYear");
           unawaited(
             _runCompute(reason: "daily", bypassFlag: false),
           );
@@ -260,7 +259,8 @@ class WrappedService {
       return false;
     }
     final DateTime now = DateTime.now();
-    if (_dateOnly(now).isBefore(_dateOnly(_kAvailabilityStart))) {
+    if (!flagService.internalUser &&
+        _dateOnly(now).isBefore(_dateOnly(_kAvailabilityStart))) {
       return false;
     }
     final DateTime generatedDate = _dateOnly(result.generatedAt.toLocal());

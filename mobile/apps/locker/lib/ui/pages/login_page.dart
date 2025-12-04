@@ -251,7 +251,6 @@ class _LoginPageState extends State<LoginPage> {
       body: context.l10n.unlockLockerNewUserBody,
       buttonLabel: context.l10n.okay,
       assetPath: "assets/file_lock.png",
-      icon: const SizedBox.shrink(),
     );
   }
 

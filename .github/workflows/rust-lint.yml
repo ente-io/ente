@@ -1,10 +1,14 @@
 name: "Lint (rust)"
 
 on:
-    # Run on every pull request (open or push to it) that changes rust/
+    # Run on every pull request (open or push to it) that changes Rust code
+    #
+    # See also: rust-lint-cli.yml
     pull_request:
         paths:
-            - "rust/**"
+            - "rust/core/**"
+            - "web/packages/wasm/Cargo.*"
+            - "web/packages/wasm/src/**"
             - ".github/workflows/rust-lint.yml"
 
 permissions:
@@ -21,9 +25,6 @@ env:
 jobs:
     lint:
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: rust
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -34,11 +35,38 @@ jobs:
                   path: |
                       ~/.cargo/registry
                       ~/.cargo/git
-                      target
-                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                      rust/core/target
+                      web/packages/wasm/target
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('rust/core/Cargo.lock', 'web/packages/wasm/Cargo.lock') }}
 
-            - run: cargo fmt --check
+            - name: Check formatting (core)
+              working-directory: rust/core
+              run: cargo fmt --check
 
-            - run: cargo clippy --all-targets --all-features
+            - name: Run clippy (core)
+              working-directory: rust/core
+              run: cargo clippy --all-targets --all-features
 
-            - run: cargo build
+            - name: Build (core)
+              working-directory: rust/core
+              run: cargo build
+
+            - name: Test (core)
+              working-directory: rust/core
+              run: cargo test
+
+            - name: Check formatting (wasm)
+              working-directory: web/packages/wasm
+              run: cargo fmt --check
+
+            - name: Run clippy (wasm)
+              working-directory: web/packages/wasm
+              run: cargo clippy --all-targets --all-features
+
+            - name: Build (wasm)
+              working-directory: web/packages/wasm
+              run: cargo build
+
+            - name: Test (wasm)
+              working-directory: web/packages/wasm
+              run: cargo test

@@ -2,6 +2,7 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
+import "package:locker/core/errors.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -15,6 +16,7 @@ import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
+import "package:locker/ui/components/subscription_required_dialog.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -263,10 +265,14 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        showToast(
-          context,
-          '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
-        );
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          await showSubscriptionRequiredDialog(context);
+        } else {
+          showToast(
+            context,
+            context.l10n.failedToCreateShareLink,
+          );
+        }
       }
     }
   }

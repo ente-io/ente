@@ -70,55 +70,22 @@ class _StoryCard extends StatelessWidget {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(24),
           clipBehavior: Clip.antiAlias,
-          child: isBadge
-              ? Padding(
-                  padding: EdgeInsets.zero,
-                  child: _CardContent(
-                    card: card,
-                    colorScheme: colorScheme,
-                    textTheme: textTheme,
-                  ),
-                )
-              : Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _StoryCardBackground(
-                      card: card,
-                      colorScheme: colorScheme,
-                    ),
-                    if (showMeshGradient)
-                      _MeshGradientOverlay(
-                        variantIndex: gradientVariantIndex,
-                      ),
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              colorScheme.backgroundElevated
-                                  .withValues(alpha: 0.45),
-                              colorScheme.backgroundElevated
-                                  .withValues(alpha: 0.2),
-                              colorScheme.backgroundElevated
-                                  .withValues(alpha: 0.08),
-                            ],
-                            stops: const <double>[0.0, 0.6, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: _kStoryCardInnerPadding,
-                      child: _CardContent(
-                        card: card,
-                        colorScheme: colorScheme,
-                        textTheme: textTheme,
-                      ),
-                    ),
-                  ],
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.bottomCenter,
+                child: _StoryDesignSurface(
+                  isBadge: isBadge,
+                  showMeshGradient: showMeshGradient,
+                  gradientVariantIndex: gradientVariantIndex,
+                  card: card,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -409,6 +376,105 @@ class _GenericCardContent extends StatelessWidget {
           ),
         const Spacer(),
       ],
+    );
+  }
+}
+
+class _StoryDesignSurface extends StatelessWidget {
+  const _StoryDesignSurface({
+    required this.isBadge,
+    required this.showMeshGradient,
+    required this.gradientVariantIndex,
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final bool isBadge;
+  final bool showMeshGradient;
+  final int gradientVariantIndex;
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: _kStoryDesignWidth,
+      height: _kStoryDesignHeight + _kStoryControlReserveHeight,
+      child: isBadge
+          ? Column(
+              children: [
+                Expanded(
+                  child: _CardContent(
+                    card: card,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
+                  ),
+                ),
+                const SizedBox(
+                  height:
+                      _kStoryControlReserveHeight - _kStoryControlBottomPadding,
+                ),
+                const SizedBox(height: _kStoryControlBottomPadding),
+              ],
+            )
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _StoryCardBackground(
+                    card: card,
+                    colorScheme: colorScheme,
+                  ),
+                  if (showMeshGradient)
+                    _MeshGradientOverlay(
+                      variantIndex: gradientVariantIndex,
+                    ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            colorScheme.backgroundElevated
+                                .withValues(alpha: 0.45),
+                            colorScheme.backgroundElevated
+                                .withValues(alpha: 0.2),
+                            colorScheme.backgroundElevated
+                                .withValues(alpha: 0.08),
+                          ],
+                          stops: const <double>[0.0, 0.6, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: _kStoryCardInnerPadding,
+                            child: _CardContent(
+                              card: card,
+                              colorScheme: colorScheme,
+                              textTheme: textTheme,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: _kStoryControlReserveHeight -
+                              _kStoryControlBottomPadding,
+                        ),
+                        const SizedBox(height: _kStoryControlBottomPadding),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

@@ -31,7 +31,6 @@ class _BadgeCardContent extends StatelessWidget {
     final _BadgeVisuals visuals = _badgeVisualsFor(card);
     final _WrappedViewerPageState? viewerState =
         context.findAncestorStateOfType<_WrappedViewerPageState>();
-    final GlobalKey? shareKey = viewerState?.shareButtonKey;
     final bool hideSharePill = viewerState?.hideBadgeSharePill ?? false;
 
     final _BadgeLayoutConstants layout = _BadgeLayoutConstants(
@@ -164,7 +163,7 @@ class _BadgeCardContent extends StatelessWidget {
                           onTap: viewerState == null
                               ? null
                               : () => unawaited(viewerState.shareCurrentCard()),
-                          shareButtonKey: shareKey,
+                          shareButtonKey: null,
                           size: Size(metrics.shareWidth, metrics.shareHeight),
                         ),
                       ),
