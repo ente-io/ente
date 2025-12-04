@@ -4,8 +4,8 @@ import 'package:bip39/bip39.dart' as bip39;
 import "package:crypto/crypto.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
+import "package:ente_sharing/components/gradient_button.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/loading_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -85,8 +85,8 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildHeader(context, colorScheme),
-              const SizedBox(height: 12),
+              _buildHeader(context, colorScheme, textStyle),
+              const SizedBox(height: 20),
               FutureBuilder<String>(
                 future: _getPublicKey(),
                 builder: (context, snapshot) {
@@ -133,10 +133,15 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
   Widget _buildHeader(
     BuildContext context,
     EnteColorScheme colorScheme,
+    EnteTextTheme textStyle,
   ) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Text(
+          context.strings.verify,
+          style: textStyle.largeBold,
+        ),
         GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Container(
@@ -165,11 +170,6 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          context.strings.verify,
-          style: textStyle.largeBold,
-        ),
-        const SizedBox(height: 8),
-        Text(
           context.strings.emailNoEnteAccount(widget.email),
           style: textStyle.small.copyWith(color: colorScheme.textMuted),
           textAlign: TextAlign.center,
@@ -196,11 +196,6 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          context.strings.verify,
-          style: textStyle.largeBold,
-        ),
-        const SizedBox(height: 8),
         Text(
           subTitle,
           style: textStyle.small.copyWith(color: colorScheme.textMuted),

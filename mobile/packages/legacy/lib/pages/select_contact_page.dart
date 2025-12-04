@@ -7,7 +7,6 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -82,7 +81,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -314,17 +313,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
   Future<void> _onAddContactTap() async {
     final emailToAdd = selectedEmail.isNotEmpty ? selectedEmail : _email;
-    final choiceResult = await showChoiceActionSheet(
-      context,
-      title: context.strings.warning,
-      body: context.strings.confirmAddingTrustedContact(
-        emailToAdd,
-        _selectedRecoveryDays,
-      ),
-      firstButtonLabel: context.strings.proceed,
-      isCritical: true,
+    final confirmed = await _showAddContactConfirmationDialog(
+      emailToAdd,
+      _selectedRecoveryDays,
     );
-    if (choiceResult != null && choiceResult.action == ButtonAction.first) {
+    if (confirmed == true) {
       try {
         final r = await EmergencyContactService.instance.addContact(
           context,
@@ -344,6 +337,97 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         }
       }
     }
+  }
+
+  Future<bool?> _showAddContactConfirmationDialog(
+    String email,
+    int recoveryDays,
+  ) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: true,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.backdropBase,
+            border: Border(top: BorderSide(color: colorScheme.strokeFaint)),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pop(),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: colorScheme.backgroundElevated,
+                            ),
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.close,
+                              size: 24,
+                              color: colorScheme.textBase,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: Image.asset("assets/warning-blue.png"),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    context.strings.warning,
+                    style: textTheme.h3Bold,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    context.strings.confirmAddingTrustedContact(
+                      email,
+                      recoveryDays,
+                    ),
+                    style: textTheme.body.copyWith(
+                      color: colorScheme.textMuted,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      onTap: () => Navigator.of(context).pop(true),
+                      text: context.strings.proceed,
+                      backgroundColor: colorScheme.warning400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildVerifyLink(EnteTextTheme textTheme) {
