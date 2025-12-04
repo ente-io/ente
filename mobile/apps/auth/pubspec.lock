@@ -1027,6 +1027,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.9.5"
+  launcher_icon_switcher:
+    dependency: "direct main"
+    description:
+      name: launcher_icon_switcher
+      sha256: a1e0778ed016107077f54f22b4987f322315de8d3df31a6ed494134f55c0ff41
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   leak_tracker:
     dependency: transitive
     description:
