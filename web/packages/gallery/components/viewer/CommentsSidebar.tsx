@@ -1308,6 +1308,7 @@ const SidebarDrawer = styled(Drawer)(() => ({
         backgroundColor: "#fff",
         padding: "24px 24px 32px 24px",
         boxShadow: "none",
+        border: "1px solid #E0E0E0",
         display: "flex",
         flexDirection: "column",
         "@media (max-width: 450px)": {

@@ -148,6 +148,10 @@ type FileViewerPhotoSwipeOptions = Pick<
      */
     onViewLikes: () => void;
     /**
+     * Called when the user clicks the like button (left-click on heart).
+     */
+    onLikeClick: () => void;
+    /**
      * Called when the user activates the download action on a file.
      */
     onDownload: (annotatedFile: FileViewerAnnotatedFile) => void;
@@ -212,6 +216,7 @@ export class FileViewerPhotoSwipe {
         onViewInfo,
         onViewComments,
         onViewLikes,
+        onLikeClick,
         onDownload,
         onMore,
     }: FileViewerPhotoSwipeOptions) {
@@ -1439,10 +1444,13 @@ export class FileViewerPhotoSwipe {
                         '.pswp__action-button[aria-label="Comment"]',
                     );
                     commentButton?.addEventListener("click", onViewComments);
-                    // Wire up right-click handler for the like button to open likes sidebar.
+                    // Wire up click handlers for the like button.
                     const likeButton = element.querySelector<HTMLElement>(
                         '.pswp__action-button[aria-label="Like"]',
                     );
+                    // Left-click: trigger like action (may open album selector)
+                    likeButton?.addEventListener("click", onLikeClick);
+                    // Right-click: open likes sidebar
                     likeButton?.addEventListener("contextmenu", (e) => {
                         e.preventDefault();
                         onViewLikes();
