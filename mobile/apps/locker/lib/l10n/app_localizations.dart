@@ -1189,7 +1189,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Hint text'**
+  /// **'Note title'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.

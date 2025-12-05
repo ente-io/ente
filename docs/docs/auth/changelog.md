@@ -7,6 +7,15 @@ description: Release notes of recent updates to Ente Auth
 
 A short summary list of changes to the Ente Auth mobile and desktop apps. For a more descriptive list with screenshots and blog post links, see the [news](https://ente.io/news).
 
+## v4.4.12 - Nov 2025
+
+- Continuous on-device backups
+- Notes in search results
+- Quick settings tile on Android
+- Custom sort improvements
+- Improved new user experience
+- Bug fixes and other improvements
+
 ## v4.4.10 - Nov 2025
 
 - New icon!

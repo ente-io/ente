@@ -147,7 +147,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/ente-io/mobile_ocr
-      ref: 8dba33ad89eea99683780469bc4d0ec4993d61c3
+      ref: 4f3aa1660d94eae0a9caa292d076dad72a978ddf
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"

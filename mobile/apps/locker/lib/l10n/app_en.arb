@@ -399,7 +399,7 @@
   "emergencyContact": "Emergency contact",
   "emergencyContactDescription": "Keep contact info for key people in crises.",
   "noteName": "Title",
-  "noteNameHint": "Hint text",
+  "noteNameHint": "Note title",
   "noteContent": "Content",
   "noteContentHint": "Write down important thoughts or instructions",
   "unsavedNoteChangesTitle": "Discard changes?",

@@ -629,7 +629,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteName => 'Title';
 
   @override
-  String get noteNameHint => 'Hint text';
+  String get noteNameHint => 'Note title';
 
   @override
   String get noteContent => 'Content';
