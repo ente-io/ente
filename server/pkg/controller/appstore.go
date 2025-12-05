@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
+	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
+
 	"github.com/prometheus/common/log"
 
 	"github.com/ente-io/stacktrace"
@@ -23,12 +25,13 @@ import (
 
 // AppStoreController provides abstractions for handling billing on AppStore
 type AppStoreController struct {
-	AppStoreClient         appstore.Client
-	BillingRepo            *repo.BillingRepository
-	FileRepo               *repo.FileRepository
-	UserRepo               *repo.UserRepository
-	BillingPlansPerCountry ente.BillingPlansPerCountry
-	CommonBillCtrl         *commonbilling.Controller
+	AppStoreClient          appstore.Client
+	BillingRepo             *repo.BillingRepository
+	FileRepo                *repo.FileRepository
+	UserRepo                *repo.UserRepository
+	NotificationHistoryRepo *repo.NotificationHistoryRepository
+	BillingPlansPerCountry  ente.BillingPlansPerCountry
+	CommonBillCtrl          *commonbilling.Controller
 	// appStoreSharedPassword is the password to be used to access AppStore APIs
 	appStoreSharedPassword string
 }
@@ -39,17 +42,19 @@ func NewAppStoreController(
 	billingRepo *repo.BillingRepository,
 	fileRepo *repo.FileRepository,
 	userRepo *repo.UserRepository,
+	notificationHistoryRepo *repo.NotificationHistoryRepository,
 	commonBillCtrl *commonbilling.Controller,
 ) *AppStoreController {
 	appleSharedSecret := viper.GetString("apple.shared-secret")
 	return &AppStoreController{
-		AppStoreClient:         *appstore.New(),
-		BillingRepo:            billingRepo,
-		FileRepo:               fileRepo,
-		UserRepo:               userRepo,
-		BillingPlansPerCountry: plans,
-		appStoreSharedPassword: appleSharedSecret,
-		CommonBillCtrl:         commonBillCtrl,
+		AppStoreClient:          *appstore.New(),
+		BillingRepo:             billingRepo,
+		FileRepo:                fileRepo,
+		UserRepo:                userRepo,
+		NotificationHistoryRepo: notificationHistoryRepo,
+		BillingPlansPerCountry:  plans,
+		appStoreSharedPassword:  appleSharedSecret,
+		CommonBillCtrl:          commonBillCtrl,
 	}
 }
 
@@ -118,6 +123,10 @@ func (c *AppStoreController) HandleNotification(ctx *gin.Context, notification a
 			if err != nil {
 				return stacktrace.Propagate(err, "")
 			}
+
+			c.NotificationHistoryRepo.DeleteLastNotification(subscription.UserID, emailCtrl.StorageLimitExceededTemplateID)
+			c.NotificationHistoryRepo.DeleteLastNotification(subscription.UserID, emailCtrl.StorageLimitExceedingTemplateID)
+
 		} else {
 			if notification.NotificationType == appstore.NotificationTypeDidChangeRenewalStatus {
 				err := c.BillingRepo.UpdateSubscriptionCancellationStatus(subscription.UserID, notification.AutoRenewStatus == "false")
