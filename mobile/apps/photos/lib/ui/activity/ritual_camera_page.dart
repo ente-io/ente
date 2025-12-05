@@ -223,8 +223,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       } else {
         final controller = CameraController(
           target,
-          ResolutionPreset.high,
-          imageFormatGroup: ImageFormatGroup.jpeg,
+          ResolutionPreset.max,
           enableAudio: false,
         );
         await controller.initialize();
