@@ -157,15 +157,21 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
                             <AlbumsCount>{albums.length} Albums</AlbumsCount>
                             <LikeAllButton onClick={onLikeAll}>
                                 <Typography
-                                    sx={{
+                                    sx={(theme) => ({
                                         fontWeight: 500,
                                         fontSize: 14,
                                         color: "#000",
-                                    }}
+                                        ...theme.applyStyles("dark", {
+                                            color: "#fff",
+                                        }),
+                                    })}
                                 >
                                     Like all
                                 </Typography>
-                                <HeartOutlineIcon size={16} color="#000" />
+                                <HeartOutlineIcon
+                                    size={16}
+                                    color="var(--mui-palette-text-base)"
+                                />
                             </LikeAllButton>
                         </AlbumsHeader>
 
@@ -192,7 +198,7 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
 // Styled Components
 // =============================================================================
 
-const StyledDialog = styled(Dialog)(() => ({
+const StyledDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-paper": {
         width: 381,
         maxWidth: "calc(100% - 32px)",
@@ -203,6 +209,10 @@ const StyledDialog = styled(Dialog)(() => ({
         overflow: "visible",
         boxShadow: "none",
         border: "1px solid #E0E0E0",
+        ...theme.applyStyles("dark", {
+            backgroundColor: "#1b1b1b",
+            border: "1px solid rgba(255, 255, 255, 0.18)",
+        }),
     },
     "& .MuiBackdrop-root": {
         backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -214,7 +224,7 @@ const DialogWrapper = styled(Box)(() => ({
     padding: "58px 24px 24px 24px",
 }));
 
-const CloseButton = styled(IconButton)(() => ({
+const CloseButton = styled(IconButton)(({ theme }) => ({
     position: "absolute",
     top: 11,
     right: 12,
@@ -224,6 +234,11 @@ const CloseButton = styled(IconButton)(() => ({
     "&:hover": {
         backgroundColor: "#F0F0F0",
     },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(255, 255, 255, 0.12)",
+        color: "#fff",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.16)" },
+    }),
 }));
 
 const ContentContainer = styled(Box)(() => ({
@@ -249,23 +264,29 @@ const TitleSection = styled(Box)(() => ({
     marginBottom: 14,
 }));
 
-const Title = styled(Typography)(() => ({
+const Title = styled(Typography)(({ theme }) => ({
     fontWeight: 600,
     fontSize: 24,
     lineHeight: "22px",
     letterSpacing: "-0.48px",
     color: "#000",
+    ...theme.applyStyles("dark", {
+        color: "#fff",
+    }),
 }));
 
-const Subtitle = styled(Typography)(() => ({
+const Subtitle = styled(Typography)(({ theme }) => ({
     fontWeight: 500,
     fontSize: 14,
     lineHeight: "17px",
     color: "#666666",
     maxWidth: 295,
+    ...theme.applyStyles("dark", {
+        color: "rgba(255, 255, 255, 0.7)",
+    }),
 }));
 
-const AlbumsSection = styled(Box)(() => ({
+const AlbumsSection = styled(Box)(({ theme }) => ({
     width: "100%",
     backgroundColor: "rgba(162, 162, 162, 0.12)",
     borderRadius: 27,
@@ -274,6 +295,9 @@ const AlbumsSection = styled(Box)(() => ({
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(162, 162, 162, 0.12)",
+    }),
 }));
 
 const AlbumsHeader = styled(Box)(() => ({
@@ -284,14 +308,17 @@ const AlbumsHeader = styled(Box)(() => ({
     marginBottom: 16,
 }));
 
-const AlbumsCount = styled(Typography)(() => ({
+const AlbumsCount = styled(Typography)(({ theme }) => ({
     fontWeight: 500,
     fontSize: 14,
     lineHeight: "17px",
     color: "#000",
+    ...theme.applyStyles("dark", {
+        color: "#fff",
+    }),
 }));
 
-const LikeAllButton = styled(Box)(() => ({
+const LikeAllButton = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 10,
@@ -300,11 +327,15 @@ const LikeAllButton = styled(Box)(() => ({
     borderRadius: 14,
     cursor: "pointer",
     "&:hover": {
-        backgroundColor: "#E8E8E8",
+        backgroundColor: "#EBEBEB",
     },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#1b1b1b",
+        "&:hover": { backgroundColor: "#252525" },
+    }),
 }));
 
-const AlbumsList = styled(Box)(() => ({
+const AlbumsList = styled(Box)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
     gap: 6,
@@ -321,9 +352,14 @@ const AlbumsList = styled(Box)(() => ({
         background: "rgba(0, 0, 0, 0.2)",
         borderRadius: 3,
     },
+    ...theme.applyStyles("dark", {
+        "&::-webkit-scrollbar-thumb": {
+            background: "rgba(255, 255, 255, 0.2)",
+        },
+    }),
 }));
 
-const AlbumItem = styled(Box)(() => ({
+const AlbumItem = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -331,14 +367,20 @@ const AlbumItem = styled(Box)(() => ({
     padding: "10px 10px 10px 16px",
     backgroundColor: "#fff",
     borderRadius: 16,
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#212121",
+    }),
 }));
 
-const AlbumName = styled(Typography)(() => ({
+const AlbumName = styled(Typography)(({ theme }) => ({
     fontWeight: 500,
     fontSize: 14,
     lineHeight: "17px",
     color: "#000",
     flex: 1,
+    ...theme.applyStyles("dark", {
+        color: "#fff",
+    }),
 }));
 
 const HeartButton = styled(Box)(() => ({

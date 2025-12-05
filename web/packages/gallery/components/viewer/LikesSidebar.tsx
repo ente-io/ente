@@ -26,7 +26,7 @@ const ChevronDownIcon: React.FC = () => (
     >
         <path
             d="M10.0007 12.5004L6.46484 8.96544L7.64401 7.78711L10.0007 10.1438L12.3573 7.78711L13.5365 8.96544L10.0007 12.5004Z"
-            fill="black"
+            fill="currentColor"
         />
     </svg>
 );
@@ -155,7 +155,13 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                 )}
                 <Header>
                     {hasCollectionContext ? (
-                        <Typography sx={{ color: "#000", fontWeight: 600 }}>
+                        <Typography
+                            sx={(theme) => ({
+                                color: "#000",
+                                fontWeight: 600,
+                                ...theme.applyStyles("dark", { color: "#fff" }),
+                            })}
+                        >
                             {`${mockLikers.length} likes`}
                         </Typography>
                     ) : (
@@ -182,12 +188,15 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                     </CollectionBadge>
                                 </Box>
                                 <Typography
-                                    sx={{
+                                    sx={(theme) => ({
                                         color: "#000",
                                         fontWeight: 600,
                                         fontSize: 14,
                                         lineHeight: "20px",
-                                    }}
+                                        ...theme.applyStyles("dark", {
+                                            color: "#fff",
+                                        }),
+                                    })}
                                 >
                                     {selectedCollection.name}
                                 </Typography>
@@ -214,12 +223,15 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                                 </CollectionBadge>
                                             </Box>
                                             <Typography
-                                                sx={{
+                                                sx={(theme) => ({
                                                     color: "#000",
                                                     fontWeight: 600,
                                                     fontSize: 14,
                                                     lineHeight: "20px",
-                                                }}
+                                                    ...theme.applyStyles("dark", {
+                                                        color: "#fff",
+                                                    }),
+                                                })}
                                             >
                                                 {collection.name}
                                             </Typography>
@@ -238,13 +250,17 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                     {mockLikers.map((liker) => (
                         <LikerRow key={liker.id}>
                             <Avatar
-                                sx={{
+                                sx={(theme) => ({
                                     width: 32,
                                     height: 32,
                                     fontSize: 14,
                                     bgcolor: "#E0E0E0",
                                     color: "#666",
-                                }}
+                                    ...theme.applyStyles("dark", {
+                                        bgcolor: "rgba(255, 255, 255, 0.16)",
+                                        color: "rgba(255, 255, 255, 0.7)",
+                                    }),
+                                })}
                             >
                                 {liker.userName[0]}
                             </Avatar>
@@ -263,7 +279,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
 // =============================================================================
 
 // Drawer & Layout
-const SidebarDrawer = styled(Drawer)(() => ({
+const SidebarDrawer = styled(Drawer)(({ theme }) => ({
     "& .MuiDrawer-paper": {
         width: "23vw",
         minWidth: "520px",
@@ -277,6 +293,7 @@ const SidebarDrawer = styled(Drawer)(() => ({
         border: "1px solid #E0E0E0",
         display: "flex",
         flexDirection: "column",
+        overflow: "visible",
         "@media (max-width: 450px)": {
             width: "100%",
             minWidth: "unset",
@@ -285,6 +302,10 @@ const SidebarDrawer = styled(Drawer)(() => ({
             margin: 0,
             borderRadius: 0,
         },
+        ...theme.applyStyles("dark", {
+            backgroundColor: "#1b1b1b",
+            border: "1px solid rgba(255, 255, 255, 0.18)",
+        }),
     },
     "& .MuiBackdrop-root": { backgroundColor: "transparent" },
 }));
@@ -304,24 +325,33 @@ const Header = styled(Stack)(() => ({
     marginBottom: 48,
 }));
 
-const CloseButton = styled(IconButton)(() => ({
+const CloseButton = styled(IconButton)(({ theme }) => ({
     backgroundColor: "#F5F5F7",
     color: "#000",
     padding: "8px",
     "&:hover": { backgroundColor: "#E5E5E7" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(255, 255, 255, 0.12)",
+        color: "#fff",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.16)" },
+    }),
 }));
 
 // Collection Dropdown
-const CollectionDropdownButton = styled(Box)(() => ({
+const CollectionDropdownButton = styled(Box)(({ theme }) => ({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
-    padding: "6px 6px 3px 6px",
+    padding: "5px 6px 4px 6px",
     borderRadius: 12,
     backgroundColor: "#F0F0F0",
     cursor: "pointer",
     "&:hover": { backgroundColor: "#E8E8E8" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#363636",
+        "&:hover": { backgroundColor: "#404040" },
+    }),
 }));
 
 const CollectionThumbnail = styled("img")(() => ({
@@ -332,7 +362,7 @@ const CollectionThumbnail = styled("img")(() => ({
     backgroundColor: "#08C225",
 }));
 
-const CollectionBadge = styled(Box)(() => ({
+const CollectionBadge = styled(Box)(({ theme }) => ({
     position: "absolute",
     bottom: 2,
     right: -4,
@@ -347,9 +377,13 @@ const CollectionBadge = styled(Box)(() => ({
     fontWeight: 600,
     lineHeight: 1,
     minWidth: 14,
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#fff",
+        color: "#000",
+    }),
 }));
 
-const CollectionDropdownMenu = styled(Box)(() => ({
+const CollectionDropdownMenu = styled(Box)(({ theme }) => ({
     position: "absolute",
     top: "calc(100% + 8px)",
     left: 0,
@@ -364,9 +398,13 @@ const CollectionDropdownMenu = styled(Box)(() => ({
     border: "1px solid rgba(0, 0, 0, 0.08)",
     backgroundColor: "#F0F0F0",
     zIndex: 12,
+    ...theme.applyStyles("dark", {
+        border: "1px solid rgba(0, 0, 0, 0.08)",
+        backgroundColor: "#363636",
+    }),
 }));
 
-const CollectionDropdownItem = styled(Box)(() => ({
+const CollectionDropdownItem = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 14,
@@ -375,9 +413,12 @@ const CollectionDropdownItem = styled(Box)(() => ({
     cursor: "pointer",
     width: "100%",
     "&:hover": { backgroundColor: "#E8E8E8" },
+    ...theme.applyStyles("dark", {
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.16)" },
+    }),
 }));
 
-const LikersContainer = styled(Box)(() => ({
+const LikersContainer = styled(Box)(({ theme }) => ({
     flex: 1,
     overflow: "auto",
     marginRight: -24,
@@ -390,6 +431,12 @@ const LikersContainer = styled(Box)(() => ({
     },
     scrollbarWidth: "thin",
     scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
+    ...theme.applyStyles("dark", {
+        "&::-webkit-scrollbar-thumb": {
+            background: "rgba(255, 255, 255, 0.2)",
+        },
+        scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
+    }),
 }));
 
 const LikerRow = styled(Box)(() => ({
@@ -399,20 +446,23 @@ const LikerRow = styled(Box)(() => ({
     padding: "10px 10px 10px 0",
 }));
 
-const LikerName = styled(Typography)(() => ({
+const LikerName = styled(Typography)(({ theme }) => ({
     flex: 1,
     fontWeight: 500,
     color: "#000",
     fontSize: 14,
+    ...theme.applyStyles("dark", {
+        color: "#fff",
+    }),
 }));
 
 // Context Menu Overlay
 const ContextMenuOverlay = styled(Box)(() => ({
     position: "absolute",
-    top: -24,
-    left: -24,
-    right: -24,
-    bottom: -32,
+    top: -25,
+    left: -25,
+    right: -25,
+    bottom: -33,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     zIndex: 10,
     borderRadius: "36px",

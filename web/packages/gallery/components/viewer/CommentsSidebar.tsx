@@ -29,8 +29,7 @@ const SendIcon: React.FC = () => (
     >
         <path
             d="M2.03872 4.50697L2.47372 5.26697C2.75072 5.75197 2.88872 5.99397 2.88872 6.25997C2.88872 6.52597 2.75072 6.76797 2.47372 7.25197L2.03872 8.01297C0.800717 10.18 0.181717 11.263 0.663717 11.801C1.14672 12.338 2.29072 11.838 4.57672 10.838L10.8527 8.09197C12.6477 7.30697 13.5457 6.91397 13.5457 6.25997C13.5457 5.60597 12.6477 5.21297 10.8527 4.42797L4.57672 1.68197C2.29072 0.681968 1.14672 0.181968 0.663717 0.718968C0.181717 1.25597 0.800717 2.33897 2.03872 4.50697Z"
-            stroke="black"
-            strokeOpacity="0.8"
+            stroke="currentColor"
         />
     </svg>
 );
@@ -47,8 +46,8 @@ const ReplyIcon: React.FC = () => (
             fillRule="evenodd"
             clipRule="evenodd"
             d="M4.5241 0.242677C4.62341 0.34442 4.67919 0.482337 4.67919 0.626134C4.67919 0.76993 4.62341 0.907847 4.5241 1.00959L1.89369 3.70102H7.68483C8.3587 3.70102 9.35854 3.9036 10.2042 4.52653C11.0775 5.17045 11.7507 6.23762 11.7507 7.86116C11.7507 8.00507 11.6948 8.14309 11.5953 8.24485C11.4959 8.34661 11.361 8.40378 11.2203 8.40378C11.0797 8.40378 10.9448 8.34661 10.8453 8.24485C10.7459 8.14309 10.69 8.00507 10.69 7.86116C10.69 6.59069 10.1844 5.84982 9.58481 5.40776C8.95761 4.94544 8.18899 4.78627 7.68483 4.78627H1.89369L4.5241 7.4777C4.5762 7.52738 4.61799 7.58728 4.64698 7.65384C4.67597 7.72041 4.69155 7.79226 4.69281 7.86512C4.69406 7.93798 4.68096 8.01035 4.65429 8.07791C4.62762 8.14548 4.58792 8.20686 4.53756 8.25839C4.4872 8.30991 4.42722 8.35053 4.36118 8.37782C4.29515 8.40512 4.22442 8.41852 4.15321 8.41723C4.082 8.41595 4.01178 8.4 3.94673 8.37034C3.88167 8.34068 3.82313 8.29792 3.77457 8.24461L0.23908 4.6271C0.139767 4.52536 0.0839844 4.38744 0.0839844 4.24364C0.0839844 4.09985 0.139767 3.96193 0.23908 3.86019L3.77457 0.242677C3.87401 0.141061 4.0088 0.0839844 4.14934 0.0839844C4.28987 0.0839844 4.42466 0.141061 4.5241 0.242677Z"
-            fill="#131313"
-            stroke="#131313"
+            fill="currentColor"
+            stroke="currentColor"
             strokeWidth="0.166667"
         />
     </svg>
@@ -64,7 +63,7 @@ const HeartIcon: React.FC = () => (
     >
         <path
             d="M6.63749 12.3742C4.66259 10.885 0.75 7.4804 0.75 4.41664C0.75 2.39161 2.22368 0.75 4.25 0.75C5.3 0.75 6.35 1.10294 7.75 2.51469C9.15 1.10294 10.2 0.75 11.25 0.75C13.2763 0.75 14.75 2.39161 14.75 4.41664C14.75 7.4804 10.8374 10.885 8.86251 12.3742C8.19793 12.8753 7.30207 12.8753 6.63749 12.3742Z"
-            stroke="#131313"
+            stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -82,7 +81,7 @@ const DeleteIcon: React.FC = () => (
     >
         <path
             d="M11.5 2.83203L11.0869 9.51543C10.9813 11.223 10.9285 12.0768 10.5005 12.6906C10.2889 12.9941 10.0165 13.2502 9.70047 13.4427C9.0614 13.832 8.206 13.832 6.49513 13.832C4.78208 13.832 3.92553 13.832 3.28603 13.442C2.96987 13.2492 2.69733 12.9926 2.48579 12.6886C2.05792 12.0738 2.0063 11.2188 1.90307 9.50883L1.5 2.83203M0.5 2.83333H12.5M9.2038 2.83333L8.74873 1.89449C8.4464 1.27084 8.2952 0.959013 8.03447 0.76454C7.97667 0.7214 7.9154 0.683027 7.85133 0.6498C7.5626 0.5 7.21607 0.5 6.523 0.5C5.81253 0.5 5.45733 0.5 5.16379 0.65608C5.09873 0.690673 5.03665 0.7306 4.97819 0.775447C4.71443 0.9778 4.56709 1.30103 4.27241 1.94751L3.86861 2.83333M4.83203 10.166V6.16602M8.16797 10.166V6.16602"
-            stroke="#131313"
+            stroke="currentColor"
             strokeLinecap="round"
         />
     </svg>
@@ -99,7 +98,7 @@ const ChevronDownIcon: React.FC = () => (
     >
         <path
             d="M10.0007 12.5004L6.46484 8.96544L7.64401 7.78711L10.0007 10.1438L12.3573 7.78711L13.5365 8.96544L10.0007 12.5004Z"
-            fill="black"
+            fill="currentColor"
         />
     </svg>
 );
@@ -818,13 +817,17 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
 }) => (
     <CommentHeaderContainer>
         <Avatar
-            sx={{
+            sx={(theme) => ({
                 width: avatarSize,
                 height: avatarSize,
                 fontSize: 14,
                 bgcolor: "#E0E0E0",
                 color: "#666",
-            }}
+                ...theme.applyStyles("dark", {
+                    bgcolor: "rgba(255, 255, 255, 0.16)",
+                    color: "rgba(255, 255, 255, 0.7)",
+                }),
+            })}
         >
             {userName[0]}
         </Avatar>
@@ -846,32 +849,44 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
     <QuotedReplyContainer isOwn={isOwn}>
         {parentComment.isDeleted ? (
             <Typography
-                sx={{
+                sx={(theme) => ({
                     fontSize: 12,
                     fontStyle: "italic",
                     color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
-                }}
+                    ...(!isOwn &&
+                        theme.applyStyles("dark", {
+                            color: "rgba(255, 255, 255, 0.5)",
+                        })),
+                })}
             >
                 (deleted)
             </Typography>
         ) : (
             <>
                 <Typography
-                    sx={{
+                    sx={(theme) => ({
                         fontWeight: 600,
                         fontSize: 12,
                         color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
-                    }}
+                        ...(!isOwn &&
+                            theme.applyStyles("dark", {
+                                color: "rgba(255, 255, 255, 0.7)",
+                            })),
+                    })}
                 >
                     {parentComment.userID === CURRENT_USER_ID
                         ? "Me"
                         : parentComment.encData.userName}
                 </Typography>
                 <Typography
-                    sx={{
+                    sx={(theme) => ({
                         fontSize: 12,
                         color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
-                    }}
+                        ...(!isOwn &&
+                            theme.applyStyles("dark", {
+                                color: "rgba(255, 255, 255, 0.5)",
+                            })),
+                    })}
                 >
                     {truncateCommentText(parentComment.encData.text)}
                 </Typography>
@@ -1000,7 +1015,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 )}
                 <Header>
                     {hasCollectionContext ? (
-                        <Typography sx={{ color: "#000", fontWeight: 600 }}>
+                        <Typography
+                            sx={(theme) => ({
+                                color: "#000",
+                                fontWeight: 600,
+                                ...theme.applyStyles("dark", { color: "#fff" }),
+                            })}
+                        >
                             {`${sortedComments.length} ${t("comments")}`}
                         </Typography>
                     ) : (
@@ -1027,12 +1048,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     </CollectionBadge>
                                 </Box>
                                 <Typography
-                                    sx={{
+                                    sx={(theme) => ({
                                         color: "#000",
                                         fontWeight: 600,
                                         fontSize: 14,
                                         lineHeight: "20px",
-                                    }}
+                                        ...theme.applyStyles("dark", {
+                                            color: "#fff",
+                                        }),
+                                    })}
                                 >
                                     {selectedCollection.name}
                                 </Typography>
@@ -1059,12 +1083,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                 </CollectionBadge>
                                             </Box>
                                             <Typography
-                                                sx={{
+                                                sx={(theme) => ({
                                                     color: "#000",
                                                     fontWeight: 600,
                                                     fontSize: 14,
                                                     lineHeight: "20px",
-                                                }}
+                                                    ...theme.applyStyles("dark", {
+                                                        color: "#fff",
+                                                    }),
+                                                })}
                                             >
                                                 {collection.name}
                                             </Typography>
@@ -1227,14 +1254,23 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     {replyingTo && (
                         <ReplyingToBar>
                             <Box
-                                sx={{
+                                sx={(theme) => ({
                                     borderLeft: "3px solid #ccc",
                                     paddingLeft: "10px",
                                     paddingRight: "24px",
-                                }}
+                                    ...theme.applyStyles("dark", {
+                                        borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
+                                    }),
+                                })}
                             >
                                 <Typography
-                                    sx={{ fontSize: 12, color: "#666" }}
+                                    sx={(theme) => ({
+                                        fontSize: 12,
+                                        color: "#666",
+                                        ...theme.applyStyles("dark", {
+                                            color: "rgba(255, 255, 255, 0.7)",
+                                        }),
+                                    })}
                                 >
                                     Replying to{" "}
                                     {replyingTo.userID === CURRENT_USER_ID
@@ -1243,13 +1279,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     ...
                                 </Typography>
                                 <Typography
-                                    sx={{
+                                    sx={(theme) => ({
                                         fontSize: 14,
                                         color: "#000",
                                         overflow: "hidden",
                                         textOverflow: "ellipsis",
                                         whiteSpace: "nowrap",
-                                    }}
+                                        ...theme.applyStyles("dark", {
+                                            color: "#fff",
+                                        }),
+                                    })}
                                 >
                                     {truncateCommentText(
                                         replyingTo.encData.text,
@@ -1259,13 +1298,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             <IconButton
                                 size="small"
                                 onClick={() => setReplyingTo(null)}
-                                sx={{
+                                sx={(theme) => ({
                                     position: "absolute",
                                     top: 8,
                                     right: 8,
                                     color: "#666",
                                     p: 0.5,
-                                }}
+                                    ...theme.applyStyles("dark", {
+                                        color: "rgba(255, 255, 255, 0.7)",
+                                    }),
+                                })}
                             >
                                 <CloseIcon sx={{ fontSize: 16 }} />
                             </IconButton>
@@ -1297,7 +1339,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 // =============================================================================
 
 // Drawer & Layout
-const SidebarDrawer = styled(Drawer)(() => ({
+const SidebarDrawer = styled(Drawer)(({ theme }) => ({
     "& .MuiDrawer-paper": {
         width: "23vw",
         minWidth: "520px",
@@ -1311,6 +1353,7 @@ const SidebarDrawer = styled(Drawer)(() => ({
         border: "1px solid #E0E0E0",
         display: "flex",
         flexDirection: "column",
+        overflow: "visible",
         "@media (max-width: 450px)": {
             width: "100%",
             minWidth: "unset",
@@ -1319,6 +1362,10 @@ const SidebarDrawer = styled(Drawer)(() => ({
             margin: 0,
             borderRadius: 0,
         },
+        ...theme.applyStyles("dark", {
+            backgroundColor: "#1b1b1b",
+            border: "1px solid rgba(255, 255, 255, 0.18)",
+        }),
     },
     "& .MuiBackdrop-root": { backgroundColor: "transparent" },
 }));
@@ -1338,24 +1385,33 @@ const Header = styled(Stack)(() => ({
     marginBottom: 48,
 }));
 
-const CloseButton = styled(IconButton)(() => ({
+const CloseButton = styled(IconButton)(({ theme }) => ({
     backgroundColor: "#F5F5F7",
     color: "#000",
     padding: "8px",
     "&:hover": { backgroundColor: "#E5E5E7" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(255, 255, 255, 0.12)",
+        color: "#fff",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.16)" },
+    }),
 }));
 
 // Collection Dropdown
-const CollectionDropdownButton = styled(Box)(() => ({
+const CollectionDropdownButton = styled(Box)(({ theme }) => ({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
-    padding: "6px 6px 3px 6px",
+    padding: "5px 6px 4px 6px",
     borderRadius: 12,
     backgroundColor: "#F0F0F0",
     cursor: "pointer",
     "&:hover": { backgroundColor: "#E8E8E8" },
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#363636",
+        "&:hover": { backgroundColor: "#404040" },
+    }),
 }));
 
 const CollectionThumbnail = styled("img")(() => ({
@@ -1366,7 +1422,7 @@ const CollectionThumbnail = styled("img")(() => ({
     backgroundColor: "#08C225",
 }));
 
-const CollectionBadge = styled(Box)(() => ({
+const CollectionBadge = styled(Box)(({ theme }) => ({
     position: "absolute",
     bottom: 2,
     right: -4,
@@ -1381,9 +1437,13 @@ const CollectionBadge = styled(Box)(() => ({
     fontWeight: 600,
     lineHeight: 1,
     minWidth: 14,
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#fff",
+        color: "#000",
+    }),
 }));
 
-const CollectionDropdownMenu = styled(Box)(() => ({
+const CollectionDropdownMenu = styled(Box)(({ theme }) => ({
     position: "absolute",
     top: "calc(100% + 8px)",
     left: 0,
@@ -1398,9 +1458,13 @@ const CollectionDropdownMenu = styled(Box)(() => ({
     border: "1px solid rgba(0, 0, 0, 0.08)",
     backgroundColor: "#F0F0F0",
     zIndex: 12,
+    ...theme.applyStyles("dark", {
+        border: "1px solid rgba(0, 0, 0, 0.08)",
+        backgroundColor: "#363636",
+    }),
 }));
 
-const CollectionDropdownItem = styled(Box)(() => ({
+const CollectionDropdownItem = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 14,
@@ -1409,9 +1473,12 @@ const CollectionDropdownItem = styled(Box)(() => ({
     cursor: "pointer",
     width: "100%",
     "&:hover": { backgroundColor: "#E8E8E8" },
+    ...theme.applyStyles("dark", {
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.16)" },
+    }),
 }));
 
-const CommentsContainer = styled(Box)(() => ({
+const CommentsContainer = styled(Box)(({ theme }) => ({
     flex: 1,
     overflow: "auto",
     marginBottom: 16,
@@ -1425,6 +1492,12 @@ const CommentsContainer = styled(Box)(() => ({
     },
     scrollbarWidth: "thin",
     scrollbarColor: "rgba(0, 0, 0, 0.2) transparent",
+    ...theme.applyStyles("dark", {
+        "&::-webkit-scrollbar-thumb": {
+            background: "rgba(255, 255, 255, 0.2)",
+        },
+        scrollbarColor: "rgba(255, 255, 255, 0.2) transparent",
+    }),
 }));
 
 // Comment Header
@@ -1435,26 +1508,41 @@ const CommentHeaderContainer = styled(Box)(() => ({
     marginBottom: 12,
 }));
 
-const UserName = styled(Typography)(() => ({
+const UserName = styled(Typography)(({ theme }) => ({
     fontWeight: 600,
     color: "#000",
     fontSize: 14,
+    ...theme.applyStyles("dark", {
+        color: "#fff",
+    }),
 }));
 
-const Separator = styled(Typography)(() => ({
+const Separator = styled(Typography)(({ theme }) => ({
     color: "#666",
     fontSize: 12,
     marginLeft: -4,
+    ...theme.applyStyles("dark", {
+        color: "rgba(255, 255, 255, 0.7)",
+    }),
 }));
 
-const Timestamp = styled(Typography)(() => ({ color: "#666", fontSize: 12 }));
+const Timestamp = styled(Typography)(({ theme }) => ({
+    color: "#666",
+    fontSize: 12,
+    ...theme.applyStyles("dark", {
+        color: "rgba(255, 255, 255, 0.7)",
+    }),
+}));
 
-const OwnTimestamp = styled(Typography)(() => ({
+const OwnTimestamp = styled(Typography)(({ theme }) => ({
     color: "#666",
     fontSize: 12,
     textAlign: "right",
     marginBottom: 4,
     paddingRight: 52,
+    ...theme.applyStyles("dark", {
+        color: "rgba(255, 255, 255, 0.7)",
+    }),
 }));
 
 // Comment Bubbles
@@ -1480,27 +1568,39 @@ const CommentBubbleInner = styled(Box)(() => ({
     maxWidth: 320,
 }));
 
-const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
+const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     backgroundColor: isOwn ? "#0DAF35" : "#F0F0F0",
     borderRadius: isOwn ? "20px 6px 20px 20px" : "6px 20px 20px 20px",
     padding: "20px 40px 20px 20px",
     width: "fit-content",
+    ...(!isOwn &&
+        theme.applyStyles("dark", {
+            backgroundColor: "#363636",
+        })),
 }));
 
-const CommentText = styled(Typography)<{ isOwn: boolean }>(({ isOwn }) => ({
+const CommentText = styled(Typography)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     color: isOwn ? "#fff" : "#000",
     fontSize: 14,
     whiteSpace: "pre-wrap",
+    ...(!isOwn &&
+        theme.applyStyles("dark", {
+            color: "#fff",
+        })),
 }));
 
-const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(({ isOwn }) => ({
+const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
     paddingLeft: 10,
     marginBottom: 16,
+    ...(!isOwn &&
+        theme.applyStyles("dark", {
+            borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
+        })),
 }));
 
 // Actions
-const ActionsContainer = styled(Box)(() => ({
+const ActionsContainer = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 14,
@@ -1512,6 +1612,12 @@ const ActionsContainer = styled(Box)(() => ({
     bottom: 0,
     right: 0,
     transform: "translate(50%, 50%)",
+    color: "#131313",
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#363636",
+        border: "2px solid #1b1b1b",
+        color: "#fff",
+    }),
 }));
 
 const ActionButton = styled(Box)(() => ({
@@ -1522,11 +1628,14 @@ const ActionButton = styled(Box)(() => ({
 }));
 
 // Input Area
-const InputContainer = styled(Box)(() => ({
+const InputContainer = styled(Box)(({ theme }) => ({
     position: "relative",
     backgroundColor: "#F3F3F3",
     borderRadius: "20px",
     margin: "0 -8px -16px -8px",
+    ...theme.applyStyles("dark", {
+        backgroundColor: "rgba(255, 255, 255, 0.12)",
+    }),
 }));
 
 const ReplyingToBar = styled(Box)(() => ({
@@ -1534,7 +1643,7 @@ const ReplyingToBar = styled(Box)(() => ({
     padding: "20px 16px 0 16px",
 }));
 
-const InputWrapper = styled(Box)(() => ({
+const InputWrapper = styled(Box)(({ theme }) => ({
     padding: "8px 48px 8px 16px",
     maxHeight: "300px",
     overflow: "auto",
@@ -1547,41 +1656,60 @@ const InputWrapper = styled(Box)(() => ({
     "&::-webkit-scrollbar-thumb:hover": { background: "rgba(0, 0, 0, 0.5)" },
     scrollbarWidth: "thin",
     scrollbarColor: "rgba(0, 0, 0, 0.3) transparent",
+    ...theme.applyStyles("dark", {
+        "&::-webkit-scrollbar-thumb": {
+            background: "rgba(255, 255, 255, 0.3)",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+            background: "rgba(255, 255, 255, 0.5)",
+        },
+        scrollbarColor: "rgba(255, 255, 255, 0.3) transparent",
+    }),
 }));
 
-const StyledTextField = styled(TextField)(() => ({
+const StyledTextField = styled(TextField)(({ theme }) => ({
     "& .MuiInput-root": { "&::before, &::after": { display: "none" } },
     "& .MuiInputBase-input": {
         padding: 0,
         color: "#000",
         "&::placeholder": { color: "#666", opacity: 1 },
     },
+    ...theme.applyStyles("dark", {
+        "& .MuiInputBase-input": {
+            color: "#fff",
+            "&::placeholder": { color: "rgba(255, 255, 255, 0.7)" },
+        },
+    }),
 }));
 
-const SendButton = styled(IconButton)(() => ({
+const SendButton = styled(IconButton)(({ theme }) => ({
     position: "absolute",
     right: 12,
     bottom: 8.5,
-    color: "#000",
+    color: "rgba(0, 0, 0, 0.8)",
     width: 42,
     height: 42,
     "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.1)" },
+    ...theme.applyStyles("dark", {
+        color: "rgba(255, 255, 255, 0.8)",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+    }),
 }));
 
 // Context Menu
 const ContextMenuOverlay = styled(Box)(() => ({
     position: "absolute",
-    top: -24,
-    left: -24,
-    right: -24,
-    bottom: -32,
+    top: -25,
+    left: -25,
+    right: -25,
+    bottom: -33,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     zIndex: 10,
     borderRadius: "36px",
     "@media (max-width: 450px)": { borderRadius: 0 },
 }));
 
-const StyledMenu = styled(Menu)(() => ({
+const StyledMenu = styled(Menu)(({ theme }) => ({
     "& .MuiPaper-root": {
         backgroundColor: "#fff",
         borderRadius: "12px",
@@ -1589,9 +1717,15 @@ const StyledMenu = styled(Menu)(() => ({
         minWidth: "140px",
     },
     "& .MuiList-root": { padding: "6px" },
+    ...theme.applyStyles("dark", {
+        "& .MuiPaper-root": {
+            backgroundColor: "#2b2b2b",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.5)",
+        },
+    }),
 }));
 
-const StyledMenuItem = styled(MenuItem)(() => ({
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 10,
@@ -1600,4 +1734,8 @@ const StyledMenuItem = styled(MenuItem)(() => ({
     color: "#131313",
     fontSize: 14,
     "&:hover": { backgroundColor: "#F5F5F5" },
+    ...theme.applyStyles("dark", {
+        color: "#fff",
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.12)" },
+    }),
 }));
