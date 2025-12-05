@@ -690,6 +690,20 @@ const mockComments: Comment[] = [
         createdAt: Date.now() - 5 * 60 * 1000,
         updatedAt: Date.now() - 5 * 60 * 1000,
     },
+    {
+        id: "45",
+        collectionID: 1,
+        fileID: 1,
+        encData: {
+            text: "Done! Album cover updated. Looks so good in the grid now",
+            userName: "Anand",
+        },
+        parentCommentID: "40",
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 20 * 60 * 1000,
+        updatedAt: Date.now() - 20 * 60 * 1000,
+    },
 ];
 
 // =============================================================================
@@ -794,7 +808,9 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
                         color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
                     }}
                 >
-                    {parentComment.encData.userName}
+                    {parentComment.userID === CURRENT_USER_ID
+                        ? "Me"
+                        : parentComment.encData.userName}
                 </Typography>
                 <Typography
                     sx={{
@@ -867,6 +883,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         targetComment: Comment,
         bubbleElement: HTMLElement,
     ) => {
+        const selection = window.getSelection();
+        if (selection && selection.toString().length > 0) {
+            return;
+        }
         e.preventDefault();
         setContextMenu({ comment: targetComment, anchorEl: bubbleElement });
     };
@@ -1291,7 +1311,7 @@ const InputContainer = styled(Box)(() => ({
 
 const ReplyingToBar = styled(Box)(() => ({
     position: "relative",
-    padding: "20px 16px 8px 16px",
+    padding: "20px 16px 0 16px",
 }));
 
 const InputWrapper = styled(Box)(() => ({
@@ -1348,14 +1368,14 @@ const StyledMenu = styled(Menu)(() => ({
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
         minWidth: "140px",
     },
-    "& .MuiList-root": { padding: "8px 0" },
+    "& .MuiList-root": { padding: "4px 0" },
 }));
 
 const StyledMenuItem = styled(MenuItem)(() => ({
     display: "flex",
     alignItems: "center",
-    gap: 12,
-    padding: "12px 16px",
+    gap: 10,
+    padding: "8px 14px",
     color: "#131313",
     fontSize: 14,
     "&:hover": { backgroundColor: "#F5F5F7" },
