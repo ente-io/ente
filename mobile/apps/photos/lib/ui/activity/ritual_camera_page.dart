@@ -225,7 +225,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
           target,
           ResolutionPreset.high,
           imageFormatGroup: ImageFormatGroup.jpeg,
-          enableAudio: true,
+          enableAudio: false,
         );
         await controller.initialize();
         _controller = controller;
