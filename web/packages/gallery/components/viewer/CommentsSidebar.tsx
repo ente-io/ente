@@ -88,6 +88,22 @@ const DeleteIcon: React.FC = () => (
     </svg>
 );
 
+const ChevronDownIcon: React.FC = () => (
+    <svg
+        width="22"
+        height="22"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ marginLeft: -6 }}
+    >
+        <path
+            d="M10.0007 12.5004L6.46484 8.96544L7.64401 7.78711L10.0007 10.1438L12.3573 7.78711L13.5365 8.96544L10.0007 12.5004Z"
+            fill="black"
+        />
+    </svg>
+);
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -105,12 +121,52 @@ interface Comment {
     updatedAt: number;
 }
 
+interface Collection {
+    id: number;
+    name: string;
+    coverURL?: string;
+    commentCount: number;
+}
+
 // =============================================================================
 // Constants
 // =============================================================================
 
 // Mock current user ID (for determining if comment is from current user)
 const CURRENT_USER_ID = 2;
+
+
+// Mock collections that contain this file
+const mockCollections: Collection[] = [
+    {
+        id: 1,
+        name: "Mindfulness",
+        coverURL:
+            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
+        commentCount: 4,
+    },
+    {
+        id: 2,
+        name: "Meditation",
+        coverURL:
+            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
+        commentCount: 12,
+    },
+    {
+        id: 3,
+        name: "Gratitude",
+        coverURL:
+            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
+        commentCount: 12,
+    },
+    {
+        id: 4,
+        name: "Self-Reflection",
+        coverURL:
+            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
+        commentCount: 12,
+    },
+];
 
 // Mock data - realistic discussion between 4 friends about a Goa trip photo
 const mockComments: Comment[] = [
@@ -866,6 +922,15 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(
         null,
     );
+    const [selectedCollection, setSelectedCollection] = useState<Collection>(
+        mockCollections[0]!,
+    );
+    const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
+
+    // Check if opened from a collection (has ?collection=... in URL)
+    const hasCollectionContext =
+        typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).has("collection");
 
     const handleSend = () => {
         if (!comment.trim()) return;
@@ -876,6 +941,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
     const handleReply = (commentToReply: Comment) => {
         setReplyingTo(commentToReply);
+    };
+
+    const handleCollectionSelect = (collection: Collection) => {
+        setSelectedCollection(collection);
+        setCollectionDropdownOpen(false);
     };
 
     const handleContextMenu = (
@@ -916,16 +986,95 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         .filter((c) => !c.isDeleted)
         .sort((a, b) => a.createdAt - b.createdAt);
 
+    const showOverlay = contextMenu || collectionDropdownOpen;
+
     return (
         <SidebarDrawer open={open} onClose={onClose} anchor="right">
             <DrawerContentWrapper>
-                {contextMenu && (
-                    <ContextMenuOverlay onClick={handleCloseContextMenu} />
+                {showOverlay && (
+                    <ContextMenuOverlay
+                        onClick={() => {
+                            handleCloseContextMenu();
+                            setCollectionDropdownOpen(false);
+                        }}
+                    />
                 )}
                 <Header>
-                    <Typography sx={{ color: "#000", fontWeight: 600 }}>
-                        {`${sortedComments.length} ${t("comments")}`}
-                    </Typography>
+                    {hasCollectionContext ? (
+                        <Typography sx={{ color: "#000", fontWeight: 600 }}>
+                            {`${sortedComments.length} ${t("comments")}`}
+                        </Typography>
+                    ) : (
+                        <Box
+                            sx={{
+                                position: "relative",
+                                zIndex: collectionDropdownOpen ? 12 : "auto",
+                            }}
+                        >
+                            <CollectionDropdownButton
+                                onClick={() =>
+                                    setCollectionDropdownOpen(
+                                        !collectionDropdownOpen,
+                                    )
+                                }
+                            >
+                                <Box sx={{ position: "relative" }}>
+                                    <CollectionThumbnail
+                                        src={selectedCollection.coverURL}
+                                        alt={selectedCollection.name}
+                                    />
+                                    <CollectionBadge>
+                                        {selectedCollection.commentCount}
+                                    </CollectionBadge>
+                                </Box>
+                                <Typography
+                                    sx={{
+                                        color: "#000",
+                                        fontWeight: 600,
+                                        fontSize: 14,
+                                        lineHeight: "20px",
+                                    }}
+                                >
+                                    {selectedCollection.name}
+                                </Typography>
+                                <ChevronDownIcon />
+                            </CollectionDropdownButton>
+                            {collectionDropdownOpen && (
+                                <CollectionDropdownMenu>
+                                    {mockCollections.map((collection) => (
+                                        <CollectionDropdownItem
+                                            key={collection.id}
+                                            onClick={() =>
+                                                handleCollectionSelect(
+                                                    collection,
+                                                )
+                                            }
+                                        >
+                                            <Box sx={{ position: "relative" }}>
+                                                <CollectionThumbnail
+                                                    src={collection.coverURL}
+                                                    alt={collection.name}
+                                                />
+                                                <CollectionBadge>
+                                                    {collection.commentCount}
+                                                </CollectionBadge>
+                                            </Box>
+                                            <Typography
+                                                sx={{
+                                                    color: "#000",
+                                                    fontWeight: 600,
+                                                    fontSize: 14,
+                                                    lineHeight: "20px",
+                                                }}
+                                            >
+                                                {collection.name}
+                                            </Typography>
+                                        </CollectionDropdownItem>
+                                    ))}
+                                </CollectionDropdownMenu>
+                            )}
+                        </Box>
+                    )}
                     <CloseButton onClick={onClose}>
                         <CloseIcon sx={{ fontSize: 22 }} />
                     </CloseButton>
@@ -1063,6 +1212,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         </StyledMenuItem>
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("delete")}
+                            sx={{
+                                "&:hover": {
+                                    backgroundColor: "rgba(228, 7, 7, 0.2)",
+                                },
+                            }}
                         >
                             <DeleteIcon />
                             <span>Delete</span>
@@ -1189,6 +1343,72 @@ const CloseButton = styled(IconButton)(() => ({
     color: "#000",
     padding: "8px",
     "&:hover": { backgroundColor: "#E5E5E7" },
+}));
+
+// Collection Dropdown
+const CollectionDropdownButton = styled(Box)(() => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    padding: "6px 6px 3px 6px",
+    borderRadius: 12,
+    backgroundColor: "#F0F0F0",
+    cursor: "pointer",
+    "&:hover": { backgroundColor: "#E8E8E8" },
+}));
+
+const CollectionThumbnail = styled("img")(() => ({
+    width: 24,
+    height: 24,
+    borderRadius: 5,
+    objectFit: "cover",
+    backgroundColor: "#08C225",
+}));
+
+const CollectionBadge = styled(Box)(() => ({
+    position: "absolute",
+    bottom: 2,
+    right: -4,
+    display: "inline-flex",
+    padding: "3px 5px",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 34,
+    backgroundColor: "#FFF",
+    color: "#000",
+    fontSize: 10,
+    fontWeight: 600,
+    lineHeight: 1,
+    minWidth: 14,
+}));
+
+const CollectionDropdownMenu = styled(Box)(() => ({
+    position: "absolute",
+    top: "calc(100% + 8px)",
+    left: 0,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    width: 184,
+    padding: 6,
+    gap: 12,
+    borderRadius: 12,
+    border: "1px solid rgba(0, 0, 0, 0.08)",
+    backgroundColor: "#F0F0F0",
+    zIndex: 12,
+}));
+
+const CollectionDropdownItem = styled(Box)(() => ({
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
+    padding: "6px 6px 3px 6px",
+    borderRadius: 8,
+    cursor: "pointer",
+    width: "100%",
+    "&:hover": { backgroundColor: "#E8E8E8" },
 }));
 
 const CommentsContainer = styled(Box)(() => ({
@@ -1368,15 +1588,16 @@ const StyledMenu = styled(Menu)(() => ({
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
         minWidth: "140px",
     },
-    "& .MuiList-root": { padding: "4px 0" },
+    "& .MuiList-root": { padding: "6px" },
 }));
 
 const StyledMenuItem = styled(MenuItem)(() => ({
     display: "flex",
     alignItems: "center",
     gap: 10,
-    padding: "8px 14px",
+    padding: "8px 12px",
+    borderRadius: 8,
     color: "#131313",
     fontSize: 14,
-    "&:hover": { backgroundColor: "#F5F5F7" },
+    "&:hover": { backgroundColor: "#F5F5F5" },
 }));
