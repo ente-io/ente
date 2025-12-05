@@ -6,13 +6,41 @@ use thiserror::Error;
 /// HTTP client errors.
 #[derive(Error, Debug)]
 pub enum Error {
-    /// A network or HTTP protocol error occurred during the request.
-    #[error("HTTP request failed: {0}")]
-    Request(#[from] reqwest::Error),
+    /// Network error - connection failed, timeout, etc.
+    #[error("Network error: {0}")]
+    Network(String),
+
+    /// Server retured an HTTP error status.
+    #[error("HTTP {status}: {message}")]
+    Http {
+        /// HTTP status code.
+        status: u16,
+        /// Error message or response body.
+        message: String,
+    },
 
     /// Failed to parse JSON response.
     #[error("JSON parse error: {0}")]
-    Json(#[from] serde_json::Error),
+    Parse(String),
+}
+
+impl From<reqwest::Error> for Error {
+    fn from(e: reqwest::Error) -> Self {
+        if let Some(status) = e.status() {
+            Error::Http {
+                status: status.as_u16(),
+                message: e.to_string(),
+            }
+        } else {
+            Error::Network(e.to_string())
+        }
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(e: serde_json::Error) -> Self {
+        Error::Parse(e.to_string())
+    }
 }
 
 /// Response from the /ping endpoint
@@ -51,6 +79,7 @@ impl HttpClient {
     pub async fn get(&self, path: &str) -> Result<String, Error> {
         let url = format!("{}{}", self.base_url, path);
         let response = self.client.get(&url).send().await?;
+        let response = response.error_for_status()?;
         let text = response.text().await?;
         Ok(text)
     }
@@ -71,5 +100,13 @@ mod tests {
     fn test_client_creation() {
         let client = HttpClient::new("https://api.ente.io");
         assert_eq!(client.base_url, "https://api.ente.io");
+    }
+
+    #[test]
+    fn test_parse_error_conversion() {
+        let bad_json = "not json";
+        let err: Result<PingResponse, Error> = serde_json::from_str(bad_json).map_err(|e| e.into());
+        println!("{:?}", err);
+        assert!(matches!(err, Err(Error::Parse(_))))
     }
 }
