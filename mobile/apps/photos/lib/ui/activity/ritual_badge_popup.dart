@@ -428,9 +428,15 @@ Future<void> shareRitualBadge(
       builder: (_) => Center(
         child: Material(
           type: MaterialType.transparency,
-          child: RepaintBoundary(
-            key: repaintKey,
-            child: _RitualBadgeShareCard(badge: badge),
+          child: IgnorePointer(
+            child: Opacity(
+              // Keep the share card invisible while still allowing it to paint.
+              opacity: 0.01,
+              child: RepaintBoundary(
+                key: repaintKey,
+                child: _RitualBadgeShareCard(badge: badge),
+              ),
+            ),
           ),
         ),
       ),

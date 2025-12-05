@@ -119,8 +119,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
             final String heatmapTitle = selectedRitual == null
                 ? l10n.ritualDefaultHeatmapTitle
                 : (selectedRitual.title.isEmpty
-                      ? l10n.ritualUntitled
-                      : selectedRitual.title);
+                    ? l10n.ritualUntitled
+                    : selectedRitual.title);
             final String heatmapEmoji =
                 selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
             final String shareTitle = heatmapTitle;
@@ -157,10 +157,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           customBorder: const CircleBorder(),
                           onTap: summaryToShare != null
                               ? () => _shareActivity(
-                                  summaryToShare,
-                                  shareTitle,
-                                  emoji: shareEmoji,
-                                )
+                                    summaryToShare,
+                                    shareTitle,
+                                    emoji: shareEmoji,
+                                  )
                               : null,
                           child: SizedBox(
                             width: 48,
@@ -179,8 +179,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
                                     size: 24,
                                     color: shareEnabled
                                         ? iconColor
-                                        : Theme.of(context).disabledColor
-                                              .withValues(alpha: 0.7),
+                                        : Theme.of(context)
+                                            .disabledColor
+                                            .withValues(alpha: 0.7),
                                   ),
                                 ),
                               ),
@@ -240,12 +241,18 @@ class _ActivityScreenState extends State<ActivityScreen> {
           return Center(
             child: Material(
               type: MaterialType.transparency,
-              child: RepaintBoundary(
-                key: key,
-                child: _ActivityShareCard(
-                  summary: summary,
-                  title: title,
-                  emoji: emoji,
+              child: IgnorePointer(
+                child: Opacity(
+                  // Keep the share card invisible while still allowing it to paint.
+                  opacity: 0.01,
+                  child: RepaintBoundary(
+                    key: key,
+                    child: _ActivityShareCard(
+                      summary: summary,
+                      title: title,
+                      emoji: emoji,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -263,8 +270,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
       _logger.fine(
         "Activity share: boundary ready, size=${boundary.size}, needsPaint=$needsPaint",
       );
-      final double pixelRatio = (MediaQuery.of(context).devicePixelRatio * 1.6)
-          .clamp(2.0, 3.5);
+      final double pixelRatio =
+          (MediaQuery.of(context).devicePixelRatio * 1.6).clamp(2.0, 3.5);
       late final ui.Image image;
       try {
         image = await boundary.toImage(pixelRatio: pixelRatio.toDouble());
@@ -338,9 +345,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
     const Duration attemptDelay = Duration(milliseconds: 40);
 
     for (int attempt = 0; attempt < maxAttempts; attempt++) {
-      final boundary =
-          repaintKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
+      final boundary = repaintKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
       bool needsPaint = false;
       assert(() {
         needsPaint = boundary?.debugNeedsPaint ?? false;
@@ -389,10 +395,10 @@ class _ActivityScreenState extends State<ActivityScreen> {
     final Set<int> dayKeys = ritualProgress == null
         ? <int>{}
         : ritualProgress.completedDays
-              .map(
-                (d) => DateTime(d.year, d.month, d.day).millisecondsSinceEpoch,
-              )
-              .toSet();
+            .map(
+              (d) => DateTime(d.year, d.month, d.day).millisecondsSinceEpoch,
+            )
+            .toSet();
 
     final last365Days = summary.last365Days
         .map(
@@ -480,9 +486,8 @@ class _ActivityShareCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color shareBackgroundColor = Color(0xFF08C225);
-    final String shareHeaderTitle = (emoji ?? "").isNotEmpty
-        ? "${emoji!} $title"
-        : title;
+    final String shareHeaderTitle =
+        (emoji ?? "").isNotEmpty ? "${emoji!} $title" : title;
     final double maxWidth = math
         .min(math.max(MediaQuery.of(context).size.width - 32, 360), 440)
         .toDouble();
@@ -511,8 +516,8 @@ class _ActivityShareCard extends StatelessWidget {
                           data: Theme.of(context).copyWith(
                             brightness: Brightness.light,
                             colorScheme: Theme.of(context).colorScheme.copyWith(
-                              brightness: Brightness.light,
-                            ),
+                                  brightness: Brightness.light,
+                                ),
                           ),
                           child: ActivityHeatmapCard(
                             summary: summary,
