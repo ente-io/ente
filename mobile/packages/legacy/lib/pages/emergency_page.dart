@@ -183,13 +183,15 @@ class _EmergencyPageState extends State<EmergencyPage> {
                     } else if (index > 0 && index <= trustedContacts.length) {
                       final listIndex = index - 1;
                       final contact = trustedContacts[listIndex];
+                      final isLastItem =
+                          listIndex == trustedContacts.length - 1;
                       return Column(
                         children: [
                           MenuItemWidget(
                             captionedTextWidget: CaptionedTextWidget(
                               title: contact.emergencyContact.email,
+                              textStyle: getEnteTextTheme(context).body,
                               subTitle: contact.isPendingInvite() ? "⚠" : null,
-                              makeTextBold: contact.isPendingInvite(),
                             ),
                             leadingIconSize: 24.0,
                             surfaceExecutionStates: false,
@@ -208,13 +210,14 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               await showRevokeOrRemoveDialog(context, contact);
                             },
                             isTopBorderRadiusRemoved: listIndex > 0,
-                            isBottomBorderRadiusRemoved: true,
+                            isBottomBorderRadiusRemoved: !isLastItem,
                             singleBorderRadius: 8,
                           ),
-                          DividerWidget(
-                            dividerType: DividerType.menu,
-                            bgColor: getEnteColorScheme(context).fillFaint,
-                          ),
+                          if (!isLastItem)
+                            DividerWidget(
+                              dividerType: DividerType.menu,
+                              bgColor: getEnteColorScheme(context).fillFaint,
+                            ),
                         ],
                       );
                     } else if (index == (1 + trustedContacts.length)) {
@@ -251,28 +254,23 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           ],
                         );
                       }
-                      return MenuItemWidget(
-                        captionedTextWidget: CaptionedTextWidget(
-                          title: trustedContacts.isNotEmpty
-                              ? context.strings.addMore
-                              : context.strings.addTrustedContact,
-                          makeTextBold: true,
-                        ),
-                        leadingIcon: Icons.add_outlined,
-                        surfaceExecutionStates: false,
-                        menuItemColor: getEnteColorScheme(context).fillFaint,
-                        onTap: () async {
-                          final result = await showAddContactBottomSheet(
-                            context,
-                            emergencyInfo: info!,
-                            config: widget.config,
-                          );
-                          if (result == true) {
-                            unawaited(_fetchData());
-                          }
-                        },
-                        isTopBorderRadiusRemoved: trustedContacts.isNotEmpty,
-                        singleBorderRadius: 8,
+                      return Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          GradientButton(
+                            text: context.strings.addTrustedContact,
+                            onTap: () async {
+                              final result = await showAddContactBottomSheet(
+                                context,
+                                emergencyInfo: info!,
+                                config: widget.config,
+                              );
+                              if (result == true) {
+                                unawaited(_fetchData());
+                              }
+                            },
+                          ),
+                        ],
                       );
                     }
                     return const SizedBox.shrink();
