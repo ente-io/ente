@@ -9,3 +9,4 @@ crate-type = ["cdylib"]
 [dependencies]
 ente-core = { path = "../../../rust/core" }
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
