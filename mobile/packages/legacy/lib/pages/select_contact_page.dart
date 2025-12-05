@@ -1,5 +1,6 @@
 import "package:email_validator/email_validator.dart";
 import "package:ente_configuration/base_configuration.dart";
+import "package:ente_legacy/components/error_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/services/emergency_service.dart";
@@ -13,7 +14,6 @@ import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
-import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 
@@ -69,6 +69,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final List<User> suggestedUsers = _getSuggestedUser();
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
       decoration: BoxDecoration(
@@ -78,33 +79,36 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           topRight: Radius.circular(24),
         ),
       ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(colorScheme, textTheme),
-                const SizedBox(height: 12),
-                _buildEmailInputRow(colorScheme),
-                if (suggestedUsers.isNotEmpty) ...[
+      child: Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(colorScheme, textTheme),
+                  const SizedBox(height: 12),
+                  _buildEmailInputRow(colorScheme),
+                  if (suggestedUsers.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    _buildExistingContactsSection(
+                      suggestedUsers,
+                      colorScheme,
+                      textTheme,
+                    ),
+                  ],
                   const SizedBox(height: 20),
-                  _buildExistingContactsSection(
-                    suggestedUsers,
-                    colorScheme,
-                    textTheme,
-                  ),
+                  _buildRecoveryTimeSection(colorScheme, textTheme),
+                  const SizedBox(height: 20),
+                  _buildAddContactButton(textTheme),
+                  const SizedBox(height: 20),
+                  _buildVerifyLink(textTheme),
                 ],
-                const SizedBox(height: 20),
-                _buildRecoveryTimeSection(colorScheme, textTheme),
-                const SizedBox(height: 20),
-                _buildAddContactButton(textTheme),
-                const SizedBox(height: 20),
-                _buildVerifyLink(textTheme),
-              ],
+              ),
             ),
           ),
         ),
@@ -329,10 +333,10 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       } catch (e) {
         _logger.severe("Failed to add contact", e);
         if (mounted) {
-          await showErrorDialog(
+          await showErrorBottomSheet(
             context,
-            context.strings.error,
-            context.strings.somethingWentWrong,
+            title: context.strings.error,
+            message: context.strings.somethingWentWrong,
           );
         }
       }
@@ -399,7 +403,6 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                   Text(
                     context.strings.warning,
                     style: textTheme.h3Bold,
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -407,10 +410,10 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                       email,
                       recoveryDays,
                     ),
+                    textAlign: TextAlign.center,
                     style: textTheme.body.copyWith(
                       color: colorScheme.textMuted,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -438,7 +441,6 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         onTap: _onVerifyTap,
         child: Text(
           context.strings.verifyIDLabel,
-          textAlign: TextAlign.center,
           style: textTheme.body.copyWith(
             color: canAdd
                 ? getEnteColorScheme(context).primary700
@@ -455,10 +457,10 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
   Future<void> _onVerifyTap() async {
     if (selectedEmail.isEmpty && !_emailIsValid) {
-      await showErrorDialog(
+      await showErrorBottomSheet(
         context,
-        context.strings.invalidEmailAddress,
-        context.strings.enterValidEmail,
+        title: context.strings.invalidEmailAddress,
+        message: context.strings.enterValidEmail,
       );
       return;
     }

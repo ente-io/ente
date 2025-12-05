@@ -9,6 +9,7 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_base/models/key_attributes.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_legacy/components/error_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_network/network.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
@@ -44,17 +45,17 @@ class EmergencyContactService {
 
   Future<bool> addContact(BuildContext context, String email) async {
     if (!isValidEmail(email)) {
-      await showErrorDialog(
+      await showErrorBottomSheet(
         context,
-        context.strings.invalidEmailAddress,
-        context.strings.enterValidEmail,
+        title: context.strings.invalidEmailAddress,
+        message: context.strings.enterValidEmail,
       );
       return false;
     } else if (email.trim() == _config.getEmail()) {
-      await showErrorDialog(
+      await showErrorBottomSheet(
         context,
-        context.strings.oops,
-        context.strings.youCannotShareWithYourself,
+        title: context.strings.oops,
+        message: context.strings.youCannotShareWithYourself,
       );
       return false;
     }
@@ -273,26 +274,5 @@ class EmergencyContactService {
     final secureRandom = FortunaRandom();
     secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
     return secureRandom;
-  }
-
-  // Helper methods for dialogs
-  Future<void> showErrorDialog(
-    BuildContext context,
-    String title,
-    String message,
-  ) async {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

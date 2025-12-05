@@ -172,7 +172,6 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
         Text(
           context.strings.emailNoEnteAccount(widget.email),
           style: textStyle.small.copyWith(color: colorScheme.textMuted),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
         GradientButton(
@@ -199,7 +198,6 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
         Text(
           subTitle,
           style: textStyle.small.copyWith(color: colorScheme.textMuted),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
         _verificationIDWidget(context, publicKey),
@@ -207,7 +205,6 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
         Text(
           bottomText,
           style: textStyle.small.copyWith(color: colorScheme.textMuted),
-          textAlign: TextAlign.center,
         ),
       ],
     );
