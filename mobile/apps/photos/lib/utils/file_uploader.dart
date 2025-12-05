@@ -309,26 +309,8 @@ class FileUploader {
         entriesToRemove.add(pendingUpload.value);
       }
     });
-    // For user-initiated cancellations (folder deselection, video backup paused),
-    // remove the item from backups entirely instead of marking as retry
-    final bool isUserCancellation = reason is UserCancelledUploadError ||
-        reason is SilentlyCancelUploadsError ||
-        reason is BackupTooOldForPreferenceError;
     for (final entry in entriesToRemove) {
-      if (isUserCancellation) {
-        _removeAndSkip(entry, reason);
-      } else {
-        final id = entry.file.localID;
-        _queue.remove(id)?.completer.completeError(reason);
-        if (id != null && _allBackups.containsKey(id)) {
-          _allBackups[id] = _allBackups[id]!
-              .copyWith(status: BackupItemStatus.retry, error: reason);
-          Bus.instance.fire(BackupUpdatedEvent(_allBackups));
-        }
-        if (_totalCountInUploadSession > 0) {
-          _totalCountInUploadSession--;
-        }
-      }
+      _removeAndSkip(entry, reason);
     }
     _logger.info(
       'number of entries removed from queue ${entriesToRemove.length}',
@@ -450,7 +432,7 @@ class FileUploader {
           await _cleanupPendingUpload(localId, pendingEntry.collectionID);
         }
         _removeAndSkip(pendingEntry, BackupFolderDeselectedError());
-        unawaited(Future.microtask(() => _pollQueue()));
+        unawaited(_pollQueue());
         return;
       }
       // Only-new filter - only applies to auto-sync uploads.
@@ -469,7 +451,7 @@ class FileUploader {
           await _cleanupPendingUpload(localId, pendingEntry.collectionID);
         }
         _removeAndSkip(pendingEntry, BackupTooOldForPreferenceError());
-        unawaited(Future.microtask(() => _pollQueue()));
+        unawaited(_pollQueue());
         return;
       }
       if (pendingEntry != null) {
@@ -486,8 +468,6 @@ class FileUploader {
           _encryptAndUploadFileToCollection(
             pendingEntry.file,
             pendingEntry.collectionID,
-            queueSource: pendingEntry.queueSource,
-            isAutoSync: pendingEntry.isAutoSync,
           ),
         );
         _logger.internalInfo(
@@ -510,13 +490,11 @@ class FileUploader {
   Future<EnteFile?> _encryptAndUploadFileToCollection(
     EnteFile file,
     int collectionID, {
-    String? queueSource,
-    bool isAutoSync = false,
     bool forcedUpload = false,
   }) async {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _encryptAndUploadFileToCollection() started for ${file.title} "
-      "(collectionID: $collectionID, isAutoSync: $isAutoSync, forcedUpload: $forcedUpload, "
+      "(collectionID: $collectionID, forcedUpload: $forcedUpload, "
       "isProcessBg: $isProcessBg)",
     );
     _uploadCounter++;
@@ -529,24 +507,8 @@ class FileUploader {
     );
     final localID = file.localID!;
     try {
-      // Folder deselection check - only for auto-sync uploads
-      if (isAutoSync &&
-          flagService.enableBackupFolderSync &&
-          queueSource != null &&
-          !DeviceFolderSelectionCache.instance.isSelected(queueSource)) {
-        await _cleanupPendingUpload(localID, collectionID);
-        throw BackupFolderDeselectedError();
-      }
-      // Only-new filter - only applies to auto-sync uploads.
-      // Manual uploads should always be allowed regardless of their creation
-      // time to support importing older albums or retrying uploads.
-      final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
-      if (isAutoSync &&
-          onlyNewSinceEpoch != null &&
-          (file.creationTime ?? 0) < onlyNewSinceEpoch) {
-        await _cleanupPendingUpload(localID, collectionID);
-        throw BackupTooOldForPreferenceError();
-      }
+      // Note: Folder deselection and only-new filters are applied in _pollQueue
+      // before this method is called. No need to duplicate checks here.
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Calling _tryToUpload() for ${file.title} with ${kFileUploadTimeout.inSeconds}s timeout...",
       );
@@ -568,14 +530,7 @@ class FileUploader {
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       return uploadedFile;
     } catch (e) {
-      if (e is BackupFolderDeselectedError ||
-          e is BackupTooOldForPreferenceError) {
-        final entry = _queue[localID];
-        if (entry != null) {
-          _removeAndSkip(entry, e as Error);
-        }
-        return null;
-      } else if (e is LockAlreadyAcquiredError) {
+      if (e is LockAlreadyAcquiredError) {
         _queue[localID]!.status = UploadStatus.inBackground;
         _allBackups[localID] = _allBackups[localID]!
             .copyWith(status: BackupItemStatus.inBackground);
