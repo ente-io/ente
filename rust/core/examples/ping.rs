@@ -12,8 +12,8 @@ async fn main() {
 
     let client = HttpClient::new(&base_url);
 
-    match client.get("/ping").await {
-        Ok(response) => println!("{}", response),
+    match client.ping().await {
+        Ok(response) => println!("message: {}, id: {}", response.message, response.id),
         Err(e) => eprintln!("Error: {}", e),
     }
 }

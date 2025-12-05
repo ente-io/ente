@@ -1,5 +1,6 @@
 //! HTTP client for communicating with the Ente API.
 
+use serde::Deserialize;
 use thiserror::Error;
 
 /// HTTP client errors.
@@ -8,6 +9,19 @@ pub enum Error {
     /// A network or HTTP protocol error occurred during the request.
     #[error("HTTP request failed: {0}")]
     Request(#[from] reqwest::Error),
+
+    /// Failed to parse JSON response.
+    #[error("JSON parse error: {0}")]
+    Json(#[from] serde_json::Error),
+}
+
+/// Response from the /ping endpoint
+#[derive(Deserialize, Debug)]
+pub struct PingResponse {
+    /// "pong"
+    pub message: String,
+    /// Git commit hash of the server.
+    pub id: String,
 }
 
 // TODO: Future HTTP features to implement:
@@ -39,6 +53,13 @@ impl HttpClient {
         let response = self.client.get(&url).send().await?;
         let text = response.text().await?;
         Ok(text)
+    }
+
+    /// Ping the API, returns [PingResponse].
+    pub async fn ping(&self) -> Result<PingResponse, Error> {
+        let text = self.get("/ping").await?;
+        let response: PingResponse = serde_json::from_str(&text)?;
+        Ok(response)
     }
 }
 
