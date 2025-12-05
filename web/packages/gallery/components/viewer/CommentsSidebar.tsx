@@ -135,7 +135,6 @@ interface Collection {
 // Mock current user ID (for determining if comment is from current user)
 const CURRENT_USER_ID = 2;
 
-
 // Mock collections that contain this file
 const mockCollections: Collection[] = [
     {
