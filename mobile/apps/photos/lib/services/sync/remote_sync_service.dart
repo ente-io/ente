@@ -506,6 +506,53 @@ class RemoteSyncService {
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
+  Future<void> handleOnlyNewBackupThresholdUpdated(
+    int thresholdMicros,
+  ) async {
+    _logger.info(
+      "[UPLOAD-DEBUG] Applying only-new backup threshold $thresholdMicros",
+    );
+    // Note: removeFromQueueWhere only removes auto-synced files (those with
+    // isAutoSync=true) from the upload queue. Manual uploads are preserved.
+    _uploader.removeFromQueueWhere(
+      (file) => (file.creationTime ?? 0) < thresholdMicros,
+      BackupTooOldForPreferenceError(),
+    );
+    // Clean up DB entries for auto-synced files that are too old.
+    // Only clean up files in collections that are mapped to device folders
+    // (auto-sync collections). Files manually added to other collections
+    // are preserved.
+    final Set<int> autoSyncCollectionIDs =
+        await _db.getDeviceSyncCollectionIDs();
+    if (autoSyncCollectionIDs.isEmpty) {
+      return;
+    }
+    int cleanedEntries = 0;
+    final pending = await _db.getFilesPendingForUpload();
+    for (final file in pending) {
+      if (file.localID == null || file.collectionID == null) {
+        continue;
+      }
+      // Only clean up files in auto-sync collections
+      if (!autoSyncCollectionIDs.contains(file.collectionID)) {
+        continue;
+      }
+      final creationTime = file.creationTime ?? 0;
+      if (creationTime < thresholdMicros) {
+        await _db.cleanupByLocalIDAndCollection(
+          file.localID!,
+          file.collectionID!,
+        );
+        cleanedEntries++;
+      }
+    }
+    if (cleanedEntries > 0) {
+      _logger.info(
+        "[UPLOAD-DEBUG] Cleared $cleanedEntries pending auto-sync uploads older than only-new cutoff",
+      );
+    }
+  }
+
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
     /*
       For each collection, perform following action
@@ -609,9 +656,24 @@ class RemoteSyncService {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
 
+    final bool enableBackupFolderSync = flagService.enableBackupFolderSync;
+    DeviceFolderSelectionCache? selectionCache;
+    if (enableBackupFolderSync) {
+      selectionCache = DeviceFolderSelectionCache.instance;
+      if (!selectionCache.isInitialized) {
+        await selectionCache.init();
+      }
+    }
+    final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
+    // Get auto-sync collection IDs for only-new filter (independent of enableBackupFolderSync)
+    final Set<int> autoSyncCollectionIDs =
+        onlyNewSinceEpoch != null ? await _db.getDeviceSyncCollectionIDs() : {};
+
     final List<EnteFile> filesToBeUploaded = [];
     int ignoredForUpload = 0;
     int skippedVideos = 0;
+    int deselectedFiles = 0;
+    int tooOldFiles = 0;
     final whitelistedIDs =
         (_prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[])
             .toSet();
@@ -626,11 +688,51 @@ class RemoteSyncService {
         ignoredForUpload++;
         continue;
       }
+      // Check if file is in an auto-sync collection for filtering
+      final bool isAutoSyncFile = file.collectionID != null &&
+          autoSyncCollectionIDs.contains(file.collectionID);
+
+      // Folder deselection check - only when enableBackupFolderSync is on
+      if (enableBackupFolderSync &&
+          file.collectionID != null &&
+          file.localID != null) {
+        final String? pathId =
+            selectionCache!.getPathIdForCollectionId(file.collectionID!);
+        if (pathId != null && !selectionCache.isSelected(pathId)) {
+          await FilesDB.instance.cleanupByLocalIDAndCollection(
+            file.localID!,
+            file.collectionID!,
+          );
+          deselectedFiles++;
+          continue;
+        }
+      }
+      // Only-new filter - applies to files in auto-sync collections only.
+      // Manual uploads (not in auto-sync collections) are always allowed.
+      if (isAutoSyncFile &&
+          onlyNewSinceEpoch != null &&
+          file.localID != null &&
+          file.collectionID != null) {
+        final int creationTime = file.creationTime ?? 0;
+        if (creationTime < onlyNewSinceEpoch) {
+          await FilesDB.instance.cleanupByLocalIDAndCollection(
+            file.localID!,
+            file.collectionID!,
+          );
+          tooOldFiles++;
+          continue;
+        }
+      }
       filesToBeUploaded.add(file);
     }
-    if (skippedVideos > 0 || ignoredForUpload > 0) {
-      _logger.info("Skipped $skippedVideos videos and $ignoredForUpload "
-          "ignored files for upload");
+    if (skippedVideos > 0 ||
+        ignoredForUpload > 0 ||
+        deselectedFiles > 0 ||
+        tooOldFiles > 0) {
+      _logger.info(
+        "Skipped $skippedVideos videos, $ignoredForUpload ignored files, "
+        "$deselectedFiles deselected-folder files, and $tooOldFiles too-old files for upload",
+      );
     }
     _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
@@ -697,8 +799,7 @@ class RemoteSyncService {
       );
     }
     final List<Future> futures = [];
-    final bool enableBackupFolderSync =
-        flagService.enableBackupFolderSync && !isProcessBg;
+    final bool enableBackupFolderSync = flagService.enableBackupFolderSync;
 
     _logger.internalInfo(
       "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
@@ -732,11 +833,13 @@ class RemoteSyncService {
             ? DeviceFolderSelectionCache.instance
                 .getPathIdForCollectionId(collectionID)
             : null;
+        // Files queued from _uploadFiles are from background auto-sync
         _uploadFile(
           file,
           collectionID,
           futures,
           queueSource: queueSource,
+          isAutoSync: true,
         );
         queuedCount++;
         _logger.internalInfo(
@@ -910,25 +1013,40 @@ class RemoteSyncService {
     int collectionID,
     List<Future> futures, {
     String? queueSource,
+    bool isAutoSync = false,
   }) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
-      "(localID: ${file.localID}, collectionID: $collectionID). "
+      "(localID: ${file.localID}, collectionID: $collectionID, isAutoSync: $isAutoSync). "
       "Calling FileUploader.upload()...",
     );
     final future = _uploader
-        .upload(file, collectionID, queueSource: queueSource)
+        .upload(
+      file,
+      collectionID,
+      queueSource: queueSource,
+      isAutoSync: isAutoSync,
+    )
         .then((uploadedFile) {
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Upload completed successfully for ${uploadedFile.title}",
       );
       return _onFileUploaded(uploadedFile);
     }).onError((error, stackTrace) {
-      _logger.internalSevere(
-        "[UPLOAD-DEBUG] Upload failed for ${file.title}",
-        error,
-        stackTrace,
-      );
+      // Skip severe logging for expected cancellation errors (folder deselection, etc.)
+      if (error is! BackupFolderDeselectedError &&
+          error is! BackupTooOldForPreferenceError &&
+          error is! SilentlyCancelUploadsError) {
+        _logger.internalSevere(
+          "[UPLOAD-DEBUG] Upload failed for ${file.title}",
+          error,
+          stackTrace,
+        );
+      } else {
+        _logger.fine(
+          "[UPLOAD-DEBUG] Upload cancelled for ${file.title}: ${error.runtimeType}",
+        );
+      }
       return _onFileUploadError(error, stackTrace, file);
     });
     futures.add(future);
@@ -977,6 +1095,9 @@ class RemoteSyncService {
       return;
     }
     if (error is BackupFolderDeselectedError) {
+      return;
+    }
+    if (error is BackupTooOldForPreferenceError) {
       return;
     }
     if (error is SilentlyCancelUploadsError) {

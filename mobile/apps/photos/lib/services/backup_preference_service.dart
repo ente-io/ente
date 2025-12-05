@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:ente_feature_flag/ente_feature_flag.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/device_files_db.dart';
@@ -74,7 +76,11 @@ class BackupPreferenceService {
   }
 
   Future<void> setOnlyNewSinceEpoch(int timestamp) async {
-    await _prefs.setInt(_keyOnlyNewSinceEpoch, timestamp);
+    if (timestamp <= 0) {
+      _logger.severe("Invalid timestamp for only-new backup: $timestamp");
+      return;
+    }
+    await _applyOnlyNewThreshold(timestamp);
   }
 
   Future<void> setOnlyNewSinceSevenDaysAgo() async {
@@ -92,7 +98,7 @@ class BackupPreferenceService {
     _logger.info(
       "Setting only-new backup threshold to $threshold (7 days ago at 12 AM)",
     );
-    await _prefs.setInt(_keyOnlyNewSinceEpoch, threshold);
+    await _applyOnlyNewThreshold(threshold);
     await _ensureDefaultFolderSelection();
   }
 
@@ -103,16 +109,34 @@ class BackupPreferenceService {
       return;
     }
     _logger.info("Setting only-new backup threshold to $now");
-    await _prefs.setInt(_keyOnlyNewSinceEpoch, now);
+    await _applyOnlyNewThreshold(now);
   }
 
   Future<void> clearOnlyNewSinceEpoch() async {
     await _prefs.remove(_keyOnlyNewSinceEpoch);
   }
 
-  /// Auto-selects all device folders when the user hasn't made any manual
-  /// selection yet. This is used in onboarding flows to quickly opt into
-  /// backing up everything visible to the app.
+  /// Applies the only-new backup threshold by saving it to preferences and
+  /// triggering cleanup of old pending uploads in the background.
+  /// The cleanup is fire-and-forget to avoid blocking the UI during
+  /// onboarding or settings toggle.
+  Future<void> _applyOnlyNewThreshold(int timestamp) async {
+    await _prefs.setInt(_keyOnlyNewSinceEpoch, timestamp);
+    // Fire-and-forget: run cleanup in background to avoid blocking UI.
+    // The actual filtering will happen during sync/upload anyway.
+    unawaited(
+      RemoteSyncService.instance
+          .handleOnlyNewBackupThresholdUpdated(timestamp)
+          .catchError((e, s) {
+        _logger.warning(
+          'Background cleanup after only-new threshold update failed',
+          e,
+          s,
+        );
+      }),
+    );
+  }
+
   Future<void> _ensureDefaultFolderSelection() async {
     if (hasManualFolderSelection || hasSelectedAnyBackupFolder) {
       return;
