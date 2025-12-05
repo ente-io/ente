@@ -337,6 +337,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
             context,
             title: context.strings.error,
             message: context.strings.somethingWentWrong,
+            assetPath: "assets/warning-blue.png",
           );
         }
       }
@@ -366,12 +367,11 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: Row(
@@ -381,7 +381,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                           onTap: () => Navigator.of(context).pop(),
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
+                              shape: BoxShape.circle,
                               color: colorScheme.backgroundElevated,
                             ),
                             padding: const EdgeInsets.all(8),
@@ -461,6 +461,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         context,
         title: context.strings.invalidEmailAddress,
         message: context.strings.enterValidEmail,
+        assetPath: "assets/warning-blue.png",
       );
       return;
     }

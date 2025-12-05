@@ -47,8 +47,9 @@ class EmergencyContactService {
     if (!isValidEmail(email)) {
       await showErrorBottomSheet(
         context,
-        title: context.strings.invalidEmailAddress,
+        title: context.strings.letsTryThatAgain,
         message: context.strings.enterValidEmail,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     } else if (email.trim() == _config.getEmail()) {
@@ -56,6 +57,7 @@ class EmergencyContactService {
         context,
         title: context.strings.oops,
         message: context.strings.youCannotShareWithYourself,
+        assetPath: "assets/warning-blue.png",
       );
       return false;
     }

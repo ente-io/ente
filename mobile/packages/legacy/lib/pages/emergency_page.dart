@@ -1,7 +1,9 @@
 import "dart:async";
 
 import "package:ente_configuration/base_configuration.dart";
+import "package:ente_legacy/components/confirmation_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
+import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
 import "package:ente_legacy/pages/select_contact_page.dart"
@@ -377,78 +379,38 @@ class _EmergencyPageState extends State<EmergencyPage> {
     BuildContext context,
     EmergencyContact contact,
   ) async {
-    if (contact.isPendingInvite()) {
-      await showActionSheet(
-        context: context,
-        body:
-            "You have invited ${contact.emergencyContact.email} to be a trusted contact",
-        bodyHighlight: "They are yet to accept your invite",
-        buttons: [
-          ButtonWidget(
-            labelText: context.strings.removeInvite,
-            buttonType: ButtonType.critical,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.first,
-            shouldStickToDarkTheme: true,
-            shouldSurfaceExecutionStates: true,
-            shouldShowSuccessConfirmation: false,
-            onTap: () async {
-              await EmergencyContactService.instance
-                  .updateContact(contact, ContactState.userRevokedContact);
-              info?.contacts.remove(contact);
-              if (mounted) {
-                setState(() {});
-                unawaited(_fetchData());
-              }
-            },
-            isInAlert: true,
-          ),
-          ButtonWidget(
-            labelText: context.strings.cancel,
-            buttonType: ButtonType.tertiary,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.second,
-            shouldStickToDarkTheme: true,
-            isInAlert: true,
-          ),
-        ],
+    final result = await showTrustedContactBottomSheet(
+      context,
+      contact: contact,
+    );
+
+    if (result == TrustedContactAction.revoke) {
+      final isPending = contact.isPendingInvite();
+      final confirmed = await showConfirmationBottomSheet(
+        context,
+        title: isPending
+            ? context.strings.cancelInviteTitle
+            : context.strings.removeContactTitle,
+        message: isPending
+            ? context.strings.cancelInviteMessage
+            : context.strings.removeContactMessage,
+        buttonText: isPending
+            ? context.strings.revokeInvite
+            : context.strings.removeContact,
+        assetPath: "assets/warning-grey.png",
       );
-    } else {
-      await showActionSheet(
-        context: context,
-        body:
-            "You have added ${contact.emergencyContact.email} as a trusted contact",
-        bodyHighlight: "They have accepted your invite",
-        buttons: [
-          ButtonWidget(
-            labelText: context.strings.remove,
-            buttonType: ButtonType.critical,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.second,
-            shouldStickToDarkTheme: true,
-            shouldSurfaceExecutionStates: true,
-            shouldShowSuccessConfirmation: false,
-            onTap: () async {
-              await EmergencyContactService.instance
-                  .updateContact(contact, ContactState.userRevokedContact);
-              info?.contacts.remove(contact);
-              if (mounted) {
-                setState(() {});
-                unawaited(_fetchData());
-              }
-            },
-            isInAlert: true,
-          ),
-          ButtonWidget(
-            labelText: context.strings.cancel,
-            buttonType: ButtonType.tertiary,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.third,
-            shouldStickToDarkTheme: true,
-            isInAlert: true,
-          ),
-        ],
-      );
+
+      if (confirmed == true) {
+        await EmergencyContactService.instance
+            .updateContact(contact, ContactState.userRevokedContact);
+        info?.contacts.remove(contact);
+        if (mounted) {
+          setState(() {});
+          unawaited(_fetchData());
+        }
+      }
+    } else if (result == TrustedContactAction.updateTime) {
+      // TODO: Implement update time functionality when API is available
     }
   }
 
