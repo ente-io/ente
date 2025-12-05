@@ -1919,8 +1919,9 @@ const bottomRightControlsHTML = () => `
   <button class="pswp__action-button" aria-label="Like">
     <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} /></svg>
   </button>
-  <button class="pswp__action-button" aria-label="Comment">
+  <button class="pswp__action-button pswp__action-button--comment" aria-label="Comment">
     <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>
+    <span class="pswp__comment-count">42</span>
   </button>
 </div>
 `;

@@ -550,6 +550,32 @@ body:has(
     fill: white;
 }
 
+/* Comment button with count indicator */
+.pswp-ente .pswp__action-button--comment {
+    position: relative;
+}
+
+.pswp-ente .pswp__comment-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #fff;
+    color: #000;
+    font-family: "Inter Variable", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 24px;
+    text-align: center;
+    display: none;
+}
+
+.pswp-ente .pswp__comment-count:not(:empty) {
+    display: block;
+}
+
 /* Reduce padding on mobile */
 @media (width < 450px) {
     .pswp-ente .pswp__bottom-right-controls {
