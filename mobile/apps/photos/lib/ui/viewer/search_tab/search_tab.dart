@@ -236,7 +236,7 @@ class _RitualsDiscoverySection extends StatelessWidget {
     }
     final textTheme = getEnteTextTheme(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.only(top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
