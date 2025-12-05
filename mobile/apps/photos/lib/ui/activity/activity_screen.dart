@@ -152,28 +152,26 @@ class _ActivityScreenState extends State<ActivityScreen> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const Spacer(),
-                        InkWell(
-                          key: _shareButtonKey,
-                          customBorder: const CircleBorder(),
-                          onTap: summaryToShare != null
-                              ? () => _shareActivity(
-                                    summaryToShare,
-                                    shareTitle,
-                                    emoji: shareEmoji,
-                                  )
-                              : null,
-                          child: SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  color: colorScheme.fillFaint,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
+                        SizedBox(
+                          width: 48,
+                          height: 48,
+                          child: Material(
+                            key: _shareButtonKey,
+                            color: colorScheme.fillFaint,
+                            borderRadius: BorderRadius.circular(10),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: summaryToShare != null
+                                  ? () => _shareActivity(
+                                        summaryToShare,
+                                        shareTitle,
+                                        emoji: shareEmoji,
+                                      )
+                                  : null,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Center(
                                   child: HugeIcon(
                                     icon: HugeIcons.strokeRoundedShare08,
                                     size: 24,
