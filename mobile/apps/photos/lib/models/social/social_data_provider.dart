@@ -103,24 +103,6 @@ class SocialDataProvider {
     return comment;
   }
 
-  Comment? updateComment(String id, String newData) {
-    if (newData.trim().isEmpty) {
-      debugPrint('updateComment: Cannot update comment with empty data');
-      return null;
-    }
-    final existing = _comments[id];
-    if (existing == null) {
-      debugPrint('updateComment: Comment $id does not exist');
-      return null;
-    }
-    final updated = existing.copyWith(
-      data: newData,
-      updatedAt: DateTime.now().millisecondsSinceEpoch,
-    );
-    _comments[id] = updated;
-    return updated;
-  }
-
   Comment? deleteComment(String id) {
     final existing = _comments[id];
     if (existing == null) {
