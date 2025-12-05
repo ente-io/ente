@@ -1,3 +1,5 @@
+//! URL construction utilities for Ente API and S3 endpoints.
+
 /// Generate the download URL for a file.
 ///
 /// - If api_base_url is production (https://api.ente.io), return CDN URL

@@ -1,7 +1,11 @@
+//! HTTP client for communicating with the Ente API.
+
 use thiserror::Error;
 
+/// HTTP client errors.
 #[derive(Error, Debug)]
 pub enum Error {
+    /// A network or HTTP protocol error occurred during the request.
     #[error("HTTP request failed: {0}")]
     Request(#[from] reqwest::Error),
 }
@@ -14,12 +18,14 @@ pub enum Error {
 // - Retry logic
 // - Configurable timeouts
 
+/// HTTP client for making requests to the Ente API.
 pub struct HttpClient {
     client: reqwest::Client,
     base_url: String,
 }
 
 impl HttpClient {
+    /// Create a client with the given base URL.
     pub fn new(base_url: &str) -> Self {
         Self {
             client: reqwest::Client::new(),
@@ -27,6 +33,7 @@ impl HttpClient {
         }
     }
 
+    /// GET request, returns response body as text.
     pub async fn get(&self, path: &str) -> Result<String, Error> {
         let url = format!("{}{}", self.base_url, path);
         let response = self.client.get(&url).send().await?;
