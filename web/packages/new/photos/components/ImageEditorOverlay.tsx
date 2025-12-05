@@ -31,6 +31,7 @@ import {
     Tab,
     Tabs,
     Typography,
+    useTheme,
 } from "@mui/material";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
@@ -114,6 +115,9 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     onSaveEditedCopy,
     zIndex,
 }) => {
+    const theme = useTheme();
+    const overlayZIndex = zIndex ?? theme.zIndex.modal + 2;
+
     const { showMiniDialog } = useBaseContext();
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -534,7 +538,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
                 width: "100%",
-                zIndex: zIndex ?? "var(--mui-zIndex-modal)",
+                zIndex: overlayZIndex,
             }}
             open
         >

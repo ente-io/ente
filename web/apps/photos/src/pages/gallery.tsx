@@ -1303,6 +1303,13 @@ const Page: React.FC = () => {
                     setFileListHeader,
                     saveGroups,
                     onAddSaveGroup,
+                    onMarkTempDeleted: handleMarkTempDeleted,
+                    onAddFileToCollection: handleAddSingleFileToCollection,
+                    onRemoteFilesPull: remoteFilesPull,
+                    onVisualFeedback: handleVisualFeedback,
+                    fileNormalCollectionIDs,
+                    collectionNameByID,
+                    onSelectCollection: handleSelectCollection,
                 }}
                 mode={barMode}
                 shouldHide={isInSearchMode}

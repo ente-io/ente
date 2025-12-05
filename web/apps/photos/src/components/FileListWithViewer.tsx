@@ -15,6 +15,7 @@ import { PseudoCollectionID } from "ente-new/photos/services/collection-summary"
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
+import { useTheme } from "@mui/material/styles";
 import { uploadManager } from "services/upload-manager";
 import {
     FileList,
@@ -28,6 +29,10 @@ export type FileListWithViewerProps = {
      */
     files: EnteFile[];
     enableDownload?: boolean;
+    /**
+     * Whether the edit image action should be available in the viewer.
+     */
+    enableEditImage?: boolean;
     /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
@@ -108,6 +113,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     user,
     files,
     enableDownload,
+    enableEditImage = true,
     disableGrouping,
     enableSelect,
     selected,
@@ -137,6 +143,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const theme = useTheme();
+    const viewerZIndex = useMemo(
+        () => fileViewerZIndex ?? theme.zIndex.modal + 2,
+        [fileViewerZIndex, theme.zIndex.modal],
+    );
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -221,7 +232,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 isInTrashSection={
                     activeCollectionID == PseudoCollectionID.trash
                 }
-                zIndex={fileViewerZIndex}
+                zIndex={viewerZIndex}
                 {...{
                     user,
                     files,
@@ -242,7 +253,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
-                onSaveEditedImageCopy={handleSaveEditedImageCopy}
+                onSaveEditedImageCopy={
+                    enableEditImage ? handleSaveEditedImageCopy : undefined
+                }
                 onAddFileToCollection={onAddFileToCollection}
                 activeCollectionID={activeCollectionID}
             />

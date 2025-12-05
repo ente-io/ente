@@ -36,6 +36,7 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import type { FileListWithViewerProps } from "../FileListWithViewer";
 import {
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
@@ -64,7 +65,18 @@ import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
 import { CollectionMapDialog } from "./CollectionMapDialog";
 
-export interface CollectionHeaderProps {
+export interface CollectionHeaderProps
+    extends Pick<
+        FileListWithViewerProps,
+        | "onMarkTempDeleted"
+        | "onAddFileToCollection"
+        | "onRemoteFilesPull"
+        | "onVisualFeedback"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    > {
     collectionSummary: CollectionSummary;
     // TODO: This can be undefined
     activeCollection: Collection;
@@ -129,6 +141,14 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onCollectionCast,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
@@ -599,6 +619,16 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 {...mapDialogVisibilityProps}
                 collectionSummary={collectionSummary}
                 activeCollection={activeCollection}
+                onRemotePull={onRemotePull}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={onMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                onVisualFeedback={onVisualFeedback}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
             />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}

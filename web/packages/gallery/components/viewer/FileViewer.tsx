@@ -1063,7 +1063,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     onClose={handleImageEditorClose}
                     file={activeAnnotatedFile.file}
                     onSaveEditedCopy={handleSaveEditedCopy}
-                    zIndex={zIndex !== undefined ? zIndex + 1 : undefined}
+                    zIndex={zIndex !== undefined ? zIndex + 2 : undefined}
                 />
             )}
             <Shortcuts

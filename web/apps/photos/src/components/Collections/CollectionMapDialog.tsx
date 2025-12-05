@@ -11,6 +11,7 @@ import {
     Stack,
     styled,
     Typography,
+    useTheme,
     type IconButtonProps,
 } from "@mui/material";
 import { ensureLocalUser } from "ente-accounts/services/user";
@@ -27,6 +28,7 @@ import {
     fileLocation,
     ItemVisibility,
 } from "ente-media/file-metadata";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import {
     addToFavoritesCollection,
     removeFromFavoritesCollection,
@@ -48,6 +50,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
 import { calculateOptimalZoom, getMapCenter } from "../TripLayout/mapHelpers";
 import type { JourneyPoint } from "../TripLayout/types";
@@ -57,9 +60,23 @@ import { generateNeededThumbnails } from "../TripLayout/utils/dataProcessing";
 // Types
 // ============================================================================
 
-interface CollectionMapDialogProps extends ModalVisibilityProps {
+interface CollectionMapDialogProps
+    extends ModalVisibilityProps,
+        Pick<
+            FileListWithViewerProps,
+            | "onAddSaveGroup"
+            | "onMarkTempDeleted"
+            | "onAddFileToCollection"
+            | "onRemoteFilesPull"
+            | "onVisualFeedback"
+            | "fileNormalCollectionIDs"
+            | "collectionNameByID"
+            | "onSelectCollection"
+            | "onSelectPerson"
+        > {
     collectionSummary: CollectionSummary;
     activeCollection: Collection;
+    onRemotePull?: (opts?: RemotePullOpts) => Promise<void>;
 }
 
 interface MapDataState {
@@ -75,6 +92,11 @@ interface FavoritesState {
     favoriteFileIDs: Set<number>;
     pendingFavoriteUpdates: Set<number>;
     pendingVisibilityUpdates: Set<number>;
+}
+
+interface MapDataResult extends MapDataState {
+    removeFiles: (fileIDs: number[]) => void;
+    updateFileVisibility: (file: EnteFile, visibility: ItemVisibility) => void;
 }
 
 /**
@@ -148,7 +170,7 @@ function useMapData(
     open: boolean,
     activeCollection: Collection,
     onGenericError: (e: unknown) => void,
-): MapDataState {
+): MapDataResult {
     const [state, setState] = useState<MapDataState>({
         mapCenter: null,
         mapPhotos: [],
@@ -241,7 +263,53 @@ function useMapData(
         void loadMapData();
     }, [open, activeCollection, onGenericError, loadAllThumbs]);
 
-    return state;
+    const removeFiles = useCallback((fileIDs: number[]) => {
+        if (!fileIDs.length) return;
+        setState((prev) => {
+            const ids = new Set(fileIDs);
+            const filesByID = new Map(prev.filesByID);
+            const thumbByFileID = new Map(prev.thumbByFileID);
+            ids.forEach((id) => {
+                filesByID.delete(id);
+                thumbByFileID.delete(id);
+            });
+            const mapPhotos = prev.mapPhotos.filter(
+                (photo) => !ids.has(photo.fileId),
+            );
+            return {
+                ...prev,
+                filesByID,
+                thumbByFileID,
+                mapPhotos,
+                mapCenter: mapPhotos.length ? prev.mapCenter : null,
+            };
+        });
+    }, []);
+
+    const updateFileVisibility = useCallback(
+        (file: EnteFile, visibility: ItemVisibility) => {
+            setState((prev) => {
+                if (!prev.filesByID.has(file.id)) return prev;
+                if (!file.magicMetadata) return prev;
+
+                const updatedMagicMetadata = {
+                    ...file.magicMetadata,
+                    data: { ...file.magicMetadata.data, visibility },
+                };
+
+                const updatedFile: EnteFile = {
+                    ...file,
+                    magicMetadata: updatedMagicMetadata,
+                };
+                const filesByID = new Map(prev.filesByID);
+                filesByID.set(file.id, updatedFile);
+                return { ...prev, filesByID };
+            });
+        },
+        [],
+    );
+
+    return { ...state, removeFiles, updateFileVisibility };
 }
 
 /**
@@ -650,14 +718,37 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     onClose,
     collectionSummary,
     activeCollection,
+    onRemotePull,
+    onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
 }) => {
     const { onGenericError } = useBaseContext();
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
+    const theme = useTheme();
+    const fileViewerZIndex = useMemo(
+        () => theme.zIndex.modal + 3,
+        [theme.zIndex.modal],
+    );
     const optimalZoom = calculateOptimalZoom();
 
-    const { mapCenter, mapPhotos, filesByID, thumbByFileID, isLoading, error } =
-        useMapData(open, activeCollection, onGenericError);
+    const {
+        mapCenter,
+        mapPhotos,
+        filesByID,
+        thumbByFileID,
+        isLoading,
+        error,
+        removeFiles: removeFilesFromMap,
+        updateFileVisibility,
+    } = useMapData(open, activeCollection, onGenericError);
 
     const { visiblePhotos, setVisiblePhotos } = useVisiblePhotos();
 
@@ -678,11 +769,12 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             .filter((f): f is EnteFile => f !== undefined);
     }, [visiblePhotos, filesByID]);
 
-    // No-op handlers for FileListWithViewer
-    const handleRemotePull = useCallback(() => Promise.resolve(), []);
-    const handleVisualFeedback = useCallback(() => {
-        /* no-op */
-    }, []);
+    const handleRemotePull = useCallback(
+        () =>
+            onRemotePull ? onRemotePull({ silent: true }) : Promise.resolve(),
+        [onRemotePull],
+    );
+    const visualFeedback = useMemo(() => onVisualFeedback, [onVisualFeedback]);
 
     // Empty selection state since we don't support selection in map view
     const emptySelected = useMemo(
@@ -697,6 +789,36 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const noOpSetSelected = useCallback(() => {
         /* no-op */
     }, []);
+
+    const handleMarkTempDeleted = useCallback(
+        (files: EnteFile[]) => {
+            onMarkTempDeleted?.(files);
+            const idsToRemove = new Set(files.map((file) => file.id));
+            setVisiblePhotos((prev) =>
+                prev.filter((photo) => !idsToRemove.has(photo.fileId)),
+            );
+            removeFilesFromMap([...idsToRemove]);
+        },
+        [onMarkTempDeleted, removeFilesFromMap, setVisiblePhotos],
+    );
+
+    const handleFileVisibilityUpdateWithLocalState = useCallback(
+        async (file: EnteFile, visibility: ItemVisibility) => {
+            await handleFileVisibilityUpdate(file, visibility);
+            const updatedMagicMetadata = file.magicMetadata
+                ? {
+                      ...file.magicMetadata,
+                      data: { ...file.magicMetadata.data, visibility },
+                  }
+                : undefined;
+            const updatedFile =
+                updatedMagicMetadata !== undefined
+                    ? { ...file, magicMetadata: updatedMagicMetadata }
+                    : file;
+            updateFileVisibility(updatedFile, visibility);
+        },
+        [handleFileVisibilityUpdate, updateFileVisibility],
+    );
 
     const body = useMemo(() => {
         if (isLoading) {
@@ -757,9 +879,20 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 pendingFavoriteUpdates={pendingFavoriteUpdates}
                 pendingVisibilityUpdates={pendingVisibilityUpdates}
                 onToggleFavorite={handleToggleFavorite}
-                onFileVisibilityUpdate={handleFileVisibilityUpdate}
+                onFileVisibilityUpdate={
+                    handleFileVisibilityUpdateWithLocalState
+                }
                 onRemotePull={handleRemotePull}
-                onVisualFeedback={handleVisualFeedback}
+                onVisualFeedback={visualFeedback}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={handleMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
+                fileViewerZIndex={fileViewerZIndex}
                 selected={emptySelected}
                 setSelected={noOpSetSelected}
             />
@@ -770,10 +903,10 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         emptySelected,
         error,
         favoriteFileIDs,
-        handleFileVisibilityUpdate,
+        handleFileVisibilityUpdateWithLocalState,
         handleRemotePull,
         handleToggleFavorite,
-        handleVisualFeedback,
+        visualFeedback,
         isLoading,
         mapCenter,
         mapComponents,
@@ -781,9 +914,18 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         noOpSetSelected,
         onClose,
         optimalZoom,
+        onAddFileToCollection,
+        onAddSaveGroup,
+        onRemoteFilesPull,
         pendingFavoriteUpdates,
         pendingVisibilityUpdates,
         setVisiblePhotos,
+        collectionNameByID,
+        fileNormalCollectionIDs,
+        handleMarkTempDeleted,
+        onSelectCollection,
+        onSelectPerson,
+        fileViewerZIndex,
         thumbByFileID,
         user,
         visibleFiles,
@@ -839,6 +981,15 @@ interface MapLayoutProps {
     ) => Promise<void>;
     onRemotePull: () => Promise<void>;
     onVisualFeedback: () => void;
+    onAddSaveGroup: FileListWithViewerProps["onAddSaveGroup"];
+    onMarkTempDeleted?: FileListWithViewerProps["onMarkTempDeleted"];
+    onAddFileToCollection?: FileListWithViewerProps["onAddFileToCollection"];
+    onRemoteFilesPull?: FileListWithViewerProps["onRemoteFilesPull"];
+    fileNormalCollectionIDs?: FileListWithViewerProps["fileNormalCollectionIDs"];
+    collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
+    onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
+    onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
+    fileViewerZIndex: number;
     selected: {
         ownCount: number;
         count: number;
@@ -868,6 +1019,15 @@ function MapLayout({
     onFileVisibilityUpdate,
     onRemotePull,
     onVisualFeedback,
+    onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
+    fileViewerZIndex,
     selected,
     setSelected,
 }: MapLayoutProps) {
@@ -888,8 +1048,17 @@ function MapLayout({
                 onFileVisibilityUpdate={onFileVisibilityUpdate}
                 onRemotePull={onRemotePull}
                 onVisualFeedback={onVisualFeedback}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={onMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
                 selected={selected}
                 setSelected={setSelected}
+                fileViewerZIndex={fileViewerZIndex}
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
@@ -932,6 +1101,15 @@ interface CollectionSidebarProps {
     ) => Promise<void>;
     onRemotePull: () => Promise<void>;
     onVisualFeedback: () => void;
+    onAddSaveGroup: FileListWithViewerProps["onAddSaveGroup"];
+    onMarkTempDeleted?: FileListWithViewerProps["onMarkTempDeleted"];
+    onAddFileToCollection?: FileListWithViewerProps["onAddFileToCollection"];
+    onRemoteFilesPull?: FileListWithViewerProps["onRemoteFilesPull"];
+    fileNormalCollectionIDs?: FileListWithViewerProps["fileNormalCollectionIDs"];
+    collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
+    onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
+    onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
+    fileViewerZIndex: number;
     selected: {
         ownCount: number;
         count: number;
@@ -956,6 +1134,15 @@ function CollectionSidebar({
     onFileVisibilityUpdate,
     onRemotePull,
     onVisualFeedback,
+    onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
+    fileViewerZIndex,
     selected,
     setSelected,
 }: CollectionSidebarProps) {
@@ -970,14 +1157,6 @@ function CollectionSidebar({
             ? getPhotoThumbnail(fallbackPhoto, thumbByFileID)
             : undefined;
     }, [coverFile, mapPhotos, thumbByFileID]);
-
-    // No-op for onAddSaveGroup since we don't support download in map view
-    const handleAddSaveGroup = useCallback(
-        () => () => {
-            /* no-op */
-        },
-        [],
-    );
 
     return (
         <SidebarWrapper>
@@ -1000,12 +1179,20 @@ function CollectionSidebar({
                             onFileVisibilityUpdate={onFileVisibilityUpdate}
                             onRemotePull={onRemotePull}
                             onVisualFeedback={onVisualFeedback}
-                            onAddSaveGroup={handleAddSaveGroup}
-                            enableDownload={false}
+                            onAddSaveGroup={onAddSaveGroup}
+                            onMarkTempDeleted={onMarkTempDeleted}
+                            onAddFileToCollection={onAddFileToCollection}
+                            onRemoteFilesPull={onRemoteFilesPull}
+                            enableEditImage={false}
+                            fileNormalCollectionIDs={fileNormalCollectionIDs}
+                            collectionNameByID={collectionNameByID}
+                            onSelectCollection={onSelectCollection}
+                            onSelectPerson={onSelectPerson}
+                            enableDownload={true}
                             activeCollectionID={collectionSummary.id}
                             selected={selected}
                             setSelected={setSelected}
-                            fileViewerZIndex={1301}
+                            fileViewerZIndex={fileViewerZIndex}
                         />
                     ) : (
                         <EmptyState>
@@ -1525,7 +1712,7 @@ const SidebarGradient = styled(Box)(({ theme }) => ({
     right: 0,
     height: "80px",
     background:
-        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0) 100%)",
+        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 4%, rgba(0,0,0,0) 100%)",
     pointerEvents: "none",
     borderRadius: "0",
     [theme.breakpoints.up("md")]: {
