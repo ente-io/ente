@@ -851,7 +851,7 @@
   "enterEmail": "Enter email",
   "verifyIDLabel": "Verify",
   "invalidEmailAddress": "Invalid email address",
-  "enterValidEmail": "Please enter a valid email address.",
+  "enterValidEmail": "That email doesn't seem to be valid. Please enter a valid email address",
   "addANewEmail": "Add a new email",
   "orPickAnExistingOne": "Or pick an existing one",
   "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
@@ -883,7 +883,7 @@
       }
     }
   },
-  "youCannotShareWithYourself": "You cannot share with yourself",
+  "youCannotShareWithYourself": "You cannot add yourself as a legacy contact",
   "emailNoEnteAccount": "{email} does not have an Ente account. Send them an invite to share files.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
@@ -903,5 +903,54 @@
         "example": "7"
       }
     }
+  },
+  "updateTime": "Update time",
+  "@updateTime": {
+    "description": "Button label to update the recovery time for a trusted contact"
+  },
+  "revokeInvite": "Revoke invite",
+  "@revokeInvite": {
+    "description": "Button label to revoke a pending trusted contact invite"
+  },
+  "trustedContactInvitePending": "You have invited {email} to be a trusted contact. They are yet to accept your invite.",
+  "@trustedContactInvitePending": {
+    "description": "Description shown when a trusted contact invite is pending",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "trustedContactAccepted": "You have added {email} as a trusted contact. They have accepted your invite.",
+  "@trustedContactAccepted": {
+    "description": "Description shown when a trusted contact has accepted the invite",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "letsTryThatAgain": "Let's try that again",
+  "cancelInviteTitle": "Cancel invite?",
+  "@cancelInviteTitle": {
+    "description": "Title for cancel invite confirmation dialog"
+  },
+  "cancelInviteMessage": "If you delete this invite, you'll need to send a new one if you change your mind.",
+  "@cancelInviteMessage": {
+    "description": "Message for cancel invite confirmation dialog"
+  },
+  "removeContactTitle": "Remove contact?",
+  "@removeContactTitle": {
+    "description": "Title for remove contact confirmation dialog"
+  },
+  "removeContactMessage": "If you delete this contact, you'll need to send a new invitation, and the contact will have to accept it again.",
+  "@removeContactMessage": {
+    "description": "Message for remove contact confirmation dialog"
+  },
+  "removeContact": "Remove contact",
+  "@removeContact": {
+    "description": "Button label to remove a trusted contact"
   }
 }
