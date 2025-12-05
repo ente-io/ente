@@ -580,6 +580,13 @@ body:has(
 @media (width < 450px) {
     .pswp-ente .pswp__bottom-right-controls {
         bottom: 12px;
+        left: 12px;
         right: 12px;
+    }
+
+    .pswp-ente .pswp__bottom-right-controls::before {
+        bottom: -12px;
+        left: -12px;
+        right: -12px;
     }
 }
