@@ -10,13 +10,13 @@ pub enum Error {
     #[error("Network error: {0}")]
     Network(String),
 
-    /// Server retured an HTTP error status.
+    /// Server returned an HTTP error status.
     #[error("HTTP {status}: {message}")]
     Http {
-        /// HTTP status code.
-        status: u16,
         /// Error message or response body.
         message: String,
+        /// HTTP status code.
+        status: u16,
     },
 
     /// Failed to parse JSON response.

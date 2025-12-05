@@ -28,14 +28,14 @@ pub enum HttpError {
 impl From<CoreError> for HttpError {
     fn from(e: CoreError) -> Self {
         match e {
-            CoreError::Network(msg) => HttpError::Network { message: msg },
+            CoreError::Network(message) => HttpError::Network { message },
             CoreError::Http { status, message } => HttpError::Http { status, message },
-            CoreError::Parse(msg) => HttpError::Parse { message: msg },
+            CoreError::Parse(message) => HttpError::Parse { message },
         }
     }
 }
 
-/// HTTP client fro making requests to the Ente API.
+/// HTTP client for making requests to the Ente API.
 #[frb(opaque)]
 pub struct HttpClient {
     inner: CoreHttpClient,
