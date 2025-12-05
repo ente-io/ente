@@ -247,7 +247,18 @@ function useMapData(
                     });
 
                     void loadAllThumbs(pointsWithThumbs, files);
+                    return;
                 }
+
+                // Reset state when no geotagged locations exist to avoid showing stale data
+                setState({
+                    filesByID: new Map(),
+                    mapCenter: null,
+                    mapPhotos: [],
+                    thumbByFileID: new Map(),
+                    isLoading: false,
+                    error: null,
+                });
 
                 return;
             } catch (e) {
@@ -690,6 +701,7 @@ function extractLocationPoints(files: EnteFile[]): JourneyPoint[] {
     for (const file of files) {
         const loc = fileLocation(file);
         if (!loc) continue;
+        if (loc.latitude === 0 && loc.longitude === 0) continue; // Ignore invalid default coordinates
 
         points.push({
             lat: loc.latitude,
@@ -852,10 +864,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             return (
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
-                        {t("view_on_map")}
-                    </Typography>
-                    <Typography variant="small" color="text.secondary">
-                        {t("maps_privacy_notice")}
+                        {t("no_geotagged_photos", {
+                            defaultValue: "No photos found with location information",
+                        })}
                     </Typography>
                 </CenteredBox>
             );
