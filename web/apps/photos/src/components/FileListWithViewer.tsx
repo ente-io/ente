@@ -1,4 +1,5 @@
 import { styled } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
@@ -15,7 +16,6 @@ import { PseudoCollectionID } from "ente-new/photos/services/collection-summary"
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { useTheme } from "@mui/material/styles";
 import { uploadManager } from "services/upload-manager";
 import {
     FileList,
@@ -29,10 +29,6 @@ export type FileListWithViewerProps = {
      */
     files: EnteFile[];
     enableDownload?: boolean;
-    /**
-     * Whether the edit image action should be available in the viewer.
-     */
-    enableEditImage?: boolean;
     /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
@@ -113,7 +109,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     user,
     files,
     enableDownload,
-    enableEditImage = true,
     disableGrouping,
     enableSelect,
     selected,
@@ -253,9 +248,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
-                onSaveEditedImageCopy={
-                    enableEditImage ? handleSaveEditedImageCopy : undefined
-                }
+                onSaveEditedImageCopy={handleSaveEditedImageCopy}
                 onAddFileToCollection={onAddFileToCollection}
                 activeCollectionID={activeCollectionID}
             />

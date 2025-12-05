@@ -1183,7 +1183,6 @@ function CollectionSidebar({
                             onMarkTempDeleted={onMarkTempDeleted}
                             onAddFileToCollection={onAddFileToCollection}
                             onRemoteFilesPull={onRemoteFilesPull}
-                            enableEditImage={false}
                             fileNormalCollectionIDs={fileNormalCollectionIDs}
                             collectionNameByID={collectionNameByID}
                             onSelectCollection={onSelectCollection}
