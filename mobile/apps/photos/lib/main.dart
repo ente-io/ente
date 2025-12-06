@@ -189,7 +189,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     await FileUploader.instance.init(prefs, true);
     LocalFileUpdateService.instance.init(prefs);
     await LocalSyncService.instance.init(prefs);
-    RemoteSyncService.instance.init(prefs);
+    await RemoteSyncService.instance.init(prefs);
     await SyncService.instance.init(prefs);
 
     // Misc Services
@@ -293,7 +293,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await LocalSyncService.instance.init(preferences);
     _logger.info("LocalSyncService init done $tlog");
 
-    RemoteSyncService.instance.init(preferences);
+    await RemoteSyncService.instance.init(preferences);
     _logger.info("RemoteFileMLService done $tlog");
 
     _logger.info("SyncService init $tlog");

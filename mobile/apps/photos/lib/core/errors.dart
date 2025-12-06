@@ -43,6 +43,8 @@ class FileTooLargeForPlanError extends Error {}
 
 class SilentlyCancelUploadsError extends Error {}
 
+class BackupFolderDeselectedError extends Error {}
+
 class UserCancelledUploadError extends Error {}
 
 bool isHandledSyncError(Object errObj) {
@@ -50,7 +52,8 @@ bool isHandledSyncError(Object errObj) {
       errObj is NoActiveSubscriptionError ||
       errObj is WiFiUnavailableError ||
       errObj is StorageLimitExceededError ||
-      errObj is SyncStopRequestedError) {
+      errObj is SyncStopRequestedError ||
+      errObj is BackupFolderDeselectedError) {
     return true;
   }
   return false;
