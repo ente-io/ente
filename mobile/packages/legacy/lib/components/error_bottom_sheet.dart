@@ -1,5 +1,3 @@
-import "package:ente_legacy/components/gradient_button.dart";
-import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 
@@ -92,14 +90,6 @@ class ErrorBottomSheet extends StatelessWidget {
                   color: colorScheme.textMuted,
                 ),
                 textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  text: context.strings.ok,
-                  onTap: () => Navigator.of(context).pop(),
-                ),
               ),
             ],
           ),
