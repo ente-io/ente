@@ -1,0 +1,1758 @@
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import NavigationIcon from "@mui/icons-material/Navigation";
+import RemoveIcon from "@mui/icons-material/Remove";
+import {
+    Box,
+    Dialog,
+    DialogContent,
+    IconButton,
+    Stack,
+    styled,
+    Typography,
+    useTheme,
+    type IconButtonProps,
+} from "@mui/material";
+import { ensureLocalUser } from "ente-accounts/services/user";
+import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
+import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
+import { downloadManager } from "ente-gallery/services/download";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
+import { type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
+import {
+    fileCreationTime,
+    fileFileName,
+    fileLocation,
+    ItemVisibility,
+} from "ente-media/file-metadata";
+import type { RemotePullOpts } from "ente-new/photos/components/gallery";
+import {
+    addToFavoritesCollection,
+    removeFromFavoritesCollection,
+} from "ente-new/photos/services/collection";
+import { type CollectionSummary } from "ente-new/photos/services/collection-summary";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
+import {
+    savedCollectionFiles,
+    savedCollections,
+} from "ente-new/photos/services/photos-fdb";
+import { t } from "i18next";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet/dist/leaflet.css";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import type { FileListWithViewerProps } from "../FileListWithViewer";
+import { FileListWithViewer } from "../FileListWithViewer";
+import { calculateOptimalZoom, getMapCenter } from "../TripLayout/mapHelpers";
+import type { JourneyPoint } from "../TripLayout/types";
+import { generateNeededThumbnails } from "../TripLayout/utils/dataProcessing";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface CollectionMapDialogProps
+    extends ModalVisibilityProps,
+        Pick<
+            FileListWithViewerProps,
+            | "onAddSaveGroup"
+            | "onMarkTempDeleted"
+            | "onAddFileToCollection"
+            | "onRemoteFilesPull"
+            | "onVisualFeedback"
+            | "fileNormalCollectionIDs"
+            | "collectionNameByID"
+            | "onSelectCollection"
+            | "onSelectPerson"
+        > {
+    collectionSummary: CollectionSummary;
+    activeCollection: Collection;
+    onRemotePull?: (opts?: RemotePullOpts) => Promise<void>;
+}
+
+interface MapDataState {
+    mapCenter: [number, number] | null;
+    mapPhotos: JourneyPoint[];
+    filesByID: Map<number, EnteFile>;
+    thumbByFileID: Map<number, string>;
+    isLoading: boolean;
+    error: string | null;
+}
+
+interface FavoritesState {
+    favoriteFileIDs: Set<number>;
+    pendingFavoriteUpdates: Set<number>;
+    pendingVisibilityUpdates: Set<number>;
+}
+
+interface MapDataResult extends MapDataState {
+    removeFiles: (fileIDs: number[]) => void;
+    updateFileVisibility: (file: EnteFile, visibility: ItemVisibility) => void;
+}
+
+/**
+ * Dynamically loaded map components to avoid SSR issues with Leaflet
+ */
+interface MapComponents {
+    MapContainer: typeof import("react-leaflet").MapContainer;
+    TileLayer: typeof import("react-leaflet").TileLayer;
+    Marker: typeof import("react-leaflet").Marker;
+    useMap: typeof import("react-leaflet").useMap;
+    MarkerClusterGroup: typeof import("react-leaflet-cluster").default;
+}
+
+// ============================================================================
+// Custom Hooks
+// ============================================================================
+
+/**
+ * Dynamically loads map-related React components (Leaflet) to avoid SSR issues
+ * Responsibility: Lazy load map dependencies only when needed (window must exist)
+ */
+function useMapComponents() {
+    const [mapComponents, setMapComponents] = useState<MapComponents | null>(
+        null,
+    );
+
+    useEffect(() => {
+        // Only load on client-side where window exists
+        if (typeof window === "undefined") return;
+
+        void Promise.all([
+            import("react-leaflet"),
+            import("react-leaflet-cluster"),
+        ])
+            .then(([leaflet, cluster]) =>
+                setMapComponents({
+                    MapContainer: leaflet.MapContainer,
+                    TileLayer: leaflet.TileLayer,
+                    Marker: leaflet.Marker,
+                    useMap: leaflet.useMap,
+                    MarkerClusterGroup: cluster.default,
+                }),
+            )
+            .catch((e: unknown) => {
+                console.error("Failed to load map components", e);
+            });
+    }, []);
+
+    return mapComponents;
+}
+
+/**
+ * Retrieves the current authenticated user
+ * Responsibility: Provide user context for favorite/visibility operations
+ */
+function useCurrentUser() {
+    return useMemo(() => {
+        try {
+            return ensureLocalUser();
+        } catch {
+            return undefined;
+        }
+    }, []);
+}
+
+/**
+ * Loads and manages map data including photos, locations, and thumbnails
+ * Responsibility: Fetch collection files, extract locations, generate thumbnails
+ */
+function useMapData(
+    open: boolean,
+    activeCollection: Collection,
+    onGenericError: (e: unknown) => void,
+): MapDataResult {
+    const [state, setState] = useState<MapDataState>({
+        mapCenter: null,
+        mapPhotos: [],
+        filesByID: new Map(),
+        thumbByFileID: new Map(),
+        isLoading: false,
+        error: null,
+    });
+
+    const loadAllThumbs = useCallback(
+        async (points: JourneyPoint[], files: EnteFile[]) => {
+            // Build a Map for O(1) file lookup instead of O(n) find
+            const filesById = new Map(files.map((f) => [f.id, f]));
+
+            const entries = await Promise.all(
+                points.map(async (p) => {
+                    if (p.image) return [p.fileId, p.image] as const;
+                    const file = filesById.get(p.fileId);
+                    if (!file) return [p.fileId, undefined] as const;
+                    try {
+                        const thumb =
+                            await downloadManager.renderableThumbnailURL(file);
+                        return [p.fileId, thumb] as const;
+                    } catch {
+                        return [p.fileId, undefined] as const;
+                    }
+                }),
+            );
+
+            setState((prev) => ({
+                ...prev,
+                thumbByFileID: new Map(
+                    entries.filter(([, t]) => t !== undefined) as [
+                        number,
+                        string,
+                    ][],
+                ),
+            }));
+        },
+        [],
+    );
+
+    useEffect(() => {
+        if (!open) return;
+
+        const loadMapData = async () => {
+            setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+            try {
+                const files = await getFilesForCollection(activeCollection);
+                const locationPoints = extractLocationPoints(files); // transforms the files into JourneyData[]
+
+                if (locationPoints.length) {
+                    const sortedPoints = sortPhotosByTimestamp(locationPoints);
+
+                    const { thumbnailUpdates } = await generateNeededThumbnails(
+                        { photoClusters: [sortedPoints], files },
+                    );
+
+                    const pointsWithThumbs = sortedPoints.map((point) => {
+                        const thumb = thumbnailUpdates.get(point.fileId);
+                        return thumb ? { ...point, image: thumb } : point;
+                    });
+
+                    setState({
+                        filesByID: new Map(
+                            files.map((file) => [file.id, file]),
+                        ),
+                        mapCenter: getMapCenter([], pointsWithThumbs),
+                        mapPhotos: pointsWithThumbs,
+                        thumbByFileID: new Map(),
+                        isLoading: false,
+                        error: null,
+                    });
+
+                    void loadAllThumbs(pointsWithThumbs, files);
+                }
+
+                return;
+            } catch (e) {
+                setState((prev) => ({
+                    ...prev,
+                    isLoading: false,
+                    error: t("something_went_wrong"),
+                }));
+                onGenericError(e);
+            }
+        };
+
+        void loadMapData();
+    }, [open, activeCollection, onGenericError, loadAllThumbs]);
+
+    const removeFiles = useCallback((fileIDs: number[]) => {
+        if (!fileIDs.length) return;
+        setState((prev) => {
+            const ids = new Set(fileIDs);
+            const filesByID = new Map(prev.filesByID);
+            const thumbByFileID = new Map(prev.thumbByFileID);
+            ids.forEach((id) => {
+                filesByID.delete(id);
+                thumbByFileID.delete(id);
+            });
+            const mapPhotos = prev.mapPhotos.filter(
+                (photo) => !ids.has(photo.fileId),
+            );
+            return {
+                ...prev,
+                filesByID,
+                thumbByFileID,
+                mapPhotos,
+                mapCenter: mapPhotos.length ? prev.mapCenter : null,
+            };
+        });
+    }, []);
+
+    const updateFileVisibility = useCallback(
+        (file: EnteFile, visibility: ItemVisibility) => {
+            setState((prev) => {
+                if (!prev.filesByID.has(file.id)) return prev;
+                if (!file.magicMetadata) return prev;
+
+                const updatedMagicMetadata = {
+                    ...file.magicMetadata,
+                    data: { ...file.magicMetadata.data, visibility },
+                };
+
+                const updatedFile: EnteFile = {
+                    ...file,
+                    magicMetadata: updatedMagicMetadata,
+                };
+                const filesByID = new Map(prev.filesByID);
+                filesByID.set(file.id, updatedFile);
+                return { ...prev, filesByID };
+            });
+        },
+        [],
+    );
+
+    return { ...state, removeFiles, updateFileVisibility };
+}
+
+/**
+ * Manages favorite files state and handles favorite/visibility updates
+ * Responsibility: Load user's favorites, toggle favorite status, update file visibility
+ */
+function useFavorites(
+    open: boolean,
+    user: ReturnType<typeof useCurrentUser>,
+): FavoritesState & {
+    handleToggleFavorite: (file: EnteFile) => Promise<void>;
+    handleFileVisibilityUpdate: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+} {
+    const [favoriteFileIDs, setFavoriteFileIDs] = useState<Set<number>>(
+        new Set(),
+    );
+    const [pendingFavoriteUpdates, setPendingFavoriteUpdates] = useState<
+        Set<number>
+    >(new Set());
+    const [pendingVisibilityUpdates, setPendingVisibilityUpdates] = useState<
+        Set<number>
+    >(new Set());
+
+    useEffect(() => {
+        if (!open || !user) return;
+
+        const loadFavorites = async () => {
+            const collections = await savedCollections();
+            const collectionFiles = await savedCollectionFiles();
+
+            for (const collection of collections) {
+                if (
+                    collection.type === "favorites" &&
+                    collection.owner.id === user.id
+                ) {
+                    const favoriteIDs = new Set(
+                        collectionFiles
+                            .filter((f) => f.collectionID === collection.id)
+                            .map((f) => f.id),
+                    );
+                    setFavoriteFileIDs(favoriteIDs);
+                    break;
+                }
+            }
+        };
+
+        void loadFavorites();
+    }, [open, user]);
+
+    // Helper to add/remove from Set immutably - avoids recreating Set when unnecessary
+    const addToSet = useCallback((set: Set<number>, id: number) => {
+        if (set.has(id)) return set;
+        const next = new Set(set);
+        next.add(id);
+        return next;
+    }, []);
+
+    const removeFromSet = useCallback((set: Set<number>, id: number) => {
+        if (!set.has(id)) return set;
+        const next = new Set(set);
+        next.delete(id);
+        return next;
+    }, []);
+
+    const handleToggleFavorite = useCallback(
+        async (file: EnteFile) => {
+            if (!user) return;
+            const fileID = file.id;
+
+            // Check favorite status at call time to avoid stale closure
+            const isFavorite = favoriteFileIDs.has(fileID);
+
+            setPendingFavoriteUpdates((prev) => addToSet(prev, fileID));
+            try {
+                const action = isFavorite
+                    ? removeFromFavoritesCollection
+                    : addToFavoritesCollection;
+                await action([file]);
+                setFavoriteFileIDs((prev) =>
+                    isFavorite
+                        ? removeFromSet(prev, fileID)
+                        : addToSet(prev, fileID),
+                );
+            } finally {
+                setPendingFavoriteUpdates((prev) =>
+                    removeFromSet(prev, fileID),
+                );
+            }
+        },
+        [user, favoriteFileIDs, addToSet, removeFromSet],
+    );
+
+    const handleFileVisibilityUpdate = useCallback(
+        async (file: EnteFile, visibility: ItemVisibility) => {
+            const fileID = file.id;
+            setPendingVisibilityUpdates((prev) => addToSet(prev, fileID));
+            try {
+                await updateFilesVisibility([file], visibility);
+            } finally {
+                setPendingVisibilityUpdates((prev) =>
+                    removeFromSet(prev, fileID),
+                );
+            }
+        },
+        [addToSet, removeFromSet],
+    );
+
+    return {
+        favoriteFileIDs,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        handleToggleFavorite,
+        handleFileVisibilityUpdate,
+    };
+}
+
+/**
+ * Manages the lifecycle of the currently visible journey photos.
+ *
+ * Tracks the ordered list of visible photos and exposes a setter to update them.
+ *
+ * @returns An object containing the visible photos array and setter.
+ */
+function useVisiblePhotos() {
+    const [visiblePhotos, setVisiblePhotos] = useState<JourneyPoint[]>([]);
+
+    return { visiblePhotos, setVisiblePhotos };
+}
+
+/**
+ * Creates a marker icon for individual photos (no badge)
+ * Used only in CollectionMapDialog for consistent styling
+ */
+function createMarkerIcon(
+    imageSrc: string,
+    size: number,
+): import("leaflet").DivIcon | null {
+    if (typeof window === "undefined") return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const leaflet = require("leaflet") as typeof import("leaflet");
+
+    const pinSize = size;
+    const triangleHeight = 12;
+    const pinHeight = pinSize + triangleHeight;
+    const hasImage = imageSrc && imageSrc.trim() !== "";
+
+    return leaflet.divIcon({
+        html: `
+            <div class="photo-pin" style="
+                width: ${pinSize}px;
+                height: ${pinHeight}px;
+                position: relative;
+                cursor: pointer;
+                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+            ">
+              <div style="
+                  width: ${pinSize}px;
+                  height: ${pinSize}px;
+                  border-radius: 6px;
+                  background: #f6f6f6;
+                  border: 2px solid #ffffff;
+                  overflow: hidden;
+                  position: relative;
+              ">
+                ${
+                    hasImage
+                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Location" />`
+                        : `<div style="width:100%;height:100%;background:linear-gradient(90deg,#f8f8f8 25%,#f0f0f0 50%,#f8f8f8 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;"></div>
+                           <style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>`
+                }
+              </div>
+              <div style="
+                  position: absolute;
+                  bottom: 0;
+                  left: 50%;
+                  transform: translate(-50%, 0);
+                  width: 0;
+                  height: 0;
+                  border-left: ${triangleHeight / 1.4}px solid transparent;
+                  border-right: ${triangleHeight / 1.4}px solid transparent;
+                  border-top: ${triangleHeight}px solid #f6f6f6;
+              "></div>
+            </div>
+        `,
+        className: "collection-marker",
+        iconSize: [pinSize, pinHeight],
+        iconAnchor: [pinSize / 2, pinHeight],
+        popupAnchor: [0, -pinHeight],
+    });
+}
+
+/**
+ * Creates a cluster icon with badge popping out of the container
+ * Used only in CollectionMapDialog for cluster markers
+ */
+function createClusterIcon(
+    imageSrc: string,
+    size: number,
+    clusterCount: number,
+): import("leaflet").DivIcon | null {
+    if (typeof window === "undefined") return null;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const leaflet = require("leaflet") as typeof import("leaflet");
+
+    const pinSize = size;
+    const triangleHeight = 12;
+    const pinHeight = pinSize + triangleHeight;
+    const hasImage = imageSrc && imageSrc.trim() !== "";
+    const badgeOverflow = 6;
+
+    const badgeLabel =
+        clusterCount >= 2000
+            ? `${Math.floor((clusterCount - 1) / 1000)}K+`
+            : clusterCount >= 1000
+              ? "1K+"
+              : clusterCount > 999
+                ? `${Math.floor(clusterCount / 100)}00+`
+                : `${clusterCount}`;
+
+    return leaflet.divIcon({
+        html: `
+            <div class="photo-pin" style="
+                width: ${pinSize}px;
+                height: ${pinHeight}px;
+                position: relative;
+                cursor: pointer;
+                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+                overflow: visible;
+            ">
+              <div style="
+                  width: ${pinSize}px;
+                  height: ${pinSize}px;
+                  border-radius: 6px;
+                  background: #f6f6f6;
+                  border: 2px solid #ffffff;
+                  overflow: hidden;
+                  position: relative;
+              ">
+                ${
+                    hasImage
+                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Location" />`
+                        : `<div style="width:100%;height:100%;background:linear-gradient(90deg,#f8f8f8 25%,#f0f0f0 50%,#f8f8f8 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;"></div>
+                           <style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>`
+                }
+              </div>
+              <div style="
+                  position: absolute;
+                  top: -${badgeOverflow}px;
+                  right: -${badgeOverflow}px;
+                  background: #22c55e;
+                  color: #ffffff;
+                  border-radius: 6px;
+                  padding: 4px 6px;
+                  font-size: 11px;
+                  font-weight: 700;
+                  line-height: 1;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                  z-index: 1;
+              ">
+                  ${badgeLabel}
+              </div>
+              <style>
+                .leaflet-marker-icon.collection-cluster-marker { overflow: visible !important; }
+              </style>
+              <div style="
+                  position: absolute;
+                  bottom: 0;
+                  left: 50%;
+                  transform: translate(-50%, 0);
+                  width: 0;
+                  height: 0;
+                  border-left: ${triangleHeight / 1.4}px solid transparent;
+                  border-right: ${triangleHeight / 1.4}px solid transparent;
+                  border-top: ${triangleHeight}px solid #f6f6f6;
+              "></div>
+            </div>
+        `,
+        className: "collection-cluster-marker",
+        iconSize: [pinSize + badgeOverflow, pinHeight + badgeOverflow],
+        iconAnchor: [pinSize / 2, pinHeight],
+        popupAnchor: [0, -pinHeight],
+    });
+}
+
+/**
+ * Creates custom icons for map marker clusters with thumbnails
+ * Responsibility: Generate cluster icons showing photo thumbnail and count
+ */
+function useClusterIcon(
+    mapPhotos: JourneyPoint[],
+    thumbByFileID: Map<number, string>,
+) {
+    const photosByPosition = useMemo(() => {
+        const map = new Map<string, JourneyPoint>();
+        mapPhotos.forEach((photo) => {
+            map.set(`${photo.lat},${photo.lng}`, photo);
+        });
+        return map;
+    }, [mapPhotos]);
+
+    return useCallback(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (cluster: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const count: number = cluster.getChildCount();
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+            const childMarkers = cluster.getAllChildMarkers();
+
+            let thumbnailUrl = "";
+            for (const marker of childMarkers) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+                const latlng = marker.getLatLng();
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                const key = `${latlng.lat},${latlng.lng}`;
+                const photo = photosByPosition.get(key);
+                if (photo) {
+                    const thumb = getPhotoThumbnail(photo, thumbByFileID);
+                    if (thumb) {
+                        thumbnailUrl = thumb;
+                        break;
+                    }
+                }
+            }
+
+            return createClusterIcon(thumbnailUrl, 68, count);
+        },
+        [photosByPosition, thumbByFileID],
+    );
+}
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Extracts thumbnail URL - prioritizes photo.image (loaded first with mapPhotos),
+ * then falls back to thumbByFileID (loaded afterward with higher quality thumbs)
+ */
+function getPhotoThumbnail(
+    photo: JourneyPoint,
+    thumbByFileID: Map<number, string>,
+): string | undefined {
+    return photo.image || thumbByFileID.get(photo.fileId);
+}
+
+/**
+ * Sorts journey points by timestamp in descending order (newest first)
+ */
+function sortPhotosByTimestamp(photos: JourneyPoint[]): JourneyPoint[] {
+    return [...photos].sort(
+        (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
+}
+
+/**
+ * Loads every file stored in IndexedDB, filters those belonging to the
+ * target collection, removes duplicates by ID, and returns the unique set.
+ */
+async function getFilesForCollection(
+    activeCollection: Collection,
+): Promise<EnteFile[]> {
+    const allFiles = await savedCollectionFiles();
+    const filtered = allFiles.filter(
+        (file) => file.collectionID === activeCollection.id,
+    );
+    return uniqueFilesByID(filtered);
+}
+
+function extractLocationPoints(files: EnteFile[]): JourneyPoint[] {
+    const points: JourneyPoint[] = [];
+
+    for (const file of files) {
+        const loc = fileLocation(file);
+        if (!loc) continue;
+
+        points.push({
+            lat: loc.latitude,
+            lng: loc.longitude,
+            name: fileFileName(file),
+            country: "",
+            timestamp: new Date(fileCreationTime(file) / 1000).toISOString(),
+            image: "",
+            fileId: file.id,
+        });
+    }
+
+    return points;
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+/**
+ * Main dialog component that displays a collection's photos on an interactive map
+ * Responsibility: Coordinate all hooks, manage dialog state, render map layout or loading states
+ */
+export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
+    open,
+    onClose,
+    collectionSummary,
+    activeCollection,
+    onRemotePull,
+    onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
+}) => {
+    const { onGenericError } = useBaseContext();
+    const mapComponents = useMapComponents();
+    const user = useCurrentUser();
+    const theme = useTheme();
+    const fileViewerZIndex = useMemo(
+        () => theme.zIndex.modal + 3,
+        [theme.zIndex.modal],
+    );
+    const optimalZoom = calculateOptimalZoom();
+
+    const {
+        mapCenter,
+        mapPhotos,
+        filesByID,
+        thumbByFileID,
+        isLoading,
+        error,
+        removeFiles: removeFilesFromMap,
+        updateFileVisibility,
+    } = useMapData(open, activeCollection, onGenericError);
+
+    const { visiblePhotos, setVisiblePhotos } = useVisiblePhotos();
+
+    const {
+        favoriteFileIDs,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        handleToggleFavorite,
+        handleFileVisibilityUpdate,
+    } = useFavorites(open, user);
+
+    const createClusterCustomIcon = useClusterIcon(mapPhotos, thumbByFileID);
+
+    // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
+    const visibleFiles = useMemo(() => {
+        return visiblePhotos
+            .map((p) => filesByID.get(p.fileId))
+            .filter((f): f is EnteFile => f !== undefined);
+    }, [visiblePhotos, filesByID]);
+
+    const handleRemotePull = useCallback(
+        () =>
+            onRemotePull ? onRemotePull({ silent: true }) : Promise.resolve(),
+        [onRemotePull],
+    );
+    const visualFeedback = useMemo(() => onVisualFeedback, [onVisualFeedback]);
+
+    // Empty selection state since we don't support selection in map view
+    const emptySelected = useMemo(
+        () => ({
+            ownCount: 0,
+            count: 0,
+            context: undefined,
+            collectionID: activeCollection.id,
+        }),
+        [activeCollection.id],
+    );
+    const noOpSetSelected = useCallback(() => {
+        /* no-op */
+    }, []);
+
+    const handleMarkTempDeleted = useCallback(
+        (files: EnteFile[]) => {
+            onMarkTempDeleted?.(files);
+            const idsToRemove = new Set(files.map((file) => file.id));
+            setVisiblePhotos((prev) =>
+                prev.filter((photo) => !idsToRemove.has(photo.fileId)),
+            );
+            removeFilesFromMap([...idsToRemove]);
+        },
+        [onMarkTempDeleted, removeFilesFromMap, setVisiblePhotos],
+    );
+
+    const handleFileVisibilityUpdateWithLocalState = useCallback(
+        async (file: EnteFile, visibility: ItemVisibility) => {
+            await handleFileVisibilityUpdate(file, visibility);
+            const updatedMagicMetadata = file.magicMetadata
+                ? {
+                      ...file.magicMetadata,
+                      data: { ...file.magicMetadata.data, visibility },
+                  }
+                : undefined;
+            const updatedFile =
+                updatedMagicMetadata !== undefined
+                    ? { ...file, magicMetadata: updatedMagicMetadata }
+                    : file;
+            updateFileVisibility(updatedFile, visibility);
+        },
+        [handleFileVisibilityUpdate, updateFileVisibility],
+    );
+
+    const body = useMemo(() => {
+        if (isLoading) {
+            return (
+                <CenteredBox>
+                    <ActivityIndicator size="28px" />
+                </CenteredBox>
+            );
+        }
+
+        if (error) {
+            return (
+                <CenteredBox>
+                    <Typography variant="body" color="text.secondary">
+                        {error}
+                    </Typography>
+                </CenteredBox>
+            );
+        }
+
+        // Wait for map components to load (they're dynamically imported)
+        if (!mapComponents) {
+            return (
+                <CenteredBox>
+                    <ActivityIndicator size="28px" />
+                </CenteredBox>
+            );
+        }
+
+        if (!mapPhotos.length || !mapCenter) {
+            return (
+                <CenteredBox onClose={onClose} closeLabel={t("close")}>
+                    <Typography variant="body" color="text.secondary">
+                        {t("view_on_map")}
+                    </Typography>
+                    <Typography variant="small" color="text.secondary">
+                        {t("maps_privacy_notice")}
+                    </Typography>
+                </CenteredBox>
+            );
+        }
+
+        return (
+            <MapLayout
+                collectionSummary={collectionSummary}
+                visiblePhotos={visiblePhotos}
+                visibleFiles={visibleFiles}
+                mapPhotos={mapPhotos}
+                thumbByFileID={thumbByFileID}
+                mapComponents={mapComponents}
+                mapCenter={mapCenter}
+                optimalZoom={optimalZoom}
+                createClusterCustomIcon={createClusterCustomIcon}
+                onClose={onClose}
+                onVisiblePhotosChange={setVisiblePhotos}
+                user={user}
+                favoriteFileIDs={favoriteFileIDs}
+                pendingFavoriteUpdates={pendingFavoriteUpdates}
+                pendingVisibilityUpdates={pendingVisibilityUpdates}
+                onToggleFavorite={handleToggleFavorite}
+                onFileVisibilityUpdate={
+                    handleFileVisibilityUpdateWithLocalState
+                }
+                onRemotePull={handleRemotePull}
+                onVisualFeedback={visualFeedback}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={handleMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
+                fileViewerZIndex={fileViewerZIndex}
+                selected={emptySelected}
+                setSelected={noOpSetSelected}
+            />
+        );
+    }, [
+        collectionSummary,
+        createClusterCustomIcon,
+        emptySelected,
+        error,
+        favoriteFileIDs,
+        handleFileVisibilityUpdateWithLocalState,
+        handleRemotePull,
+        handleToggleFavorite,
+        visualFeedback,
+        isLoading,
+        mapCenter,
+        mapComponents,
+        mapPhotos,
+        noOpSetSelected,
+        onClose,
+        optimalZoom,
+        onAddFileToCollection,
+        onAddSaveGroup,
+        onRemoteFilesPull,
+        pendingFavoriteUpdates,
+        pendingVisibilityUpdates,
+        setVisiblePhotos,
+        collectionNameByID,
+        fileNormalCollectionIDs,
+        handleMarkTempDeleted,
+        onSelectCollection,
+        onSelectPerson,
+        fileViewerZIndex,
+        thumbByFileID,
+        user,
+        visibleFiles,
+        visiblePhotos,
+    ]);
+
+    return (
+        <Dialog fullScreen open={open} onClose={onClose}>
+            <Box
+                sx={{
+                    position: "relative",
+                    width: "100vw",
+                    height: "100vh",
+                    bgcolor: "background.default",
+                }}
+            >
+                <DialogContent sx={{ padding: "0 !important", height: "100%" }}>
+                    {body}
+                </DialogContent>
+            </Box>
+        </Dialog>
+    );
+};
+
+// ============================================================================
+// Layout Components
+// ============================================================================
+
+/**
+ * Main layout container for map and sidebar
+ * Responsibility: Position sidebar and map canvas side-by-side
+ */
+interface MapLayoutProps {
+    collectionSummary: CollectionSummary;
+    visiblePhotos: JourneyPoint[];
+    visibleFiles: EnteFile[];
+    mapPhotos: JourneyPoint[];
+    thumbByFileID: Map<number, string>;
+    mapComponents: MapComponents;
+    mapCenter: [number, number];
+    optimalZoom: number;
+    createClusterCustomIcon: (cluster: unknown) => unknown;
+    onClose: () => void;
+    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    user: ReturnType<typeof useCurrentUser>;
+    favoriteFileIDs: Set<number>;
+    pendingFavoriteUpdates: Set<number>;
+    pendingVisibilityUpdates: Set<number>;
+    onToggleFavorite: (file: EnteFile) => Promise<void>;
+    onFileVisibilityUpdate: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+    onRemotePull: () => Promise<void>;
+    onVisualFeedback: () => void;
+    onAddSaveGroup: FileListWithViewerProps["onAddSaveGroup"];
+    onMarkTempDeleted?: FileListWithViewerProps["onMarkTempDeleted"];
+    onAddFileToCollection?: FileListWithViewerProps["onAddFileToCollection"];
+    onRemoteFilesPull?: FileListWithViewerProps["onRemoteFilesPull"];
+    fileNormalCollectionIDs?: FileListWithViewerProps["fileNormalCollectionIDs"];
+    collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
+    onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
+    onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
+    fileViewerZIndex: number;
+    selected: {
+        ownCount: number;
+        count: number;
+        context: undefined;
+        collectionID: number;
+    };
+    setSelected: () => void;
+}
+
+function MapLayout({
+    collectionSummary,
+    visiblePhotos,
+    visibleFiles,
+    mapPhotos,
+    thumbByFileID,
+    mapComponents,
+    mapCenter,
+    optimalZoom,
+    createClusterCustomIcon,
+    onClose,
+    onVisiblePhotosChange,
+    user,
+    favoriteFileIDs,
+    pendingFavoriteUpdates,
+    pendingVisibilityUpdates,
+    onToggleFavorite,
+    onFileVisibilityUpdate,
+    onRemotePull,
+    onVisualFeedback,
+    onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
+    fileViewerZIndex,
+    selected,
+    setSelected,
+}: MapLayoutProps) {
+    return (
+        <Box sx={{ position: "relative", height: "100%", width: "100%" }}>
+            <CollectionSidebar
+                collectionSummary={collectionSummary}
+                visibleCount={visiblePhotos.length}
+                visibleFiles={visibleFiles}
+                mapPhotos={mapPhotos}
+                thumbByFileID={thumbByFileID}
+                onClose={onClose}
+                user={user}
+                favoriteFileIDs={favoriteFileIDs}
+                pendingFavoriteUpdates={pendingFavoriteUpdates}
+                pendingVisibilityUpdates={pendingVisibilityUpdates}
+                onToggleFavorite={onToggleFavorite}
+                onFileVisibilityUpdate={onFileVisibilityUpdate}
+                onRemotePull={onRemotePull}
+                onVisualFeedback={onVisualFeedback}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={onMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
+                selected={selected}
+                setSelected={setSelected}
+                fileViewerZIndex={fileViewerZIndex}
+            />
+            <Box sx={{ width: "100%", height: "100%" }}>
+                <MapCanvas
+                    mapComponents={mapComponents}
+                    mapCenter={mapCenter}
+                    mapPhotos={mapPhotos}
+                    optimalZoom={optimalZoom}
+                    thumbByFileID={thumbByFileID}
+                    createClusterCustomIcon={createClusterCustomIcon}
+                    onVisiblePhotosChange={onVisiblePhotosChange}
+                />
+            </Box>
+        </Box>
+    );
+}
+
+// ============================================================================
+// Sidebar Components
+// ============================================================================
+
+/**
+ * Sidebar displaying collection details and photo thumbnails using FileListWithViewer
+ * Responsibility: Show collection cover, header, and file list with integrated viewer
+ */
+interface CollectionSidebarProps {
+    collectionSummary: CollectionSummary;
+    visibleCount: number;
+    visibleFiles: EnteFile[];
+    mapPhotos: JourneyPoint[];
+    thumbByFileID: Map<number, string>;
+    onClose: () => void;
+    user: ReturnType<typeof useCurrentUser>;
+    favoriteFileIDs: Set<number>;
+    pendingFavoriteUpdates: Set<number>;
+    pendingVisibilityUpdates: Set<number>;
+    onToggleFavorite: (file: EnteFile) => Promise<void>;
+    onFileVisibilityUpdate: (
+        file: EnteFile,
+        visibility: ItemVisibility,
+    ) => Promise<void>;
+    onRemotePull: () => Promise<void>;
+    onVisualFeedback: () => void;
+    onAddSaveGroup: FileListWithViewerProps["onAddSaveGroup"];
+    onMarkTempDeleted?: FileListWithViewerProps["onMarkTempDeleted"];
+    onAddFileToCollection?: FileListWithViewerProps["onAddFileToCollection"];
+    onRemoteFilesPull?: FileListWithViewerProps["onRemoteFilesPull"];
+    fileNormalCollectionIDs?: FileListWithViewerProps["fileNormalCollectionIDs"];
+    collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
+    onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
+    onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
+    fileViewerZIndex: number;
+    selected: {
+        ownCount: number;
+        count: number;
+        context: undefined;
+        collectionID: number;
+    };
+    setSelected: () => void;
+}
+
+function CollectionSidebar({
+    collectionSummary,
+    visibleCount,
+    visibleFiles,
+    mapPhotos,
+    thumbByFileID,
+    onClose,
+    user,
+    favoriteFileIDs,
+    pendingFavoriteUpdates,
+    pendingVisibilityUpdates,
+    onToggleFavorite,
+    onFileVisibilityUpdate,
+    onRemotePull,
+    onVisualFeedback,
+    onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
+    fileViewerZIndex,
+    selected,
+    setSelected,
+}: CollectionSidebarProps) {
+    // Get cover image: prioritize collection's coverFile, fallback to first photo
+    const coverFile = collectionSummary.coverFile;
+    const coverImageUrl = useMemo(() => {
+        const coverThumb = coverFile && thumbByFileID.get(coverFile.id);
+        if (coverThumb) return coverThumb;
+
+        const fallbackPhoto = mapPhotos[0];
+        return fallbackPhoto
+            ? getPhotoThumbnail(fallbackPhoto, thumbByFileID)
+            : undefined;
+    }, [coverFile, mapPhotos, thumbByFileID]);
+
+    return (
+        <SidebarWrapper>
+            <SidebarContainer>
+                <MapCover
+                    name={collectionSummary.name}
+                    coverImageUrl={coverImageUrl}
+                    visibleCount={visibleCount}
+                    onClose={onClose}
+                />
+                <FileListContainer>
+                    {visibleFiles.length > 0 ? (
+                        <FileListWithViewer
+                            files={visibleFiles}
+                            user={user}
+                            favoriteFileIDs={favoriteFileIDs}
+                            pendingFavoriteUpdates={pendingFavoriteUpdates}
+                            pendingVisibilityUpdates={pendingVisibilityUpdates}
+                            onToggleFavorite={onToggleFavorite}
+                            onFileVisibilityUpdate={onFileVisibilityUpdate}
+                            onRemotePull={onRemotePull}
+                            onVisualFeedback={onVisualFeedback}
+                            onAddSaveGroup={onAddSaveGroup}
+                            onMarkTempDeleted={onMarkTempDeleted}
+                            onAddFileToCollection={onAddFileToCollection}
+                            onRemoteFilesPull={onRemoteFilesPull}
+                            enableEditImage={false}
+                            fileNormalCollectionIDs={fileNormalCollectionIDs}
+                            collectionNameByID={collectionNameByID}
+                            onSelectCollection={onSelectCollection}
+                            onSelectPerson={onSelectPerson}
+                            enableDownload={true}
+                            activeCollectionID={collectionSummary.id}
+                            selected={selected}
+                            setSelected={setSelected}
+                            fileViewerZIndex={fileViewerZIndex}
+                        />
+                    ) : (
+                        <EmptyState>
+                            <Typography variant="body" sx={{ fontWeight: 600 }}>
+                                {t("no_photos_found_here", {
+                                    defaultValue: "No photos found here",
+                                })}
+                            </Typography>
+                            <Typography variant="small" color="text.secondary">
+                                {t("zoom_out_to_see_photos", {
+                                    defaultValue: "Zoom out to see photos",
+                                })}
+                            </Typography>
+                        </EmptyState>
+                    )}
+                </FileListContainer>
+            </SidebarContainer>
+            <SidebarGradient />
+        </SidebarWrapper>
+    );
+}
+
+// ============================================================================
+// Map Components
+// ============================================================================
+
+/**
+ * Renders the Leaflet map with markers, clusters, and controls
+ * Responsibility: Display interactive map with photo markers and handle viewport changes
+ */
+interface MapCanvasProps {
+    mapComponents: MapComponents;
+    mapCenter: [number, number];
+    mapPhotos: JourneyPoint[];
+    optimalZoom: number;
+    thumbByFileID: Map<number, string>;
+    createClusterCustomIcon: (cluster: unknown) => unknown;
+    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+}
+
+const MapCanvas = React.memo(function MapCanvas({
+    mapComponents,
+    mapCenter,
+    mapPhotos,
+    optimalZoom,
+    thumbByFileID,
+    createClusterCustomIcon,
+    onVisiblePhotosChange,
+}: MapCanvasProps) {
+    const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
+        mapComponents;
+
+    // Memoize marker icons to prevent recreation on every render
+    // Key: fileId, Value: Leaflet icon instance
+    const markerIcons = useMemo(() => {
+        const icons = new Map<number, ReturnType<typeof createMarkerIcon>>();
+        for (const photo of mapPhotos) {
+            const thumbnail = getPhotoThumbnail(photo, thumbByFileID);
+            icons.set(photo.fileId, createMarkerIcon(thumbnail ?? "", 68));
+        }
+        return icons;
+    }, [mapPhotos, thumbByFileID]);
+
+    return (
+        <MapContainer
+            center={mapCenter}
+            zoom={optimalZoom}
+            scrollWheelZoom
+            zoomControl={false}
+            style={{ width: "100%", height: "100%" }}
+        >
+            <TileLayer
+                attribution=""
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+                updateWhenZooming
+            />
+            <MapControls useMap={useMap} />
+            <MapViewportListener
+                useMap={useMap}
+                photos={mapPhotos}
+                onVisiblePhotosChange={onVisiblePhotosChange}
+            />
+            <MarkerClusterGroup
+                key={thumbByFileID.size}
+                chunkedLoading
+                iconCreateFunction={createClusterCustomIcon}
+                maxClusterRadius={80}
+                spiderfyOnMaxZoom
+                showCoverageOnHover={false}
+                zoomToBoundsOnClick
+                animate
+                animateAddingMarkers
+                spiderfyDistanceMultiplier={1.5}
+            >
+                {mapPhotos.map((photo) => (
+                    <Marker
+                        key={`${photo.fileId}-${thumbByFileID.has(photo.fileId)}`}
+                        position={[photo.lat, photo.lng]}
+                        icon={markerIcons.get(photo.fileId) ?? undefined}
+                    />
+                ))}
+            </MarkerClusterGroup>
+        </MapContainer>
+    );
+});
+
+/**
+ * Floating map control buttons (open in Maps, zoom in/out, attribution)
+ * Responsibility: Provide map navigation and external link controls
+ */
+interface MapControlsProps {
+    useMap: typeof import("react-leaflet").useMap;
+}
+
+const MapControls = React.memo(function MapControls({
+    useMap,
+}: MapControlsProps) {
+    const map = useMap();
+    const [showAttribution, setShowAttribution] = useState(false);
+
+    const handleOpenInMaps = useCallback(() => {
+        const center = map.getCenter();
+        const url = `https://www.google.com/maps?q=${center.lat},${center.lng}&z=${map.getZoom()}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+    }, [map]);
+
+    const handleZoomIn = useCallback(() => map.zoomIn(), [map]);
+    const handleZoomOut = useCallback(() => map.zoomOut(), [map]);
+    const toggleAttribution = useCallback(
+        () => setShowAttribution((prev) => !prev),
+        [],
+    );
+
+    return (
+        <>
+            <FloatingIconButton
+                onClick={handleOpenInMaps}
+                sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
+            >
+                <NavigationIcon />
+            </FloatingIconButton>
+
+            <Stack
+                spacing={1}
+                sx={{
+                    position: "absolute",
+                    right: 16,
+                    bottom: 16,
+                    zIndex: 1000,
+                }}
+            >
+                <FloatingIconButton onClick={handleZoomIn}>
+                    <AddIcon />
+                </FloatingIconButton>
+                <FloatingIconButton onClick={handleZoomOut}>
+                    <RemoveIcon />
+                </FloatingIconButton>
+            </Stack>
+
+            {/* Hide Leaflet attribution watermark */}
+            <style>{`.leaflet-control-attribution { display: none !important; }`}</style>
+
+            {/* Attribution info button */}
+            <Box
+                sx={{
+                    position: "absolute",
+                    left: 12,
+                    bottom: 12,
+                    zIndex: 1000,
+                }}
+            >
+                {showAttribution && (
+                    <AttributionPopup>
+                        <Typography variant="mini" color="text.primary">
+                            <a
+                                href="https://leafletjs.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "inherit" }}
+                            >
+                                Leaflet
+                            </a>
+                            {" | © "}
+                            <a
+                                href="https://www.openstreetmap.org/copyright"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: "inherit" }}
+                            >
+                                OpenStreetMap
+                            </a>
+                        </Typography>
+                    </AttributionPopup>
+                )}
+                <IconButton
+                    onClick={toggleAttribution}
+                    size="small"
+                    sx={{
+                        width: 24,
+                        height: 24,
+                        opacity: 0.4,
+                        "&:hover": { opacity: 0.7 },
+                    }}
+                >
+                    <InfoOutlinedIcon sx={{ fontSize: 14, color: "#fff" }} />
+                </IconButton>
+            </Box>
+        </>
+    );
+});
+
+const AttributionPopup = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    bottom: 44,
+    left: 0,
+    backgroundColor: theme.vars.palette.background.paper,
+    padding: "8px 12px",
+    borderRadius: "8px",
+    boxShadow: theme.shadows[4],
+    whiteSpace: "nowrap",
+    "& a": { textDecoration: "underline", "&:hover": { opacity: 0.8 } },
+}));
+
+/**
+ * Listens to map viewport changes and updates visible photos
+ * Responsibility: Track map bounds and notify parent of visible photos when viewport changes
+ */
+interface MapViewportListenerProps {
+    useMap: typeof import("react-leaflet").useMap;
+    photos: JourneyPoint[];
+    onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+}
+
+function MapViewportListener({
+    useMap,
+    photos,
+    onVisiblePhotosChange,
+}: MapViewportListenerProps) {
+    const map = useMap();
+    const previousVisibleIdsRef = useRef<Set<number>>(new Set());
+    const previousClusterCountRef = useRef<number>(0);
+
+    // Cache cluster count query result to avoid repeated DOM queries
+    const getClusterCount = useCallback(
+        () => map.getContainer().querySelectorAll(".marker-cluster").length,
+        [map],
+    );
+
+    const updateVisiblePhotos = useCallback(() => {
+        const bounds = map.getBounds();
+        const inView = photos.filter((p) => bounds.contains([p.lat, p.lng]));
+
+        // Use Set comparison instead of string join for O(n) vs O(n log n + n)
+        const currentIds = new Set(inView.map((p) => p.fileId));
+        const previousIds = previousVisibleIdsRef.current;
+
+        const clusterCount = getClusterCount();
+        const clusterChanged = previousClusterCountRef.current !== clusterCount;
+
+        // Check if sets are equal (same size and all elements match)
+        const setsEqual =
+            currentIds.size === previousIds.size &&
+            [...currentIds].every((id) => previousIds.has(id));
+
+        if (setsEqual && !clusterChanged) {
+            return;
+        }
+
+        previousVisibleIdsRef.current = currentIds;
+        previousClusterCountRef.current = clusterCount;
+        onVisiblePhotosChange(inView);
+    }, [getClusterCount, map, onVisiblePhotosChange, photos]);
+
+    useEffect(() => {
+        if (!photos.length) {
+            previousVisibleIdsRef.current = new Set();
+            previousClusterCountRef.current = getClusterCount();
+            onVisiblePhotosChange([]);
+            return;
+        }
+        updateVisiblePhotos();
+    }, [getClusterCount, photos, onVisiblePhotosChange, updateVisiblePhotos]);
+
+    useEffect(() => {
+        map.on("moveend", updateVisiblePhotos);
+        map.on("zoomend", updateVisiblePhotos);
+        return () => {
+            map.off("moveend", updateVisiblePhotos);
+            map.off("zoomend", updateVisiblePhotos);
+        };
+    }, [map, updateVisiblePhotos]);
+
+    return null;
+}
+
+// ============================================================================
+// UI Components
+// ============================================================================
+
+/**
+ * Styled floating action button with consistent styling
+ * Responsibility: Provide consistent button styling for map controls
+ */
+const FloatingIconButton: React.FC<IconButtonProps> = ({ sx, ...props }) => {
+    const baseSx = {
+        bgcolor: (theme: {
+            vars: { palette: { background: { paper: string } } };
+        }) => theme.vars.palette.background.paper,
+        boxShadow: (theme: { shadows: string[] }) => theme.shadows[4],
+        width: 48,
+        height: 48,
+        borderRadius: "16px",
+        transition: "transform 0.2s ease-out",
+        "&:hover": {
+            bgcolor: (theme: {
+                vars: { palette: { background: { paper: string } } };
+            }) => theme.vars.palette.background.paper,
+            transform: "scale(1.05)",
+        },
+    };
+
+    const mergedSx =
+        sx == null
+            ? baseSx
+            : Array.isArray(sx)
+              ? // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                [baseSx, ...sx]
+              : [baseSx, sx];
+
+    return <IconButton {...props} sx={mergedSx} />;
+};
+
+/**
+ * Centered container for loading/error states with optional close button
+ * Responsibility: Display centered content like loading spinners or error messages
+ */
+interface CenteredBoxProps extends React.PropsWithChildren {
+    onClose?: () => void;
+    closeLabel?: string;
+}
+
+function CenteredBox({ children, onClose, closeLabel }: CenteredBoxProps) {
+    return (
+        <CenteredBoxContainer>
+            {onClose && (
+                <IconButton
+                    aria-label={closeLabel ?? "Close"}
+                    onClick={onClose}
+                    sx={{ position: "absolute", top: 16, right: 16 }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            )}
+            {children}
+        </CenteredBoxContainer>
+    );
+}
+
+/**
+ * Empty state placeholder for when no photos are visible
+ * Responsibility: Display empty state message when no photos match filters
+ */
+function EmptyState({ children }: React.PropsWithChildren) {
+    return <EmptyStateContainer>{children}</EmptyStateContainer>;
+}
+
+// ============================================================================
+// Map Cover Component
+// ============================================================================
+
+/**
+ * Hero image cover for the collection with title and memory count
+ * Responsibility: Display collection cover image, name, and visible memory count
+ */
+interface MapCoverProps {
+    name: string;
+    coverImageUrl: string | undefined;
+    visibleCount: number;
+    onClose: () => void;
+}
+
+const MapCover = React.memo(function MapCover({
+    name,
+    coverImageUrl,
+    visibleCount,
+    onClose,
+}: MapCoverProps) {
+    return (
+        <CoverContainer>
+            <CoverImageContainer>
+                <img
+                    src={coverImageUrl}
+                    alt="Cover"
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                    }}
+                />
+                <CoverGradientOverlay />
+
+                <CoverCloseButton aria-label="Close" onClick={onClose}>
+                    <CloseIcon sx={{ fontSize: 20 }} />
+                </CoverCloseButton>
+
+                <CoverContentContainer>
+                    <CoverTitle>{name}</CoverTitle>
+                    <CoverSubtitle>{visibleCount} memories</CoverSubtitle>
+                </CoverContentContainer>
+            </CoverImageContainer>
+        </CoverContainer>
+    );
+});
+
+const CoverContainer = styled(Box)(({ theme }) => ({
+    width: "100%",
+    flexShrink: 0,
+    padding: "16px",
+    paddingBottom: "8px",
+    [theme.breakpoints.down("md")]: { padding: "8px", paddingBottom: "4px" },
+}));
+
+const CoverImageContainer = styled(Box)(({ theme }) => ({
+    aspectRatio: "16/9",
+    position: "relative",
+    overflow: "hidden",
+    backgroundColor: "#333",
+    borderRadius: "36px 36px 24px 24px",
+    marginTop: "2px",
+    [theme.breakpoints.down("md")]: { borderRadius: "20px 20px 20px 20px" },
+}));
+
+const CoverGradientOverlay = styled(Box)({
+    position: "absolute",
+    inset: 0,
+    background:
+        "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 35%, transparent 60%, rgba(0,0,0,0.75))",
+});
+
+const CoverCloseButton = styled(IconButton)({
+    position: "absolute",
+    top: "12px",
+    right: "12px",
+    color: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+});
+
+const CoverContentContainer = styled(Box)({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: "24px",
+    paddingLeft: "18px",
+    color: "white",
+});
+
+const CoverTitle = styled(Typography)({
+    fontSize: "22px",
+    fontWeight: "bold",
+    marginBottom: "6px",
+    lineHeight: 1.2,
+});
+
+const CoverSubtitle = styled(Typography)({
+    color: "rgba(255, 255, 255, 0.85)",
+    fontSize: "14px",
+    fontWeight: "500",
+});
+
+// ============================================================================
+// Sidebar Styled Components
+// ============================================================================
+
+const SidebarWrapper = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    left: 0,
+    top: "auto",
+    bottom: 0,
+    right: 0,
+    width: "100%",
+    height: "50%",
+    zIndex: 1000,
+    [theme.breakpoints.up("md")]: {
+        left: 16,
+        top: 16,
+        bottom: 16,
+        right: "auto",
+        width: "35%",
+        height: "auto",
+        maxWidth: "600px",
+        minWidth: "450px",
+    },
+}));
+
+const SidebarContainer = styled(Box)(({ theme }) => ({
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    backgroundColor: theme.vars.palette.background.paper,
+    boxShadow: theme.shadows[10],
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    borderRadius: "24px 24px 0 0",
+    [theme.breakpoints.up("md")]: { borderRadius: "48px" },
+}));
+
+const SidebarGradient = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "80px",
+    background:
+        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 4%, rgba(0,0,0,0) 100%)",
+    pointerEvents: "none",
+    borderRadius: "0",
+    [theme.breakpoints.up("md")]: {
+        height: "150px",
+        borderRadius: "0 0 48px 48px",
+    },
+}));
+
+const FileListContainer = styled(Box)(({ theme }) => ({
+    flex: 1,
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    paddingLeft: "16px",
+    paddingRight: "16px",
+    [theme.breakpoints.up("md")]: { paddingLeft: "24px", paddingRight: "24px" },
+}));
+
+const CenteredBoxContainer = styled(Box)({
+    width: "100%",
+    height: "100%",
+    minHeight: "420px",
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    flexDirection: "column",
+    textAlign: "center",
+});
+
+const EmptyStateContainer = styled(Box)(({ theme }) => ({
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+    color: theme.vars.palette.text.secondary,
+    gap: theme.spacing(0.5),
+}));

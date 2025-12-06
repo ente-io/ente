@@ -52,7 +52,19 @@ type GalleryBarAndListHeaderProps = Omit<
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
-} & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
+} & Pick<
+        CollectionHeaderProps,
+        | "onRemotePull"
+        | "onAddSaveGroup"
+        | "onMarkTempDeleted"
+        | "onAddFileToCollection"
+        | "onRemoteFilesPull"
+        | "onVisualFeedback"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    > &
     Pick<
         CollectionShareProps,
         "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
@@ -95,6 +107,13 @@ export const GalleryBarAndListHeader: React.FC<
     shareSuggestionEmails,
     onRemotePull,
     onAddSaveGroup,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
     onSelectPerson,
     setFileListHeader,
 }) => {
@@ -145,6 +164,14 @@ export const GalleryBarAndListHeader: React.FC<
                             isActiveCollectionDownloadInProgress,
                             onRemotePull,
                             onAddSaveGroup,
+                            onMarkTempDeleted,
+                            onAddFileToCollection,
+                            onRemoteFilesPull,
+                            onVisualFeedback,
+                            fileNormalCollectionIDs,
+                            collectionNameByID,
+                            onSelectCollection,
+                            onSelectPerson,
                         }}
                         collectionSummary={
                             toShowCollectionSummaries.get(activeCollectionID!)!
@@ -172,6 +199,16 @@ export const GalleryBarAndListHeader: React.FC<
         activePerson,
         showCollectionShare,
         showCollectionCast,
+        onRemotePull,
+        onAddSaveGroup,
+        onMarkTempDeleted,
+        onAddFileToCollection,
+        onRemoteFilesPull,
+        onVisualFeedback,
+        fileNormalCollectionIDs,
+        collectionNameByID,
+        onSelectCollection,
+        onSelectPerson,
         // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
