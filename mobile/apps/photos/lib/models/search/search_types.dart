@@ -38,6 +38,7 @@ enum ResultType {
   shared,
   faces,
   magic,
+  camera,
 }
 
 enum SectionType {
