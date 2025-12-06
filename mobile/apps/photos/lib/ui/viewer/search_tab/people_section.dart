@@ -110,7 +110,8 @@ class _PeopleSectionState extends State<PeopleSection> {
                             padding: const EdgeInsets.all(12),
                             child: Icon(
                               Icons.chevron_right_outlined,
-                              color: getEnteColorScheme(context).strokeMuted,
+                              color:
+                                  getEnteColorScheme(context).blurStrokePressed,
                             ),
                           )
                         : const SizedBox.shrink(),
