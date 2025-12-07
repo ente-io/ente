@@ -3,21 +3,25 @@ import "dart:async";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_legacy/components/confirmation_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
+import "package:ente_legacy/components/invite_bottom_sheet.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
 import "package:ente_legacy/pages/select_contact_page.dart"
     show showAddContactBottomSheet;
 import "package:ente_legacy/services/emergency_service.dart";
+import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/loading_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
+import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/components/menu_section_title.dart";
 import "package:ente_ui/components/notification_widget.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
@@ -61,7 +65,26 @@ class _EmergencyPageState extends State<EmergencyPage> {
       if (mounted) {
         setState(() {
           info = result;
+          // TODO: Remove dummy contacts - for testing MenuItemWidgetV2 only
           if (info != null) {
+            final dummyUser = User(id: 0, email: "me@example.com");
+            final dummyEmails = [
+              "alice@example.com",
+              "bob@example.com",
+              "charlie@example.com",
+              "diana@example.com",
+              "eve@example.com",
+            ];
+            for (final email in dummyEmails) {
+              info!.contacts.add(
+                EmergencyContact(
+                  dummyUser,
+                  User(id: dummyEmails.indexOf(email) + 100, email: email),
+                  ContactState.contactAccepted,
+                  30,
+                ),
+              );
+            }
             hasTrustedContact = info!.contacts.isNotEmpty;
           }
         });
@@ -189,11 +212,19 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           listIndex == trustedContacts.length - 1;
                       return Column(
                         children: [
-                          MenuItemWidget(
-                            captionedTextWidget: CaptionedTextWidget(
+                          MenuItemWidgetV2(
+                            captionedTextWidget: CaptionedTextWidgetV2(
                               title: contact.emergencyContact.email,
-                              textStyle: getEnteTextTheme(context).body,
-                              subTitle: contact.isPendingInvite() ? "⚠" : null,
+                              textStyle: getEnteTextTheme(context)
+                                  .small
+                                  .copyWith(color: colorScheme.textMuted),
+                              trailingTitleWidget: contact.isPendingInvite()
+                                  ? Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 20,
+                                      color: colorScheme.warning500,
+                                    )
+                                  : null,
                             ),
                             leadingIconSize: 24.0,
                             surfaceExecutionStates: false,
@@ -213,7 +244,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             },
                             isTopBorderRadiusRemoved: listIndex > 0,
                             isBottomBorderRadiusRemoved: !isLastItem,
-                            singleBorderRadius: 8,
+                            isFirstItem: listIndex == 0,
+                            isLastItem: isLastItem,
                           ),
                           if (!isLastItem)
                             DividerWidget(
@@ -308,14 +340,25 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       final isLastItem = index == othersTrustedContacts.length;
                       return Column(
                         children: [
-                          MenuItemWidget(
-                            captionedTextWidget: CaptionedTextWidget(
+                          MenuItemWidgetV2(
+                            captionedTextWidget: CaptionedTextWidgetV2(
                               title: currentUser.user.email,
-                              makeTextBold: currentUser.isPendingInvite(),
-                              subTitle:
-                                  currentUser.isPendingInvite() ? "⚠" : null,
+                              textStyle:
+                                  getEnteTextTheme(context).small.copyWith(
+                                        color: colorScheme.textMuted,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                              trailingTitleWidget: currentUser.isPendingInvite()
+                                  ? Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 20,
+                                      color: colorScheme.warning500,
+                                    )
+                                  : null,
                             ),
                             leadingIconSize: 24.0,
+                            surfaceExecutionStates: false,
+                            alwaysShowSuccessState: false,
                             leadingIconWidget: UserAvatarWidget(
                               currentUser.user,
                               type: AvatarType.mini,
@@ -351,8 +394,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             },
                             isTopBorderRadiusRemoved: listIndex > 0,
                             isBottomBorderRadiusRemoved: !isLastItem,
-                            singleBorderRadius: 8,
-                            surfaceExecutionStates: false,
+                            isFirstItem: listIndex == 0,
+                            isLastItem: isLastItem,
                           ),
                           isLastItem
                               ? const SizedBox.shrink()
@@ -418,57 +461,29 @@ class _EmergencyPageState extends State<EmergencyPage> {
     BuildContext context,
     EmergencyContact contact,
   ) async {
-    await showActionSheet(
-      context: context,
-      buttons: [
-        ButtonWidget(
-          labelText: context.strings.acceptTrustInvite,
-          buttonType: ButtonType.primary,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonAction: ButtonAction.first,
-          onTap: () async {
-            await EmergencyContactService.instance
-                .updateContact(contact, ContactState.contactAccepted);
-            final updatedContact =
-                contact.copyWith(state: ContactState.contactAccepted);
-            info?.othersEmergencyContact.remove(contact);
-            info?.othersEmergencyContact.add(updatedContact);
-            if (mounted) {
-              setState(() {});
-            }
-          },
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: context.strings.declineTrustInvite,
-          buttonType: ButtonType.critical,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.second,
-          shouldStickToDarkTheme: true,
-          onTap: () async {
-            await EmergencyContactService.instance
-                .updateContact(contact, ContactState.contactDenied);
-            info?.othersEmergencyContact.remove(contact);
-            if (mounted) {
-              setState(() {});
-            }
-          },
-          isInAlert: true,
-        ),
-        ButtonWidget(
-          labelText: context.strings.cancel,
-          buttonType: ButtonType.tertiary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.third,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
-      ],
-      body: context.strings.legacyInvite(contact.user.email),
-      actionSheetType: ActionSheetType.defaultActionSheet,
+    final result = await showInviteBottomSheet(
+      context,
+      email: contact.user.email,
     );
-    return;
+
+    if (result == InviteAction.accept) {
+      await EmergencyContactService.instance
+          .updateContact(contact, ContactState.contactAccepted);
+      final updatedContact =
+          contact.copyWith(state: ContactState.contactAccepted);
+      info?.othersEmergencyContact.remove(contact);
+      info?.othersEmergencyContact.add(updatedContact);
+      if (mounted) {
+        setState(() {});
+      }
+    } else if (result == InviteAction.decline) {
+      await EmergencyContactService.instance
+          .updateContact(contact, ContactState.contactDenied);
+      info?.othersEmergencyContact.remove(contact);
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 
   Future<void> showRejectRecoveryDialog(RecoverySessions session) async {
