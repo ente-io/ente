@@ -217,6 +217,7 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
+        await _preferences.setString(keyUserDetails, userDetails.toJson());
         if (userDetails.profileData != null) {
           await _preferences.setBool(
             kIsEmailMFAEnabled,
