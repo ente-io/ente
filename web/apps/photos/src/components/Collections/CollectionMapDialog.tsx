@@ -472,10 +472,14 @@ function createMarkerIcon(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const leaflet = require("leaflet") as typeof import("leaflet");
 
-    const pinSize = size;
-    const triangleHeight = 12;
-    const pinHeight = pinSize + triangleHeight;
+    const pinSize = size + 16; // Add padding for consistent sizing with TripLayout
+    const triangleHeight = 10;
+    const pinHeight = pinSize + triangleHeight + 2;
     const hasImage = imageSrc && imageSrc.trim() !== "";
+
+    // Border radius matching TripLayout style
+    const outerBorderRadius = 16;
+    const innerBorderRadius = 12;
 
     return leaflet.divIcon({
         html: `
@@ -484,34 +488,40 @@ function createMarkerIcon(
                 height: ${pinHeight}px;
                 position: relative;
                 cursor: pointer;
-                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+                transition: all 0.3s ease;
             ">
               <div style="
                   width: ${pinSize}px;
                   height: ${pinSize}px;
-                  border-radius: 6px;
-                  background: #f6f6f6;
+                  border-radius: ${outerBorderRadius}px;
+                  background: white;
                   border: 2px solid #ffffff;
-                  overflow: hidden;
+                  padding: 4px;
                   position: relative;
-              ">
+                  overflow: hidden;
+                  transition: background-color 0.3s ease, border-color 0.3s ease;
+              "
+              onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
+              onmouseout="this.style.background='white'; this.style.borderColor='#ffffff'; this.nextElementSibling.style.borderTopColor='white';"
+              >
                 ${
                     hasImage
-                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Location" />`
-                        : `<div style="width:100%;height:100%;background:linear-gradient(90deg,#f8f8f8 25%,#f0f0f0 50%,#f8f8f8 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;"></div>
-                           <style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>`
+                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:${innerBorderRadius}px;" alt="Location" />`
+                        : `<div style="width:100%;height:100%;border-radius:${innerBorderRadius}px;animation:skeleton-pulse 1.5s ease-in-out infinite;"></div>
+                           <style>@keyframes skeleton-pulse{0%{background-color:#ffffff}50%{background-color:#f0f0f0}100%{background-color:#ffffff}}</style>`
                 }
               </div>
               <div style="
                   position: absolute;
-                  bottom: 0;
+                  bottom: 2px;
                   left: 50%;
-                  transform: translate(-50%, 0);
+                  transform: translateX(-50%);
                   width: 0;
                   height: 0;
-                  border-left: ${triangleHeight / 1.4}px solid transparent;
-                  border-right: ${triangleHeight / 1.4}px solid transparent;
-                  border-top: ${triangleHeight}px solid #f6f6f6;
+                  border-left: ${triangleHeight}px solid transparent;
+                  border-right: ${triangleHeight}px solid transparent;
+                  border-top: ${triangleHeight}px solid white;
+                  transition: border-top-color 0.3s ease;
               "></div>
             </div>
         `,
@@ -536,11 +546,15 @@ function createClusterIcon(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const leaflet = require("leaflet") as typeof import("leaflet");
 
-    const pinSize = size;
-    const triangleHeight = 12;
-    const pinHeight = pinSize + triangleHeight;
+    const pinSize = size + 16; // Add padding for consistent sizing with TripLayout
+    const triangleHeight = 10;
+    const pinHeight = pinSize + triangleHeight + 2;
     const hasImage = imageSrc && imageSrc.trim() !== "";
     const badgeOverflow = 6;
+
+    // Border radius matching TripLayout style
+    const outerBorderRadius = 16;
+    const innerBorderRadius = 12;
 
     const badgeLabel =
         clusterCount >= 2000
@@ -558,23 +572,28 @@ function createClusterIcon(
                 height: ${pinHeight}px;
                 position: relative;
                 cursor: pointer;
-                filter: drop-shadow(0px 6px 16px rgba(0,0,0,0.2));
+                transition: all 0.3s ease;
                 overflow: visible;
             ">
               <div style="
                   width: ${pinSize}px;
                   height: ${pinSize}px;
-                  border-radius: 6px;
-                  background: #f6f6f6;
+                  border-radius: ${outerBorderRadius}px;
+                  background: white;
                   border: 2px solid #ffffff;
-                  overflow: hidden;
+                  padding: 4px;
                   position: relative;
-              ">
+                  overflow: hidden;
+                  transition: background-color 0.3s ease, border-color 0.3s ease;
+              "
+              onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.parentElement.querySelector('.triangle').style.borderTopColor='#22c55e';"
+              onmouseout="this.style.background='white'; this.style.borderColor='#ffffff'; this.parentElement.querySelector('.triangle').style.borderTopColor='white';"
+              >
                 ${
                     hasImage
-                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Location" />`
-                        : `<div style="width:100%;height:100%;background:linear-gradient(90deg,#f8f8f8 25%,#f0f0f0 50%,#f8f8f8 75%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;"></div>
-                           <style>@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}</style>`
+                        ? `<img src="${imageSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:${innerBorderRadius}px;" alt="Location" />`
+                        : `<div style="width:100%;height:100%;border-radius:${innerBorderRadius}px;animation:skeleton-pulse 1.5s ease-in-out infinite;"></div>
+                           <style>@keyframes skeleton-pulse{0%{background-color:#ffffff}50%{background-color:#f0f0f0}100%{background-color:#ffffff}}</style>`
                 }
               </div>
               <div style="
@@ -583,9 +602,9 @@ function createClusterIcon(
                   right: -${badgeOverflow}px;
                   background: #22c55e;
                   color: #ffffff;
-                  border-radius: 6px;
-                  padding: 4px 6px;
-                  font-size: 11px;
+                  border-radius: 7px;
+                  padding: 4px 7px;
+                  font-size: 12px;
                   font-weight: 700;
                   line-height: 1;
                   box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -596,16 +615,17 @@ function createClusterIcon(
               <style>
                 .leaflet-marker-icon.collection-cluster-marker { overflow: visible !important; }
               </style>
-              <div style="
+              <div class="triangle" style="
                   position: absolute;
-                  bottom: 0;
+                  bottom: 2px;
                   left: 50%;
-                  transform: translate(-50%, 0);
+                  transform: translateX(-50%);
                   width: 0;
                   height: 0;
-                  border-left: ${triangleHeight / 1.4}px solid transparent;
-                  border-right: ${triangleHeight / 1.4}px solid transparent;
-                  border-top: ${triangleHeight}px solid #f6f6f6;
+                  border-left: ${triangleHeight}px solid transparent;
+                  border-right: ${triangleHeight}px solid transparent;
+                  border-top: ${triangleHeight}px solid white;
+                  transition: border-top-color 0.3s ease;
               "></div>
             </div>
         `,
@@ -795,6 +815,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             const timeout = window.setTimeout(cleanupClosingPreview, 280);
             return () => window.clearTimeout(timeout);
         }
+        return undefined;
     }, [cleanupClosingPreview, hasClosingPreview, open]);
 
     // Keep a static blurred clone while the dialog is closing
@@ -821,7 +842,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         clone.style.pointerEvents = "none";
         clone.style.userSelect = "none";
         clone.style.overflow = "hidden";
-        clone.style.filter = "blur(18px)";
+        clone.style.filter = "blur(16px)";
         clone.style.transformOrigin = "center";
         wrapper.appendChild(clone);
 
@@ -850,12 +871,12 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             },
             [createClosingPreview, hasClosingPreview, isFileViewerOpen],
         );
-
     useEffect(() => {
         if (open && !isFileViewerOpen && hasClosingPreview) {
             const timeout = window.setTimeout(cleanupClosingPreview, 120);
             return () => window.clearTimeout(timeout);
         }
+        return undefined;
     }, [cleanupClosingPreview, hasClosingPreview, isFileViewerOpen, open]);
 
     // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
@@ -1299,6 +1320,7 @@ function CollectionSidebar({
                             selected={selected}
                             setSelected={setSelected}
                             onSetOpenFileViewer={onSetOpenFileViewer}
+                            listBorderRadius="0 0 32px 32px"
                         />
                     ) : (
                         <EmptyState>
@@ -1732,7 +1754,7 @@ const CoverImageContainer = styled(Box)(({ theme }) => ({
     position: "relative",
     overflow: "hidden",
     backgroundColor: "#333",
-    borderRadius: "36px 36px 24px 24px",
+    borderRadius: "36px 36px 0px 0px",
     marginTop: "2px",
     [theme.breakpoints.down("md")]: { borderRadius: "20px 20px 20px 20px" },
 }));
@@ -1821,7 +1843,7 @@ const SidebarGradient = styled(Box)(({ theme }) => ({
     right: 0,
     height: "80px",
     background:
-        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 4%, rgba(0,0,0,0) 100%)",
+        "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.65) 2%, rgba(0,0,0,0) 100%)",
     pointerEvents: "none",
     borderRadius: "0",
     [theme.breakpoints.up("md")]: {
@@ -1835,9 +1857,15 @@ const FileListContainer = styled(Box)(({ theme }) => ({
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
-    paddingLeft: "16px",
-    paddingRight: "16px",
-    [theme.breakpoints.up("md")]: { paddingLeft: "24px", paddingRight: "24px" },
+    paddingLeft: "8px",
+    paddingRight: "8px",
+    paddingTop: "12px",
+    [theme.breakpoints.up("md")]: {
+        paddingTop: "12px",
+        paddingLeft: "12px",
+        paddingRight: "12px",
+        paddingBottom: "18px",
+    },
 }));
 
 const CenteredBoxContainer = styled(Box)({

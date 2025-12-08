@@ -161,6 +161,10 @@ export interface FileListProps {
     /** The width we should occupy.*/
     width: number;
     /**
+     * Optional border radius to apply to the scrollable list container.
+     */
+    listBorderRadius?: string;
+    /**
      * The files to show, annotated with cached precomputed properties that are
      * frequently needed by the {@link FileList}.
      */
@@ -240,6 +244,7 @@ export interface FileListProps {
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
+    listBorderRadius,
     mode,
     modePlus,
     header,
@@ -728,6 +733,11 @@ export const FileList: React.FC<FileListProps> = ({
             itemCount={items.length}
             overscanCount={3}
             useIsScrolling
+            style={
+                listBorderRadius
+                    ? { borderRadius: listBorderRadius }
+                    : undefined
+            }
         >
             {FileListRow}
         </VariableSizeList>
