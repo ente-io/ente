@@ -201,6 +201,12 @@ var ErrCastIPMismatch = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLinkEditNotAllowed = ApiError{
+	Code:           LinkEditNotAllowed,
+	Message:        "Editing link settings is not allowed for free accounts",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 var ErrLockerRegistrationDisabled = &ApiError{
 	Code:           LockerRegistrationDisabled,
 	Message:        "Locker is restricted to paid users currently",
@@ -253,6 +259,9 @@ const (
 	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"
 
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
+
+	// LinkEditNotAllowed indicates that the user cannot change link settings
+	LinkEditNotAllowed ErrorCode = "LINK_EDIT_NOT_ALLOWED"
 )
 
 type ApiError struct {
