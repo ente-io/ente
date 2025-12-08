@@ -52,11 +52,10 @@ Future<void> showEncryptedImportInstruction(BuildContext context) async {
 
 Future<void> _decryptExportData(
   BuildContext context,
-  EnteAuthExport enteAuthExport, {
-  String? password,
-}) async {
+  EnteAuthExport enteAuthExport,
+) async {
   final l10n = context.l10n;
-  bool isPasswordIncorrect = false;
+  bool shouldRetry = false;
   int? importedCodeCount;
   await showTextInputDialog(
     context,
@@ -69,66 +68,59 @@ Future<void> _decryptExportData(
     onSubmit: (String password) async {
       if (password.isEmpty) {
         showToast(context, l10n.passwordEmptyError);
-        Future.delayed(const Duration(seconds: 0), () {
-          _decryptExportData(context, enteAuthExport, password: password);
-        });
+        shouldRetry = true;
         return;
       }
-      if (password.isNotEmpty) {
-        final progressDialog = createProgressDialog(context, l10n.pleaseWait);
+      final progressDialog = createProgressDialog(context, l10n.pleaseWait);
+      try {
+        await progressDialog.show();
+        final derivedKey = await CryptoUtil.deriveKey(
+          utf8.encode(password),
+          CryptoUtil.base642bin(enteAuthExport.kdfParams.salt),
+          enteAuthExport.kdfParams.memLimit,
+          enteAuthExport.kdfParams.opsLimit,
+        );
+        late final Uint8List decryptedContent;
         try {
-          await progressDialog.show();
-          final derivedKey = await CryptoUtil.deriveKey(
-            utf8.encode(password),
-            CryptoUtil.base642bin(enteAuthExport.kdfParams.salt),
-            enteAuthExport.kdfParams.memLimit,
-            enteAuthExport.kdfParams.opsLimit,
+          decryptedContent = await CryptoUtil.decryptData(
+            CryptoUtil.base642bin(enteAuthExport.encryptedData),
+            derivedKey,
+            CryptoUtil.base642bin(enteAuthExport.encryptionNonce),
           );
-          Uint8List? decryptedContent;
-          // Encrypt the key with this derived key
-          try {
-            decryptedContent = await CryptoUtil.decryptData(
-              CryptoUtil.base642bin(enteAuthExport.encryptedData),
-              derivedKey,
-              CryptoUtil.base642bin(enteAuthExport.encryptionNonce),
-            );
-          } catch (e, s) {
-            Logger("encryptedImport").warning('failed to decrypt', e, s);
-            showToast(context, l10n.incorrectPasswordTitle);
-            isPasswordIncorrect = true;
-          }
-          if (isPasswordIncorrect) {
-            await progressDialog.hide();
-
-            Future.delayed(const Duration(seconds: 0), () {
-              _decryptExportData(context, enteAuthExport, password: password);
-            });
-            return;
-          }
-          String content = utf8.decode(decryptedContent!);
-          List<String> splitCodes = content.split("\n");
-          final parsedCodes = [];
-          for (final code in splitCodes) {
-            try {
-              parsedCodes.add(Code.fromOTPAuthUrl(code));
-            } catch (e) {
-              Logger('EncryptedText').severe("Could not parse code", e);
-            }
-          }
-          for (final code in parsedCodes) {
-            await CodeStore.instance.addCode(code, shouldSync: false);
-          }
-          unawaited(AuthenticatorService.instance.onlineSync());
-          importedCodeCount = parsedCodes.length;
-          await progressDialog.hide();
         } catch (e, s) {
+          Logger("encryptedImport").warning('failed to decrypt', e, s);
+          showToast(context, l10n.incorrectPasswordTitle);
+          shouldRetry = true;
           await progressDialog.hide();
-          Logger("ExportWidget").severe(e, s);
-          showToast(context, "Error while exporting codes.");
+          return;
         }
+        String content = utf8.decode(decryptedContent);
+        List<String> splitCodes = content.split("\n");
+        final parsedCodes = [];
+        for (final code in splitCodes) {
+          try {
+            parsedCodes.add(Code.fromOTPAuthUrl(code));
+          } catch (e) {
+            Logger('EncryptedText').severe("Could not parse code", e);
+          }
+        }
+        for (final code in parsedCodes) {
+          await CodeStore.instance.addCode(code, shouldSync: false);
+        }
+        unawaited(AuthenticatorService.instance.onlineSync());
+        importedCodeCount = parsedCodes.length;
+        await progressDialog.hide();
+      } catch (e, s) {
+        await progressDialog.hide();
+        Logger("ExportWidget").severe(e, s);
+        showToast(context, "Error while exporting codes.");
       }
     },
   );
+  if (shouldRetry) {
+    await _decryptExportData(context, enteAuthExport);
+    return;
+  }
   if (importedCodeCount != null) {
     await importSuccessDialog(context, importedCodeCount!);
   }
