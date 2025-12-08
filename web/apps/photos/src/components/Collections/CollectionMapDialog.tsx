@@ -937,7 +937,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         handleMarkTempDeleted,
         onSelectCollection,
         onSelectPerson,
-        isFileViewerOpen,
         thumbByFileID,
         user,
         visibleFiles,
@@ -1355,12 +1354,15 @@ const MapControls = React.memo(function MapControls({
 
             <Stack
                 spacing={1}
-                sx={{
+                sx={(theme) => ({
                     position: "absolute",
-                    right: 16,
-                    bottom: 16,
+                    left: 24,
+                    top: 24,
                     zIndex: 1000,
-                }}
+                    [theme.breakpoints.up("md")]: {
+                        left: "calc(24px + clamp(450px, 35vw, 600px) + 12px)",
+                    },
+                })}
             >
                 <FloatingIconButton onClick={handleZoomIn}>
                     <AddIcon />
