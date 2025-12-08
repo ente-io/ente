@@ -80,7 +80,7 @@ Future<void> _decryptExportData(
           enteAuthExport.kdfParams.memLimit,
           enteAuthExport.kdfParams.opsLimit,
         );
-        Uint8List? decryptedContent;
+        late final Uint8List decryptedContent;
         try {
           decryptedContent = await CryptoUtil.decryptData(
             CryptoUtil.base642bin(enteAuthExport.encryptedData),
@@ -94,7 +94,7 @@ Future<void> _decryptExportData(
           await progressDialog.hide();
           return;
         }
-        String content = utf8.decode(decryptedContent!);
+        String content = utf8.decode(decryptedContent);
         List<String> splitCodes = content.split("\n");
         final parsedCodes = [];
         for (final code in splitCodes) {
