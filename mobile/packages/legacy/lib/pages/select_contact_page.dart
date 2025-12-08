@@ -1,4 +1,5 @@
 import "package:email_validator/email_validator.dart";
+import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_legacy/components/error_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
@@ -8,9 +9,9 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
+import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
@@ -56,11 +57,13 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
   final textFieldFocusNode = FocusNode();
   final _textController = TextEditingController();
+  final _scrollController = ScrollController();
 
   @override
   void dispose() {
     _textController.dispose();
     textFieldFocusNode.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -189,6 +192,9 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     EnteColorScheme colorScheme,
     EnteTextTheme textTheme,
   ) {
+    const double maxVisibleHeight = 121.0;
+    final showScrollbar = suggestedUsers.length > 2;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -196,57 +202,132 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           context.strings.chooseFromAnExistingContact,
           style: textTheme.bodyMuted,
         ),
-        const SizedBox(height: 12),
-        Container(
-          constraints: const BoxConstraints(maxHeight: 150),
-          decoration: BoxDecoration(
-            color: colorScheme.fillFaint,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: ListView.separated(
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            itemCount: suggestedUsers.length,
-            separatorBuilder: (context, index) => DividerWidget(
-              dividerType: DividerType.menu,
-              bgColor: colorScheme.fillFaint,
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                constraints: const BoxConstraints(maxHeight: maxVisibleHeight),
+                child: ListView.separated(
+                  controller: _scrollController,
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: suggestedUsers.length,
+                  separatorBuilder: (context, index) => DividerWidget(
+                    dividerType: DividerType.menu,
+                    bgColor: getEnteColorScheme(context).fillFaint,
+                  ),
+                  itemBuilder: (context, index) {
+                    final user = suggestedUsers[index];
+                    final isFirst = index == 0;
+                    final isLast = index == suggestedUsers.length - 1;
+                    return MenuItemWidgetV2(
+                      captionedTextWidget: CaptionedTextWidgetV2(
+                        title: user.email,
+                        textStyle: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
+                      ),
+                      leadingIconSize: 24.0,
+                      leadingIconWidget: UserAvatarWidget(
+                        user,
+                        type: AvatarType.mini,
+                        currentUserID: widget.config.getUserID()!,
+                        config: widget.config,
+                        thumbnailView: false,
+                      ),
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      pressedColor: colorScheme.fillFaintPressed,
+                      trailingIcon:
+                          (selectedEmail == user.email) ? Icons.check : null,
+                      trailingIconColor: colorScheme.primary500,
+                      surfaceExecutionStates: false,
+                      onTap: () async {
+                        textFieldFocusNode.unfocus();
+                        if (selectedEmail == user.email) {
+                          selectedEmail = "";
+                        } else {
+                          selectedEmail = user.email;
+                        }
+                        setState(() {});
+                      },
+                      isTopBorderRadiusRemoved: !isFirst,
+                      isBottomBorderRadiusRemoved: !isLast,
+                      isFirstItem: isFirst,
+                      isLastItem: isLast,
+                      singleBorderRadius: 20,
+                      multipleBorderRadius: 20,
+                    );
+                  },
+                ),
+              ),
             ),
-            itemBuilder: (context, index) {
-              final user = suggestedUsers[index];
-              return MenuItemWidget(
-                captionedTextWidget: CaptionedTextWidget(
-                  title: user.email,
-                ),
-                leadingIconSize: 24.0,
-                leadingIconWidget: UserAvatarWidget(
-                  user,
-                  type: AvatarType.mini,
-                  currentUserID: widget.config.getUserID()!,
-                  config: widget.config,
-                  thumbnailView: false,
-                ),
-                menuItemColor: Colors.transparent,
-                pressedColor: colorScheme.fillFaintPressed,
-                trailingIcon:
-                    (selectedEmail == user.email) ? Icons.check : null,
-                onTap: () async {
-                  textFieldFocusNode.unfocus();
-                  if (selectedEmail == user.email) {
-                    selectedEmail = "";
-                  } else {
-                    selectedEmail = user.email;
-                  }
-                  setState(() {});
-                },
-                isTopBorderRadiusRemoved: index > 0,
-                isBottomBorderRadiusRemoved:
-                    index < (suggestedUsers.length - 1),
-                singleBorderRadius: 8,
-              );
-            },
-          ),
+            if (showScrollbar) ...[
+              const SizedBox(width: 4),
+              _buildCustomScrollbar(
+                suggestedUsers.length,
+                maxVisibleHeight,
+                colorScheme,
+              ),
+            ],
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _buildCustomScrollbar(
+    int itemCount,
+    double containerHeight,
+    EnteColorScheme colorScheme,
+  ) {
+    const visibleItems = 2;
+    final thumbHeightRatio = visibleItems / itemCount;
+    final thumbHeight = containerHeight * thumbHeightRatio;
+
+    return AnimatedBuilder(
+      animation: _scrollController,
+      builder: (context, child) {
+        double thumbPosition = 0;
+        if (_scrollController.hasClients) {
+          final maxExtent = _scrollController.position.hasContentDimensions
+              ? _scrollController.position.maxScrollExtent
+              : 0.0;
+          if (maxExtent > 0) {
+            final scrollFraction = _scrollController.offset / maxExtent;
+            thumbPosition = scrollFraction * (containerHeight - thumbHeight);
+          }
+        }
+
+        return SizedBox(
+          height: containerHeight,
+          width: 5,
+          child: Stack(
+            children: [
+              Container(
+                width: 5,
+                height: containerHeight,
+                decoration: BoxDecoration(
+                  color: colorScheme.strokeFaint,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              Positioned(
+                top: thumbPosition,
+                child: Container(
+                  width: 5,
+                  height: thumbHeight,
+                  decoration: BoxDecoration(
+                    color: colorScheme.strokeMuted,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -326,6 +407,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         final r = await EmergencyContactService.instance.addContact(
           context,
           emailToAdd,
+          _selectedRecoveryDays,
         );
         if (r && mounted) {
           Navigator.of(context).pop(true);
@@ -476,14 +558,30 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
   List<User> _getSuggestedUser() {
     final List<User> suggestedUsers = [];
-    // Get suggested users from emergencyInfo if available
-    // For now, return contacts that are already trusted by others
+    final Set<String> existingEmails = {};
+
+    existingEmails.add(widget.config.getEmail() ?? "");
+
+    // Get suggested users from othersEmergencyContact (people who added you)
     for (final contact in widget.emergencyInfo.othersEmergencyContact) {
-      if (!suggestedUsers.any((u) => u.email == contact.user.email)) {
+      if (!existingEmails.contains(contact.user.email)) {
+        existingEmails.add(contact.user.email);
         suggestedUsers.add(contact.user);
       }
     }
 
+    final cachedUserDetails = UserService.instance.getCachedUserDetails();
+    if (cachedUserDetails != null &&
+        (cachedUserDetails.familyData?.members?.isNotEmpty ?? false)) {
+      for (final member in cachedUserDetails.familyData!.members!) {
+        if (!existingEmails.contains(member.email)) {
+          existingEmails.add(member.email);
+          suggestedUsers.add(User(email: member.email));
+        }
+      }
+    }
+
+    // Filter by search text
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(
         (element) => !element.email
