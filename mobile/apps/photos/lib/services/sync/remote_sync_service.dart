@@ -819,13 +819,11 @@ class RemoteSyncService {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
         );
-        final queueSource = file.queueSource; // auto-sync should persist this
         // Files queued from _uploadFiles are from background auto-sync
         _uploadFile(
           file,
           collectionID,
           futures,
-          queueSource: queueSource,
         );
         queuedCount++;
         _logger.internalInfo(
@@ -889,7 +887,6 @@ class RemoteSyncService {
             fileInCollectionOwnedByUser,
             fileInCollectionOwnedByUser.collectionID!,
             futures,
-            queueSource: fileInCollectionOwnedByUser.queueSource,
           );
           reuploadQueuedCount++;
           _logger.internalInfo(
@@ -998,20 +995,17 @@ class RemoteSyncService {
   void _uploadFile(
     EnteFile file,
     int collectionID,
-    List<Future> futures, {
-    String? queueSource,
-  }) {
+    List<Future> futures,
+  ) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
       "(localID: ${file.localID}, collectionID: $collectionID). "
       "Calling FileUploader.upload()...",
     );
-    final effectiveQueueSource = queueSource ?? file.queueSource;
     final future = _uploader
         .upload(
       file,
       collectionID,
-      queueSource: effectiveQueueSource,
     )
         .then((uploadedFile) {
       _logger.internalInfo(

@@ -222,7 +222,6 @@ class _BackupItemCardState extends State<BackupItemCard> {
                         await FileUploader.instance.upload(
                           widget.item.file,
                           widget.item.collectionID,
-                          queueSource: widget.item.file.queueSource,
                         );
                       },
                     ),

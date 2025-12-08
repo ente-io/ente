@@ -179,17 +179,12 @@ class FileUploader {
   /// folder deselection checks. Manual uploads bypass these filters.
   Future<EnteFile> upload(
     EnteFile file,
-    int collectionID, {
-    String? queueSource,
-  }) {
-    final effectiveQueueSource = file.queueSource ?? queueSource;
-    if (file.queueSource == null && effectiveQueueSource != null) {
-      file.queueSource = effectiveQueueSource;
-    }
+    int collectionID,
+  ) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] FileUploader.upload() called for ${file.title} "
       "(localID: ${file.localID}, collectionID: $collectionID, "
-      "queueSource: $effectiveQueueSource, isProcessBg: $isProcessBg)",
+      "queueSource: ${file.queueSource}, isProcessBg: $isProcessBg)",
     );
 
     if (file.localID == null || file.localID!.isEmpty) {
