@@ -4,6 +4,7 @@ import "dart:io";
 
 import 'package:bip39/bip39.dart' as bip39;
 import "package:ente_crypto/ente_crypto.dart";
+import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -130,6 +131,7 @@ class Configuration {
         await _migrateSecurityStorageToFirstUnlock();
       }
       SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+      debugPrint("userID: ${getUserID()}");
     } catch (e, s) {
       _logger.severe("Configuration init failed", e, s);
       /*
