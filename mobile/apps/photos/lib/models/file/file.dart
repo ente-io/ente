@@ -24,6 +24,8 @@ class EnteFile {
   String? localID;
   String? title;
   String? deviceFolder;
+  // Path ID for the device folder that queued this file (auto backup). Null for manual uploads.
+  String? queueSource;
   int? creationTime;
   int? modificationTime;
   int? updationTime;

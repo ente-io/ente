@@ -50,6 +50,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
 
+extension FileUploadItemX on FileUploadItem? {
+  bool get isManualUpload => this?.queueSource == null;
+}
+
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
   static const kMaximumConcurrentVideoUploads = 2;
@@ -171,19 +175,17 @@ class FileUploader {
 
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
-  /// [isAutoSync] should be true only when called from background auto-sync.
   /// Auto-sync uploads are subject to "only backup new photos" filter and
   /// folder deselection checks. Manual uploads bypass these filters.
   Future<EnteFile> upload(
     EnteFile file,
     int collectionID, {
     String? queueSource,
-    bool isAutoSync = false,
   }) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] FileUploader.upload() called for ${file.title} "
       "(localID: ${file.localID}, collectionID: $collectionID, "
-      "isAutoSync: $isAutoSync, isProcessBg: $isProcessBg)",
+      "queueSource: $queueSource, isProcessBg: $isProcessBg)",
     );
 
     if (file.localID == null || file.localID!.isEmpty) {
@@ -206,7 +208,6 @@ class FileUploader {
         collectionID,
         completer,
         queueSource: queueSource,
-        isAutoSync: isAutoSync,
       );
       _allBackups[localID] = BackupItem(
         status: BackupItemStatus.inQueue,
@@ -296,13 +297,13 @@ class FileUploader {
   ) {
     final List<FileUploadItem> entriesToRemove = [];
     // For BackupTooOldForPreferenceError, only remove auto-synced files.
-    // Manual uploads (isAutoSync=false) should be preserved.
+    // Manual uploads should be preserved.
     final bool isOnlyNewFilter = reason is BackupTooOldForPreferenceError;
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
       // Skip manual uploads when applying only-new filter
-      if (isOnlyNewFilter && !pendingUpload.value.isAutoSync) {
+      if (isOnlyNewFilter && pendingUpload.value.isManualUpload) {
         return;
       }
       if (fn(pendingUpload.value.file)) {
@@ -330,6 +331,14 @@ class FileUploader {
     }
     Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     entry.completer.completeError(error ?? SilentlyCancelUploadsError());
+  }
+
+  Future<void> _cleanupAndSkip(FileUploadItem entry, Error error) async {
+    final localId = entry.file.localID;
+    if (localId != null) {
+      await _cleanupPendingUpload(localId, entry.collectionID);
+    }
+    _removeAndSkip(entry, error);
   }
 
   /// Helper to cleanup a file entry from the database by localID and collectionID.
@@ -418,39 +427,31 @@ class FileUploader {
         }
       }
       // Folder deselection check - only for auto-sync uploads with queueSource
-      if (pendingEntry != null &&
-          pendingEntry.isAutoSync &&
-          flagService.enableBackupFolderSync &&
-          pendingEntry.queueSource != null &&
-          !DeviceFolderSelectionCache.instance
-              .isSelected(pendingEntry.queueSource!)) {
-        // Mark as in-progress immediately to prevent race conditions with
-        // concurrent _pollQueue calls before the async cleanup completes
-        pendingEntry.status = UploadStatus.inProgress;
-        final localId = pendingEntry.file.localID;
-        if (localId != null) {
-          await _cleanupPendingUpload(localId, pendingEntry.collectionID);
+      if (flagService.enableBackupFolderSync && !pendingEntry.isManualUpload) {
+        final queueSource = pendingEntry!.queueSource!;
+        final isSelected =
+            DeviceFolderSelectionCache.instance.isSelected(queueSource);
+        if (!isSelected) {
+          // Mark as in-progress immediately to prevent race conditions with
+          // concurrent _pollQueue calls before the async cleanup completes
+          pendingEntry.status = UploadStatus.inProgress;
+          await _cleanupAndSkip(pendingEntry, BackupFolderDeselectedError());
+          unawaited(_pollQueue());
+          return;
         }
-        _removeAndSkip(pendingEntry, BackupFolderDeselectedError());
-        unawaited(_pollQueue());
-        return;
       }
       // Only-new filter - only applies to auto-sync uploads.
       // Manual uploads should always be allowed regardless of their creation
       // time to support importing older albums or retrying uploads.
       final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
       if (pendingEntry != null &&
-          pendingEntry.isAutoSync &&
+          !pendingEntry.isManualUpload &&
           onlyNewSinceEpoch != null &&
           (pendingEntry.file.creationTime ?? 0) < onlyNewSinceEpoch) {
         // Mark as in-progress immediately to prevent race conditions with
         // concurrent _pollQueue calls before the async cleanup completes
         pendingEntry.status = UploadStatus.inProgress;
-        final localId = pendingEntry.file.localID;
-        if (localId != null) {
-          await _cleanupPendingUpload(localId, pendingEntry.collectionID);
-        }
-        _removeAndSkip(pendingEntry, BackupTooOldForPreferenceError());
+        await _cleanupAndSkip(pendingEntry, BackupTooOldForPreferenceError());
         unawaited(_pollQueue());
         return;
       }
@@ -1869,10 +1870,6 @@ class FileUploadItem {
   /// Used for folder deselection checks.
   final String? queueSource;
 
-  /// Whether this upload was queued by background auto-sync (true) or
-  /// explicitly triggered by user action (false). Only auto-sync uploads
-  /// are subject to the "only backup new photos" filter.
-  final bool isAutoSync;
   UploadStatus status;
 
   FileUploadItem(
@@ -1880,7 +1877,6 @@ class FileUploadItem {
     this.collectionID,
     this.completer, {
     this.queueSource,
-    this.isAutoSync = false,
     this.status = UploadStatus.notStarted,
   });
 }

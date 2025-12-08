@@ -421,6 +421,7 @@ class RemoteSyncService {
       await _db.setCollectionIDForUnMappedLocalFiles(
         collectionID,
         localIDsToSync,
+        queueSource: deviceCollection.id,
       );
 
       // mark IDs as already synced if corresponding entry is present in
@@ -457,6 +458,7 @@ class RemoteSyncService {
             existingFile.collectionID = collectionID;
             existingFile.uploadedFileID = null;
             existingFile.ownerID = null;
+            existingFile.queueSource = deviceCollection.id;
             newFilesToInsert.add(existingFile);
             fileFoundForLocalIDs.add(localID);
           }
@@ -512,8 +514,9 @@ class RemoteSyncService {
     _logger.info(
       "[UPLOAD-DEBUG] Applying only-new backup threshold $thresholdMicros",
     );
-    // Note: removeFromQueueWhere only removes auto-synced files (those with
-    // isAutoSync=true) from the upload queue. Manual uploads are preserved.
+    // Note: removeFromQueueWhere only removes auto-synced files (detected via
+    // device folder mapping) from the upload queue. Manual uploads are
+    // preserved.
     _uploader.removeFromQueueWhere(
       (file) => (file.creationTime ?? 0) < thresholdMicros,
       BackupTooOldForPreferenceError(),
@@ -588,6 +591,7 @@ class RemoteSyncService {
           entriesToDelete.add(pendingUpload.generatedID!);
         } else {
           pendingUpload.collectionID = null;
+          pendingUpload.queueSource = null;
           entriesToUpdate.add(pendingUpload);
         }
       }
@@ -665,9 +669,6 @@ class RemoteSyncService {
       }
     }
     final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
-    // Get auto-sync collection IDs for only-new filter (independent of enableBackupFolderSync)
-    final Set<int> autoSyncCollectionIDs =
-        onlyNewSinceEpoch != null ? await _db.getDeviceSyncCollectionIDs() : {};
 
     final List<EnteFile> filesToBeUploaded = [];
     int ignoredForUpload = 0;
@@ -688,17 +689,15 @@ class RemoteSyncService {
         ignoredForUpload++;
         continue;
       }
-      // Check if file is in an auto-sync collection for filtering
-      final bool isAutoSyncFile = file.collectionID != null &&
-          autoSyncCollectionIDs.contains(file.collectionID);
+      // Check if file is queued via auto-sync for filtering
+      final bool isAutoSyncFile = file.queueSource != null;
 
       // Folder deselection check - only when enableBackupFolderSync is on
       if (enableBackupFolderSync &&
           file.collectionID != null &&
           file.localID != null) {
-        final String? pathId =
-            selectionCache!.getPathIdForCollectionId(file.collectionID!);
-        if (pathId != null && !selectionCache.isSelected(pathId)) {
+        final String? pathId = file.queueSource;
+        if (pathId != null && !selectionCache!.isSelected(pathId)) {
           await FilesDB.instance.cleanupByLocalIDAndCollection(
             file.localID!,
             file.collectionID!,
@@ -829,17 +828,18 @@ class RemoteSyncService {
         _logger.internalInfo(
           "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
         );
-        final queueSource = enableBackupFolderSync
-            ? DeviceFolderSelectionCache.instance
-                .getPathIdForCollectionId(collectionID)
-            : null;
+        final queueSource = file.queueSource; // auto-sync should persist this
+        if (enableBackupFolderSync && queueSource == null) {
+          _logger.internalWarning(
+            "[UPLOAD-DEBUG] Missing queueSource for auto-sync file ${file.title} (cid: $collectionID)",
+          );
+        }
         // Files queued from _uploadFiles are from background auto-sync
         _uploadFile(
           file,
           collectionID,
           futures,
           queueSource: queueSource,
-          isAutoSync: true,
         );
         queuedCount++;
         _logger.internalInfo(
@@ -903,6 +903,7 @@ class RemoteSyncService {
             fileInCollectionOwnedByUser,
             fileInCollectionOwnedByUser.collectionID!,
             futures,
+            queueSource: fileInCollectionOwnedByUser.queueSource,
           );
           reuploadQueuedCount++;
           _logger.internalInfo(
@@ -1013,19 +1014,18 @@ class RemoteSyncService {
     int collectionID,
     List<Future> futures, {
     String? queueSource,
-    bool isAutoSync = false,
   }) {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
-      "(localID: ${file.localID}, collectionID: $collectionID, isAutoSync: $isAutoSync). "
+      "(localID: ${file.localID}, collectionID: $collectionID). "
       "Calling FileUploader.upload()...",
     );
+    final effectiveQueueSource = queueSource ?? file.queueSource;
     final future = _uploader
         .upload(
       file,
       collectionID,
-      queueSource: queueSource,
-      isAutoSync: isAutoSync,
+      queueSource: effectiveQueueSource,
     )
         .then((uploadedFile) {
       _logger.internalInfo(

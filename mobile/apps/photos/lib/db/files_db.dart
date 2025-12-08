@@ -41,6 +41,7 @@ class FilesDB with SqlDbBase {
   static const columnLocalID = 'local_id';
   static const columnTitle = 'title';
   static const columnDeviceFolder = 'device_folder';
+  static const columnQueueSource = 'queue_source';
   static const columnLatitude = 'latitude';
   static const columnLongitude = 'longitude';
   static const columnFileType = 'file_type';
@@ -90,6 +91,7 @@ class FilesDB with SqlDbBase {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...addQueueSourceColumn(),
   ];
 
   static const List<String> _columnNames = [
@@ -100,6 +102,7 @@ class FilesDB with SqlDbBase {
     columnCollectionID,
     columnTitle,
     columnDeviceFolder,
+    columnQueueSource,
     columnLatitude,
     columnLongitude,
     columnFileType,
@@ -162,6 +165,7 @@ class FilesDB with SqlDbBase {
           $columnCollectionID INTEGER DEFAULT -1,
           $columnTitle TEXT NOT NULL,
           $columnDeviceFolder TEXT,
+          $columnQueueSource TEXT,
           $columnLatitude REAL,
           $columnLongitude REAL,
           $columnFileType INTEGER,
@@ -227,6 +231,7 @@ class FilesDB with SqlDbBase {
           $columnCollectionID INTEGER DEFAULT -1,
           $columnTitle TEXT NOT NULL,
           $columnDeviceFolder TEXT,
+          $columnQueueSource TEXT,
           $columnLatitude REAL,
           $columnLongitude REAL,
           $columnFileType INTEGER,
@@ -251,6 +256,7 @@ class FilesDB with SqlDbBase {
           $columnCollectionID,
           $columnTitle,
           $columnDeviceFolder,
+          $columnQueueSource,
           $columnLatitude,
           $columnLongitude,
           $columnFileType,
@@ -412,6 +418,14 @@ class FilesDB with SqlDbBase {
       ''',
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
+      '''
+    ];
+  }
+
+  static List<String> addQueueSourceColumn() {
+    return [
+      '''
+        ALTER TABLE $filesTable ADD COLUMN $columnQueueSource TEXT;
       '''
     ];
   }
@@ -1073,17 +1087,40 @@ class FilesDB with SqlDbBase {
   // corresponding file entries are not already mapped to some other collection
   Future<void> setCollectionIDForUnMappedLocalFiles(
     int collectionID,
-    Set<String> localIDs,
-  ) async {
+    Set<String> localIDs, {
+    String? queueSource,
+  }) async {
+    if (localIDs.isEmpty) {
+      return;
+    }
     final db = await instance.sqliteAsyncDB;
-    final inParam = localIDs.map((id) => "'$id'").join(',');
+    final idPlaceholders = List.filled(localIDs.length, '?').join(',');
+
+    final setExpressions = <String>[
+      '$columnCollectionID = ?',
+    ];
+    final params = <Object?>[
+      collectionID,
+    ];
+
+    if (queueSource != null) {
+      // Set queue_source only when it is currently NULL.
+      setExpressions.add(
+        '$columnQueueSource = COALESCE($columnQueueSource, ?)',
+      );
+      params.add(queueSource);
+    }
+
+    params.addAll(localIDs);
+
     await db.execute(
       '''
       UPDATE $filesTable
-      SET $columnCollectionID = $collectionID
-      WHERE $columnLocalID IN ($inParam) AND ($columnCollectionID IS NULL OR 
+      SET ${setExpressions.join(', ')}
+      WHERE $columnLocalID IN ($idPlaceholders) AND ($columnCollectionID IS NULL OR
       $columnCollectionID = -1);
     ''',
+      params,
     );
   }
 
@@ -1462,7 +1499,7 @@ class FilesDB with SqlDbBase {
     } else {
       await db.execute(
         '''
-        UPDATE $filesTable SET $columnCollectionID = NULL
+        UPDATE $filesTable SET $columnCollectionID = NULL, $columnQueueSource = NULL
         WHERE $columnLocalID = ? AND $columnCollectionID = ?
         AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
         ''',
@@ -1914,6 +1951,7 @@ class FilesDB with SqlDbBase {
       file.collectionID ?? -1,
       file.title,
       file.deviceFolder,
+      file.queueSource,
       latitude,
       longitude,
       getInt(file.fileType),
@@ -1973,6 +2011,7 @@ class FilesDB with SqlDbBase {
         row[columnCollectionID] == -1 ? null : row[columnCollectionID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
+    file.queueSource = row[columnQueueSource];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
       file.location = Location(
         latitude: row[columnLatitude],
