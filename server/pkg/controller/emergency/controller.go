@@ -29,43 +29,68 @@ func (c *Controller) UpdateContact(ctx *gin.Context,
 	if err := validateUpdateReq(userID, req); err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	if req.State == ente.ContactDenied || req.State == ente.ContactLeft || req.State == ente.UserRevokedContact {
-		activeSessions, sessionErr := c.Repo.GetActiveSessions(ctx, req.UserID, req.EmergencyContactID)
-		if sessionErr != nil {
-			return stacktrace.Propagate(sessionErr, "")
+
+	// Handle recovery notice update if provided
+	if req.RecoveryNoticeInDays != nil {
+		// Only the account owner can update recovery notice period
+		if req.UserID != userID {
+			return stacktrace.Propagate(ente.ErrPermissionDenied, "only account owner can update recovery notice period")
 		}
-		for _, session := range activeSessions {
-			if req.State == ente.UserRevokedContact {
-				rejErr := c.RejectRecovery(ctx, userID, ente.RecoveryIdentifier{
-					ID:                 session.ID,
-					UserID:             session.UserID,
-					EmergencyContactID: session.EmergencyContactID,
-				})
-				if rejErr != nil {
-					return stacktrace.Propagate(rejErr, "failed to reject recovery")
-				}
-			} else {
-				stopErr := c.StopRecovery(ctx, userID, ente.RecoveryIdentifier{
-					ID:                 session.ID,
-					UserID:             session.UserID,
-					EmergencyContactID: session.EmergencyContactID,
-				})
-				if stopErr != nil {
-					return stacktrace.Propagate(stopErr, "failed to stop recovery")
+		if *req.RecoveryNoticeInDays < 1 {
+			return stacktrace.Propagate(ente.NewBadRequestWithMessage("recovery notice days must be at least 1"), "")
+		}
+		noticeInHrs := *req.RecoveryNoticeInDays * 24
+		hasNoticeUpdate, err := c.Repo.UpdateNoticePeriod(ctx, req.UserID, req.EmergencyContactID, noticeInHrs)
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
+		if !hasNoticeUpdate {
+			log.WithField("userID", userID).WithField("req", req).
+				Warn("No update applied for recovery notice period")
+		}
+	}
+
+	// Handle state update if provided
+	if req.State != "" {
+		if req.State == ente.ContactDenied || req.State == ente.ContactLeft || req.State == ente.UserRevokedContact {
+			activeSessions, sessionErr := c.Repo.GetActiveSessions(ctx, req.UserID, req.EmergencyContactID)
+			if sessionErr != nil {
+				return stacktrace.Propagate(sessionErr, "")
+			}
+			for _, session := range activeSessions {
+				if req.State == ente.UserRevokedContact {
+					rejErr := c.RejectRecovery(ctx, userID, ente.RecoveryIdentifier{
+						ID:                 session.ID,
+						UserID:             session.UserID,
+						EmergencyContactID: session.EmergencyContactID,
+					})
+					if rejErr != nil {
+						return stacktrace.Propagate(rejErr, "failed to reject recovery")
+					}
+				} else {
+					stopErr := c.StopRecovery(ctx, userID, ente.RecoveryIdentifier{
+						ID:                 session.ID,
+						UserID:             session.UserID,
+						EmergencyContactID: session.EmergencyContactID,
+					})
+					if stopErr != nil {
+						return stacktrace.Propagate(stopErr, "failed to stop recovery")
+					}
 				}
 			}
 		}
+		hasUpdate, err := c.Repo.UpdateState(ctx, req.UserID, req.EmergencyContactID, req.State)
+		if !hasUpdate {
+			log.WithField("userID", userID).WithField("req", req).
+				Warn("No update applied for emergency contact")
+		} else {
+			go c.sendContactNotification(ctx, req.UserID, req.EmergencyContactID, req.State)
+		}
+		if err != nil {
+			return stacktrace.Propagate(err, "")
+		}
 	}
-	hasUpdate, err := c.Repo.UpdateState(ctx, req.UserID, req.EmergencyContactID, req.State)
-	if !hasUpdate {
-		log.WithField("userID", userID).WithField("req", req).
-			Warn("No update applied for emergency contact")
-	} else {
-		go c.sendContactNotification(ctx, req.UserID, req.EmergencyContactID, req.State)
-	}
-	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
+
 	return nil
 }
 
@@ -112,6 +137,12 @@ func validateUpdateReq(userID int64, req ente.UpdateContact) error {
 		return stacktrace.Propagate(ente.ErrPermissionDenied, "user can only update his own state")
 	}
 
+	// If no state is provided, skip state validation (only recovery notice update)
+	if req.State == "" {
+		return nil
+	}
+
+	// Validate state based on who is making the request
 	isActorContact := userID == req.EmergencyContactID
 	if isActorContact {
 		if req.State == ente.ContactAccepted ||

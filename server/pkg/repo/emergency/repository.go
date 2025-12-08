@@ -106,6 +106,27 @@ func (r *Repository) UpdateState(ctx context.Context,
 	return count > 0, stacktrace.Propagate(err2, "")
 }
 
+// UpdateNoticePeriod updates the notice period for an emergency contact
+// Only the account owner (userID) can update the notice period for their emergency contacts
+func (r *Repository) UpdateNoticePeriod(ctx context.Context,
+	userID int64,
+	emergencyContactID int64,
+	noticePeriodInHrs int) (bool, error) {
+	res, err := r.DB.ExecContext(ctx,
+		`UPDATE emergency_contact SET notice_period_in_hrs=$1
+		 WHERE user_id=$2 AND emergency_contact_id=$3 AND state = ANY($4)`,
+		noticePeriodInHrs, userID, emergencyContactID,
+		pq.Array([]ente.ContactState{ente.ContactAccepted, ente.UserInvitedContact}))
+	if err != nil {
+		return false, stacktrace.Propagate(err, "")
+	}
+	count, err2 := res.RowsAffected()
+	if count > 1 {
+		panic("invalid state, only one row should be updated")
+	}
+	return count > 0, stacktrace.Propagate(err2, "")
+}
+
 func getValidPreviousState(cs ente.ContactState) []ente.ContactState {
 	switch cs {
 	case ente.UserInvitedContact:

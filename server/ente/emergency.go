@@ -11,9 +11,10 @@ type AddContact struct {
 }
 
 type UpdateContact struct {
-	UserID             int64        `json:"userID" binding:"required"`
-	EmergencyContactID int64        `json:"emergencyContactID" binding:"required"`
-	State              ContactState `json:"state" binding:"required"`
+	UserID               int64        `json:"userID" binding:"required"`
+	EmergencyContactID   int64        `json:"emergencyContactID" binding:"required"`
+	State                ContactState `json:"state"`
+	RecoveryNoticeInDays *int         `json:"recoveryNoticeInDays"`
 }
 
 type ContactIdentifier struct {
