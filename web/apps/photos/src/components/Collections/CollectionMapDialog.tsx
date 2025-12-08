@@ -13,6 +13,7 @@ import {
     Typography,
     type IconButtonProps,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
@@ -42,6 +43,7 @@ import { t } from "i18next";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet/dist/leaflet.css";
+import type { Dispatch, SetStateAction } from "react";
 import React, {
     useCallback,
     useEffect,
@@ -746,10 +748,14 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     onSelectPerson,
 }) => {
     const { onGenericError } = useBaseContext();
+    const theme = useTheme();
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const optimalZoom = calculateOptimalZoom();
+    const dialogRootRef = useRef<HTMLDivElement | null>(null);
+    const closingPreviewRef = useRef<HTMLDivElement | null>(null);
+    const [hasClosingPreview, setHasClosingPreview] = useState(false);
 
     const {
         mapCenter,
@@ -773,6 +779,84 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     } = useFavorites(open, user);
 
     const createClusterCustomIcon = useClusterIcon(mapPhotos, thumbByFileID);
+
+    const cleanupClosingPreview = useCallback(() => {
+        closingPreviewRef.current?.remove();
+        closingPreviewRef.current = null;
+        setHasClosingPreview(false);
+    }, []);
+
+    useEffect(() => {
+        return () => cleanupClosingPreview();
+    }, [cleanupClosingPreview]);
+
+    useEffect(() => {
+        if (!open && hasClosingPreview) {
+            const timeout = window.setTimeout(cleanupClosingPreview, 280);
+            return () => window.clearTimeout(timeout);
+        }
+    }, [cleanupClosingPreview, hasClosingPreview, open]);
+
+    // Keep a static blurred clone while the dialog is closing
+    const createClosingPreview = useCallback(() => {
+        if (typeof document === "undefined") return;
+        const dialogNode = dialogRootRef.current;
+        if (!dialogNode) return;
+
+        cleanupClosingPreview();
+
+        const wrapper = document.createElement("div");
+        wrapper.setAttribute("data-collection-map-preview", "true");
+        wrapper.style.position = "fixed";
+        wrapper.style.inset = "0";
+        wrapper.style.zIndex = "1199";
+        wrapper.style.pointerEvents = "none";
+        wrapper.style.overflow = "hidden";
+        wrapper.style.backgroundColor =
+            theme.palette.mode === "dark"
+                ? "rgba(0, 0, 0, 0.65)"
+                : "rgba(0, 0, 0, 0.7)";
+
+        const clone = dialogNode.cloneNode(true) as HTMLElement;
+        clone.style.pointerEvents = "none";
+        clone.style.userSelect = "none";
+        clone.style.overflow = "hidden";
+        clone.style.filter = "blur(18px)";
+        clone.style.transformOrigin = "center";
+        wrapper.appendChild(clone);
+
+        document.body.appendChild(wrapper);
+        closingPreviewRef.current = wrapper;
+        setHasClosingPreview(true);
+    }, [cleanupClosingPreview, theme.palette.mode]);
+
+    const handleClose = useCallback(() => {
+        createClosingPreview();
+        onClose();
+    }, [createClosingPreview, onClose]);
+
+    const handleSetFileViewerOpen: Dispatch<SetStateAction<boolean>> =
+        useCallback(
+            (next) => {
+                const nextValue =
+                    typeof next === "function"
+                        ? (next as (prev: boolean) => boolean)(isFileViewerOpen)
+                        : next;
+
+                if (nextValue && !hasClosingPreview) {
+                    createClosingPreview();
+                }
+                setIsFileViewerOpen(nextValue);
+            },
+            [createClosingPreview, hasClosingPreview, isFileViewerOpen],
+        );
+
+    useEffect(() => {
+        if (open && !isFileViewerOpen && hasClosingPreview) {
+            const timeout = window.setTimeout(cleanupClosingPreview, 120);
+            return () => window.clearTimeout(timeout);
+        }
+    }, [cleanupClosingPreview, hasClosingPreview, isFileViewerOpen, open]);
 
     // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
     const visibleFiles = useMemo(() => {
@@ -862,7 +946,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
         if (!mapPhotos.length || !mapCenter) {
             return (
-                <CenteredBox onClose={onClose} closeLabel={t("close")}>
+                <CenteredBox onClose={handleClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
                         {t("no_geotagged_photos", {
                             defaultValue:
@@ -884,7 +968,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 mapCenter={mapCenter}
                 optimalZoom={optimalZoom}
                 createClusterCustomIcon={createClusterCustomIcon}
-                onClose={onClose}
+                onClose={handleClose}
                 onVisiblePhotosChange={setVisiblePhotos}
                 user={user}
                 favoriteFileIDs={favoriteFileIDs}
@@ -906,7 +990,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 onSelectPerson={onSelectPerson}
                 selected={emptySelected}
                 setSelected={noOpSetSelected}
-                onSetOpenFileViewer={setIsFileViewerOpen}
+                onSetOpenFileViewer={handleSetFileViewerOpen}
             />
         );
     }, [
@@ -924,7 +1008,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         mapComponents,
         mapPhotos,
         noOpSetSelected,
-        onClose,
         optimalZoom,
         onAddFileToCollection,
         onAddSaveGroup,
@@ -941,28 +1024,35 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         user,
         visibleFiles,
         visiblePhotos,
+        handleClose,
+        handleSetFileViewerOpen,
     ]);
 
     return (
-        <Dialog
-            fullScreen
-            keepMounted
-            open={open && !isFileViewerOpen}
-            onClose={onClose}
-        >
-            <Box
-                sx={{
-                    position: "relative",
-                    width: "100vw",
-                    height: "100vh",
-                    bgcolor: "background.default",
-                }}
+        <>
+            <Dialog
+                fullScreen
+                keepMounted
+                open={open && !isFileViewerOpen}
+                onClose={handleClose}
             >
-                <DialogContent sx={{ padding: "0 !important", height: "100%" }}>
-                    {body}
-                </DialogContent>
-            </Box>
-        </Dialog>
+                <Box
+                    sx={{
+                        position: "relative",
+                        width: "100vw",
+                        height: "100vh",
+                        bgcolor: "background.default",
+                    }}
+                    ref={dialogRootRef}
+                >
+                    <DialogContent
+                        sx={{ padding: "0 !important", height: "100%" }}
+                    >
+                        {body}
+                    </DialogContent>
+                </Box>
+            </Dialog>
+        </>
     );
 };
 
