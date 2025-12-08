@@ -3,6 +3,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
@@ -88,15 +89,29 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
         final anythingSelected =
             selectedPersonIds.isNotEmpty || selectedClusterIds.isNotEmpty;
+        final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
+            selectedPersonIds.every(
+              (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
+            );
         final bool showPinAction = onlyPersonSelected &&
-            selectedPersonIds.isNotEmpty &&
+            namedPersonsSelected &&
             selectedPersonIds.every(
               (id) => !(personMap[id]?.data.isPinned ?? false),
             );
         final bool showUnpinAction = onlyPersonSelected &&
-            selectedPersonIds.isNotEmpty &&
+            namedPersonsSelected &&
             selectedPersonIds.every(
               (id) => personMap[id]?.data.isPinned ?? false,
+            );
+        final bool showHideFromMemoriesAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+            );
+        final bool showShowInMemoriesAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => personMap[id]?.data.hideFromMemories ?? false,
             );
 
         items.add(
@@ -153,6 +168,22 @@ class _PeopleSelectionActionWidgetState
             icon: Icons.push_pin,
             onTap: () => _updatePinState(false),
             shouldShow: showUnpinAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).hideFromMemories,
+            icon: Icons.visibility_off_outlined,
+            onTap: () => _updateHideFromMemoriesState(true),
+            shouldShow: showHideFromMemoriesAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: context.l10n.showInMemories,
+            icon: Icons.visibility_outlined,
+            onTap: () => _updateHideFromMemoriesState(false),
+            shouldShow: showShowInMemoriesAction,
           ),
         );
         items.add(
@@ -262,6 +293,28 @@ class _PeopleSelectionActionWidgetState
       Bus.instance.fire(PeopleChangedEvent());
     } catch (e, s) {
       _logger.severe('Failed to update pin state', e, s);
+    } finally {
+      widget.selectedPeople.clearAll();
+    }
+  }
+
+  Future<void> _updateHideFromMemoriesState(bool shouldHide) async {
+    final selectedPersonIds = _getSelectedPersonIds();
+    if (selectedPersonIds.isEmpty) return;
+    try {
+      final personMap = await personEntitiesMapFuture;
+      for (final personID in selectedPersonIds) {
+        final person = personMap[personID];
+        if (person == null || person.data.name.isEmpty) continue;
+        if (person.data.hideFromMemories == shouldHide) continue;
+        await PersonService.instance.updateAttributes(
+          person.remoteID,
+          hideFromMemories: shouldHide,
+        );
+      }
+      Bus.instance.fire(PeopleChangedEvent());
+    } catch (e, s) {
+      _logger.severe('Failed to update hide from memories state', e, s);
     } finally {
       widget.selectedPeople.clearAll();
     }
