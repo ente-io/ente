@@ -1104,10 +1104,7 @@ class FilesDB with SqlDbBase {
     ];
 
     if (queueSource != null) {
-      // Set queue_source only when it is currently NULL.
-      setExpressions.add(
-        '$columnQueueSource = COALESCE($columnQueueSource, ?)',
-      );
+      setExpressions.add('$columnQueueSource = ?');
       params.add(queueSource);
     }
 
@@ -1478,6 +1475,8 @@ class FilesDB with SqlDbBase {
     int collectionId,
   ) async {
     final db = await instance.sqliteAsyncDB;
+    // If the localID exists in any other collection, delete the pending row for this
+    // collection; otherwise, clear collection/queueSource so it can be re-mapped.
     final existsInOtherCollection = (await db.getAll(
       '''
       SELECT 1 FROM $filesTable
