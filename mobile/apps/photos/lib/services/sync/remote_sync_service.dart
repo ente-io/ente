@@ -530,18 +530,17 @@ class RemoteSyncService {
       if (file.localID == null || file.collectionID == null) {
         continue;
       }
-      if (file.queueSource == null) {
-        // Manual upload, skip
+
+      final creationTime = file.creationTime ?? 0;
+      if (file.queueSource == null || creationTime >= thresholdMicros) {
         continue;
       }
-      final creationTime = file.creationTime ?? 0;
-      if (creationTime < thresholdMicros) {
-        await _db.cleanupByLocalIDAndCollection(
-          file.localID!,
-          file.collectionID!,
-        );
-        cleanedEntries++;
-      }
+
+      await _db.cleanupByLocalIDAndCollection(
+        file.localID!,
+        file.collectionID!,
+      );
+      cleanedEntries++;
     }
     if (cleanedEntries > 0) {
       _logger.internalInfo(
@@ -654,9 +653,8 @@ class RemoteSyncService {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
 
-    final bool enableBackupFolderSync = flagService.enableBackupFolderSync;
     DeviceFolderSelectionCache? selectionCache;
-    if (enableBackupFolderSync) {
+    if (flagService.enableBackupFolderSync) {
       selectionCache = DeviceFolderSelectionCache.instance;
       if (!selectionCache.isInitialized) {
         await selectionCache.init();
@@ -687,7 +685,7 @@ class RemoteSyncService {
       final bool isAutoSyncFile = file.queueSource != null;
 
       // Folder deselection check - only when enableBackupFolderSync is on
-      if (enableBackupFolderSync &&
+      if (flagService.enableBackupFolderSync &&
           file.collectionID != null &&
           file.localID != null) {
         final String? pathId = file.queueSource;
