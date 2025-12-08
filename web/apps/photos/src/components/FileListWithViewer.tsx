@@ -28,6 +28,7 @@ export type FileListWithViewerProps = {
      */
     files: EnteFile[];
     enableDownload?: boolean;
+    enableImageEditing?: boolean;
     /**
      * Called when the component wants to mark the given files as deleted in the
      * the in-memory, unsynced, state maintained by the top level gallery.
@@ -102,6 +103,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     user,
     files,
     enableDownload,
+    enableImageEditing = true,
     disableGrouping,
     enableSelect,
     selected,
@@ -172,14 +174,14 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
             : undefined;
     }, [onMarkTempDeleted]);
 
-    const handleSaveEditedImageCopy = useCallback(
-        (editedFile: File, collection: Collection, enteFile: EnteFile) => {
+    const handleSaveEditedImageCopy = useMemo(() => {
+        if (!enableImageEditing) return undefined;
+        return (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
             void uploadManager.uploadFile(editedFile, collection, enteFile);
-        },
-        [],
-    );
+        };
+    }, [enableImageEditing]);
 
     return (
         <Container>

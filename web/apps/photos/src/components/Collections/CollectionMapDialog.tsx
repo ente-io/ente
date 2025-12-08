@@ -1198,6 +1198,7 @@ function CollectionSidebar({
                             collectionNameByID={collectionNameByID}
                             onSelectCollection={onSelectCollection}
                             onSelectPerson={onSelectPerson}
+                            enableImageEditing={false}
                             enableDownload={true}
                             activeCollectionID={collectionSummary.id}
                             selected={selected}
