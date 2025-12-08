@@ -40,8 +40,8 @@ class RecoveryDateSelector extends StatelessWidget {
       onTap: () => onDaysChanged(days),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 24.0,
-          vertical: 16.0,
+          horizontal: 26.0,
+          vertical: 18.0,
         ),
         decoration: BoxDecoration(
           color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
@@ -49,7 +49,7 @@ class RecoveryDateSelector extends StatelessWidget {
         ),
         child: Text(
           context.strings.nDays(days),
-          style: textTheme.body.copyWith(
+          style: textTheme.bodyBold.copyWith(
             color: isSelected ? Colors.white : colorScheme.primary700,
           ),
         ),
