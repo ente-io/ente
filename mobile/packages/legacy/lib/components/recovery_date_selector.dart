@@ -40,7 +40,7 @@ class RecoveryDateSelector extends StatelessWidget {
       onTap: () => onDaysChanged(days),
       child: Container(
         padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
+          horizontal: 24.0,
           vertical: 16.0,
         ),
         decoration: BoxDecoration(
