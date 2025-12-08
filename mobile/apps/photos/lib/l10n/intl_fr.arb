@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Partager avec des utilisateurs non-Ente",
   "createPublicLink": "Créer un lien public",
   "sendLink": "Envoyer le lien",
+  "qrCode": "QR Code",
   "sendQrCode": "Envoyer le QR code",
   "copyLink": "Copier le lien",
   "copyEmbedHtml": "Copier le code HTML intégré",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "Retirer de l'album ?",
   "removeFromAlbum": "Retirer de l'album",
   "itemsWillBeRemovedFromAlbum": "Les éléments sélectionnés seront supprimés de cet album",
-  "removeShareItemsWarning": "Certains des éléments que vous êtes en train de retirer ont été ajoutés par d'autres personnes, vous perdrez l'accès vers ces éléments",
+  "removeShareItemsWarning": "Les photos sélectionnées ne seront accessibles par aucun spectateur de cet album, à l'exception des propriétaires de photos.",
   "addingToFavorites": "Ajout aux favoris...",
   "removingFromFavorites": "Suppression des favoris…",
   "sorryCouldNotAddToFavorites": "Désolé, impossible d'ajouter aux favoris !",
@@ -2081,5 +2082,91 @@
     "description": "Fallback message when the faces timeline cannot be displayed yet"
   },
   "playfulKids": "Enfants amusants",
-  "coastalCliffs": "Falaises au bord de mer"
+  "coastalCliffs": "Falaises au bord de mer",
+  "ritualsTitle": "Routines",
+  "ritualAddTooltip": "Ajouter une routine",
+  "ritualActivityHeading": "Activité",
+  "ritualDefaultHeatmapTitle": "Prendre une photo chaque jour",
+  "ritualUntitled": "Routine sans titre",
+  "ritualShareUnavailable": "Impossible de partager pour le moment. Veuillez réessayer.",
+  "ritualNotificationMessage": "Prendre une photo maintenant",
+  "ritualCameraNotFound": "Aucune caméra trouvée sur cet appareil.",
+  "ritualCameraStartError": "Impossible de démarrer la caméra. Veuillez vérifier les autorisations.",
+  "ritualCaptureError": "Impossible de prendre la photo. Veuillez réessayer.",
+  "ritualPhotoLimit": "Vous pouvez ajouter jusqu'à {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Prenez au moins une photo d'abord.",
+  "ritualAlbumMissing": "Routine d'album manquante. Modifiez-la pour définir un album.",
+  "ritualAddedToAlbum": "Ajouté à l'album",
+  "ritualAddedToAlbumWithName": "Ajouté à {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Échec lors de l'ajout des photos à l'album : {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Retour aux routines",
+  "ritualNoPhotosYet": "Aucune photo pour l'instant",
+  "ritualSetAlbumToLaunchCamera": "Définissez un album pour que cette routine lance la caméra.",
+  "ritualDefaultCameraTitle": "Prendre une photo",
+  "ritualBadgeMessage7": "7 jours passé ! La régularité semble bonne pour vous. Continuez !",
+  "ritualBadgeMessage14": "14 jours plus tard ! Votre routine devient une habitude. Incroyable !",
+  "ritualBadgeMessage30": "30 jours de suite ! Régularité légendaire. Prends un arc !",
+  "ritualBadgeMessageDefault": "Vous êtes bien parti !",
+  "ritualBadgeNewTitle": "Nouveau succès",
+  "ritualBadgePreparing": "Préparation...",
+  "ritualStreaksLabel": "Séries",
+  "ritualCreateYourOwn": "Créez votre propre routine",
+  "ritualGetDailyReminders": "Recevez des rappels quotidiens",
+  "ritualAlbumNotSet": "Album non configuré",
+  "ritualOpenCameraTooltip": "Ouvrir la routine caméra",
+  "ritualEditorLabel": "Éditeur de routine",
+  "ritualNew": "Nouvelle routine",
+  "ritualEdit": "Modifier la routine",
+  "ritualEnterPrompt": "Saisissez votre routine",
+  "ritualEnterDescription": "Veuillez saisir une description",
+  "ritualDayLabel": "Jour",
+  "ritualNotificationsOffHint": "Les notifications sont désactivées. Appuyez sur un jour pour les activer.",
+  "ritualTimeLabel": "Date et heure",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Enregistrer la routine",
+  "ritualUpdate": "Mettre à jour la routine",
+  "ritualSelectAlbumTitle": "Sélectionner un album",
+  "ritualSearchOrCreate": "Rechercher ou créer un nouveau",
+  "ritualNoAlbumsYet": "Pas encore d'albums",
+  "ritualNoMatchingAlbums": "Aucuns albums correspondants",
+  "ritualCreateAlbumWithName": "Créer \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Créer un nouveau",
+  "ritualAlbumSelectionPlaceholder": "Sélectionner un album",
+  "ritualPickEmojiTitle": "Choisir un émoji",
+  "ritualCustomKeyboardLabel": "Personnalisé (clavier)",
+  "ritualEmojiKeyboardHint": "Appuyez pour ouvrir le clavier emoji",
+  "ritualEmojiUseAction": "Utiliser",
+  "ritualSearchEmpty": "Construisez un rituel pour garder votre habitude de photographie."
 }

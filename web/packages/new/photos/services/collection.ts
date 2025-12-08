@@ -688,31 +688,33 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *
  * @param files The files to remove from the collection. The files owned by the
  * user will be removed. If the collection is not owned by the user, then any
- * files that are not owned by the user will not be processed. In such cases,
- * this function will return a count less than the count of the provided files
- * (after having removed what can be removed).
+ * files that are not owned by the user will not be processed (unless the user
+ * is an admin of the collection). In such cases, this function will return a
+ * count less than the count of the provided files (after having removed what
+ * can be removed).
  *
  * @returns The count of files that were processed. This can be less than the
  * count of the provided {@link files} if some files were not processed because
  * because they belong to other users (and {@link collection} also does not
- * belong to the current user).
+ * belong to the current user, and the user is not an admin).
  *
  * [Note: Removing files from a collection]
  *
- * There are three scenarios
+ * There are four scenarios
  *
  *                             own file      shared file
  *     own collection             M               R
+ *     admin in collection        R               R
  *     others collection          R         not supported
  *
  *     M (move)   when both collection and file belongs to user
- *     R (remove) when only one of them belongs to the user
+ *     R (remove) when only one of them belongs to the user, or user is admin
  *
  * The move operation is not supported across ownership boundaries. The remove
  * operation is only supported across ownership boundaries, but the user should
- * have ownership of either the file or collection (not both).
+ * have ownership of either the file or collection (not both), or be an admin.
  *
- * In more detail, the above three scenarios can be described this way.
+ * In more detail, the above scenarios can be described this way.
  *
  * 1. Move: If the user owns both the collection and the file they're trying to
  *    remove from the collection, then instead of a remove the client needs to
@@ -727,9 +729,11 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  *    removed, they can remove it from the collection using the POST
  *    "/collections/v3/remove-files".
  *
- * 3. Not supported: Currently the possibility of removing a file the user does
- *    not own from a collection that the user does not own, even if they are a
- *    collaborator, is not supported.
+ * 3. Admin remove: If the user is an admin of a collection they don't own, they
+ *    can remove any file from the collection (including files they don't own).
+ *
+ * 4. Not supported: Removing a file the user does not own from a collection
+ *    that the user does not own and is not an admin of.
  *
  * The "remove from collection" primitive is provided to the user both as a UI
  * action (on selecting files in a collection), and as an implicit action if the
@@ -743,9 +747,9 @@ export const deleteFromTrash = async (fileIDs: number[]) =>
  * 2. [Public] {@link removeFromOwnCollection} - Handles both cases for own
  *    collections by delegating to either "Move" or "Remove"
  *
- * 3. [Private] {@link removeFromOthersCollection} - Handles both cases for
- *    other's collections by delegating to "Remove", then if needed, also
- *    throwing an error for the unsupported case.
+ * 3. [Private] {@link removeFromOthersCollection} - Handles cases for other's
+ *    collections. If the user is an admin, they can remove all files. Otherwise
+ *    only the user's own files can be removed.
  *
  * 4. [Private] {@link removeOwnFilesFromOwnCollection} implements the "Move".
  *
@@ -757,7 +761,7 @@ export const removeFromCollection = async (
 ): Promise<number> =>
     collection.owner.id == ensureLocalUser().id
         ? removeFromOwnCollection(collection.id, files)
-        : removeFromOthersCollection(collection.id, files);
+        : removeFromOthersCollection(collection, files);
 
 export const removeFromOwnCollection = async (
     collectionID: number,
@@ -778,13 +782,26 @@ export const removeFromOwnCollection = async (
 };
 
 const removeFromOthersCollection = async (
-    collectionID: number,
+    collection: Collection,
     files: EnteFile[],
 ) => {
     const userID = ensureLocalUser().id;
+    // Check if user is an admin of this collection
+    const isAdmin =
+        collection.sharees.find((s) => s.id == userID)?.role == "ADMIN";
+
+    if (isAdmin) {
+        // Admins can remove all files from the collection
+        if (files.length) {
+            await removeNonCollectionOwnerFiles(collection.id, files);
+        }
+        return files.length;
+    }
+
+    // Non-admins can only remove their own files
     const [userFiles] = splitByPredicate(files, (f) => f.ownerID == userID);
     if (userFiles.length) {
-        await removeNonCollectionOwnerFiles(collectionID, userFiles);
+        await removeNonCollectionOwnerFiles(collection.id, userFiles);
     }
     return userFiles.length;
 };
@@ -1315,6 +1332,25 @@ export const isArchivedCollection = (collection: Collection) =>
     collection.sharedMagicMetadata?.data.visibility == ItemVisibility.archived;
 
 /**
+ * Return `true` if the current user can remove files from all participants in
+ * the given collection.
+ *
+ * This is true if the user is either:
+ * - The owner of the collection, or
+ * - An admin of the collection
+ *
+ * This is used to determine if the user can remove files added by other users
+ * from a shared collection.
+ */
+export const canRemoveFilesFromAllParticipants = (collection: Collection) => {
+    const userID = ensureLocalUser().id;
+    if (collection.owner.id == userID) return true;
+    // Check if the user is an admin of this collection
+    const sharee = collection.sharees.find((s) => s.id == userID);
+    return sharee?.role == "ADMIN";
+};
+
+/**
  * Hide the provided {@link files} by moving them to the default hidden
  * collection.
  *
@@ -1471,3 +1507,136 @@ export const leaveSharedCollection = async (collectionID: number) =>
             headers: await authenticatedRequestHeaders(),
         }),
     );
+
+/**
+ * Zod schema for a collection action (used for pending removal actions).
+ */
+const CollectionAction = z.object({
+    collectionID: z.number(),
+    fileID: z.number().nullish(),
+});
+
+type CollectionAction = z.infer<typeof CollectionAction>;
+
+/**
+ * Zod schema for the pending removal actions response.
+ */
+const PendingRemovalActionsResponse = z.object({
+    actions: z.array(CollectionAction).nullish(),
+});
+
+/**
+ * Fetch pending removal actions from remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * Pending removal actions indicate files that have been removed from a
+ * collection by the owner or an admin, and should be moved to the user's
+ * uncategorized collection if they exist locally.
+ *
+ * @returns A list of {@link CollectionAction} objects representing files that
+ * should be moved to uncategorized.
+ */
+export const fetchPendingRemovalActions = async (): Promise<
+    CollectionAction[]
+> => {
+    const res = await fetch(
+        await apiURL("/collection-actions/pending-remove"),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const { actions } = PendingRemovalActionsResponse.parse(await res.json());
+    return actions ?? [];
+};
+
+/**
+ * Process pending removal actions by moving affected files to the user's
+ * uncategorized collection.
+ *
+ * This function fetches pending removal actions from remote, identifies which
+ * files are affected, and moves them to the uncategorized collection. This
+ * ensures that files removed from shared collections by owners/admins are not
+ * lost but instead moved to a safe location.
+ *
+ * @param collections The current list of collections (used to find affected
+ * files).
+ *
+ * Reads local state but does not modify it. The effects are on remote.
+ */
+export const movePendingRemovalActionsToUncategorized = async (
+    collections: Collection[],
+) => {
+    const pendingActions = await fetchPendingRemovalActions();
+    if (!pendingActions.length) return;
+
+    // Group file IDs by collection ID
+    const collectionToFileIDs = new Map<number, Set<number>>();
+    for (const action of pendingActions) {
+        if (action.fileID == null) continue;
+        const fileIDs = collectionToFileIDs.get(action.collectionID);
+        if (fileIDs) {
+            fileIDs.add(action.fileID);
+        } else {
+            collectionToFileIDs.set(
+                action.collectionID,
+                new Set([action.fileID]),
+            );
+        }
+    }
+
+    if (!collectionToFileIDs.size) return;
+
+    // Get all files from local storage
+    const collectionFiles = await savedCollectionFiles();
+
+    // Group files by collection ID for efficient lookup
+    const filesByCollectionID = groupFilesByCollectionID(collectionFiles);
+
+    // Create a map of collection ID to collection for quick lookup
+    const collectionByID = new Map(collections.map((c) => [c.id, c]));
+
+    // Lazily initialized target collections (only created if needed)
+    let uncategorizedCollection: Collection | undefined;
+    let defaultHiddenCollection: Collection | undefined;
+
+    // Process each collection with pending removal actions
+    for (const [
+        collectionID,
+        pendingFileIDs,
+    ] of collectionToFileIDs.entries()) {
+        const sourceCollection = collectionByID.get(collectionID);
+        const filesInCollection = filesByCollectionID.get(collectionID) ?? [];
+        const filesToMove = filesInCollection.filter((file) =>
+            pendingFileIDs.has(file.id),
+        );
+
+        if (!filesToMove.length) continue;
+
+        // Determine target collection based on whether source is hidden
+        const isSourceHidden =
+            sourceCollection && isHiddenCollection(sourceCollection);
+
+        let targetCollection: Collection;
+        if (isSourceHidden) {
+            // Move files from hidden collections to default hidden collection
+            if (!defaultHiddenCollection) {
+                defaultHiddenCollection =
+                    collections.find(isDefaultHiddenCollection) ??
+                    (await createDefaultHiddenCollection());
+            }
+            targetCollection = defaultHiddenCollection;
+        } else {
+            // Move files from normal collections to uncategorized
+            if (!uncategorizedCollection) {
+                uncategorizedCollection =
+                    collections.find((c) => c.type == "uncategorized") ??
+                    (await createUncategorizedCollection());
+            }
+            targetCollection = uncategorizedCollection;
+        }
+
+        // Move files to target collection (this also removes them from the
+        // source collection, which is the primary goal here)
+        await moveFromCollection(collectionID, targetCollection, filesToMove);
+    }
+};

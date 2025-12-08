@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Salve com segurança seus códigos 2FA",
   "onBoardingGetStarted": "Introdução",
-  "setupFirstAccount": "Configure sua primeira conta",
   "importScanQrCode": "Escanear QR code",
   "importEnterSetupKey": "Inserir chave de config.",
   "importAccountPageTitle": "Inserir detalhes da conta",

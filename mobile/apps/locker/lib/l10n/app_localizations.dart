@@ -1189,7 +1189,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Hint text'**
+  /// **'Note title'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -2517,6 +2517,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
+
+  /// No description provided for @sorry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry'**
+  String get sorry;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
 }
 
 class _AppLocalizationsDelegate

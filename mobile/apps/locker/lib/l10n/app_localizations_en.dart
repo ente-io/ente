@@ -629,7 +629,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteName => 'Title';
 
   @override
-  String get noteNameHint => 'Hint text';
+  String get noteNameHint => 'Note title';
 
   @override
   String get noteContent => 'Content';
@@ -1464,4 +1464,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String fileCount(String used, String max) {
     return '$used / $max';
   }
+
+  @override
+  String get sorry => 'Sorry';
+
+  @override
+  String get subscribe => 'Subscribe';
+
+  @override
+  String get subscriptionRequiredForSharing =>
+      'You need a paid subscription to share links';
 }

@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Compartir con usuarios fuera de Ente",
   "createPublicLink": "Crear enlace público",
   "sendLink": "Enviar enlace",
+  "qrCode": "Código QR",
   "sendQrCode": "Enviar código QR",
   "copyLink": "Copiar enlace",
   "copyEmbedHtml": "Copiar HTML incorporado",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "¿Eliminar del álbum?",
   "removeFromAlbum": "Eliminar del álbum",
   "itemsWillBeRemovedFromAlbum": "Los elementos seleccionados serán eliminados de este álbum",
-  "removeShareItemsWarning": "Algunos de los elementos que estás eliminando fueron añadidos por otras personas, y perderás el acceso a ellos",
+  "removeShareItemsWarning": "Las fotos seleccionadas no serán accesibles para ningún visor de este álbum, excepto para los propietarios de las fotos.",
   "addingToFavorites": "Añadiendo a favoritos...",
   "removingFromFavorites": "Quitando de favoritos...",
   "sorryCouldNotAddToFavorites": "¡Lo sentimos, no se pudo añadir a favoritos!",
@@ -2081,5 +2082,45 @@
     "description": "Fallback message when the faces timeline cannot be displayed yet"
   },
   "playfulKids": "Niños jugando",
-  "coastalCliffs": "Acantilados marinos"
+  "coastalCliffs": "Acantilados marinos",
+  "ritualsTitle": "Rituales",
+  "ritualAddTooltip": "Añadir ritual",
+  "ritualActivityHeading": "Actividad",
+  "ritualDefaultHeatmapTitle": "Toma una foto cada día",
+  "ritualShareUnavailable": "No se puede compartir ahora. Por favor, inténtalo de nuevo.",
+  "ritualNotificationMessage": "Tomar una foto ahora",
+  "ritualCameraNotFound": "No se ha encontrado ninguna cámara en este dispositivo.",
+  "ritualCameraStartError": "No se puede iniciar la cámara. Por favor, comprueba los permisos.",
+  "ritualCaptureError": "No se puede capturar la foto. Por favor, inténtalo de nuevo.",
+  "ritualCaptureAtLeastOne": "Captura al menos una foto primero.",
+  "ritualDefaultCameraTitle": "Tomar una foto",
+  "ritualBadgeMessageDefault": "¡Estás en buena racha!",
+  "ritualBadgeNewTitle": "Nuevo logro",
+  "ritualBadgePreparing": "Preparando...",
+  "ritualStreaksLabel": "Rachas",
+  "ritualGetDailyReminders": "Obtener recordatorios diarios",
+  "ritualAlbumNotSet": "Álbum no establecido",
+  "ritualEnterDescription": "Por favor, ingresa una descripción",
+  "ritualDayLabel": "Día",
+  "ritualNotificationsOffHint": "Las notificaciones están apagadas. Toca en un día para activarlas.",
+  "ritualAlbumLabel": "Álbum",
+  "ritualSave": "Guardar ritual",
+  "ritualUpdate": "Actualizar ritual",
+  "ritualSelectAlbumTitle": "Seleccionar álbum",
+  "ritualSearchOrCreate": "Buscar o crear nuevo",
+  "ritualCreateAlbumWithName": "Crear \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Crear nuevo",
+  "ritualAlbumSelectionPlaceholder": "Seleccionar álbum",
+  "ritualPickEmojiTitle": "Elegir un emoji",
+  "ritualCustomKeyboardLabel": "Personalizado (teclado)",
+  "ritualEmojiKeyboardHint": "Presiona para abrir el teclado de emojis",
+  "ritualSearchEmpty": "Construye un ritual para mantener tu hábito fotográfico."
 }

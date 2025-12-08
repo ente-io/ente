@@ -621,5 +621,9 @@
   "chooseIcon": "Choisir un icône",
   "customOrder": "Commande personnalisée",
   "selectAnOption": "Choisir une option",
-  "todaysLogs": "Journaux du jour"
+  "todaysLogs": "Journaux du jour",
+  "appIcon": "Icône de l'application",
+  "importAndOTPGuide": "Exportez votre sauvegarde depuis andOTP en utilisant les options de \"sauvegarde\" dans les paramètres.",
+  "enterPasswordToDecryptAndOTP": "Entrez le mot de passe pour déchiffrer la sauvegarde andOTP",
+  "failedToDecryptAndOTPBackup": "Impossible de déchiffrer la sauvegarde andOTP"
 }

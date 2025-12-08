@@ -23,6 +23,7 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
+import "package:locker/ui/components/subscription_required_dialog.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -434,7 +435,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (e is SharingNotPermittedForFreeAccountsError) {
-        await _showUnSupportedAlert(context);
+        await showSubscriptionRequiredDialog(context);
       } else {
         _logger.severe("Failed to update shareUrl collection", e);
         await showGenericErrorDialog(context: context, error: e);
@@ -484,55 +485,6 @@ class CollectionActions {
     } else {
       return false;
     }
-  }
-
-  static Future<void> _showUnSupportedAlert(BuildContext context) async {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Sorry"),
-      content: const Text(
-        "You need an active paid subscription to enable sharing.",
-      ),
-      actions: [
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          isInAlert: true,
-          shouldStickToDarkTheme: false,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: "Subscribe",
-          onTap: () async {
-            // TODO: If we are having subscriptions for locker
-            // Navigator.of(context).push(
-            //   MaterialPageRoute(
-            //     builder: (BuildContext context) {
-            //       return getSubscriptionPage();
-            //     },
-            //   ),
-            // ).ignore();
-            Navigator.of(context).pop();
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: ButtonWidget(
-            buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-            shouldStickToDarkTheme: false,
-            labelText: context.l10n.ok,
-          ),
-        ),
-      ],
-    );
-
-    return showDialog(
-      useRootNavigator: false,
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-      barrierDismissible: true,
-    );
   }
 
   Future<bool> doesEmailHaveAccount(
@@ -651,7 +603,7 @@ class CollectionActions {
       } catch (e) {
         await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await _showUnSupportedAlert(context);
+          await showSubscriptionRequiredDialog(context);
         } else {
           _logger.severe("failed to share collection", e);
           await showGenericErrorDialog(context: context, error: e);

@@ -335,19 +335,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     await _updateCollectionMembership();
 
     // Update the local data to reflect the changes in the UI
-    // The metadata updater service already updated the file object locally
-    // Now extract the updated info data and refresh the UI
-    final updatedInfo =
-        InfoFileService.instance.extractInfoFromFile(widget.existingFile!);
-    if (updatedInfo != null) {
-      // Update the current data state to show the new values in view mode
-      setState(() {
-        _currentData = updatedInfo.data as T?;
-      });
+    // Use the infoItem data directly since it contains the updated values
+    setState(() {
+      _currentData = infoItem.data as T?;
+    });
 
-      // Refresh UI with updated data
-      refreshUIWithCurrentData();
-    }
+    // Refresh UI with updated data
+    refreshUIWithCurrentData();
 
     // The info file service already performs a sync, so we don't need to sync again
   }
