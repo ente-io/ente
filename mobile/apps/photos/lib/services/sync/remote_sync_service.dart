@@ -511,7 +511,7 @@ class RemoteSyncService {
   Future<void> handleOnlyNewBackupThresholdUpdated(
     int thresholdMicros,
   ) async {
-    _logger.info(
+    _logger.internalInfo(
       "[UPLOAD-DEBUG] Applying only-new backup threshold $thresholdMicros",
     );
     // Note: removeFromQueueWhere only removes auto-synced files (detected via
@@ -550,7 +550,7 @@ class RemoteSyncService {
       }
     }
     if (cleanedEntries > 0) {
-      _logger.info(
+      _logger.internalInfo(
         "[UPLOAD-DEBUG] Cleared $cleanedEntries pending auto-sync uploads older than only-new cutoff",
       );
     }
