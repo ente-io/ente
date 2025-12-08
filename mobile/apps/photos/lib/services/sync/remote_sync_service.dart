@@ -514,11 +514,13 @@ class RemoteSyncService {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] Applying only-new backup threshold $thresholdMicros",
     );
-    // Note: removeFromQueueWhere only removes auto-synced files (detected via
-    // queueSource) from the upload queue. Manual uploads are preserved.
-    _uploader.removeFromQueueWhere(
-      (file) => (file.creationTime ?? 0) < thresholdMicros,
-      BackupTooOldForPreferenceError(),
+    // Remove queued/not-started and lingering backup items that are too old
+    // (auto-sync only). Manual uploads are preserved.
+    _uploader.removeSkippedUploads(
+      predicate: (file) =>
+          file.queueSource != null &&
+          (file.creationTime ?? 0) < thresholdMicros,
+      reason: BackupTooOldForPreferenceError(),
     );
 
     // Clean up DB entries for auto-synced files (queueSource != null) that are
@@ -527,14 +529,6 @@ class RemoteSyncService {
     // row mid-flight.
     int cleanedEntries = 0;
     final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
-    // Drop lingering backup items (e.g., stuck in retry) that are too old
-    // before we clean the DB.
-    _uploader.dropBackupsWhere(
-      predicate: (item) =>
-          item.file.queueSource != null &&
-          (item.file.creationTime ?? 0) < thresholdMicros,
-      reason: BackupTooOldForPreferenceError(),
-    );
 
     final pending = await _db.getFilesPendingForUpload();
     for (final file in pending) {
@@ -578,22 +572,15 @@ class RemoteSyncService {
     final Set<int> collectionIDSet = collectionIDs.toSet();
     final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
 
-    // Drop queued (not-started) auto-sync uploads from these collections and
-    // clear any lingering backup items (e.g., stuck in retry) that are no
-    // longer eligible. Active uploads are left untouched and resolved by
-    // _pollQueue.
-    _uploader.removeFromQueueWhere(
-      (file) =>
+    // Remove queued/not-started and lingering backup items for deselected
+    // collections (auto-sync only). Active uploads are left untouched and
+    // resolved by _pollQueue.
+    _uploader.removeSkippedUploads(
+      predicate: (file) =>
           file.queueSource != null &&
           file.collectionID != null &&
           collectionIDSet.contains(file.collectionID) &&
           !uploadingLocalIDs.contains(file.localID),
-      BackupFolderDeselectedError(),
-    );
-    _uploader.dropBackupsWhere(
-      predicate: (item) =>
-          item.file.queueSource != null &&
-          collectionIDSet.contains(item.collectionID),
       reason: BackupFolderDeselectedError(),
     );
 

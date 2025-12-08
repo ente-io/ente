@@ -314,6 +314,24 @@ class FileUploader {
     }
   }
 
+  /// Remove queued (not-started) entries and backup items that match
+  /// [predicate], skipping active uploads. Use this when uploads become
+  /// ineligible (e.g., folder deselection, only-new cutoff).
+  void removeSkippedUploads({
+    required bool Function(EnteFile file) predicate,
+    Error? reason,
+  }) {
+    removeFromQueueWhere(
+      predicate,
+      reason ?? SilentlyCancelUploadsError(),
+    );
+
+    dropBackupsWhere(
+      predicate: (item) => predicate(item.file),
+      reason: reason,
+    );
+  }
+
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
