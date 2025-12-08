@@ -16,6 +16,11 @@ type UpdateContact struct {
 	State              ContactState `json:"state" binding:"required"`
 }
 
+type UpdateRecoveryNotice struct {
+	EmergencyContactID   int64 `json:"emergencyContactID" binding:"required"`
+	RecoveryNoticeInDays int   `json:"recoveryNoticeInDays" binding:"required"`
+}
+
 type ContactIdentifier struct {
 	UserID             int64 `json:"userID" binding:"required"`
 	EmergencyContactID int64 `json:"emergencyContactID" binding:"required"`
