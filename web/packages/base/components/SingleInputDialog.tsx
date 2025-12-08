@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, useTheme } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import React, { useCallback } from "react";
 import { SingleInputForm, type SingleInputFormProps } from "./SingleInputForm";
@@ -7,8 +7,6 @@ type SingleInputDialogProps = ModalVisibilityProps &
     Omit<SingleInputFormProps, "onCancel"> & {
         /** Title of the dialog. */
         title: string;
-        /** Optional z-index override to layer above other dialogs. */
-        zIndex?: number;
     };
 
 /**
@@ -25,12 +23,8 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     onClose,
     onSubmit,
     title,
-    zIndex,
     ...rest
 }) => {
-    const theme = useTheme();
-    const dialogZIndex = zIndex ?? theme.zIndex.modal + 4;
-
     const handleSubmit: SingleInputFormProps["onSubmit"] = useCallback(
         async (value, setFieldError) => {
             await onSubmit(value, setFieldError);
@@ -45,7 +39,6 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
             onClose={onClose}
             maxWidth="xs"
             fullWidth
-            sx={{ zIndex: dialogZIndex }}
             slotProps={{ paper: { sx: { p: "8px 4px 4px 4px" } } }}
         >
             <DialogTitle>{title}</DialogTitle>
