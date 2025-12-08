@@ -29,6 +29,9 @@ const (
 	DeviceLimitThresholdMultiplier = 10
 
 	DeviceLimitWarningThreshold = 2000
+
+	// FreeUserDeviceLimit is the hardcoded device limit for free users
+	FreeUserDeviceLimit = 5
 )
 
 // CollectionLinkController controls share collection operations
