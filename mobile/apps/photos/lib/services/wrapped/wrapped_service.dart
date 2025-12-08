@@ -110,8 +110,7 @@ class WrappedService {
         );
         updateResult(cached);
         if (_shouldScheduleDailyRecompute(cached)) {
-          _logger
-              .info("Scheduling daily Wrapped recompute for $_kWrappedYear");
+          _logger.info("Scheduling daily Wrapped recompute for $_kWrappedYear");
           unawaited(
             _runCompute(reason: "daily", bypassFlag: false),
           );
