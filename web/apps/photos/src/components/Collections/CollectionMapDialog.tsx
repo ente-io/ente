@@ -1,7 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import NavigationIcon from "@mui/icons-material/Navigation";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import RemoveIcon from "@mui/icons-material/Remove";
 import {
     Box,
@@ -1344,7 +1344,7 @@ const MapControls = React.memo(function MapControls({
                 onClick={handleOpenInMaps}
                 sx={{ position: "absolute", right: 16, top: 16, zIndex: 1000 }}
             >
-                <NavigationIcon />
+                <LocationOnIcon />
             </FloatingIconButton>
 
             <Stack
