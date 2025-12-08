@@ -278,6 +278,42 @@ class FileUploader {
         .toSet();
   }
 
+  /// Remove backup entries (and any queued items) that match [predicate],
+  /// skipping active uploads. Used to clear stale retry/inQueue items when
+  /// folder deselection or only-new filters make them ineligible.
+  void dropBackupsWhere({
+    required bool Function(BackupItem item) predicate,
+    Error? reason,
+  }) {
+    final Set<String> uploadingLocalIDs = getActiveUploadLocalIDs();
+    final List<String> toRemove = [];
+
+    _allBackups.forEach((localId, item) {
+      if (uploadingLocalIDs.contains(localId)) {
+        return;
+      }
+      if (item.status == BackupItemStatus.uploading ||
+          item.status == BackupItemStatus.inBackground) {
+        return;
+      }
+      if (predicate(item)) {
+        toRemove.add(localId);
+      }
+    });
+
+    for (final localId in toRemove) {
+      _queue
+          .remove(localId)
+          ?.completer
+          .completeError(reason ?? SilentlyCancelUploadsError());
+      _allBackups.remove(localId);
+    }
+
+    if (toRemove.isNotEmpty) {
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+    }
+  }
+
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries

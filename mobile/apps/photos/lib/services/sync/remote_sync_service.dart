@@ -527,6 +527,15 @@ class RemoteSyncService {
     // row mid-flight.
     int cleanedEntries = 0;
     final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
+    // Drop lingering backup items (e.g., stuck in retry) that are too old
+    // before we clean the DB.
+    _uploader.dropBackupsWhere(
+      predicate: (item) =>
+          item.file.queueSource != null &&
+          (item.file.creationTime ?? 0) < thresholdMicros,
+      reason: BackupTooOldForPreferenceError(),
+    );
+
     final pending = await _db.getFilesPendingForUpload();
     for (final file in pending) {
       if (file.localID == null || file.collectionID == null) {
@@ -569,7 +578,10 @@ class RemoteSyncService {
     final Set<int> collectionIDSet = collectionIDs.toSet();
     final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
 
-    // Drop queued (not-started) auto-sync uploads from these collections.
+    // Drop queued (not-started) auto-sync uploads from these collections and
+    // clear any lingering backup items (e.g., stuck in retry) that are no
+    // longer eligible. Active uploads are left untouched and resolved by
+    // _pollQueue.
     _uploader.removeFromQueueWhere(
       (file) =>
           file.queueSource != null &&
@@ -577,6 +589,12 @@ class RemoteSyncService {
           collectionIDSet.contains(file.collectionID) &&
           !uploadingLocalIDs.contains(file.localID),
       BackupFolderDeselectedError(),
+    );
+    _uploader.dropBackupsWhere(
+      predicate: (item) =>
+          item.file.queueSource != null &&
+          collectionIDSet.contains(item.collectionID),
+      reason: BackupFolderDeselectedError(),
     );
 
     _logger.info("Removing files for collections $collectionIDSet");
