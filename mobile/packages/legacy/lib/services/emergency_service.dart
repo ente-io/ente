@@ -43,7 +43,11 @@ class EmergencyContactService {
     _config = config;
   }
 
-  Future<bool> addContact(BuildContext context, String email) async {
+  Future<bool> addContact(
+    BuildContext context,
+    String email,
+    int recoveryNoticeInDays,
+  ) async {
     if (!isValidEmail(email)) {
       await showErrorBottomSheet(
         context,
@@ -76,6 +80,7 @@ class EmergencyContactService {
       data: {
         "email": email.trim(),
         "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+        "recoveryNoticeInDays": recoveryNoticeInDays,
       },
     );
     return true;
@@ -105,7 +110,7 @@ class EmergencyContactService {
         },
       );
     } catch (e, s) {
-      Logger("EmergencyContact").severe('failed to update contact', e, s);
+      _logger.severe('failed to update contact', e, s);
       rethrow;
     }
   }
