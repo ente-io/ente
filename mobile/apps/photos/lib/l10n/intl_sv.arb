@@ -11,6 +11,7 @@
   "invalidEmailAddress": "Ogiltig e-postadress",
   "enterValidEmail": "Ange en giltig e-postadress.",
   "deleteAccount": "Radera konto",
+  "deleteAccountWarning": "Detta kommer att ta bort ditt Ente Auth, Ente foton och Ente Locker konto.",
   "askDeleteReason": "Vad är den främsta anledningen till att du raderar ditt konto?",
   "deleteAccountFeedbackPrompt": "Vi är ledsna att se dig lämna oss. Vänligen dela dina synpunkter för att hjälpa oss att förbättra.",
   "feedback": "Feedback",
@@ -36,11 +37,14 @@
   "activeSessions": "Aktiva sessioner",
   "ocrProcessingOverlayMessage": "Upptäcker text...",
   "ocrLoadingIndicatorLabel": "Upptäcker text",
+  "ocrSelectionHint": "Svep eller dubbeltryck för att välja vad du behöver",
   "ocrNoTextDetected": "Ingen text upptäckt",
   "ocrRetryButtonLabel": "Försök igen",
+  "ocrModelsNetworkRequiredError": "Nätverksanslutning krävs för att ladda ned OCR-modeller vid första användning",
   "ocrModelsPrepareFailed": "Kunde inte förbereda OCR-modeller",
   "ocrImageNotFoundError": "Bildfil hittades inte",
   "ocrImageDecodeFailedError": "Kunde inte läsa bildfil",
+  "ocrGenericDetectError": "Kunde inte identifiera text i bilden",
   "oops": "Hoppsan",
   "somethingWentWrongPleaseTryAgain": "Något gick fel, vänligen försök igen",
   "thisWillLogYouOutOfThisDevice": "Detta kommer att logga ut dig från denna enhet!",
@@ -114,6 +118,10 @@
   "enterYourPassword": "Ange ditt lösenord",
   "welcomeBack": "Välkommen tillbaka!",
   "contactSupport": "Kontakta support",
+  "locationPickerTip": "Du kan också lägga till en plats centrerad på ett foto från fotots informationsskärm",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Felaktigt lösenord",
   "pleaseTryAgain": "Försök igen",
   "recreatePasswordTitle": "Återskapa lösenord",
@@ -193,6 +201,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Tillåt att ansluta till albumet",
   "allowAddPhotosDescription": "Tillåt personer med länken att även lägga till foton i det delade albumet.",
   "passwordLock": "Lösenordskydd",
   "canNotOpenTitle": "Kan inte öppna det här albumet",
@@ -205,8 +214,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Albumets layout",
   "layoutGrouped": "Grupperad",
   "layoutContinuous": "Kontinuerlig",
+  "layoutTrip": "Resa",
+  "preview": "Förhandsgranska",
   "linkExpiry": "Länken upphör",
   "linkExpired": "Upphört",
   "linkEnabled": "Aktiverat",
@@ -246,8 +258,10 @@
   "shareWithNonenteUsers": "Dela med icke-Ente användare",
   "createPublicLink": "Skapa offentlig länk",
   "sendLink": "Skicka länk",
+  "qrCode": "QR-kod",
   "sendQrCode": "Skicka QR-kod",
   "copyLink": "Kopiera länk",
+  "copyEmbedHtml": "Kopiera inbäddad HTML",
   "linkHasExpired": "Länk har upphört att gälla",
   "publicLinkEnabled": "Offentlig länk aktiverad",
   "shareALink": "Dela en länk",
@@ -337,7 +351,7 @@
   "removeFromAlbumTitle": "Ta bort från album?",
   "removeFromAlbum": "Ta bort från album",
   "itemsWillBeRemovedFromAlbum": "Valda objekt kommer att tas bort från detta album",
-  "removeShareItemsWarning": "Några av de objekt som du tar bort lades av andra personer, och du kommer att förlora tillgång till dem",
+  "removeShareItemsWarning": "Utvalda foton kommer inte att vara tillgängliga för någon som tittar på detta album, förutom fotoägaren.",
   "addingToFavorites": "Lägger till bland favoriter...",
   "removingFromFavorites": "Tar bort från favoriter...",
   "sorryCouldNotAddToFavorites": "Tyvärr, kunde inte lägga till i favoriterna!",
@@ -509,6 +523,7 @@
   "changePassword": "Ändra lösenord",
   "authToChangeYourPassword": "Autentisera för att ändra ditt lösenord",
   "emailVerificationToggle": "E-postverifiering",
+  "authToChangeEmailVerificationSetting": "Vänligen autentisera för att ändra e-postverifieringen",
   "exportYourData": "Exportera din data",
   "logout": "Logga ut",
   "authToInitiateAccountDeletion": "Vänligen autentisera för att initiera borttagning av konto",
@@ -531,24 +546,71 @@
   "allClear": "✨ Allt klart",
   "noDeviceThatCanBeDeleted": "Du har inga filer på denna enhet som kan tas bort",
   "removeDuplicates": "Ta bort dubbletter",
+  "removeDuplicatesDesc": "Granska och ta bort filer som är exakta dubbletter.",
   "viewLargeFiles": "Stora filer",
+  "viewLargeFilesDesc": "Visa filer som förbrukar mest lagringsutrymme.",
   "noDuplicates": "✨ Inga dubbletter",
+  "youveNoDuplicateFilesThatCanBeCleared": "Du har inga dubbletter som kan rensas",
+  "success": "Lyckades",
   "rateUs": "Betygsätt oss",
+  "remindToEmptyDeviceTrash": "Töm även \"Nyligen borttagen\" från \"Inställningar\" -> \"Lagring\" för att göra anspråk på det frigjorda utrymmet",
+  "youHaveSuccessfullyFreedUp": "Du har framgångsrikt frigjort {storageSaved}!",
+  "@youHaveSuccessfullyFreedUp": {
+    "description": "The text to display when the user has successfully freed up storage",
+    "type": "text",
+    "placeholders": {
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "remindToEmptyEnteTrash": "Töm också din \"Papperskorg\" för att göra anspråk på frigjort utrymme",
+  "sparkleSuccess": "✨ Lyckades",
+  "duplicateFileCountWithStorageSaved": "Du har rensat upp {count, plural, one{{count} duplicerad fil} other{{count} duplicerade filer}}, sparar ({storageSaved}!)",
+  "@duplicateFileCountWithStorageSaved": {
+    "description": "The text to display when the user has successfully cleaned up duplicate files",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "familyPlans": "Familjeplaner",
+  "referrals": "Hänvisningar",
+  "notifications": "Notiser",
   "sharedPhotoNotifications": "Nya delade foton",
+  "sharedPhotoNotificationsExplanation": "Få notiser när någon lägger till ett foto i ett delat album som du är en del av",
   "advanced": "Avancerad",
   "general": "Allmänt",
   "security": "Säkerhet",
+  "authToViewYourRecoveryKey": "Vänligen autentisera för att visa din återställningsnyckel",
+  "twofactor": "Tvåfaktorsautentisering",
+  "authToConfigureTwofactorAuthentication": "Vänligen autentisera för att konfigurera tvåfaktorsautentisering",
   "lockscreen": "Låsskärm",
+  "authToChangeLockscreenSetting": "Vänligen autentisera för att ändra låsskärmsinställningen",
   "viewActiveSessions": "Visa aktiva sessioner",
+  "authToViewYourActiveSessions": "Autentisera för att visa dina aktiva sessioner",
+  "disableTwofactor": "Inaktivera tvåfaktorsautentisering",
+  "confirm2FADisable": "Är du säker på att du vill inaktivera tvåfaktorsautentisering?",
   "no": "Nej",
   "yes": "Ja",
+  "social": "Socialt",
   "rateUsOnStore": "Betygsätt oss på {storeName}",
   "blog": "Blogg",
+  "merchandise": "Produkter",
   "twitter": "Twitter",
   "mastodon": "Mastodon",
   "matrix": "Matrix",
   "discord": "Discord",
   "reddit": "Reddit",
+  "yourStorageDetailsCouldNotBeFetched": "Din lagringsinformation kunde inte hämtas",
   "reportABug": "Rapportera en bugg",
   "reportBug": "Rapportera bugg",
   "suggestFeatures": "Föreslå funktioner",
@@ -559,19 +621,68 @@
   "systemTheme": "System",
   "freeTrial": "Gratis provperiod",
   "selectYourPlan": "Välj din plan",
+  "enteSubscriptionPitch": "Ente bevarar dina minnen, så de är alltid tillgängliga för dig, även om du förlorar din enhet.",
+  "enteSubscriptionShareWithFamily": "Din familj kan också läggas till i din plan.",
+  "currentUsageIs": "Nuvarande användning är ",
+  "@currentUsageIs": {
+    "description": "This text is followed by storage usage",
+    "examples": {
+      "0": "Current usage is 1.2 GB"
+    },
+    "type": "text"
+  },
+  "faqs": "Vanliga frågor",
+  "renewsOn": "Prenumerationen förnyas på {endDate}",
+  "freeTrialValidTill": "Gratis provperiod giltig till {endDate}",
   "validTill": "Giltig till {endDate}",
+  "addOnValidTill": "Ditt {storageAmount} tillägg är giltigt till {endDate}",
+  "playStoreFreeTrialValidTill": "Gratis provperiod giltig till {endDate}.\nDu kan välja en betalplan efteråt.",
+  "subWillBeCancelledOn": "Din prenumeration kommer att avslutas på {endDate}",
   "subscription": "Prenumeration",
   "paymentDetails": "Betalningsdetaljer",
   "manageFamily": "Hantera familj",
+  "contactToManageSubscription": "Kontakta oss på support@ente.io för att hantera din {provider} prenumeration.",
   "renewSubscription": "Förnya prenumeration",
   "cancelSubscription": "Avbryt prenumeration",
+  "areYouSureYouWantToRenew": "Är du säker på att du vill förnya?",
   "yesRenew": "Ja, förnya",
   "areYouSureYouWantToCancel": "Är du säker på att du vill avbryta?",
   "yesCancel": "Ja, avbryt",
   "failedToRenew": "Kunde inte förnya",
   "failedToCancel": "Misslyckades att avbryta",
+  "twoMonthsFreeOnYearlyPlans": "2 månader gratis på årsplaner",
+  "monthly": "Månadsvis",
+  "@monthly": {
+    "description": "The text to display for monthly plans",
+    "type": "text"
+  },
+  "yearly": "Årsvis",
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
   "confirmPlanChange": "Bekräfta ändring av plan",
+  "areYouSureYouWantToChangeYourPlan": "Är du säker på att du vill ändra din plan?",
+  "youCannotDowngradeToThisPlan": "Du kan inte nedgradera till den här planen",
+  "cancelOtherSubscription": "Vänligen avbryt din befintliga prenumeration från {paymentProvider} först",
+  "@cancelOtherSubscription": {
+    "description": "The text to display when the user has an existing subscription from a different payment provider",
+    "type": "text",
+    "placeholders": {
+      "paymentProvider": {
+        "example": "Apple",
+        "type": "String"
+      }
+    }
+  },
+  "optionalAsShortAsYouLike": "Valfritt, så kort som du vill...",
   "send": "Skicka",
+  "askCancelReason": "Din prenumeration avbröts. Vill du dela anledningen?",
+  "thankYouForSubscribing": "Tack för att du prenumererar!",
+  "yourPurchaseWasSuccessful": "Ditt köp lyckades",
+  "yourPlanWasSuccessfullyUpgraded": "Din plan uppgraderades framgångsrikt",
+  "yourPlanWasSuccessfullyDowngraded": "Din plan har nedgraderats",
+  "yourSubscriptionWasUpdatedSuccessfully": "Din prenumeration har uppdaterats",
   "googlePlayId": "Google Play ID",
   "appleId": "Apple ID",
   "playstoreSubscription": "PlayStore-prenumeration",

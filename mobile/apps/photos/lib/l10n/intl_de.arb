@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Mit Nicht-Ente-Benutzern teilen",
   "createPublicLink": "Öffentlichen Link erstellen",
   "sendLink": "Link senden",
+  "qrCode": "QR-Code",
   "sendQrCode": "QR-Code senden",
   "copyLink": "Link kopieren",
   "copyEmbedHtml": "Einzubettendes HTML kopieren",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "Aus Album entfernen?",
   "removeFromAlbum": "Aus Album entfernen",
   "itemsWillBeRemovedFromAlbum": "Ausgewählte Elemente werden aus diesem Album entfernt",
-  "removeShareItemsWarning": "Einige der Elemente, die du entfernst, wurden von anderen Nutzern hinzugefügt und du wirst den Zugriff auf sie verlieren",
+  "removeShareItemsWarning": "Ausgewählte Fotos werden für Betrachter dieses Albums nicht zugänglich sein, außer für die Besitzer der Fotos.",
   "addingToFavorites": "Wird zu Favoriten hinzugefügt...",
   "removingFromFavorites": "Wird aus Favoriten entfernt...",
   "sorryCouldNotAddToFavorites": "Konnte leider nicht zu den Favoriten hinzugefügt werden!",
@@ -2081,5 +2082,87 @@
     "description": "Fallback message when the faces timeline cannot be displayed yet"
   },
   "playfulKids": "Verspielte Kinder",
-  "coastalCliffs": "Klippen am Meer"
+  "coastalCliffs": "Klippen am Meer",
+  "ritualsTitle": "Rituale",
+  "ritualAddTooltip": "Ritual hinzufügen",
+  "ritualActivityHeading": "Aktivität",
+  "ritualDefaultHeatmapTitle": "Täglich ein Foto machen",
+  "ritualUntitled": "Unbenanntes Ritual",
+  "ritualShareUnavailable": "Momentan kann nicht geteilt werden. Bitte versuche es erneut.",
+  "ritualNotificationMessage": "Jetzt ein Foto machen",
+  "ritualCameraNotFound": "Keine Kamera auf diesem Gerät gefunden.",
+  "ritualCameraStartError": "Kamera kann nicht gestartet werden. Bitte überprüfe die Berechtigungen.",
+  "ritualCaptureError": "Foto konnte nicht aufgenommen werden. Bitte versuche es erneut.",
+  "ritualPhotoLimit": "Du kannst bis zu {maxPhotos, plural, one {einem Foto} other {# Fotos}} hinzufügen.",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Nimm zuerst mindestens ein Foto auf.",
+  "ritualAlbumMissing": "Das Rituale-Album fehlt. Bearbeite das Ritual, um ein Album festzulegen.",
+  "ritualAddedToAlbum": "Zum Album hinzugefügt",
+  "ritualAddedToAlbumWithName": "Zu {albumName} hinzugefügt",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Konnte keine Fotos zum Album hinzufügen: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Zurück zu den Ritualen",
+  "ritualNoPhotosYet": "Noch keine Fotos",
+  "ritualSetAlbumToLaunchCamera": "Lege ein Album für dieses Ritual fest, um die Kamera zu starten.",
+  "ritualDefaultCameraTitle": "Mach ein Foto",
+  "ritualBadgeMessage7": "7 Tage geschafft! Die Beständigkeit steht dir. Weiter so!",
+  "ritualBadgeMessage14": "14 Tage dabei! Dein Ritual wird zur Gewohnheit. Unglaublich!",
+  "ritualBadgeMessage30": "30 Tage in Folge! Legendäre Beständigkeit! Genieße den Applaus!",
+  "ritualBadgeMessageDefault": "Du hast einen Lauf!",
+  "ritualBadgeNewTitle": "Neuer Erfolg",
+  "ritualBadgePreparing": "Wird vorbereitet...",
+  "ritualStreaksLabel": "Streaks",
+  "ritualCreateYourOwn": "Erstelle dein eigenes Ritual",
+  "ritualGetDailyReminders": "Erhalte tägliche Erinnerungen",
+  "ritualAlbumNotSet": "Album nicht gesetzt",
+  "ritualOpenCameraTooltip": "Ritualkamera öffnen",
+  "ritualEditorLabel": "Ritual-Editor",
+  "ritualNew": "Neues Ritual",
+  "ritualEdit": "Ritual bearbeiten",
+  "ritualEnterPrompt": "Gib dein Ritual ein",
+  "ritualEnterDescription": "Bitte gib eine Beschreibung ein",
+  "ritualDayLabel": "Tag",
+  "ritualNotificationsOffHint": "Benachrichtigungen sind ausgeschaltet. Tippe auf einen Tag, um sie einzuschalten.",
+  "ritualTimeLabel": "Zeitpunkt",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Ritual speichern",
+  "ritualUpdate": "Ritual aktualisieren",
+  "ritualSelectAlbumTitle": "Album auswählen",
+  "ritualSearchOrCreate": "Suchen oder neu erstellen",
+  "ritualNoAlbumsYet": "Bisher keine Alben",
+  "ritualNoMatchingAlbums": "Keine passenden Alben",
+  "ritualCreateAlbumWithName": "\"{albumName} \" erstellen",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Neu erstellen",
+  "ritualAlbumSelectionPlaceholder": "Album auswählen",
+  "ritualPickEmojiTitle": "Emoji auswählen"
 }
