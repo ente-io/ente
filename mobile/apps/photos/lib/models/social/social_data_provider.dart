@@ -30,6 +30,34 @@ class SocialDataProvider {
     return _db.getReactionsForComment(commentID);
   }
 
+  Future<Comment?> getCommentById(String id) {
+    return _db.getCommentById(id);
+  }
+
+  Future<List<Comment>> getCommentsForFilePaginated(
+    int fileID, {
+    int limit = 20,
+    int offset = 0,
+  }) {
+    return _db.getCommentsForFilePaginated(
+      fileID,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
+  Future<List<Comment>> getCommentsForCollectionPaginated(
+    int collectionID, {
+    int limit = 20,
+    int offset = 0,
+  }) {
+    return _db.getCommentsForCollectionPaginated(
+      collectionID,
+      limit: limit,
+      offset: offset,
+    );
+  }
+
   // Collection-level queries
 
   Future<List<Comment>> getCommentsForCollection(int collectionID) {

@@ -1,25 +1,27 @@
 import "dart:async";
-import 'dart:io';
+import "dart:io";
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
-import 'package:photos/models/file/file.dart';
-import 'package:photos/models/file/trash_file.dart';
-import 'package:photos/models/selected_files.dart';
+import "package:photos/models/file/file.dart";
+import "package:photos/models/file/trash_file.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
-import 'package:photos/ui/collections/collection_action_sheet.dart';
-import 'package:photos/utils/delete_file_util.dart';
+import "package:photos/ui/collections/collection_action_sheet.dart";
+import "package:photos/ui/social/comments_screen.dart";
+import "package:photos/utils/delete_file_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/panorama_util.dart";
-import 'package:photos/utils/share_util.dart';
+import "package:photos/utils/share_util.dart";
 
 class FileBottomBar extends StatefulWidget {
   final EnteFile file;
@@ -352,46 +354,68 @@ class FileBottomBarState extends State<FileBottomBar> {
           return const SizedBox.shrink();
         }
 
-        return Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedBubbleChat,
-                color: Colors.white,
-              ),
-              if (_commentCount > 0)
-                Positioned(
-                  right: -4,
-                  top: -4,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.all(Radius.circular(16)),
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2,
-                        strokeAlign: BorderSide.strokeAlignOutside,
+        return GestureDetector(
+          onTap: _openCommentsScreen,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const HugeIcon(
+                  icon: HugeIcons.strokeRoundedBubbleChat,
+                  color: Colors.white,
+                ),
+                if (_commentCount > 0)
+                  Positioned(
+                    right: -4,
+                    top: -4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 1,
                       ),
-                    ),
-                    child: Text(
-                      _commentCount > 99 ? '99+' : _commentCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w500,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(16)),
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 2,
+                          strokeAlign: BorderSide.strokeAlignOutside,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
+                      child: Text(
+                        _commentCount > 99 ? '99+' : _commentCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 8,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },
     );
+  }
+
+  void _openCommentsScreen() {
+    final file = widget.file;
+    if (file.collectionID == null) return;
+
+    routeToPage(
+      context,
+      CommentsScreen(
+        collectionID: file.collectionID!,
+        fileID: file.uploadedFileID,
+      ),
+    ).then((_) {
+      // Refresh comment count when returning from comments screen
+      _updateSocialState();
+    });
   }
 }
