@@ -1311,6 +1311,17 @@ class _HomePageState extends State<HomePage> {
             if (_isSettingsOpen) {
               scaffoldKey.currentState!.closeDrawer();
               return;
+            }
+
+            if (_showSearchBox) {
+              FocusScope.of(context).unfocus();
+              setState(() {
+                _showSearchBox = false;
+                _searchText = "";
+                _textController.clear();
+              });
+              _applyFilteringAndRefresh();
+              return;
             } else if (!Platform.isAndroid) {
               Navigator.of(context).pop();
               return;
@@ -1575,6 +1586,9 @@ class _HomePageState extends State<HomePage> {
     final l10n = context.l10n;
     final crossAxisCount = _calculateGridColumnCount(context);
     _currentGridColumns = crossAxisCount;
+    final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final double gridBottomPadding =
+        80 + (_showSearchBox ? keyboardInset : 0);
     if (_hasLoaded) {
       final bool noCodesAnywhere = !hasNonTrashedCodes && !hasTrashedCodes;
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
@@ -1698,7 +1712,7 @@ class _HomePageState extends State<HomePage> {
                   final gridView = AlignedGridView.count(
                     crossAxisCount: crossAxisCount,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 80),
+                    padding: EdgeInsets.only(bottom: gridBottomPadding),
                     itemBuilder: ((context, index) {
                       if (index == 0 && anyCodeHasError) {
                         return CodeErrorWidget(
@@ -1760,7 +1774,7 @@ class _HomePageState extends State<HomePage> {
                 child: _filteredCodes.isNotEmpty
                     ? AlignedGridView.count(
                         crossAxisCount: crossAxisCount,
-                        padding: const EdgeInsets.only(bottom: 80),
+                        padding: EdgeInsets.only(bottom: gridBottomPadding),
                         itemBuilder: ((context, index) {
                           final codeState = _filteredCodes[index];
                           return CodeWidget(
