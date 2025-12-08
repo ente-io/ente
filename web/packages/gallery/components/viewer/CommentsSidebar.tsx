@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 // =============================================================================
 // Icons
@@ -741,8 +741,8 @@ const mockComments: Comment[] = [
         parentCommentID: "42",
         isDeleted: false,
         userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 5 * 60 * 1000,
-        updatedAt: Date.now() - 5 * 60 * 1000,
+        createdAt: Date.now() - 14 * 60 * 1000,
+        updatedAt: Date.now() - 14 * 60 * 1000,
     },
     {
         id: "45",
@@ -757,6 +757,16 @@ const mockComments: Comment[] = [
         userID: CURRENT_USER_ID,
         createdAt: Date.now() - 20 * 60 * 1000,
         updatedAt: Date.now() - 20 * 60 * 1000,
+    },
+    {
+        id: "46",
+        collectionID: 1,
+        fileID: 1,
+        encData: { text: "hehe", userName: "Anand" },
+        isDeleted: false,
+        userID: CURRENT_USER_ID,
+        createdAt: Date.now() - 2 * 60 * 1000,
+        updatedAt: Date.now() - 2 * 60 * 1000,
     },
 ];
 
@@ -940,6 +950,16 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         mockCollections[0]!,
     );
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
+    const [comments, setComments] = useState<Comment[]>(mockComments);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const commentsContainerRef = useRef<HTMLDivElement>(null);
+
+    // Focus input when replying to a comment
+    useEffect(() => {
+        if (replyingTo && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [replyingTo]);
 
     // Check if opened from a collection (has ?collection=... in URL)
     const hasCollectionContext =
@@ -949,8 +969,26 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const handleSend = () => {
         if (!comment.trim()) return;
         // TODO: Call API to store comment
+        const newComment: Comment = {
+            id: String(Date.now()),
+            collectionID: selectedCollection.id,
+            fileID: 1,
+            encData: { text: comment.trim(), userName: "Anand" },
+            parentCommentID: replyingTo?.id,
+            isDeleted: false,
+            userID: CURRENT_USER_ID,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+        };
+        setComments((prev) => [...prev, newComment]);
         setComment("");
         setReplyingTo(null);
+        // Scroll to bottom after adding comment
+        setTimeout(() => {
+            if (commentsContainerRef.current) {
+                commentsContainerRef.current.scrollTop = 0;
+            }
+        }, 0);
     };
 
     const handleReply = (commentToReply: Comment) => {
@@ -995,10 +1033,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setContextMenu(null);
     };
 
-    // Filter out deleted comments and sort by timestamp
-    const sortedComments = [...mockComments]
+    // Filter out deleted comments and sort by timestamp (newest first for column-reverse layout)
+    const sortedComments = [...comments]
         .filter((c) => !c.isDeleted)
-        .sort((a, b) => a.createdAt - b.createdAt);
+        .sort((a, b) => b.createdAt - a.createdAt);
 
     const showOverlay = contextMenu || collectionDropdownOpen;
 
@@ -1106,11 +1144,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     </CloseButton>
                 </Header>
 
-                <CommentsContainer>
+                <CommentsContainer ref={commentsContainerRef}>
                     {sortedComments.map((comment, index) => {
                         const commentIsOwn = comment.userID === CURRENT_USER_ID;
-                        const prevComment = sortedComments[index - 1];
-                        const nextComment = sortedComments[index + 1];
+                        // With column-reverse, visual order is reversed from array order
+                        // Visual "above" = higher index, visual "below" = lower index
+                        const prevComment = sortedComments[index + 1];
+                        const nextComment = sortedComments[index - 1];
 
                         // 10 minutes in milliseconds
                         const GROUP_TIME_THRESHOLD = 10 * 60 * 1000;
@@ -1133,17 +1173,18 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         const parentComment = comment.parentCommentID
                             ? getParentComment(
                                   comment.parentCommentID,
-                                  mockComments,
+                                  comments,
                               )
                             : undefined;
 
                         const showOwnTimestamp =
                             commentIsOwn &&
                             !!prevComment &&
-                            prevComment.userID !== CURRENT_USER_ID;
+                            (prevComment.userID !== CURRENT_USER_ID ||
+                                !isSameSequenceAsPrev);
 
                         return (
-                            <React.Fragment key={comment.id}>
+                            <Box key={comment.id}>
                                 {showHeader && (
                                     <CommentHeader
                                         userName={comment.encData.userName}
@@ -1208,7 +1249,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         )}
                                     </CommentBubbleInner>
                                 </CommentBubbleWrapper>
-                            </React.Fragment>
+                            </Box>
                         );
                     })}
                     <StyledMenu
@@ -1297,7 +1338,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             </Box>
                             <IconButton
                                 size="small"
-                                onClick={() => setReplyingTo(null)}
+                                onClick={() => {
+                                    setReplyingTo(null);
+                                    inputRef.current?.focus();
+                                }}
                                 sx={(theme) => ({
                                     position: "absolute",
                                     top: 8,
@@ -1323,6 +1367,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             variant="standard"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
+                            inputRef={inputRef}
                         />
                     </InputWrapper>
                     <SendButton onClick={handleSend}>
@@ -1484,6 +1529,8 @@ const CommentsContainer = styled(Box)(({ theme }) => ({
     marginBottom: 16,
     marginRight: -24,
     position: "relative",
+    display: "flex",
+    flexDirection: "column-reverse",
     "&::-webkit-scrollbar": { width: "6px" },
     "&::-webkit-scrollbar-track": { background: "transparent" },
     "&::-webkit-scrollbar-thumb": {
@@ -1715,6 +1762,7 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
         borderRadius: "12px",
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
         minWidth: "140px",
+        marginTop: "4px",
     },
     "& .MuiList-root": { padding: "6px" },
     ...theme.applyStyles("dark", {
