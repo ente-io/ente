@@ -215,10 +215,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               textStyle: textTheme.small
                                   .copyWith(color: colorScheme.textMuted),
                               trailingTitleWidget: contact.isPendingInvite()
-                                  ? Icon(
-                                      Icons.warning_amber_rounded,
-                                      size: 20,
-                                      color: colorScheme.warning500,
+                                  ? Image.asset(
+                                      "assets/warning-yellow.png",
+                                      width: 20,
+                                      height: 20,
                                     )
                                   : null,
                             ),
@@ -343,10 +343,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                                 fontWeight: FontWeight.w500,
                               ),
                               trailingTitleWidget: currentUser.isPendingInvite()
-                                  ? Icon(
-                                      Icons.warning_amber_rounded,
-                                      size: 20,
-                                      color: colorScheme.warning500,
+                                  ? Image.asset(
+                                      "assets/warning-yellow.png",
+                                      width: 20,
+                                      height: 20,
                                     )
                                   : null,
                             ),
