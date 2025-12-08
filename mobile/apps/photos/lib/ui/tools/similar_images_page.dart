@@ -1036,8 +1036,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
       if (groupAtIndexSurvives(topIndex)) {
         anchorGroup = beforeFiltered[topIndex!];
       } else {
-        final visiblePositions = _itemPositionsListener
-            .itemPositions.value
+        final visiblePositions = _itemPositionsListener.itemPositions.value
             .where(
               (p) => p.index >= 0 && p.index < beforeFiltered.length,
             )
