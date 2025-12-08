@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Sikkerhedskopier dine 2FA koder",
   "onBoardingGetStarted": "Kom i gang",
-  "setupFirstAccount": "Opret din første konto",
   "importScanQrCode": "Skan en QR kode",
   "importEnterSetupKey": "Indtast en oprettelsesnøgle",
   "importAccountPageTitle": "Indtast kontooplysninger",
