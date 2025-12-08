@@ -14,7 +14,6 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -24,11 +23,7 @@ import "package:photos/ui/common/date_input.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/captioned_text_widget.dart";
-import "package:photos/ui/components/expandable_menu_item_widget.dart";
-import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
@@ -307,8 +302,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           child: _EmailSection(_email, person?.remoteID),
                         ),
                         const SizedBox(height: 24),
-                        _buildVisibilitySection(context),
-                        const SizedBox(height: 24),
                         ButtonWidget(
                           buttonType: ButtonType.primary,
                           labelText: context.l10n.save,
@@ -361,51 +354,6 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildVisibilitySection(BuildContext context) {
-    return ExpandableMenuItemWidget(
-      title: context.l10n.visibility,
-      leadingIcon: Icons.visibility_outlined,
-      selectionOptionsWidget: Column(
-        children: [
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.pinToTop,
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => _isPinned,
-              onChanged: () async {
-                if (!mounted) return;
-                setState(() {
-                  _isPinned = !_isPinned;
-                });
-              },
-            ),
-            singleBorderRadius: 8,
-            isGestureDetectorDisabled: true,
-          ),
-          const SizedBox(height: 12),
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.hideFromMemories,
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => _hideFromMemories,
-              onChanged: () async {
-                if (!mounted) return;
-                setState(() {
-                  _hideFromMemories = !_hideFromMemories;
-                });
-                memoriesCacheService.queueUpdateCache();
-              },
-            ),
-            singleBorderRadius: 8,
-            isGestureDetectorDisabled: true,
-          ),
-        ],
       ),
     );
   }

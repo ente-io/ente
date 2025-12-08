@@ -599,7 +599,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     Expanded(
                                       child: TextFormField(
                                         controller: controller,
-                                        autofocus: true,
+                                        autofocus: false,
                                         textCapitalization:
                                             TextCapitalization.sentences,
                                         onChanged: (_) => setState(() {}),
