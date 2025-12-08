@@ -162,6 +162,65 @@ class SocialDB {
     return rows.map(_rowToComment).toList();
   }
 
+  /// Fetch a single comment by ID (for parent lookup)
+  Future<Comment?> getCommentById(String id) async {
+    final db = await database;
+    final rows = await db.query(
+      commentsTable,
+      where: 'id = ? AND is_deleted = 0',
+      whereArgs: [id],
+    );
+    if (rows.isEmpty) return null;
+    return _rowToComment(rows.first);
+  }
+
+  /// Paginated fetch for file comments
+  Future<List<Comment>> getCommentsForFilePaginated(
+    int fileID, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      commentsTable,
+      where: 'file_id = ? AND is_deleted = 0',
+      whereArgs: [fileID],
+      orderBy: 'created_at DESC',
+      limit: limit,
+      offset: offset,
+    );
+    return rows.map(_rowToComment).toList();
+  }
+
+  /// Paginated fetch for collection comments
+  Future<List<Comment>> getCommentsForCollectionPaginated(
+    int collectionID, {
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final db = await database;
+    final rows = await db.query(
+      commentsTable,
+      where: 'collection_id = ? AND file_id IS NULL AND is_deleted = 0',
+      whereArgs: [collectionID],
+      orderBy: 'created_at DESC',
+      limit: limit,
+      offset: offset,
+    );
+    return rows.map(_rowToComment).toList();
+  }
+
+  /// Delete all comments from the database
+  Future<int> deleteAllComments() async {
+    final db = await database;
+    final deletedCount = await db.delete(commentsTable);
+    _logger.info('Deleted $deletedCount comments');
+    return deletedCount;
+  }
+
+  /// Seeds the database with example comments and reactions for testing.
+  Future<void> seedExampleData() async {}
+
   // Reaction methods
 
   Future<Reaction?> addReaction(Reaction reaction) async {
