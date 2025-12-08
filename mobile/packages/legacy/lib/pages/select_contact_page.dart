@@ -217,7 +217,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                   itemCount: suggestedUsers.length,
                   separatorBuilder: (context, index) => DividerWidget(
                     dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).fillFaint,
+                    bgColor: colorScheme.fillFaint,
                   ),
                   itemBuilder: (context, index) {
                     final user = suggestedUsers[index];
@@ -238,7 +238,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                         config: widget.config,
                         thumbnailView: false,
                       ),
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: colorScheme.fillFaint,
                       pressedColor: colorScheme.fillFaintPressed,
                       trailingIcon:
                           (selectedEmail == user.email) ? Icons.check : null,

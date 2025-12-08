@@ -12,14 +12,9 @@ import "package:ente_legacy/pages/select_contact_page.dart"
 import "package:ente_legacy/services/emergency_service.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_strings/ente_strings.dart";
-import "package:ente_ui/components/action_sheet_widget.dart";
-import "package:ente_ui/components/buttons/button_widget.dart";
-import "package:ente_ui/components/buttons/models/button_type.dart";
-import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/loading_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/components/menu_section_title.dart";
 import "package:ente_ui/components/notification_widget.dart";
@@ -78,6 +73,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final List<EmergencyContact> othersTrustedContacts =
         info?.othersEmergencyContact ?? [];
     final List<EmergencyContact> trustedContacts = info?.contacts ?? [];
@@ -110,7 +106,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 context.strings.legacyPageDesc,
-                style: getEnteTextTheme(context).smallMuted,
+                style: textTheme.smallMuted,
               ),
             ),
           ),
@@ -144,8 +140,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                     }
                     final RecoverySessions recoverSession =
                         info!.recoverSessions[index - 1];
-                    return MenuItemWidget(
-                      captionedTextWidget: CaptionedTextWidget(
+                    return MenuItemWidgetV2(
+                      captionedTextWidget: CaptionedTextWidgetV2(
                         title: recoverSession.emergencyContact.email,
                         makeTextBold: recoverSession.status.isNotEmpty,
                         textColor: colorScheme.warning500,
@@ -157,7 +153,6 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       ),
                       leadingIconSize: 24,
                       menuItemColor: colorScheme.fillFaint,
-                      singleBorderRadius: 8,
                       trailingIcon: Icons.chevron_right,
                       onTap: () async {
                         await showRejectRecoveryDialog(recoverSession);
@@ -193,8 +188,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           MenuItemWidgetV2(
                             captionedTextWidget: CaptionedTextWidgetV2(
                               title: contact.emergencyContact.email,
-                              textStyle: getEnteTextTheme(context)
-                                  .small
+                              textStyle: textTheme.small
                                   .copyWith(color: colorScheme.textMuted),
                               trailingTitleWidget: contact.isPendingInvite()
                                   ? Icon(
@@ -213,8 +207,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               currentUserID: currentUserID,
                               config: widget.config,
                             ),
-                            menuItemColor:
-                                getEnteColorScheme(context).fillFaint,
+                            menuItemColor: colorScheme.fillFaint,
                             trailingIcon: Icons.chevron_right,
                             trailingIconIsMuted: true,
                             onTap: () async {
@@ -228,7 +221,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           if (!isLastItem)
                             DividerWidget(
                               dividerType: DividerType.menu,
-                              bgColor: getEnteColorScheme(context).fillFaint,
+                              bgColor: colorScheme.fillFaint,
                             ),
                         ],
                       );
@@ -247,7 +240,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             ),
                             Text(
                               context.strings.legacyPageDesc2,
-                              style: getEnteTextTheme(context).smallMuted,
+                              style: textTheme.smallMuted,
                             ),
                             const SizedBox(height: 16),
                             GradientButton(
@@ -321,11 +314,10 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           MenuItemWidgetV2(
                             captionedTextWidget: CaptionedTextWidgetV2(
                               title: currentUser.user.email,
-                              textStyle:
-                                  getEnteTextTheme(context).small.copyWith(
-                                        color: colorScheme.textMuted,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                              textStyle: textTheme.small.copyWith(
+                                color: colorScheme.textMuted,
+                                fontWeight: FontWeight.w500,
+                              ),
                               trailingTitleWidget: currentUser.isPendingInvite()
                                   ? Icon(
                                       Icons.warning_amber_rounded,
@@ -343,8 +335,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               currentUserID: currentUserID,
                               config: widget.config,
                             ),
-                            menuItemColor:
-                                getEnteColorScheme(context).fillFaint,
+                            menuItemColor: colorScheme.fillFaint,
                             trailingIcon: Icons.chevron_right,
                             trailingIconIsMuted: true,
                             onTap: () async {
@@ -379,8 +370,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               ? const SizedBox.shrink()
                               : DividerWidget(
                                   dividerType: DividerType.menu,
-                                  bgColor:
-                                      getEnteColorScheme(context).fillFaint,
+                                  bgColor: colorScheme.fillFaint,
                                 ),
                         ],
                       );
@@ -477,54 +467,47 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
   Future<void> showRejectRecoveryDialog(RecoverySessions session) async {
     final String emergencyContactEmail = session.emergencyContact.email;
-    await showActionSheet(
-      context: context,
+    final colorScheme = getEnteColorScheme(context);
+
+    final confirmed = await showAlertBottomSheet<bool>(
+      context,
+      title: context.strings.recoveryWarning,
+      message: context.strings.recoveryWarningBody(emergencyContactEmail),
+      assetPath: "assets/warning-grey.png",
       buttons: [
-        ButtonWidget(
-          labelText: context.strings.rejectRecovery,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          buttonType: ButtonType.critical,
-          buttonAction: ButtonAction.first,
-          onTap: () async {
-            await EmergencyContactService.instance.rejectRecovery(session);
-            info?.recoverSessions
-                .removeWhere((element) => element.id == session.id);
-            if (mounted) {
-              setState(() {});
-            }
-            unawaited(_fetchData());
-          },
-          isInAlert: true,
+        SizedBox(
+          width: double.infinity,
+          child: GradientButton(
+            text: context.strings.rejectRecovery,
+            backgroundColor: colorScheme.warning700,
+            onTap: () => Navigator.of(context).pop(true),
+          ),
         ),
         if (kDebugMode)
-          ButtonWidget(
-            labelText: "Approve recovery (to be removed)",
-            buttonType: ButtonType.primary,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.second,
-            shouldStickToDarkTheme: true,
-            onTap: () async {
-              await EmergencyContactService.instance.approveRecovery(session);
-              if (mounted) {
-                setState(() {});
-              }
-              unawaited(_fetchData());
-            },
-            isInAlert: true,
+          SizedBox(
+            width: double.infinity,
+            child: GradientButton(
+              text: "Approve recovery (to be removed)",
+              onTap: () async {
+                Navigator.of(context).pop();
+                await EmergencyContactService.instance.approveRecovery(session);
+                if (mounted) {
+                  setState(() {});
+                }
+                unawaited(_fetchData());
+              },
+            ),
           ),
-        ButtonWidget(
-          labelText: context.strings.cancel,
-          buttonType: ButtonType.tertiary,
-          buttonSize: ButtonSize.large,
-          buttonAction: ButtonAction.third,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-        ),
       ],
-      body: context.strings.recoveryWarningBody(emergencyContactEmail),
-      actionSheetType: ActionSheetType.defaultActionSheet,
     );
-    return;
+
+    if (confirmed == true) {
+      await EmergencyContactService.instance.rejectRecovery(session);
+      info?.recoverSessions.removeWhere((element) => element.id == session.id);
+      if (mounted) {
+        setState(() {});
+      }
+      unawaited(_fetchData());
+    }
   }
 }

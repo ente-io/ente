@@ -82,7 +82,7 @@ class MenuItemWidgetV2 extends StatefulWidget {
     this.onLongPress,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
-    this.singleBorderRadius = 20.0,
+    this.singleBorderRadius = 16.0,
     this.multipleBorderRadius = 20.0,
     this.pressedColor,
     this.expandableController,
