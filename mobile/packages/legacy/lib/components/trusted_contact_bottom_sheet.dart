@@ -1,4 +1,5 @@
 import "package:ente_legacy/components/gradient_button.dart";
+import "package:ente_legacy/components/recovery_date_selector.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/theme/colors.dart";
@@ -85,7 +86,7 @@ class _TrustedContactBottomSheetState extends State<TrustedContactBottomSheet> {
               const SizedBox(height: 12),
               _buildDescription(colorScheme, textTheme, email, isPending),
               const SizedBox(height: 20),
-              _buildRecoveryTimeSection(colorScheme, textTheme),
+              _buildRecoveryTimeSection(),
               const SizedBox(height: 20),
               _buildUpdateTimeButton(colorScheme, textTheme),
               const SizedBox(height: 20),
@@ -147,50 +148,14 @@ class _TrustedContactBottomSheetState extends State<TrustedContactBottomSheet> {
     );
   }
 
-  Widget _buildRecoveryTimeSection(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildRecoveryChip(7, colorScheme, textTheme),
-        const SizedBox(width: 12),
-        _buildRecoveryChip(14, colorScheme, textTheme),
-        const SizedBox(width: 12),
-        _buildRecoveryChip(30, colorScheme, textTheme),
-      ],
-    );
-  }
-
-  Widget _buildRecoveryChip(
-    int days,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    final isSelected = _selectedRecoveryDays == days;
-    return GestureDetector(
-      onTap: () {
+  Widget _buildRecoveryTimeSection() {
+    return RecoveryDateSelector(
+      selectedDays: _selectedRecoveryDays,
+      onDaysChanged: (days) {
         setState(() {
           _selectedRecoveryDays = days;
         });
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 16.0,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          context.strings.nDays(days),
-          style: textTheme.body.copyWith(
-            color: isSelected ? Colors.white : colorScheme.primary700,
-          ),
-        ),
-      ),
     );
   }
 

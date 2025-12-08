@@ -3,6 +3,7 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
+import "package:ente_legacy/components/recovery_date_selector.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/services/emergency_service.dart";
 import "package:ente_sharing/models/user.dart";
@@ -105,7 +106,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                     ),
                   ],
                   const SizedBox(height: 20),
-                  _buildRecoveryTimeSection(colorScheme, textTheme),
+                  _buildRecoveryTimeSection(textTheme),
                   const SizedBox(height: 20),
                   _buildAddContactButton(textTheme),
                   const SizedBox(height: 12),
@@ -331,10 +332,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
     );
   }
 
-  Widget _buildRecoveryTimeSection(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _buildRecoveryTimeSection(EnteTextTheme textTheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -343,48 +341,15 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
           style: textTheme.bodyMuted,
         ),
         const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildRecoveryChip(7, colorScheme, textTheme),
-            const SizedBox(width: 12),
-            _buildRecoveryChip(14, colorScheme, textTheme),
-            const SizedBox(width: 12),
-            _buildRecoveryChip(30, colorScheme, textTheme),
-          ],
+        RecoveryDateSelector(
+          selectedDays: _selectedRecoveryDays,
+          onDaysChanged: (days) {
+            setState(() {
+              _selectedRecoveryDays = days;
+            });
+          },
         ),
       ],
-    );
-  }
-
-  Widget _buildRecoveryChip(
-    int days,
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
-    final isSelected = _selectedRecoveryDays == days;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedRecoveryDays = days;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 16.0,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Text(
-          context.strings.nDays(days),
-          style: textTheme.body.copyWith(
-            color: isSelected ? Colors.white : colorScheme.primary700,
-          ),
-        ),
-      ),
     );
   }
 
