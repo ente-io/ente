@@ -12,7 +12,7 @@
   "featureOpenSource": "Open source and\naudited by security experts",
   "signUp": "Sign up",
   "onBoardingGetStarted": "Get Started",
-  "setupFirstAccount": "Setup your first account",
+  "setupFirstAccount": "Setup your first\naccount",
   "allTabEmptyHint": "Nothing here yet. Tap + to add a code or open Trash to recover one.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -623,5 +623,9 @@
   "chooseIcon": "Choose icon",
   "customOrder": "Custom order",
   "selectAnOption": "Select an option",
-  "todaysLogs": "Today's logs"
+  "todaysLogs": "Today's logs",
+  "appIcon": "App icon",
+  "importAndOTPGuide": "Export your backup from andOTP using the \"Backup\" option in Settings.\n\nIf your backup is encrypted, you will need to enter the backup password to decrypt it.",
+  "enterPasswordToDecryptAndOTP": "Enter password to decrypt andOTP backup",
+  "failedToDecryptAndOTPBackup": "Failed to decrypt andOTP backup"
 }

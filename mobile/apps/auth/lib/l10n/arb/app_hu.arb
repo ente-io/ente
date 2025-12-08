@@ -12,7 +12,6 @@
   "featureOpenSource": "Nyílt forráskódú és\nbiztonsági szakértők által auditált",
   "signUp": "Bejelentkezés",
   "onBoardingGetStarted": "Kezdjünk bele",
-  "setupFirstAccount": "Állítsd be az első fiókodat",
   "allTabEmptyHint": "Még nincs itt semmi. Koppints a + jelre kód hozzáadásához, vagy nyisd meg a Kukát egy visszaállításához.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"

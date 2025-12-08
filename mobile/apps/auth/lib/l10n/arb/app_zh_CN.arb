@@ -12,7 +12,7 @@
   "featureOpenSource": "开源且经\n安全专家审计",
   "signUp": "注册",
   "onBoardingGetStarted": "开始",
-  "setupFirstAccount": "设置您的第一个账户",
+  "setupFirstAccount": "设置您的\n第一个账户",
   "allTabEmptyHint": "这里暂时没有内容。点按 + 添加代码，或打开回收站恢复代码。",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -621,5 +621,9 @@
   "chooseIcon": "选择图标",
   "customOrder": "自定义排序",
   "selectAnOption": "选择一个选项",
-  "todaysLogs": "当天日志"
+  "todaysLogs": "当天日志",
+  "appIcon": "应用图标",
+  "importAndOTPGuide": "使用设置中的“备份”选项从 andOTP 导出您的备份。\n\n如果您的备份已加密，您需要输入备份密码才能解密。",
+  "enterPasswordToDecryptAndOTP": "请输入密码以解密 andOTP 备份",
+  "failedToDecryptAndOTPBackup": "解密 andOTP 备份失败"
 }

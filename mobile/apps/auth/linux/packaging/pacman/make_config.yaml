@@ -5,7 +5,7 @@ maintainer:
   email: auth@ente.io
 licenses:
   - GPLv3
-icon: assets/icons/io.ente.auth.png
+icon: assets/generation-icons/icon-windows-linux.png
 installed_size: 36000
 
 metainfo: linux/packaging/enteauth.appdata.xml

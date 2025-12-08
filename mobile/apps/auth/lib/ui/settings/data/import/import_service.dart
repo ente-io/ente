@@ -1,4 +1,5 @@
 import 'package:ente_auth/ui/settings/data/import/aegis_import.dart';
+import 'package:ente_auth/ui/settings/data/import/andotp_import.dart';
 import 'package:ente_auth/ui/settings/data/import/bitwarden_import.dart';
 import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
@@ -46,6 +47,9 @@ class ImportService {
         break;
       case ImportType.proton:
         await showProtonImportInstruction(context);
+        break;
+      case ImportType.andOTP:
+        await showAndOTPImportInstruction(context);
         break;
     }
   }

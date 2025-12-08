@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Chia sẻ với người không dùng Ente",
   "createPublicLink": "Tạo liên kết công khai",
   "sendLink": "Gửi liên kết",
+  "qrCode": "Mã QR",
   "sendQrCode": "Gửi mã QR",
   "copyLink": "Sao chép liên kết",
   "copyEmbedHtml": "Sao chép mã nhúng HTML",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "Xóa khỏi album?",
   "removeFromAlbum": "Xóa khỏi album",
   "itemsWillBeRemovedFromAlbum": "Các mục đã chọn sẽ bị xóa khỏi album này",
-  "removeShareItemsWarning": "Vài mục mà bạn đang xóa được thêm bởi người khác, và bạn sẽ mất quyền truy cập vào chúng",
+  "removeShareItemsWarning": "Những ảnh đã chọn sẽ không thể được xem bởi bất kỳ người xem nào của album này, ngoại trừ chủ sở hữu ảnh.",
   "addingToFavorites": "Đang thêm vào mục yêu thích...",
   "removingFromFavorites": "Đang xóa khỏi mục yêu thích...",
   "sorryCouldNotAddToFavorites": "Xin lỗi, không thể thêm vào mục yêu thích!",
@@ -2081,5 +2082,91 @@
     "description": "Fallback message when the faces timeline cannot be displayed yet"
   },
   "playfulKids": "Trẻ em vui chơi",
-  "coastalCliffs": "Vách đá bên bờ biển"
+  "coastalCliffs": "Vách đá bên bờ biển",
+  "ritualsTitle": "Thói quen",
+  "ritualAddTooltip": "Thêm thói quen",
+  "ritualActivityHeading": "Hoạt động",
+  "ritualDefaultHeatmapTitle": "Chụp một ảnh mỗi ngày",
+  "ritualUntitled": "Thói quen chưa đặt tên",
+  "ritualShareUnavailable": "Không thể chia sẻ. Vui lòng thử lại.",
+  "ritualNotificationMessage": "Chụp ảnh ngay",
+  "ritualCameraNotFound": "Không tìm thấy camera trên thiết bị này.",
+  "ritualCameraStartError": "Không thể khởi động camera. Vui lòng kiểm tra quyền.",
+  "ritualCaptureError": "Không thể chụp ảnh. Vui lòng thử lại.",
+  "ritualPhotoLimit": "Bạn có thể thêm tối đa {maxPhotos, plural, other {# ảnh.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Chụp ít nhất một ảnh trước.",
+  "ritualAlbumMissing": "Album thói quen bị thiếu. Chỉnh sửa thói quen để thiết lập album.",
+  "ritualAddedToAlbum": "Đã thêm vào album",
+  "ritualAddedToAlbumWithName": "Đã thêm vào album {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Không thể thêm ảnh vào album: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Quay lại thói quen",
+  "ritualNoPhotosYet": "Chưa có ảnh nào",
+  "ritualSetAlbumToLaunchCamera": "Thiết lập một album cho thói quen này để khởi động camera.",
+  "ritualDefaultCameraTitle": "Chụp ảnh",
+  "ritualBadgeMessage7": "Đã 7 ngày trôi qua! Bạn kiên trì tốt đấy. Hãy tiếp tục nhé!",
+  "ritualBadgeMessage14": "14 ngày rồi! Bạn đang dần có một thói quen. Thật tuyệt vời!",
+  "ritualBadgeMessage30": "30 ngày liên tiếp! Sự kiên trì đáng kinh ngạc. Ngưỡng mộ ghê!",
+  "ritualBadgeMessageDefault": "Bạn đang trên đà!",
+  "ritualBadgeNewTitle": "Thành tích mới",
+  "ritualBadgePreparing": "Đang chuẩn bị...",
+  "ritualStreaksLabel": "Ngày liên tiếp",
+  "ritualCreateYourOwn": "Tạo thói quen của riêng bạn",
+  "ritualGetDailyReminders": "Nhận nhắc nhở mỗi ngày",
+  "ritualAlbumNotSet": "Album chưa đặt tên",
+  "ritualOpenCameraTooltip": "Mở camera thói quen",
+  "ritualEditorLabel": "Trình chỉnh sửa thói quen",
+  "ritualNew": "Thói quen mới",
+  "ritualEdit": "Sửa thói quen",
+  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterDescription": "Vui lòng nhập mô tả",
+  "ritualDayLabel": "Ngày",
+  "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
+  "ritualTimeLabel": "Thời gian",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Lưu thói quen",
+  "ritualUpdate": "Cập nhật thói quen",
+  "ritualSelectAlbumTitle": "Chọn album",
+  "ritualSearchOrCreate": "Tìm kiếm hoặc tạo mới",
+  "ritualNoAlbumsYet": "Chưa có album nào",
+  "ritualNoMatchingAlbums": "Không có album trùng khớp",
+  "ritualCreateAlbumWithName": "Tạo \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Tạo mới",
+  "ritualAlbumSelectionPlaceholder": "Chọn album",
+  "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
+  "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
+  "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
+  "ritualEmojiUseAction": "Sử dụng",
+  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
 }

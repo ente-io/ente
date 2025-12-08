@@ -350,7 +350,6 @@
   "removeFromAlbumTitle": "Удалить из альбома?",
   "removeFromAlbum": "Удалить из альбома",
   "itemsWillBeRemovedFromAlbum": "Выбранные элементы будут удалены из этого альбома",
-  "removeShareItemsWarning": "Некоторые из удаляемых вами элементов были добавлены другими людьми, и вы потеряете к ним доступ",
   "addingToFavorites": "Добавление в избранное...",
   "removingFromFavorites": "Удаление из избранного...",
   "sorryCouldNotAddToFavorites": "Извините, не удалось добавить в избранное!",

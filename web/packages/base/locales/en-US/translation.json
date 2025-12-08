@@ -375,6 +375,7 @@
     "remove": "Remove",
     "yes_remove": "Yes, remove",
     "remove_from_album": "Remove from album",
+    "remove_from_album_others_message": "Selected photos will not be accessible to any viewer of this album, except the photo owners.",
     "move_to_trash": "Move to trash",
     "trash_files_message": "Selected files will be removed from all albums and moved to trash.",
     "trash_file_message": "The file will be removed from all albums and moved to trash.",

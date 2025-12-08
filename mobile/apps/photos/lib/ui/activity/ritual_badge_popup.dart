@@ -4,6 +4,7 @@ import "dart:ui" as ui;
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:flutter_svg/flutter_svg.dart";
+import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
@@ -51,6 +52,8 @@ String _badgeMessage(BuildContext context, int days) {
       return context.l10n.ritualBadgeMessageDefault;
   }
 }
+
+final Logger _logger = Logger("RitualBadgePopup");
 
 Future<void> showRitualBadgePopup(
   BuildContext context, {
@@ -414,6 +417,8 @@ Future<void> shareRitualBadge(
 }) async {
   OverlayEntry? entry;
   try {
+    final badgeAsset = _badgeAssets[badge.days] ?? _badgeAssets[7]!;
+    await _precacheBadgeAssets(badgeAsset, context);
     final overlay = Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) {
       throw StateError("Overlay not available for badge share");
@@ -423,32 +428,39 @@ Future<void> shareRitualBadge(
       builder: (_) => Center(
         child: Material(
           type: MaterialType.transparency,
-          child: RepaintBoundary(
-            key: repaintKey,
-            child: _RitualBadgeShareCard(badge: badge),
+          child: IgnorePointer(
+            child: Opacity(
+              // Keep the share card invisible while still allowing it to paint.
+              opacity: 0.01,
+              child: RepaintBoundary(
+                key: repaintKey,
+                child: _RitualBadgeShareCard(badge: badge),
+              ),
+            ),
           ),
         ),
       ),
     );
     overlay.insert(entry);
-    await WidgetsBinding.instance.endOfFrame;
-    await Future.delayed(const Duration(milliseconds: 36));
-    final boundary =
-        repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) {
-      throw StateError("Render boundary unavailable for badge share");
+    final boundary = await _waitForBoundaryReady(repaintKey: repaintKey);
+    final double pixelRatio =
+        (MediaQuery.of(context).devicePixelRatio * 1.8).clamp(2.4, 3.5);
+    late final ui.Image image;
+    try {
+      image = await boundary.toImage(pixelRatio: pixelRatio);
+    } catch (e, s) {
+      _logger.warning("Badge share toImage failed", e, s);
+      rethrow;
     }
-    if (boundary.debugNeedsPaint) {
-      await WidgetsBinding.instance.endOfFrame;
-      await Future.delayed(const Duration(milliseconds: 24));
-    }
-    final ui.Image image = await boundary.toImage(
-      pixelRatio:
-          (MediaQuery.of(context).devicePixelRatio * 1.8).clamp(2.4, 3.5),
+    final byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png).catchError(
+      (Object e, StackTrace s) {
+        _logger.warning("Badge share toByteData failed", e, s);
+        throw e;
+      },
     );
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final data = byteData?.buffer.asUint8List();
-    if (data == null) {
+    if (data == null || data.isEmpty) {
       throw StateError("Unable to encode badge image");
     }
     final dir = await getTemporaryDirectory();
@@ -456,6 +468,9 @@ Future<void> shareRitualBadge(
       "${dir.path}/ritual_badge_${badge.days}_${badge.ritual.id}_${DateTime.now().millisecondsSinceEpoch}.png",
     );
     await file.writeAsBytes(data, flush: true);
+    _logger.info(
+      "Sharing ritual badge for ${badge.ritual.id} (${badge.days}d); file: ${file.path}",
+    );
     await SharePlus.instance.share(
       ShareParams(
         files: [XFile(file.path)],
@@ -463,7 +478,7 @@ Future<void> shareRitualBadge(
       ),
     );
   } catch (e, s) {
-    debugPrint("Failed to share ritual badge: $e\n$s");
+    _logger.warning("Failed to share ritual badge", e, s);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -474,6 +489,74 @@ Future<void> shareRitualBadge(
   } finally {
     entry?.remove();
   }
+}
+
+Future<void> _precacheBadgeAssets(
+  String badgeAsset,
+  BuildContext context,
+) async {
+  final providers = <ImageProvider>[
+    AssetImage(badgeAsset),
+    const AssetImage("assets/qr_logo.png"),
+    const AssetImage("assets/ente_io_green.png"),
+  ];
+  for (final provider in providers) {
+    try {
+      await precacheImage(provider, context);
+    } catch (e, s) {
+      _logger.fine("Failed to precache badge share asset $provider", e, s);
+    }
+  }
+}
+
+Future<RenderRepaintBoundary> _waitForBoundaryReady({
+  required GlobalKey repaintKey,
+}) async {
+  const int maxAttempts = 8;
+  const Duration attemptDelay = Duration(milliseconds: 40);
+
+  for (int attempt = 0; attempt < maxAttempts; attempt++) {
+    final boundary =
+        repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    bool needsPaint = false;
+    assert(() {
+      needsPaint = boundary?.debugNeedsPaint ?? false;
+      return true;
+    }());
+    if (boundary == null) {
+      _logger.fine("Badge share boundary missing (attempt ${attempt + 1})");
+    } else if (boundary.size.isEmpty) {
+      _logger.fine(
+        "Badge share boundary has zero size (attempt ${attempt + 1})",
+      );
+    } else if (needsPaint) {
+      _logger.fine(
+        "Badge share boundary needs paint (attempt ${attempt + 1}), waiting",
+      );
+    } else {
+      return boundary;
+    }
+    await WidgetsBinding.instance.endOfFrame;
+    await Future.delayed(attemptDelay);
+  }
+
+  final boundary =
+      repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+  if (boundary == null) {
+    throw StateError("Render boundary unavailable for badge share");
+  }
+  if (boundary.size.isEmpty) {
+    throw StateError("Render boundary has zero size for badge share");
+  }
+  bool needsPaint = false;
+  assert(() {
+    needsPaint = boundary.debugNeedsPaint;
+    return true;
+  }());
+  if (needsPaint) {
+    throw StateError("Render boundary not ready to paint for badge share");
+  }
+  return boundary;
 }
 
 class _RitualBadgeShareCard extends StatelessWidget {
