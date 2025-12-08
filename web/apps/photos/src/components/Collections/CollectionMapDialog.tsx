@@ -267,6 +267,11 @@ function useMapData(
                     error: t("something_went_wrong"),
                 }));
                 onGenericError(e);
+            } finally {
+                // Ensure we never leave the dialog stuck in a loading state
+                setState((prev) =>
+                    prev.isLoading ? { ...prev, isLoading: false } : prev,
+                );
             }
         };
 
