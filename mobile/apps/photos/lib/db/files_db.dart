@@ -92,6 +92,7 @@ class FilesDB with SqlDbBase {
     ...createEntityDataTable(),
     ...addAddedTime(),
     ...addQueueSourceColumn(),
+    ...backfillQueueSourceForPendingUploads(),
   ];
 
   static const List<String> _columnNames = [
@@ -426,6 +427,33 @@ class FilesDB with SqlDbBase {
     return [
       '''
         ALTER TABLE $filesTable ADD COLUMN $columnQueueSource TEXT;
+      '''
+    ];
+  }
+
+  // Backfills queue_source for pending auto-backup uploads that existed before
+  // the column was added. This ensures "only backup new photos" and folder
+  // deselection filters apply to pre-existing queued files.
+  // We set queue_source only when:
+  // - The file is pending upload (uploadedFileID is null/-1)
+  // - The file's localID exists in device_files for a path that maps to its collectionID
+  // This avoids incorrectly marking manual uploads as auto-synced.
+  static List<String> backfillQueueSourceForPendingUploads() {
+    return [
+      '''
+        UPDATE $filesTable
+        SET $columnQueueSource = (
+          SELECT df.path_id
+          FROM device_files df
+          JOIN device_collections dc ON dc.id = df.path_id
+          WHERE df.id = $filesTable.$columnLocalID
+            AND dc.collection_id = $filesTable.$columnCollectionID
+          LIMIT 1
+        )
+        WHERE $columnQueueSource IS NULL
+          AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
+          AND $columnCollectionID IS NOT NULL AND $columnCollectionID != -1
+          AND $columnLocalID IS NOT NULL;
       '''
     ];
   }
