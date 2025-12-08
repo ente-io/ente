@@ -234,6 +234,40 @@ class CollectionsService {
     return true;
   }
 
+  /// Returns true if the file exists in any shared collection.
+  ///
+  /// A collection is considered "shared" if it has sharees, has a public link,
+  /// or is owned by someone else (incoming share).
+  Future<bool> isFileInSharedCollection(int uploadedFileID) async {
+    final Set<int> collectionIDs =
+        await _filesDB.getAllCollectionIDsOfFile(uploadedFileID);
+
+    if (collectionIDs.isEmpty) {
+      return false;
+    }
+
+    final int? currentUserID = _config.getUserID();
+    if (currentUserID == null) {
+      return false;
+    }
+
+    for (final int collectionID in collectionIDs) {
+      final Collection? collection = _collectionIDToCollections[collectionID];
+
+      if (collection == null || collection.isDeleted) {
+        continue;
+      }
+
+      if (collection.hasSharees ||
+          collection.hasLink ||
+          !collection.isOwner(currentUserID)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Future<List<Collection>> getArchivedCollection() async {
     final allCollections = getCollectionsForUI();
     return allCollections
@@ -2213,9 +2247,21 @@ class CollectionsService {
       }
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom", type: EventType.deletedFromRemote,));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom", type: EventType.deletedFromRemote,));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collectionID,
+          batch,
+          "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          batch,
+          source: "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
     }
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
@@ -2250,7 +2296,13 @@ class CollectionsService {
         type: EventType.deletedFromRemote,
       ),
     );
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "suggestDelete", type: EventType.deletedFromRemote,));
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: "suggestDelete",
+        type: EventType.deletedFromRemote,
+      ),
+    );
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 

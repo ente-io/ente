@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
@@ -11,6 +12,9 @@ import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/models/social/social_data_provider.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -42,16 +46,63 @@ class FileBottomBarState extends State<FileBottomBar> {
   bool isGuestView = false;
   late final StreamSubscription<GuestViewEvent> _guestViewEventSubscription;
   int? lastFileGenID;
+  Future<bool>? _isFileInSharedCollectionFuture;
+  bool _hasLiked = false;
+  int _commentCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _updateSharedCollectionFuture();
+    _updateSocialState();
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
         isGuestView = event.isGuestView;
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(FileBottomBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.file.uploadedFileID != widget.file.uploadedFileID) {
+      _updateSharedCollectionFuture();
+      _updateSocialState();
+    }
+  }
+
+  void _updateSharedCollectionFuture() {
+    if (widget.file.uploadedFileID != null) {
+      _isFileInSharedCollectionFuture =
+          CollectionsService.instance.isFileInSharedCollection(
+        widget.file.uploadedFileID!,
+      );
+    } else {
+      _isFileInSharedCollectionFuture = null;
+    }
+  }
+
+  Future<void> _updateSocialState() async {
+    if (widget.file.uploadedFileID == null) {
+      _hasLiked = false;
+      _commentCount = 0;
+      return;
+    }
+
+    final fileID = widget.file.uploadedFileID!;
+    final provider = SocialDataProvider.instance;
+
+    // Check if user has liked
+    final reactions = await provider.getReactionsForFile(fileID);
+    _hasLiked = reactions.any(
+      (r) => r.userID == widget.userID && !r.isDeleted,
+    );
+
+    // Get comment count
+    _commentCount = await provider.getCommentCountForFile(fileID);
+
+    safeRefresh();
   }
 
   @override
@@ -132,6 +183,12 @@ class FileBottomBarState extends State<FileBottomBar> {
           ),
         ),
       );
+
+      // Add social icons (heart, comment) if file is in a shared collection
+      if (widget.file.uploadedFileID != null) {
+        children.add(_buildHeartIcon());
+        children.add(_buildCommentIcon());
+      }
     }
     return ValueListenableBuilder(
       valueListenable: widget.enableFullScreenNotifier,
@@ -228,6 +285,113 @@ class FileBottomBarState extends State<FileBottomBar> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeartIcon() {
+    if (_isFileInSharedCollectionFuture == null) {
+      return const SizedBox.shrink();
+    }
+
+    return FutureBuilder<bool>(
+      future: _isFileInSharedCollectionFuture,
+      builder: (context, snapshot) {
+        if (snapshot.data != true) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: GestureDetector(
+            onTap: _toggleReaction,
+            child: Icon(
+              _hasLiked
+                  ? (Platform.isAndroid
+                      ? Icons.favorite
+                      : Icons.favorite_rounded)
+                  : (Platform.isAndroid
+                      ? Icons.favorite_border
+                      : Icons.favorite_border_rounded),
+              color: _hasLiked
+                  ? getEnteColorScheme(context).primary700
+                  : Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _toggleReaction() async {
+    final file = widget.file;
+    if (file.uploadedFileID == null ||
+        file.collectionID == null ||
+        widget.userID == null) {
+      return;
+    }
+
+    await SocialDataProvider.instance.toggleReaction(
+      userID: widget.userID!,
+      collectionID: file.collectionID!,
+      fileID: file.uploadedFileID,
+    );
+
+    _hasLiked = !_hasLiked;
+    safeRefresh();
+  }
+
+  Widget _buildCommentIcon() {
+    if (_isFileInSharedCollectionFuture == null) {
+      return const SizedBox.shrink();
+    }
+
+    return FutureBuilder<bool>(
+      future: _isFileInSharedCollectionFuture,
+      builder: (context, snapshot) {
+        if (snapshot.data != true) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedBubbleChat,
+                color: Colors.white,
+              ),
+              if (_commentCount > 0)
+                Positioned(
+                  right: -4,
+                  top: -4,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: const BorderRadius.all(Radius.circular(16)),
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 2,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                    ),
+                    child: Text(
+                      _commentCount > 99 ? '99+' : _commentCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
