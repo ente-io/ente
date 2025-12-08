@@ -176,12 +176,6 @@ export type FileInfoProps = ModalVisibilityProps & {
      * Called when the user selects a person in the file info panel.
      */
     onSelectPerson?: (personID: string) => void;
-    /**
-     * Optional z-index for the file info drawer.
-     *
-     * Use this when FileInfo needs to appear above other dialogs/modals.
-     */
-    zIndex?: number;
 };
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -198,7 +192,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     onUpdateCaption,
     onSelectCollection,
     onSelectPerson,
-    zIndex,
 }) => {
     const { mapEnabled } = useSettingsSnapshot();
 
@@ -252,7 +245,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const uploaderName = file.pubMagicMetadata?.data.uploaderName;
 
     return (
-        <FileInfoSidebar {...{ open, onClose, zIndex }}>
+        <FileInfoSidebar {...{ open, onClose }}>
             <SidebarDrawerTitlebar
                 onClose={onClose}
                 onRootClose={onClose}
@@ -433,12 +426,7 @@ const annotateExif = (
 };
 
 const FileInfoSidebar = styled(
-    ({
-        zIndex,
-        ...props
-    }: Pick<DialogProps, "open" | "onClose" | "children"> & {
-        zIndex?: number;
-    }) => (
+    (props: Pick<DialogProps, "open" | "onClose" | "children">) => (
         <SidebarDrawer
             {...props}
             anchor="right"
@@ -448,7 +436,6 @@ const FileInfoSidebar = styled(
             // https://github.com/mui/material-ui/issues/43106#issuecomment-2514637251
             disableRestoreFocus={true}
             closeAfterTransition={true}
-            sx={zIndex !== undefined ? { zIndex } : undefined}
         />
     ),
 )(({ theme }) => ({

@@ -31,7 +31,6 @@ import {
     Tab,
     Tabs,
     Typography,
-    useTheme,
 } from "@mui/material";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { SidebarDrawer } from "ente-base/components/mui/SidebarDrawer";
@@ -82,13 +81,6 @@ export type ImageEditorOverlayProps = ModalVisibilityProps & {
         collection: Collection,
         enteFile: EnteFile,
     ) => void;
-    /**
-     * Optional z-index for the overlay.
-     *
-     * Use this when ImageEditorOverlay needs to appear above other
-     * dialogs/modals.
-     */
-    zIndex?: number;
 };
 
 const filterDefaultValues = {
@@ -113,11 +105,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
     onClose,
     file,
     onSaveEditedCopy,
-    zIndex,
 }) => {
-    const theme = useTheme();
-    const overlayZIndex = zIndex ?? theme.zIndex.modal + 2;
-
     const { showMiniDialog } = useBaseContext();
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -538,7 +526,6 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
                 width: "100%",
-                zIndex: overlayZIndex,
             }}
             open
         >

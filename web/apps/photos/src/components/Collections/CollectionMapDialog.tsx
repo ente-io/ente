@@ -11,7 +11,6 @@ import {
     Stack,
     styled,
     Typography,
-    useTheme,
     type IconButtonProps,
 } from "@mui/material";
 import { ensureLocalUser } from "ente-accounts/services/user";
@@ -744,11 +743,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const { onGenericError } = useBaseContext();
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
-    const theme = useTheme();
-    const fileViewerZIndex = useMemo(
-        () => theme.zIndex.modal + 3,
-        [theme.zIndex.modal],
-    );
+    const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const optimalZoom = calculateOptimalZoom();
 
     const {
@@ -903,9 +898,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 collectionNameByID={collectionNameByID}
                 onSelectCollection={onSelectCollection}
                 onSelectPerson={onSelectPerson}
-                fileViewerZIndex={fileViewerZIndex}
                 selected={emptySelected}
                 setSelected={noOpSetSelected}
+                onSetOpenFileViewer={setIsFileViewerOpen}
             />
         );
     }, [
@@ -936,7 +931,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         handleMarkTempDeleted,
         onSelectCollection,
         onSelectPerson,
-        fileViewerZIndex,
+        isFileViewerOpen,
         thumbByFileID,
         user,
         visibleFiles,
@@ -944,7 +939,12 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     ]);
 
     return (
-        <Dialog fullScreen open={open} onClose={onClose}>
+        <Dialog
+            fullScreen
+            keepMounted
+            open={open && !isFileViewerOpen}
+            onClose={onClose}
+        >
             <Box
                 sx={{
                     position: "relative",
@@ -1000,7 +1000,7 @@ interface MapLayoutProps {
     collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
-    fileViewerZIndex: number;
+    onSetOpenFileViewer?: (open: boolean) => void;
     selected: {
         ownCount: number;
         count: number;
@@ -1038,7 +1038,7 @@ function MapLayout({
     collectionNameByID,
     onSelectCollection,
     onSelectPerson,
-    fileViewerZIndex,
+    onSetOpenFileViewer,
     selected,
     setSelected,
 }: MapLayoutProps) {
@@ -1069,7 +1069,7 @@ function MapLayout({
                 onSelectPerson={onSelectPerson}
                 selected={selected}
                 setSelected={setSelected}
-                fileViewerZIndex={fileViewerZIndex}
+                onSetOpenFileViewer={onSetOpenFileViewer}
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
@@ -1120,7 +1120,7 @@ interface CollectionSidebarProps {
     collectionNameByID?: FileListWithViewerProps["collectionNameByID"];
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
-    fileViewerZIndex: number;
+    onSetOpenFileViewer?: (open: boolean) => void;
     selected: {
         ownCount: number;
         count: number;
@@ -1153,7 +1153,7 @@ function CollectionSidebar({
     collectionNameByID,
     onSelectCollection,
     onSelectPerson,
-    fileViewerZIndex,
+    onSetOpenFileViewer,
     selected,
     setSelected,
 }: CollectionSidebarProps) {
@@ -1202,7 +1202,7 @@ function CollectionSidebar({
                             activeCollectionID={collectionSummary.id}
                             selected={selected}
                             setSelected={setSelected}
-                            fileViewerZIndex={fileViewerZIndex}
+                            onSetOpenFileViewer={onSetOpenFileViewer}
                         />
                     ) : (
                         <EmptyState>

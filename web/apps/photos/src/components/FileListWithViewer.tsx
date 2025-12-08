@@ -1,5 +1,4 @@
 import { styled } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
@@ -58,12 +57,6 @@ export type FileListWithViewerProps = {
         file: EnteFile,
         sourceCollectionSummaryID?: number,
     ) => void;
-    /**
-     * Optional z-index for the FileViewer dialog.
-     *
-     * Use this when FileViewer needs to appear above other dialogs/modals.
-     */
-    fileViewerZIndex?: number;
 } & Pick<
     FileListProps,
     | "mode"
@@ -134,15 +127,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onAddFileToCollection,
-    fileViewerZIndex,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const theme = useTheme();
-    const viewerZIndex = useMemo(
-        () => fileViewerZIndex ?? theme.zIndex.modal + 2,
-        [fileViewerZIndex, theme.zIndex.modal],
-    );
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -227,7 +214,6 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 isInTrashSection={
                     activeCollectionID == PseudoCollectionID.trash
                 }
-                zIndex={viewerZIndex}
                 {...{
                     user,
                     files,

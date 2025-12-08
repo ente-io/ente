@@ -12,7 +12,6 @@ import {
     TextField,
     Typography,
     useMediaQuery,
-    useTheme,
 } from "@mui/material";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
@@ -105,10 +104,6 @@ type CollectionSelectorProps = ModalVisibilityProps & {
     collectionForCollectionSummaryID: (
         collectionID: number,
     ) => Promise<Collection>;
-    /**
-     * Optional z-index to ensure the selector appears above other dialogs.
-     */
-    zIndex?: number;
 };
 
 /**
@@ -121,12 +116,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
     collectionForCollectionSummaryID,
-    zIndex,
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
-    const theme = useTheme();
-    const dialogZIndex = zIndex ?? theme.zIndex.modal + 3;
 
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -218,7 +210,6 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            sx={{ zIndex: dialogZIndex }}
             slotProps={{
                 paper: {
                     sx: {
