@@ -1,7 +1,7 @@
 import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_legacy/components/error_bottom_sheet.dart";
+import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/services/emergency_service.dart";
@@ -108,7 +108,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                   _buildRecoveryTimeSection(colorScheme, textTheme),
                   const SizedBox(height: 20),
                   _buildAddContactButton(textTheme),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                   _buildVerifyLink(textTheme),
                 ],
               ),
@@ -415,7 +415,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       } catch (e) {
         _logger.severe("Failed to add contact", e);
         if (mounted) {
-          await showErrorBottomSheet(
+          await showAlertBottomSheet(
             context,
             title: context.strings.error,
             message: context.strings.somethingWentWrong,
@@ -539,7 +539,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
 
   Future<void> _onVerifyTap() async {
     if (selectedEmail.isEmpty && !_emailIsValid) {
-      await showErrorBottomSheet(
+      await showAlertBottomSheet(
         context,
         title: context.strings.invalidEmailAddress,
         message: context.strings.enterValidEmail,

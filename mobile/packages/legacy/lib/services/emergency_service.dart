@@ -9,7 +9,7 @@ import "package:ente_accounts/services/user_service.dart";
 import "package:ente_base/models/key_attributes.dart";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
-import "package:ente_legacy/components/error_bottom_sheet.dart";
+import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_network/network.dart";
 import "package:ente_sharing/components/invite_dialog.dart";
@@ -49,7 +49,7 @@ class EmergencyContactService {
     int recoveryNoticeInDays,
   ) async {
     if (!isValidEmail(email)) {
-      await showErrorBottomSheet(
+      await showAlertBottomSheet(
         context,
         title: context.strings.letsTryThatAgain,
         message: context.strings.enterValidEmail,
@@ -57,7 +57,7 @@ class EmergencyContactService {
       );
       return false;
     } else if (email.trim() == _config.getEmail()) {
-      await showErrorBottomSheet(
+      await showAlertBottomSheet(
         context,
         title: context.strings.oops,
         message: context.strings.youCannotShareWithYourself,

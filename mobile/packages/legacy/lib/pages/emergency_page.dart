@@ -1,7 +1,7 @@
 import "dart:async";
 
 import "package:ente_configuration/base_configuration.dart";
-import "package:ente_legacy/components/confirmation_bottom_sheet.dart";
+import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
 import "package:ente_legacy/components/invite_bottom_sheet.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
@@ -407,7 +407,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
     if (result?.action == TrustedContactAction.revoke) {
       final isPending = contact.isPendingInvite();
-      final confirmed = await showConfirmationBottomSheet(
+      final colorScheme = getEnteColorScheme(context);
+      final confirmed = await showAlertBottomSheet<bool>(
         context,
         title: isPending
             ? context.strings.cancelInviteTitle
@@ -415,13 +416,22 @@ class _EmergencyPageState extends State<EmergencyPage> {
         message: isPending
             ? context.strings.cancelInviteMessage
             : context.strings.removeContactMessage,
-        buttonText: isPending
-            ? context.strings.revokeInvite
-            : context.strings.removeContact,
         assetPath: "assets/warning-grey.png",
+        buttons: [
+          SizedBox(
+            width: double.infinity,
+            child: GradientButton(
+              text: isPending
+                  ? context.strings.revokeInvite
+                  : context.strings.removeContact,
+              backgroundColor: colorScheme.warning700,
+              onTap: () => Navigator.of(context).pop(true),
+            ),
+          ),
+        ],
       );
 
-      if (confirmed == true) {
+      if (confirmed!) {
         await EmergencyContactService.instance
             .updateContact(contact, ContactState.userRevokedContact);
         info?.contacts.remove(contact);
