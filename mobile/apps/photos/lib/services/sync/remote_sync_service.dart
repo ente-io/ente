@@ -523,11 +523,17 @@ class RemoteSyncService {
 
     // Clean up DB entries for auto-synced files (queueSource != null) that are
     // too old. Manual uploads stay queued even if they target an auto-sync
-    // collection.
+    // collection. Skip any file that is actively uploading to avoid losing its
+    // row mid-flight.
     int cleanedEntries = 0;
+    final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
     final pending = await _db.getFilesPendingForUpload();
     for (final file in pending) {
       if (file.localID == null || file.collectionID == null) {
+        continue;
+      }
+
+      if (uploadingLocalIDs.contains(file.localID)) {
         continue;
       }
 
@@ -556,30 +562,57 @@ class RemoteSyncService {
       2) Delete files who localIDs is also present in other collections.
       3) For Remaining files, set the collectionID as -1
      */
-    _logger.info("Removing files for collections $collectionIDs");
-    for (int collectionID in collectionIDs) {
+    if (collectionIDs.isEmpty) {
+      return;
+    }
+
+    final Set<int> collectionIDSet = collectionIDs.toSet();
+    final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
+
+    // Drop queued (not-started) auto-sync uploads from these collections.
+    _uploader.removeFromQueueWhere(
+      (file) =>
+          file.queueSource != null &&
+          file.collectionID != null &&
+          collectionIDSet.contains(file.collectionID) &&
+          !uploadingLocalIDs.contains(file.localID),
+      BackupFolderDeselectedError(),
+    );
+
+    _logger.info("Removing files for collections $collectionIDSet");
+    for (final collectionID in collectionIDSet) {
       final List<EnteFile> pendingUploads =
           await _db.getPendingUploadForCollection(collectionID);
+
+      // Consider only auto-sync entries that are not actively uploading.
+      pendingUploads.removeWhere(
+        (file) =>
+            file.queueSource == null ||
+            file.localID == null ||
+            uploadingLocalIDs.contains(file.localID),
+      );
+
       if (pendingUploads.isEmpty) {
         continue;
-      } else {
-        _logger.info(
-          "RemovingFiles $collectionIDs: pendingUploads "
-          "${pendingUploads.length}",
-        );
       }
+
+      _logger.info(
+        "RemovingFiles $collectionID: pendingAutoSyncUploads "
+        "${pendingUploads.length}",
+      );
+
       final Set<String> localIDsInOtherFileEntries =
           await _db.getLocalIDsPresentInEntries(
         pendingUploads,
         collectionID,
       );
       _logger.info(
-        "RemovingFiles $collectionIDs: filesInOtherCollection "
+        "RemovingFiles $collectionID: filesInOtherCollection "
         "${localIDsInOtherFileEntries.length}",
       );
       final List<EnteFile> entriesToUpdate = [];
       final List<int> entriesToDelete = [];
-      for (EnteFile pendingUpload in pendingUploads) {
+      for (final EnteFile pendingUpload in pendingUploads) {
         if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
           entriesToDelete.add(pendingUpload.generatedID!);
         } else {
@@ -591,7 +624,7 @@ class RemoteSyncService {
       await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
       await _db.insertMultiple(entriesToUpdate);
       _logger.info(
-        "RemovingFiles $collectionIDs: deleted "
+        "RemovingFiles $collectionID: deleted "
         "${entriesToDelete.length} and updated ${entriesToUpdate.length}",
       );
     }

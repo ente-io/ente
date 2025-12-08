@@ -265,6 +265,19 @@ class FileUploader {
     return _totalCountInUploadSession;
   }
 
+  /// Returns localIDs that are currently being uploaded (in progress or running
+  /// in background). Use this to avoid deleting DB rows for active uploads.
+  Set<String> getActiveUploadLocalIDs() {
+    return _queue.entries
+        .where(
+          (entry) =>
+              entry.value.status == UploadStatus.inProgress ||
+              entry.value.status == UploadStatus.inBackground,
+        )
+        .map((entry) => entry.key)
+        .toSet();
+  }
+
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
