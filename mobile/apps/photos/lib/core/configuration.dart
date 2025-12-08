@@ -131,6 +131,7 @@ class Configuration {
         await _migrateSecurityStorageToFirstUnlock();
       }
       SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+      _logger.info('User ID: ${getUserID()}');
     } catch (e, s) {
       _logger.severe("Configuration init failed", e, s);
       /*

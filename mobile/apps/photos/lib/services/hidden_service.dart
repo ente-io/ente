@@ -154,9 +154,23 @@ extension HiddenService on CollectionsService {
         if (filesToMove.isEmpty) {
           continue;
         }
+
+        // Determine destination: files from hidden collections go to default
+        // hidden collection, others go to uncategorized
+        final Collection? sourceCollection = getCollectionByID(collectionID);
+        final bool isSourceHidden = sourceCollection?.isHidden() ?? false;
+        final int destinationCollectionID;
+        if (isSourceHidden) {
+          final Collection defaultHiddenCollection =
+              await getDefaultHiddenCollection();
+          destinationCollectionID = defaultHiddenCollection.id;
+        } else {
+          destinationCollectionID = uncategorizedCollection.id;
+        }
+
         await move(
           filesToMove,
-          toCollectionID: uncategorizedCollection.id,
+          toCollectionID: destinationCollectionID,
           fromCollectionID: collectionID,
         );
       }

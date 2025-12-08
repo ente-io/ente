@@ -3,6 +3,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
@@ -86,25 +87,58 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
         final onePersonAndClusters =
             selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
-        final anythingSelected =
-            selectedPersonIds.isNotEmpty || selectedClusterIds.isNotEmpty;
+        final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
+            selectedPersonIds.every(
+              (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
+            );
+        final bool showEditAction = onlyOnePerson;
+        final bool showReviewAction = onlyOnePerson;
+        final bool showMergeAction = onePersonAndClusters;
+        final bool showResetAction = onlyOnePerson;
+        final bool showAutoAddAction = onlyPersonSelected;
         final bool showPinAction = onlyPersonSelected &&
-            selectedPersonIds.isNotEmpty &&
+            namedPersonsSelected &&
             selectedPersonIds.every(
               (id) => !(personMap[id]?.data.isPinned ?? false),
             );
         final bool showUnpinAction = onlyPersonSelected &&
-            selectedPersonIds.isNotEmpty &&
+            namedPersonsSelected &&
             selectedPersonIds.every(
               (id) => personMap[id]?.data.isPinned ?? false,
             );
+        final bool showHideFromMemoriesAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+            );
+        final bool showShowInMemoriesAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => personMap[id]?.data.hideFromMemories ?? false,
+            );
+        final bool showIgnoreAction =
+            selectedClusterIds.isNotEmpty && selectedPersonIds.isEmpty;
+        final bool hasVisibleAction = showEditAction ||
+            showReviewAction ||
+            showIgnoreAction ||
+            showMergeAction ||
+            showResetAction ||
+            showPinAction ||
+            showUnpinAction ||
+            showHideFromMemoriesAction ||
+            showShowInMemoriesAction ||
+            showAutoAddAction;
+
+        if (!hasVisibleAction) {
+          return const SizedBox.shrink();
+        }
 
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).edit,
             icon: Icons.edit_outlined,
             onTap: _onEditPerson,
-            shouldShow: onlyOnePerson,
+            shouldShow: showEditAction,
           ),
         );
         items.add(
@@ -112,7 +146,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).review,
             icon: Icons.search_outlined,
             onTap: _onReviewSuggestion,
-            shouldShow: onlyOnePerson,
+            shouldShow: showReviewAction,
           ),
         );
         items.add(
@@ -120,7 +154,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).ignore,
             icon: Icons.hide_image_outlined,
             onTap: _onIgnore,
-            shouldShow: anythingSelected,
+            shouldShow: showIgnoreAction,
           ),
         );
         items.add(
@@ -128,7 +162,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).merge,
             icon: Icons.merge_outlined,
             onTap: _onMerge,
-            shouldShow: onePersonAndClusters,
+            shouldShow: showMergeAction,
           ),
         );
         items.add(
@@ -136,7 +170,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).reset,
             icon: Icons.remove_outlined,
             onTap: _onResetPerson,
-            shouldShow: onlyOnePerson,
+            shouldShow: showResetAction,
           ),
         );
         items.add(
@@ -157,6 +191,22 @@ class _PeopleSelectionActionWidgetState
         );
         items.add(
           SelectionActionButton(
+            labelText: AppLocalizations.of(context).hideFromMemories,
+            icon: Icons.visibility_off_outlined,
+            onTap: () => _updateHideFromMemoriesState(true),
+            shouldShow: showHideFromMemoriesAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: context.l10n.showInMemories,
+            icon: Icons.visibility_outlined,
+            onTap: () => _updateHideFromMemoriesState(false),
+            shouldShow: showShowInMemoriesAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
             labelText: AppLocalizations.of(context).autoAddToAlbum,
             iconWidget: Image.asset(
               "assets/auto-add-people.png",
@@ -165,7 +215,7 @@ class _PeopleSelectionActionWidgetState
               color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
             ),
             onTap: _autoAddToAlbum,
-            shouldShow: onlyPersonSelected,
+            shouldShow: showAutoAddAction,
           ),
         );
 
@@ -262,6 +312,28 @@ class _PeopleSelectionActionWidgetState
       Bus.instance.fire(PeopleChangedEvent());
     } catch (e, s) {
       _logger.severe('Failed to update pin state', e, s);
+    } finally {
+      widget.selectedPeople.clearAll();
+    }
+  }
+
+  Future<void> _updateHideFromMemoriesState(bool shouldHide) async {
+    final selectedPersonIds = _getSelectedPersonIds();
+    if (selectedPersonIds.isEmpty) return;
+    try {
+      final personMap = await personEntitiesMapFuture;
+      for (final personID in selectedPersonIds) {
+        final person = personMap[personID];
+        if (person == null || person.data.name.isEmpty) continue;
+        if (person.data.hideFromMemories == shouldHide) continue;
+        await PersonService.instance.updateAttributes(
+          person.remoteID,
+          hideFromMemories: shouldHide,
+        );
+      }
+      Bus.instance.fire(PeopleChangedEvent());
+    } catch (e, s) {
+      _logger.severe('Failed to update hide from memories state', e, s);
     } finally {
       widget.selectedPeople.clearAll();
     }

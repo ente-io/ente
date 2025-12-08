@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 import "dart:developer";
 
@@ -558,6 +559,11 @@ class PersonService {
     if (hideFromMemories != null &&
         hideFromMemories != person.data.hideFromMemories) {
       memoriesCacheService.queueUpdateCache();
+      if (hideFromMemories) {
+        unawaited(
+          memoriesCacheService.purgePersonFromMemoriesCache(id),
+        );
+      }
     }
     return updatedPerson;
   }

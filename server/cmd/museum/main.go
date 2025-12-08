@@ -691,6 +691,7 @@ func main() {
 	privateAPI.POST("/emergency-contacts/add", emergencyHandler.AddContact)
 	privateAPI.GET("/emergency-contacts/info", emergencyHandler.GetInfo)
 	privateAPI.POST("/emergency-contacts/update", emergencyHandler.UpdateContact)
+	privateAPI.POST("/emergency-contacts/update-recovery-notice", emergencyHandler.UpdateRecoveryNotice)
 	privateAPI.POST("/emergency-contacts/start-recovery", emergencyHandler.StartRecovery)
 	privateAPI.POST("/emergency-contacts/stop-recovery", emergencyHandler.StopRecovery)
 	privateAPI.POST("/emergency-contacts/reject-recovery", emergencyHandler.RejectRecovery)
