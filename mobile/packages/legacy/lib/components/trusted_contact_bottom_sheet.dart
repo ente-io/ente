@@ -6,11 +6,11 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/theme/text_style.dart";
 import "package:flutter/material.dart";
 
-Future<TrustedContactAction?> showTrustedContactBottomSheet(
+Future<TrustedContactResult?> showTrustedContactBottomSheet(
   BuildContext context, {
   required EmergencyContact contact,
 }) {
-  return showModalBottomSheet<TrustedContactAction>(
+  return showModalBottomSheet<TrustedContactResult>(
     context: context,
     isScrollControlled: true,
     builder: (context) => TrustedContactBottomSheet(contact: contact),
@@ -20,6 +20,16 @@ Future<TrustedContactAction?> showTrustedContactBottomSheet(
 enum TrustedContactAction {
   revoke,
   updateTime,
+}
+
+class TrustedContactResult {
+  final TrustedContactAction action;
+  final int? selectedDays;
+
+  TrustedContactResult({
+    required this.action,
+    this.selectedDays,
+  });
 }
 
 class TrustedContactBottomSheet extends StatefulWidget {
@@ -37,13 +47,16 @@ class TrustedContactBottomSheet extends StatefulWidget {
 
 class _TrustedContactBottomSheetState extends State<TrustedContactBottomSheet> {
   late int _selectedRecoveryDays;
+  late int _originalRecoveryDays;
 
   @override
   void initState() {
     super.initState();
-    // Default to 14 days if not set
-    _selectedRecoveryDays = 14;
+    _originalRecoveryDays = widget.contact.recoveryNoticeInDays;
+    _selectedRecoveryDays = _originalRecoveryDays;
   }
+
+  bool get _hasChanges => _selectedRecoveryDays != _originalRecoveryDays;
 
   @override
   Widget build(BuildContext context) {
@@ -187,9 +200,16 @@ class _TrustedContactBottomSheetState extends State<TrustedContactBottomSheet> {
   ) {
     return GradientButton(
       text: context.strings.updateTime,
-      onTap: () {
-        Navigator.of(context).pop(TrustedContactAction.updateTime);
-      },
+      onTap: _hasChanges
+          ? () {
+              Navigator.of(context).pop(
+                TrustedContactResult(
+                  action: TrustedContactAction.updateTime,
+                  selectedDays: _selectedRecoveryDays,
+                ),
+              );
+            }
+          : null,
     );
   }
 
@@ -203,7 +223,9 @@ class _TrustedContactBottomSheetState extends State<TrustedContactBottomSheet> {
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pop(TrustedContactAction.revoke);
+        Navigator.of(context).pop(
+          TrustedContactResult(action: TrustedContactAction.revoke),
+        );
       },
       child: SizedBox(
         width: double.infinity,
