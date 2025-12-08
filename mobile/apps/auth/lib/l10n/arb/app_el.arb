@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Δημιουργήστε αντίγραφο ασφαλείας των 2FA κωδικών σας",
   "onBoardingGetStarted": "Ξεκινήστε",
-  "setupFirstAccount": "Ρυθμίστε τον πρώτο σας λογαριασμό",
   "importScanQrCode": "Σαρώστε έναν κωδικό QR",
   "importEnterSetupKey": "Εισάγετε ένα κλειδί ρύθμισης",
   "importAccountPageTitle": "Εισαγωγή στοιχείων λογαριασμού",

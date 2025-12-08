@@ -12,7 +12,6 @@
   "featureOpenSource": "Open Source und\nvon Sicherheitsexperten geprüft",
   "signUp": "Registrieren",
   "onBoardingGetStarted": "Los geht's",
-  "setupFirstAccount": "Ihr erstes Konto einrichten",
   "allTabEmptyHint": "Noch nichts hier. Drück auf das +, um einen Code hinzuzufügen oder öffne den Papierkorb um einen wiederherzustellen.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
