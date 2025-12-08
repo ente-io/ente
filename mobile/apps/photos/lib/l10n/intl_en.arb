@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
   "sorryCouldNotRemoveFromFavorites": "Sorry, could not remove from favorites!",
   "subscribeToEnableSharing": "You need an active paid subscription to enable sharing.",
+  "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
