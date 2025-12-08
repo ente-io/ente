@@ -62,6 +62,7 @@ import {
 } from "./data-source";
 import { LikeAlbumSelectorModal } from "./LikeAlbumSelectorModal";
 import { LikesSidebar } from "./LikesSidebar";
+import { PublicLikeModal } from "./PublicLikeModal";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -390,6 +391,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openComments, setOpenComments] = useState(false);
     const [openLikes, setOpenLikes] = useState(false);
     const [openLikeAlbumSelector, setOpenLikeAlbumSelector] = useState(false);
+    const [openPublicLikeModal, setOpenPublicLikeModal] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
@@ -415,6 +417,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenComments(false);
         setOpenLikes(false);
         setOpenLikeAlbumSelector(false);
+        setOpenPublicLikeModal(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
         setMoreMenuAnchorEl(null);
@@ -447,19 +450,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleLikesClose = useCallback(() => setOpenLikes(false), []);
 
     // Called when the like button (heart) is clicked.
-    // If opened from a collection (?collection=... in URL), perform like action.
-    // If no collection context, show album selector modal.
+    // - If public album (has ?t=): show PublicLikeModal
+    // - If collection context (has ?collection=): perform like action directly
+    // - If no collection context: show album selector modal
     const handleLikeClick = useCallback(() => {
-        const hasCollectionContext =
-            typeof window !== "undefined" &&
-            new URLSearchParams(window.location.search).has("collection");
+        const searchParams =
+            typeof window !== "undefined"
+                ? new URLSearchParams(window.location.search)
+                : new URLSearchParams();
+        const isPublicAlbum = searchParams.has("t");
+        const hasCollectionContext = searchParams.has("collection");
 
-        if (hasCollectionContext) {
+        if (isPublicAlbum) {
+            // Public album - show public like modal
+            setOpenPublicLikeModal(true);
+        } else if (hasCollectionContext) {
             // Collection context exists - perform like action directly
             // TODO: Implement actual like action when API is available
-            const collectionId = new URLSearchParams(
-                window.location.search,
-            ).get("collection");
+            const collectionId = searchParams.get("collection");
             console.log(`Like action: collection=${collectionId}`);
         } else {
             // No collection context - show album selector modal
@@ -482,6 +490,23 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // TODO: Implement actual like all action when API is available
         console.log("Like all action");
         setOpenLikeAlbumSelector(false);
+    }, []);
+
+    const handlePublicLikeModalClose = useCallback(
+        () => setOpenPublicLikeModal(false),
+        [],
+    );
+
+    const handleLikeAnonymously = useCallback(() => {
+        // TODO: Implement anonymous like action when API is available
+        console.log("Like anonymously action");
+        setOpenPublicLikeModal(false);
+    }, []);
+
+    const handleSignInAndLike = useCallback(() => {
+        // TODO: Redirect to sign in page with return URL
+        console.log("Sign in and like action");
+        setOpenPublicLikeModal(false);
     }, []);
 
     // Callback invoked when the download action is triggered by activating the
@@ -745,6 +770,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             openComments ||
             openLikes ||
             openLikeAlbumSelector ||
+            openPublicLikeModal ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
             openConfirmDelete ||
@@ -777,6 +803,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         openComments,
         openLikes,
         openLikeAlbumSelector,
+        openPublicLikeModal,
         moreMenuAnchorEl,
         openImageEditor,
         openConfirmDelete,
@@ -1048,6 +1075,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 albums={mockAlbumsForLike}
                 onSelectAlbum={handleSelectAlbumForLike}
                 onLikeAll={handleLikeAll}
+            />
+            <PublicLikeModal
+                open={openPublicLikeModal}
+                onClose={handlePublicLikeModalClose}
+                onLikeAnonymously={handleLikeAnonymously}
+                onSignInAndLike={handleSignInAndLike}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}

@@ -131,10 +131,12 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     );
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
 
-    // Check if opened from a collection (has ?collection=... in URL)
+    // Check if opened from a collection context (has ?collection=... or ?t=... in URL)
+    // Public links use ?t= (access token) instead of ?collection=
     const hasCollectionContext =
         typeof window !== "undefined" &&
-        new URLSearchParams(window.location.search).has("collection");
+        (new URLSearchParams(window.location.search).has("collection") ||
+            new URLSearchParams(window.location.search).has("t"));
 
     const handleCollectionSelect = (collection: Collection) => {
         setSelectedCollection(collection);
