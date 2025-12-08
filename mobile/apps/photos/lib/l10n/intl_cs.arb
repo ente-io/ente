@@ -198,6 +198,7 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "preview": "Náhled",
   "linkExpiry": "Platnost odkazu",
   "linkExpired": "Vypršel",
   "linkEnabled": "Povoleno",
@@ -327,7 +328,6 @@
   "removeFromAlbumTitle": "Odstranit z alba?",
   "removeFromAlbum": "Odstranit z alba",
   "itemsWillBeRemovedFromAlbum": "Vybrané položky budou odstraněny z tohoto alba",
-  "removeShareItemsWarning": "Některé položky, které odstraňujete, byly přidány jinými lidmi a ztratíte k nim přístup",
   "addingToFavorites": "Přidávání k oblíbeným...",
   "removingFromFavorites": "Odstraňování z oblíbených...",
   "sorryCouldNotAddToFavorites": "Omlouváme se, nelze přidat k oblíbeným!",

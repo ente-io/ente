@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Абагуліць з карыстальнікамі, якія не карыстаюцца Ente",
   "createPublicLink": "Стварыць публічную спасылку",
   "sendLink": "Адправіць спасылку",
+  "qrCode": "QR-код",
   "sendQrCode": "Адправіць QR-код",
   "copyLink": "Скапіяваць спасылку",
   "copyEmbedHtml": "Скапіяваць убудаваны HTML",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "Выдаліць з альбома?",
   "removeFromAlbum": "Выдаліць з альбома",
   "itemsWillBeRemovedFromAlbum": "Выбраныя элементы будуць выдалены з гэтага альбома",
-  "removeShareItemsWarning": "Некаторыя элементы, якія вы выдаляеце, былі дададзены іншымі людзьмі, і вы згубіце да іх доступ",
+  "removeShareItemsWarning": "Выбраныя фатаграфіі не будуць даступныя нікому з гледачоў гэтага альбома, акрамя іх уладальнікаў.",
   "addingToFavorites": "Дадаванне ў абранае...",
   "removingFromFavorites": "Выдаленне з абраных...",
   "sorryCouldNotAddToFavorites": "Немагчыма дадаць у абраныя!",
@@ -2081,5 +2082,27 @@
     "description": "Fallback message when the faces timeline cannot be displayed yet"
   },
   "playfulKids": "Гарэзлівыя дзеці",
-  "coastalCliffs": "Скалы ля мора"
+  "coastalCliffs": "Скалы ля мора",
+  "ritualsTitle": "Рытуалы",
+  "ritualAddTooltip": "Дадаць рытуал",
+  "ritualActivityHeading": "Актыўнасць",
+  "ritualDefaultHeatmapTitle": "Рабіце фатаграфіі кожны дзень",
+  "ritualUntitled": "Рытуал без назвы",
+  "ritualShareUnavailable": "Немагчыма абагуліць зараз. Калі ласка, паспрабуйце яшчэ раз.",
+  "ritualNotificationMessage": "Сфатаграфуйце зараз",
+  "ritualCameraNotFound": "На гэтай прыладзе камера не знойдзена.",
+  "ritualCameraStartError": "Немагчыма ўключыць камеру. Праверце дазволы.",
+  "ritualCaptureError": "Не атрымалася зрабіць фатаграфію. Паўтарыце спробу.",
+  "ritualPhotoLimit": "Вы можаце дадаць да {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Спачатку зрабіце хаця б адну фатаграфію.",
+  "ritualAlbumMissing": "Адсутнічае альбом рытуалаў. Адрэдагуйце рытуал, каб усталяваць альбом.",
+  "ritualAddedToAlbum": "Дададзена ў альбом"
 }

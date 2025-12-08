@@ -326,7 +326,6 @@
   "removeFromAlbumTitle": "Eltávolítás az albumból?",
   "removeFromAlbum": "Eltávolítás az albumból",
   "itemsWillBeRemovedFromAlbum": "A kiválasztott elemek eltávolításra kerülnek ebből az albumból.",
-  "removeShareItemsWarning": "Néhány eltávolítandó elemet mások adtak hozzá, és elveszíted a hozzáférésedet hozzájuk.",
   "addingToFavorites": "Hozzáadás a kedvencekhez...",
   "removingFromFavorites": "Eltávolítás a kedvencek közül...",
   "sorryCouldNotAddToFavorites": "Sajnálom, nem sikerült hozzáadni a kedvencekhez!",
