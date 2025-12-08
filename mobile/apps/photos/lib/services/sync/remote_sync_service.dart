@@ -829,11 +829,6 @@ class RemoteSyncService {
           "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
         );
         final queueSource = file.queueSource; // auto-sync should persist this
-        if (enableBackupFolderSync && queueSource == null) {
-          _logger.internalWarning(
-            "[UPLOAD-DEBUG] Missing queueSource for auto-sync file ${file.title} (cid: $collectionID)",
-          );
-        }
         // Files queued from _uploadFiles are from background auto-sync
         _uploadFile(
           file,
@@ -1033,20 +1028,11 @@ class RemoteSyncService {
       );
       return _onFileUploaded(uploadedFile);
     }).onError((error, stackTrace) {
-      // Skip severe logging for expected cancellation errors (folder deselection, etc.)
-      if (error is! BackupFolderDeselectedError &&
-          error is! BackupTooOldForPreferenceError &&
-          error is! SilentlyCancelUploadsError) {
-        _logger.internalSevere(
-          "[UPLOAD-DEBUG] Upload failed for ${file.title}",
-          error,
-          stackTrace,
-        );
-      } else {
-        _logger.fine(
-          "[UPLOAD-DEBUG] Upload cancelled for ${file.title}: ${error.runtimeType}",
-        );
-      }
+      _logger.internalSevere(
+        "[UPLOAD-DEBUG] Upload failed for ${file.title}",
+        error,
+        stackTrace,
+      );
       return _onFileUploadError(error, stackTrace, file);
     });
     futures.add(future);
