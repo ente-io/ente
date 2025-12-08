@@ -193,6 +193,7 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
     String bottomText,
   ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
@@ -225,7 +226,7 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
 
   Widget _verificationIDWidget(BuildContext context, String publicKey) {
     final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final textTheme = getEnteTextTheme(context);
     final String verificationID = _generateVerificationID(publicKey);
     return GestureDetector(
       onTap: () async {
@@ -245,14 +246,23 @@ class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           color: colorScheme.primary700,
         ),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 22,
+          vertical: 24,
+        ),
         width: double.infinity,
         child: Text(
           verificationID,
-          style: textStyle.bodyBold.copyWith(color: Colors.white),
+          style: textTheme.body.copyWith(
+            color: Colors.white,
+            fontFamily: 'monospace',
+            letterSpacing: 0.5,
+            height: 1.5,
+          ),
+          textAlign: TextAlign.justify,
         ),
       ),
     );
