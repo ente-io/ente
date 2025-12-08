@@ -364,6 +364,43 @@ class FileUploader {
     }
   }
 
+  Future<bool> _skipPendingEntryIfFilteredOut(
+    FileUploadItem? pendingEntry,
+  ) async {
+    if (pendingEntry == null || pendingEntry.isManualUpload) {
+      return false;
+    }
+
+    Error? skipReason;
+
+    if (flagService.enableBackupFolderSync) {
+      final queueSource = pendingEntry.file.queueSource;
+      final isSelected = queueSource != null &&
+          DeviceFolderSelectionCache.instance.isSelected(queueSource);
+      if (!isSelected) {
+        skipReason = BackupFolderDeselectedError();
+      }
+    }
+
+    final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
+    if (skipReason == null &&
+        onlyNewSinceEpoch != null &&
+        (pendingEntry.file.creationTime ?? 0) < onlyNewSinceEpoch) {
+      skipReason = BackupTooOldForPreferenceError();
+    }
+
+    if (skipReason != null) {
+      // Mark as in-progress immediately to prevent race conditions with
+      // concurrent _pollQueue calls before the async cleanup completes
+      pendingEntry.status = UploadStatus.inProgress;
+      await _cleanupAndSkip(pendingEntry, skipReason);
+      unawaited(_pollQueue());
+      return true;
+    }
+
+    return false;
+  }
+
   Future<void> _pollQueue() async {
     _logger.internalInfo(
       "[UPLOAD-DEBUG] _pollQueue() called. Queue size: ${_queue.length}, "
@@ -430,33 +467,10 @@ class FileUploader {
           _logger.internalInfo("[UPLOAD-DEBUG] No non-video entry available");
         }
       }
-      // Folder deselection check - auto-sync uploads only (manual uploads have no queueSource)
-      if (flagService.enableBackupFolderSync && !pendingEntry.isManualUpload) {
-        final queueSource = pendingEntry!.file.queueSource!;
-        final isSelected =
-            DeviceFolderSelectionCache.instance.isSelected(queueSource);
-        if (!isSelected) {
-          // Mark as in-progress immediately to prevent race conditions with
-          // concurrent _pollQueue calls before the async cleanup completes
-          pendingEntry.status = UploadStatus.inProgress;
-          await _cleanupAndSkip(pendingEntry, BackupFolderDeselectedError());
-          unawaited(_pollQueue());
-          return;
-        }
-      }
-      // Only-new filter - only applies to auto-sync uploads.
-      // Manual uploads should always be allowed regardless of their creation
-      // time to support importing older albums or retrying uploads.
-      final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
-      if (pendingEntry != null &&
-          !pendingEntry.isManualUpload &&
-          onlyNewSinceEpoch != null &&
-          (pendingEntry.file.creationTime ?? 0) < onlyNewSinceEpoch) {
-        // Mark as in-progress immediately to prevent race conditions with
-        // concurrent _pollQueue calls before the async cleanup completes
-        pendingEntry.status = UploadStatus.inProgress;
-        await _cleanupAndSkip(pendingEntry, BackupTooOldForPreferenceError());
-        unawaited(_pollQueue());
+      final bool wasSkipped = await _skipPendingEntryIfFilteredOut(
+        pendingEntry,
+      );
+      if (wasSkipped) {
         return;
       }
       if (pendingEntry != null) {
