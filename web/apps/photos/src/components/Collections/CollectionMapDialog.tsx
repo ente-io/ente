@@ -1246,6 +1246,13 @@ interface CollectionSidebarProps {
     setSelected: () => void;
 }
 
+// Fixed height for the cover image container (px)
+const COVER_IMAGE_HEIGHT = 320;
+// Mobile has less padding: 8px top + 12px bottom + 2px margin = 22px
+// Desktop has more padding: 16px top + 16px bottom + 2px margin = 34px
+// Use desktop value for consistency in the virtualized list
+const COVER_HEADER_HEIGHT = COVER_IMAGE_HEIGHT + 34;
+
 function CollectionSidebar({
     collectionSummary,
     visibleCount,
@@ -1273,6 +1280,11 @@ function CollectionSidebar({
     selected,
     setSelected,
 }: CollectionSidebarProps) {
+    const [currentDate, setCurrentDate] = useState<string | undefined>(
+        undefined,
+    );
+    const [scrollOffset, setScrollOffset] = useState(0);
+
     // Get cover image: prioritize collection's coverFile, fallback to first photo
     const coverFile = collectionSummary.coverFile;
     const coverImageUrl = useMemo(() => {
@@ -1285,15 +1297,74 @@ function CollectionSidebar({
             : undefined;
     }, [coverFile, mapPhotos, thumbByFileID]);
 
-    return (
-        <SidebarWrapper>
-            <SidebarContainer>
+    // Create header component for FileListWithViewer (cover scrolls with content)
+    const coverHeader = useMemo(
+        () => ({
+            component: (
                 <MapCover
                     name={collectionSummary.name}
                     coverImageUrl={coverImageUrl}
-                    visibleCount={visibleCount}
+                    totalCount={collectionSummary.fileCount}
                     onClose={onClose}
                 />
+            ),
+            height: COVER_HEADER_HEIGHT,
+            extendToInlineEdges: true,
+        }),
+        [collectionSummary.name, coverImageUrl, visibleCount, onClose],
+    );
+
+    // Handle scroll events from the file list
+    const handleScroll = useCallback((offset: number) => {
+        setScrollOffset(offset);
+    }, []);
+
+    // Handle visible date changes from the file list
+    const handleVisibleDateChange = useCallback((date: string | undefined) => {
+        setCurrentDate(date);
+    }, []);
+
+    // Only show sticky date after scrolling past the cover header
+    const showStickyDate = scrollOffset > COVER_HEADER_HEIGHT && currentDate;
+
+    return (
+        <SidebarWrapper>
+            <SidebarContainer>
+                <StickyDateHeader visible={!!showStickyDate}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Box>
+                            <Typography
+                                variant="body"
+                                sx={{ fontWeight: 700, fontSize: "18px" }}
+                            >
+                                {collectionSummary.name}
+                            </Typography>
+                            <Typography
+                                variant="small"
+                                sx={{ color: "text.muted", fontSize: "14px" }}
+                            >
+                                {collectionSummary.fileCount} memories
+                            </Typography>
+                        </Box>
+                        <IconButton
+                            onClick={onClose}
+                            size="small"
+                            sx={{
+                                color: "text.secondary",
+                                bgcolor: "fill.faint",
+                                "&:hover": { bgcolor: "fill.muted" },
+                            }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
+                </StickyDateHeader>
                 <FileListContainer>
                     {visibleFiles.length > 0 ? (
                         <FileListWithViewer
@@ -1321,9 +1392,18 @@ function CollectionSidebar({
                             setSelected={setSelected}
                             onSetOpenFileViewer={onSetOpenFileViewer}
                             listBorderRadius="0 0 32px 32px"
+                            header={coverHeader}
+                            onScroll={handleScroll}
+                            onVisibleDateChange={handleVisibleDateChange}
                         />
                     ) : (
                         <EmptyState>
+                            <MapCover
+                                name={collectionSummary.name}
+                                coverImageUrl={coverImageUrl}
+                                totalCount={collectionSummary.fileCount}
+                                onClose={onClose}
+                            />
                             <Typography variant="body" sx={{ fontWeight: 600 }}>
                                 {t("no_photos_found_here", {
                                     defaultValue: "No photos found here",
@@ -1702,14 +1782,14 @@ function EmptyState({ children }: React.PropsWithChildren) {
 interface MapCoverProps {
     name: string;
     coverImageUrl: string | undefined;
-    visibleCount: number;
+    totalCount: number;
     onClose: () => void;
 }
 
 const MapCover = React.memo(function MapCover({
     name,
     coverImageUrl,
-    visibleCount,
+    totalCount,
     onClose,
 }: MapCoverProps) {
     return (
@@ -1724,6 +1804,7 @@ const MapCover = React.memo(function MapCover({
                         width: "100%",
                         height: "100%",
                         objectFit: "cover",
+                        objectPosition: "Center",
                     }}
                 />
                 <CoverGradientOverlay />
@@ -1734,7 +1815,7 @@ const MapCover = React.memo(function MapCover({
 
                 <CoverContentContainer>
                     <CoverTitle>{name}</CoverTitle>
-                    <CoverSubtitle>{visibleCount} memories</CoverSubtitle>
+                    <CoverSubtitle>{totalCount} memories</CoverSubtitle>
                 </CoverContentContainer>
             </CoverImageContainer>
         </CoverContainer>
@@ -1744,17 +1825,21 @@ const MapCover = React.memo(function MapCover({
 const CoverContainer = styled(Box)(({ theme }) => ({
     width: "100%",
     flexShrink: 0,
-    padding: "16px",
-    paddingBottom: "8px",
-    [theme.breakpoints.down("md")]: { padding: "8px", paddingBottom: "4px" },
+    paddingTop: "16px",
+    paddingBottom: "16px",
+    [theme.breakpoints.down("md")]: {
+        padding: "8px",
+        paddingTop: "20px",
+        paddingBottom: "12px",
+    },
 }));
 
 const CoverImageContainer = styled(Box)(({ theme }) => ({
-    aspectRatio: "16/9",
+    height: `${COVER_IMAGE_HEIGHT}px`,
     position: "relative",
     overflow: "hidden",
     backgroundColor: "#333",
-    borderRadius: "36px 36px 0px 0px",
+    borderRadius: "36px 36px 24px 24px",
     marginTop: "2px",
     [theme.breakpoints.down("md")]: { borderRadius: "20px 20px 20px 20px" },
 }));
@@ -1859,14 +1944,33 @@ const FileListContainer = styled(Box)(({ theme }) => ({
     flexDirection: "column",
     paddingLeft: "8px",
     paddingRight: "8px",
-    paddingTop: "12px",
+    paddingTop: "0px",
+    paddingBottom: "40px",
     [theme.breakpoints.up("md")]: {
-        paddingTop: "12px",
-        paddingLeft: "12px",
-        paddingRight: "12px",
+        paddingTop: "0px",
+        paddingLeft: "16px",
+        paddingRight: "16px",
         paddingBottom: "18px",
     },
 }));
+
+const StickyDateHeader = styled(Box)<{ visible: boolean }>(
+    ({ theme, visible }) => ({
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        backgroundColor: theme.vars.palette.background.paper,
+        padding: "28px 24px 24px 24px",
+        borderBottom: `1px solid ${theme.vars.palette.divider}`,
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(-10px)",
+        pointerEvents: visible ? "auto" : "none",
+        transition: "opacity 0.25s ease-out, transform 0.25s ease-out",
+        [theme.breakpoints.down("md")]: { padding: "24px 20px 20px 20px" },
+    }),
+);
 
 const CenteredBoxContainer = styled(Box)({
     width: "100%",
@@ -1886,10 +1990,10 @@ const EmptyStateContainer = styled(Box)(({ theme }) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
     textAlign: "center",
-    paddingTop: theme.spacing(4),
+    paddingTop: 0,
     paddingBottom: theme.spacing(4),
     color: theme.vars.palette.text.secondary,
-    gap: theme.spacing(0.5),
+    gap: theme.spacing(1),
+    overflow: "auto",
 }));

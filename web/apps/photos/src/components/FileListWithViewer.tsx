@@ -58,6 +58,14 @@ export type FileListWithViewerProps = {
         file: EnteFile,
         sourceCollectionSummaryID?: number,
     ) => void;
+    /**
+     * Called when the list scrolls, providing the current scroll offset.
+     */
+    onScroll?: (scrollOffset: number) => void;
+    /**
+     * Called when the visible date at the top of the viewport changes.
+     */
+    onVisibleDateChange?: (date: string | undefined) => void;
 } & Pick<
     FileListProps,
     | "mode"
@@ -131,6 +139,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onSelectCollection,
     onSelectPerson,
     onAddFileToCollection,
+    onScroll,
+    onVisibleDateChange,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -210,6 +220,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             favoriteFileIDs,
                             emailByUserID,
                             listBorderRadius,
+                            onScroll,
+                            onVisibleDateChange,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
