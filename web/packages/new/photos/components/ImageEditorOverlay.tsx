@@ -526,6 +526,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = ({
             sx={{
                 backgroundColor: "background.default" /* Opaque */,
                 width: "100%",
+                zIndex: "var(--mui-zIndex-modal)",
             }}
             open
         >
