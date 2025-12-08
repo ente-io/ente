@@ -62,6 +62,7 @@ import {
 } from "./data-source";
 import { LikeAlbumSelectorModal } from "./LikeAlbumSelectorModal";
 import { LikesSidebar } from "./LikesSidebar";
+import { AddNameModal } from "./AddNameModal";
 import { PublicLikeModal } from "./PublicLikeModal";
 import {
     FileViewerPhotoSwipe,
@@ -392,6 +393,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const [openLikes, setOpenLikes] = useState(false);
     const [openLikeAlbumSelector, setOpenLikeAlbumSelector] = useState(false);
     const [openPublicLikeModal, setOpenPublicLikeModal] = useState(false);
+    const [openAddNameModal, setOpenAddNameModal] = useState(false);
     const [moreMenuAnchorEl, setMoreMenuAnchorEl] =
         useState<HTMLElement | null>(null);
     const [openImageEditor, setOpenImageEditor] = useState(false);
@@ -498,15 +500,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     );
 
     const handleLikeAnonymously = useCallback(() => {
-        // TODO: Implement anonymous like action when API is available
-        console.log("Like anonymously action");
         setOpenPublicLikeModal(false);
+        setOpenAddNameModal(true);
     }, []);
 
     const handleSignInAndLike = useCallback(() => {
-        // TODO: Redirect to sign in page with return URL
-        console.log("Sign in and like action");
-        setOpenPublicLikeModal(false);
+        window.open("https://web.ente.io", "_blank");
+    }, []);
+
+    const handleAddNameModalClose = useCallback(
+        () => setOpenAddNameModal(false),
+        [],
+    );
+
+    const handleAddNameSubmit = useCallback((name: string) => {
+        // TODO: Implement like with name when API is available
+        console.log("Like with name:", name);
+        setOpenAddNameModal(false);
+        setOpenLikes(true);
     }, []);
 
     // Callback invoked when the download action is triggered by activating the
@@ -1081,6 +1092,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 onClose={handlePublicLikeModalClose}
                 onLikeAnonymously={handleLikeAnonymously}
                 onSignInAndLike={handleSignInAndLike}
+            />
+            <AddNameModal
+                open={openAddNameModal}
+                onClose={handleAddNameModalClose}
+                onSubmit={handleAddNameSubmit}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}

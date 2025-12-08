@@ -1,7 +1,15 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, Dialog, IconButton, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    IconButton,
+    styled,
+    TextField,
+    Typography,
+} from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
-import React from "react";
+import React, { useState } from "react";
 
 // =============================================================================
 // Icons
@@ -24,7 +32,7 @@ const LikeIllustration: React.FC = () => (
             strokeLinejoin="round"
         />
         <mask
-            id="mask0_public_like"
+            id="mask0_add_name"
             style={{ maskType: "alpha" }}
             maskUnits="userSpaceOnUse"
             x="31"
@@ -37,7 +45,7 @@ const LikeIllustration: React.FC = () => (
                 fill="#08C225"
             />
         </mask>
-        <g mask="url(#mask0_public_like)">
+        <g mask="url(#mask0_add_name)">
             <path
                 d="M47.5975 41.0431C46.8515 39.3306 47.9859 37.1849 50.1312 36.2504C52.2765 35.316 54.6203 35.9467 55.3662 37.6591C56.1121 39.3716 54.9777 41.5173 52.8324 42.4518C50.6872 43.3862 48.3434 42.7555 47.5975 41.0431Z"
                 fill="white"
@@ -74,31 +82,39 @@ const LikeIllustration: React.FC = () => (
 // Types
 // =============================================================================
 
-export interface PublicLikeModalProps extends ModalVisibilityProps {
+export interface AddNameModalProps extends ModalVisibilityProps {
     /**
-     * Called when user clicks "Like anonymously".
+     * Called when user submits their name.
      */
-    onLikeAnonymously: () => void;
-    /**
-     * Called when user clicks "Sign in and like".
-     */
-    onSignInAndLike: () => void;
+    onSubmit: (name: string) => void;
 }
 
 /**
- * Modal dialog for liking a photo in a public album.
- * Shows options to like anonymously or sign in to like.
+ * Modal dialog for adding a name when liking a photo anonymously.
  */
-export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
+export const AddNameModal: React.FC<AddNameModalProps> = ({
     open,
     onClose,
-    onLikeAnonymously,
-    onSignInAndLike,
+    onSubmit,
 }) => {
+    const [name, setName] = useState("");
+
+    const handleSubmit = () => {
+        if (name.trim()) {
+            onSubmit(name.trim());
+            setName("");
+        }
+    };
+
+    const handleClose = () => {
+        setName("");
+        onClose();
+    };
+
     return (
-        <StyledDialog open={open} onClose={onClose}>
+        <StyledDialog open={open} onClose={handleClose}>
             <DialogWrapper>
-                <CloseButton onClick={onClose}>
+                <CloseButton onClick={handleClose}>
                     <CloseIcon sx={{ fontSize: 20 }} />
                 </CloseButton>
 
@@ -108,30 +124,31 @@ export const PublicLikeModal: React.FC<PublicLikeModalProps> = ({
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>Give it a like</Title>
+                        <Title>Add your name</Title>
                         <Subtitle>
-                            Let them know who liked it
+                            Add your name so your friends
                             <br />
-                            Or keep it just between you and the memory.
+                            know who liked it.
                         </Subtitle>
                     </TitleSection>
 
-                    <ButtonsSection>
-                        <AnonymousButton
-                            variant="outlined"
-                            fullWidth
-                            onClick={onLikeAnonymously}
-                        >
-                            Like anonymously
-                        </AnonymousButton>
-                        <SignInButton
-                            variant="contained"
-                            fullWidth
-                            onClick={onSignInAndLike}
-                        >
-                            Sign in and like
-                        </SignInButton>
-                    </ButtonsSection>
+                    <StyledTextField
+                        fullWidth
+                        placeholder="Name...."
+                        variant="standard"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        autoFocus
+                    />
+
+                    <SubmitButton
+                        variant="contained"
+                        fullWidth
+                        onClick={handleSubmit}
+                        hasName={!!name.trim()}
+                    >
+                        Set name and like
+                    </SubmitButton>
                 </ContentContainer>
             </DialogWrapper>
         </StyledDialog>
@@ -205,7 +222,7 @@ const TitleSection = styled(Box)(() => ({
     alignItems: "center",
     gap: 9,
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: 8,
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
@@ -230,54 +247,80 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     }),
 }));
 
-const ButtonsSection = styled(Box)(() => ({
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-}));
-
-const AnonymousButton = styled(Button)(({ theme }) => ({
-    display: "flex",
-    padding: "20px 16px",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    flex: "1 0 0",
-    borderRadius: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.04)",
-    border: "none",
-    fontSize: 16,
-    fontWeight: 500,
-    textTransform: "none",
-    color: "#000",
-    "&:hover": {
-        backgroundColor: "rgba(0, 0, 0, 0.08)",
-        border: "none",
+const StyledTextField = styled(TextField)(({ theme }) => ({
+    "& .MuiInput-root": {
+        height: 54,
+        backgroundColor: "#FAFAFA",
+        borderRadius: 12,
+        "&::before": {
+            borderBottom: "1px solid #E0E0E0",
+        },
+        "&::after": {
+            borderBottom: "2px solid #08C225",
+        },
+        "&:hover:not(.Mui-disabled)::before": {
+            borderBottom: "1px solid #BDBDBD",
+        },
+    },
+    "& .MuiInputBase-input": {
+        padding: "0 16px",
+        height: "100%",
+        boxSizing: "border-box",
+        fontSize: 16,
+        color: "#000",
+        "&::placeholder": {
+            color: "#999",
+            opacity: 1,
+        },
     },
     ...theme.applyStyles("dark", {
-        backgroundColor: "rgba(255, 255, 255, 0.08)",
-        color: "#fff",
-        "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.12)",
+        "& .MuiInput-root": {
+            backgroundColor: "rgba(255, 255, 255, 0.08)",
+            "&::before": {
+                borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+            },
+            "&:hover:not(.Mui-disabled)::before": {
+                borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+            },
+        },
+        "& .MuiInputBase-input": {
+            color: "#fff",
+            "&::placeholder": {
+                color: "rgba(255, 255, 255, 0.5)",
+            },
         },
     }),
 }));
 
-const SignInButton = styled(Button)(() => ({
-    display: "flex",
-    padding: "20px 16px",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    flex: "1 0 0",
-    borderRadius: 20,
-    backgroundColor: "#08C225",
-    fontSize: 16,
-    fontWeight: 500,
-    textTransform: "none",
-    color: "#fff",
-    "&:hover": {
-        backgroundColor: "#07A820",
-    },
-}));
+const SubmitButton = styled(Button)<{ hasName: boolean }>(
+    ({ hasName, theme }) => ({
+        display: "flex",
+        padding: "20px 16px",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 8,
+        flex: "1 0 0",
+        borderRadius: 20,
+        backgroundColor: hasName ? "#08C225" : "rgba(0, 0, 0, 0.04)",
+        fontSize: 16,
+        fontWeight: 500,
+        textTransform: "none",
+        color: hasName ? "#fff" : "#999",
+        boxShadow: "none",
+        "&:hover": {
+            backgroundColor: hasName ? "#07A820" : "rgba(0, 0, 0, 0.08)",
+            boxShadow: "none",
+        },
+        ...theme.applyStyles("dark", {
+            backgroundColor: hasName
+                ? "#08C225"
+                : "rgba(255, 255, 255, 0.08)",
+            color: hasName ? "#fff" : "rgba(255, 255, 255, 0.5)",
+            "&:hover": {
+                backgroundColor: hasName
+                    ? "#07A820"
+                    : "rgba(255, 255, 255, 0.12)",
+            },
+        }),
+    }),
+);
