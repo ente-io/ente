@@ -10,7 +10,6 @@ import "package:ente_legacy/pages/other_contact_page.dart";
 import "package:ente_legacy/pages/select_contact_page.dart"
     show showAddContactBottomSheet;
 import "package:ente_legacy/services/emergency_service.dart";
-import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
@@ -65,28 +64,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
       if (mounted) {
         setState(() {
           info = result;
-          // TODO: Remove dummy contacts - for testing MenuItemWidgetV2 only
-          if (info != null) {
-            final dummyUser = User(id: 0, email: "me@example.com");
-            final dummyEmails = [
-              "alice@example.com",
-              "bob@example.com",
-              "charlie@example.com",
-              "diana@example.com",
-              "eve@example.com",
-            ];
-            for (final email in dummyEmails) {
-              info!.contacts.add(
-                EmergencyContact(
-                  dummyUser,
-                  User(id: dummyEmails.indexOf(email) + 100, email: email),
-                  ContactState.contactAccepted,
-                  30,
-                ),
-              );
-            }
-            hasTrustedContact = info!.contacts.isNotEmpty;
-          }
+          hasTrustedContact = info?.contacts.isNotEmpty ?? false;
         });
       }
     } catch (e) {
@@ -427,7 +405,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
       contact: contact,
     );
 
-    if (result == TrustedContactAction.revoke) {
+    if (result?.action == TrustedContactAction.revoke) {
       final isPending = contact.isPendingInvite();
       final confirmed = await showConfirmationBottomSheet(
         context,
@@ -452,8 +430,9 @@ class _EmergencyPageState extends State<EmergencyPage> {
           unawaited(_fetchData());
         }
       }
-    } else if (result == TrustedContactAction.updateTime) {
-      // TODO: Implement update time functionality when API is available
+    } else if (result?.action == TrustedContactAction.updateTime) {
+      // TODO: Implement when server API for updating notice period is available
+      // final selectedDays = result!.selectedDays;
     }
   }
 
