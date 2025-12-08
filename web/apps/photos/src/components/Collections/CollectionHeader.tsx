@@ -73,6 +73,7 @@ export interface CollectionHeaderProps {
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     onCollectionShare: () => void;
     onCollectionCast: () => void;
+    onCollectionNotifications: () => void;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -124,6 +125,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onRemotePull,
     onCollectionShare,
     onCollectionCast,
+    onCollectionNotifications,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
 }) => {
@@ -550,6 +552,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
+                onNotificationsClick={onCollectionNotifications}
                 onShareClick={onCollectionShare}
             />
             {validMenuOptions.length > 0 && (
@@ -593,12 +596,14 @@ interface QuickOptionsProps {
     isDownloadInProgress: () => boolean;
     onEmptyTrashClick: () => void;
     onDownloadClick: () => void;
+    onNotificationsClick: () => void;
     onShareClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
+    onNotificationsClick,
     onShareClick,
     collectionSummary,
     isDownloadInProgress,
@@ -617,6 +622,9 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                     onClick={onDownloadClick}
                 />
             ))}
+        {showNotificationsQuickOption(collectionSummary) && (
+            <NotificationsQuickOption onClick={onNotificationsClick} />
+        )}
         {showShareQuickOption(collectionSummary) && (
             <ShareQuickOption
                 collectionSummary={collectionSummary}
@@ -666,6 +674,45 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     >
         <IconButton onClick={onClick}>
             <FileDownloadOutlinedIcon />
+        </IconButton>
+    </Tooltip>
+);
+
+const showNotificationsQuickOption = ({ type }: CollectionSummary) =>
+    type == "album" || type == "folder";
+
+const NotificationsIcon: React.FC = () => (
+    <svg
+        width="18"
+        height="19"
+        viewBox="0 0 20 21"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+    >
+        <path
+            d="M13.5 16.5C13.5 18.433 11.933 20 10 20C8.067 20 6.5 18.433 6.5 16.5M17.2311 16.5H2.76887C1.79195 16.5 1 15.708 1 14.7311C1 14.262 1.18636 13.8121 1.51809 13.4803L2.12132 12.8771C2.68393 12.3145 3 11.5514 3 10.7558V8C3 4.13401 6.13401 1 10 1C13.866 1 17 4.134 17 8V10.7558C17 11.5514 17.3161 12.3145 17.8787 12.8771L18.4819 13.4803C18.8136 13.8121 19 14.262 19 14.7311C19 15.708 18.208 16.5 17.2311 16.5Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
+const NotificationsQuickOption: React.FC<OptionProps> = ({ onClick }) => (
+    <Tooltip title={t("notifications")}>
+        <IconButton onClick={onClick}>
+            <Box
+                sx={{
+                    width: 24,
+                    height: 24,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <NotificationsIcon />
+            </Box>
         </IconButton>
     </Tooltip>
 );

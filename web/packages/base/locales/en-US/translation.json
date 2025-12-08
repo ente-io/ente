@@ -243,6 +243,7 @@
     "delete_photos": "Delete photos",
     "keep_photos": "Keep photos",
     "share_album": "Share album",
+    "notifications": "Notifications",
     "sharing_with_self": "You cannot share with yourself",
     "sharing_already_shared": "You're already sharing this with {{email}}",
     "sharing_album_not_allowed": "Sharing album not allowed",

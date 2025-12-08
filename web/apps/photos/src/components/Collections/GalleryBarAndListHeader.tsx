@@ -11,6 +11,7 @@ import {
     isSaveComplete,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
+import { NotificationsSidebar } from "ente-gallery/components/viewer/NotificationsSidebar";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
@@ -104,6 +105,10 @@ export const GalleryBarAndListHeader: React.FC<
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
         useModalVisibility();
+    const {
+        show: showCollectionNotifications,
+        props: collectionNotificationsVisibilityProps,
+    } = useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -151,6 +156,7 @@ export const GalleryBarAndListHeader: React.FC<
                         }
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
+                        onCollectionNotifications={showCollectionNotifications}
                     />
                 ) : activePerson ? (
                     <PeopleHeader
@@ -172,6 +178,7 @@ export const GalleryBarAndListHeader: React.FC<
         activePerson,
         showCollectionShare,
         showCollectionCast,
+        showCollectionNotifications,
         // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
@@ -229,6 +236,10 @@ export const GalleryBarAndListHeader: React.FC<
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}
                 collection={activeCollection}
+            />
+            <NotificationsSidebar
+                {...collectionNotificationsVisibilityProps}
+                albumName={activeCollection?.name ?? ""}
             />
         </>
     );
