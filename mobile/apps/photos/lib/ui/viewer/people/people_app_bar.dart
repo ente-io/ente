@@ -56,6 +56,8 @@ class PeopleAppBar extends StatefulWidget {
 enum PeoplePopupAction {
   rename,
   setCover,
+  pinPerson,
+  hideFromMemories,
   removeLabel,
   reviewSuggestions,
   unignore,
@@ -211,6 +213,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
   List<Widget> _getDefaultActions(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final currentPerson = person;
+    final bool isIgnored = currentPerson.data.isIgnored;
+    final bool isPinned = currentPerson.data.isPinned;
+    final bool hideFromMemories = currentPerson.data.hideFromMemories;
     final List<Widget> actions = <Widget>[];
     // If the user has selected files, don't show any actions
     if (widget.selectedFiles.files.isNotEmpty ||
@@ -241,7 +247,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       );
     }
 
-    if (!widget.isIgnored) {
+    if (!isIgnored) {
       items.addAll(
         [
           PopupMenuItem(
@@ -289,8 +295,44 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               ],
             ),
           ),
-          if (widget.person.data.email != null &&
-              (widget.person.data.email == Configuration.instance.getEmail()))
+          PopupMenuItem(
+            value: PeoplePopupAction.pinPerson,
+            child: Row(
+              children: [
+                Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  isPinned ? context.l10n.unpinPerson : context.l10n.pinPerson,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: PeoplePopupAction.hideFromMemories,
+            child: Row(
+              children: [
+                Icon(
+                  hideFromMemories
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(
+                  hideFromMemories
+                      ? context.l10n.showInMemories
+                      : context.l10n.hideFromMemories,
+                  style: textTheme.bodyBold,
+                ),
+              ],
+            ),
+          ),
+          if (currentPerson.data.email != null &&
+              (currentPerson.data.email == Configuration.instance.getEmail()))
             PopupMenuItem(
               value: PeoplePopupAction.reassignMe,
               child: Row(
@@ -367,6 +409,10 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               await _editPerson(context);
             } else if (value == PeoplePopupAction.setCover) {
               await setCoverPhoto(context);
+            } else if (value == PeoplePopupAction.pinPerson) {
+              await _togglePinState();
+            } else if (value == PeoplePopupAction.hideFromMemories) {
+              await _toggleHideFromMemories();
             } else if (value == PeoplePopupAction.unignore) {
               await _showPerson(context);
             } else if (value == PeoplePopupAction.removeLabel) {
@@ -380,6 +426,50 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     }
 
     return actions;
+  }
+
+  Future<void> _togglePinState() async {
+    final shouldPin = !person.data.isPinned;
+    try {
+      final updatedPerson = await PersonService.instance.updateAttributes(
+        person.remoteID,
+        isPinned: shouldPin,
+      );
+      setState(() {
+        person = updatedPerson;
+      });
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "_AppBarWidgetState._togglePinState",
+          person: updatedPerson,
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe('Failed to update pin state', e, s);
+    }
+  }
+
+  Future<void> _toggleHideFromMemories() async {
+    final shouldHideFromMemories = !person.data.hideFromMemories;
+    try {
+      final updatedPerson = await PersonService.instance.updateAttributes(
+        person.remoteID,
+        hideFromMemories: shouldHideFromMemories,
+      );
+      setState(() {
+        person = updatedPerson;
+      });
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "_AppBarWidgetState._toggleHideFromMemories",
+          person: updatedPerson,
+        ),
+      );
+    } catch (e, s) {
+      _logger.severe('Failed to update hide from memories state', e, s);
+    }
   }
 
   Future<void> _resetPerson(BuildContext context) async {
