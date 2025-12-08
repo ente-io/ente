@@ -275,7 +275,7 @@ jobs:
                   updateOnlyUnreleased: true
 
     build-macos:
-        runs-on: macos-13 # latest is 12
+        runs-on: macos-latest
 
         defaults:
             run:
