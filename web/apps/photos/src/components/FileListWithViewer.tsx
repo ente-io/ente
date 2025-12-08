@@ -176,7 +176,11 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 
     const handleSaveEditedImageCopy = useMemo(() => {
         if (!enableImageEditing) return undefined;
-        return (editedFile: File, collection: Collection, enteFile: EnteFile) => {
+        return (
+            editedFile: File,
+            collection: Collection,
+            enteFile: EnteFile,
+        ) => {
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
             void uploadManager.uploadFile(editedFile, collection, enteFile);

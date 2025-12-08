@@ -865,7 +865,8 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
                         {t("no_geotagged_photos", {
-                            defaultValue: "No photos found with location information",
+                            defaultValue:
+                                "No photos found with location information",
                         })}
                     </Typography>
                 </CenteredBox>

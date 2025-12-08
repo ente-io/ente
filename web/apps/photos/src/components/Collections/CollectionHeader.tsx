@@ -36,7 +36,6 @@ import {
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
 import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
-import type { FileListWithViewerProps } from "../FileListWithViewer";
 import {
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
@@ -63,6 +62,7 @@ import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
+import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { CollectionMapDialog } from "./CollectionMapDialog";
 
 export interface CollectionHeaderProps
