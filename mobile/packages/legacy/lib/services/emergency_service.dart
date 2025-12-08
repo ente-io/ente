@@ -115,6 +115,34 @@ class EmergencyContactService {
     }
   }
 
+  Future<bool> updateRecoveryNotice(
+    EmergencyContact contact,
+    int recoveryNoticeInDays,
+  ) async {
+    try {
+      await _enteDio.post(
+        "/emergency-contacts/update-recovery-notice",
+        data: {
+          "emergencyContactID": contact.emergencyContact.id,
+          "recoveryNoticeInDays": recoveryNoticeInDays,
+        },
+      );
+      return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        final message = e.response?.data?['message'] as String?;
+        if (message != null && message.contains('active recovery session')) {
+          return false;
+        }
+      }
+      _logger.severe('failed to update recovery notice', e);
+      rethrow;
+    } catch (e, s) {
+      _logger.severe('failed to update recovery notice', e, s);
+      rethrow;
+    }
+  }
+
   Future<void> startRecovery(EmergencyContact contact) async {
     try {
       await _enteDio.post(

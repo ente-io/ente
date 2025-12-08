@@ -138,25 +138,49 @@ class _EmergencyPageState extends State<EmergencyPage> {
                         ),
                       );
                     }
+                    final listIndex = index - 1;
                     final RecoverySessions recoverSession =
-                        info!.recoverSessions[index - 1];
-                    return MenuItemWidgetV2(
-                      captionedTextWidget: CaptionedTextWidgetV2(
-                        title: recoverSession.emergencyContact.email,
-                        makeTextBold: recoverSession.status.isNotEmpty,
-                        textColor: colorScheme.warning500,
-                      ),
-                      leadingIconWidget: UserAvatarWidget(
-                        recoverSession.emergencyContact,
-                        currentUserID: currentUserID,
-                        config: widget.config,
-                      ),
-                      leadingIconSize: 24,
-                      menuItemColor: colorScheme.fillFaint,
-                      trailingIcon: Icons.chevron_right,
-                      onTap: () async {
-                        await showRejectRecoveryDialog(recoverSession);
-                      },
+                        info!.recoverSessions[listIndex];
+                    final isLastItem =
+                        listIndex == info!.recoverSessions.length - 1;
+                    return Column(
+                      children: [
+                        MenuItemWidgetV2(
+                          captionedTextWidget: CaptionedTextWidgetV2(
+                            title: recoverSession.emergencyContact.email,
+                            textStyle: textTheme.small.copyWith(
+                              color: colorScheme.warning500,
+                              fontWeight: recoverSession.status.isNotEmpty
+                                  ? FontWeight.bold
+                                  : null,
+                            ),
+                          ),
+                          leadingIconSize: 24.0,
+                          surfaceExecutionStates: false,
+                          alwaysShowSuccessState: false,
+                          leadingIconWidget: UserAvatarWidget(
+                            recoverSession.emergencyContact,
+                            type: AvatarType.mini,
+                            currentUserID: currentUserID,
+                            config: widget.config,
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingIcon: Icons.chevron_right,
+                          trailingIconIsMuted: true,
+                          onTap: () async {
+                            await showRejectRecoveryDialog(recoverSession);
+                          },
+                          isTopBorderRadiusRemoved: listIndex > 0,
+                          isBottomBorderRadiusRemoved: !isLastItem,
+                          isFirstItem: listIndex == 0,
+                          isLastItem: isLastItem,
+                        ),
+                        if (!isLastItem)
+                          DividerWidget(
+                            dividerType: DividerType.menu,
+                            bgColor: colorScheme.fillFaint,
+                          ),
+                      ],
                     );
                   },
                   childCount: 1 + info!.recoverSessions.length,
@@ -431,8 +455,36 @@ class _EmergencyPageState extends State<EmergencyPage> {
         }
       }
     } else if (result?.action == TrustedContactAction.updateTime) {
-      // TODO: Implement when server API for updating notice period is available
-      // final selectedDays = result!.selectedDays;
+      final selectedDays = result!.selectedDays;
+      if (selectedDays == null) return;
+      try {
+        final success = await EmergencyContactService.instance
+            .updateRecoveryNotice(contact, selectedDays);
+        if (success) {
+          final updatedContact =
+              contact.copyWith(recoveryNoticeInDays: selectedDays);
+          final index = info?.contacts.indexOf(contact);
+          if (index != null && index >= 0) {
+            info?.contacts[index] = updatedContact;
+          }
+          if (mounted) {
+            setState(() {});
+          }
+        } else {
+          if (mounted) {
+            await showAlertBottomSheet(
+              context,
+              title: context.strings.cannotUpdateRecoveryTime,
+              message: context.strings.cannotUpdateRecoveryTimeMessage,
+              assetPath: "assets/warning-blue.png",
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          showShortToast(context, context.strings.somethingWentWrong);
+        }
+      }
     }
   }
 

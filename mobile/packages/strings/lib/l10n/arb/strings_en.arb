@@ -815,6 +815,8 @@
   "addTrustedContact": "Add trusted contact",
   "removeInvite": "Remove invite",
   "rejectRecovery": "Reject recovery",
+  "cannotUpdateRecoveryTime": "Cannot update recovery time",
+  "cannotUpdateRecoveryTimeMessage": "Recovery time cannot be changed while there is an active recovery session. Please reject or wait for the recovery to complete.",
   "recoveryInitiated": "Recovery initiated",
   "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
   "@recoveryInitiatedDesc": {
