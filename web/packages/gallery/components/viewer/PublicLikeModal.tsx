@@ -196,7 +196,7 @@ const IllustrationWrapper = styled(Box)(() => ({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: -12,
+    marginBottom: 8,
 }));
 
 const TitleSection = styled(Box)(() => ({

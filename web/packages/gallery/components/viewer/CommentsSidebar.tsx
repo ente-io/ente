@@ -14,6 +14,8 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { t } from "i18next";
 import React, { useEffect, useRef, useState } from "react";
+import { AddNameModal } from "./AddNameModal";
+import { PublicCommentModal } from "./PublicCommentModal";
 
 // =============================================================================
 // Icons
@@ -951,6 +953,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     );
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
     const [comments, setComments] = useState<Comment[]>(mockComments);
+    const [showPublicCommentModal, setShowPublicCommentModal] = useState(false);
+    const [showAddNameModal, setShowAddNameModal] = useState(false);
+    const [pendingComment, setPendingComment] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const commentsContainerRef = useRef<HTMLDivElement>(null);
 
@@ -968,14 +973,31 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         (new URLSearchParams(window.location.search).has("collection") ||
             new URLSearchParams(window.location.search).has("t"));
 
+    // Check if this is a public album (has ?t=... in URL)
+    const isPublicAlbum =
+        typeof window !== "undefined" &&
+        new URLSearchParams(window.location.search).has("t");
+
     const handleSend = () => {
         if (!comment.trim()) return;
-        // TODO: Call API to store comment
+
+        // For public albums, show the modal instead of directly sending
+        if (isPublicAlbum) {
+            setPendingComment(comment.trim());
+            setShowPublicCommentModal(true);
+            return;
+        }
+
+        // For authenticated users, send directly
+        addComment(comment.trim(), "Anand");
+    };
+
+    const addComment = (text: string, userName: string) => {
         const newComment: Comment = {
             id: String(Date.now()),
             collectionID: selectedCollection.id,
             fileID: 1,
-            encData: { text: comment.trim(), userName: "Anand" },
+            encData: { text, userName },
             parentCommentID: replyingTo?.id,
             isDeleted: false,
             userID: CURRENT_USER_ID,
@@ -991,6 +1013,23 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 commentsContainerRef.current.scrollTop = 0;
             }
         }, 0);
+    };
+
+    const handleCommentAnonymously = () => {
+        setShowPublicCommentModal(false);
+        setShowAddNameModal(true);
+    };
+
+    const handleSignInAndComment = () => {
+        setShowPublicCommentModal(false);
+        // Redirect to web.ente.io for sign in
+        window.open("https://web.ente.io", "_blank");
+    };
+
+    const handleNameSubmit = (name: string) => {
+        setShowAddNameModal(false);
+        addComment(pendingComment, name);
+        setPendingComment("");
     };
 
     const handleReply = (commentToReply: Comment) => {
@@ -1377,6 +1416,23 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     </SendButton>
                 </InputContainer>
             </DrawerContentWrapper>
+
+            {/* Public album comment modals */}
+            <PublicCommentModal
+                open={showPublicCommentModal}
+                onClose={() => setShowPublicCommentModal(false)}
+                onCommentAnonymously={handleCommentAnonymously}
+                onSignInAndComment={handleSignInAndComment}
+            />
+            <AddNameModal
+                open={showAddNameModal}
+                onClose={() => {
+                    setShowAddNameModal(false);
+                    setPendingComment("");
+                }}
+                onSubmit={handleNameSubmit}
+                actionType="comment"
+            />
         </SidebarDrawer>
     );
 };

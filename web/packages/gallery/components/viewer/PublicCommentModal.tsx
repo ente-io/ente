@@ -1,82 +1,11 @@
 import CloseIcon from "@mui/icons-material/Close";
-import {
-    Box,
-    Button,
-    Dialog,
-    IconButton,
-    styled,
-    TextField,
-    Typography,
-} from "@mui/material";
+import { Box, Button, Dialog, IconButton, styled, Typography } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
-import React, { useState } from "react";
+import React from "react";
 
 // =============================================================================
 // Icons
 // =============================================================================
-
-const LikeIllustration: React.FC = () => (
-    <svg
-        width="126"
-        height="121"
-        viewBox="0 0 126 121"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path
-            d="M84.7129 23.0781C96.7222 23.0784 105.29 32.8476 105.29 44.499C105.29 53.3449 99.7258 62.2116 93.4453 69.4932C87.0622 76.8936 79.4391 83.2238 74.3574 87.0557C69.973 90.3616 64.031 90.3614 59.6465 87.0557C54.5648 83.2238 46.9408 76.8937 40.5576 69.4932C34.2771 62.2116 28.7129 53.3449 28.7129 44.499C28.713 32.8474 37.2813 23.0781 49.291 23.0781C54.9545 23.0782 60.4297 24.9062 67.001 30.9004C73.5726 24.9056 79.0491 23.0781 84.7129 23.0781Z"
-            fill="#08C225"
-            stroke="#232323"
-            strokeWidth="5.73358"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        />
-        <mask
-            id="mask0_add_name"
-            style={{ maskType: "alpha" }}
-            maskUnits="userSpaceOnUse"
-            x="31"
-            y="25"
-            width="72"
-            height="62"
-        >
-            <path
-                d="M61.3721 84.7662C51.3787 77.2306 31.5801 60.0026 31.5801 44.4993C31.5801 34.2522 39.0372 25.9453 49.2909 25.9453C54.6041 25.9453 59.9173 27.7313 67.0016 34.8751C74.086 27.7313 79.3992 25.9453 84.7124 25.9453C94.9659 25.9453 102.423 34.2522 102.423 44.4993C102.423 60.0026 82.6247 77.2306 72.6312 84.7662C69.2683 87.3019 64.735 87.3019 61.3721 84.7662Z"
-                fill="#08C225"
-            />
-        </mask>
-        <g mask="url(#mask0_add_name)">
-            <path
-                d="M47.5975 41.0431C46.8515 39.3306 47.9859 37.1849 50.1312 36.2504C52.2765 35.316 54.6203 35.9467 55.3662 37.6591C56.1121 39.3716 54.9777 41.5173 52.8324 42.4518C50.6872 43.3862 48.3434 42.7555 47.5975 41.0431Z"
-                fill="white"
-            />
-            <path
-                d="M44.5677 45.0545C44.3136 44.4712 44.7025 43.7391 45.4364 43.4194C46.1704 43.0997 46.9713 43.3135 47.2254 43.8968C47.4795 44.4802 47.0906 45.2123 46.3567 45.532C45.6227 45.8517 44.8218 45.6379 44.5677 45.0545Z"
-                fill="white"
-            />
-            <path
-                d="M102.994 32.271C101.622 55.1395 78.9821 78.0073 50.9683 82.581C49.2531 88.2982 42.3926 93.7861 42.3926 95.1582C42.3926 96.5303 48.1097 107.926 50.9683 113.453L89.8447 101.447L115 66.5725C113.094 57.9969 106.196 31.3563 102.994 32.271Z"
-                fill="#46A030"
-            />
-            <path
-                d="M59.7039 28.2666C34.9591 23.1218 29.8137 47.7054 32.6723 55.1377L23.1143 51.7074C21.3992 47.3243 18.1976 37.9863 19.1123 35.6995C20.0271 33.4126 22.1615 16.833 23.1143 8.829L55.1302 3.68359L96.8651 13.9744C97.6274 18.1664 98.4659 26.8936 95.7217 28.2666C80.2855 22.5506 66.5644 33.9826 66.5644 33.4109C66.5644 32.9535 68.4701 30.5523 69.423 29.4089C66.3738 29.0281 60.1612 28.2666 59.7039 28.2666Z"
-                fill="white"
-            />
-        </g>
-        <path
-            d="M20.9639 58.8477C14.9399 61.182 10.9104 66.0874 11.263 71.48C10.9104 66.0874 6.28324 61.7544 -9.80907e-05 60.2184C6.02383 57.884 10.0533 52.9787 9.70073 47.5861C10.0533 52.9787 14.6805 57.3117 20.9639 58.8477Z"
-            fill="#08C225"
-        />
-        <path
-            d="M119.579 91.9746C111.591 92.7003 105.114 97.1692 103.689 103.722C105.114 97.1692 101.077 90.4145 94.1117 86.438C102.099 85.7122 108.576 81.2434 110.001 74.6902C108.576 81.2434 112.613 87.9981 119.579 91.9746Z"
-            fill="#08C225"
-        />
-        <path
-            d="M112.728 9.21189C108.334 9.91374 104.912 12.6353 104.37 16.3181C104.912 12.6353 102.421 9.04853 98.4114 7.10627C102.806 6.40442 106.228 3.68284 106.77 7.55054e-05C106.228 3.68284 108.719 7.26962 112.728 9.21189Z"
-            fill="#08C225"
-        />
-    </svg>
-);
 
 const CommentIllustration: React.FC = () => (
     <svg
@@ -95,7 +24,7 @@ const CommentIllustration: React.FC = () => (
             strokeLinejoin="round"
         />
         <mask
-            id="mask0_add_name_comment"
+            id="mask0_737_21326"
             style={{ maskType: "alpha" }}
             maskUnits="userSpaceOnUse"
             x="36"
@@ -108,7 +37,7 @@ const CommentIllustration: React.FC = () => (
                 fill="#08C225"
             />
         </mask>
-        <g mask="url(#mask0_add_name_comment)">
+        <g mask="url(#mask0_737_21326)">
             <path
                 d="M90.785 29.2779C55.9844 19.5648 41.0889 44.5028 37.9912 58.186L34.2834 72.1186C32.1784 72.553 27.1513 72.4724 23.883 68.6747C19.7976 63.9275 7.9607 55.936 8.75491 45.336C9.54911 34.736 9.85699 18.7723 10.8726 17.072C11.6851 15.7117 48.8217 4.51972 67.2885 -0.90625L123.817 3.32912C127.307 16.0258 125.586 38.991 90.785 29.2779Z"
                 fill="white"
@@ -157,80 +86,64 @@ const CommentIllustration: React.FC = () => (
 // Types
 // =============================================================================
 
-export interface AddNameModalProps extends ModalVisibilityProps {
+export interface PublicCommentModalProps extends ModalVisibilityProps {
     /**
-     * Called when user submits their name.
+     * Called when user clicks "Comment anonymously".
      */
-    onSubmit: (name: string) => void;
+    onCommentAnonymously: () => void;
     /**
-     * The type of action being performed (like or comment).
-     * Defaults to 'like'.
+     * Called when user clicks "Sign in and comment".
      */
-    actionType?: "like" | "comment";
+    onSignInAndComment: () => void;
 }
 
 /**
- * Modal dialog for adding a name when liking or commenting on a photo anonymously.
+ * Modal dialog for commenting on a photo in a public album.
+ * Shows options to comment anonymously or sign in to comment.
  */
-export const AddNameModal: React.FC<AddNameModalProps> = ({
+export const PublicCommentModal: React.FC<PublicCommentModalProps> = ({
     open,
     onClose,
-    onSubmit,
-    actionType = "like",
+    onCommentAnonymously,
+    onSignInAndComment,
 }) => {
-    const [name, setName] = useState("");
-    const isComment = actionType === "comment";
-
-    const handleSubmit = () => {
-        if (name.trim()) {
-            onSubmit(name.trim());
-            setName("");
-        }
-    };
-
-    const handleClose = () => {
-        setName("");
-        onClose();
-    };
-
     return (
-        <StyledDialog open={open} onClose={handleClose}>
+        <StyledDialog open={open} onClose={onClose}>
             <DialogWrapper>
-                <CloseButton onClick={handleClose}>
+                <CloseButton onClick={onClose}>
                     <CloseIcon sx={{ fontSize: 20 }} />
                 </CloseButton>
 
                 <ContentContainer>
                     <IllustrationWrapper>
-                        {isComment ? <CommentIllustration /> : <LikeIllustration />}
+                        <CommentIllustration />
                     </IllustrationWrapper>
 
                     <TitleSection>
-                        <Title>Add your name</Title>
+                        <Title>Say something nice</Title>
                         <Subtitle>
-                            Add your name so your friends
+                            Share who said it, or keep it as a private
                             <br />
-                            know who {isComment ? "said it" : "liked it"}.
+                            memory.
                         </Subtitle>
                     </TitleSection>
 
-                    <StyledTextField
-                        fullWidth
-                        placeholder="Name...."
-                        variant="standard"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        autoFocus
-                    />
-
-                    <SubmitButton
-                        variant="contained"
-                        fullWidth
-                        onClick={handleSubmit}
-                        hasName={!!name.trim()}
-                    >
-                        {isComment ? "Set name and comment" : "Set name and like"}
-                    </SubmitButton>
+                    <ButtonsSection>
+                        <AnonymousButton
+                            variant="outlined"
+                            fullWidth
+                            onClick={onCommentAnonymously}
+                        >
+                            Comment anonymously
+                        </AnonymousButton>
+                        <SignInButton
+                            variant="contained"
+                            fullWidth
+                            onClick={onSignInAndComment}
+                        >
+                            Sign in and comment
+                        </SignInButton>
+                    </ButtonsSection>
                 </ContentContainer>
             </DialogWrapper>
         </StyledDialog>
@@ -304,7 +217,7 @@ const TitleSection = styled(Box)(() => ({
     alignItems: "center",
     gap: 9,
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 16,
 }));
 
 const Title = styled(Typography)(({ theme }) => ({
@@ -329,80 +242,54 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     }),
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-    "& .MuiInput-root": {
-        height: 54,
-        backgroundColor: "#FAFAFA",
-        borderRadius: 12,
-        "&::before": {
-            borderBottom: "1px solid #E0E0E0",
-        },
-        "&::after": {
-            borderBottom: "2px solid #08C225",
-        },
-        "&:hover:not(.Mui-disabled)::before": {
-            borderBottom: "1px solid #BDBDBD",
-        },
-    },
-    "& .MuiInputBase-input": {
-        padding: "0 16px",
-        height: "100%",
-        boxSizing: "border-box",
-        fontSize: 16,
-        color: "#000",
-        "&::placeholder": {
-            color: "#999",
-            opacity: 1,
-        },
+const ButtonsSection = styled(Box)(() => ({
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+}));
+
+const AnonymousButton = styled(Button)(({ theme }) => ({
+    display: "flex",
+    padding: "20px 16px",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    flex: "1 0 0",
+    borderRadius: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.04)",
+    border: "none",
+    fontSize: 16,
+    fontWeight: 500,
+    textTransform: "none",
+    color: "#000",
+    "&:hover": {
+        backgroundColor: "rgba(0, 0, 0, 0.08)",
+        border: "none",
     },
     ...theme.applyStyles("dark", {
-        "& .MuiInput-root": {
-            backgroundColor: "rgba(255, 255, 255, 0.08)",
-            "&::before": {
-                borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
-            },
-            "&:hover:not(.Mui-disabled)::before": {
-                borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
-            },
-        },
-        "& .MuiInputBase-input": {
-            color: "#fff",
-            "&::placeholder": {
-                color: "rgba(255, 255, 255, 0.5)",
-            },
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        color: "#fff",
+        "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 0.12)",
         },
     }),
 }));
 
-const SubmitButton = styled(Button)<{ hasName: boolean }>(
-    ({ hasName, theme }) => ({
-        display: "flex",
-        padding: "20px 16px",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 8,
-        flex: "1 0 0",
-        borderRadius: 20,
-        backgroundColor: hasName ? "#08C225" : "rgba(0, 0, 0, 0.04)",
-        fontSize: 16,
-        fontWeight: 500,
-        textTransform: "none",
-        color: hasName ? "#fff" : "#999",
-        boxShadow: "none",
-        "&:hover": {
-            backgroundColor: hasName ? "#07A820" : "rgba(0, 0, 0, 0.08)",
-            boxShadow: "none",
-        },
-        ...theme.applyStyles("dark", {
-            backgroundColor: hasName
-                ? "#08C225"
-                : "rgba(255, 255, 255, 0.08)",
-            color: hasName ? "#fff" : "rgba(255, 255, 255, 0.5)",
-            "&:hover": {
-                backgroundColor: hasName
-                    ? "#07A820"
-                    : "rgba(255, 255, 255, 0.12)",
-            },
-        }),
-    }),
-);
+const SignInButton = styled(Button)(() => ({
+    display: "flex",
+    padding: "20px 16px",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    flex: "1 0 0",
+    borderRadius: 20,
+    backgroundColor: "#08C225",
+    fontSize: 16,
+    fontWeight: 500,
+    textTransform: "none",
+    color: "#fff",
+    "&:hover": {
+        backgroundColor: "#07A820",
+    },
+}));
