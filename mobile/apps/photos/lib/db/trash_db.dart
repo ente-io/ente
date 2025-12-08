@@ -217,7 +217,7 @@ class TrashDB {
         trashFile.pubMagicMetadata!.editedTime != null) {
       // override existing creationTime to avoid re-writing all queries related
       // to loading the gallery
-      row[columnCreationTime] = trashFile.pubMagicMetadata!.editedTime!;
+      trashFile.creationTime = trashFile.pubMagicMetadata!.editedTime!;
     }
 
     return trashFile;
