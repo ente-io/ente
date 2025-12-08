@@ -51,7 +51,7 @@ import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
 
 extension FileUploadItemX on FileUploadItem? {
-  bool get isManualUpload => this?.queueSource == null;
+  bool get isManualUpload => this?.file.queueSource == null;
 }
 
 class FileUploader {
@@ -182,10 +182,14 @@ class FileUploader {
     int collectionID, {
     String? queueSource,
   }) {
+    final effectiveQueueSource = file.queueSource ?? queueSource;
+    if (file.queueSource == null && effectiveQueueSource != null) {
+      file.queueSource = effectiveQueueSource;
+    }
     _logger.internalInfo(
       "[UPLOAD-DEBUG] FileUploader.upload() called for ${file.title} "
       "(localID: ${file.localID}, collectionID: $collectionID, "
-      "queueSource: $queueSource, isProcessBg: $isProcessBg)",
+      "queueSource: $effectiveQueueSource, isProcessBg: $isProcessBg)",
     );
 
     if (file.localID == null || file.localID!.isEmpty) {
@@ -207,7 +211,6 @@ class FileUploader {
         file,
         collectionID,
         completer,
-        queueSource: queueSource,
       );
       _allBackups[localID] = BackupItem(
         status: BackupItemStatus.inQueue,
@@ -302,7 +305,8 @@ class FileUploader {
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
-      // Skip manual uploads when applying only-new filter
+      // Only-new applies to auto-sync uploads; manual uploads (queueSource null) bypass it.
+      // Folder deselection is handled separately in _pollQueue for auto-sync items only.
       if (isOnlyNewFilter && pendingUpload.value.isManualUpload) {
         return;
       }
@@ -426,9 +430,9 @@ class FileUploader {
           _logger.internalInfo("[UPLOAD-DEBUG] No non-video entry available");
         }
       }
-      // Folder deselection check - only for auto-sync uploads with queueSource
+      // Folder deselection check - auto-sync uploads only (manual uploads have no queueSource)
       if (flagService.enableBackupFolderSync && !pendingEntry.isManualUpload) {
-        final queueSource = pendingEntry!.queueSource!;
+        final queueSource = pendingEntry!.file.queueSource!;
         final isSelected =
             DeviceFolderSelectionCache.instance.isSelected(queueSource);
         if (!isSelected) {
@@ -508,8 +512,6 @@ class FileUploader {
     );
     final localID = file.localID!;
     try {
-      // Note: Folder deselection and only-new filters are applied in _pollQueue
-      // before this method is called. No need to duplicate checks here.
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Calling _tryToUpload() for ${file.title} with ${kFileUploadTimeout.inSeconds}s timeout...",
       );
@@ -1866,17 +1868,12 @@ class FileUploadItem {
   final int collectionID;
   final Completer<EnteFile> completer;
 
-  /// The device folder path ID if this upload came from auto-sync.
-  /// Used for folder deselection checks.
-  final String? queueSource;
-
   UploadStatus status;
 
   FileUploadItem(
     this.file,
     this.collectionID,
     this.completer, {
-    this.queueSource,
     this.status = UploadStatus.notStarted,
   });
 }

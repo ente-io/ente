@@ -798,7 +798,6 @@ class RemoteSyncService {
       );
     }
     final List<Future> futures = [];
-    final bool enableBackupFolderSync = flagService.enableBackupFolderSync;
 
     _logger.internalInfo(
       "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
