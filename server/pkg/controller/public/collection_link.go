@@ -70,6 +70,10 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 			}
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
+		enableJoin := false
+		if req.EnableJoin != nil {
+			enableJoin = *req.EnableJoin
+		}
 
 		response := ente.PublicURL{
 			URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
@@ -77,6 +81,7 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 			DeviceLimit:     req.DeviceLimit,
 			EnableDownload:  true,
 			EnableCollect:   req.EnableCollect,
+			EnableJoin:      enableJoin,
 			PasswordEnabled: false,
 			MinRole:         nil,
 		}

@@ -217,6 +217,10 @@ func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente
 	if userID != collection.Owner.ID {
 		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
+	valTrue := true
+	if req.EnableJoin == nil {
+		req.EnableJoin = &valTrue
+	}
 	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
 		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
