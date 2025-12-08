@@ -515,29 +515,23 @@ class RemoteSyncService {
       "[UPLOAD-DEBUG] Applying only-new backup threshold $thresholdMicros",
     );
     // Note: removeFromQueueWhere only removes auto-synced files (detected via
-    // device folder mapping) from the upload queue. Manual uploads are
-    // preserved.
+    // queueSource) from the upload queue. Manual uploads are preserved.
     _uploader.removeFromQueueWhere(
       (file) => (file.creationTime ?? 0) < thresholdMicros,
       BackupTooOldForPreferenceError(),
     );
-    // Clean up DB entries for auto-synced files that are too old.
-    // Only clean up files in collections that are mapped to device folders
-    // (auto-sync collections). Files manually added to other collections
-    // are preserved.
-    final Set<int> autoSyncCollectionIDs =
-        await _db.getDeviceSyncCollectionIDs();
-    if (autoSyncCollectionIDs.isEmpty) {
-      return;
-    }
+
+    // Clean up DB entries for auto-synced files (queueSource != null) that are
+    // too old. Manual uploads stay queued even if they target an auto-sync
+    // collection.
     int cleanedEntries = 0;
     final pending = await _db.getFilesPendingForUpload();
     for (final file in pending) {
       if (file.localID == null || file.collectionID == null) {
         continue;
       }
-      // Only clean up files in auto-sync collections
-      if (!autoSyncCollectionIDs.contains(file.collectionID)) {
+      if (file.queueSource == null) {
+        // Manual upload, skip
         continue;
       }
       final creationTime = file.creationTime ?? 0;
