@@ -76,11 +76,8 @@ class BackupPreferenceService {
   }
 
   Future<void> setOnlyNewSinceEpoch(int timestamp) async {
-    if (timestamp <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $timestamp");
-      return;
-    }
-    await _applyOnlyNewThreshold(timestamp);
+    await _prefs.setInt(_keyOnlyNewSinceEpoch, timestamp);
+    _triggerOnlyNewCleanup(timestamp);
   }
 
   Future<void> setOnlyNewSinceSevenDaysAgo() async {
@@ -91,39 +88,27 @@ class BackupPreferenceService {
       sevenDaysAgo.month,
       sevenDaysAgo.day,
     ).microsecondsSinceEpoch;
-    if (threshold <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $threshold");
-      return;
-    }
     _logger.info(
       "Setting only-new backup threshold to $threshold (7 days ago at 12 AM)",
     );
-    await _applyOnlyNewThreshold(threshold);
+    await setOnlyNewSinceEpoch(threshold);
     await _ensureDefaultFolderSelection();
   }
 
   Future<void> setOnlyNewSinceNow() async {
     final now = DateTime.now().microsecondsSinceEpoch;
-    if (now <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $now");
-      return;
-    }
     _logger.info("Setting only-new backup threshold to $now");
-    await _applyOnlyNewThreshold(now);
+    await setOnlyNewSinceEpoch(now);
   }
 
   Future<void> clearOnlyNewSinceEpoch() async {
     await _prefs.remove(_keyOnlyNewSinceEpoch);
   }
 
-  /// Applies the only-new backup threshold by saving it to preferences and
-  /// triggering cleanup of old pending uploads in the background.
-  /// The cleanup is fire-and-forget to avoid blocking the UI during
-  /// onboarding or settings toggle.
-  Future<void> _applyOnlyNewThreshold(int timestamp) async {
-    await _prefs.setInt(_keyOnlyNewSinceEpoch, timestamp);
-    // Fire-and-forget: run cleanup in background to avoid blocking UI.
-    // The actual filtering will happen during sync/upload anyway.
+  /// Triggers cleanup of old pending uploads after only-new threshold updates.
+  /// Fire-and-forget to avoid blocking the UI; actual filtering happens during
+  /// sync/upload anyway.
+  void _triggerOnlyNewCleanup(int timestamp) {
     unawaited(
       RemoteSyncService.instance
           .handleOnlyNewBackupThresholdUpdated(timestamp)
