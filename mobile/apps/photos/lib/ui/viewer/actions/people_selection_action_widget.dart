@@ -87,12 +87,15 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
         final onePersonAndClusters =
             selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
-        final anythingSelected =
-            selectedPersonIds.isNotEmpty || selectedClusterIds.isNotEmpty;
         final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
             selectedPersonIds.every(
               (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
             );
+        final bool showEditAction = onlyOnePerson;
+        final bool showReviewAction = onlyOnePerson;
+        final bool showMergeAction = onePersonAndClusters;
+        final bool showResetAction = onlyOnePerson;
+        final bool showAutoAddAction = onlyPersonSelected;
         final bool showPinAction = onlyPersonSelected &&
             namedPersonsSelected &&
             selectedPersonIds.every(
@@ -113,13 +116,29 @@ class _PeopleSelectionActionWidgetState
             selectedPersonIds.every(
               (id) => personMap[id]?.data.hideFromMemories ?? false,
             );
+        final bool showIgnoreAction =
+            selectedClusterIds.isNotEmpty && selectedPersonIds.isEmpty;
+        final bool hasVisibleAction = showEditAction ||
+            showReviewAction ||
+            showIgnoreAction ||
+            showMergeAction ||
+            showResetAction ||
+            showPinAction ||
+            showUnpinAction ||
+            showHideFromMemoriesAction ||
+            showShowInMemoriesAction ||
+            showAutoAddAction;
+
+        if (!hasVisibleAction) {
+          return const SizedBox.shrink();
+        }
 
         items.add(
           SelectionActionButton(
             labelText: AppLocalizations.of(context).edit,
             icon: Icons.edit_outlined,
             onTap: _onEditPerson,
-            shouldShow: onlyOnePerson,
+            shouldShow: showEditAction,
           ),
         );
         items.add(
@@ -127,7 +146,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).review,
             icon: Icons.search_outlined,
             onTap: _onReviewSuggestion,
-            shouldShow: onlyOnePerson,
+            shouldShow: showReviewAction,
           ),
         );
         items.add(
@@ -135,7 +154,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).ignore,
             icon: Icons.hide_image_outlined,
             onTap: _onIgnore,
-            shouldShow: anythingSelected,
+            shouldShow: showIgnoreAction,
           ),
         );
         items.add(
@@ -143,7 +162,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).merge,
             icon: Icons.merge_outlined,
             onTap: _onMerge,
-            shouldShow: onePersonAndClusters,
+            shouldShow: showMergeAction,
           ),
         );
         items.add(
@@ -151,7 +170,7 @@ class _PeopleSelectionActionWidgetState
             labelText: AppLocalizations.of(context).reset,
             icon: Icons.remove_outlined,
             onTap: _onResetPerson,
-            shouldShow: onlyOnePerson,
+            shouldShow: showResetAction,
           ),
         );
         items.add(
@@ -196,7 +215,7 @@ class _PeopleSelectionActionWidgetState
               color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
             ),
             onTap: _autoAddToAlbum,
-            shouldShow: onlyPersonSelected,
+            shouldShow: showAutoAddAction,
           ),
         );
 
