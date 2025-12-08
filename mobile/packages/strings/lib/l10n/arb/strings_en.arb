@@ -908,6 +908,10 @@
   "@updateTime": {
     "description": "Button label to update the recovery time for a trusted contact"
   },
+  "recoveryTimeUpdated": "Recovery time updated",
+  "@recoveryTimeUpdated": {
+    "description": "Toast message shown when recovery time is updated successfully"
+  },
   "revokeInvite": "Revoke invite",
   "@revokeInvite": {
     "description": "Button label to revoke a pending trusted contact invite"
