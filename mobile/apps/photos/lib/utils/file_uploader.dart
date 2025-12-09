@@ -221,7 +221,7 @@ class FileUploader {
         "[UPLOAD-DEBUG] File ${file.title} added to queue (queue size: ${_queue.length}). "
         "Calling _pollQueue()...",
       );
-      unawaited(_pollQueue());
+      _pollQueue();
       _logger.internalInfo(
         "[UPLOAD-DEBUG] _pollQueue() called for ${file.title}. Returning completer.future",
       );
@@ -547,7 +547,7 @@ class FileUploader {
       if (file.fileType == FileType.video) {
         _videoUploadCounter--;
       }
-      unawaited(_pollQueue());
+      _pollQueue();
     }
   }
 

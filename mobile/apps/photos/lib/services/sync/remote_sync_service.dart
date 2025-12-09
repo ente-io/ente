@@ -85,7 +85,7 @@ class RemoteSyncService {
 
   RemoteSyncService._privateConstructor();
 
-  Future<void> init(SharedPreferences preferences) async {
+  void init(SharedPreferences preferences) {
     _prefs = preferences;
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
