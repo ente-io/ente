@@ -32,7 +32,6 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/language_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/notification_service.dart';
-import 'package:photos/services/sync/device_folder_selection_cache.dart';
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -482,8 +481,7 @@ class RemoteSyncService {
     final Set<int> oldCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     await _db.updateDevicePathSyncStatus(syncStatusUpdate);
-    await DeviceFolderSelectionCache.instance.ensureInitialized();
-    DeviceFolderSelectionCache.instance.update(syncStatusUpdate);
+    await deviceFolderSelectionCache.update(syncStatusUpdate);
     final Set<int> newCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
@@ -577,8 +575,10 @@ class RemoteSyncService {
     final collection =
         await _collectionsService.getOrCreateForPath(deviceCollection.name);
     await _db.updateDeviceCollection(deviceCollection.id, collection.id);
-    DeviceFolderSelectionCache.instance
-        .setCollectionIdMapping(collection.id, deviceCollection.id);
+    await deviceFolderSelectionCache.setCollectionIdMapping(
+      collection.id,
+      deviceCollection.id,
+    );
     return collection.id;
   }
 

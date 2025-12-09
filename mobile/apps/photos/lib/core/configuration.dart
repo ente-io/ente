@@ -34,7 +34,6 @@ import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/sync/device_folder_selection_cache.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
@@ -234,7 +233,7 @@ class Configuration {
     // Clear all service caches
     await SimilarImagesService.instance.clearCache();
     await IgnoredFilesService.instance.reset();
-    DeviceFolderSelectionCache.instance.clear();
+    deviceFolderSelectionCache.clear();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
 
     // Clear additional caches (safe to call even if not initialized)

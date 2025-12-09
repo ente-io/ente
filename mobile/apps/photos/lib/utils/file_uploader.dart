@@ -37,7 +37,6 @@ import "package:photos/module/upload/service/multipart.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/sync/device_folder_selection_cache.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import "package:photos/utils/exif_util.dart";
