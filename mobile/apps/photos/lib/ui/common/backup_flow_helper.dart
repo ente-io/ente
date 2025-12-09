@@ -48,12 +48,7 @@ Future<void> handleLimitedOrFolderBackupFlow(
   if (permissionService.hasGrantedLimitedPermissions()) {
     unawaited(PhotoManager.presentLimited());
   } else {
-    unawaited(
-      _navigateToFolderSelection(
-        context,
-        isFirstBackup: isFirstBackup,
-      ),
-    );
+    unawaited(_navigateToFolderSelection(context, isFirstBackup: isFirstBackup));
   }
 }
 
