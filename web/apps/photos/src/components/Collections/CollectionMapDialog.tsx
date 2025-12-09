@@ -1190,7 +1190,6 @@ const COVER_HEADER_HEIGHT = COVER_IMAGE_HEIGHT + 34;
 
 function CollectionSidebar({
     collectionSummary,
-    visibleCount,
     visibleFiles,
     mapPhotos,
     thumbByFileID,
@@ -1246,7 +1245,12 @@ function CollectionSidebar({
             height: COVER_HEADER_HEIGHT,
             extendToInlineEdges: true,
         }),
-        [collectionSummary.name, coverImageUrl, visibleCount, onClose],
+        [
+            collectionSummary.name,
+            collectionSummary.fileCount,
+            coverImageUrl,
+            onClose,
+        ],
     );
 
     // Handle scroll events from the file list
@@ -1529,9 +1533,7 @@ const MapControls = React.memo(function MapControls({
                     left: 12,
                     bottom: 12,
                     zIndex: 1000,
-                    [theme.breakpoints.up("md")]: {
-                        display: "none",
-                    },
+                    [theme.breakpoints.up("md")]: { display: "none" },
                 })}
             >
                 {showAttribution && (
@@ -1590,9 +1592,7 @@ const DesktopAttribution = styled(Box)(({ theme }) => ({
         "& a": {
             color: "#0078A8",
             textDecoration: "none",
-            "&:hover": {
-                textDecoration: "underline",
-            },
+            "&:hover": { textDecoration: "underline" },
         },
     },
 }));
