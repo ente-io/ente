@@ -13,7 +13,6 @@ import {
     Typography,
     type IconButtonProps,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
@@ -768,14 +767,10 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     onSelectPerson,
 }) => {
     const { onGenericError } = useBaseContext();
-    const theme = useTheme();
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const optimalZoom = calculateOptimalZoom();
-    const dialogRootRef = useRef<HTMLDivElement | null>(null);
-    const closingPreviewRef = useRef<HTMLDivElement | null>(null);
-    const [hasClosingPreview, setHasClosingPreview] = useState(false);
 
     const {
         mapCenter,
@@ -799,62 +794,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     } = useFavorites(open, user);
 
     const createClusterCustomIcon = useClusterIcon(mapPhotos, thumbByFileID);
-
-    const cleanupClosingPreview = useCallback(() => {
-        closingPreviewRef.current?.remove();
-        closingPreviewRef.current = null;
-        setHasClosingPreview(false);
-    }, []);
-
-    useEffect(() => {
-        return () => cleanupClosingPreview();
-    }, [cleanupClosingPreview]);
-
-    useEffect(() => {
-        if (!open && hasClosingPreview) {
-            const timeout = window.setTimeout(cleanupClosingPreview, 280);
-            return () => window.clearTimeout(timeout);
-        }
-        return undefined;
-    }, [cleanupClosingPreview, hasClosingPreview, open]);
-
-    // Keep a static blurred clone while the dialog is closing
-    const createClosingPreview = useCallback(() => {
-        if (typeof document === "undefined") return;
-        const dialogNode = dialogRootRef.current;
-        if (!dialogNode) return;
-
-        cleanupClosingPreview();
-
-        const wrapper = document.createElement("div");
-        wrapper.setAttribute("data-collection-map-preview", "true");
-        wrapper.style.position = "fixed";
-        wrapper.style.inset = "0";
-        wrapper.style.zIndex = "1199";
-        wrapper.style.pointerEvents = "none";
-        wrapper.style.overflow = "hidden";
-        wrapper.style.backgroundColor =
-            theme.palette.mode === "dark"
-                ? "rgba(0, 0, 0, 0.65)"
-                : "rgba(0, 0, 0, 0.7)";
-
-        const clone = dialogNode.cloneNode(true) as HTMLElement;
-        clone.style.pointerEvents = "none";
-        clone.style.userSelect = "none";
-        clone.style.overflow = "hidden";
-        clone.style.filter = "blur(16px)";
-        clone.style.transformOrigin = "center";
-        wrapper.appendChild(clone);
-
-        document.body.appendChild(wrapper);
-        closingPreviewRef.current = wrapper;
-        setHasClosingPreview(true);
-    }, [cleanupClosingPreview, theme.palette.mode]);
-
-    const handleClose = useCallback(() => {
-        createClosingPreview();
-        onClose();
-    }, [createClosingPreview, onClose]);
 
     const handleSetFileViewerOpen: Dispatch<SetStateAction<boolean>> =
         useCallback(
@@ -956,7 +895,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
 
         if (!mapPhotos.length || !mapCenter) {
             return (
-                <CenteredBox onClose={handleClose} closeLabel={t("close")}>
+                <CenteredBox onClose={onClose} closeLabel={t("close")}>
                     <Typography variant="body" color="text.secondary">
                         {t("no_geotagged_photos", {
                             defaultValue:
@@ -978,7 +917,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 mapCenter={mapCenter}
                 optimalZoom={optimalZoom}
                 createClusterCustomIcon={createClusterCustomIcon}
-                onClose={handleClose}
+                onClose={onClose}
                 onVisiblePhotosChange={setVisiblePhotos}
                 user={user}
                 favoriteFileIDs={favoriteFileIDs}
@@ -1034,7 +973,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         user,
         visibleFiles,
         visiblePhotos,
-        handleClose,
+        onClose,
         handleSetFileViewerOpen,
     ]);
 
@@ -1043,7 +982,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             fullScreen
             keepMounted
             open={open}
-            onClose={handleClose}
+            onClose={onClose}
             sx={{
                 // When the FileViewer is open, lower this dialog's z-index below
                 // PhotoSwipe's z-index (1199) so that FileViewer appears on top.
@@ -1062,7 +1001,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                     height: "100vh",
                     bgcolor: "background.default",
                 }}
-                ref={dialogRootRef}
             >
                 <DialogContent
                     sx={{ padding: "0 !important", height: "100%" }}
