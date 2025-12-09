@@ -19,22 +19,23 @@ type CreatePublicAccessTokenRequest struct {
 }
 
 type UpdatePublicAccessTokenRequest struct {
-	CollectionID    int64   `json:"collectionID" binding:"required"`
-	ValidTill       *int64  `json:"validTill"`
-	DeviceLimit     *int    `json:"deviceLimit"`
-	PassHash        *string `json:"passHash"`
-	Nonce           *string `json:"nonce"`
-	MemLimit        *int64  `json:"memLimit"`
-	OpsLimit        *int64  `json:"opsLimit"`
-	EnableDownload  *bool   `json:"enableDownload"`
-	EnableCollect   *bool   `json:"enableCollect"`
-	DisablePassword *bool   `json:"disablePassword"`
-	EnableJoin      *bool   `json:"enableJoin"`
+	CollectionID    int64                      `json:"collectionID" binding:"required"`
+	ValidTill       *int64                     `json:"validTill"`
+	DeviceLimit     *int                       `json:"deviceLimit"`
+	PassHash        *string                    `json:"passHash"`
+	Nonce           *string                    `json:"nonce"`
+	MemLimit        *int64                     `json:"memLimit"`
+	OpsLimit        *int64                     `json:"opsLimit"`
+	EnableDownload  *bool                      `json:"enableDownload"`
+	EnableCollect   *bool                      `json:"enableCollect"`
+	DisablePassword *bool                      `json:"disablePassword"`
+	EnableJoin      *bool                      `json:"enableJoin"`
+	MinRole         *CollectionParticipantRole `json:"minRole"`
 }
 
 func (ut *UpdatePublicAccessTokenRequest) Validate() error {
 	if ut.DeviceLimit == nil && ut.ValidTill == nil && ut.DisablePassword == nil &&
-		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil && ut.EnableJoin == nil {
+		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil && ut.EnableJoin == nil && ut.MinRole == nil {
 		return NewBadRequestWithMessage("all parameters are missing")
 	}
 
@@ -55,6 +56,10 @@ func (ut *UpdatePublicAccessTokenRequest) Validate() error {
 
 	if allPassParamsPresent && ut.DisablePassword != nil && *ut.DisablePassword {
 		return NewBadRequestWithMessage("can not set and disable password in same request")
+	}
+
+	if ut.MinRole != nil && !ut.MinRole.IsValidShareRole() {
+		return NewBadRequestWithMessage(fmt.Sprintf("invalid min role %s", *ut.MinRole))
 	}
 	return nil
 }
@@ -82,6 +87,7 @@ type CollectionLinkRow struct {
 	EnableDownload bool
 	EnableCollect  bool
 	EnableJoin     bool
+	MinRole        *CollectionParticipantRole
 }
 
 func (p CollectionLinkRow) CanJoin() error {
@@ -110,10 +116,11 @@ type PublicURL struct {
 	EnableCollect   bool `json:"enableCollect"`
 	PasswordEnabled bool `json:"passwordEnabled"`
 	// Nonce contains the nonce value for the password if the link is password protected.
-	Nonce      *string `json:"nonce,omitempty"`
-	MemLimit   *int64  `json:"memLimit,omitempty"`
-	OpsLimit   *int64  `json:"opsLimit,omitempty"`
-	EnableJoin bool    `json:"enableJoin"`
+	Nonce      *string                    `json:"nonce,omitempty"`
+	MemLimit   *int64                     `json:"memLimit,omitempty"`
+	OpsLimit   *int64                     `json:"opsLimit,omitempty"`
+	EnableJoin bool                       `json:"enableJoin"`
+	MinRole    *CollectionParticipantRole `json:"minRole,omitempty"`
 }
 
 type PublicAccessContext struct {
@@ -121,6 +128,19 @@ type PublicAccessContext struct {
 	IP           string
 	UserAgent    string
 	CollectionID int64
+}
+
+func FilterPublicURLsForRole(urls []PublicURL, role CollectionParticipantRole) []PublicURL {
+	result := make([]PublicURL, 0, len(urls))
+	if role == UNKNOWN {
+		role = VIEWER
+	}
+	for _, url := range urls {
+		if role.Satisfies(url.MinRole) {
+			result = append(result, url)
+		}
+	}
+	return result
 }
 
 // PublicCollectionSummary represents an information about a public collection

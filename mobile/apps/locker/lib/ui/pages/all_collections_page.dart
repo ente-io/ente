@@ -4,17 +4,16 @@ import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/models/ui_section_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
-import 'package:locker/services/trash/trash_service.dart';
 import "package:locker/ui/components/empty_state_widget.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/pages/collection_page.dart';
-import 'package:locker/ui/pages/trash_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -38,7 +37,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   int? _uncategorizedFileCount;
   bool _isLoading = true;
   String? _error;
-  bool showTrash = false;
   bool showUncategorized = false;
   final _logger = Logger("AllCollectionsPage");
   StreamSubscription<CollectionsUpdatedEvent>? _collectionsUpdatedSub;
@@ -46,14 +44,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   @override
   void initState() {
     super.initState();
-    _loadCollections();
+    _loadCollections(showLoading: true);
     _collectionsUpdatedSub =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       if (!mounted) return;
-      await _loadCollections();
+      await _loadCollections(showLoading: false);
     });
     if (widget.viewType == UISectionType.homeCollections) {
-      showTrash = true;
       showUncategorized = true;
     }
   }
@@ -64,8 +61,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     super.dispose();
   }
 
-  Future<void> _loadCollections() async {
-    if (mounted) {
+  Future<void> _loadCollections({bool showLoading = true}) async {
+    if (mounted && showLoading) {
       setState(() {
         _isLoading = true;
         _error = null;
@@ -114,13 +111,17 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           : 0;
 
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        if (showLoading) {
+          setState(() {
+            _isLoading = false;
+          });
+        } else {
+          setState(() {});
+        }
       }
     } catch (e) {
       _logger.severe("Failed to load collections", e);
-      if (mounted) {
+      if (mounted && showLoading) {
         setState(() {
           _error = context.l10n.failedToLoadCollections(e.toString());
           _isLoading = false;
@@ -165,6 +166,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
   Widget _buildBody(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final safeBottomInset = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = safeBottomInset + 24.0;
 
     if (_isLoading) {
       return const Center(
@@ -215,7 +218,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               const SizedBox(height: 20),
               if (_uncategorizedCollection != null && showUncategorized)
                 _buildUncategorizedHook(),
-              if (showTrash) _buildTrashHook(),
             ],
           ),
         ),
@@ -223,7 +225,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.fromLTRB(
+        16.0,
+        16.0,
+        16.0,
+        bottomPadding,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -245,68 +252,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           ),
           if (_uncategorizedCollection != null && showUncategorized)
             _buildUncategorizedHook(),
-          if (showTrash) _buildTrashHook(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTrashHook() {
-    final textTheme = getEnteTextTheme(context);
-
-    return Container(
-      margin: const EdgeInsets.only(top: 4.0, bottom: 16.0),
-      child: InkWell(
-        onTap: _openTrash,
-        borderRadius: BorderRadius.circular(12.0),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withAlpha(30),
-            border: Border.all(
-              color: Theme.of(context).dividerColor.withAlpha(50),
-              width: 0.5,
-            ),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.delete_outline,
-                color:
-                    Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
-                size: 22,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  context.l10n.trash,
-                  style: textTheme.large.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withAlpha(60),
-                size: 20,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _openTrash() async {
-    final trashFiles = await TrashService.instance.getTrashFiles();
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => TrashPage(trashFiles: trashFiles),
       ),
     );
   }
@@ -315,12 +261,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
     if (_uncategorizedCollection == null) return const SizedBox.shrink();
 
     final textTheme = getEnteTextTheme(context);
+    final borderRadius = BorderRadius.circular(20.0);
 
     return Container(
       margin: const EdgeInsets.only(top: 16.0, bottom: 4.0),
       child: InkWell(
         onTap: () => _openUncategorized(),
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: borderRadius,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           decoration: BoxDecoration(
@@ -329,12 +276,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               color: Theme.of(context).dividerColor.withAlpha(50),
               width: 0.5,
             ),
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: borderRadius,
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.folder_open_outlined,
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedFolderUnknown,
                 color:
                     Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
                 size: 22,

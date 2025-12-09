@@ -9,6 +9,7 @@ import "package:ente_ui/utils/dialog_util.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
+import "package:locker/extensions/collection_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -46,6 +47,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   final _logger = Logger("CollectionPage");
   late StreamSubscription<CollectionsUpdatedEvent>
       _collectionUpdateSubscription;
+  bool _isCollectionDeleted = false;
+  bool _isDeletingCollection = false;
+  bool _ignoreCollectionUpdates = false;
 
   late Collection _collection;
   List<EnteFile> _files = [];
@@ -111,6 +115,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     _initializeData(widget.collection);
     _collectionUpdateSubscription =
         Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      if (_ignoreCollectionUpdates || _isCollectionDeleted) {
+        return;
+      }
       _logger.info(
         "CollectionsUpdatedEvent received on CollectionPage (${widget.collection.id}): ${event.source}",
       );
@@ -129,7 +136,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           _logger.warning(
             'Collection ${widget.collection.id} no longer exists, navigating back',
           );
-          if (mounted) {
+          if (!_isCollectionDeleted && mounted) {
             Navigator.of(context).pop();
           }
         }
@@ -153,7 +160,30 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _deleteCollection() async {
-    await CollectionActions.deleteCollection(context, _collection);
+    if (_isDeletingCollection) {
+      return;
+    }
+    _isDeletingCollection = true;
+    _ignoreCollectionUpdates = true;
+    var didDelete = false;
+    try {
+      await CollectionActions.deleteCollection(
+        context,
+        _collection,
+        onSuccess: () {
+          didDelete = true;
+          _isCollectionDeleted = true;
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+      );
+    } finally {
+      if (!didDelete) {
+        _ignoreCollectionUpdates = false;
+      }
+      _isDeletingCollection = false;
+    }
   }
 
   Future<void> _editCollection() async {
@@ -378,7 +408,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TitleBarTitleWidget(
-                title: _collection.name ?? context.l10n.untitled,
+                title: _collection.displayName ?? context.l10n.untitled,
                 trailingWidgets: widget.isUncategorized
                     ? const []
                     : [

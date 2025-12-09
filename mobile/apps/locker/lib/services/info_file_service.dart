@@ -45,7 +45,9 @@ class InfoFileService {
       // Upload the file using the special info file upload method
       final uploadedFile = await _uploadInfoFile(enteFile, collection);
 
-      _logger.info('Successfully uploaded info file: ${uploadedFile.title}');
+      _logger.info(
+        'Successfully uploaded info file (ID: ${uploadedFile.uploadedFileID})',
+      );
       return uploadedFile;
     } catch (e, s) {
       _logger.severe('Failed to create and upload info file', e, s);
@@ -70,9 +72,10 @@ class InfoFileService {
         infoKey: infoData,
       };
 
-      // Update title if it's different
+      // Update title if it's different from current display name
+      // Use displayName (which considers editedName) instead of title (original name)
       final updatedTitle = getInfoFileTitle(updatedInfoItem);
-      if (existingFile.title != updatedTitle) {
+      if (existingFile.displayName != updatedTitle) {
         metadataUpdates[editNameKey] = updatedTitle;
         metadataUpdates[editTimeKey] = DateTime.now().millisecondsSinceEpoch;
       }
@@ -84,7 +87,9 @@ class InfoFileService {
       );
 
       if (success) {
-        _logger.info('Successfully updated info file: $updatedTitle');
+        _logger.info(
+          'Successfully updated info file (ID: ${existingFile.uploadedFileID})',
+        );
         return true;
       } else {
         throw Exception('Failed to update file metadata on server');

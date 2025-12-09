@@ -334,6 +334,42 @@ body {
     background: var(--ente-background-default);
 }
 
+/* Device Info Section */
+.device-info-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ente-spacing-lg);
+    padding: var(--ente-spacing-md) var(--ente-spacing-lg);
+    margin-bottom: var(--ente-spacing-lg);
+    background: var(--ente-fill-faint);
+    border-radius: var(--ente-border-radius);
+    border: 1px solid var(--ente-stroke-faint);
+}
+
+.device-info-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ente-spacing-sm);
+    color: var(--ente-text-base);
+    font-size: 14px;
+}
+
+.device-info-item .material-icons {
+    font-size: 20px;
+    color: var(--ente-color-accent-photos);
+}
+
+.device-info-label {
+    font-weight: var(--ente-font-weight-medium);
+    color: var(--ente-text-muted);
+}
+
+.device-info-value {
+    font-weight: var(--ente-font-weight-regular);
+    color: var(--ente-text-base);
+    font-family: 'Roboto Mono', monospace;
+}
+
 /* Search Section */
 .search-section {
     margin-bottom: var(--ente-spacing-lg);

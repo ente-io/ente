@@ -1,47 +1,31 @@
-import 'dart:async';
-
-import "package:ente_accounts/ente_accounts.dart";
+import "package:ente_accounts/models/user_details.dart";
 import 'package:ente_ui/components/loading_widget.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:intl/intl.dart';
 import "package:locker/l10n/l10n.dart";
+import "package:locker/states/user_details_state.dart";
 
-class UsageCardWidget extends StatefulWidget {
+class UsageCardWidget extends StatelessWidget {
+  static const _defaultMaxFileCount = 100;
+
   const UsageCardWidget({
     super.key,
   });
 
   @override
-  State<UsageCardWidget> createState() => _UsageCardWidgetState();
-}
-
-class _UsageCardWidgetState extends State<UsageCardWidget> {
-  static const maxFileCount = 1000;
-  int? _fileCount;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFileCount();
-  }
-
-  Future<void> _loadFileCount() async {
-    final userDetails = await UserService.instance.getUserDetailsV2(
-      memoryCount: true,
-      shouldCache: true,
-    );
-    setState(() {
-      _fileCount = userDetails.fileCount;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final usedCount = _fileCount ?? 0;
+    final inheritedDetails = InheritedUserDetails.of(context);
+    final userDetails = inheritedDetails?.userDetails;
+    final isCached = inheritedDetails?.isCached ?? false;
+
+    final maxFileCount =
+        userDetails?.getLockerFileLimit() ?? _defaultMaxFileCount;
+    final usedCount =
+        (userDetails is UserDetails && !isCached) ? userDetails.fileCount : 0;
     final progress = maxFileCount > 0 ? usedCount / maxFileCount : 0.0;
 
     return Container(
@@ -83,7 +67,7 @@ class _UsageCardWidgetState extends State<UsageCardWidget> {
                         color: Colors.white,
                       ),
                     ),
-                    _fileCount != null
+                    userDetails is UserDetails && !isCached
                         ? Text(
                             context.l10n.fileCount(
                               NumberFormat().format(usedCount),
@@ -93,11 +77,13 @@ class _UsageCardWidgetState extends State<UsageCardWidget> {
                               color: Colors.white,
                             ),
                           )
-                        : SizedBox(
-                            width: 60,
-                            height: 12,
+                        : const SizedBox(
+                            width: 14,
+                            height: 14,
                             child: EnteLoadingWidget(
-                              color: Colors.white.withValues(alpha: 0.6),
+                              size: 14,
+                              padding: 0,
+                              color: Colors.white,
                             ),
                           ),
                   ],

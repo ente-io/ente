@@ -1,6 +1,6 @@
 import CheckIcon from "@mui/icons-material/Check";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { Box, IconButton, Typography } from "@mui/material";
+import { Copy01Icon, ViewIcon, ViewOffSlashIcon } from "hugeicons-react";
 import React, { useState } from "react";
 
 interface CopyableFieldProps {
@@ -19,6 +19,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
     maskValue = false,
 }) => {
     const [copied, setCopied] = useState(false);
+    const [showValue, setShowValue] = useState(false);
 
     const handleCopy = () => {
         onCopy(value);
@@ -36,7 +37,7 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                     sx={{
                         fontWeight: 500,
                         fontSize: "16px",
-                        color: "#000000",
+                        color: "text.base",
                         mb: 1,
                         mt: 3,
                     }}
@@ -49,52 +50,73 @@ export const CopyableField: React.FC<CopyableFieldProps> = ({
                     sx={{
                         px: 4,
                         py: multiline ? 4 : 2,
-                        bgcolor: "#FFFFFF",
+                        bgcolor: "background.paper",
                         borderRadius: "12px",
                     }}
                 >
                     <Typography
                         variant="body"
                         sx={{
-                            color: "#757575",
+                            color: "text.muted",
                             whiteSpace: "pre-wrap",
                             wordBreak: "break-word",
                         }}
                     >
-                        {maskValue ? "**********************" : value}
+                        {maskValue && !showValue
+                            ? "•".repeat(value.length)
+                            : value}
                     </Typography>
                 </Box>
-                {copied ? (
-                    <Box
-                        sx={{
-                            position: "absolute",
-                            top: multiline ? 8 : "50%",
-                            right: 8,
-                            transform: multiline ? "none" : "translateY(-50%)",
-                            color: "#4caf50",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            p: 1,
-                        }}
-                    >
-                        <CheckIcon fontSize="small" />
-                    </Box>
-                ) : (
-                    <IconButton
-                        onClick={handleCopy}
-                        sx={{
-                            position: "absolute",
-                            top: multiline ? 8 : "50%",
-                            right: 8,
-                            transform: multiline ? "none" : "translateY(-50%)",
-                            color: "#757575",
-                            "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
-                        }}
-                    >
-                        <ContentCopyIcon fontSize="small" />
-                    </IconButton>
-                )}
+                <Box
+                    sx={{
+                        position: "absolute",
+                        top: multiline ? 8 : "50%",
+                        right: 8,
+                        transform: multiline ? "none" : "translateY(-50%)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                    }}
+                >
+                    {maskValue && (
+                        <IconButton
+                            onClick={() => setShowValue(!showValue)}
+                            sx={{
+                                color: "text.muted",
+                                "&:hover": { bgcolor: "fill.faintHover" },
+                            }}
+                        >
+                            {showValue ? (
+                                <ViewOffSlashIcon size={18} />
+                            ) : (
+                                <ViewIcon size={18} />
+                            )}
+                        </IconButton>
+                    )}
+                    {copied ? (
+                        <Box
+                            sx={{
+                                color: "success.main",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                p: 1,
+                            }}
+                        >
+                            <CheckIcon fontSize="small" />
+                        </Box>
+                    ) : (
+                        <IconButton
+                            onClick={handleCopy}
+                            sx={{
+                                color: "text.muted",
+                                "&:hover": { bgcolor: "fill.faintHover" },
+                            }}
+                        >
+                            <Copy01Icon size={16} />
+                        </IconButton>
+                    )}
+                </Box>
             </Box>
         </Box>
     );

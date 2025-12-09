@@ -1,17 +1,25 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:locker/core/errors.dart';
+import 'package:locker/events/user_details_refresh_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/favorites_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/ui/pages/home_page.dart';
+import 'package:logging/logging.dart';
 
 enum InfoPageMode { view, edit }
 
@@ -30,6 +38,7 @@ abstract class BaseInfoPage<T extends InfoData> extends StatefulWidget {
 
 abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     extends State<W> {
+  final _logger = Logger('BaseInfoPageState');
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   late InfoPageMode _currentMode;
@@ -85,7 +94,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   double get collectionSpacing => 24;
 
   @protected
-  bool get isSaveEnabled => !_isLoading;
+  bool get isSaveEnabled => !_isLoading && _selectedCollectionIds.isNotEmpty;
 
   @protected
   Future<bool> onEditModeBackPressed() async {
@@ -178,23 +187,30 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _loadCollections() async {
     try {
       final collections = await CollectionService.instance.getCollections();
+      final filteredCollections = collections
+          .where((c) => c.type != CollectionType.uncategorized)
+          .toList();
+
+      Set<int> initialSelection = _selectedCollectionIds;
+
+      if (widget.existingFile != null) {
+        final fileCollections =
+            await CollectionService.instance.getCollectionsForFile(
+          widget.existingFile!,
+        );
+        initialSelection = fileCollections
+            .where((c) => c.type != CollectionType.uncategorized)
+            .map((c) => c.id)
+            .toSet();
+      }
+
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
-        // Filter out uncategorized and favorites collections
-        _availableCollections = collections
-            .where(
-              (c) =>
-                  c.type != CollectionType.uncategorized &&
-                  c.type != CollectionType.favorites,
-            )
-            .toList();
-        // Pre-select a default collection if available
-        if (_availableCollections.isNotEmpty) {
-          final defaultCollection = _availableCollections.firstWhere(
-            (c) => c.name == context.l10n.informationCollectionName,
-            orElse: () => _availableCollections.first,
-          );
-          _selectedCollectionIds = {defaultCollection.id};
-        }
+        _availableCollections = filteredCollections;
+        _selectedCollectionIds = initialSelection;
       });
     } catch (e) {
       // Handle error silently or show a message
@@ -255,13 +271,25 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
             _currentMode = InfoPageMode.view;
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.recordSavedSuccessfully),
-              backgroundColor: Colors.green,
-            ),
+          showToast(
+            context,
+            context.l10n.recordSavedSuccessfully,
           );
         }
+      }
+    } on StorageLimitExceededError {
+      if (mounted) {
+        showToast(
+          context,
+          context.l10n.uploadStorageLimitErrorBody,
+        );
+      }
+    } on FileLimitReachedError {
+      if (mounted) {
+        showToast(
+          context,
+          context.l10n.uploadFileCountLimitErrorToast,
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -276,13 +304,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           return e.toString();
         }();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${context.l10n.failedToSaveRecord}: $errorDetails',
-            ),
-            backgroundColor: Colors.red,
-          ),
+        showToast(
+          context,
+          '${context.l10n.failedToSaveRecord}: $errorDetails',
         );
       }
     } finally {
@@ -307,31 +331,128 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       throw Exception('Failed to update file metadata');
     }
 
-    // Update the local data to reflect the changes in the UI
-    // The metadata updater service already updated the file object locally
-    // Now extract the updated info data and refresh the UI
-    final updatedInfo =
-        InfoFileService.instance.extractInfoFromFile(widget.existingFile!);
-    if (updatedInfo != null) {
-      // Update the current data state to show the new values in view mode
-      setState(() {
-        _currentData = updatedInfo.data as T?;
-      });
+    // Handle collection membership changes
+    await _updateCollectionMembership();
 
-      // Refresh UI with updated data
-      refreshUIWithCurrentData();
-    }
+    // Update the local data to reflect the changes in the UI
+    // Use the infoItem data directly since it contains the updated values
+    setState(() {
+      _currentData = infoItem.data as T?;
+    });
+
+    // Refresh UI with updated data
+    refreshUIWithCurrentData();
 
     // The info file service already performs a sync, so we don't need to sync again
   }
 
+  Future<void> _updateCollectionMembership() async {
+    if (widget.existingFile == null) return;
+
+    // Get current collections for the file
+    final currentCollections =
+        await CollectionService.instance.getCollectionsForFile(
+      widget.existingFile!,
+    );
+
+    // Fetch all collections to ensure we have the latest state
+    final allCollections = await CollectionService.instance.getCollections();
+
+    // Get the favorites/important collection for special handling
+    final favoriteCollection =
+        await CollectionService.instance.getOrCreateImportantCollection();
+
+    final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
+
+    // Check if favorites status changed
+    final wasFavorite = currentCollectionIds.contains(favoriteCollection.id);
+    final isFavoriteNow =
+        _selectedCollectionIds.contains(favoriteCollection.id);
+
+    if (wasFavorite && !isFavoriteNow) {
+      await FavoritesService.instance.removeFromFavorites(
+        context,
+        widget.existingFile!,
+      );
+    } else if (!wasFavorite && isFavoriteNow) {
+      await FavoritesService.instance.addToFavorites(
+        context,
+        widget.existingFile!,
+      );
+    }
+
+    // Get regular (non-favorites, non-uncategorized) collection IDs
+    final regularCurrentIds =
+        currentCollectionIds.where((id) => id != favoriteCollection.id).toSet();
+    final regularSelectedIds = _selectedCollectionIds
+        .where((id) => id != favoriteCollection.id)
+        .toSet();
+
+    final collectionsToAdd = regularSelectedIds.difference(regularCurrentIds);
+    final collectionsToRemove =
+        regularCurrentIds.difference(regularSelectedIds);
+
+    // If all regular collections are deselected, move to uncategorized
+    if (regularSelectedIds.isEmpty && collectionsToRemove.isNotEmpty) {
+      for (final collectionId in collectionsToRemove) {
+        try {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance.moveFilesFromCurrentCollection(
+            context,
+            collection,
+            [widget.existingFile!],
+          );
+        } catch (e) {
+          _logger.severe(
+            'Failed to remove file from collection $collectionId: $e',
+          );
+        }
+      }
+    } else {
+      // Add to new collections
+      for (final collectionId in collectionsToAdd) {
+        try {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance.addToCollection(
+            collection,
+            widget.existingFile!,
+            runSync: false,
+          );
+        } catch (e) {
+          _logger.severe(
+            'Failed to add file to collection $collectionId: $e',
+          );
+        }
+      }
+
+      // Remove from deselected collections
+      for (final collectionId in collectionsToRemove) {
+        try {
+          final collection =
+              allCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance.moveFilesFromCurrentCollection(
+            context,
+            collection,
+            [widget.existingFile!],
+          );
+        } catch (e) {
+          _logger.severe(
+            'Failed to remove file from collection $collectionId: $e',
+          );
+        }
+      }
+    }
+
+    await CollectionService.instance.sync();
+  }
+
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
-          backgroundColor: Colors.red,
-        ),
+      showToast(
+        context,
+        context.l10n.pleaseSelectAtLeastOneCollection,
       );
       return;
     }
@@ -358,6 +479,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
     // Trigger sync after successful save
     await CollectionService.instance.sync();
+    Bus.instance.fire(UserDetailsRefreshEvent());
 
     // Show success message
     final collectionCount = selectedCollections.length;
@@ -374,11 +496,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     // Show success message after navigation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-          ),
+        showToast(
+          context,
+          message,
         );
       }
     });
@@ -394,12 +514,9 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
 
   void _copyToClipboard(String text, String fieldName) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.copiedToClipboard(fieldName)),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
+    showToast(
+      context,
+      context.l10n.copiedToClipboard(fieldName),
     );
   }
 
@@ -546,40 +663,49 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
           ],
         ),
         backgroundColor: colorScheme.backgroundBase,
-        body: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (isViewMode) {
-                        return buildViewModeContent(context, constraints);
-                      }
-                      return buildEditModeContent(context, constraints);
-                    },
-                  ),
-                ),
-
-                // Save button only in edit mode
-                if (isEditMode) ...[
-                  const SizedBox(height: 20),
-                  SafeArea(
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: GradientButton(
-                        onTap: isSaveEnabled ? _saveRecord : null,
-                        text: _isLoading
-                            ? context.l10n.pleaseWait
-                            : submitButtonText,
-                      ),
+        body: GestureDetector(
+          onTap: Platform.isIOS
+              ? () {
+                  FocusScope.of(context).unfocus();
+                }
+              : null,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (isViewMode) {
+                          return buildViewModeContent(context, constraints);
+                        }
+                        return buildEditModeContent(context, constraints);
+                      },
                     ),
                   ),
+
+                  // Save button only in edit mode
+                  if (isEditMode) ...[
+                    const SizedBox(height: 8),
+                    SafeArea(
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: GradientButton(
+                          onTap: isSaveEnabled ? _saveRecord : null,
+                          text: _isLoading
+                              ? context.l10n.pleaseWait
+                              : submitButtonText,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

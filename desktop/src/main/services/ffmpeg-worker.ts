@@ -228,7 +228,7 @@ export interface FFmpegGenerateHLSPlaylistAndSegmentsResult {
  *
  * Example invocation:
  *
- *     ffmpeg -i in.mov -vf "scale=-2:'min(720,ih)',fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p" -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
+ *     ffmpeg -i in.mov -vf "scale='if(lt(iw,ih),min(720,iw),-2)':'if(lt(iw,ih),-2,min(720,ih))',fps=30,zscale=transfer=linear,tonemap=tonemap=hable:desat=0,zscale=primaries=709:transfer=709:matrix=709,format=yuv420p" -c:v libx264 -c:a aac -f hls -hls_key_info_file out.m3u8.info -hls_list_size 0 -hls_flags single_file out.m3u8
  *
  * See: [Note: Preview variant of videos]
  *
@@ -446,11 +446,11 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
                       // enough bitrate to require rescaling anyways.
                       rescaleVideo || tonemap
                           ? [
-                                // Scales the video to maximum 720p height,
-                                // keeping aspect ratio and the calculated
-                                // dimension divisible by 2 (some of the other
-                                // operations require an even pixel count).
-                                "scale=-2:'min(720,ih)'",
+                                // Scale smaller dimension to 720p (or keep
+                                // original if less than 720p). Portrait videos
+                                // scale width, landscape videos scale height.
+                                // -2 keeps aspect ratio with even pixel count.
+                                "scale='if(lt(iw,ih),min(720,iw),-2)':'if(lt(iw,ih),-2,min(720,ih))'",
                                 // Convert the video to a constant 30 fps,
                                 // duplicating or dropping frames as necessary.
                                 "fps=30",
@@ -497,11 +497,14 @@ const ffmpegGenerateHLSPlaylistAndSegments = async (
               //
               // - `-c:v libx264` converts the video stream to the H.264 codec.
               //
-              // - We don't supply a bitrate, instead it uses the default CRF
-              //   ("23") as recommended in the ffmpeg trac.
+              // - We use CRF 23 (default) for quality, but cap the bitrate at
+              //   2000 kbps using `-maxrate` to ensure smaller bitrates are
+              //   preserved while preventing CRF from exceeding 2000 kbps.
+              //
+              // - `-bufsize` is set to 2x maxrate for smooth rate control.
               //
               // - We don't supply a preset, it'll use the default ("medium").
-              ["-c:v", "libx264"]
+              ["-c:v", "libx264", "-maxrate", "2000k", "-bufsize", "4000k"]
             : // Keep the video stream unchanged
               ["-c:v", "copy"],
         // Audio codec AAC

@@ -21,6 +21,10 @@ export interface SaveGroup {
      */
     id: number;
     /**
+     * A callback to retry the download that created this save group.
+     */
+    retry?: () => void;
+    /**
      * The user visible title of the save group.
      *
      * Depending on the context can either be an auto generated string (e.g "5
@@ -106,6 +110,7 @@ export type AddSaveGroup = (
         | "downloadDirPath"
         | "total"
         | "canceller"
+        | "retry"
     >,
 ) => UpdateSaveGroup;
 

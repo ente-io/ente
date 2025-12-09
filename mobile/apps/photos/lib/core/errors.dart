@@ -78,6 +78,8 @@ class SrpSetupNotCompleteError extends Error {}
 
 class SharingNotPermittedForFreeAccountsError extends Error {}
 
+class LinkEditNotAllowedError extends Error {}
+
 class NoMediaLocationAccessError extends Error {}
 
 class PassKeySessionNotVerifiedError extends Error {}

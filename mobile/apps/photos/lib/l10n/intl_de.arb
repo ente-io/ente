@@ -118,6 +118,10 @@
   "enterYourPassword": "Passwort eingeben",
   "welcomeBack": "Willkommen zurück!",
   "contactSupport": "Support kontaktieren",
+  "locationPickerTip": "Du kannst auch vom Infobildschirm eines Fotos aus einen Ort zentriert um das Foto hinzufügen",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Falsches Passwort",
   "pleaseTryAgain": "Bitte versuche es erneut",
   "recreatePasswordTitle": "Passwort wiederherstellen",
@@ -254,6 +258,7 @@
   "shareWithNonenteUsers": "Mit Nicht-Ente-Benutzern teilen",
   "createPublicLink": "Öffentlichen Link erstellen",
   "sendLink": "Link senden",
+  "qrCode": "QR-Code",
   "sendQrCode": "QR-Code senden",
   "copyLink": "Link kopieren",
   "copyEmbedHtml": "Einzubettendes HTML kopieren",
@@ -346,7 +351,7 @@
   "removeFromAlbumTitle": "Aus Album entfernen?",
   "removeFromAlbum": "Aus Album entfernen",
   "itemsWillBeRemovedFromAlbum": "Ausgewählte Elemente werden aus diesem Album entfernt",
-  "removeShareItemsWarning": "Einige der Elemente, die du entfernst, wurden von anderen Nutzern hinzugefügt und du wirst den Zugriff auf sie verlieren",
+  "removeShareItemsWarning": "Ausgewählte Fotos werden für Betrachter dieses Albums nicht zugänglich sein, außer für die Besitzer der Fotos.",
   "addingToFavorites": "Wird zu Favoriten hinzugefügt...",
   "removingFromFavorites": "Wird aus Favoriten entfernt...",
   "sorryCouldNotAddToFavorites": "Konnte leider nicht zu den Favoriten hinzugefügt werden!",
@@ -1200,6 +1205,11 @@
   "noImagesWithLocation": "Keine Bilder mit Standort",
   "unpinAlbum": "Album lösen",
   "pinAlbum": "Album anheften",
+  "pin": "Anheften",
+  "pinToTop": "Oben anheften",
+  "unpin": "Lösen",
+  "visibility": "Sichtbarkeit",
+  "hideFromMemories": "Aus Erinnerungen ausblenden",
   "create": "Erstellen",
   "viewAll": "Alle anzeigen",
   "nothingSharedWithYouYet": "Noch nichts mit Dir geteilt",
@@ -1385,8 +1395,8 @@
   "appLockDescriptions": "Wähle zwischen dem Standard-Sperrbildschirm deines Gerätes und einem eigenen Sperrbildschirm mit PIN oder Passwort.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Um die App-Sperre zu aktivieren, konfiguriere bitte den Gerätepasscode oder die Bildschirmsperre in den Systemeinstellungen.",
   "authToViewPasskey": "Bitte authentifizieren, um deinen Passkey zu sehen",
-  "loopVideoOn": "Videoschleife an",
-  "loopVideoOff": "Videoschleife aus",
+  "loopVideoOn": "Endlosschleife ausschalten",
+  "loopVideoOff": "Endlosschleife einschalten",
   "localSyncErrorMessage": "Es sieht so aus, als ob etwas schiefgelaufen ist, da die lokale Foto-Synchronisierung länger dauert als erwartet. Bitte kontaktiere unser Support-Team",
   "showPerson": "Person anzeigen",
   "sort": "Sortierung",
@@ -1608,6 +1618,7 @@
   "legacyInvite": "{email} hat dich eingeladen, ein vertrauenswürdiger Kontakt zu werden",
   "authToManageLegacy": "Bitte authentifiziere dich, um deine vertrauenswürdigen Kontakte zu verwalten",
   "hideSharedItemsFromHomeGallery": "Geteilte Elemente in der Home-Galerie ausblenden",
+  "swipeToSelect": "Zum Auswählen wischen",
   "gallery": "Galerie",
   "joinAlbum": "Album beitreten",
   "joinAlbumSubtext": "um deine Fotos anzuzeigen und hinzuzufügen",
@@ -1849,6 +1860,18 @@
   "addedToStreamRecreationQueue": "Zur Warteschlange für Neuerstellung der Streams hinzugefügt",
   "videoPreviewAlreadyExists": "Videovorschau existiert bereits",
   "videoAlreadyInQueue": "Videodatei existiert bereits in der Warteschlange",
+  "videoExportFailed": "Erstellung des Videos fehlgeschlagen. Bitte versuche es erneut.",
+  "videoExportSuccess": "Video erfolgreich unter {path} erstellt",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Zur Warteschlange hinzugefügt",
   "creatingStream": "Stream wird erzeugt",
   "similarImages": "Ähnliche Bilder",
@@ -1992,6 +2015,154 @@
   "artisticPortraits": "Kunstvolle Porträts",
   "streetFood": "Streetfood-Happen",
   "riverCruises": "Flusskreuzfahrt-Ausblicke",
+  "facesTimelineBannerTitle": "Erinnerungen",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Sieh dir Fotos von {name} über die Jahre an",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Erinnerungen",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} war {count, plural, one {ein Jahr alt} other {{count} Jahre alt}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "vor {count, plural, one {einem Jahr} other {# Jahren}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Das Teilen von Videos kommt bald",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Vorheriges",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Nächstes",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Wiedergabe",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pause",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Zeitleiste der Gesichter wird vorbereitet...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Verspielte Kinder",
-  "coastalCliffs": "Klippen am Meer"
+  "coastalCliffs": "Klippen am Meer",
+  "ritualsTitle": "Rituale",
+  "ritualAddTooltip": "Ritual hinzufügen",
+  "ritualActivityHeading": "Aktivität",
+  "ritualDefaultHeatmapTitle": "Täglich ein Foto machen",
+  "ritualUntitled": "Unbenanntes Ritual",
+  "ritualShareUnavailable": "Momentan kann nicht geteilt werden. Bitte versuche es erneut.",
+  "ritualNotificationMessage": "Jetzt ein Foto machen",
+  "ritualCameraNotFound": "Keine Kamera auf diesem Gerät gefunden.",
+  "ritualCameraStartError": "Kamera kann nicht gestartet werden. Bitte überprüfe die Berechtigungen.",
+  "ritualCaptureError": "Foto konnte nicht aufgenommen werden. Bitte versuche es erneut.",
+  "ritualPhotoLimit": "Du kannst bis zu {maxPhotos, plural, one {einem Foto} other {# Fotos}} hinzufügen.",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Nimm zuerst mindestens ein Foto auf.",
+  "ritualAlbumMissing": "Das Rituale-Album fehlt. Bearbeite das Ritual, um ein Album festzulegen.",
+  "ritualAddedToAlbum": "Zum Album hinzugefügt",
+  "ritualAddedToAlbumWithName": "Zu {albumName} hinzugefügt",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Konnte keine Fotos zum Album hinzufügen: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Zurück zu den Ritualen",
+  "ritualNoPhotosYet": "Noch keine Fotos",
+  "ritualSetAlbumToLaunchCamera": "Lege ein Album für dieses Ritual fest, um die Kamera zu starten.",
+  "ritualDefaultCameraTitle": "Mach ein Foto",
+  "ritualBadgeMessage7": "7 Tage geschafft! Die Beständigkeit steht dir. Weiter so!",
+  "ritualBadgeMessage14": "14 Tage dabei! Dein Ritual wird zur Gewohnheit. Unglaublich!",
+  "ritualBadgeMessage30": "30 Tage in Folge! Legendäre Beständigkeit! Genieße den Applaus!",
+  "ritualBadgeMessageDefault": "Du hast einen Lauf!",
+  "ritualBadgeNewTitle": "Neuer Erfolg",
+  "ritualBadgePreparing": "Wird vorbereitet...",
+  "ritualStreaksLabel": "Streaks",
+  "ritualCreateYourOwn": "Erstelle dein eigenes Ritual",
+  "ritualGetDailyReminders": "Erhalte tägliche Erinnerungen",
+  "ritualAlbumNotSet": "Album nicht gesetzt",
+  "ritualOpenCameraTooltip": "Ritualkamera öffnen",
+  "ritualEditorLabel": "Ritual-Editor",
+  "ritualNew": "Neues Ritual",
+  "ritualEdit": "Ritual bearbeiten",
+  "ritualEnterPrompt": "Gib dein Ritual ein",
+  "ritualEnterDescription": "Bitte gib eine Beschreibung ein",
+  "ritualDayLabel": "Tag",
+  "ritualNotificationsOffHint": "Benachrichtigungen sind ausgeschaltet. Tippe auf einen Tag, um sie einzuschalten.",
+  "ritualTimeLabel": "Zeitpunkt",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Ritual speichern",
+  "ritualUpdate": "Ritual aktualisieren",
+  "ritualSelectAlbumTitle": "Album auswählen",
+  "ritualSearchOrCreate": "Suchen oder neu erstellen",
+  "ritualNoAlbumsYet": "Bisher keine Alben",
+  "ritualNoMatchingAlbums": "Keine passenden Alben",
+  "ritualCreateAlbumWithName": "\"{albumName} \" erstellen",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Neu erstellen",
+  "ritualAlbumSelectionPlaceholder": "Album auswählen",
+  "ritualPickEmojiTitle": "Emoji auswählen"
 }

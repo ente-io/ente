@@ -30,6 +30,7 @@ class CollectionListPage extends StatefulWidget {
   final double? initialScrollOffset;
   final String tag;
   final UISectionType sectionType;
+  final bool startInSearchMode;
 
   const CollectionListPage(
     this.collections, {
@@ -37,6 +38,7 @@ class CollectionListPage extends StatefulWidget {
     this.appTitle,
     this.initialScrollOffset,
     this.tag = "",
+    this.startInSearchMode = false,
     super.key,
   });
 
@@ -101,6 +103,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
                   SearchableAppBar(
                     title: widget.appTitle ?? const SizedBox.shrink(),
                     heroTag: widget.tag,
+                    autoActivateSearch: widget.startInSearchMode,
                     onSearch: (value) {
                       setState(() {
                         _searchQuery = value;

@@ -58,16 +58,12 @@ class Configuration {
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyShouldBackupVideos = "should_backup_videos";
   static const keyShowSystemLockScreen = "should_show_lock_screen";
-  static const keyHasSelectedAnyBackupFolder =
-      "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const secretKeyKey = "secret_key";
   static const tokenKey = "token";
   static const encryptedTokenKey = "encrypted_token";
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageKey = "has_migrated_secure_storage";
-  static const hasSelectedAllFoldersForBackupKey =
-      "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
   static final _logger = Logger("Configuration");
@@ -134,6 +130,7 @@ class Configuration {
         await _migrateSecurityStorageToFirstUnlock();
       }
       SuperLogging.setUserID(await _getOrCreateAnonymousUserID()).ignore();
+      _logger.info('User ID: ${getUserID()}');
     } catch (e, s) {
       _logger.severe("Configuration init failed", e, s);
       /*
@@ -686,22 +683,6 @@ class Configuration {
 
   String? getVolatilePassword() {
     return _volatilePassword;
-  }
-
-  Future<void> setHasSelectedAnyBackupFolder(bool val) async {
-    await _preferences.setBool(keyHasSelectedAnyBackupFolder, val);
-  }
-
-  bool hasSelectedAnyBackupFolder() {
-    return _preferences.getBool(keyHasSelectedAnyBackupFolder) ?? false;
-  }
-
-  bool hasSelectedAllFoldersForBackup() {
-    return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
-  }
-
-  Future<void> setSelectAllFoldersForBackup(bool value) async {
-    await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {

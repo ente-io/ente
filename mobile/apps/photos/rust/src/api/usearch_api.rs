@@ -102,7 +102,7 @@ impl VectorDB {
         self.save_index();
     }
 
-    pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &Vec<Vec<f32>>) {
+    pub fn bulk_add_vectors(&self, keys: Vec<u64>, vectors: &[Vec<f32>]) {
         self.ensure_capacity(keys.len());
         for (key, vector) in keys.iter().zip(vectors.iter()) {
             if self.contains_vector(*key) {

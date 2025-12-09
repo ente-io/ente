@@ -347,6 +347,31 @@ class CollectionDB extends EnteBaseDatabase {
     await batch.commit();
   }
 
+  Future<void> deleteFilesByUploadedFileIDs(
+    List<int> uploadedFileIDs,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return;
+    }
+
+    final batch = _db.batch();
+
+    for (final uploadedFileID in uploadedFileIDs) {
+      batch.delete(
+        _collectionFilesTable,
+        where: 'uploaded_file_id = ?',
+        whereArgs: [uploadedFileID],
+      );
+      batch.delete(
+        _filesTable,
+        where: 'uploaded_file_id = ?',
+        whereArgs: [uploadedFileID],
+      );
+    }
+
+    await batch.commit();
+  }
+
   Future<List<EnteFile>> getFilesInCollection(Collection collection) async {
     final result = await _db.rawQuery(
       '''
@@ -386,9 +411,73 @@ class CollectionDB extends EnteBaseDatabase {
     return result.map((row) => _mapToCollection(row)).toList();
   }
 
+  Future<Map<int, List<EnteFile>>> getAllFilesGroupByCollectionID(
+    List<int> uploadedFileIDs,
+  ) async {
+    if (uploadedFileIDs.isEmpty) {
+      return {};
+    }
+
+    final Map<int, List<EnteFile>> collectionToFilesMap = {};
+
+    // Query to get all collection mappings for the given file IDs
+    final placeholders = List.filled(uploadedFileIDs.length, '?').join(',');
+    final result = await _db.rawQuery(
+      '''
+      SELECT
+        cf.collection_id AS mapping_collection_id,
+        f.*
+      FROM $_collectionFilesTable cf
+      JOIN $_filesTable f ON cf.uploaded_file_id = f.uploaded_file_id
+      WHERE cf.uploaded_file_id IN ($placeholders)
+    ''',
+      uploadedFileIDs,
+    );
+
+    // Group files by collection ID
+    for (final row in result) {
+      final collectionId = row['mapping_collection_id'] as int;
+      final file = _mapToFile(row)..collectionID = collectionId;
+
+      collectionToFilesMap.putIfAbsent(collectionId, () => []);
+      collectionToFilesMap[collectionId]!.add(file);
+    }
+
+    return collectionToFilesMap;
+  }
+
   Future<List<EnteFile>> getAllFiles() async {
     final result = await _db.query(_filesTable);
     return result.map((row) => _mapToFile(row)).toList();
+  }
+
+  /// Removes orphaned files that exist in files table but have no collection mappings.
+  /// This can happen if files were deleted from trash before the cleanup fix was applied.
+  Future<void> cleanupOrphanedFiles() async {
+    final orphanedFiles = await _db.rawQuery(
+      '''
+      SELECT f.uploaded_file_id, f.title
+      FROM $_filesTable f
+      LEFT JOIN $_collectionFilesTable cf ON f.uploaded_file_id = cf.uploaded_file_id
+      WHERE cf.uploaded_file_id IS NULL
+    ''',
+    );
+
+    if (orphanedFiles.isEmpty) {
+      return;
+    }
+
+    final batch = _db.batch();
+    for (final row in orphanedFiles) {
+      final fileId = row['uploaded_file_id'];
+      batch.delete(
+        _filesTable,
+        where: 'uploaded_file_id = ?',
+        whereArgs: [fileId],
+      );
+    }
+
+    await batch.commit();
   }
 
   Map<String, dynamic> _collectionToMap(Collection collection) {

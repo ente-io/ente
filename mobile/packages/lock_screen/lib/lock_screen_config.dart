@@ -84,19 +84,9 @@ class LockScreenConfig {
 
   // Helper methods for building title
   static Widget _buildLockerTitle() {
-    return Builder(
-      builder: (context) {
-        final colorTheme = getEnteColorScheme(context);
-        return Text(
-          'Locker',
-          style: TextStyle(
-            color: colorTheme.primary700,
-            fontSize: 24,
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.w600,
-          ),
-        );
-      },
+    return Image.asset(
+      'assets/locker-logo-blue.png',
+      height: 24,
     );
   }
 

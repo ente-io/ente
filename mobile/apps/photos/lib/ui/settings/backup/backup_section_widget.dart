@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/backup_flow_helper.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
-import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
+import "package:photos/ui/settings/backup/backup_settings_screen.dart";
 import "package:photos/ui/settings/backup/backup_status_screen.dart";
 import "package:photos/ui/settings/backup/free_space_options.dart";
 import 'package:photos/ui/settings/common_settings.dart';
@@ -39,12 +39,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          await routeToPage(
-            context,
-            const BackupFolderSelectionPage(
-              isFirstBackup: false,
-            ),
-          );
+          await handleFolderSelectionBackupFlow(context);
         },
       ),
       sectionOptionSpacing,

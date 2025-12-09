@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
+import "package:photos/core/errors.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/public_url.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -11,16 +13,19 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
-import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -392,9 +397,26 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       onTap: () async {
                         await showDialog<void>(
                           context: context,
-                          builder: (BuildContext context) {
-                            return QrCodeDialogWidget(
-                              collection: widget.collection!,
+                          builder: (BuildContext dialogContext) {
+                            return QrCodeDialog(
+                              data: urlValue,
+                              title: widget.collection!.displayName,
+                              accentColor: enteColorScheme.primary500,
+                              shareFileName:
+                                  'ente_qr_${widget.collection!.displayName}.png',
+                              shareText:
+                                  'Scan this QR code to view my ${widget.collection!.displayName} album on ente',
+                              dialogTitle: AppLocalizations.of(context).qrCode,
+                              shareButtonText:
+                                  AppLocalizations.of(context).share,
+                              logoAssetPath: 'assets/qr_logo.png',
+                              branding: const QrTextBranding(
+                                text: 'ente',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
                             );
                           },
                         );
@@ -470,8 +492,45 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       }
     } catch (e) {
       await dialog?.hide();
-      await showGenericErrorDialog(context: context, error: e);
+      if (e is LinkEditNotAllowedError) {
+        await _showLinkEditNotAllowedDialog(context);
+      } else {
+        await showGenericErrorDialog(context: context, error: e);
+      }
       rethrow;
+    }
+  }
+
+  Future<void> _showLinkEditNotAllowedDialog(BuildContext context) async {
+    final buttonResult = await showDialogWidget(
+      context: context,
+      title: AppLocalizations.of(context).sorry,
+      body: AppLocalizations.of(context).subscribeToChangeLinkSetting,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          labelText: AppLocalizations.of(context).subscribe,
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: AppLocalizations.of(context).ok,
+        ),
+      ],
+    );
+    if (buttonResult?.action == ButtonAction.first) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return getSubscriptionPage();
+          },
+        ),
+      );
     }
   }
 }

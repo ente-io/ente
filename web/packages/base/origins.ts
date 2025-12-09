@@ -120,3 +120,13 @@ export const isCustomShareAppOrigin =
  */
 export const shareAppOrigin = (): string =>
     process.env.NEXT_PUBLIC_ENTE_SHARE_ENDPOINT ?? "https://share.ente.io";
+
+/**
+ * Return the origin that serves the photos app.
+ *
+ * Defaults to our production instance, "https://web.ente.io", but can be
+ * overridden by setting the `NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT` environment
+ * variable.
+ */
+export const photosAppOrigin = (): string =>
+    process.env.NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT ?? "https://web.ente.io";

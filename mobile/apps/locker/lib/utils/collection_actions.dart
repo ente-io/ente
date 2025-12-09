@@ -23,7 +23,7 @@ import "package:locker/services/configuration.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
-import 'package:locker/utils/snack_bar_utils.dart';
+import "package:locker/ui/components/subscription_required_dialog.dart";
 import 'package:logging/logging.dart';
 
 /// Utility class for common collection actions like edit and delete
@@ -95,7 +95,7 @@ class CollectionActions {
           await CollectionService.instance.rename(collection, newName);
           await progressDialog.hide();
 
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
             context.l10n.collectionRenamedSuccessfully,
           );
@@ -108,7 +108,7 @@ class CollectionActions {
         } catch (error) {
           await progressDialog.hide();
 
-          SnackBarUtils.showWarningSnackBar(
+          showToast(
             context,
             context.l10n.failedToRenameCollection(error.toString()),
           );
@@ -186,6 +186,7 @@ class CollectionActions {
       for (final collection in nonEmptyCollections) {
         try {
           await CollectionService.instance.trashCollection(
+            context,
             collection,
             keepFiles: keepFiles,
           );
@@ -204,7 +205,7 @@ class CollectionActions {
         );
       }
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         "${collections.length} collections deleted successfully",
       );
@@ -220,7 +221,7 @@ class CollectionActions {
     } catch (error) {
       await progressDialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         context.l10n.failedToDeleteCollection(error.toString()),
       );
@@ -235,7 +236,7 @@ class CollectionActions {
   }) async {
     final l10n = context.l10n;
     if (!collection.type.canDelete) {
-      SnackBarUtils.showWarningSnackBar(
+      showToast(
         context,
         l10n.collectionCannotBeDeleted,
       );
@@ -253,20 +254,24 @@ class CollectionActions {
 
         await progressDialog.hide();
 
-        SnackBarUtils.showInfoSnackBar(
-          context,
-          l10n.collectionDeletedSuccessfully,
-        );
+        if (context.mounted) {
+          showToast(
+            context,
+            l10n.collectionDeletedSuccessfully,
+          );
+        }
 
         // Call success callback if provided
         onSuccess?.call();
       } catch (error) {
         await progressDialog.hide();
 
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          l10n.failedToDeleteCollection(error.toString()),
-        );
+        if (context.mounted) {
+          showToast(
+            context,
+            l10n.failedToDeleteCollection(error.toString()),
+          );
+        }
       }
       return;
     }
@@ -293,26 +298,31 @@ class CollectionActions {
       // If deleteFromAllCollections is true → keepFiles should be false (move files to trash)
       // If deleteFromAllCollections is false → keepFiles should be true (keep files in other collections)
       await CollectionService.instance.trashCollection(
+        context,
         collection,
         keepFiles: !(result?.deleteFromAllCollections ?? false),
       );
 
       await progressDialog.hide();
 
-      SnackBarUtils.showInfoSnackBar(
-        context,
-        l10n.collectionDeletedSuccessfully,
-      );
+      if (context.mounted) {
+        showToast(
+          context,
+          l10n.collectionDeletedSuccessfully,
+        );
+      }
 
       // Call success callback if provided
       onSuccess?.call();
     } catch (error) {
       await progressDialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
-        context,
-        l10n.failedToDeleteCollection(error.toString()),
-      );
+      if (context.mounted) {
+        showToast(
+          context,
+          l10n.failedToDeleteCollection(error.toString()),
+        );
+      }
     }
   }
 
@@ -355,7 +365,7 @@ class CollectionActions {
       } else if (actionResult.action == ButtonAction.first) {
         onSuccess?.call();
         Navigator.of(context).pop();
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           "Leave collection successfully",
         );
@@ -404,7 +414,7 @@ class CollectionActions {
       } else if (actionResult.action == ButtonAction.first) {
         onSuccess?.call();
         Navigator.of(context).pop();
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           "Leave collection successfully",
         );
@@ -425,7 +435,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (e is SharingNotPermittedForFreeAccountsError) {
-        await _showUnSupportedAlert(context);
+        await showSubscriptionRequiredDialog(context);
       } else {
         _logger.severe("Failed to update shareUrl collection", e);
         await showGenericErrorDialog(context: context, error: e);
@@ -475,55 +485,6 @@ class CollectionActions {
     } else {
       return false;
     }
-  }
-
-  static Future<void> _showUnSupportedAlert(BuildContext context) async {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Sorry"),
-      content: const Text(
-        "You need an active paid subscription to enable sharing.",
-      ),
-      actions: [
-        ButtonWidget(
-          buttonType: ButtonType.primary,
-          isInAlert: true,
-          shouldStickToDarkTheme: false,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: true,
-          labelText: "Subscribe",
-          onTap: () async {
-            // TODO: If we are having subscriptions for locker
-            // Navigator.of(context).push(
-            //   MaterialPageRoute(
-            //     builder: (BuildContext context) {
-            //       return getSubscriptionPage();
-            //     },
-            //   ),
-            // ).ignore();
-            Navigator.of(context).pop();
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: ButtonWidget(
-            buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-            shouldStickToDarkTheme: false,
-            labelText: context.l10n.ok,
-          ),
-        ),
-      ],
-    );
-
-    return showDialog(
-      useRootNavigator: false,
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-      barrierDismissible: true,
-    );
   }
 
   Future<bool> doesEmailHaveAccount(
@@ -642,7 +603,7 @@ class CollectionActions {
       } catch (e) {
         await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          await _showUnSupportedAlert(context);
+          await showSubscriptionRequiredDialog(context);
         } else {
           _logger.severe("failed to share collection", e);
           await showGenericErrorDialog(context: context, error: e);

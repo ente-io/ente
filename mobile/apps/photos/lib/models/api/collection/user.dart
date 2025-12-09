@@ -22,6 +22,8 @@ class User {
   bool get isCollaborator =>
       role != null && role?.toUpperCase() == 'COLLABORATOR';
 
+  bool get isAdmin => role != null && role?.toUpperCase() == 'ADMIN';
+
   Map<String, dynamic> toMap() {
     // ignore: deprecated_member_use_from_same_package
     return {'id': id, 'email': email, 'name': name, "role": role};

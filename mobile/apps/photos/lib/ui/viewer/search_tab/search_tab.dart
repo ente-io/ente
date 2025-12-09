@@ -12,6 +12,7 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
+import "package:photos/ui/activity/activity_banner.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
@@ -21,6 +22,7 @@ import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
+import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
@@ -115,9 +117,9 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   padding: const EdgeInsets.only(bottom: 180),
                   physics: const BouncingScrollPhysics(),
                   itemCount: searchTypes.length,
-                  // ignore: body_might_complete_normally_nullable
                   itemBuilder: (context, index) {
-                    switch (searchTypes[index]) {
+                    final sectionType = searchTypes[index];
+                    switch (sectionType) {
                       case SectionType.face:
                         if (!flagService.hasGrantedMLConsent) {
                           return const SizedBox.shrink();
@@ -131,10 +133,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
+                      case SectionType.ritual:
+                        return const _RitualsDiscoverySection();
                       case SectionType.wrapped:
                         return ValueListenableBuilder<WrappedEntryState>(
-                          valueListenable:
-                              wrappedService.stateListenable,
+                          valueListenable: wrappedService.stateListenable,
                           builder: (
                             BuildContext context,
                             WrappedEntryState state,
@@ -217,6 +220,28 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   : const SizedBox.shrink();
             },
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RitualsDiscoverySection extends StatelessWidget {
+  const _RitualsDiscoverySection();
+
+  @override
+  Widget build(BuildContext context) {
+    if (!flagService.ritualsFlag) {
+      return const SizedBox.shrink();
+    }
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SectionHeader(SectionType.ritual, hasMore: false),
+          SizedBox(height: 2),
+          ActivityBanner(),
         ],
       ),
     );

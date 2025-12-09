@@ -118,6 +118,10 @@
   "enterYourPassword": "Ingresa tu contraseña",
   "welcomeBack": "¡Bienvenido de nuevo!",
   "contactSupport": "Contactar con soporte",
+  "locationPickerTip": "También puedes añadir una ubicación centrada en una foto desde la pantalla de información de la foto",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Contraseña incorrecta",
   "pleaseTryAgain": "Por favor, inténtalo nuevamente",
   "recreatePasswordTitle": "Recrear contraseña",
@@ -254,6 +258,7 @@
   "shareWithNonenteUsers": "Compartir con usuarios fuera de Ente",
   "createPublicLink": "Crear enlace público",
   "sendLink": "Enviar enlace",
+  "qrCode": "Código QR",
   "sendQrCode": "Enviar código QR",
   "copyLink": "Copiar enlace",
   "copyEmbedHtml": "Copiar HTML incorporado",
@@ -346,7 +351,7 @@
   "removeFromAlbumTitle": "¿Eliminar del álbum?",
   "removeFromAlbum": "Eliminar del álbum",
   "itemsWillBeRemovedFromAlbum": "Los elementos seleccionados serán eliminados de este álbum",
-  "removeShareItemsWarning": "Algunos de los elementos que estás eliminando fueron añadidos por otras personas, y perderás el acceso a ellos",
+  "removeShareItemsWarning": "Las fotos seleccionadas no serán accesibles para ningún visor de este álbum, excepto para los propietarios de las fotos.",
   "addingToFavorites": "Añadiendo a favoritos...",
   "removingFromFavorites": "Quitando de favoritos...",
   "sorryCouldNotAddToFavorites": "¡Lo sentimos, no se pudo añadir a favoritos!",
@@ -1200,6 +1205,11 @@
   "noImagesWithLocation": "No hay imágenes con ubicación",
   "unpinAlbum": "Dejar de fijar álbum",
   "pinAlbum": "Fijar álbum",
+  "pin": "Anclar",
+  "pinToTop": "Anclar al principio",
+  "unpin": "Desanclar",
+  "visibility": "Visibilidad",
+  "hideFromMemories": "Ocultar de los recuerdos",
   "create": "Crear",
   "viewAll": "Ver todo",
   "nothingSharedWithYouYet": "Aún no hay nada compartido contigo",
@@ -1385,8 +1395,8 @@
   "appLockDescriptions": "Escoge entre la pantalla de bloqueo por defecto de tu dispositivo y una pantalla de bloqueo personalizada con un PIN o contraseña.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para habilitar el bloqueo de la aplicación, por favor configura el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes del sistema.",
   "authToViewPasskey": "Por favor, autentícate para ver tu clave de acceso",
-  "loopVideoOn": "Vídeo en bucle activado",
-  "loopVideoOff": "Vídeo en bucle desactivado",
+  "loopVideoOn": "Desactivar bucle",
+  "loopVideoOff": "Activar bucle",
   "localSyncErrorMessage": "Parece que algo salió mal ya que la sincronización de fotos locales está tomando más tiempo del esperado. Por favor contacta con nuestro equipo de soporte",
   "showPerson": "Mostrar persona",
   "sort": "Ordenar",
@@ -1608,6 +1618,7 @@
   "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
   "hideSharedItemsFromHomeGallery": "Ocultar elementos compartidos de la galería de inicio",
+  "swipeToSelect": "Desliza para seleccionar",
   "gallery": "Galería",
   "joinAlbum": "Unir álbum",
   "joinAlbumSubtext": "para ver y añadir tus fotos",
@@ -1849,6 +1860,18 @@
   "addedToStreamRecreationQueue": "Añadido a la cola de grabación de transmisiones",
   "videoPreviewAlreadyExists": "La vista previa de vídeo ya existe",
   "videoAlreadyInQueue": "El archivo de vídeo ya está en la cola",
+  "videoExportFailed": "Falló la creación de vídeo. Por favor, inténtalo de nuevo.",
+  "videoExportSuccess": "Vídeo creado con éxito en {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Añadido a la cola",
   "creatingStream": "Creando transmisión",
   "similarImages": "Imágenes similares",
@@ -1992,6 +2015,112 @@
   "artisticPortraits": "Retratos artísticos",
   "streetFood": "Antojos callejeros",
   "riverCruises": "Vistas de crusero fluvial",
+  "facesTimelineBannerTitle": "Jardín de recuerdos",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Ver fotos de {name} a lo largo de los años",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Jardín de recuerdos",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} tenía {count, plural, one {{count} año de edad} other {{count} años de edad}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {Hace # año} other {Hace # años}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Compartir vídeos próximamente",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Anterior",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Siguiente",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Reproducir",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pausar",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Se está preparando la línea de tiempo de caras...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Niños jugando",
-  "coastalCliffs": "Acantilados marinos"
+  "coastalCliffs": "Acantilados marinos",
+  "ritualsTitle": "Rituales",
+  "ritualAddTooltip": "Añadir ritual",
+  "ritualActivityHeading": "Actividad",
+  "ritualDefaultHeatmapTitle": "Toma una foto cada día",
+  "ritualShareUnavailable": "No se puede compartir ahora. Por favor, inténtalo de nuevo.",
+  "ritualNotificationMessage": "Tomar una foto ahora",
+  "ritualCameraNotFound": "No se ha encontrado ninguna cámara en este dispositivo.",
+  "ritualCameraStartError": "No se puede iniciar la cámara. Por favor, comprueba los permisos.",
+  "ritualCaptureError": "No se puede capturar la foto. Por favor, inténtalo de nuevo.",
+  "ritualCaptureAtLeastOne": "Captura al menos una foto primero.",
+  "ritualDefaultCameraTitle": "Tomar una foto",
+  "ritualBadgeMessageDefault": "¡Estás en buena racha!",
+  "ritualBadgeNewTitle": "Nuevo logro",
+  "ritualBadgePreparing": "Preparando...",
+  "ritualStreaksLabel": "Rachas",
+  "ritualGetDailyReminders": "Obtener recordatorios diarios",
+  "ritualAlbumNotSet": "Álbum no establecido",
+  "ritualEnterDescription": "Por favor, ingresa una descripción",
+  "ritualDayLabel": "Día",
+  "ritualNotificationsOffHint": "Las notificaciones están apagadas. Toca en un día para activarlas.",
+  "ritualAlbumLabel": "Álbum",
+  "ritualSave": "Guardar ritual",
+  "ritualUpdate": "Actualizar ritual",
+  "ritualSelectAlbumTitle": "Seleccionar álbum",
+  "ritualSearchOrCreate": "Buscar o crear nuevo",
+  "ritualCreateAlbumWithName": "Crear \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Crear nuevo",
+  "ritualAlbumSelectionPlaceholder": "Seleccionar álbum",
+  "ritualPickEmojiTitle": "Elegir un emoji",
+  "ritualCustomKeyboardLabel": "Personalizado (teclado)",
+  "ritualEmojiKeyboardHint": "Presiona para abrir el teclado de emojis",
+  "ritualSearchEmpty": "Construye un ritual para mantener tu hábito fotográfico."
 }

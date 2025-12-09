@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "Share with non-Ente users",
   "createPublicLink": "Create public link",
   "sendLink": "Send link",
+  "qrCode": "QR Code",
   "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
   "copyEmbedHtml": "Copy embed HTML",
@@ -350,12 +351,13 @@
   "removeFromAlbumTitle": "Remove from album?",
   "removeFromAlbum": "Remove from album",
   "itemsWillBeRemovedFromAlbum": "Selected items will be removed from this album",
-  "removeShareItemsWarning": "Some of the items you are removing were added by other people, and you will lose access to them",
+  "removeShareItemsWarning": "Selected photos will not be accessible to any viewer of this album, except the photo owners.",
   "addingToFavorites": "Adding to favorites...",
   "removingFromFavorites": "Removing from favorites...",
   "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
   "sorryCouldNotRemoveFromFavorites": "Sorry, could not remove from favorites!",
   "subscribeToEnableSharing": "You need an active paid subscription to enable sharing.",
+  "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
@@ -1204,6 +1206,14 @@
   "noImagesWithLocation": "No images with location",
   "unpinAlbum": "Unpin album",
   "pinAlbum": "Pin album",
+  "pin": "Pin",
+  "pinPerson": "Pin person",
+  "pinToTop": "Pin to top",
+  "unpin": "Unpin",
+  "unpinPerson": "Unpin person",
+  "visibility": "Visibility",
+  "hideFromMemories": "Hide from memories",
+  "showInMemories": "Show in memories",
   "create": "Create",
   "viewAll": "View all",
   "nothingSharedWithYouYet": "Nothing shared with you yet",
@@ -1389,8 +1399,8 @@
   "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "authToViewPasskey": "Please authenticate to view your passkey",
-  "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off",
+  "loopVideoOn": "Disable looping",
+  "loopVideoOff": "Enable looping",
   "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
   "showPerson": "Show person",
   "sort": "Sort",
@@ -1612,6 +1622,7 @@
   "legacyInvite": "{email} has invited you to be a trusted contact",
   "authToManageLegacy": "Please authenticate to manage your trusted contacts",
   "hideSharedItemsFromHomeGallery": "Hide shared items from home gallery",
+  "swipeToSelect": "Swipe to select",
   "gallery": "Gallery",
   "joinAlbum": "Join album",
   "joinAlbumSubtext": "to view and add your photos",
@@ -2008,6 +2019,158 @@
   "artisticPortraits": "Artful portraits",
   "streetFood": "Street food bites",
   "riverCruises": "River cruise views",
+  "facesTimelineBannerTitle": "Memory Lane",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "See {name}'s photos across the years",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Memory lane",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} was {count, plural, one {{count} year old} other {{count} years old}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {# year ago} other {# years ago}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Video sharing coming soon",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Previous",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Next",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Play",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pause",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Faces timeline is preparing...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Playful kids",
-  "coastalCliffs": "Cliffs by the sea"
+  "coastalCliffs": "Cliffs by the sea",
+  "ritualsTitle": "Rituals",
+  "ritualAddTooltip": "Add ritual",
+  "ritualActivityHeading": "Activity",
+  "ritualDefaultHeatmapTitle": "Take a photo every day",
+  "ritualUntitled": "Untitled ritual",
+  "ritualShareUnavailable": "Unable to share right now. Please try again.",
+  "ritualNotificationMessage": "Take a photo now",
+  "ritualCameraNotFound": "No camera found on this device.",
+  "ritualCameraStartError": "Unable to start camera. Please check permissions.",
+  "ritualCaptureError": "Unable to capture photo. Please try again.",
+  "ritualPhotoLimit": "You can add up to {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Capture at least one photo first.",
+  "ritualAlbumMissing": "Ritual album missing. Edit the ritual to set an album.",
+  "ritualAddedToAlbum": "Added to album",
+  "ritualAddedToAlbumWithName": "Added to {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Couldn't add photos to the album: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Back to rituals",
+  "ritualNoPhotosYet": "No photos yet",
+  "ritualSetAlbumToLaunchCamera": "Set an album for this ritual to launch the camera.",
+  "ritualDefaultCameraTitle": "Take a photo",
+  "ritualBadgeMessage7": "7 days down! Consistency looks good on you. Keep going!",
+  "ritualBadgeMessage14": "14 days in! Your ritual is becoming a habit. Incredible!",
+  "ritualBadgeMessage30": "30 days in a row! Legendary consistency. Take a bow!",
+  "ritualBadgeMessageDefault": "You're on a roll!",
+  "ritualBadgeNewTitle": "New achievement",
+  "ritualBadgePreparing": "Preparing...",
+  "ritualStreaksLabel": "Streaks",
+  "ritualCreateYourOwn": "Create your own ritual",
+  "ritualGetDailyReminders": "Get daily reminders",
+  "ritualAlbumNotSet": "Album not set",
+  "ritualOpenCameraTooltip": "Open ritual camera",
+  "ritualEditorLabel": "Ritual editor",
+  "ritualNew": "New ritual",
+  "ritualEdit": "Edit ritual",
+  "ritualEnterPrompt": "Enter your ritual",
+  "ritualEnterDescription": "Please enter a description",
+  "ritualDayLabel": "Day",
+  "ritualNotificationsOffHint": "Notifications are off. Tap a day to turn them on.",
+  "ritualTimeLabel": "Time",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Save ritual",
+  "ritualUpdate": "Update ritual",
+  "ritualSelectAlbumTitle": "Select album",
+  "ritualSearchOrCreate": "Search or create new",
+  "ritualNoAlbumsYet": "No albums yet",
+  "ritualNoMatchingAlbums": "No matching albums",
+  "ritualCreateAlbumWithName": "Create \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Create new",
+  "ritualAlbumSelectionPlaceholder": "Select album",
+  "ritualPickEmojiTitle": "Pick an emoji",
+  "ritualCustomKeyboardLabel": "Custom (keyboard)",
+  "ritualEmojiKeyboardHint": "Press to open emoji keyboard",
+  "ritualEmojiUseAction": "Use",
+  "ritualSearchEmpty": "Build a ritual to keep your photo habit going."
 }

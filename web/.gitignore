@@ -21,3 +21,6 @@ dist
 .next-desktop/
 out/
 next-env.d.ts
+
+packages/wasm/pkg/
+packages/wasm/target/

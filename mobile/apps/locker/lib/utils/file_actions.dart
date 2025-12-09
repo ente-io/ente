@@ -1,127 +1,238 @@
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
+import "package:locker/core/errors.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/services/info_file_service.dart";
 import "package:locker/services/trash/trash_service.dart";
 import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
-import "package:locker/utils/collection_list_util.dart";
-import "package:locker/utils/snack_bar_utils.dart";
+import "package:locker/ui/components/subscription_required_dialog.dart";
+import "package:locker/ui/pages/account_credentials_page.dart";
+import "package:locker/ui/pages/base_info_page.dart";
+import "package:locker/ui/pages/emergency_contact_page.dart";
+import "package:locker/ui/pages/personal_note_page.dart";
+import "package:locker/ui/pages/physical_records_page.dart";
 import "package:logging/logging.dart";
 
 /// Utility class for common file actions like edit, share, delete, and favorites
 class FileActions {
   static final _logger = Logger("FileActions");
 
-  /// Shows edit dialog for a file to update title, caption, and collections
+  /// Shows edit dialog for a file to update title
   static Future<void> editFile(
     BuildContext context,
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
+    if (InfoFileService.instance.isInfoFile(file)) {
+      await _editInfoFile(context, file);
+      return;
+    }
+
+    _logger.info(
+      'Opening edit dialog for file ${file.uploadedFileID}',
+    );
+
     final allCollections = await CollectionService.instance.getCollections();
-    final dedupedCollections = uniqueCollectionsById(allCollections);
+    final currentCollections =
+        await CollectionService.instance.getCollectionsForFile(file);
+
+    final favoriteCollection =
+        await CollectionService.instance.getOrCreateImportantCollection();
+
+    final editableCollections = allCollections
+        .where((c) => c.type != CollectionType.uncategorized)
+        .toList();
+
+    final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 
     final result = await showFileEditDialog(
       context,
       file: file,
-      collections: dedupedCollections,
-      snackBarContext: context,
+      collections: editableCollections,
     );
 
-    if (result != null && context.mounted) {
-      List<Collection> currentCollections;
-      try {
-        currentCollections =
-            await CollectionService.instance.getCollectionsForFile(file);
-      } catch (e) {
-        currentCollections = <Collection>[];
-      }
+    if (result == null || !context.mounted) {
+      return;
+    }
 
-      final currentCollectionsSet = currentCollections.toSet();
-      final selectedCollectionsSet = result.selectedCollections.toSet();
-      final collectionsToAdd =
-          selectedCollectionsSet.difference(currentCollectionsSet).toList();
-      final hasCollectionAdds = collectionsToAdd.isNotEmpty;
+    // Fetch collections in case new ones were created during file edit dialog
+    final updatedAllCollections =
+        await CollectionService.instance.getCollections();
 
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.pleaseWait,
+      isDismissible: false,
+    );
+    await dialog.show();
+
+    try {
       final currentTitle = file.displayName;
-      final currentCaption = file.caption ?? '';
-      final hasMetadataChanged =
-          result.title != currentTitle || result.caption != currentCaption;
+      final hasMetadataChanged = result.title != currentTitle;
 
-      if (hasMetadataChanged || hasCollectionAdds) {
-        final dialog = createProgressDialog(
-          context,
-          context.l10n.pleaseWait,
-          isDismissible: false,
-        );
-        await dialog.show();
+      if (hasMetadataChanged) {
+        _logger.info('Updating file metadata: title changed');
+        final metadataUpdateSuccess = await MetadataUpdaterService.instance
+            .editFileName(file, result.title);
 
-        try {
-          final addFutures = <Future<void>>[];
-          for (final collection in collectionsToAdd) {
-            addFutures.add(
-              CollectionService.instance.addToCollection(
-                collection,
-                file,
-                runSync: false,
-              ),
-            );
-          }
-          if (addFutures.isNotEmpty) {
-            await Future.wait(addFutures);
-          }
-
-          final List<Future<void>> apiCalls = [];
-
-          if (hasMetadataChanged) {
-            apiCalls.add(
-              MetadataUpdaterService.instance
-                  .editFileNameAndCaption(file, result.title, result.caption),
-            );
-          }
-          await Future.wait(apiCalls);
-
-          await dialog.hide();
-
-          if (!context.mounted) {
-            return;
-          }
-
-          SnackBarUtils.showInfoSnackBar(
-            context,
-            context.l10n.fileUpdatedSuccessfully,
-          );
-
-          onSuccess?.call();
-        } catch (e) {
+        if (!metadataUpdateSuccess) {
           await dialog.hide();
           if (!context.mounted) {
             return;
           }
-
-          SnackBarUtils.showWarningSnackBar(
+          showToast(
             context,
-            context.l10n.failedToUpdateFile(e.toString()),
+            context.l10n.failedToUpdateFile('Metadata update failed'),
           );
-        }
-      } else {
-        if (!context.mounted) {
           return;
         }
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          context.l10n.noChangesWereMade,
-        );
       }
+      final selectedCollectionIds =
+          result.selectedCollections.map((c) => c.id).toSet();
+
+      final wasFavorite = currentCollectionIds.contains(favoriteCollection.id);
+      final isFavoriteNow =
+          selectedCollectionIds.contains(favoriteCollection.id);
+
+      if (wasFavorite && !isFavoriteNow) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else if (!wasFavorite && isFavoriteNow) {
+        await FavoritesService.instance.addToFavorites(context, file);
+      }
+
+      final regularCurrentIds = currentCollectionIds
+          .where((id) => id != favoriteCollection.id)
+          .toSet();
+      final regularSelectedIds = selectedCollectionIds
+          .where((id) => id != favoriteCollection.id)
+          .toSet();
+
+      final collectionsToRemove =
+          regularCurrentIds.difference(regularSelectedIds);
+
+      final collectionsToAdd = regularSelectedIds.difference(regularCurrentIds);
+
+      if (regularSelectedIds.isEmpty && collectionsToRemove.isNotEmpty) {
+        _logger.info('All collections deselected, moving to uncategorized');
+
+        for (final collectionId in collectionsToRemove) {
+          try {
+            final collection =
+                updatedAllCollections.firstWhere((c) => c.id == collectionId);
+            await CollectionService.instance.moveFilesFromCurrentCollection(
+              context,
+              collection,
+              [file],
+            );
+          } catch (e) {
+            final collection =
+                updatedAllCollections.firstWhere((c) => c.id == collectionId);
+            _logger.severe(
+              'Failed to remove file from collection (ID: ${collection.id}): $e',
+            );
+          }
+        }
+      } else {
+        for (final collectionId in collectionsToAdd) {
+          final collection =
+              updatedAllCollections.firstWhere((c) => c.id == collectionId);
+
+          try {
+            await CollectionService.instance.addToCollection(
+              collection,
+              file,
+              runSync: false,
+            );
+          } catch (e) {
+            _logger.severe(
+              'Failed to move file to collection (ID: ${collection.id}): $e',
+            );
+          }
+        }
+
+        for (final collectionId in collectionsToRemove) {
+          final collection =
+              updatedAllCollections.firstWhere((c) => c.id == collectionId);
+          await CollectionService.instance
+              .moveFilesFromCurrentCollection(context, collection, [file]);
+        }
+      }
+
+      showToast(context, context.l10n.fileUpdatedSuccessfully);
+
+      await CollectionService.instance.sync();
+
+      await dialog.hide();
+
+      onSuccess?.call();
+    } catch (e) {
+      await dialog.hide();
+      _logger.severe('Failed to update file collections: $e');
+
+      if (!context.mounted) {
+        return;
+      }
+      showToast(context, context.l10n.failedToUpdateFile(e.toString()));
     }
+  }
+
+  static Future<void> _editInfoFile(
+    BuildContext context,
+    EnteFile file,
+  ) async {
+    Widget page;
+    final infoItem = InfoFileService.instance.extractInfoFromFile(file);
+
+    if (infoItem == null) {
+      _logger.warning(
+        'File ${file.uploadedFileID} marked as info file but no info payload found',
+      );
+      return;
+    }
+
+    switch (infoItem.type) {
+      case InfoType.note:
+        page = PersonalNotePage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+      case InfoType.accountCredential:
+        page = AccountCredentialsPage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+      case InfoType.physicalRecord:
+        page = PhysicalRecordsPage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+      case InfoType.emergencyContact:
+        page = EmergencyContactPage(
+          mode: InfoPageMode.edit,
+          existingFile: file,
+        );
+        break;
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => page,
+      ),
+    );
   }
 
   /// Creates and shows a shareable link for a file
@@ -154,10 +265,14 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
-          context,
-          '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
-        );
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          await showSubscriptionRequiredDialog(context);
+        } else {
+          showToast(
+            context,
+            context.l10n.failedToCreateShareLink,
+          );
+        }
       }
     }
   }
@@ -198,7 +313,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.fileDeletedSuccessfully,
         );
@@ -209,7 +324,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDeleteFile(e.toString()),
         );
@@ -267,7 +382,7 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.fileDeletedSuccessfully,
         );

@@ -9,7 +9,6 @@ import app_links
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-
     super.application(application, didFinishLaunchingWithOptions: launchOptions)
 
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {

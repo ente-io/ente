@@ -2,6 +2,7 @@ import "package:ente_events/event_bus.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
@@ -16,7 +17,6 @@ import "package:locker/ui/components/selection_action_button_widget.dart";
 import "package:locker/utils/collection_list_util.dart";
 import "package:locker/utils/file_actions.dart";
 import "package:locker/utils/file_util.dart";
-import "package:locker/utils/snack_bar_utils.dart";
 import "package:logging/logging.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -402,14 +402,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     List<EnteFile> files,
   ) async {
     try {
-      final success = await FileUtil.downloadFilesToDownloads(context, files);
+      final success = await FileUtil.downloadFiles(context, files);
       if (success) {
         widget.selectedFiles.clearAll();
       }
     } catch (e, stackTrace) {
       _logger.severe("Failed to download files: $e", e, stackTrace);
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDownloadOrDecrypt,
         );
@@ -418,7 +418,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   void _shareMultipleFiles(BuildContext context) {
-    SnackBarUtils.showWarningSnackBar(
+    showToast(
       context,
       "Sharing multiple files is coming soon",
     );
@@ -474,8 +474,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         for (final file in files) {
           _logger.fine(
-            'Processing file ${file.uploadedFileID} (${file.displayName}) '
-            'for add-to operation.',
+            'Processing file ${file.uploadedFileID} for add-to operation',
           );
           List<Collection> currentCollections;
           try {
@@ -511,7 +510,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         if (addFutures.isEmpty) {
           await dialog.hide();
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
             context.l10n.noChangesWereMade,
           );
@@ -528,7 +527,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
         widget.selectedFiles.clearAll();
 
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
           context.l10n.fileUpdatedSuccessfully,
         );
@@ -538,7 +537,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           'Failed add-to operation: $e',
         );
 
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToUpdateFile(e.toString()),
         );
@@ -599,7 +598,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
       widget.selectedFiles.clearAll();
 
-      SnackBarUtils.showInfoSnackBar(
+      showToast(
         context,
         context.l10n.fileDeletedSuccessfully,
       );
@@ -623,14 +622,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   Future<void> _downloadFile(BuildContext context, EnteFile file) async {
     try {
-      final success = await FileUtil.downloadFilesToDownloads(context, [file]);
+      final success = await FileUtil.downloadFile(context, file);
       if (success) {
         widget.selectedFiles.clearAll();
       }
     } catch (e, stackTrace) {
       _logger.severe("Failed to download file: $e", e, stackTrace);
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
           context.l10n.failedToDownloadOrDecrypt,
         );

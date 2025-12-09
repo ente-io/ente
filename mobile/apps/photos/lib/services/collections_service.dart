@@ -30,6 +30,7 @@ import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/api/metadata.dart";
+import 'package:photos/models/collection/action.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
@@ -386,6 +387,7 @@ class CollectionsService {
     }
     if (includedShared || includeCollab) {
       allowedRoles.add(CollectionParticipantRole.collaborator);
+      allowedRoles.add(CollectionParticipantRole.admin);
     }
     final int userID = _config.getUserID()!;
     return _collectionIDToCollections.values
@@ -398,6 +400,20 @@ class CollectionsService {
               allowedRoles.contains(c.getRole(userID)),
         )
         .toList();
+  }
+
+  bool canRemoveFilesFromAllParticipants(Collection collection) {
+    final int? userID = _config.getUserID();
+    if (userID == null) {
+      return false;
+    }
+    if (collection.isOwner(userID)) {
+      return true;
+    }
+    if (!flagService.enableAdminRole) {
+      return false;
+    }
+    return collection.isAdmin(userID);
   }
 
   List<int> getAllOwnedCollectionIDs() {
@@ -586,6 +602,65 @@ class CollectionsService {
           collection.isQuickLinkCollection() ||
           collection.isHidden() ||
           collection.isArchived()) {
+        continue;
+      }
+      if (collection.type == CollectionType.favorites) {
+        // Hide fav collection if it's empty
+        if (hasFavorites) {
+          favorites.add(collection);
+        }
+      } else if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        rest.add(collection);
+      }
+    }
+
+    return favorites + pinned + rest;
+  }
+
+  Future<List<Collection>> getCollectionsForRituals() async {
+    final AlbumSortKey sortKey = localSettings.albumSortKey();
+    final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
+    final List<Collection> collections =
+        CollectionsService.instance.getCollectionsForUI();
+    final bool hasFavorites = FavoritesService.instance.hasFavorites();
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+    collections.sort(
+      (first, second) {
+        int comparison;
+        if (sortKey == AlbumSortKey.albumName) {
+          comparison = compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          comparison =
+              (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+                  .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          comparison = second.updationTime.compareTo(first.updationTime);
+        }
+        return sortDirection == AlbumSortDirection.ascending
+            ? comparison
+            : -comparison;
+      },
+    );
+    final List<Collection> favorites = [];
+    final List<Collection> pinned = [];
+    final List<Collection> rest = [];
+    final int? userId = Configuration.instance.getUserID();
+    for (final collection in collections) {
+      if (collection.type == CollectionType.uncategorized ||
+          collection.isQuickLinkCollection() ||
+          (collection.isHidden()) ||
+          ((userId == null || !collection.canAutoAdd(userId)))) {
         continue;
       }
       if (collection.type == CollectionType.favorites) {
@@ -828,9 +903,13 @@ class CollectionsService {
     final PublicURL url = c.publicURLs.firstOrNull!;
     Uri publicUrl = Uri.parse(url.url);
 
-    // Replace with custom domain if configured
+    final int? currentUserID = Configuration.instance.getUserID();
+    final bool isOwner = currentUserID != null && currentUserID == c.owner.id;
     final String customDomain = flagService.customDomain;
-    if (customDomain.isNotEmpty) {
+    final bool applyCustomDomain = isOwner && customDomain.isNotEmpty;
+
+    // Replace with custom domain if configured for the owner
+    if (applyCustomDomain) {
       publicUrl = publicUrl.replace(
         host: customDomain,
         scheme: "https",
@@ -848,7 +927,7 @@ class CollectionsService {
 
     // Handle IDN domains - if the host was percent-encoded by Uri.replace,
     // decode it for user-friendly display
-    if (customDomain.isNotEmpty && publicUrl.host.contains('%')) {
+    if (applyCustomDomain && publicUrl.host.contains('%')) {
       final decodedHost = Uri.decodeComponent(publicUrl.host);
       finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
     }
@@ -1198,6 +1277,10 @@ class CollectionsService {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
+      if (e.response?.statusCode == 403 &&
+          e.response?.data?['code'] == 'LINK_EDIT_NOT_ALLOWED') {
+        throw LinkEditNotAllowedError();
+      }
       rethrow;
     } catch (e, s) {
       _logger.severe("failed to update ShareUrl", e, s);
@@ -1248,6 +1331,73 @@ class CollectionsService {
       if (e is DioException && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
+      rethrow;
+    }
+  }
+
+  Future<List<CollectionAction>> fetchPendingRemovalActions() async {
+    try {
+      final response = await _enteDio.get(
+        "/collection-actions/pending-remove/",
+      );
+      final List<dynamic> rawActions =
+          (response.data["actions"] as List<dynamic>?) ?? const [];
+      final actions = rawActions
+          .map(
+            (dynamic action) => CollectionAction.fromJson(
+              Map<String, dynamic>.from(action as Map<dynamic, dynamic>),
+            ),
+          )
+          .toList(growable: false);
+      _logger
+          .info("Fetched ${actions.length} pending collection removal actions");
+      return actions;
+    } catch (e, s) {
+      _logger.warning("Failed to fetch pending removal actions", e, s);
+      rethrow;
+    }
+  }
+
+  Future<List<int>> fetchDeleteSuggestionFileIDs() async {
+    try {
+      final response =
+          await _enteDio.get("/collection-actions/delete-suggestions/");
+      final List<dynamic> rawActions =
+          (response.data["actions"] as List<dynamic>?) ?? const [];
+      final actions = rawActions
+          .map(
+            (dynamic action) => CollectionAction.fromJson(
+              Map<String, dynamic>.from(action as Map<dynamic, dynamic>),
+            ),
+          )
+          .toList(growable: false);
+      final Set<int> uniqueFileIDs = <int>{};
+      for (final action in actions) {
+        if (action.fileID != null) {
+          uniqueFileIDs.add(action.fileID!);
+        }
+      }
+      _logger.info(
+        "Fetched ${uniqueFileIDs.length} unique delete suggestion file IDs",
+      );
+      return uniqueFileIDs.toList();
+    } catch (e, s) {
+      _logger.warning("Failed to fetch delete suggestion actions", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> rejectDeleteSuggestions(List<int> fileIDs) async {
+    if (fileIDs.isEmpty) {
+      return;
+    }
+    try {
+      await _enteDio.post(
+        "/collection-actions/reject-delete-suggestions/",
+        data: {"fileIDs": fileIDs},
+      );
+    } catch (e, s) {
+      _logger.warning("Failed to reject delete suggestions", e, s);
       rethrow;
     }
   }
@@ -2067,10 +2217,62 @@ class CollectionsService {
       }
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collectionID,
+          batch,
+          "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          batch,
+          source: "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
     }
+    RemoteSyncService.instance.sync(silently: true).ignore();
+  }
+
+  Future<void> suggestDeleteFromCollection(
+    int collectionID,
+    List<EnteFile> files,
+  ) async {
+    final List<int> fileIDs =
+        files.map((file) => file.uploadedFileID).whereType<int>().toList();
+    if (fileIDs.isEmpty) {
+      return;
+    }
+    final params = <String, dynamic>{
+      "collectionID": collectionID,
+      "fileIDs": fileIDs,
+    };
+    final resp = await _enteDio.post(
+      "/collections/suggest-delete",
+      data: params,
+    );
+    if (resp.statusCode != 200) {
+      throw Exception("Failed to send delete suggestion");
+    }
+
+    await _filesDB.removeFromCollection(collectionID, fileIDs);
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collectionID,
+        files,
+        "suggestDelete",
+        type: EventType.deletedFromRemote,
+      ),
+    );
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: "suggestDelete",
+        type: EventType.deletedFromRemote,
+      ),
+    );
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 

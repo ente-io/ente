@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:convert";
 import "dart:developer";
 
@@ -161,10 +162,13 @@ class PersonService {
     w?.log("Got DB person cluster info");
     final persons = await getPersonsMap();
     w?.log("Got persons");
+    int orphanMappingsRemoved = 0;
     for (var personID in dbPersonClusterInfo.keys) {
       final person = persons[personID];
       if (person == null) {
         logger.severe("Person $personID not found");
+        await _removeOrphanedLocalPerson(personID);
+        orphanMappingsRemoved++;
         continue;
       }
       final Map<String, Set<String>> dbPersonCluster =
@@ -183,6 +187,11 @@ class PersonService {
             .ignore();
         personData.logStats();
       }
+    }
+    if (orphanMappingsRemoved > 0) {
+      logger.warning(
+        "Removed $orphanMappingsRemoved orphaned local person mappings during reconcile",
+      );
     }
     w?.log("Reconciled clusters for ${persons.length} persons");
   }
@@ -232,6 +241,8 @@ class PersonService {
     required String name,
     required String clusterID,
     bool isHidden = false,
+    bool isPinned = false,
+    bool hideFromMemories = false,
     String? birthdate,
     String? email,
   }) async {
@@ -245,6 +256,8 @@ class PersonService {
         ),
       ],
       isHidden: isHidden,
+      isPinned: isPinned,
+      hideFromMemories: hideFromMemories,
       birthDate: birthdate,
       email: email,
     );
@@ -376,6 +389,20 @@ class PersonService {
     }
 
     final entities = await entityService.getEntities(EntityType.cgroup);
+    final remotePersonIDs = entities.map((e) => e.id).toSet();
+    final localPersonMappings = await faceMLDataDB.getPersonToClusterIDs();
+    int removedOrphans = 0;
+    for (final localPersonID in localPersonMappings.keys) {
+      if (!remotePersonIDs.contains(localPersonID)) {
+        removedOrphans++;
+        await _removeOrphanedLocalPerson(localPersonID);
+      }
+    }
+    if (removedOrphans > 0) {
+      logger.info(
+        "Removed $removedOrphans orphaned local person mappings during sync",
+      );
+    }
     // todo: (neerajg) perf change, this can be expensive to do on every sync
     // especially when we have a lot of people. We should only do this when the
     // last sync time is updated for cgroup entity type. To avoid partial update,
@@ -508,6 +535,8 @@ class PersonService {
     String? name,
     String? avatarFaceId,
     bool? isHidden,
+    bool? isPinned,
+    bool? hideFromMemories,
     int? version,
     String? birthDate,
     String? email,
@@ -518,6 +547,8 @@ class PersonService {
         name: name,
         avatarFaceId: avatarFaceId,
         isHidden: isHidden,
+        isPinned: isPinned,
+        hideFromMemories: hideFromMemories,
         version: version,
         birthDate: birthDate,
         email: email,
@@ -525,6 +556,15 @@ class PersonService {
     );
     await updatePerson(updatedPerson);
     await refreshPersonCache();
+    if (hideFromMemories != null &&
+        hideFromMemories != person.data.hideFromMemories) {
+      memoriesCacheService.queueUpdateCache();
+      if (hideFromMemories) {
+        unawaited(
+          memoriesCacheService.purgePersonFromMemoriesCache(id),
+        );
+      }
+    }
     return updatedPerson;
   }
 
@@ -551,5 +591,12 @@ class PersonService {
     final result = await entityService.addOrUpdate(type, jsonMap, id: id);
     _lastCacheRefreshTime = 0; // Invalidate cache
     return result;
+  }
+
+  Future<void> _removeOrphanedLocalPerson(String personID) async {
+    logger.warning(
+      "Removing local ML mappings for person $personID because entity no longer exists",
+    );
+    await faceMLDataDB.removePerson(personID);
   }
 }

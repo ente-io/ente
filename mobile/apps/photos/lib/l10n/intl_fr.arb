@@ -118,6 +118,10 @@
   "enterYourPassword": "Entrez votre mot de passe",
   "welcomeBack": "Bienvenue !",
   "contactSupport": "Contacter l'assistance",
+  "locationPickerTip": "Vous pouvez également ajouter un lieu centré à partir d'une photo depuis l'écran d'information de la photo",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Mot de passe incorrect",
   "pleaseTryAgain": "Veuillez réessayer",
   "recreatePasswordTitle": "Recréer le mot de passe",
@@ -254,6 +258,7 @@
   "shareWithNonenteUsers": "Partager avec des utilisateurs non-Ente",
   "createPublicLink": "Créer un lien public",
   "sendLink": "Envoyer le lien",
+  "qrCode": "QR Code",
   "sendQrCode": "Envoyer le QR code",
   "copyLink": "Copier le lien",
   "copyEmbedHtml": "Copier le code HTML intégré",
@@ -346,7 +351,7 @@
   "removeFromAlbumTitle": "Retirer de l'album ?",
   "removeFromAlbum": "Retirer de l'album",
   "itemsWillBeRemovedFromAlbum": "Les éléments sélectionnés seront supprimés de cet album",
-  "removeShareItemsWarning": "Certains des éléments que vous êtes en train de retirer ont été ajoutés par d'autres personnes, vous perdrez l'accès vers ces éléments",
+  "removeShareItemsWarning": "Les photos sélectionnées ne seront accessibles par aucun spectateur de cet album, à l'exception des propriétaires de photos.",
   "addingToFavorites": "Ajout aux favoris...",
   "removingFromFavorites": "Suppression des favoris…",
   "sorryCouldNotAddToFavorites": "Désolé, impossible d'ajouter aux favoris !",
@@ -1200,6 +1205,11 @@
   "noImagesWithLocation": "Aucune image avec localisation",
   "unpinAlbum": "Désépingler l'album",
   "pinAlbum": "Épingler l'album",
+  "pin": "Épingler",
+  "pinToTop": "Épingler en haut",
+  "unpin": "Désépingler",
+  "visibility": "Visibilité",
+  "hideFromMemories": "Masquer des souvenirs",
   "create": "Créer",
   "viewAll": "Tout afficher",
   "nothingSharedWithYouYet": "Rien n'a encore été partagé avec vous",
@@ -1385,8 +1395,8 @@
   "appLockDescriptions": "Choisissez entre l'écran de verrouillage par défaut de votre appareil et un écran de verrouillage personnalisé avec un code PIN ou un mot de passe.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pour activer le verrouillage de l'application vous devez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
   "authToViewPasskey": "Veuillez vous authentifier pour afficher votre clé de récupération",
-  "loopVideoOn": "Vidéo en boucle activée",
-  "loopVideoOff": "Vidéo en boucle désactivée",
+  "loopVideoOn": "Désactiver la lecture en boucle",
+  "loopVideoOff": "Activer la lecture en boucle",
   "localSyncErrorMessage": "Il semble que quelque chose s'est mal passé car la synchronisation des photos locales prend plus de temps que prévu. Veuillez contacter notre équipe d'assistance",
   "showPerson": "Montrer la personne",
   "sort": "Trier",
@@ -1608,6 +1618,7 @@
   "legacyInvite": "{email} vous a invité à être un contact de confiance",
   "authToManageLegacy": "Veuillez vous authentifier pour gérer vos contacts de confiance",
   "hideSharedItemsFromHomeGallery": "Masquer les éléments partagés avec vous dans la galerie",
+  "swipeToSelect": "Balayer pour sélectionner",
   "gallery": "Galerie",
   "joinAlbum": "Rejoindre l'album",
   "joinAlbumSubtext": "pour afficher et ajouter vos photos",
@@ -1849,6 +1860,18 @@
   "addedToStreamRecreationQueue": "Ajouté à la file d'attente de re-création de flux",
   "videoPreviewAlreadyExists": "L'aperçu vidéo existe déjà",
   "videoAlreadyInQueue": "Fichier vidéo déjà présent dans la file d'attente",
+  "videoExportFailed": "Échec de la création de la vidéo. Veuillez réessayer.",
+  "videoExportSuccess": "Vidéo créée avec succès à {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Ajouté à la file d'attente",
   "creatingStream": "Création du flux",
   "similarImages": "Images similaires",
@@ -1992,6 +2015,158 @@
   "artisticPortraits": "Portraits joyeux",
   "streetFood": "Bouchés de la bouffe",
   "riverCruises": "Vue sur le fleuve",
+  "facesTimelineBannerTitle": "Souvenirs",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Voir les photos de {name}au fil des années",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Souvenirs",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} avait {count, plural, one {{count} an} other {{count} ans}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, one {# an plus tôt} other {# ans plus tôt}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Le partage de vidéos arrive bientôt",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Précédent",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Suivant",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Lecture",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Pause",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "L'historique des visages est en préparation...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Enfants amusants",
-  "coastalCliffs": "Falaises au bord de mer"
+  "coastalCliffs": "Falaises au bord de mer",
+  "ritualsTitle": "Routines",
+  "ritualAddTooltip": "Ajouter une routine",
+  "ritualActivityHeading": "Activité",
+  "ritualDefaultHeatmapTitle": "Prendre une photo chaque jour",
+  "ritualUntitled": "Routine sans titre",
+  "ritualShareUnavailable": "Impossible de partager pour le moment. Veuillez réessayer.",
+  "ritualNotificationMessage": "Prendre une photo maintenant",
+  "ritualCameraNotFound": "Aucune caméra trouvée sur cet appareil.",
+  "ritualCameraStartError": "Impossible de démarrer la caméra. Veuillez vérifier les autorisations.",
+  "ritualCaptureError": "Impossible de prendre la photo. Veuillez réessayer.",
+  "ritualPhotoLimit": "Vous pouvez ajouter jusqu'à {maxPhotos, plural, one {# photo.} other {# photos.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Prenez au moins une photo d'abord.",
+  "ritualAlbumMissing": "Routine d'album manquante. Modifiez-la pour définir un album.",
+  "ritualAddedToAlbum": "Ajouté à l'album",
+  "ritualAddedToAlbumWithName": "Ajouté à {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Échec lors de l'ajout des photos à l'album : {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Retour aux routines",
+  "ritualNoPhotosYet": "Aucune photo pour l'instant",
+  "ritualSetAlbumToLaunchCamera": "Définissez un album pour que cette routine lance la caméra.",
+  "ritualDefaultCameraTitle": "Prendre une photo",
+  "ritualBadgeMessage7": "7 jours passé ! La régularité semble bonne pour vous. Continuez !",
+  "ritualBadgeMessage14": "14 jours plus tard ! Votre routine devient une habitude. Incroyable !",
+  "ritualBadgeMessage30": "30 jours de suite ! Régularité légendaire. Prends un arc !",
+  "ritualBadgeMessageDefault": "Vous êtes bien parti !",
+  "ritualBadgeNewTitle": "Nouveau succès",
+  "ritualBadgePreparing": "Préparation...",
+  "ritualStreaksLabel": "Séries",
+  "ritualCreateYourOwn": "Créez votre propre routine",
+  "ritualGetDailyReminders": "Recevez des rappels quotidiens",
+  "ritualAlbumNotSet": "Album non configuré",
+  "ritualOpenCameraTooltip": "Ouvrir la routine caméra",
+  "ritualEditorLabel": "Éditeur de routine",
+  "ritualNew": "Nouvelle routine",
+  "ritualEdit": "Modifier la routine",
+  "ritualEnterPrompt": "Saisissez votre routine",
+  "ritualEnterDescription": "Veuillez saisir une description",
+  "ritualDayLabel": "Jour",
+  "ritualNotificationsOffHint": "Les notifications sont désactivées. Appuyez sur un jour pour les activer.",
+  "ritualTimeLabel": "Date et heure",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Enregistrer la routine",
+  "ritualUpdate": "Mettre à jour la routine",
+  "ritualSelectAlbumTitle": "Sélectionner un album",
+  "ritualSearchOrCreate": "Rechercher ou créer un nouveau",
+  "ritualNoAlbumsYet": "Pas encore d'albums",
+  "ritualNoMatchingAlbums": "Aucuns albums correspondants",
+  "ritualCreateAlbumWithName": "Créer \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Créer un nouveau",
+  "ritualAlbumSelectionPlaceholder": "Sélectionner un album",
+  "ritualPickEmojiTitle": "Choisir un émoji",
+  "ritualCustomKeyboardLabel": "Personnalisé (clavier)",
+  "ritualEmojiKeyboardHint": "Appuyez pour ouvrir le clavier emoji",
+  "ritualEmojiUseAction": "Utiliser",
+  "ritualSearchEmpty": "Construisez un rituel pour garder votre habitude de photographie."
 }

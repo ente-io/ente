@@ -1,3 +1,4 @@
+import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -149,19 +150,15 @@ class _AccountCredentialsPageState
         controller: _passwordController,
         obscureText: !_passwordVisible,
         textInputAction: TextInputAction.next,
-        trailing: IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minHeight: 32, minWidth: 32),
-          iconSize: 20,
-          visualDensity: VisualDensity.compact,
-          icon: Icon(
-            _passwordVisible ? Icons.visibility : Icons.visibility_off,
-          ),
-          onPressed: () {
+        trailing: GestureDetector(
+          onTap: () {
             setState(() {
               _passwordVisible = !_passwordVisible;
             });
           },
+          child: Icon(
+            _passwordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
@@ -241,12 +238,9 @@ class _AccountCredentialsPageState
     }
     Clipboard.setData(ClipboardData(text: value));
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.copiedToClipboard(label)),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
-      ),
+    showToast(
+      context,
+      context.l10n.copiedToClipboard(label),
     );
   }
 }

@@ -201,9 +201,21 @@ var ErrCastIPMismatch = ApiError{
 	HttpStatusCode: http.StatusForbidden,
 }
 
+var ErrLinkEditNotAllowed = ApiError{
+	Code:           LinkEditNotAllowed,
+	Message:        "Editing link settings is not allowed for free accounts",
+	HttpStatusCode: http.StatusForbidden,
+}
+
 var ErrLockerRegistrationDisabled = &ApiError{
 	Code:           LockerRegistrationDisabled,
 	Message:        "Locker is restricted to paid users currently",
+	HttpStatusCode: http.StatusForbidden,
+}
+
+var ErrLockerRollOutLimit = &ApiError{
+	Code:           LockerRolloutLimit,
+	Message:        "Sorry, locker registration is paused temporarily, please try again later",
 	HttpStatusCode: http.StatusForbidden,
 }
 
@@ -241,10 +253,15 @@ const (
 	// LockerRegistrationDisabled indicates that locker registration is currently disabled
 	LockerRegistrationDisabled ErrorCode = "LOCKER_REGISTRATION_DISABLED"
 
+	LockerRolloutLimit ErrorCode = "LOCKER_ROLLOUT_LIMIT"
+
 	// FileLimitReached indicates the user hit the maximum number of files allowed
 	FileLimitReached ErrorCode = "FILE_LIMIT_REACHED"
 
 	SessionExpired ErrorCode = "SESSION_EXPIRED"
+
+	// LinkEditNotAllowed indicates that the user cannot change link settings
+	LinkEditNotAllowed ErrorCode = "LINK_EDIT_NOT_ALLOWED"
 )
 
 type ApiError struct {

@@ -703,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @shareThisLink.
   ///
   /// In en, this message translates to:
-  /// **'Anyone with this link can access your item.'**
+  /// **'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.'**
   String get shareThisLink;
 
   /// No description provided for @copyLink.
@@ -1018,6 +1018,12 @@ abstract class AppLocalizations {
   /// **'Report bug'**
   String get reportBug;
 
+  /// Dialog body text for sending logs in Locker app (without file name warning)
+  ///
+  /// In en, this message translates to:
+  /// **'This will send logs to help us debug your issue.'**
+  String get logsDialogBodyLocker;
+
   /// No description provided for @social.
   ///
   /// In en, this message translates to:
@@ -1183,7 +1189,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Hint text'**
+  /// **'Note title'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -2014,6 +2020,48 @@ abstract class AppLocalizations {
   /// **'Upload error'**
   String get uploadError;
 
+  /// Title shown when uploads fail due to running out of storage
+  ///
+  /// In en, this message translates to:
+  /// **'Storage limit reached'**
+  String get uploadStorageLimitErrorTitle;
+
+  /// Body shown when uploads fail due to running out of storage
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve run out of storage space. Free up space to continue uploading.'**
+  String get uploadStorageLimitErrorBody;
+
+  /// Title shown when uploads fail because the locker already has the maximum file count
+  ///
+  /// In en, this message translates to:
+  /// **'File limit reached'**
+  String get uploadFileCountLimitErrorTitle;
+
+  /// Body shown when uploads fail because the locker already has the maximum file count
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached your file limit. Upgrade to a paid plan for more storage.'**
+  String get uploadFileCountLimitErrorBody;
+
+  /// Toast shown when info items fail to save due to hitting the file count limit
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed. You\'ve reached your file limit.'**
+  String get uploadFileCountLimitErrorToast;
+
+  /// Title shown when uploads fail because the file exceeds the supported size
+  ///
+  /// In en, this message translates to:
+  /// **'File too large'**
+  String get uploadFileTooLargeErrorTitle;
+
+  /// Body shown when uploads fail because the file exceeds the supported size
+  ///
+  /// In en, this message translates to:
+  /// **'This file is larger than the maximum supported upload size of 10GB.'**
+  String get uploadFileTooLargeErrorBody;
+
   /// No description provided for @tryAdjustingYourSearchQuery.
   ///
   /// In en, this message translates to:
@@ -2230,17 +2278,17 @@ abstract class AppLocalizations {
   /// **'Log in to your Ente account'**
   String get loginToEnteAccount;
 
-  /// No description provided for @unlockLockerPaidPlanTitle.
+  /// No description provided for @unlockLockerNewUserTitle.
   ///
   /// In en, this message translates to:
-  /// **'Coming soon!'**
-  String get unlockLockerPaidPlanTitle;
+  /// **'Join Ente to use Locker'**
+  String get unlockLockerNewUserTitle;
 
-  /// No description provided for @unlockLockerPaidPlanBody.
+  /// No description provided for @unlockLockerNewUserBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is currently available only to paid customers of Ente Photos.'**
-  String get unlockLockerPaidPlanBody;
+  /// **'Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.'**
+  String get unlockLockerNewUserBody;
 
   /// No description provided for @checkoutEntePhotos.
   ///
@@ -2440,6 +2488,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 item} other{{count} items}} will be deleted permanently.'**
   String deleteMultipleFilesDialogBody(int count);
 
+  /// Checkbox label asking whether to delete collection items everywhere
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete items from everywhere'**
+  String get deleteCollectionFromEverywhere;
+
   /// Button label for confirming deletion of one or more collections
   ///
   /// In en, this message translates to:
@@ -2463,6 +2517,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
+
+  /// No description provided for @sorry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry'**
+  String get sorry;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
 }
 
 class _AppLocalizationsDelegate

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
@@ -10,14 +9,14 @@ import 'package:ente_auth/events/multi_select_action_requested_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
-import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
+import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
-import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -26,6 +25,7 @@ import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/local_authentication_service.dart';
+import 'package:ente_qr_ui/ente_qr_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
@@ -68,6 +68,8 @@ class _CodeWidgetState extends State<CodeWidget> {
   int _codeTimeStep = -1;
   int lastRefreshTime = 0;
   bool ignorePin = false;
+  // Cached localization string to avoid BuildContext access in async callbacks
+  String _errorText = 'Error';
 
   @override
   void initState() {
@@ -78,6 +80,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     _everySecondTimer = Timer.periodic(const Duration(milliseconds: 500), (
       Timer t,
     ) {
+      if (!mounted) return;
       int newStep = 0;
       int epochSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (widget.code.type != Type.hotp) {
@@ -125,6 +128,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       _isInitialized = true;
     }
     final l10n = context.l10n;
+    // Cache the localized error label for use in timer callbacks
+    _errorText = l10n.error;
 
     Widget getCardContents(AppLocalizations l10n, {required bool isSelected}) {
       final colorScheme = getEnteColorScheme(context);
@@ -403,21 +408,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                         l10n.nextTotpTitle,
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: _nextCode,
-                        builder: (context, value, child) {
-                          return Material(
-                            type: MaterialType.transparency,
-                            child: Text(
-                              _getFormattedCode(value),
-                              style: TextStyle(
-                                fontSize: widget.isCompactMode ? 12 : 18,
-                                color: Colors.grey,
-                              ),
-                              textDirection: TextDirection.ltr,
-                            ),
-                          );
-                        },
+                      InkWell(
+                        onTap: _onNextHotpTapped,
+                        child: const Icon(
+                          Icons.forward_outlined,
+                          size: 32,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -433,12 +430,6 @@ class _CodeWidgetState extends State<CodeWidget> {
     final double indicatorSize = isCompactMode ? 16 : 20;
     const double indicatorPadding = 4;
     final double indicatorSlotWidth = indicatorSize + indicatorPadding;
-    final TextStyle? issuerStyle = isCompactMode
-        ? Theme.of(context).textTheme.bodyMedium
-        : Theme.of(context).textTheme.titleLarge;
-    final double issuerLineHeight =
-        (issuerStyle?.fontSize ?? 16) * (issuerStyle?.height ?? 1.0);
-    final double rowHeight = math.max(issuerLineHeight, indicatorSize);
 
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
@@ -449,72 +440,66 @@ class _CodeWidgetState extends State<CodeWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: rowHeight,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      AnimatedContainer(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeInOut,
+                      width: isSelected ? indicatorSlotWidth : 0,
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 180),
-                        curve: Curves.easeInOut,
-                        width: isSelected ? indicatorSlotWidth : 0,
-                        height: rowHeight,
-                        alignment: Alignment.centerLeft,
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 180),
-                          switchInCurve: Curves.easeIn,
-                          switchOutCurve: Curves.easeOut,
-                          transitionBuilder: (child, animation) =>
-                              FadeTransition(
-                            opacity: animation,
-                            child:
-                                ScaleTransition(scale: animation, child: child),
-                          ),
-                          child: isSelected
-                              ? Align(
-                                  key: const ValueKey('selected-indicator'),
-                                  alignment: Alignment.centerLeft,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                      right: indicatorPadding,
-                                    ),
-                                    child: SizedBox(
-                                      width: indicatorSize,
-                                      height: indicatorSize,
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.circle,
-                                            color: colorScheme.primary400,
-                                            size: indicatorSize,
-                                          ),
-                                          Icon(
-                                            Icons.check,
-                                            color: Colors.white,
-                                            size: isCompactMode ? 8 : 12,
-                                          ),
-                                        ],
-                                      ),
+                        switchInCurve: Curves.easeIn,
+                        switchOutCurve: Curves.easeOut,
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child:
+                              ScaleTransition(scale: animation, child: child),
+                        ),
+                        child: isSelected
+                            ? Align(
+                                key: const ValueKey('selected-indicator'),
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    right: indicatorPadding,
+                                  ),
+                                  child: SizedBox(
+                                    width: indicatorSize,
+                                    height: indicatorSize,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.circle,
+                                          color: colorScheme.primary400,
+                                          size: indicatorSize,
+                                        ),
+                                        Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: isCompactMode ? 8 : 12,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            safeDecode(widget.code.issuer).trim(),
-                            style: issuerStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        safeDecode(widget.code.issuer).trim(),
+                        style: isCompactMode
+                            ? Theme.of(context).textTheme.bodyMedium
+                            : Theme.of(context).textTheme.titleLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 if (!isCompactMode) const SizedBox(height: 2),
                 Text(
@@ -828,6 +813,17 @@ class _CodeWidgetState extends State<CodeWidget> {
     _updateCodeMetadata().ignore();
   }
 
+  void _onNextHotpTapped() {
+    if (widget.code.type == Type.hotp) {
+      CodeStore.instance
+          .addCode(
+            widget.code.copyWith(counter: widget.code.counter + 1),
+            shouldSync: true,
+          )
+          .ignore();
+    }
+  }
+
   Future<void> _updateCodeMetadata() async {
     if (widget.sortKey == null) return;
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -866,14 +862,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (mounted && pop == true) {
       Navigator.of(context).pop();
     }
-    await showChoiceDialog(
-      context,
-      title: context.l10n.notes,
-      body: widget.code.note,
-      firstButtonLabel: context.l10n.close,
-      firstButtonType: ButtonType.secondary,
-      secondButtonLabel: null,
-    );
+    await showNotesDialog(context, widget.code.note);
   }
 
   Future<void> _onEditPressed([bool? pop]) async {
@@ -906,13 +895,31 @@ class _CodeWidgetState extends State<CodeWidget> {
     if (!isAuthSuccessful) {
       return;
     }
-    // ignore: unused_local_variable
-    final Code? code = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return ViewQrPage(code: widget.code);
-        },
-      ),
+    final qrData = widget.code.rawData
+        .replaceAll('algorithm=Algorithm.', 'algorithm=')
+        .replaceAll('algorithm=sha1', 'algorithm=SHA1')
+        .replaceAll('algorithm=sha256', 'algorithm=SHA256')
+        .replaceAll('algorithm=sha512', 'algorithm=SHA512');
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return QrCodeDialog(
+          data: qrData,
+          title: widget.code.account,
+          subtitle: widget.code.issuer,
+          accentColor: accentColor,
+          shareFileName: 'ente_auth_qr_${widget.code.account}.png',
+          shareText: 'QR code for ${widget.code.account}',
+          dialogTitle: context.l10n.qrCode,
+          shareButtonText: context.l10n.share,
+          logoAssetPath: 'assets/qr_logo.png',
+          branding: const QrSvgBranding(
+            assetPath: 'assets/svg/auth-logo.svg',
+            height: 12,
+          ),
+        );
+      },
     );
   }
 
@@ -976,7 +983,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       firstButtonOnTap: () async {
         try {
           await CodeStore.instance.removeCode(widget.code);
-          LocalBackupService.instance.triggerAutomaticBackup().ignore();
+          LocalBackupService.instance.triggerDailyBackupIfNeeded().ignore();
         } catch (e, s) {
           logger.severe('Failed to delete code', e, s);
           showGenericErrorDialog(context: context, error: e).ignore();
@@ -1055,7 +1062,8 @@ class _CodeWidgetState extends State<CodeWidget> {
     try {
       return getOTP(widget.code);
     } catch (e) {
-      return context.l10n.error;
+      // Avoid accessing BuildContext from async timer callbacks
+      return _errorText;
     }
   }
 
@@ -1064,7 +1072,8 @@ class _CodeWidgetState extends State<CodeWidget> {
       assert(widget.code.type.isTOTPCompatible);
       return getNextTotp(widget.code);
     } catch (e) {
-      return context.l10n.error;
+      // Avoid accessing BuildContext from async timer callbacks
+      return _errorText;
     }
   }
 

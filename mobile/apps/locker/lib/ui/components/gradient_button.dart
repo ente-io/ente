@@ -7,6 +7,8 @@ class GradientButton extends StatelessWidget {
   final String text;
   final HugeIcon? hugeIcon;
   final double paddingValue;
+  final Color? backgroundColor;
+  final Color? textColor;
 
   const GradientButton({
     super.key,
@@ -14,6 +16,8 @@ class GradientButton extends StatelessWidget {
     this.text = '',
     this.hugeIcon,
     this.paddingValue = 6.0,
+    this.backgroundColor,
+    this.textColor,
   });
 
   static const TextStyle _textStyle = TextStyle(
@@ -27,10 +31,12 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final bool isEnabled = onTap != null;
-    final Color backgroundColor =
-        isEnabled ? colorScheme.primary700 : colorScheme.fillFaint;
+    final Color effectiveBackgroundColor = backgroundColor ??
+        (isEnabled ? colorScheme.primary700 : colorScheme.fillFaint);
+    final Color effectiveTextColor =
+        textColor ?? (isEnabled ? Colors.white : colorScheme.textMuted);
     final TextStyle effectiveTextStyle = _textStyle.copyWith(
-      color: isEnabled ? Colors.white : colorScheme.textMuted,
+      color: effectiveTextColor,
     );
 
     final Widget textWidget = Text(text, style: effectiveTextStyle);
@@ -51,7 +57,7 @@ class GradientButton extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Material(
-        color: backgroundColor,
+        color: effectiveBackgroundColor,
         child: InkWell(
           onTap: onTap,
           splashColor: isEnabled ? null : Colors.transparent,

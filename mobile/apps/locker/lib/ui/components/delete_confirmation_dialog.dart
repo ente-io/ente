@@ -2,7 +2,8 @@ import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_result.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
+import "package:locker/l10n/l10n.dart";
+import "package:locker/ui/components/gradient_button.dart";
 
 class DeleteConfirmationResult {
   final ButtonResult buttonResult;
@@ -20,7 +21,6 @@ Future<DeleteConfirmationResult?> showDeleteConfirmationDialog(
   required String body,
   required String deleteButtonLabel,
   required String assetPath,
-  Widget? icon,
   bool showDeleteFromAllCollectionsOption = false,
 }) {
   return showModalBottomSheet<DeleteConfirmationResult>(
@@ -33,7 +33,6 @@ Future<DeleteConfirmationResult?> showDeleteConfirmationDialog(
         body: body,
         deleteButtonLabel: deleteButtonLabel,
         assetPath: assetPath,
-        icon: icon,
         showDeleteFromAllCollectionsOption: showDeleteFromAllCollectionsOption,
       );
     },
@@ -45,7 +44,6 @@ class _DeleteConfirmationBottomSheet extends StatefulWidget {
   final String body;
   final String deleteButtonLabel;
   final String assetPath;
-  final Widget? icon;
   final bool showDeleteFromAllCollectionsOption;
 
   const _DeleteConfirmationBottomSheet({
@@ -53,7 +51,6 @@ class _DeleteConfirmationBottomSheet extends StatefulWidget {
     required this.body,
     required this.deleteButtonLabel,
     required this.assetPath,
-    this.icon,
     required this.showDeleteFromAllCollectionsOption,
   });
 
@@ -127,7 +124,7 @@ class _DeleteConfirmationBottomSheetState
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               if (widget.showDeleteFromAllCollectionsOption) ...[
                 GestureDetector(
                   onTap: () {
@@ -137,7 +134,11 @@ class _DeleteConfirmationBottomSheetState
                   },
                   child: SizedBox(
                     width: double.infinity,
-                    child: Row(
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 12,
+                      runSpacing: 8,
                       children: [
                         Container(
                           width: 18,
@@ -163,12 +164,10 @@ class _DeleteConfirmationBottomSheetState
                                 )
                               : null,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            "Also delete items from all other collections",
-                            style: textTheme.small,
-                          ),
+                        Text(
+                          context.l10n.deleteCollectionFromEverywhere,
+                          style: textTheme.small,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -176,11 +175,11 @@ class _DeleteConfirmationBottomSheetState
                 ),
                 const SizedBox(height: 20),
               ],
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: () {
+                child: GradientButton(
+                  onTap: () {
                     Navigator.of(context).pop(
                       DeleteConfirmationResult(
                         buttonResult: ButtonResult(ButtonAction.first),
@@ -188,26 +187,8 @@ class _DeleteConfirmationBottomSheetState
                       ),
                     );
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.warning400,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                  icon: widget.icon ??
-                      const HugeIcon(
-                        icon: HugeIcons.strokeRoundedFileUpload,
-                        color: Colors.white,
-                        size: 20,
-                        strokeWidth: 1.9,
-                      ),
-                  label: Text(
-                    widget.deleteButtonLabel,
-                    style: textTheme.bodyBold.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
+                  text: widget.deleteButtonLabel,
+                  backgroundColor: colorScheme.warning400,
                 ),
               ),
             ],

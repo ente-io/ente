@@ -35,6 +35,10 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:
@@ -43,7 +47,7 @@ jobs:
 
             - name: Build PlayStore AAB
               run: |
-                  flutter build appbundle --release --flavor playstore
+                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_locker_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_LOCKER }}

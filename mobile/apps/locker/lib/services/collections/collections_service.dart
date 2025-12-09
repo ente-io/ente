@@ -6,13 +6,17 @@ import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import "package:ente_sharing/models/user.dart";
+import "package:ente_ui/utils/toast_util.dart";
 import "package:fast_base58/fast_base58.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/material.dart";
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
+import "package:locker/services/collections/models/files_split.dart";
 import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -233,6 +237,21 @@ class CollectionService {
     }
   }
 
+  /// Removes orphaned files that exist in files table but have no collection mappings.
+  /// This is a one-time cleanup for files deleted from trash before the fix was applied.
+  ///
+  /// This migration fix can be removed after a year or so (around Nov 2026)
+  /// once all users have had the corrected trash deletion logic applied.
+  Future<void> cleanupOrphanedFiles() async {
+    try {
+      await _db.cleanupOrphanedFiles();
+      _logger.info("Cleaned up orphaned files from database");
+    } catch (e) {
+      _logger.severe("Failed to cleanup orphaned files: $e");
+      rethrow;
+    }
+  }
+
   /// Adds a file to a collection. By default this triggers a full sync to
   /// update local state. Set [runSync] to false to delay syncing (useful when
   /// adding the same file to multiple collections during an upload).
@@ -243,7 +262,9 @@ class CollectionService {
   }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
-      _logger.info("Added file ${file.title} to collection ${collection.id}");
+      _logger.info(
+        "Added file (ID: ${file.uploadedFileID}) to collection ${collection.id}",
+      );
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -274,8 +295,9 @@ class CollectionService {
       await _db.deleteFilesFromCollection(collection, [file]);
 
       if (runSync) {
-        await sync();
         await TrashService.instance.syncTrash();
+        await sync();
+        Bus.instance.fire(UserDetailsRefreshEvent());
       }
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
@@ -289,7 +311,7 @@ class CollectionService {
         collection,
         newName,
       );
-      _logger.info("Renamed collection ${collection.id} to $newName");
+      _logger.info("Renamed collection ${collection.id}");
       // Let sync update the local state
       await sync();
     } catch (e, s) {
@@ -313,6 +335,9 @@ class CollectionService {
   }
 
   Future<void> _init() async {
+    // One-time cleanup of orphaned files from before the trash deletion fix
+    unawaited(cleanupOrphanedFiles());
+
     // ignore: unawaited_futures
     sync().then((_) {
       if (Configuration.instance.getKey() != null) {
@@ -345,46 +370,94 @@ class CollectionService {
     return collection;
   }
 
-  Future<void> move(EnteFile file, Collection from, Collection to) async {
+  Future<void> removeFromCollection(
+    int collectionId,
+    List<EnteFile> files,
+  ) async {
+    if (files.isEmpty) {
+      _logger.info("No files to remove");
+      return;
+    }
+
     try {
-      await _apiClient.move(file, from, to);
+      await _apiClient.removeFromCollection(collectionId, files);
 
-      // Update local database immediately for both collections
-      // Remove from source collection
-      await _db.deleteFilesFromCollection(from, [file]);
+      final collection = await getCollectionByID(collectionId);
+      if (collection != null) {
+        await _db.deleteFilesFromCollection(collection, files);
+      }
 
-      // Add to target collection with updated collectionID
-      file.collectionID = to.id;
-      await _db.addFilesToCollection(to, [file]);
+      Bus.instance.fire(CollectionsUpdatedEvent('files_removed'));
 
-      // Fire event to update UI
-      Bus.instance.fire(CollectionsUpdatedEvent('file_moved'));
-
-      // Let sync update the local state to ensure consistency
       await sync();
     } catch (e, stackTrace) {
-      _logger.severe("Failed to move file: $e", e, stackTrace);
+      _logger.severe(
+        "Failed to remove files from collection: $e",
+        e,
+        stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> move(
+    List<EnteFile> files,
+    Collection from,
+    Collection to, {
+    bool runSync = true,
+  }) async {
+    if (files.isEmpty) {
+      _logger.info("No files to move");
+      return;
+    }
+
+    try {
+      // Call API to move files on server
+      await _apiClient.move(files, from, to);
+
+      // Update local database for all files
+      // Remove from source collection
+      await _db.deleteFilesFromCollection(from, files);
+
+      // Update collectionID for all files
+      for (final file in files) {
+        file.collectionID = to.id;
+      }
+
+      // Add to target collection
+      await _db.addFilesToCollection(to, files);
+
+      // Let sync update the local state to ensure consistency
+      if (runSync) {
+        await sync();
+      }
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to move files: $e", e, stackTrace);
       rethrow;
     }
   }
 
   Future<void> trashCollection(
+    BuildContext context,
     Collection collection, {
     bool keepFiles = true,
   }) async {
     if (keepFiles) {
-      await trashCollectionKeepingFiles(collection);
+      await trashCollectionKeepingFiles(context, collection);
     } else {
       await trashCollectionWithFiles(collection);
     }
   }
 
-  Future<void> trashCollectionKeepingFiles(Collection collection) async {
+  Future<void> trashCollectionKeepingFiles(
+    BuildContext context,
+    Collection collection,
+  ) async {
     try {
       final files = await _db.getFilesInCollection(collection);
 
       if (files.isNotEmpty) {
-        await moveFilesFromCurrentCollection(collection, files);
+        await moveFilesFromCurrentCollection(context, collection, files);
       }
 
       await _apiClient.trashCollection(collection, keepFiles: true);
@@ -404,7 +477,11 @@ class CollectionService {
         for (final file in files) {
           final fileCollections = await getCollectionsForFile(file);
           for (final fileCollection in fileCollections) {
-            await trashFile(file, fileCollection, runSync: false);
+            await trashFile(
+              file,
+              fileCollection,
+              runSync: false,
+            );
           }
         }
       }
@@ -413,6 +490,7 @@ class CollectionService {
 
       await sync();
       await TrashService.instance.syncTrash();
+      Bus.instance.fire(UserDetailsRefreshEvent());
     } catch (e) {
       _logger.severe("Failed to trash collection with files: $e");
       rethrow;
@@ -447,168 +525,166 @@ class CollectionService {
   }
 
   Future<void> moveFilesFromCurrentCollection(
+    BuildContext context,
     Collection collection,
-    List<EnteFile> files,
-  ) async {
-    if (files.isEmpty) {
-      return;
-    }
-
+    Iterable<EnteFile> files, {
+    bool isHidden = false,
+  }) async {
     final int currentUserID = Configuration.instance.getUserID()!;
-
-    final List<EnteFile> ownedByCurrentUser = [];
-    final List<EnteFile> ownedByOtherUsers = [];
-    for (final file in files) {
-      if (file.uploadedFileID == null) {
-        _logger.warning(
-          "Skipping file ${file.title} while moving from collection "
-          "${collection.id} because uploadedFileID is null",
-        );
-        continue;
-      }
-      if (file.ownerID == null || file.ownerID == currentUserID) {
-        ownedByCurrentUser.add(file);
-      } else {
-        ownedByOtherUsers.add(file);
-      }
-    }
-
-    final bool isCollectionOwner = collection.owner.id == currentUserID;
-    bool removalsPerformed = false;
-    bool movesPerformed = false;
-
-    if (isCollectionOwner && ownedByOtherUsers.isNotEmpty) {
-      await _apiClient.removeFromCollection(collection.id, ownedByOtherUsers);
-      removalsPerformed = true;
-    } else if (!isCollectionOwner && ownedByCurrentUser.isNotEmpty) {
-      await _apiClient.removeFromCollection(collection.id, ownedByCurrentUser);
-      removalsPerformed = true;
-      if (removalsPerformed) {
-        await sync();
-      }
-      return;
-    }
-
-    if (!isCollectionOwner && ownedByOtherUsers.isNotEmpty) {
-      _logger.warning(
-        "Cannot remove files owned by others from collection ${collection.id}",
+    final isCollectionOwner = collection.owner.id == currentUserID;
+    final FilesSplit split = FilesSplit.split(
+      files,
+      Configuration.instance.getUserID()!,
+    );
+    if (isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
+      await _apiClient.removeFromCollection(
+        collection.id,
+        split.ownedByOtherUsers,
       );
-      if (removalsPerformed) {
-        await sync();
-      }
+    } else if (!isCollectionOwner && split.ownedByCurrentUser.isNotEmpty) {
+      // collection is not owned by the user, just remove files owned
+      // by current user and return
+      await _apiClient.removeFromCollection(
+        collection.id,
+        split.ownedByCurrentUser,
+      );
       return;
     }
 
-    if (ownedByCurrentUser.isEmpty) {
-      if (removalsPerformed) {
-        await sync();
-      }
+    if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
+      showShortToast(
+        context,
+        "Can only remove files owned by you",
+      );
       return;
     }
 
-    final Map<int, List<EnteFile>> destinationMap = {};
-    final Map<int, Collection> resolvedDestinationCollections = {};
-    final List<EnteFile> fallbackFiles = [];
-    for (final file in ownedByCurrentUser) {
-      final Collection? targetCollection = await _findAutoMoveDestination(
-        file,
-        collection,
+    // pendingAssignMap keeps a track of files which are yet to be assigned to
+    // to destination collection.
+    final Map<int, EnteFile> pendingAssignMap = {};
+    // destCollectionToFilesMap contains the destination collection and
+    // files entry which needs to be moved in destination.
+    // After the end of mapping logic, the number of files entries in
+    // pendingAssignMap should be equal to files in destCollectionToFilesMap
+    final Map<int, List<EnteFile>> destCollectionToFilesMap = {};
+    final List<int> uploadedIDs = [];
+    for (EnteFile f in split.ownedByCurrentUser) {
+      if (f.uploadedFileID != null) {
+        pendingAssignMap[f.uploadedFileID!] = f;
+        uploadedIDs.add(f.uploadedFileID!);
+      }
+    }
+
+    final Map<int, List<EnteFile>> collectionToFilesMap =
+        await _db.getAllFilesGroupByCollectionID(uploadedIDs);
+
+    // Find and map the files from current collection to to entries in other
+    // collections. This mapping is done to avoid moving all the files to
+    // uncategorized during remove from album.
+    for (MapEntry<int, List<EnteFile>> entry in collectionToFilesMap.entries) {
+      if (!await _isAutoMoveCandidate(
+        collection.id,
+        entry.key,
         currentUserID,
-      );
-      if (targetCollection != null) {
-        resolvedDestinationCollections[targetCollection.id] = targetCollection;
-        destinationMap
-            .putIfAbsent(targetCollection.id, () => <EnteFile>[])
-            .add(file);
-      } else {
-        fallbackFiles.add(file);
-      }
-    }
-
-    if (fallbackFiles.isNotEmpty) {
-      final Collection fallbackCollection =
-          await getOrCreateUncategorizedCollection();
-      resolvedDestinationCollections[fallbackCollection.id] =
-          fallbackCollection;
-      destinationMap
-          .putIfAbsent(fallbackCollection.id, () => <EnteFile>[])
-          .addAll(fallbackFiles);
-    }
-
-    for (final entry in destinationMap.entries) {
-      final Collection? targetCollection =
-          resolvedDestinationCollections[entry.key] ??
-              await getCollectionByID(entry.key);
-      if (targetCollection == null) {
-        _logger.warning(
-          "Skipping move to unknown collection ${entry.key}",
-        );
-        continue;
-      }
-      if (collection.type == CollectionType.uncategorized &&
-          targetCollection.id == collection.id) {
-        _logger.info(
-          "Skipping move back into uncategorized collection ${collection.id}",
-        );
-        continue;
-      }
-      for (final file in entry.value) {
-        await move(
-          file,
-          collection,
-          targetCollection,
-        );
-        movesPerformed = true;
-      }
-    }
-
-    if (movesPerformed || removalsPerformed) {
-      await sync();
-    }
-  }
-
-  Future<Collection?> _findAutoMoveDestination(
-    EnteFile file,
-    Collection fromCollection,
-    int currentUserID,
-  ) async {
-    final collections = await getCollectionsForFile(file);
-    for (final candidate in collections) {
-      if (!_isAutoMoveCandidate(
-        fromCollection: fromCollection,
-        targetCollection: candidate,
-        currentUserID: currentUserID,
       )) {
         continue;
       }
-      return candidate;
+      final Collection? targetCollection = await getCollectionByID(entry.key);
+      if (targetCollection != null) {
+        // for each file which already exist in the destination collection
+        // add entries in the moveDestCollectionToFiles map
+        for (EnteFile file in entry.value) {
+          // Check if the uploaded file is still waiting to be mapped
+          if (pendingAssignMap.containsKey(file.uploadedFileID)) {
+            if (!destCollectionToFilesMap.containsKey(targetCollection.id)) {
+              destCollectionToFilesMap[targetCollection.id] = <EnteFile>[];
+            }
+            destCollectionToFilesMap[targetCollection.id]!
+                .add(pendingAssignMap[file.uploadedFileID!]!);
+            pendingAssignMap.remove(file.uploadedFileID);
+          }
+        }
+      }
     }
-    return null;
+    // Move the remaining files to uncategorized collection
+    if (pendingAssignMap.isNotEmpty) {
+      late final int toCollectionID;
+
+      final Collection uncategorizedCollection =
+          await getOrCreateUncategorizedCollection();
+      toCollectionID = uncategorizedCollection.id;
+
+      for (MapEntry<int, EnteFile> entry in pendingAssignMap.entries) {
+        final file = entry.value;
+        if (pendingAssignMap.containsKey(file.uploadedFileID)) {
+          if (!destCollectionToFilesMap.containsKey(toCollectionID)) {
+            destCollectionToFilesMap[toCollectionID] = <EnteFile>[];
+          }
+          destCollectionToFilesMap[toCollectionID]!
+              .add(pendingAssignMap[file.uploadedFileID!]!);
+        }
+      }
+    }
+
+    // Verify that all files are mapped.
+    int mappedFilesCount = 0;
+    destCollectionToFilesMap.forEach((key, value) {
+      mappedFilesCount += value.length;
+    });
+    if (mappedFilesCount != uploadedIDs.length) {
+      throw AssertionError(
+        "Failed to map all files toMap: ${uploadedIDs.length} and mapped "
+        "$mappedFilesCount",
+      );
+    }
+
+    for (MapEntry<int, List<EnteFile>> entry
+        in destCollectionToFilesMap.entries) {
+      if (collection.type == CollectionType.uncategorized &&
+          entry.key == collection.id) {
+        // skip moving files to uncategorized collection from uncategorized
+        // this flow is triggered while cleaning up uncategerized collection
+
+        _logger.info(
+          'skipping moving ${entry.value.length} files to uncategorized collection',
+        );
+      } else {
+        final toCollection = await getCollection(entry.key);
+        await move(
+          entry.value,
+          collection,
+          toCollection,
+          runSync: false,
+        );
+      }
+    }
   }
 
-  bool _isAutoMoveCandidate({
-    required Collection fromCollection,
-    required Collection? targetCollection,
-    required int currentUserID,
-  }) {
-    if (targetCollection == null) {
+  // This method returns true if the given destination collection is a good
+  // target to moving files during file remove or delete collection but keep
+  // photos action. Uncategorized or favorite type of collections are not
+  // good auto-move candidates. Uncategorized will be fall back for all files
+  // which could not be mapped to a potential target collection
+  Future<bool> _isAutoMoveCandidate(
+    int fromCollectionID,
+    toCollectionID,
+    int userID,
+  ) async {
+    if (fromCollectionID == toCollectionID) {
       return false;
     }
-    if (fromCollection.id == targetCollection.id) {
-      return false;
-    }
-    if (targetCollection.owner.id != currentUserID) {
-      return false;
-    }
-    if (targetCollection.type == CollectionType.uncategorized ||
-        targetCollection.type == CollectionType.favorites) {
+    final Collection? targetCollection =
+        await getCollectionByID(toCollectionID);
+    // ignore non-cached collections, uncategorized and favorite
+    // collections and collections ignored by others
+    if (targetCollection == null ||
+        (CollectionType.uncategorized == targetCollection.type ||
+            targetCollection.type == CollectionType.favorites) ||
+        targetCollection.owner.id != userID) {
       return false;
     }
     return true;
   }
-
-  // Track if default collections have been set up
-  bool _defaultCollectionsSetupCompleted = false;
 
   Future<void> setupDefaultCollections() async {
     try {
@@ -616,12 +692,6 @@ class CollectionService {
         _logger.warning(
           "Cannot setup default collections - master key not available",
         );
-        return;
-      }
-
-      // Skip if already completed
-      if (_defaultCollectionsSetupCompleted) {
-        _logger.info("Default collections already set up, skipping.");
         return;
       }
 
@@ -636,25 +706,9 @@ class CollectionService {
       // Create Documents collection if it doesn't exist
       await _getOrCreateDocumentsCollection();
 
-      _defaultCollectionsSetupCompleted = true;
       _logger.info("Default collections setup completed.");
     } catch (e, s) {
       _logger.severe("Failed to setup default collections", e, s);
-    }
-  }
-
-  /// Ensures default collections are set up if they haven't been already
-  /// This should be called from HomePage once the master key is available
-  Future<void> ensureDefaultCollections() async {
-    if (!_defaultCollectionsSetupCompleted &&
-        Configuration.instance.getKey() != null) {
-      await setupDefaultCollections();
-    } else {
-      if (_defaultCollectionsSetupCompleted) {
-        _logger.info("Default collections already setup, skipping");
-      } else {
-        _logger.warning("Master key not available, cannot setup collections");
-      }
     }
   }
 
@@ -694,7 +748,7 @@ class CollectionService {
 
       final random = Random();
       final randomName = availableNames[random.nextInt(availableNames.length)];
-      _logger.info("Selected random unused collection name: $randomName");
+      _logger.info("Selected random unused collection name");
       return randomName;
     } catch (e) {
       _logger.severe("Failed to get random unused collection name: $e");
@@ -728,7 +782,9 @@ class CollectionService {
         collectionKey,
       );
 
-      _logger.info("Successfully decrypted file key for file ${file.title}");
+      _logger.info(
+        "Successfully decrypted file key for file (ID: ${file.uploadedFileID})",
+      );
       return fileKey;
     } catch (e) {
       _logger.severe("Failed to get file key: $e");

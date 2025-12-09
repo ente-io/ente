@@ -5,6 +5,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
+import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/gradient_button.dart";
 
 class ChangeEmailDialogLocker extends StatefulWidget {
@@ -71,7 +72,7 @@ class _ChangeEmailDialogLockerState extends State<ChangeEmailDialogLocker> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Change Email',
+                  context.l10n.changeEmail,
                   style: textTheme.h3Bold,
                 ),
                 GestureDetector(

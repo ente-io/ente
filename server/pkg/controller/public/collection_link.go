@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -28,6 +29,9 @@ const (
 	DeviceLimitThresholdMultiplier = 10
 
 	DeviceLimitWarningThreshold = 2000
+
+	// FreeUserDeviceLimit is the hardcoded device limit for free users
+	FreeUserDeviceLimit = 5
 )
 
 // CollectionLinkController controls share collection operations
@@ -44,7 +48,7 @@ type CollectionLinkController struct {
 func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	app := auth.GetApp(ctx)
 	for attempt := 0; attempt < 5; attempt++ {
-		accessToken := shortuuid.New()[0:AccessTokenLength]
+		accessToken := strings.ToUpper(shortuuid.New()[0:AccessTokenLength])
 		err := c.CollectionLinkRepo.
 			Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
 		if errors.Is(err, ente.ErrAccessTokenInUse) {
@@ -66,6 +70,10 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 			}
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
+		enableJoin := false
+		if req.EnableJoin != nil {
+			enableJoin = *req.EnableJoin
+		}
 
 		response := ente.PublicURL{
 			URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
@@ -73,7 +81,9 @@ func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreateP
 			DeviceLimit:     req.DeviceLimit,
 			EnableDownload:  true,
 			EnableCollect:   req.EnableCollect,
+			EnableJoin:      enableJoin,
 			PasswordEnabled: false,
+			MinRole:         nil,
 		}
 		return response, nil
 	}
@@ -144,6 +154,11 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 	if req.EnableJoin != nil {
 		publicCollectionToken.EnableJoin = *req.EnableJoin
 	}
+	if req.MinRole != nil {
+		role := *req.MinRole
+		rolePtr := role
+		publicCollectionToken.MinRole = &rolePtr
+	}
 	err = c.CollectionLinkRepo.UpdatePublicCollectionToken(ctx, publicCollectionToken)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
@@ -156,6 +171,7 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.Up
 		EnableDownload:  publicCollectionToken.EnableDownload,
 		EnableCollect:   publicCollectionToken.EnableCollect,
 		EnableJoin:      publicCollectionToken.EnableJoin,
+		MinRole:         publicCollectionToken.MinRole,
 		PasswordEnabled: publicCollectionToken.PassHash != nil && *publicCollectionToken.PassHash != "",
 		Nonce:           publicCollectionToken.Nonce,
 		MemLimit:        publicCollectionToken.MemLimit,

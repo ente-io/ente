@@ -230,7 +230,7 @@ class AlbumHomeWidgetService {
   Future<bool> _hasAnyBlockers([bool isBg = false]) async {
     // Check if first import is completed
     final hasCompletedFirstImport =
-        LocalSyncService.instance.hasCompletedFirstImport();
+        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
     if (!hasCompletedFirstImport) {
       return true;
     }

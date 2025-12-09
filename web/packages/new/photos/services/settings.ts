@@ -47,6 +47,14 @@ export interface Settings {
      * `true` if the current user is an internal user.
      */
     isInternalUser: boolean;
+    /**
+     * `true` if admin role management features are enabled.
+     */
+    isAdminRoleEnabled: boolean;
+    /**
+     * `true` if public link surfaces should be shown to non-owners.
+     */
+    isSurfacePublicLinkEnabled: boolean;
 
     /**
      * `true` if maps are enabled.
@@ -106,6 +114,8 @@ export interface Settings {
 
 const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
+    isAdminRoleEnabled: false,
+    isSurfacePublicLinkEnabled: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
@@ -197,6 +207,9 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = createDefaultSettings();
     settings.isInternalUser = flags?.internalUser || false;
+    settings.isAdminRoleEnabled = (flags?.internalUser ?? false) || isDevBuild;
+    settings.isSurfacePublicLinkEnabled =
+        (flags?.internalUser ?? false) || isDevBuild;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
@@ -204,9 +217,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     if (flags?.customDomain) settings.customDomain = flags.customDomain;
     if (flags?.customDomainCNAME)
         settings.customDomainCNAME = flags.customDomainCNAME;
-    updateChecksumProtectedUploadsEnabled(
-        isDevBuild || settings.isInternalUser,
-    );
+    updateChecksumProtectedUploadsEnabled(true);
     setSettingsSnapshot(settings);
 };
 

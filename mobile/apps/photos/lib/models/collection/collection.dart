@@ -140,9 +140,15 @@ class Collection {
     return (owner.id ?? -100) == userID;
   }
 
+  bool isAdmin(int userID) {
+    return getRole(userID) == CollectionParticipantRole.admin;
+  }
+
   bool canAutoAdd(int userID) {
+    final participantRole = getRole(userID);
     final canEditCollection = isOwner(userID) ||
-        getRole(userID) == CollectionParticipantRole.collaborator;
+        participantRole == CollectionParticipantRole.collaborator ||
+        participantRole == CollectionParticipantRole.admin;
     final isFavoritesOrUncategorized = type == CollectionType.favorites ||
         type == CollectionType.uncategorized;
     return canEditCollection && !isDeleted && !isFavoritesOrUncategorized;
@@ -178,10 +184,12 @@ class Collection {
     }
     for (final User u in sharees) {
       if (u.id == userID) {
-        if (u.isViewer) {
-          return CollectionParticipantRole.viewer;
+        if (u.isAdmin) {
+          return CollectionParticipantRole.admin;
         } else if (u.isCollaborator) {
           return CollectionParticipantRole.collaborator;
+        } else if (u.isViewer) {
+          return CollectionParticipantRole.viewer;
         }
       }
     }
@@ -324,6 +332,7 @@ enum CollectionParticipantRole {
   unknown,
   viewer,
   collaborator,
+  admin,
   owner,
 }
 

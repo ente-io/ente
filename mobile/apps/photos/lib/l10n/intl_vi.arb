@@ -118,6 +118,10 @@
   "enterYourPassword": "Nhập mật khẩu của bạn",
   "welcomeBack": "Chào mừng trở lại!",
   "contactSupport": "Liên hệ hỗ trợ",
+  "locationPickerTip": "Bạn cũng có thể thêm vị trí tập trung vào ảnh từ phần thông tin của ảnh",
+  "@locationPickerTip": {
+    "description": "Helper tip text shown in the location picker that refers to the photo info screen."
+  },
   "incorrectPasswordTitle": "Mật khẩu không đúng",
   "pleaseTryAgain": "Vui lòng thử lại",
   "recreatePasswordTitle": "Tạo lại mật khẩu",
@@ -254,6 +258,7 @@
   "shareWithNonenteUsers": "Chia sẻ với người không dùng Ente",
   "createPublicLink": "Tạo liên kết công khai",
   "sendLink": "Gửi liên kết",
+  "qrCode": "Mã QR",
   "sendQrCode": "Gửi mã QR",
   "copyLink": "Sao chép liên kết",
   "copyEmbedHtml": "Sao chép mã nhúng HTML",
@@ -346,7 +351,7 @@
   "removeFromAlbumTitle": "Xóa khỏi album?",
   "removeFromAlbum": "Xóa khỏi album",
   "itemsWillBeRemovedFromAlbum": "Các mục đã chọn sẽ bị xóa khỏi album này",
-  "removeShareItemsWarning": "Vài mục mà bạn đang xóa được thêm bởi người khác, và bạn sẽ mất quyền truy cập vào chúng",
+  "removeShareItemsWarning": "Những ảnh đã chọn sẽ không thể được xem bởi bất kỳ người xem nào của album này, ngoại trừ chủ sở hữu ảnh.",
   "addingToFavorites": "Đang thêm vào mục yêu thích...",
   "removingFromFavorites": "Đang xóa khỏi mục yêu thích...",
   "sorryCouldNotAddToFavorites": "Xin lỗi, không thể thêm vào mục yêu thích!",
@@ -356,7 +361,7 @@
   "canOnlyRemoveFilesOwnedByYou": "Chỉ có thể xóa các tệp thuộc sở hữu của bạn",
   "deleteSharedAlbum": "Xóa album chia sẻ?",
   "deleteAlbum": "Xóa album",
-  "deleteAlbumDialog": "Xóa luôn ảnh (và video) trong album này <bold>khỏi toàn bộ album khác</bold> cũng đang chứa chúng?",
+  "deleteAlbumDialog": "Xóa luôn ảnh (và video) có trong album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
   "deleteSharedAlbumDialogBody": "Album sẽ bị xóa với tất cả mọi người\n\nBạn sẽ mất quyền truy cập vào các ảnh chia sẻ trong album này mà thuộc sở hữu của người khác",
   "yesRemove": "Có, xóa",
   "creatingLink": "Đang tạo liên kết...",
@@ -1200,6 +1205,11 @@
   "noImagesWithLocation": "Không có ảnh với vị trí",
   "unpinAlbum": "Bỏ ghim album",
   "pinAlbum": "Ghim album",
+  "pin": "Ghim",
+  "pinToTop": "Ghim lên đầu",
+  "unpin": "Bỏ ghim",
+  "visibility": "Hiển thị",
+  "hideFromMemories": "Ẩn khỏi kỷ niệm",
   "create": "Tạo",
   "viewAll": "Xem tất cả",
   "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
@@ -1385,8 +1395,8 @@
   "appLockDescriptions": "Chọn giữa màn hình khóa mặc định của thiết bị và màn hình khóa tùy chỉnh với PIN hoặc mật khẩu.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Để bật khóa ứng dụng, vui lòng thiết lập mã khóa thiết bị hoặc khóa màn hình trong cài đặt hệ thống của bạn.",
   "authToViewPasskey": "Vui lòng xác thực để xem khóa truy cập",
-  "loopVideoOn": "Phát video lặp lại",
-  "loopVideoOff": "Dừng phát video lặp lại",
+  "loopVideoOn": "Tắt lặp",
+  "loopVideoOff": "Bật lặp",
   "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
   "showPerson": "Hiện người",
   "sort": "Sắp xếp",
@@ -1608,6 +1618,7 @@
   "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
   "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy",
   "hideSharedItemsFromHomeGallery": "Ẩn các mục được chia sẻ khỏi thư viện chính",
+  "swipeToSelect": "Quẹt để chọn",
   "gallery": "Thư viện",
   "joinAlbum": "Tham gia album",
   "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
@@ -1755,7 +1766,7 @@
   "memoriesWidgetDesc": "Chọn những loại kỷ niệm bạn muốn thấy trên màn hình chính của mình.",
   "smartMemories": "Gợi nhớ kỷ niệm",
   "pastYearsMemories": "Kỷ niệm năm ngoái",
-  "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) trong {count} album này <bold>khỏi toàn bộ album khác</bold> cũng đang chứa chúng?",
+  "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) có trong {count} album này khỏi <bold>mọi album khác</bold> có chứa chúng?",
   "addParticipants": "Thêm người tham gia",
   "selectedAlbums": "{count} đã chọn",
   "actionNotSupportedOnFavouritesAlbum": "Hành động không áp dụng trong album Đã thích",
@@ -1849,6 +1860,18 @@
   "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại luồng",
   "videoPreviewAlreadyExists": "Bản xem trước video đã tồn tại",
   "videoAlreadyInQueue": "Tệp video đã có trong hàng đợi",
+  "videoExportFailed": "Tạo video không thành công. Vui lòng thử lại.",
+  "videoExportSuccess": "Đã tạo video thành công tại {path}",
+  "@videoExportSuccess": {
+    "description": "Toast shown when a video export completes, mentioning the filesystem path.",
+    "placeholders": {
+      "path": {
+        "description": "File path where the exported video was written",
+        "type": "String",
+        "example": "/tmp/ente_export.mp4"
+      }
+    }
+  },
   "addedToQueue": "Đã thêm vào hàng đợi",
   "creatingStream": "Đang tạo luồng",
   "similarImages": "Ảnh giống nhau",
@@ -1992,6 +2015,158 @@
   "artisticPortraits": "Chân dung nghệ thuật",
   "streetFood": "Món ngon đường phố",
   "riverCruises": "Cảnh quan trên sông",
+  "facesTimelineBannerTitle": "Hồi Ức",
+  "@facesTimelineBannerTitle": {
+    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+  },
+  "facesTimelineBannerSubtitle": "Xem ảnh của {name} qua từng năm",
+  "@facesTimelineBannerSubtitle": {
+    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "The display name of the person"
+      }
+    }
+  },
+  "facesTimelineAppBarTitle": "Hồi ức",
+  "@facesTimelineAppBarTitle": {
+    "description": "Faces timeline page title shown in the app bar"
+  },
+  "facesTimelineCaptionYearsOld": "{name} vừa tròn {count, plural, other {{count} tuổi}}",
+  "@facesTimelineCaptionYearsOld": {
+    "description": "Caption for frames when birthdate is known, describing the person's age",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "description": "Person's name"
+      },
+      "count": {
+        "type": "int",
+        "description": "Number of years old"
+      }
+    }
+  },
+  "facesTimelineCaptionYearsAgo": "{count, plural, other {# năm trước}}",
+  "@facesTimelineCaptionYearsAgo": {
+    "description": "Caption for frames when birthdate is unknown, expressing time difference",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "description": "Years ago"
+      }
+    }
+  },
+  "facesTimelineShareComingSoon": "Chia sẻ video sẽ sớm ra mắt",
+  "@facesTimelineShareComingSoon": {
+    "description": "Message shown when the share action is not yet available"
+  },
+  "facesTimelinePlaybackPrevious": "Trước",
+  "@facesTimelinePlaybackPrevious": {
+    "description": "Tooltip or semantics label for the previous frame control"
+  },
+  "facesTimelinePlaybackNext": "Kế tiếp",
+  "@facesTimelinePlaybackNext": {
+    "description": "Tooltip or semantics label for the next frame control"
+  },
+  "facesTimelinePlaybackPlay": "Phát",
+  "@facesTimelinePlaybackPlay": {
+    "description": "Tooltip or semantics label for the play button"
+  },
+  "facesTimelinePlaybackPause": "Dừng",
+  "@facesTimelinePlaybackPause": {
+    "description": "Tooltip or semantics label for the pause button"
+  },
+  "facesTimelineUnavailable": "Đang chuẩn bị dòng thời gian...",
+  "@facesTimelineUnavailable": {
+    "description": "Fallback message when the faces timeline cannot be displayed yet"
+  },
   "playfulKids": "Trẻ em vui chơi",
-  "coastalCliffs": "Vách đá bên bờ biển"
+  "coastalCliffs": "Vách đá bên bờ biển",
+  "ritualsTitle": "Thói quen",
+  "ritualAddTooltip": "Thêm thói quen",
+  "ritualActivityHeading": "Hoạt động",
+  "ritualDefaultHeatmapTitle": "Chụp một ảnh mỗi ngày",
+  "ritualUntitled": "Thói quen chưa đặt tên",
+  "ritualShareUnavailable": "Không thể chia sẻ. Vui lòng thử lại.",
+  "ritualNotificationMessage": "Chụp ảnh ngay",
+  "ritualCameraNotFound": "Không tìm thấy camera trên thiết bị này.",
+  "ritualCameraStartError": "Không thể khởi động camera. Vui lòng kiểm tra quyền.",
+  "ritualCaptureError": "Không thể chụp ảnh. Vui lòng thử lại.",
+  "ritualPhotoLimit": "Bạn có thể thêm tối đa {maxPhotos, plural, other {# ảnh.}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "Chụp ít nhất một ảnh trước.",
+  "ritualAlbumMissing": "Album thói quen bị thiếu. Chỉnh sửa thói quen để thiết lập album.",
+  "ritualAddedToAlbum": "Đã thêm vào album",
+  "ritualAddedToAlbumWithName": "Đã thêm vào album {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "Không thể thêm ảnh vào album: {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "Quay lại thói quen",
+  "ritualNoPhotosYet": "Chưa có ảnh nào",
+  "ritualSetAlbumToLaunchCamera": "Thiết lập một album cho thói quen này để khởi động camera.",
+  "ritualDefaultCameraTitle": "Chụp ảnh",
+  "ritualBadgeMessage7": "Đã 7 ngày trôi qua! Bạn kiên trì tốt đấy. Hãy tiếp tục nhé!",
+  "ritualBadgeMessage14": "14 ngày rồi! Bạn đang dần có một thói quen. Thật tuyệt vời!",
+  "ritualBadgeMessage30": "30 ngày liên tiếp! Sự kiên trì đáng kinh ngạc. Ngưỡng mộ ghê!",
+  "ritualBadgeMessageDefault": "Bạn đang trên đà!",
+  "ritualBadgeNewTitle": "Thành tích mới",
+  "ritualBadgePreparing": "Đang chuẩn bị...",
+  "ritualStreaksLabel": "Ngày liên tiếp",
+  "ritualCreateYourOwn": "Tạo thói quen của riêng bạn",
+  "ritualGetDailyReminders": "Nhận nhắc nhở mỗi ngày",
+  "ritualAlbumNotSet": "Album chưa đặt tên",
+  "ritualOpenCameraTooltip": "Mở camera thói quen",
+  "ritualEditorLabel": "Trình chỉnh sửa thói quen",
+  "ritualNew": "Thói quen mới",
+  "ritualEdit": "Sửa thói quen",
+  "ritualEnterPrompt": "Mở thói quen",
+  "ritualEnterDescription": "Vui lòng nhập mô tả",
+  "ritualDayLabel": "Ngày",
+  "ritualNotificationsOffHint": "Đang tắt thông báo. Nhấn một ngày để bật chúng lên.",
+  "ritualTimeLabel": "Thời gian",
+  "ritualAlbumLabel": "Album",
+  "ritualSave": "Lưu thói quen",
+  "ritualUpdate": "Cập nhật thói quen",
+  "ritualSelectAlbumTitle": "Chọn album",
+  "ritualSearchOrCreate": "Tìm kiếm hoặc tạo mới",
+  "ritualNoAlbumsYet": "Chưa có album nào",
+  "ritualNoMatchingAlbums": "Không có album trùng khớp",
+  "ritualCreateAlbumWithName": "Tạo \"{albumName}\"",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "Tạo mới",
+  "ritualAlbumSelectionPlaceholder": "Chọn album",
+  "ritualPickEmojiTitle": "Chọn một biểu tượng cảm xúc",
+  "ritualCustomKeyboardLabel": "Tùy chỉnh (bàn phím)",
+  "ritualEmojiKeyboardHint": "Nhấn để mở bàn phím biểu tượng cảm xúc",
+  "ritualEmojiUseAction": "Sử dụng",
+  "ritualSearchEmpty": "Xây dựng thói quen để duy trì sở thích chụp ảnh của bạn."
 }

@@ -148,7 +148,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       if (dialogChoice!.action == ButtonAction.first) {
         await sendLogs(
           context,
-          context.strings.contactSupport,
+          "support@ente.io",
           postShare: () {},
         );
       }

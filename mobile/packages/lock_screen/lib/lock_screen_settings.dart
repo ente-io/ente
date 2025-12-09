@@ -45,7 +45,10 @@ class LockScreenSettings {
   late SharedPreferences _preferences;
   late FlutterSecureStorage _secureStorage;
 
-  Future<void> init(BaseConfiguration config) async {
+  Future<void> init(
+    BaseConfiguration config, {
+    bool hasOptedForOfflineMode = false,
+  }) async {
     _config = config;
     _secureStorage = const FlutterSecureStorage();
     _preferences = await SharedPreferences.getInstance();
@@ -57,7 +60,7 @@ class LockScreenSettings {
     /// already been done by checking a stored boolean value.
     await runLockScreenChangesMigration();
 
-    await _clearLsDataInKeychainIfFreshInstall();
+    await _clearLsDataInKeychainIfFreshInstall(hasOptedForOfflineMode);
 
     Bus.instance.on<SignedOutEvent>().listen((event) {
       removePinAndPassword();
@@ -240,8 +243,12 @@ class LockScreenSettings {
   // If the app was uninstalled (without logging out if it was used with
   // backups), keychain items of the app persist in the keychain. To avoid using
   // old keychain items, we delete them on reinstall.
-  Future<void> _clearLsDataInKeychainIfFreshInstall() async {
-    if ((Platform.isIOS || Platform.isMacOS) && !_config.isLoggedIn()) {
+  Future<void> _clearLsDataInKeychainIfFreshInstall(
+    bool hasOptedForOfflineMode,
+  ) async {
+    if ((Platform.isIOS || Platform.isMacOS) &&
+        !_config.isLoggedIn() &&
+        !hasOptedForOfflineMode) {
       await _secureStorage.delete(key: password);
       await _secureStorage.delete(key: pin);
       await _secureStorage.delete(key: saltKey);

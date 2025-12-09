@@ -763,7 +763,7 @@ func (c *StripeController) handleStripeError(err error, userID int64, context st
 	if stripeError.Type == stripe.ErrorTypeInvalidRequest {
 		// Send Discord alert with details
 		alertMsg := fmt.Sprintf(
-			"🚨 Stripe Invalid Request Error\n"+
+			"⚠️ Stripe Invalid Request Error\n"+
 				"**Context:** %s\n"+
 				"**User ID:** %d\n"+
 				"**Error Code:** %s\n"+

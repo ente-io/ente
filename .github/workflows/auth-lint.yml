@@ -49,12 +49,28 @@ jobs:
             - name: Verify custom icon JSON
               run: cat assets/custom-icons/_data/custom-icons.json | jq empty
 
+            - name: Verify custom icon hex codes
+              run: |
+                  jq -r '.icons[] | select(.hex != null) | .hex' assets/custom-icons/_data/custom-icons.json | while read -r hex; do
+                      if [[ -z "$hex" ]]; then
+                          continue
+                      fi
+                      if [[ ! "$hex" =~ ^[0-9a-fA-F]{6}$ ]]; then
+                          echo "Invalid hex color '$hex'. Must be exactly 6 hexadecimal characters."
+                          exit 1
+                      fi
+                  done
+
             - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
               uses: subosito/flutter-action@v2
               with:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
 
             - run: flutter pub get
 

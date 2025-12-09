@@ -20,6 +20,10 @@ derivation functions. Since only you know your password, only you can decrypt
 your files. For technical details, please see our
 [architecture document](https://ente.io/architecture).
 
+### Can Ente see the metadata of my photos and videos? {#can-ente-see-metadata}
+
+No. Just like the photos and videos, all metadata (including exif creation time, location, description etc) is also end-to-end encrypted.
+
 ### How is my data encrypted? {#data-encryption}
 
 We use the following encryption algorithms:

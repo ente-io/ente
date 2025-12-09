@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
+import "package:photos/events/swipe_to_select_enabled_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -156,6 +157,34 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                                     HideSharedItemsFromHomeGalleryEvent(
                                       !prevSetting,
                                     ),
+                                  );
+                                },
+                              ),
+                            ),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      widget.fromGalleryLayoutSettingsCTA
+                          ? const SizedBox.shrink()
+                          : MenuItemWidget(
+                              captionedTextWidget: CaptionedTextWidget(
+                                title:
+                                    AppLocalizations.of(context).swipeToSelect,
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              singleBorderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              trailingWidget: ToggleSwitchWidget(
+                                value: () =>
+                                    localSettings.isSwipeToSelectEnabled,
+                                onChanged: () async {
+                                  final prevSetting =
+                                      localSettings.isSwipeToSelectEnabled;
+                                  await localSettings
+                                      .setSwipeToSelectEnabled(!prevSetting);
+
+                                  Bus.instance.fire(
+                                    SwipeToSelectEnabledEvent(!prevSetting),
                                   );
                                 },
                               ),

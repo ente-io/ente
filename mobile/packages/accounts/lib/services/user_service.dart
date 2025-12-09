@@ -61,14 +61,23 @@ class UserService {
   late ValueNotifier<String?> emailValueNotifier;
   late BaseConfiguration _config;
   late BaseHomePage _homePage;
+  late String _clientPackageName;
+  late String _passkeyRedirectUrl;
 
   UserService._privateConstructor();
 
   static final UserService instance = UserService._privateConstructor();
 
-  Future<void> init(BaseConfiguration config, BaseHomePage homePage) async {
+  Future<void> init(
+    BaseConfiguration config,
+    BaseHomePage homePage, {
+    required String clientPackageName,
+    required String passkeyRedirectUrl,
+  }) async {
     _config = config;
     _homePage = homePage;
+    _clientPackageName = clientPackageName;
+    _passkeyRedirectUrl = passkeyRedirectUrl;
     emailValueNotifier = ValueNotifier<String?>(config.getEmail());
     _preferences = await SharedPreferences.getInstance();
   }
@@ -131,12 +140,21 @@ class UserService {
             context.strings.emailNotRegistered,
           ),
         );
-      }  else if (enteErrCode != null && enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
+      } else if (enteErrCode != null &&
+          enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
         unawaited(
           showErrorDialog(
             context,
             context.strings.oops,
-            "Registration is temporarily paused",
+            context.strings.lockerExistingUserRequired,
+          ),
+        );
+      } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
+        unawaited(
+          showErrorDialog(
+            context,
+            "We're out of beta seats for now",
+            "This preview access has reached capacity. We'll be opening it to more users soon.",
           ),
         );
       } else if (e.response != null && e.response!.statusCode == 403) {
@@ -463,6 +481,8 @@ class UserService {
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
             accountsUrl: accountsUrl,
+            redirectUrl: _passkeyRedirectUrl,
+            clientPackage: _clientPackageName,
           );
         } else if (twoFASessionID.isNotEmpty) {
           page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -504,7 +524,25 @@ class UserService {
     } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
-      if (e.response != null && e.response!.statusCode == 410) {
+      final dynamic data = e.response?.data;
+      final String? enteErrCode =
+          data is Map<String, dynamic> ? data["code"] as String? : null;
+      if (enteErrCode != null &&
+          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+        await showErrorDialog(
+          context,
+          context.strings.oops,
+          context.strings.lockerExistingUserRequired,
+        );
+        return;
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+        await showErrorDialog(
+          context,
+          "We're out of beta seats for now",
+          "This preview access has reached capacity. We'll be opening it to more users soon.",
+        );
+        return;
+      } else if (e.response != null && e.response!.statusCode == 410) {
         await showErrorDialog(
           context,
           context.strings.oops,
@@ -788,6 +826,8 @@ class UserService {
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
           accountsUrl: accountsUrl,
+          redirectUrl: _passkeyRedirectUrl,
+          clientPackage: _clientPackageName,
         );
       } else if (twoFASessionID.isNotEmpty) {
         page = TwoFactorAuthenticationPage(twoFASessionID);
@@ -899,7 +939,25 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      if (e.response != null && e.response!.statusCode == 404) {
+      final dynamic data = e.response?.data;
+      final String? enteErrCode =
+          data is Map<String, dynamic> ? data["code"] as String? : null;
+      if (enteErrCode != null &&
+          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+        // ignore: unawaited_futures
+        showErrorDialog(
+          context,
+          context.strings.oops,
+          context.strings.lockerExistingUserRequired,
+        );
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+        // ignore: unawaited_futures
+        showErrorDialog(
+          context,
+          "We're out of beta seats for now",
+          "This preview access has reached capacity. We'll be opening it to more users soon.",
+        );
+      } else if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(

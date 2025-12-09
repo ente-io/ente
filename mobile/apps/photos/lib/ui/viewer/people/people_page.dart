@@ -14,6 +14,8 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
+import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
@@ -25,8 +27,10 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/people/faces_timeline_banner.dart";
+import "package:photos/ui/viewer/people/faces_timeline_debug_panel.dart";
+import "package:photos/ui/viewer/people/faces_timeline_page.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
-
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -52,6 +56,7 @@ class PeoplePage extends StatefulWidget {
 
 class _PeoplePageState extends State<PeoplePage> {
   final Logger _logger = Logger("_PeoplePageState");
+  final Logger _timelineLogger = Logger("FacesTimelineInteractions");
   final _selectedFiles = SelectedFiles();
   List<EnteFile>? files;
   Future<List<EnteFile>> filesFuture = Future.value([]);
@@ -62,6 +67,10 @@ class _PeoplePageState extends State<PeoplePage> {
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
   late SearchFilterDataProvider? _searchFilterDataProvider;
+  ValueNotifier<Set<String>>? _timelineNotifier;
+  VoidCallback? _timelineListener;
+
+  bool get _facesTimelineEnabled => flagService.facesTimeline;
 
   @override
   void initState() {
@@ -81,8 +90,9 @@ class _PeoplePageState extends State<PeoplePage> {
 
     filesFuture = loadPersonFiles();
 
-    _filesUpdatedEvent =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
+      event,
+    ) {
       if (event.type == EventType.deletedFromDevice ||
           event.type == EventType.deletedFromEverywhere ||
           event.type == EventType.deletedFromRemote ||
@@ -99,11 +109,28 @@ class _PeoplePageState extends State<PeoplePage> {
                 widget.searchResult!.getHierarchicalSearchFilter(),
           )
         : null;
+    if (_facesTimelineEnabled) {
+      _timelineNotifier = FacesTimelineService.instance.readyPersonIds;
+      _timelineListener = () {
+        if (!mounted) return;
+        setState(() {});
+      };
+      _timelineNotifier!.addListener(_timelineListener!);
+      if (!FacesTimelineService.instance.hasReadyTimelineSync(
+        _person.remoteID,
+      )) {
+        FacesTimelineService.instance.schedulePersonRecompute(
+          _person.remoteID,
+          trigger: "people_page_visit",
+        );
+      }
+    }
   }
 
   Future<List<EnteFile>> loadPersonFiles() async {
-    final result = await SearchService.instance
-        .getClusterFilesForPersonID(_person.remoteID);
+    final result = await SearchService.instance.getClusterFilesForPersonID(
+      _person.remoteID,
+    );
     if (result.isEmpty) {
       _logger.severe(
         "No files found for person with id ${_person.remoteID}, can't load files",
@@ -124,12 +151,35 @@ class _PeoplePageState extends State<PeoplePage> {
   void dispose() {
     _filesUpdatedEvent.cancel();
     _peopleChangedEvent.cancel();
+    if (_timelineListener != null && _timelineNotifier != null) {
+      _timelineNotifier!.removeListener(_timelineListener!);
+    }
     super.dispose();
+  }
+
+  Future<void> _openFacesTimelinePage() async {
+    if (!_facesTimelineEnabled) return;
+    _timelineLogger.info("banner_tap person=${_person.remoteID}");
+    await routeToPage(context, FacesTimelinePage(person: _person));
+    if (!mounted) {
+      return;
+    }
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
+    final bool featureEnabled = _facesTimelineEnabled;
+    final bool facesTimelineReady = featureEnabled
+        ? FacesTimelineService.instance.hasReadyTimelineSync(
+            _person.remoteID,
+          )
+        : false;
+    final bool hasSeenFacesTimeline =
+        localSettings.hasSeenFacesTimeline(_person.remoteID);
+    final bool showFacesTimelineBanner =
+        featureEnabled && facesTimelineReady && !hasSeenFacesTimeline;
 
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -137,8 +187,9 @@ class _PeoplePageState extends State<PeoplePage> {
           searchFilterDataProvider: _searchFilterDataProvider,
           child: Scaffold(
             appBar: PreferredSize(
-              preferredSize:
-                  Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
+              preferredSize: Size.fromHeight(
+                widget.searchResult != null ? 90.0 : 50.0,
+              ),
               child: PeopleAppBar(
                 GalleryType.peopleTag,
                 _person.data.isIgnored
@@ -146,6 +197,10 @@ class _PeoplePageState extends State<PeoplePage> {
                     : _person.data.name,
                 _selectedFiles,
                 _person,
+                facesTimelineReady: facesTimelineReady,
+                onFacesTimelineTap: featureEnabled && facesTimelineReady
+                    ? _openFacesTimelinePage
+                    : null,
               ),
             ),
             body: FutureBuilder<List<EnteFile>>(
@@ -166,11 +221,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                 valueListenable: inheritedSearchFilterData
                                     .searchFilterDataProvider!
                                     .isSearchingNotifier,
-                                builder: (
-                                  context,
-                                  value,
-                                  _,
-                                ) {
+                                builder: (context, value, _) {
                                   return value
                                       ? HierarchicalSearchGallery(
                                           tagPrefix: widget.tagPrefix,
@@ -182,6 +233,15 @@ class _PeoplePageState extends State<PeoplePage> {
                                           personFiles: personFiles,
                                           loadPersonFiles: loadPersonFiles,
                                           personEntity: _person,
+                                          facesTimelineEnabled: featureEnabled,
+                                          showTimelineBanner:
+                                              showFacesTimelineBanner,
+                                          onTimelineTap: featureEnabled &&
+                                                  facesTimelineReady
+                                              ? () => unawaited(
+                                                    _openFacesTimelinePage(),
+                                                  )
+                                              : null,
                                         );
                                 },
                               )
@@ -191,6 +251,14 @@ class _PeoplePageState extends State<PeoplePage> {
                                 personFiles: personFiles,
                                 loadPersonFiles: loadPersonFiles,
                                 personEntity: _person,
+                                facesTimelineEnabled: featureEnabled,
+                                showTimelineBanner: showFacesTimelineBanner,
+                                onTimelineTap:
+                                    featureEnabled && facesTimelineReady
+                                        ? () => unawaited(
+                                              _openFacesTimelinePage(),
+                                            )
+                                        : null,
                               ),
                         FileSelectionOverlayBar(
                           PeoplePage.overlayType,
@@ -207,9 +275,7 @@ class _PeoplePageState extends State<PeoplePage> {
                   //Need to show an error on the UI here
                   return const SizedBox.shrink();
                 } else {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
               },
             ),
@@ -226,6 +292,9 @@ class _Gallery extends StatefulWidget {
   final List<EnteFile> personFiles;
   final Future<List<EnteFile>> Function() loadPersonFiles;
   final PersonEntity personEntity;
+  final bool facesTimelineEnabled;
+  final bool showTimelineBanner;
+  final VoidCallback? onTimelineTap;
 
   const _Gallery({
     required this.tagPrefix,
@@ -233,6 +302,9 @@ class _Gallery extends StatefulWidget {
     required this.personFiles,
     required this.loadPersonFiles,
     required this.personEntity,
+    required this.facesTimelineEnabled,
+    this.showTimelineBanner = false,
+    this.onTimelineTap,
   });
 
   @override
@@ -241,23 +313,29 @@ class _Gallery extends StatefulWidget {
 
 class _GalleryState extends State<_Gallery> {
   bool userDismissedPersonGallerySuggestion = false;
+  final Logger _timelineLogger = Logger("FacesTimelineBanner");
+  bool _loggedTimelineImpression = false;
+
+  @override
+  void didUpdateWidget(covariant _Gallery oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.showTimelineBanner && oldWidget.showTimelineBanner) {
+      _loggedTimelineImpression = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.showTimelineBanner && !_loggedTimelineImpression) {
+      _timelineLogger.info(
+        "banner_impression person=${widget.personEntity.remoteID}",
+      );
+      _loggedTimelineImpression = true;
+    }
     return Gallery(
-      asyncLoader: (
-        creationStartTime,
-        creationEndTime, {
-        limit,
-        asc,
-      }) async {
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final result = await widget.loadPersonFiles();
-        return Future.value(
-          FileLoadResult(
-            result,
-            false,
-          ),
-        );
+        return Future.value(FileLoadResult(result, false));
       },
       reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
       forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
@@ -290,6 +368,14 @@ class _GalleryState extends State<_Gallery> {
                     },
                   ),
                 ),
+          FacesTimelineBannerSection(
+            showBanner:
+                widget.facesTimelineEnabled && widget.showTimelineBanner,
+            person: widget.personEntity,
+            onTap: widget.facesTimelineEnabled ? widget.onTimelineTap : null,
+          ),
+          if (widget.facesTimelineEnabled)
+            FacesTimelineDebugPanel(person: widget.personEntity),
           !userDismissedPersonGallerySuggestion
               ? Dismissible(
                   key: const Key("personGallerySuggestion"),

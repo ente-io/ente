@@ -62,7 +62,7 @@ Learn more about [Machine learning](/photos/features/search-and-discovery/machin
 
 **On desktop:**
 
-- Access the People section through the search interface
+- Access the People section through the top tab
 
 ### Naming persons
 

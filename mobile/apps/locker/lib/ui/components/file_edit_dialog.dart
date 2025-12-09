@@ -9,7 +9,6 @@ import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
 import "package:locker/ui/components/gradient_button.dart";
 import 'package:locker/utils/collection_list_util.dart';
-import 'package:locker/utils/snack_bar_utils.dart';
 
 class FileEditDialogResult {
   final String title;
@@ -125,14 +124,6 @@ class _FileEditDialogState extends State<FileEditDialog> {
         .where((c) => _selectedCollectionIds.contains(c.id))
         .toList();
 
-    if (selectedCollections.isEmpty) {
-      SnackBarUtils.showWarningSnackBar(
-        widget.snackBarContext,
-        widget.snackBarContext.l10n.pleaseSelectAtLeastOneCollection,
-      );
-      return;
-    }
-
     final result = FileEditDialogResult(
       title: _titleController.text.trim(),
       caption: _captionController.text.trim(),
@@ -158,7 +149,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 24,
               offset: const Offset(0, 12),
             ),

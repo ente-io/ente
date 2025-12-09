@@ -2,6 +2,7 @@ import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/collection_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
@@ -70,7 +71,7 @@ class CollectionListWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  collection.name ?? 'Unnamed Collection',
+                  collection.displayName ?? 'Unnamed Collection',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),

@@ -361,6 +361,21 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  dir_utils:
+    dependency: "direct main"
+    description:
+      path: "../../packages/dir_utils"
+      relative: true
+    source: path
+    version: "1.0.0"
+  dots_indicator:
+    dependency: "direct main"
+    description:
+      name: dots_indicator
+      sha256: "2a53e0321a3f0d87e38ef30f6e9ff1deb5d6c0e2c5708e057d26cdaa94a95f10"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   dotted_border:
     dependency: "direct main"
     description:
@@ -447,6 +462,13 @@ packages:
     dependency: "direct main"
     description:
       path: "plugins/qr"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_qr_ui:
+    dependency: "direct main"
+    description:
+      path: "../../packages/qr"
       relative: true
     source: path
     version: "0.0.1"
@@ -1005,6 +1027,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.9.5"
+  launcher_icon_switcher:
+    dependency: "direct main"
+    description:
+      name: launcher_icon_switcher
+      sha256: a1e0778ed016107077f54f22b4987f322315de8d3df31a6ed494134f55c0ff41
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
   leak_tracker:
     dependency: transitive
     description:
@@ -1334,6 +1364,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  pretty_qr_code:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "80ebafb9c99ac22520092b008579013d2fcffbe1"
+      url: "https://github.com/ente-io/flutter_pretty_qr_fork"
+    source: git
+    version: "3.5.0"
   privacy_screen:
     dependency: "direct main"
     description:
@@ -1391,6 +1430,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
+  saf_stream:
+    dependency: "direct main"
+    description:
+      name: saf_stream
+      sha256: c05449997698c481a03e428162a999f93b1ee1bcc0349d651899a59f7b10230a
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.3"
+  saf_util:
+    dependency: "direct main"
+    description:
+      name: saf_util
+      sha256: "219f983e5f17b28998335158cdc97add9d52af9884e38b5a43f10dcc070510ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.0"
   screen_retriever:
     dependency: transitive
     description:

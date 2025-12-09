@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.11+477
+version: 4.4.13+522
 publish_to: none
 
 environment:
@@ -20,6 +20,9 @@ dependencies:
   convert: ^3.1.1
   device_info_plus: ^9.1.1
   dio: ^5.8.0+1
+  dir_utils:
+    path: ../../packages/dir_utils
+  dots_indicator: ^3.0.0
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
@@ -33,7 +36,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_events:
-    path: ../../packages/events 
+    path: ../../packages/events
   ente_lock_screen:
     path: ../../packages/lock_screen
   ente_logging:
@@ -42,6 +45,8 @@ dependencies:
     path: ../../packages/network
   ente_qr:
     path: plugins/qr
+  ente_qr_ui:
+    path: ../../packages/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -95,6 +100,7 @@ dependencies:
   intl: ^0.20.2
   io: ^1.0.4
   json_annotation: ^4.5.0
+  launcher_icon_switcher: ^0.0.2
   local_auth: ^2.3.0
   local_auth_android: ^1.0.37
   local_auth_darwin: ^1.2.2
@@ -119,6 +125,8 @@ dependencies:
       url: https://github.com/juliuscanute/qr_code_scanner
       ref: a2d31633d4744f72ada87cfa85d221358ab082af
   qr_flutter: ^4.1.0
+  saf_stream: any
+  saf_util: any
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2
   share_plus: ^11.0.0
@@ -156,6 +164,7 @@ flutter:
   assets:
     - assets/
     - assets/icons/
+    - assets/launcher_icon/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/
@@ -186,7 +195,8 @@ flutter_launcher_icons:
 
   ios: true
   remove_alpha_ios: true
-  image_path_ios_dark_transparent: "assets/generation-icons/icon-dark.png"
+  image_path_ios: "assets/generation-icons/icon-purple.png"
+  image_path_ios_dark_transparent: "assets/generation-icons/icon-ios-foreground.png"
   image_path_ios_tinted_grayscale: "assets/generation-icons/icon-tinted.png"
 
   macos:
@@ -204,8 +214,8 @@ flutter_launcher_icons:
     icon_size: 256
 
 flutter_native_splash:
-  color: "#FFFFFF"
-  color_dark: "#000000"
+  color: "#A75CFF"
+  color_dark: "#A75CFF"
   image: "assets/generation-icons/splash-icon-ios-padded.png"
   android_gravity: center
   ios_content_mode: center
@@ -223,16 +233,13 @@ flutter_native_splash:
     image: "assets/generation-icons/splash-icon-ios-padded.png"
 
     # Splash screen background color.
-    color: "#FFFFFF"
+    color: "#A75CFF"
 
     # App icon background color.
-    icon_background_color: "#FFFFFF"
-
-    # The branding property allows you to specify an image used as branding in the splash screen.
-    #branding: assets/dart.png
+    icon_background_color: "#A75CFF"
 
     # The image_dark, color_dark, icon_background_color_dark, and branding_dark set values that
     # apply when the device is in dark mode. If they are not specified, the app will use the
     # parameters from above.
-    color_dark: "#000000"
-    icon_background_color_dark: "#000000"
+    color_dark: "#A75CFF"
+    icon_background_color_dark: "#A75CFF"

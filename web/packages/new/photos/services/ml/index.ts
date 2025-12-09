@@ -125,6 +125,15 @@ class MLState {
 
 /** State shared by the functions in this module. See {@link MLState}. */
 let _state = new MLState();
+/**
+ * Tracks if {@link initML} has already run for the current session.
+ *
+ * Some callers (notably the Next.js app shell) can end up invoking
+ * {@link initML} multiple times because of re-renders or hot reloads. Without
+ * this guard we'd reset {@link peopleStateSnapshot} on every invocation and
+ * discard the list of people until the next sync repopulates it.
+ */
+let _didInitML = false;
 
 /** Lazily created, cached, instance of {@link MLWorker}. */
 const worker = () =>
@@ -177,8 +186,10 @@ export const isMLSupported = isDesktop;
  * Initialize the ML subsystem if the user has enabled it in preferences.
  */
 export const initML = () => {
+    if (_didInitML) return;
     _state.isMLEnabled = isMLEnabledLocal();
     resetPeopleStateSnapshot();
+    _didInitML = true;
 };
 
 export const logoutML = async () => {
@@ -191,6 +202,7 @@ export const logoutML = async () => {
         URL.revokeObjectURL(url),
     );
     _state = new MLState();
+    _didInitML = false;
     await clearMLDB();
 };
 
@@ -765,7 +777,13 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const id = await addUserEntity(
         "cgroup",
-        { name, assigned: [cluster], isHidden: false },
+        {
+            name,
+            assigned: [cluster],
+            isHidden: false,
+            isPinned: false,
+            hideFromMemories: false,
+        },
         await ensureMasterKeyFromSession(),
     );
     await mlSync();
@@ -830,6 +848,24 @@ export const deleteCGroup = async ({ id }: CGroup) => {
 };
 
 /**
+ * Change the pinned state of a person.
+ */
+export const setCGroupPinned = async (cgroup: CGroup, isPinned: boolean) => {
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [{ ...cgroup, data: { ...cgroup.data, isPinned } }],
+        await ensureMasterKeyFromSession(),
+    );
+    return mlSync();
+};
+
+export const pinCGroup = async (cgroup: CGroup) =>
+    setCGroupPinned(cgroup, true);
+
+export const unpinCGroup = async (cgroup: CGroup) =>
+    setCGroupPinned(cgroup, false);
+
+/**
  * Return suggestions for the given {@link person}.
  *
  * The suggestion computation happens in a web worker.
@@ -865,7 +901,13 @@ export const applyPersonSuggestionUpdates = async (
 export const ignoreCluster = async (cluster: FaceCluster) => {
     await addUserEntity(
         "cgroup",
-        { name: "", assigned: [cluster], isHidden: true },
+        {
+            name: "",
+            assigned: [cluster],
+            isHidden: true,
+            isPinned: false,
+            hideFromMemories: false,
+        },
         await ensureMasterKeyFromSession(),
     );
     return mlSync();

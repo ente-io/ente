@@ -3,6 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
     Box,
     Divider,
@@ -27,7 +28,7 @@ import type { SearchOption } from "ente-new/photos/services/search/types";
 import { nullToUndefined } from "ente-utils/transform";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -38,6 +39,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
+import { sidebarSearchOptionsForString } from "../services/search/sidebar-search-registry";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import {
@@ -74,7 +76,10 @@ export interface SearchBarProps {
     /**
      * Set or clear the selected {@link SearchOption}.
      */
-    onSelectSearchOption: (o: SearchOption | undefined) => void;
+    onSelectSearchOption: (
+        o: SearchOption | undefined,
+        options?: { shouldExitSearchMode?: boolean },
+    ) => void;
     /**
      * Called when the user selects the generic "People" header in the empty
      * state view.
@@ -159,17 +164,36 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const [value, setValue] = useState<SearchOption | null>(null);
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
 
     const theme = useTheme();
 
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
+    // Handle ctrl+K keyboard shortcut to focus search
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Check for ctrl+K (cmd+K on macOS)
+            if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+                event.preventDefault();
+                selectRef.current?.focus();
+            }
+        };
+
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
     const handleChange = (value: SearchOption | null) => {
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
-        if (type == "collection" || type == "person") {
+        if (
+            type == "collection" ||
+            type == "person" ||
+            type == "sidebarAction"
+        ) {
             setValue(null);
             setInputValue("");
         } else {
@@ -178,7 +202,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         }
 
         // Let our parent know the selection was changed.
-        onSelectSearchOption(nullToUndefined(value));
+        // When selecting an option, we should exit search mode if needed.
+        onSelectSearchOption(nullToUndefined(value), {
+            shouldExitSearchMode: true,
+        });
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
@@ -190,7 +217,19 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action == "input-change") setInputValue(value);
+        if (actionMeta.action == "input-change") {
+            setInputValue(value);
+
+            // If the input is cleared, also clear the selected value.
+            if (value === "") {
+                setValue(null);
+                setInputValue("");
+                // Notify parent but don't exit search mode on mobile
+                onSelectSearchOption(undefined, {
+                    shouldExitSearchMode: false,
+                });
+            }
+        }
     };
 
     const resetSearch = () => {
@@ -201,8 +240,8 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         setValue(null);
         setInputValue("");
 
-        // Let our parent know.
-        onSelectSearchOption(undefined);
+        // Let our parent know and exit search mode entirely.
+        onSelectSearchOption(undefined, { shouldExitSearchMode: true });
     };
 
     const handleSelectPeople = () => {
@@ -216,6 +255,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleFocus = () => {
+        setIsFocused(true);
         // A workaround to show the suggestions again for the current non-empty
         // search string if the user focuses back on the input field after
         // moving focus elsewhere.
@@ -225,6 +265,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 prevInputValue: "",
             });
         }
+    };
+
+    const handleBlur = () => {
+        setIsFocused(false);
     };
 
     return (
@@ -240,7 +284,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onInputChange={handleInputChange}
                 isClearable
                 escapeClearsValue
+                menuIsOpen={isFocused && inputValue !== ""}
                 onFocus={handleFocus}
+                onBlur={handleBlur}
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
@@ -272,7 +318,16 @@ const SearchInputWrapper = styled("div")`
     margin: auto;
 `;
 
-const loadOptions = pDebounce(searchOptionsForString, 250);
+const loadOptions = pDebounce(async (input: string) => {
+    const [sidebarActions, photoOptions] = await Promise.all([
+        sidebarSearchOptionsForString(input),
+        searchOptionsForString(input),
+    ]);
+
+    return [...photoOptions, ...sidebarActions];
+}, 250);
+
+// const loadOptions = pDebounce(searchOptionsForString, 250);
 
 const createSelectStyles = (
     theme: Theme,
@@ -324,31 +379,62 @@ const createSelectStyles = (
     clearIndicator: (style) => ({ ...style, display: "none" }),
 });
 
-const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
-    <SelectComponents.Control {...props}>
-        <Stack
-            direction="row"
-            sx={{
-                alignItems: "center",
-                // Fill the entire control (the control uses display flex).
-                flex: 1,
-            }}
-        >
-            <Box
+const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
+    // The shortcut UI element will be shown once the search bar supports searching the settings as well.
+    const isMac =
+        typeof navigator !== "undefined" &&
+        navigator.userAgent.toUpperCase().includes("MAC");
+    const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+
+    const hasValue =
+        props.getValue().length > 0 || props.selectProps.inputValue;
+
+    return (
+        <SelectComponents.Control {...props}>
+            <Stack
+                direction="row"
                 sx={{
-                    display: "inline-flex",
-                    // Match the default padding of the ValueContainer to make
-                    // the icon look properly spaced and aligned.
-                    pl: "8px",
-                    color: "stroke.muted",
+                    alignItems: "center",
+                    // Fill the entire control (the control uses display flex).
+                    flex: 1,
                 }}
             >
-                {iconForOption(props.getValue()[0])}
-            </Box>
-            {children}
-        </Stack>
-    </SelectComponents.Control>
-);
+                <Box
+                    sx={{
+                        display: "inline-flex",
+                        // Match the default padding of the ValueContainer to make
+                        // the icon look properly spaced and aligned.
+                        pl: "8px",
+                        color: "stroke.muted",
+                    }}
+                >
+                    {iconForOption(props.getValue()[0])}
+                </Box>
+                {children}
+                {!hasValue && (
+                    <Box
+                        sx={{
+                            display: ["none", "none", "inline-flex"],
+                            alignItems: "center",
+                            pr: "8px",
+                            color: "text.faint",
+                            fontSize: "12px",
+                            fontFamily: "monospace",
+                            border: "1px solid",
+                            borderColor: "stroke.faint",
+                            borderRadius: "4px",
+                            px: "6px",
+                            py: "2px",
+                            mr: "8px",
+                        }}
+                    >
+                        {shortcutKey}
+                    </Box>
+                )}
+            </Stack>
+        </SelectComponents.Control>
+    );
+};
 
 const iconForOption = (option: SearchOption | undefined) => {
     switch (option?.suggestion.type) {
@@ -356,6 +442,8 @@ const iconForOption = (option: SearchOption | undefined) => {
             return <ImageIcon />;
         case "date":
             return <CalendarIcon />;
+        case "sidebarAction":
+            return <SettingsIcon />;
         case "location":
         case "city":
             return <LocationIcon />;
@@ -486,20 +574,16 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     </SelectComponents.Option>
 );
 
-const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
-        <Typography variant="mini" sx={{ color: "text.muted" }}>
-            {labelForOption(option)}
-        </Typography>
-        <Stack
-            direction="row"
-            sx={{
-                gap: 1,
-                alignItems: "center",
-                justifyContent: "space-between",
-            }}
-        >
-            <Box>
+const OptionContents = ({ data: option }: { data: SearchOption }) => {
+    if (option.suggestion.type === "sidebarAction") {
+        return (
+            <Stack
+                className="option-contents"
+                sx={{ gap: "4px", px: 2, py: 1 }}
+            >
+                <Typography variant="mini" sx={{ color: "text.muted" }}>
+                    {labelForOption(option)}
+                </Typography>
                 <Typography
                     sx={{
                         color: "text.base",
@@ -510,22 +594,52 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                     {option.suggestion.label}
                 </Typography>
                 <Typography sx={{ color: "text.muted" }}>
-                    {t("photos_count", { count: option.fileCount })}
+                    {option.suggestion.path.join(" > ")}
                 </Typography>
-            </Box>
+            </Stack>
+        );
+    }
+    return (
+        <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
+            <Typography variant="mini" sx={{ color: "text.muted" }}>
+                {labelForOption(option)}
+            </Typography>
+            <Stack
+                direction="row"
+                sx={{
+                    gap: 1,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                }}
+            >
+                <Box>
+                    <Typography
+                        sx={{
+                            color: "text.base",
+                            fontWeight: "medium",
+                            wordBreak: "break-word",
+                        }}
+                    >
+                        {option.suggestion.label}
+                    </Typography>
+                    <Typography sx={{ color: "text.muted" }}>
+                        {t("photos_count", { count: option.fileCount })}
+                    </Typography>
+                </Box>
 
-            <Stack direction="row" sx={{ gap: 1 }}>
-                {option.previewFiles.map((file) => (
-                    <ItemCard
-                        key={file.id}
-                        coverFile={file}
-                        TileComponent={PreviewItemTile}
-                    />
-                ))}
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    {option.previewFiles.map((file) => (
+                        <ItemCard
+                            key={file.id}
+                            coverFile={file}
+                            TileComponent={PreviewItemTile}
+                        />
+                    ))}
+                </Stack>
             </Stack>
         </Stack>
-    </Stack>
-);
+    );
+};
 
 const labelForOption = (option: SearchOption) => {
     switch (option.suggestion.type) {
@@ -555,5 +669,8 @@ const labelForOption = (option: SearchOption) => {
 
         case "person":
             return t("people");
+
+        case "sidebarAction":
+            return t("settings");
     }
 };

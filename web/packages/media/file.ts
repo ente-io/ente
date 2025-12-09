@@ -214,13 +214,15 @@ export interface FileInfo {
     fileSize?: number;
     /**
      * The size of the thumbnail associated with the file (in bytes).
+     *
+     * This will not be present for files that don't have thumbnails (an old Locker issue)
      */
-    thumbSize: number;
+    thumbSize?: number;
 }
 
 export const RemoteFileInfo = z.looseObject({
     fileSize: z.number().nullish().transform(nullToUndefined),
-    thumbSize: z.number(),
+    thumbSize: z.number().nullish().transform(nullToUndefined),
 });
 
 const RemoteFileMetadata = z.object({
