@@ -1285,6 +1285,7 @@ function CollectionSidebar({
                                 sx={{ color: "text.muted", fontSize: "14px" }}
                             >
                                 {collectionSummary.fileCount} memories
+                                {currentDate && ` · ${currentDate}`}
                             </Typography>
                         </Box>
                         <IconButton
