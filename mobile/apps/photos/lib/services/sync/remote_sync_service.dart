@@ -901,11 +901,17 @@ class RemoteSyncService {
       );
       return _onFileUploaded(uploadedFile);
     }).onError((error, stackTrace) {
-      _logger.internalSevere(
-        "[UPLOAD-DEBUG] Upload failed for ${file.title}",
-        error,
-        stackTrace,
-      );
+      // Don't log SEVERE for expected skip errors
+      if (error is! BackupFolderDeselectedError &&
+          error is! BackupTooOldForPreferenceError &&
+          error is! SilentlyCancelUploadsError &&
+          error is! UserCancelledUploadError) {
+        _logger.internalSevere(
+          "[UPLOAD-DEBUG] Upload failed for ${file.title}",
+          error,
+          stackTrace,
+        );
+      }
       return _onFileUploadError(error, stackTrace, file);
     });
     futures.add(future);
@@ -960,6 +966,9 @@ class RemoteSyncService {
       return;
     }
     if (error is SilentlyCancelUploadsError) {
+      return;
+    }
+    if (error is UserCancelledUploadError) {
       return;
     }
     if (error is InvalidFileError) {
