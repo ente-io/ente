@@ -181,6 +181,7 @@ Future<List<EnteFile>> convertIncomingSharedMediaToFile(
     }
     enteFile.localID = sharedMediaIdentifier + sharedLocalId;
     enteFile.collectionID = collectionID;
+    enteFile.queueSource = manualQueueSource;
     enteFile.fileType =
         media.type == SharedMediaType.image ? FileType.image : FileType.video;
     if (enteFile.fileType == FileType.image) {
@@ -215,6 +216,7 @@ Future<List<EnteFile>> convertPicketAssets(
   for (var asset in pickedAssets) {
     final enteFile = await EnteFile.fromAsset('', asset);
     enteFile.collectionID = collectionID;
+    enteFile.queueSource = manualQueueSource;
     localFiles.add(enteFile);
   }
   return localFiles;

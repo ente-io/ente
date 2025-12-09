@@ -27,6 +27,9 @@ const subGalleryMultiplier = 10;
 // used to identify which ente file are available in app cache
 const String sharedMediaIdentifier = 'ente-shared-media://';
 
+// queue source identifier for manually added uploads (not auto-backup)
+const String manualQueueSource = 'manual';
+
 const galleryThumbnailDiskLoadDeferDuration = Duration(milliseconds: 80);
 const galleryThumbnailServerLoadDeferDuration = Duration(milliseconds: 80);
 
