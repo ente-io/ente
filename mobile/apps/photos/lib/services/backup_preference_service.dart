@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:ente_feature_flag/ente_feature_flag.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/db/device_files_db.dart';
@@ -77,7 +75,6 @@ class BackupPreferenceService {
 
   Future<void> setOnlyNewSinceEpoch(int timestamp) async {
     await _prefs.setInt(_keyOnlyNewSinceEpoch, timestamp);
-    _triggerOnlyNewCleanup(timestamp);
   }
 
   Future<void> setOnlyNewSinceSevenDaysAgo() async {
@@ -103,23 +100,6 @@ class BackupPreferenceService {
 
   Future<void> clearOnlyNewSinceEpoch() async {
     await _prefs.remove(_keyOnlyNewSinceEpoch);
-  }
-
-  /// Triggers cleanup of old pending uploads after only-new threshold updates.
-  /// Fire-and-forget to avoid blocking the UI; actual filtering happens during
-  /// sync/upload anyway.
-  void _triggerOnlyNewCleanup(int timestamp) {
-    unawaited(
-      RemoteSyncService.instance
-          .handleOnlyNewBackupThresholdUpdated(timestamp)
-          .catchError((e, s) {
-        _logger.warning(
-          'Background cleanup after only-new threshold update failed',
-          e,
-          s,
-        );
-      }),
-    );
   }
 
   Future<void> _ensureDefaultFolderSelection() async {

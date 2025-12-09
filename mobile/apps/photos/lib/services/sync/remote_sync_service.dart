@@ -508,56 +508,6 @@ class RemoteSyncService {
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
-  Future<void> handleOnlyNewBackupThresholdUpdated(
-    int thresholdMicros,
-  ) async {
-    _logger.internalInfo(
-      "[UPLOAD-DEBUG] Applying only-new backup threshold $thresholdMicros",
-    );
-    // Remove queued/not-started and lingering backup items that are too old
-    // (auto-sync only). Manual uploads are preserved.
-    _uploader.removeSkippedUploads(
-      predicate: (file) =>
-          file.queueSource != null &&
-          (file.creationTime ?? 0) < thresholdMicros,
-      reason: BackupTooOldForPreferenceError(),
-    );
-
-    // Clean up DB entries for auto-synced files (queueSource != null) that are
-    // too old. Manual uploads stay queued even if they target an auto-sync
-    // collection. Skip any file that is actively uploading to avoid losing its
-    // row mid-flight.
-    int cleanedEntries = 0;
-    final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
-
-    final pending = await _db.getFilesPendingForUpload();
-    for (final file in pending) {
-      if (file.localID == null || file.collectionID == null) {
-        continue;
-      }
-
-      if (uploadingLocalIDs.contains(file.localID)) {
-        continue;
-      }
-
-      final creationTime = file.creationTime ?? 0;
-      if (file.queueSource == null || creationTime >= thresholdMicros) {
-        continue;
-      }
-
-      await _db.cleanupByLocalIDAndCollection(
-        file.localID!,
-        file.collectionID!,
-      );
-      cleanedEntries++;
-    }
-    if (cleanedEntries > 0) {
-      _logger.internalInfo(
-        "[UPLOAD-DEBUG] Cleared $cleanedEntries pending auto-sync uploads older than only-new cutoff",
-      );
-    }
-  }
-
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
     /*
       For each collection, perform following action
@@ -629,7 +579,7 @@ class RemoteSyncService {
       await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
       await _db.insertMultiple(entriesToUpdate);
       _logger.info(
-        "RemovingFiles $collectionID: deleted "
+        "RemovingFiles $collectionIDs: deleted "
         "${entriesToDelete.length} and updated ${entriesToUpdate.length}",
       );
     }
@@ -673,38 +623,18 @@ class RemoteSyncService {
   }
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
-    // Note: "only backup new photos" filtering is applied at the local sync
-    // stage (see _syncDeviceCollectionFilesForUpload) where we filter by
-    // localID before setting collectionID. Files that reach here with a
-    // collectionID but no uploadedFileID either:
-    // 1. Passed the only-new filter during auto-backup sync, OR
-    // 2. Were manually added by the user to a collection
-    // In case 2, we should NOT filter them out - user explicitly chose them.
-    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
-    if (originalFiles.isEmpty) {
-      return originalFiles;
-    }
-    final bool shouldRemoveVideos =
-        !_config.shouldBackupVideos() || bgWithoutResumableUpload;
+    // rank files by time.
+    final bool shouldRemoveVideos = !_config.shouldBackupVideos();
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(EnteFile file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
 
-    DeviceFolderSelectionCache? selectionCache;
-    if (flagService.enableBackupFolderSync) {
-      selectionCache = DeviceFolderSelectionCache.instance;
-      if (!selectionCache.isInitialized) {
-        await selectionCache.init();
-      }
-    }
-    final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
-
     final List<EnteFile> filesToBeUploaded = [];
+    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
     int ignoredForUpload = 0;
     int skippedVideos = 0;
-    int deselectedFiles = 0;
-    int tooOldFiles = 0;
+
     final whitelistedIDs =
         (_prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[])
             .toSet();
@@ -719,49 +649,11 @@ class RemoteSyncService {
         ignoredForUpload++;
         continue;
       }
-      // Check if file is queued via auto-sync for filtering
-      final bool isAutoSyncFile = file.queueSource != null;
-
-      // Folder deselection check - only when enableBackupFolderSync is on
-      if (flagService.enableBackupFolderSync &&
-          file.collectionID != null &&
-          file.localID != null) {
-        final String? pathId = file.queueSource;
-        if (pathId != null && !selectionCache!.isSelected(pathId)) {
-          await FilesDB.instance.cleanupByLocalIDAndCollection(
-            file.localID!,
-            file.collectionID!,
-          );
-          deselectedFiles++;
-          continue;
-        }
-      }
-      // Only-new filter - applies to files in auto-sync collections only.
-      // Manual uploads (not in auto-sync collections) are always allowed.
-      if (isAutoSyncFile &&
-          onlyNewSinceEpoch != null &&
-          file.localID != null &&
-          file.collectionID != null) {
-        final int creationTime = file.creationTime ?? 0;
-        if (creationTime < onlyNewSinceEpoch) {
-          await FilesDB.instance.cleanupByLocalIDAndCollection(
-            file.localID!,
-            file.collectionID!,
-          );
-          tooOldFiles++;
-          continue;
-        }
-      }
       filesToBeUploaded.add(file);
     }
-    if (skippedVideos > 0 ||
-        ignoredForUpload > 0 ||
-        deselectedFiles > 0 ||
-        tooOldFiles > 0) {
-      _logger.info(
-        "Skipped $skippedVideos videos, $ignoredForUpload ignored files, "
-        "$deselectedFiles deselected-folder files, and $tooOldFiles too-old files for upload",
-      );
+    if (skippedVideos > 0 || ignoredForUpload > 0) {
+      _logger.info("Skipped $skippedVideos videos and $ignoredForUpload "
+          "ignored files for upload");
     }
     _sortByTime(filesToBeUploaded);
     _logger.info("${filesToBeUploaded.length} new files to be uploaded.");
