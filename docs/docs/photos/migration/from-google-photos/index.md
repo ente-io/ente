@@ -54,15 +54,11 @@ it with Ente.
     - **Import to existing album** → Pick one of your current albums, or
     - **Create new album(s)** → Click "Create albums", then:
         - If your folder has subfolders: Choose between "Separate albums" (each folder becomes its own album) or "Single album" (everything goes into one album)
+          ![Select ZIP workflow in the Ente desktop app](google-photos-7.webp)
         - If it's a single folder: Just name your new album
-
-
 
     **If you selected ZIP files directly**:
     - Photos are automatically organized into separate albums based on the folder structure within the ZIPs
-        | ![Select folder workflow in the Ente desktop app](google-photos-7.webp) | ![Select ZIP workflow in the Ente desktop app](google-photos-8.webp) |
-        | :---: | :---: |
-        | **Folder Selection** | **ZIP Selection** |
 
 11. Wait for the uploads to complete. Ente will parse Google's metadata and preserve everything with your photos, end-to-end encrypted!
 
