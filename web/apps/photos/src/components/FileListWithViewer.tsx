@@ -13,7 +13,7 @@ import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
 import { moveToTrash } from "ente-new/photos/services/collection";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { uploadManager } from "services/upload-manager";
 import {
@@ -66,16 +66,6 @@ export type FileListWithViewerProps = {
      * Called when the visible date at the top of the viewport changes.
      */
     onVisibleDateChange?: (date: string | undefined) => void;
-    /**
-     * When set, programmatically opens the file viewer for the file with this ID.
-     * The value should be reset to undefined after the viewer opens.
-     */
-    openFileID?: number;
-    /**
-     * Called when openFileID has been processed and the viewer has been opened.
-     * The parent should reset openFileID to undefined in this callback.
-     */
-    onOpenFileIDHandled?: () => void;
 } & Pick<
     FileListProps,
     | "mode"
@@ -151,24 +141,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     onAddFileToCollection,
     onScroll,
     onVisibleDateChange,
-    openFileID,
-    onOpenFileIDHandled,
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    // Handle programmatic file opening via openFileID prop
-    useEffect(() => {
-        if (openFileID === undefined) return;
-
-        const index = files.findIndex((f) => f.id === openFileID);
-        if (index !== -1) {
-            setCurrentIndex(index);
-            setOpenFileViewer(true);
-            onSetOpenFileViewer?.(true);
-        }
-        onOpenFileIDHandled?.();
-    }, [openFileID, files, onSetOpenFileViewer, onOpenFileIDHandled]);
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>

@@ -772,9 +772,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
-    const [markerClickFileID, setMarkerClickFileID] = useState<
-        number | undefined
-    >(undefined);
     const optimalZoom = calculateOptimalZoom();
 
     const {
@@ -945,11 +942,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 selected={emptySelected}
                 setSelected={noOpSetSelected}
                 onSetOpenFileViewer={handleSetFileViewerOpen}
-                markerClickFileID={markerClickFileID}
-                onMarkerClick={setMarkerClickFileID}
-                onMarkerClickFileIDHandled={() =>
-                    setMarkerClickFileID(undefined)
-                }
             />
         );
     }, [
@@ -985,7 +977,6 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         visiblePhotos,
         onClose,
         handleSetFileViewerOpen,
-        markerClickFileID,
     ]);
 
     return (
@@ -1061,9 +1052,6 @@ interface MapLayoutProps {
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
     onSetOpenFileViewer?: (open: boolean) => void;
-    markerClickFileID?: number;
-    onMarkerClick?: (fileID: number) => void;
-    onMarkerClickFileIDHandled?: () => void;
     selected: {
         ownCount: number;
         count: number;
@@ -1102,9 +1090,6 @@ function MapLayout({
     onSelectCollection,
     onSelectPerson,
     onSetOpenFileViewer,
-    markerClickFileID,
-    onMarkerClick,
-    onMarkerClickFileIDHandled,
     selected,
     setSelected,
 }: MapLayoutProps) {
@@ -1136,8 +1121,6 @@ function MapLayout({
                 selected={selected}
                 setSelected={setSelected}
                 onSetOpenFileViewer={onSetOpenFileViewer}
-                openFileID={markerClickFileID}
-                onOpenFileIDHandled={onMarkerClickFileIDHandled}
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
@@ -1148,7 +1131,6 @@ function MapLayout({
                     thumbByFileID={thumbByFileID}
                     createClusterCustomIcon={createClusterCustomIcon}
                     onVisiblePhotosChange={onVisiblePhotosChange}
-                    onMarkerClick={onMarkerClick}
                 />
             </Box>
         </Box>
@@ -1190,8 +1172,6 @@ interface CollectionSidebarProps {
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
     onSetOpenFileViewer?: (open: boolean) => void;
-    openFileID?: number;
-    onOpenFileIDHandled?: () => void;
     selected: {
         ownCount: number;
         count: number;
@@ -1232,8 +1212,6 @@ function CollectionSidebar({
     onSelectCollection,
     onSelectPerson,
     onSetOpenFileViewer,
-    openFileID,
-    onOpenFileIDHandled,
     selected,
     setSelected,
 }: CollectionSidebarProps) {
@@ -1352,8 +1330,6 @@ function CollectionSidebar({
                             header={coverHeader}
                             onScroll={handleScroll}
                             onVisibleDateChange={handleVisibleDateChange}
-                            openFileID={openFileID}
-                            onOpenFileIDHandled={onOpenFileIDHandled}
                         />
                     ) : (
                         <EmptyState>
@@ -1398,7 +1374,6 @@ interface MapCanvasProps {
     thumbByFileID: Map<number, string>;
     createClusterCustomIcon: (cluster: unknown) => unknown;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
-    onMarkerClick?: (fileID: number) => void;
 }
 
 const MapCanvas = React.memo(function MapCanvas({
@@ -1409,7 +1384,6 @@ const MapCanvas = React.memo(function MapCanvas({
     thumbByFileID,
     createClusterCustomIcon,
     onVisiblePhotosChange,
-    onMarkerClick,
 }: MapCanvasProps) {
     const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
         mapComponents;
@@ -1462,9 +1436,6 @@ const MapCanvas = React.memo(function MapCanvas({
                         key={`${photo.fileId}-${thumbByFileID.has(photo.fileId)}`}
                         position={[photo.lat, photo.lng]}
                         icon={markerIcons.get(photo.fileId) ?? undefined}
-                        eventHandlers={{
-                            click: () => onMarkerClick?.(photo.fileId),
-                        }}
                     />
                 ))}
             </MarkerClusterGroup>
@@ -1528,17 +1499,39 @@ const MapControls = React.memo(function MapControls({
                 </FloatingIconButton>
             </Stack>
 
-            {/* Hide Leaflet attribution watermark */}
+            {/* Hide default Leaflet attribution watermark */}
             <style>{`.leaflet-control-attribution { display: none !important; }`}</style>
 
-            {/* Attribution info button */}
+            {/* Desktop: Show attribution in bottom right corner */}
+            <DesktopAttribution>
+                <a
+                    href="https://leafletjs.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Leaflet
+                </a>
+                {" | © "}
+                <a
+                    href="https://www.openstreetmap.org/copyright"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    OpenStreetMap
+                </a>
+            </DesktopAttribution>
+
+            {/* Mobile: Attribution info button */}
             <Box
-                sx={{
+                sx={(theme) => ({
                     position: "absolute",
                     left: 12,
                     bottom: 12,
                     zIndex: 1000,
-                }}
+                    [theme.breakpoints.up("md")]: {
+                        display: "none",
+                    },
+                })}
             >
                 {showAttribution && (
                     <AttributionPopup>
@@ -1579,6 +1572,29 @@ const MapControls = React.memo(function MapControls({
         </>
     );
 });
+
+const DesktopAttribution = styled(Box)(({ theme }) => ({
+    display: "none",
+    [theme.breakpoints.up("md")]: {
+        display: "block",
+        position: "absolute",
+        right: 8,
+        bottom: 8,
+        zIndex: 1000,
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        padding: "2px 8px",
+        borderRadius: "4px",
+        fontSize: "11px",
+        color: "#333",
+        "& a": {
+            color: "#0078A8",
+            textDecoration: "none",
+            "&:hover": {
+                textDecoration: "underline",
+            },
+        },
+    },
+}));
 
 const AttributionPopup = styled(Box)(({ theme }) => ({
     position: "absolute",
