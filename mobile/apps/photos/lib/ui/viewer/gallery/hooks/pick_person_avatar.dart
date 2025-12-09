@@ -5,12 +5,10 @@ import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
@@ -51,16 +49,8 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
   });
 
   Future<FileLoadResult> loadPersonFiles() async {
-    final result = await SearchService.instance
-        .getClusterFilesForPersonID(personEntity.remoteID);
-
-    final resultFiles = <EnteFile>{};
-    for (final e in result.entries) {
-      resultFiles.addAll(e.value);
-    }
-    final List<EnteFile> sortedFiles = List<EnteFile>.from(resultFiles);
-    sortedFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
-
+    final sortedFiles =
+        await PersonService.instance.loadPersonFiles(personEntity.remoteID);
     return FileLoadResult(sortedFiles, false);
   }
 

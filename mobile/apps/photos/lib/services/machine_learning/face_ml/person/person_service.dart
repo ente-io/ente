@@ -16,6 +16,7 @@ import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -150,6 +151,25 @@ class PersonService {
       map[person.remoteID] = person;
     }
     return map;
+  }
+
+  Future<List<EnteFile>> loadPersonFiles(String personID) async {
+    final result = await SearchService.instance.getClusterFilesForPersonID(
+      personID,
+    );
+    if (result.isEmpty) {
+      logger.severe(
+        "No files found for person with id $personID, can't load files",
+      );
+      return [];
+    }
+    final Set<EnteFile> resultFiles = {};
+    for (final e in result.entries) {
+      resultFiles.addAll(e.value);
+    }
+    final List<EnteFile> sortedFiles = List<EnteFile>.from(resultFiles);
+    sortedFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+    return sortedFiles;
   }
 
   Future<void> reconcileClusters() async {
