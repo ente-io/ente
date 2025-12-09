@@ -101,7 +101,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     final bubbleTextColor =
         widget.isOwnComment ? colorScheme.backgroundBase : colorScheme.textBase;
     final bubbleBackgroundColor =
-        widget.isOwnComment ? colorScheme.primary500 : colorScheme.fillBaseGrey;
+        widget.isOwnComment ? colorScheme.primary700 : colorScheme.fillBaseGrey;
 
     return Padding(
       padding: EdgeInsets.only(
@@ -140,7 +140,6 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
                     : Alignment.centerLeft,
                 child: CommentActionsCapsule(
                   isLiked: _isLiked,
-                  likeCount: _reactions.where((r) => !r.isDeleted).length,
                   onLikeTap: _toggleLike,
                   onReplyTap: widget.onReplyTap,
                 ),
@@ -159,10 +158,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     required Color bubbleColor,
   }) {
     final bubbleBorderRadius = BorderRadius.only(
-      topLeft: const Radius.circular(18),
-      topRight: const Radius.circular(18),
-      bottomLeft: Radius.circular(widget.isOwnComment ? 18 : 10),
-      bottomRight: Radius.circular(widget.isOwnComment ? 10 : 18),
+      topLeft: Radius.circular(widget.isOwnComment ? 20 : 6),
+      topRight: Radius.circular(widget.isOwnComment ? 6 : 20),
+      bottomLeft: const Radius.circular(20),
+      bottomRight: const Radius.circular(20),
     );
 
     return Container(
@@ -183,9 +182,10 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
             ),
           Text(
             widget.comment.data,
-            style: textTheme.body.copyWith(
+            style: textTheme.small.copyWith(
               color: textColor,
-              height: 1.25,
+              height: 22 / 14,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -229,11 +229,11 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
       ),
       child: Text(
         parentText,
-        style: textTheme.small.copyWith(
+        style: textTheme.tiny.copyWith(
+          height: 1.7,
           color: widget.isOwnComment
               ? colorScheme.backgroundBase.withValues(alpha: 0.9)
               : colorScheme.textMuted,
-          height: 1.2,
         ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
@@ -267,33 +267,50 @@ class _Header extends StatelessWidget {
         alignment: Alignment.centerRight,
         child: Text(
           timestamp,
-          style: textTheme.mini.copyWith(color: colorScheme.textMuted),
+          style: textTheme.tiny.copyWith(
+            color: colorScheme.textMuted,
+            height: 14 / 10,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       );
     }
 
     final headerText = Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: [
         Text(
           name,
-          style: textTheme.small.copyWith(color: colorScheme.textBase),
+          style: textTheme.small.copyWith(
+            color: colorScheme.textMuted,
+            height: 20 / 14,
+            fontWeight: FontWeight.w500,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(width: 6),
-        Container(
-          width: 4,
-          height: 4,
-          decoration: BoxDecoration(
-            color: colorScheme.textMuted,
-            shape: BoxShape.circle,
+        const SizedBox(width: 4),
+        Transform.translate(
+          offset: const Offset(0, 1),
+          child: Text(
+            '•',
+            style: textTheme.tiny.copyWith(
+              color: colorScheme.textMuted,
+              height: 1,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Text(
           timestamp,
-          style: textTheme.mini.copyWith(color: colorScheme.textMuted),
+          style: textTheme.tiny.copyWith(
+            color: colorScheme.textMuted,
+            height: 14 / 10,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

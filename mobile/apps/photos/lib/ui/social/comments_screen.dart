@@ -6,6 +6,7 @@ import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
 import "package:uuid/uuid.dart";
@@ -187,17 +188,21 @@ class _CommentsScreenState extends State<CommentsScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        titleSpacing: 16,
+        titleSpacing: 28,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
         title: Text(
           "${_comments.length} comments",
-          style: textTheme.largeBold,
+          style: textTheme.bodyBold,
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: IconButtonWidget(
+              iconButtonType: IconButtonType.rounded,
+              icon: Icons.close_rounded,
+              onTap: () => Navigator.of(context).pop(),
+            ),
           ),
           const SizedBox(width: 4),
         ],
