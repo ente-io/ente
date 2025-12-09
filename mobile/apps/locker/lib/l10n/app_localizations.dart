@@ -2518,23 +2518,71 @@ abstract class AppLocalizations {
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
 
-  /// No description provided for @sorry.
+  /// No description provided for @favorite.
   ///
   /// In en, this message translates to:
-  /// **'Sorry'**
-  String get sorry;
+  /// **'Favorite'**
+  String get favorite;
 
-  /// No description provided for @subscribe.
+  /// No description provided for @unfavorite.
   ///
   /// In en, this message translates to:
-  /// **'Subscribe'**
-  String get subscribe;
+  /// **'Unfavorite'**
+  String get unfavorite;
 
-  /// No description provided for @subscriptionRequiredForSharing.
+  /// No description provided for @addingToFavorites.
   ///
   /// In en, this message translates to:
-  /// **'You need a paid subscription to share links'**
-  String get subscriptionRequiredForSharing;
+  /// **'Adding to Favorites...'**
+  String get addingToFavorites;
+
+  /// No description provided for @removingFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing from Favorites...'**
+  String get removingFromFavorites;
+
+  /// No description provided for @markingAsFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Marking as Favorites...'**
+  String get markingAsFavorites;
+
+  /// No description provided for @fileMarkedAsFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Item marked as favorite'**
+  String get fileMarkedAsFavorite;
+
+  /// No description provided for @fileRemovedFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Item removed from favorites'**
+  String get fileRemovedFromFavorites;
+
+  /// Success message when items are marked as favorites
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item marked as favorite} other{{count} items marked as favorites}}'**
+  String filesMarkedAsFavorites(int count);
+
+  /// No description provided for @allFilesAlreadyMarkedAsFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'All items are already marked as favorites'**
+  String get allFilesAlreadyMarkedAsFavorites;
+
+  /// Error message when marking items as favorites fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to mark items as favorites: {error}'**
+  String failedToMarkFilesAsFavorites(String error);
+
+  /// Error message when updating favorite status fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update favorite status: {error}'**
+  String failedToUpdateFavoriteStatus(String error);
 }
 
 class _AppLocalizationsDelegate

@@ -1466,12 +1466,48 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get sorry => 'Sorry';
+  String get favorite => 'Favorite';
 
   @override
-  String get subscribe => 'Subscribe';
+  String get unfavorite => 'Unfavorite';
 
   @override
-  String get subscriptionRequiredForSharing =>
-      'You need a paid subscription to share links';
+  String get addingToFavorites => 'Adding to Favorites...';
+
+  @override
+  String get removingFromFavorites => 'Removing from Favorites...';
+
+  @override
+  String get markingAsFavorites => 'Marking as Favorites...';
+
+  @override
+  String get fileMarkedAsFavorite => 'Item marked as favorite';
+
+  @override
+  String get fileRemovedFromFavorites => 'Item removed from favorites';
+
+  @override
+  String filesMarkedAsFavorites(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items marked as favorites',
+      one: '1 item marked as favorite',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get allFilesAlreadyMarkedAsFavorites =>
+      'All items are already marked as favorites';
+
+  @override
+  String failedToMarkFilesAsFavorites(String error) {
+    return 'Failed to mark items as favorites: $error';
+  }
+
+  @override
+  String failedToUpdateFavoriteStatus(String error) {
+    return 'Failed to update favorite status: $error';
+  }
 }

@@ -105,8 +105,7 @@ class FilePopupMenuWidget extends StatelessWidget {
                 color: colorScheme.textBase,
                 size: 20,
               ),
-              label:
-                  isFavorite ? context.l10n.unfavorite : context.l10n.favorite,
+              label: isFavorite ? "Unimportant" : "Important",
               isFirst: false,
               isLast: false,
             );

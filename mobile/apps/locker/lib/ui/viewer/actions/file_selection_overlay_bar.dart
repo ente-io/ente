@@ -35,26 +35,11 @@ class FileSelectionOverlayBar extends StatefulWidget {
 
 class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   static final Logger _logger = Logger("FileSelectionOverlayBar");
-  bool _isFavorite = false;
 
   @override
   void initState() {
     super.initState();
     widget.selectedFiles.addListener(_onSelectionChanged);
-    _checkIfFavorite();
-  }
-
-  Future<void> _checkIfFavorite() async {
-    if (widget.selectedFiles.files.length == 1) {
-      final file = widget.selectedFiles.files.first;
-      final isFav = await FileActions.isFavorite(file);
-
-      if (mounted) {
-        setState(() {
-          _isFavorite = isFav;
-        });
-      }
-    }
   }
 
   @override
@@ -66,7 +51,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   void _onSelectionChanged() {
     if (mounted) {
       setState(() {});
-      _checkIfFavorite();
     }
   }
 
@@ -363,25 +347,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           onTap: () => _editFile(context, file!),
         ),
       );
-      actions.add(
-        SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedStar,
-          ),
-          label: _isFavorite ? context.l10n.unfavorite : context.l10n.favorite,
-          onTap: () => _toggleFavorite(context, file!),
-        ),
-      );
-    } else {
-      actions.add(
-        SelectionActionButton(
-          hugeIcon: const HugeIcon(
-            icon: HugeIcons.strokeRoundedStar,
-          ),
-          label: context.l10n.favorite,
-          onTap: () => _markMultipleAsFavorites(context, files),
-        ),
-      );
     }
 
     actions.add(
@@ -637,31 +602,4 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
   }
 
-  Future<void> _toggleFavorite(BuildContext context, EnteFile file) async {
-    await FileActions.toggleFavorite(
-      context,
-      file,
-      onSuccess: () {
-        widget.selectedFiles.clearAll();
-        if (mounted) {
-          setState(() {
-            _isFavorite = !_isFavorite;
-          });
-        }
-      },
-    );
-  }
-
-  Future<void> _markMultipleAsFavorites(
-    BuildContext context,
-    List<EnteFile> files,
-  ) async {
-    await FileActions.markMultipleAsImportant(
-      context,
-      files,
-      onSuccess: () {
-        widget.selectedFiles.clearAll();
-      },
-    );
-  }
 }
