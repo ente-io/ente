@@ -1,6 +1,9 @@
 // Provides the FilesDB.getDeviceCollections extension.
+import "dart:async";
+
 import "package:photos/db/device_files_db.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/service_locator.dart";
 
 class DeviceFolderSelectionCache {
   DeviceFolderSelectionCache._();
@@ -11,10 +14,29 @@ class DeviceFolderSelectionCache {
   final Set<String> _selectedPathIds = <String>{};
   final Map<int, String> _collectionIdToPathId = <int, String>{};
   bool _initialized = false;
+  Completer<void>? _initCompleter;
 
   bool get isInitialized => _initialized;
 
-  Future<void> init() async {
+  Future<void> ensureInitialized() async {
+    if (!flagService.enableBackupFolderSync) return;
+    if (_initialized) return;
+    if (_initCompleter != null) {
+      return _initCompleter!.future;
+    }
+    _initCompleter = Completer<void>();
+    try {
+      await _loadFromDB();
+      _initialized = true;
+      _initCompleter!.complete();
+    } catch (e) {
+      _initCompleter!.completeError(e);
+      _initCompleter = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _loadFromDB() async {
     final deviceCollections = await FilesDB.instance.getDeviceCollections();
     _selectedPathIds.clear();
     _collectionIdToPathId.clear();
@@ -26,7 +48,6 @@ class DeviceFolderSelectionCache {
         _collectionIdToPathId[dc.collectionID!] = dc.id;
       }
     }
-    _initialized = true;
   }
 
   bool isSelected(String pathId) {
@@ -41,6 +62,7 @@ class DeviceFolderSelectionCache {
   }
 
   void update(Map<String, bool> updates) {
+    if (!flagService.enableBackupFolderSync) return;
     for (final entry in updates.entries) {
       if (entry.value) {
         _selectedPathIds.add(entry.key);
@@ -51,6 +73,7 @@ class DeviceFolderSelectionCache {
   }
 
   void setCollectionIdMapping(int collectionId, String pathId) {
+    if (!flagService.enableBackupFolderSync) return;
     _collectionIdToPathId[collectionId] = pathId;
   }
 

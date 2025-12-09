@@ -87,10 +87,6 @@ class RemoteSyncService {
   Future<void> init(SharedPreferences preferences) async {
     _prefs = preferences;
 
-    if (flagService.enableBackupFolderSync) {
-      await DeviceFolderSelectionCache.instance.init();
-    }
-
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) async {
       if (event.type == EventType.addedOrUpdated) {
         if (_existingSync == null) {
@@ -483,16 +479,11 @@ class RemoteSyncService {
   Future<void> updateDeviceFolderSyncStatus(
     Map<String, bool> syncStatusUpdate,
   ) async {
-    final cache = DeviceFolderSelectionCache.instance;
     final Set<int> oldCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     await _db.updateDevicePathSyncStatus(syncStatusUpdate);
-    if (flagService.enableBackupFolderSync) {
-      if (!cache.isInitialized) {
-        await cache.init();
-      }
-      cache.update(syncStatusUpdate);
-    }
+    await DeviceFolderSelectionCache.instance.ensureInitialized();
+    DeviceFolderSelectionCache.instance.update(syncStatusUpdate);
     final Set<int> newCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
@@ -586,10 +577,8 @@ class RemoteSyncService {
     final collection =
         await _collectionsService.getOrCreateForPath(deviceCollection.name);
     await _db.updateDeviceCollection(deviceCollection.id, collection.id);
-    if (flagService.enableBackupFolderSync) {
-      DeviceFolderSelectionCache.instance
-          .setCollectionIdMapping(collection.id, deviceCollection.id);
-    }
+    DeviceFolderSelectionCache.instance
+        .setCollectionIdMapping(collection.id, deviceCollection.id);
     return collection.id;
   }
 
