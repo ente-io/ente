@@ -50,7 +50,11 @@ import 'package:tuple/tuple.dart';
 import "package:uuid/uuid.dart";
 
 extension FileUploadItemX on FileUploadItem? {
-  bool get isManualUpload => this?.file.queueSource == null;
+  // Treat null as manual for backwards compatibility with old queued files
+  bool get isManualUpload {
+    final source = this?.file.queueSource;
+    return source == null || source == manualQueueSource;
+  }
 }
 
 class FileUploader {
