@@ -178,6 +178,10 @@ class SyncService {
   void onDeviceCollectionSet(Set<int> collectionIDs) {
     _uploader.removeFromQueueWhere(
       (file) {
+        // Skip manual uploads
+        if (file.queueSource == null || file.queueSource == manualQueueSource) {
+          return false;
+        }
         return !collectionIDs.contains(file.collectionID);
       },
       UserCancelledUploadError(),

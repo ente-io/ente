@@ -294,8 +294,9 @@ class FileUploader {
 
   void removeFromQueueWhere(
     final bool Function(EnteFile) fn,
-    final Error reason,
-  ) {
+    final Error reason, {
+    bool skip = false,
+  }) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
@@ -306,8 +307,12 @@ class FileUploader {
     });
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id)?.completer.completeError(reason);
-      _allBackups[id] = _allBackups[id]!
-          .copyWith(status: BackupItemStatus.retry, error: reason);
+      if (skip) {
+        _allBackups.remove(id);
+      } else {
+        _allBackups[id] = _allBackups[id]!
+            .copyWith(status: BackupItemStatus.retry, error: reason);
+      }
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     _logger.info(
@@ -370,7 +375,7 @@ class FileUploader {
     if (flagService.enableBackupFolderSync) {
       final queueSource = pendingEntry.file.queueSource;
       final isSelected = queueSource != null &&
-          DeviceFolderSelectionCache.instance.isSelected(queueSource);
+          await deviceFolderSelectionCache.isSelected(queueSource);
       if (!isSelected) {
         skipReason = BackupFolderDeselectedError();
       }

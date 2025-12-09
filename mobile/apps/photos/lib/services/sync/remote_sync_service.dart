@@ -5,11 +5,13 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart' show manualQueueSource;
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/diff_sync_complete_event.dart';
@@ -498,49 +500,36 @@ class RemoteSyncService {
   }
 
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
-    /*
-      For each collection, perform following action
-      1) Get List of all files not uploaded yet
-      2) Delete files who localIDs is also present in other collections.
-      3) For Remaining files, set the collectionID as -1
-     */
     _logger.info("Removing files for collections $collectionIDs");
+
     for (int collectionID in collectionIDs) {
       final List<EnteFile> pendingUploads =
           await _db.getPendingUploadForCollection(collectionID);
       if (pendingUploads.isEmpty) {
         continue;
-      } else {
-        _logger.info(
-          "RemovingFiles $collectionIDs: pendingUploads "
-          "${pendingUploads.length}",
-        );
       }
-      final Set<String> localIDsInOtherFileEntries =
-          await _db.getLocalIDsPresentInEntries(
-        pendingUploads,
-        collectionID,
-      );
-      _logger.info(
-        "RemovingFiles $collectionIDs: filesInOtherCollection "
-        "${localIDsInOtherFileEntries.length}",
-      );
-      final List<EnteFile> entriesToUpdate = [];
+
       final List<int> entriesToDelete = [];
+      final List<String> localIDsToCleanup = [];
+
       for (EnteFile pendingUpload in pendingUploads) {
-        if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
-          entriesToDelete.add(pendingUpload.generatedID!);
-        } else {
-          pendingUpload.collectionID = null;
-          pendingUpload.queueSource = null;
-          entriesToUpdate.add(pendingUpload);
+        if (pendingUpload.queueSource == null ||
+            pendingUpload.queueSource == manualQueueSource) {
+          continue;
+        }
+        entriesToDelete.add(pendingUpload.generatedID!);
+        if (pendingUpload.localID != null) {
+          localIDsToCleanup.add(pendingUpload.localID!);
         }
       }
+
       await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
-      await _db.insertMultiple(entriesToUpdate);
+      for (final localID in localIDsToCleanup) {
+        await UploadLocksDB.instance.deleteMultipartTrack(localID);
+      }
+
       _logger.info(
-        "RemovingFiles $collectionIDs: deleted "
-        "${entriesToDelete.length} and updated ${entriesToUpdate.length}",
+        "RemovingFiles $collectionID: deleted ${entriesToDelete.length}",
       );
     }
   }
