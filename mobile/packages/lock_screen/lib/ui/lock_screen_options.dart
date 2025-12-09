@@ -11,6 +11,7 @@ import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/constrained_custom_scroll_view.dart";
 import "package:ente_ui/components/dialog_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -175,8 +176,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     final colorTheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
-      body: CustomScrollView(
-        primary: false,
+      body: ConstrainedCustomScrollView(
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(

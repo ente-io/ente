@@ -151,11 +151,14 @@ class NotificationService {
     String payload = "ente://home",
     required DateTime dateTime,
     Duration? timeoutDurationAndroid,
+    bool logSchedule = true,
   }) async {
     try {
-      _logger.info(
-        "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
-      );
+      if (logSchedule) {
+        _logger.info(
+          "Scheduling notification with: $title, $message, $channelID, $channelName, $payload",
+        );
+      }
       await initTimezones();
       if (!hasGrantedPermissions()) {
         _logger.warning("Notification permissions not granted");
@@ -165,7 +168,9 @@ class NotificationService {
           return;
         }
       } else {
-        _logger.info("Notification permissions already granted");
+        if (logSchedule) {
+          _logger.info("Notification permissions already granted");
+        }
       }
       final androidSpecs = AndroidNotificationDetails(
         channelID,
@@ -175,6 +180,7 @@ class NotificationService {
         priority: Priority.high,
         category: AndroidNotificationCategory.reminder,
         showWhen: false,
+        timeoutAfter: timeoutDurationAndroid?.inMilliseconds,
       );
       final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
       final platformChannelSpecs =
@@ -197,9 +203,11 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: payload,
       );
-      _logger.info(
-        "Scheduled notification with: $title, $message, $channelID, $channelName, $payload for $dateTime",
-      );
+      if (logSchedule) {
+        _logger.info(
+          "Scheduled notification with: $title, $message, $channelID, $channelName, $payload for $dateTime",
+        );
+      }
     } catch (e, s) {
       // For now we're swallowing any exceptions here because we don't want the memories logic to get disturbed
       _logger.severe(
@@ -208,66 +216,44 @@ class NotificationService {
         s,
       );
     }
-    final androidSpecs = AndroidNotificationDetails(
-      channelID,
-      channelName,
-      channelDescription: 'ente alerts',
-      importance: Importance.max,
-      priority: Priority.high,
-      category: AndroidNotificationCategory.reminder,
-      showWhen: false,
-      timeoutAfter: timeoutDurationAndroid?.inMilliseconds,
-    );
-    final iosSpecs = DarwinNotificationDetails(threadIdentifier: channelID);
-    final platformChannelSpecs =
-        NotificationDetails(android: androidSpecs, iOS: iosSpecs);
-    final scheduledDate = tz.TZDateTime.local(
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      dateTime.minute,
-      dateTime.second,
-    );
-    await _notificationsPlugin.zonedSchedule(
-      id,
-      title,
-      message,
-      scheduledDate,
-      platformChannelSpecs,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      payload: payload,
-    );
-    _logger.info(
-      "Scheduled notification with: $title, $message, $channelID, $channelName, $payload",
-    );
   }
 
   Future<void> clearAllScheduledNotifications({
     String? containingPayload,
+    bool logLines = true,
   }) async {
     try {
-      _logger.info("Clearing all scheduled notifications");
+      if (logLines) {
+        _logger.info("Clearing all scheduled notifications");
+      }
       final pending = await _notificationsPlugin.pendingNotificationRequests();
       if (pending.isEmpty) {
-        _logger.info("No pending notifications to clear");
+        if (logLines) {
+          _logger.info("No pending notifications to clear");
+        }
         return;
       }
       for (final request in pending) {
         if (containingPayload != null &&
             !request.payload.toString().contains(containingPayload)) {
-          _logger.info(
-            "Skip clearing of notification with id: ${request.id} and payload: ${request.payload}",
-          );
+          if (logLines) {
+            _logger.info(
+              "Skip clearing of notification with id: ${request.id} and payload: ${request.payload}",
+            );
+          }
           continue;
         }
-        _logger.info(
-          "Clearing notification with id: ${request.id} and payload: ${request.payload}",
-        );
+        if (logLines) {
+          _logger.info(
+            "Clearing notification with id: ${request.id} and payload: ${request.payload}",
+          );
+        }
         await _notificationsPlugin.cancel(request.id);
-        _logger.info(
-          "Cleared notification with id: ${request.id} and payload: ${request.payload}",
-        );
+        if (logLines) {
+          _logger.info(
+            "Cleared notification with id: ${request.id} and payload: ${request.payload}",
+          );
+        }
       }
     } catch (e, s) {
       _logger.severe("Something is wrong with scheduled notifications", e, s);

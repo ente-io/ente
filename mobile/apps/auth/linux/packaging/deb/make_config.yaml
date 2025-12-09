@@ -9,7 +9,7 @@ priority: optional
 section: x11
 essential: false
 license: GPLv3
-icon: assets/icons/auth-icon.png
+icon: assets/icons/io.ente.auth.png
 installed_size: 36000
 
 metainfo: linux/packaging/enteauth.appdata.xml
@@ -32,6 +32,7 @@ categories:
   - Utility
 
 startup_notify: false
+startup_wm_class: io.ente.auth
 
 supported_mime_type:
   - x-scheme-handler/enteauth

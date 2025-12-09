@@ -1322,8 +1322,6 @@
   "appLockDescriptions": "デバイスのデフォルトのロック画面と、カスタムロック画面のどちらを利用しますか？",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "アプリのロックを有効にするには、システム設定でデバイスのパスコードまたは画面ロックを設定してください。",
   "authToViewPasskey": "パスキーを表示するには認証してください",
-  "loopVideoOn": "ビデオのループをオン",
-  "loopVideoOff": "ビデオのループをオフ",
   "localSyncErrorMessage": "ローカルの写真の同期には予想以上の時間がかかっています。問題が発生したようです。サポートチームまでご連絡ください。",
   "showPerson": "人物を表示",
   "sort": "並び替え",

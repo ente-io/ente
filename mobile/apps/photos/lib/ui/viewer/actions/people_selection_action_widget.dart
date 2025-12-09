@@ -3,6 +3,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
@@ -70,98 +71,182 @@ class _PeopleSelectionActionWidgetState
       return const SizedBox.shrink();
     }
 
-    final List<SelectionActionButton> items = [];
-    final selectedPersonIds = _getSelectedPersonIds();
-    final selectedClusterIds = _getSelectedClusterIds();
-    final onlyOnePerson =
-        selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
-    final onlyPersonSelected =
-        selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
-    final onePersonAndClusters =
-        selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
-    final anythingSelected =
-        selectedPersonIds.isNotEmpty || selectedClusterIds.isNotEmpty;
+    return FutureBuilder<Map<String, PersonEntity>>(
+      future: personEntitiesMapFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const SizedBox.shrink();
+        }
+        final personMap = snapshot.data!;
+        final List<SelectionActionButton> items = [];
+        final selectedPersonIds = _getSelectedPersonIds();
+        final selectedClusterIds = _getSelectedClusterIds();
+        final onlyOnePerson =
+            selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
+        final onlyPersonSelected =
+            selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
+        final onePersonAndClusters =
+            selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
+        final bool namedPersonsSelected = selectedPersonIds.isNotEmpty &&
+            selectedPersonIds.every(
+              (id) => (personMap[id]?.data.name ?? "").isNotEmpty,
+            );
+        final bool showEditAction = onlyOnePerson;
+        final bool showReviewAction = onlyOnePerson;
+        final bool showMergeAction = onePersonAndClusters;
+        final bool showResetAction = onlyOnePerson;
+        final bool showAutoAddAction = onlyPersonSelected;
+        final bool showPinAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => !(personMap[id]?.data.isPinned ?? false),
+            );
+        final bool showUnpinAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => personMap[id]?.data.isPinned ?? false,
+            );
+        final bool showHideFromMemoriesAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => !(personMap[id]?.data.hideFromMemories ?? false),
+            );
+        final bool showShowInMemoriesAction = onlyPersonSelected &&
+            namedPersonsSelected &&
+            selectedPersonIds.every(
+              (id) => personMap[id]?.data.hideFromMemories ?? false,
+            );
+        final bool showIgnoreAction =
+            selectedClusterIds.isNotEmpty && selectedPersonIds.isEmpty;
+        final bool hasVisibleAction = showEditAction ||
+            showReviewAction ||
+            showIgnoreAction ||
+            showMergeAction ||
+            showResetAction ||
+            showPinAction ||
+            showUnpinAction ||
+            showHideFromMemoriesAction ||
+            showShowInMemoriesAction ||
+            showAutoAddAction;
 
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).edit,
-        icon: Icons.edit_outlined,
-        onTap: _onEditPerson,
-        shouldShow: onlyOnePerson,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).review,
-        icon: Icons.search_outlined,
-        onTap: _onReviewSuggestion,
-        shouldShow: onlyOnePerson,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).ignore,
-        icon: Icons.hide_image_outlined,
-        onTap: _onIgnore,
-        shouldShow: anythingSelected,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).merge,
-        icon: Icons.merge_outlined,
-        onTap: _onMerge,
-        shouldShow: onePersonAndClusters,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).reset,
-        icon: Icons.remove_outlined,
-        onTap: _onResetPerson,
-        shouldShow: onlyOnePerson,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).autoAddToAlbum,
-        iconWidget: Image.asset(
-          "assets/auto-add-people.png",
-          width: 24,
-          height: 24,
-          color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
-        ),
-        onTap: _autoAddToAlbum,
-        shouldShow: onlyPersonSelected,
-      ),
-    );
+        if (!hasVisibleAction) {
+          return const SizedBox.shrink();
+        }
 
-    return MediaQuery(
-      data: MediaQuery.of(context).removePadding(removeBottom: true),
-      child: SafeArea(
-        child: Scrollbar(
-          radius: const Radius.circular(1),
-          thickness: 2,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(
-              decelerationRate: ScrollDecelerationRate.fast,
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).edit,
+            icon: Icons.edit_outlined,
+            onTap: _onEditPerson,
+            shouldShow: showEditAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).review,
+            icon: Icons.search_outlined,
+            onTap: _onReviewSuggestion,
+            shouldShow: showReviewAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).ignore,
+            icon: Icons.hide_image_outlined,
+            onTap: _onIgnore,
+            shouldShow: showIgnoreAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).merge,
+            icon: Icons.merge_outlined,
+            onTap: _onMerge,
+            shouldShow: showMergeAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).reset,
+            icon: Icons.remove_outlined,
+            onTap: _onResetPerson,
+            shouldShow: showResetAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).pin,
+            icon: Icons.push_pin_outlined,
+            onTap: () => _updatePinState(true),
+            shouldShow: showPinAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).unpin,
+            icon: Icons.push_pin,
+            onTap: () => _updatePinState(false),
+            shouldShow: showUnpinAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).hideFromMemories,
+            icon: Icons.visibility_off_outlined,
+            onTap: () => _updateHideFromMemoriesState(true),
+            shouldShow: showHideFromMemoriesAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: context.l10n.showInMemories,
+            icon: Icons.visibility_outlined,
+            onTap: () => _updateHideFromMemoriesState(false),
+            shouldShow: showShowInMemoriesAction,
+          ),
+        );
+        items.add(
+          SelectionActionButton(
+            labelText: AppLocalizations.of(context).autoAddToAlbum,
+            iconWidget: Image.asset(
+              "assets/auto-add-people.png",
+              width: 24,
+              height: 24,
+              color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
             ),
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 4),
-                  ...items,
-                  const SizedBox(width: 4),
-                ],
+            onTap: _autoAddToAlbum,
+            shouldShow: showAutoAddAction,
+          ),
+        );
+
+        return MediaQuery(
+          data: MediaQuery.of(context).removePadding(removeBottom: true),
+          child: SafeArea(
+            child: Scrollbar(
+              radius: const Radius.circular(1),
+              thickness: 2,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(
+                  decelerationRate: ScrollDecelerationRate.fast,
+                ),
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(width: 4),
+                      ...items,
+                      const SizedBox(width: 4),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -208,6 +293,50 @@ class _PeopleSelectionActionWidgetState
       actionType: CollectionActionType.autoAddPeople,
     );
     widget.selectedPeople.clearAll();
+  }
+
+  Future<void> _updatePinState(bool shouldPin) async {
+    final selectedPersonIds = _getSelectedPersonIds();
+    if (selectedPersonIds.isEmpty) return;
+    try {
+      final personMap = await personEntitiesMapFuture;
+      for (final personID in selectedPersonIds) {
+        final person = personMap[personID];
+        if (person == null || person.data.name.isEmpty) continue;
+        if (person.data.isPinned == shouldPin) continue;
+        final updatedPerson = person.copyWith(
+          data: person.data.copyWith(isPinned: shouldPin),
+        );
+        await PersonService.instance.updatePerson(updatedPerson);
+      }
+      Bus.instance.fire(PeopleChangedEvent());
+    } catch (e, s) {
+      _logger.severe('Failed to update pin state', e, s);
+    } finally {
+      widget.selectedPeople.clearAll();
+    }
+  }
+
+  Future<void> _updateHideFromMemoriesState(bool shouldHide) async {
+    final selectedPersonIds = _getSelectedPersonIds();
+    if (selectedPersonIds.isEmpty) return;
+    try {
+      final personMap = await personEntitiesMapFuture;
+      for (final personID in selectedPersonIds) {
+        final person = personMap[personID];
+        if (person == null || person.data.name.isEmpty) continue;
+        if (person.data.hideFromMemories == shouldHide) continue;
+        await PersonService.instance.updateAttributes(
+          person.remoteID,
+          hideFromMemories: shouldHide,
+        );
+      }
+      Bus.instance.fire(PeopleChangedEvent());
+    } catch (e, s) {
+      _logger.severe('Failed to update hide from memories state', e, s);
+    } finally {
+      widget.selectedPeople.clearAll();
+    }
   }
 
   Future<void> _onResetPerson() async {

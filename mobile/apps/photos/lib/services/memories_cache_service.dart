@@ -154,6 +154,68 @@ class MemoriesCacheService {
     unawaited(_prefs.setBool(_shouldUpdateCacheKey, true));
   }
 
+  Future<void> purgePersonFromMemoriesCache(String personID) async {
+    await _memoriesUpdateLock.synchronized(() async {
+      final removedMemoryIDs = <String>{};
+      bool cacheChanged = false;
+
+      if (_cachedMemories != null && _cachedMemories!.isNotEmpty) {
+        final filtered = <SmartMemory>[];
+        for (final memory in _cachedMemories!) {
+          if (memory is PeopleMemory && memory.personID == personID) {
+            removedMemoryIDs.add(memory.id);
+            continue;
+          }
+          filtered.add(memory);
+        }
+        if (filtered.length != _cachedMemories!.length) {
+          _cachedMemories = filtered;
+          cacheChanged = true;
+        }
+      }
+
+      final cache = await _readCacheFromDisk();
+      if (cache != null) {
+        final originalToShowLength = cache.toShowMemories.length;
+        final originalLogLength = cache.peopleShownLogs.length;
+        for (final memory in cache.toShowMemories) {
+          if (memory.type == MemoryType.people && memory.personID == personID) {
+            removedMemoryIDs.add(memory.id);
+          }
+        }
+        cache.toShowMemories.removeWhere(
+          (memory) =>
+              memory.type == MemoryType.people && memory.personID == personID,
+        );
+        cache.peopleShownLogs.removeWhere(
+          (log) => log.personID == personID,
+        );
+        final shouldWriteCache =
+            cache.toShowMemories.length != originalToShowLength ||
+                cache.peopleShownLogs.length != originalLogLength;
+        if (shouldWriteCache) {
+          await writeToJsonFile<MemoriesCache>(
+            await _getCachePath(),
+            cache,
+            MemoriesCache.encodeToJsonString,
+          );
+          cacheChanged = true;
+        }
+      }
+
+      if (removedMemoryIDs.isNotEmpty) {
+        await NotificationService.instance.clearAllScheduledNotifications(
+          containingPayload: personID,
+          logLines: false,
+        );
+      }
+
+      if (cacheChanged) {
+        Bus.instance.fire(MemoriesChangedEvent());
+      }
+    });
+  }
+
   Future<List<SmartMemory>> getMemories({bool onlyUseCache = false}) async {
     _logger.info("getMemories called");
     if (!showAnyMemories) {

@@ -357,17 +357,25 @@ func (c *UserController) GetActiveSessions(context *gin.Context, userID int64) (
 	return tokens, nil
 }
 
-func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) error {
+func (c *UserController) ensureLockerAccess(userID int64, app ente.App) error {
 	if app != ente.Locker {
 		return nil
 	}
-	const restrictionMsg = "locker is restricted to paid users currently"
-	if err := c.BillingController.HasActiveSelfOrFamilySubscription(userID, true); err != nil {
-		if !errors.Is(err, ente.ErrNoActiveSubscription) && !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
-			log.WithError(err).Error("locker access: failed to verify active subscription status")
+
+	// Check if user has completed registration (has key_attributes)
+	// This is permanent data that persists even if user logs out of all sessions
+	// Free tier: Users with existing Ente account can use Locker with limited features
+	// Paid tier: Users with paid Photos subscription get full Locker features
+	_, err := c.UserRepo.GetKeyAttributes(userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled,
+				"locker is available only to existing Ente users")
 		}
-		return stacktrace.Propagate(ente.ErrLockerRegistrationDisabled, restrictionMsg)
+		return stacktrace.Propagate(err, "failed to check user key attributes")
 	}
+
+	// Check rollout limit
 	if err := c.UserAuthRepo.EnsureLockerRolloutAccess(userID); err != nil {
 		return stacktrace.Propagate(err, "locker access: rollout check failed")
 	}
@@ -375,7 +383,7 @@ func (c *UserController) ensureLockerPaidAccess(userID int64, app ente.App) erro
 }
 
 func (c *UserController) AddTokenAndNotify(userID int64, app ente.App, token string, ip string, userAgent string) error {
-	if err := c.ensureLockerPaidAccess(userID, app); err != nil {
+	if err := c.ensureLockerAccess(userID, app); err != nil {
 		return err
 	}
 	err := c.UserAuthRepo.AddToken(userID, app, token, ip, userAgent)
@@ -501,7 +509,7 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 		if errors.Is(err, sql.ErrNoRows) {
 			// user creation is pending on key attributes set based on the password.
 			// No need to send login notification
-			if lockerErr := c.ensureLockerPaidAccess(userID, app); lockerErr != nil {
+			if lockerErr := c.ensureLockerAccess(userID, app); lockerErr != nil {
 				return ente.EmailAuthorizationResponse{}, lockerErr
 			}
 			err = c.UserAuthRepo.AddToken(userID, app, token,

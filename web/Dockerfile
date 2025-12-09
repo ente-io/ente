@@ -1,12 +1,21 @@
 # Docs - https://github.com/ente-io/ente/blob/main/web/docs/docker.md
 
-FROM node:22-alpine AS builder
+FROM node:22 AS builder
+
+# Install Rust for building ente-wasm
+RUN apt-get update && apt-get install -y curl build-essential && rm -rf /var/lib/apt/lists/* && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --target wasm32-unknown-unknown
+ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /build
-COPY . .
+COPY web/ ./web
+COPY rust/core ./rust/core
+
+WORKDIR /build/web
 
 ENV NEXT_PUBLIC_ENTE_ENDPOINT=ENTE_API_ORIGIN_PLACEHOLDER
 ENV NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=ENTE_ALBUMS_ORIGIN_PLACEHOLDER
+ENV NEXT_PUBLIC_ENTE_PHOTOS_ENDPOINT=ENTE_PHOTOS_ORIGIN_PLACEHOLDER
 
 # `yarn install` is flaky on the GitHub arm64 runners otherwise.
 RUN yarn config set network-timeout 900000 -g
@@ -23,12 +32,12 @@ FROM nginx
 
 WORKDIR /out
 
-COPY --from=builder /build/apps/photos/out /out/photos
-COPY --from=builder /build/apps/accounts/out /out/accounts
-COPY --from=builder /build/apps/auth/out /out/auth
-COPY --from=builder /build/apps/cast/out /out/cast
-COPY --from=builder /build/apps/share/out /out/share
-COPY --from=builder /build/apps/embed/out /out/embed
+COPY --from=builder /build/web/apps/photos/out /out/photos
+COPY --from=builder /build/web/apps/accounts/out /out/accounts
+COPY --from=builder /build/web/apps/auth/out /out/auth
+COPY --from=builder /build/web/apps/cast/out /out/cast
+COPY --from=builder /build/web/apps/share/out /out/share
+COPY --from=builder /build/web/apps/embed/out /out/embed
 
 COPY <<EOF /etc/nginx/conf.d/default.conf
 server {
@@ -71,12 +80,15 @@ EXPOSE 3006
 
 ENV ENTE_API_ORIGIN=http://localhost:8080
 ENV ENTE_ALBUMS_ORIGIN=https://localhost:3002
+ENV ENTE_PHOTOS_ORIGIN=https://localhost:3000
 
 COPY <<EOF /docker-entrypoint.d/90-replace-ente-env.sh
 find /out -name '*.js' |
     xargs sed -i'' "s#ENTE_API_ORIGIN_PLACEHOLDER#\$ENTE_API_ORIGIN#g"
 find /out/photos -name '*.js' |
     xargs sed -i'' "s#ENTE_ALBUMS_ORIGIN_PLACEHOLDER#\$ENTE_ALBUMS_ORIGIN#g"
+find /out/photos -name '*.js' |
+    xargs sed -i'' "s#ENTE_PHOTOS_ORIGIN_PLACEHOLDER#\$ENTE_PHOTOS_ORIGIN#g"
 EOF
 
 RUN chmod +x /docker-entrypoint.d/90-replace-ente-env.sh

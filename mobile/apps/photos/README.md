@@ -48,7 +48,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 1. Install [Flutter v3.32.8](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
-2. Install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` to generate the Rust bindings.
+2. Install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` - in both this folder, and in `mobile/packages/rust` - to generate the Rust bindings.
 
 3. Pull in all submodules with `git submodule update --init --recursive`
 

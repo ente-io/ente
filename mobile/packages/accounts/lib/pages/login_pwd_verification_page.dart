@@ -114,10 +114,9 @@ class _LoginPasswordVerificationPageState
         await _showContactSupportDialog(
           context,
           context.strings.oops,
-          'Sorry, this account doesn’t have Locker access yet.',
+          context.strings.lockerExistingUserRequired,
         );
-      } else if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         await _showContactSupportDialog(
           context,
           "We're out of beta seats for now",

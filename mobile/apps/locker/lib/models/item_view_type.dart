@@ -1,4 +1,0 @@
-enum ItemViewType {
-  listView,
-  gridView,
-}

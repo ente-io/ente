@@ -1,0 +1,6 @@
+- Pin/Unpin in People list
+- Hide people from memories
+- Fresh QR code designs for links
+- Performance improvements on Rewind
+- Setting to disable Swipe to Select
+- Bug fixes and other improvements

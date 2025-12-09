@@ -140,12 +140,13 @@ class UserService {
             context.strings.emailNotRegistered,
           ),
         );
-      }  else if (enteErrCode != null && enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
+      } else if (enteErrCode != null &&
+          enteErrCode == "LOCKER_REGISTRATION_DISABLED") {
         unawaited(
           showErrorDialog(
             context,
             context.strings.oops,
-            "Registration is temporarily paused",
+            context.strings.lockerExistingUserRequired,
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
@@ -287,7 +288,8 @@ class UserService {
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        await Navigator.of(context)
+            .pushNamedAndRemoveUntil('/', (route) => false);
       } else {
         throw Exception("Log out action failed");
       }
@@ -296,7 +298,8 @@ class UserService {
       // check if token is already invalid
       if (e is DioException && e.response?.statusCode == 401) {
         await _config.logout();
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        await Navigator.of(context)
+            .pushNamedAndRemoveUntil('/', (route) => false);
         return;
       }
       //This future is for waiting for the dialog from which logout() is called
@@ -523,7 +526,25 @@ class UserService {
     } on DioException catch (e) {
       _logger.info(e);
       await dialog.hide();
-      if (e.response != null && e.response!.statusCode == 410) {
+      final dynamic data = e.response?.data;
+      final String? enteErrCode =
+          data is Map<String, dynamic> ? data["code"] as String? : null;
+      if (enteErrCode != null &&
+          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+        await showErrorDialog(
+          context,
+          context.strings.oops,
+          context.strings.lockerExistingUserRequired,
+        );
+        return;
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+        await showErrorDialog(
+          context,
+          "We're out of beta seats for now",
+          "This preview access has reached capacity. We'll be opening it to more users soon.",
+        );
+        return;
+      } else if (e.response != null && e.response!.statusCode == 410) {
         await showErrorDialog(
           context,
           context.strings.oops,
@@ -920,7 +941,25 @@ class UserService {
     } on DioException catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      if (e.response != null && e.response!.statusCode == 404) {
+      final dynamic data = e.response?.data;
+      final String? enteErrCode =
+          data is Map<String, dynamic> ? data["code"] as String? : null;
+      if (enteErrCode != null &&
+          enteErrCode == 'LOCKER_REGISTRATION_DISABLED') {
+        // ignore: unawaited_futures
+        showErrorDialog(
+          context,
+          context.strings.oops,
+          context.strings.lockerExistingUserRequired,
+        );
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+        // ignore: unawaited_futures
+        showErrorDialog(
+          context,
+          "We're out of beta seats for now",
+          "This preview access has reached capacity. We'll be opening it to more users soon.",
+        );
+      } else if (e.response != null && e.response!.statusCode == 404) {
         showToast(context, "Session expired");
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(

@@ -64,6 +64,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   String _inputName = "";
   String? _selectedDate;
   String? _email;
+  bool _isPinned = false;
+  bool _hideFromMemories = false;
   bool userAlreadyAssigned = false;
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
@@ -78,6 +80,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     _selectedDate = widget.person?.data.birthDate;
     _email = widget.person?.data.email;
     person = widget.person;
+    _isPinned = widget.person?.data.isPinned ?? false;
+    _hideFromMemories = widget.person?.data.hideFromMemories ?? false;
   }
 
   @override
@@ -297,7 +301,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           curve: Curves.easeInOutQuad,
                           child: _EmailSection(_email, person?.remoteID),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
                         ButtonWidget(
                           buttonType: ButtonType.primary,
                           labelText: context.l10n.save,
@@ -570,6 +574,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       final personEntity = await PersonService.instance.addPerson(
         name: text,
         clusterID: clusterID,
+        isPinned: _isPinned,
+        hideFromMemories: _hideFromMemories,
         birthdate: birthdate,
         email: email,
       );
@@ -599,8 +605,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   bool get changed => widget.isEditing
       ? (_inputName.trim() != person!.data.name ||
-              _selectedDate != person!.data.birthDate) ||
-          _email != person!.data.email
+          _selectedDate != person!.data.birthDate ||
+          _email != person!.data.email ||
+          _isPinned != person!.data.isPinned ||
+          _hideFromMemories != person!.data.hideFromMemories)
       : _inputName.trim().isNotEmpty;
 
   Future<PersonEntity?> updatePerson(BuildContext context) async {
@@ -618,6 +626,8 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         person!.remoteID,
         name: name,
         birthDate: birthDate,
+        isPinned: _isPinned,
+        hideFromMemories: _hideFromMemories,
         email: _email,
       );
 

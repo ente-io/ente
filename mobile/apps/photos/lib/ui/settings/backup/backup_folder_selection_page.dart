@@ -4,19 +4,24 @@ import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/settings/backup/backup_settings_screen.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
   final bool isFirstBackup;
@@ -39,14 +44,20 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Set<String> _selectedDevicePathIDs = <String>{};
   List<DeviceCollection>? _deviceCollections;
   Map<String, int>? _pathIDToItemCount;
+  late final bool _treatAsOnboarding;
 
   @override
   void initState() {
+    _treatAsOnboarding = widget.isOnboarding ||
+        backupPreferenceService.hasSkippedOnboardingPermission;
     FilesDB.instance
         .getDeviceCollections(includeCoverThumbnail: true)
         .then((files) async {
       _pathIDToItemCount =
           await FilesDB.instance.getDevicePathIDToImportedFileCount();
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _deviceCollections = files;
         _deviceCollections!.sort((first, second) {
@@ -58,7 +69,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             _selectedDevicePathIDs.add(file.id);
           }
         }
-        if (widget.isOnboarding) {
+        if (_treatAsOnboarding) {
           _selectedDevicePathIDs.addAll(_allDevicePathIDs);
         }
         _selectedDevicePathIDs
@@ -71,7 +82,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.isOnboarding
+      appBar: _treatAsOnboarding
           ? null
           : AppBar(
               elevation: 0,
@@ -169,7 +180,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     padding: const EdgeInsets.only(left: 20, right: 20),
                     child: OutlinedButton(
                       onPressed:
-                          widget.isOnboarding && _selectedDevicePathIDs.isEmpty
+                          _treatAsOnboarding && _selectedDevicePathIDs.isEmpty
                               ? null
                               : () async {
                                   await updateFolderSettings();
@@ -181,15 +192,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       ),
                     ),
                   ),
-                  widget.isOnboarding
+                  _treatAsOnboarding
                       ? const SizedBox(height: 20)
                       : const SizedBox.shrink(),
-                  widget.isOnboarding
+                  _treatAsOnboarding
                       ? GestureDetector(
                           key: const ValueKey("skipBackupButton"),
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(false);
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 8),
@@ -225,20 +236,60 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       for (String pathID in _allDevicePathIDs) {
         syncStatus[pathID] = _selectedDevicePathIDs.contains(pathID);
       }
-      await Configuration.instance.setHasSelectedAnyBackupFolder(
+      await backupPreferenceService.setHasSelectedAnyBackupFolder(
         _selectedDevicePathIDs.isNotEmpty,
       );
-      await Configuration.instance.setSelectAllFoldersForBackup(
+      await backupPreferenceService.setSelectAllFoldersForBackup(
         _allDevicePathIDs.length == _selectedDevicePathIDs.length,
       );
       await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
       await dialog.hide();
-      Navigator.of(context).pop();
+      await backupPreferenceService.setHasManualFolderSelection(true);
+      if (backupPreferenceService.hasSkippedOnboardingPermission) {
+        await backupPreferenceService.setOnboardingPermissionSkipped(false);
+      }
+
+      final onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;
+      if (onlyNewSinceEpoch != null) {
+        final shouldContinue =
+            await _showOnlyNewBackupWarning(onlyNewSinceEpoch);
+
+        if (!shouldContinue) return;
+      }
+
+      if (context.mounted) {
+        Navigator.of(context).pop(true);
+      }
     } catch (e, s) {
       _logger.severe("Failed to updated backup folder", e, s);
       await dialog.hide();
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<bool> _showOnlyNewBackupWarning(int onlyNewSinceEpoch) async {
+    final date = DateTime.fromMicrosecondsSinceEpoch(onlyNewSinceEpoch);
+    final locale = Localizations.localeOf(context).languageCode;
+    final formattedDate = DateFormat.yMMMd(locale).format(date);
+
+    final result = await showChoiceDialog(
+      context,
+      title: AppLocalizations.of(context).warning,
+      body:
+          "You are currently backing up photos from $formattedDate. Please update your settings to backup all photos.",
+      firstButtonLabel: "Update settings",
+      firstButtonOnTap: () async {
+        await routeToPage(
+          context,
+          const BackupSettingsScreen(),
+        );
+      },
+      firstButtonType: ButtonType.neutral,
+      secondButtonLabel: AppLocalizations.of(context).ok,
+      secondButtonAction: ButtonAction.second,
+    );
+
+    return result?.action == ButtonAction.second;
   }
 
   Widget _getFolders() {

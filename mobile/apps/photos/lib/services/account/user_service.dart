@@ -29,6 +29,7 @@ import 'package:photos/models/api/user/set_keys_request.dart';
 import 'package:photos/models/api/user/set_recovery_key_request.dart';
 import "package:photos/models/api/user/srp.dart";
 import 'package:photos/models/user_details.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/account/login_page.dart';
@@ -417,6 +418,7 @@ class UserService {
           throw Exception("unexpected response during passkey verification");
         }
         await dialog.hide();
+        await flagService.tryRefreshFlags();
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(AccountConfiguredEvent());
       }
@@ -803,6 +805,7 @@ class UserService {
             Configuration.instance.getKeyAttributes()!,
             keyEncryptionKey: keyEncryptionKey,
           );
+          await flagService.tryRefreshFlags();
           Configuration.instance.resetVolatilePassword();
           page = const HomeWidget();
         } else {

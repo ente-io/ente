@@ -11,6 +11,7 @@ import "package:fast_base58/fast_base58.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import 'package:locker/events/collections_updated_event.dart';
+import 'package:locker/events/user_details_refresh_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
@@ -261,7 +262,9 @@ class CollectionService {
   }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
-      _logger.info("Added file ${file.title} to collection ${collection.id}");
+      _logger.info(
+        "Added file (ID: ${file.uploadedFileID}) to collection ${collection.id}",
+      );
 
       // Update local database immediately
       await _db.addFilesToCollection(collection, [file]);
@@ -294,6 +297,7 @@ class CollectionService {
       if (runSync) {
         await TrashService.instance.syncTrash();
         await sync();
+        Bus.instance.fire(UserDetailsRefreshEvent());
       }
     } catch (e) {
       _logger.severe("Failed to remove file from collections: $e");
@@ -307,7 +311,7 @@ class CollectionService {
         collection,
         newName,
       );
-      _logger.info("Renamed collection ${collection.id} to $newName");
+      _logger.info("Renamed collection ${collection.id}");
       // Let sync update the local state
       await sync();
     } catch (e, s) {
@@ -422,7 +426,7 @@ class CollectionService {
 
       // Add to target collection
       await _db.addFilesToCollection(to, files);
-      
+
       // Let sync update the local state to ensure consistency
       if (runSync) {
         await sync();
@@ -473,7 +477,11 @@ class CollectionService {
         for (final file in files) {
           final fileCollections = await getCollectionsForFile(file);
           for (final fileCollection in fileCollections) {
-            await trashFile(file, fileCollection, runSync: false);
+            await trashFile(
+              file,
+              fileCollection,
+              runSync: false,
+            );
           }
         }
       }
@@ -482,6 +490,7 @@ class CollectionService {
 
       await sync();
       await TrashService.instance.syncTrash();
+      Bus.instance.fire(UserDetailsRefreshEvent());
     } catch (e) {
       _logger.severe("Failed to trash collection with files: $e");
       rethrow;
@@ -739,7 +748,7 @@ class CollectionService {
 
       final random = Random();
       final randomName = availableNames[random.nextInt(availableNames.length)];
-      _logger.info("Selected random unused collection name: $randomName");
+      _logger.info("Selected random unused collection name");
       return randomName;
     } catch (e) {
       _logger.severe("Failed to get random unused collection name: $e");
@@ -773,7 +782,9 @@ class CollectionService {
         collectionKey,
       );
 
-      _logger.info("Successfully decrypted file key for file ${file.title}");
+      _logger.info(
+        "Successfully decrypted file key for file (ID: ${file.uploadedFileID})",
+      );
       return fileKey;
     } catch (e) {
       _logger.severe("Failed to get file key: $e");

@@ -1,69 +1,72 @@
-import 'dart:async';
+import "dart:async";
 import "dart:convert";
 import "dart:io";
 
 import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
+import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
+import "package:flutter/services.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
-import 'package:logging/logging.dart';
+import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:move_to_background/move_to_background.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/account_configured_event.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/ente_theme_data.dart";
+import "package:photos/events/account_configured_event.dart";
+import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
-import 'package:photos/events/permission_granted_event.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/events/tab_changed_event.dart';
-import 'package:photos/events/trigger_logout_event.dart';
-import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/events/permission_granted_event.dart";
+import "package:photos/events/subscription_purchased_event.dart";
+import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/events/tab_changed_event.dart";
+import "package:photos/events/trigger_logout_event.dart";
+import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
-import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_albums.dart";
-import 'package:photos/models/selected_files.dart';
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/account/user_service.dart';
+import "package:photos/services/account/user_service.dart";
 import "package:photos/services/album_home_widget_service.dart";
-import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/collections_service.dart';
+import "package:photos/services/app_lifecycle_service.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
-import 'package:photos/services/sync/local_sync_service.dart';
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
-import 'package:photos/states/user_details_state.dart';
-import 'package:photos/theme/colors.dart';
+import "package:photos/states/user_details_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/activity/ritual_badge_popup.dart";
+import "package:photos/ui/activity/ritual_camera_page.dart";
+import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import 'package:photos/ui/extents_page_view.dart';
-import 'package:photos/ui/home/grant_permissions_widget.dart';
-import 'package:photos/ui/home/header_widget.dart';
-import 'package:photos/ui/home/home_bottom_nav_bar.dart';
-import 'package:photos/ui/home/home_gallery_widget.dart';
-import 'package:photos/ui/home/landing_page_widget.dart';
+import "package:photos/ui/extents_page_view.dart";
+import "package:photos/ui/home/grant_permissions_widget.dart";
+import "package:photos/ui/home/header_widget.dart";
+import "package:photos/ui/home/home_bottom_nav_bar.dart";
+import "package:photos/ui/home/home_gallery_widget.dart";
+import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
-import 'package:photos/ui/home/start_backup_hook_widget.dart';
-import 'package:photos/ui/notification/update/change_log_page.dart';
+import "package:photos/ui/home/start_backup_hook_widget.dart";
+import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
@@ -73,11 +76,11 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
-import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
-import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
@@ -108,9 +111,14 @@ class _HomeWidgetState extends State<HomeWidget> {
   List<SharedMediaFile>? _sharedFiles;
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
+  bool _personSyncTriggered = false;
+  bool _collectionsSyncTriggered = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
+  RitualBadgeUnlock? _queuedRitualBadge;
+  bool _showingRitualBadge = false;
+  late final VoidCallback _activityStateListener;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -132,13 +140,21 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
+    _activityStateListener = () =>
+        _maybeShowRitualBadge(activityService.stateNotifier.value.pendingBadge);
+    activityService.stateNotifier.addListener(_activityStateListener);
 
-    if (LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
     }
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
+      if (_selectedTabIndex == 0 && _queuedRitualBadge != null) {
+        final queued = _queuedRitualBadge;
+        _queuedRitualBadge = null;
+        _maybeShowRitualBadge(queued);
+      }
 
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
@@ -243,10 +259,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     });
 
-    // MediaExtension plugin handles the deeplink for android
-    // [todo 4/Feb/2025]We need to validate if calling this method doesn't break
-    // android deep linking
-    Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
+    // Initialize deep link subscription for public albums on both iOS and Android
+    _initDeepLinkSubscriptionForPublicAlbums();
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
@@ -285,6 +299,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         .listen((inProgress) {
       _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowRitualBadge(
+        activityService.stateNotifier.value.pendingBadge,
+      );
+    });
   }
 
   Future<void> syncWidget() async {
@@ -298,6 +318,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final Map<Uri, (bool, int)> _linkedPublicAlbums = {};
   Future<void> _handlePublicAlbumLink(Uri uri, String via) async {
+    if (!mounted) {
+      _logger.warning("Cannot handle public album link - widget not mounted");
+      return;
+    }
     try {
       _logger.info("Handling public album link: via $via");
       final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -330,6 +354,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         return;
       }
+
+      // Check for action=join parameter to show join dialog
+      final shouldShowJoinDialog = uri.queryParameters['action'] == 'join' &&
+          Configuration.instance.isLoggedIn();
 
       // Check for trip layout and show in webview
       if (collection.pubMagicMetadata.layout == "trip") {
@@ -396,11 +424,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                     await routeToPage(
                       context,
                       SharedPublicCollectionPage(
-                        files: sharedFiles,
                         CollectionWithThumbnail(
                           collection,
                           null,
                         ),
+                        files: sharedFiles,
+                        shouldShowJoinDialog: shouldShowJoinDialog,
                       ),
                     );
                   }
@@ -423,16 +452,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         await dialog.hide();
 
-        routeToPage(
+        await routeToPage(
           context,
           SharedPublicCollectionPage(
-            files: sharedFiles,
             CollectionWithThumbnail(
               collection,
               null,
             ),
+            files: sharedFiles,
+            shouldShowJoinDialog: shouldShowJoinDialog,
           ),
-        ).ignore();
+        );
         if (sharedFiles.length == 1) {
           await routeToPage(
             context,
@@ -502,11 +532,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    if (Platform.isIOS) {
-      _publicAlbumLinkSubscription.cancel();
-    }
+    _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
+    activityService.stateNotifier.removeListener(_activityStateListener);
     super.dispose();
   }
 
@@ -518,7 +547,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         if (value.isEmpty) {
           return;
         }
-        if (value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (_isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getMediaStream");
           return;
@@ -585,7 +615,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
-        if (value.isNotEmpty && value[0].path.contains("albums.ente.io")) {
+        // Check if this is a public album link
+        if (value.isNotEmpty && _isPublicAlbumUrl(value[0].path)) {
           final uri = Uri.parse(value[0].path);
           _handlePublicAlbumLink(uri, "sharedIntent.getInitialMedia");
           return;
@@ -616,14 +647,20 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
     final appLinks = AppLinks();
+
+    // Handle public album deep links:
+    // - iOS: Universal Links (https://albums.ente.io/...)
+    // - Android: Custom scheme (ente://albums.ente.io/...) from web join feature
     try {
       final initialUri = await appLinks.getInitialLink();
       if (initialUri != null) {
-        if (initialUri.toString().contains("albums.ente.io")) {
+        if (_isPublicAlbumUrl(initialUri.toString()) &&
+            (Platform.isIOS ||
+                (Platform.isAndroid && initialUri.scheme == "ente"))) {
           await _handlePublicAlbumLink(initialUri, "appLinks.getInitialLink");
         } else {
           _logger.info(
-            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+            "Ignoring deep link: $initialUri",
           );
         }
       } else {
@@ -638,11 +675,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription = appLinks.uriLinkStream.listen(
       (Uri? uri) {
         if (uri != null) {
-          if (uri.toString().contains("albums.ente.io")) {
+          if (_isPublicAlbumUrl(uri.toString()) &&
+              (Platform.isIOS ||
+                  (Platform.isAndroid && uri.scheme == "ente"))) {
             _handlePublicAlbumLink(uri, "appLinks.uriLinkStream");
           } else {
             _logger.info(
-              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+              "Ignoring deep link: $uri",
             );
           }
         } else {
@@ -655,11 +694,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  bool _isPublicAlbumUrl(String url) {
+    return url.contains("albums.ente.io");
+  }
+
   @override
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
-    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
+    final enableDrawer = _shouldEnableDrawer();
     final action = AppLifecycleService.instance.mediaExtensionAction.action;
     return UserDetailsStateWidget(
       child: PopScope(
@@ -732,13 +775,15 @@ class _HomeWidgetState extends State<HomeWidget> {
       _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
-    if (!permissionService.hasGrantedPermissions()) {
-      entityService.syncEntities().then((_) {
-        PersonService.instance.refreshPersonCache();
-      });
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      _ensurePersonSync();
+      _ensureCollectionsSync();
+    }
+    if (_shouldShowPermissionWidget()) {
+      _ensurePersonSync();
       return const GrantPermissionsWidget();
     }
-    if (!LocalSyncService.instance.hasCompletedFirstImport()) {
+    if (_shouldShowLoadingWidget()) {
       return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null &&
@@ -758,10 +803,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       });
     }
 
-    _showShowBackupHook =
-        !Configuration.instance.hasSelectedAnyBackupFolder() &&
-            !permissionService.hasGrantedLimitedPermissions() &&
-            CollectionsService.instance.getActiveCollections().isEmpty;
+    _showShowBackupHook = _shouldShowBackupHook();
 
     return Stack(
       children: [
@@ -867,6 +909,39 @@ class _HomeWidgetState extends State<HomeWidget> {
         : null;
   }
 
+  void _maybeShowRitualBadge(RitualBadgeUnlock? badge) {
+    if (!flagService.ritualsFlag) return;
+    if (badge == null) return;
+    if (_showingRitualBadge) {
+      _queuedRitualBadge ??= badge;
+      return;
+    }
+    if (_selectedTabIndex != 0) {
+      _queuedRitualBadge = badge;
+      return;
+    }
+    final badgeToShow = badge;
+    _queuedRitualBadge = null;
+    _showingRitualBadge = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await activityService.markRitualBadgeSeen(
+          badgeToShow.ritual.id,
+          badgeToShow.days,
+        );
+        if (!mounted) return;
+        await showRitualBadgePopup(
+          context,
+          badge: badgeToShow,
+        );
+      } catch (e, s) {
+        _logger.severe("Failed to show ritual badge popup", e, s);
+      } finally {
+        _showingRitualBadge = false;
+      }
+    });
+  }
+
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
     final appLinks = AppLinks();
@@ -944,6 +1019,25 @@ class _HomeWidgetState extends State<HomeWidget> {
     final String? payload = notificationResponse.payload;
     if (payload != null) {
       debugPrint('notification payload: $payload');
+      final uri = Uri.tryParse(payload);
+      if (uri != null &&
+          (uri.host.toLowerCase() == "ritual" ||
+              uri.host.toLowerCase() == "camera")) {
+        final ritualId = uri.queryParameters["ritualId"] ?? "";
+        final albumIdRaw = uri.queryParameters["albumId"];
+        final int? albumId = albumIdRaw != null && albumIdRaw.isNotEmpty
+            ? int.tryParse(albumIdRaw)
+            : null;
+        // ignore: unawaited_futures
+        routeToPage(
+          context,
+          RitualCameraPage(
+            ritualId: ritualId,
+            albumId: albumId,
+          ),
+        );
+        return;
+      }
       if (payload.toLowerCase().contains("onthisday")) {
         _logger.info("On this day notification received");
         // ignore: unawaited_futures
@@ -974,5 +1068,69 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       }
     }
+  }
+
+  bool _shouldEnableDrawer() {
+    final isFirstImportCompleted =
+        LocalSyncService.instance.hasCompletedFirstImportOrBypassed();
+    return isFirstImportCompleted;
+  }
+
+  bool _shouldShowPermissionWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      return !permissionService.hasGrantedPermissions() &&
+          !backupPreferenceService.hasSkippedOnboardingPermission;
+    } else {
+      return !permissionService.hasGrantedPermissions();
+    }
+  }
+
+  bool _shouldShowLoadingWidget() {
+    if (flagService.enableOnlyBackupFuturePhotos) {
+      if (!permissionService.hasGrantedPermissions()) {
+        return false;
+      }
+      return !backupPreferenceService.isOnlyNewBackupEnabled &&
+          !LocalSyncService.instance.hasCompletedFirstImport();
+    } else {
+      return !LocalSyncService.instance.hasCompletedFirstImport();
+    }
+  }
+
+  bool _shouldShowBackupHook() {
+    final bool noFoldersSelected =
+        !backupPreferenceService.hasSelectedAnyBackupFolder;
+    final bool hasLimitedPermission =
+        permissionService.hasGrantedLimitedPermissions();
+    final bool hasActiveCollections =
+        CollectionsService.instance.getActiveCollections().isNotEmpty;
+
+    return !hasActiveCollections && noFoldersSelected && !hasLimitedPermission;
+  }
+
+  void _ensurePersonSync() {
+    if (_personSyncTriggered) {
+      return;
+    }
+    _personSyncTriggered = true;
+    entityService.syncEntities().then((_) {
+      PersonService.instance.refreshPersonCache();
+    });
+  }
+
+  void _ensureCollectionsSync() {
+    if (_collectionsSyncTriggered) {
+      return;
+    }
+    if (!(backupPreferenceService.hasSkippedOnboardingPermission ||
+        backupPreferenceService.isOnlyNewBackupEnabled)) {
+      return;
+    }
+    _collectionsSyncTriggered = true;
+    CollectionsService.instance.sync().then((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 }

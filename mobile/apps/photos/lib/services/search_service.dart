@@ -797,7 +797,18 @@ class SearchService {
                 personIdToFiles[a]!.length,
               ),
         );
-      for (final personID in sortedPersonIds) {
+      final pinnedPersonIds = <String>[];
+      final unpinnedPersonIds = <String>[];
+      for (final personId in sortedPersonIds) {
+        final person = personIdToPerson[personId];
+        if (person != null && person.data.isPinned) {
+          pinnedPersonIds.add(personId);
+        } else {
+          unpinnedPersonIds.add(personId);
+        }
+      }
+      final orderedPersonIds = [...pinnedPersonIds, ...unpinnedPersonIds];
+      for (final personID in orderedPersonIds) {
         final files = personIdToFiles[personID]!;
         final PersonEntity p = personIdToPerson[personID]!;
         if (p.data.isIgnored) continue;
@@ -810,6 +821,7 @@ class SearchService {
               kPersonWidgetKey: p.data.avatarFaceID ?? p.hashCode.toString(),
               kPersonParamID: personID,
               kFileID: files.first.uploadedFileID,
+              kPersonPinned: p.data.isPinned,
             },
             onResultTap: (ctx) {
               routeToPage(
@@ -825,6 +837,7 @@ class SearchService {
                       kPersonWidgetKey:
                           p.data.avatarFaceID ?? p.hashCode.toString(),
                       kPersonParamID: personID,
+                      kPersonPinned: p.data.isPinned,
                       kFileID: files.first.uploadedFileID,
                     },
                     hierarchicalSearchFilter: FaceFilter(

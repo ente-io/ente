@@ -15,6 +15,7 @@ class Configuration extends BaseConfiguration {
   static const authSecretKeyKey = "auth_secret_key";
   static const offlineAuthSecretKey = "offline_auth_secret_key";
   static const hasOptedForOfflineModeKey = "has_opted_for_offline_mode";
+  static const autoBackupPasswordKey = "autoBackupPassword";
 
   late SharedPreferences _preferences;
   String? _authSecretKey;
@@ -56,7 +57,7 @@ class Configuration extends BaseConfiguration {
         BaseConfiguration.secretKeyKey,
         authSecretKeyKey,
         // Note: offlineAuthSecretKey is intentionally not included here
-        // as it persists across logouts
+        // as it persists across logouts for offline mode
       ];
 
   @override
@@ -104,5 +105,18 @@ class Configuration extends BaseConfiguration {
       );
     }
     await _preferences.setBool(hasOptedForOfflineModeKey, true);
+  }
+
+  // Backup password methods
+  Future<String?> getBackupPassword() async {
+    return _secureStorage.read(key: autoBackupPasswordKey);
+  }
+
+  Future<void> setBackupPassword(String password) async {
+    await _secureStorage.write(key: autoBackupPasswordKey, value: password);
+  }
+
+  Future<void> clearBackupPassword() async {
+    await _secureStorage.delete(key: autoBackupPasswordKey);
   }
 }

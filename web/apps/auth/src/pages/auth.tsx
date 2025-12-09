@@ -10,6 +10,7 @@ import {
     Typography,
     useTheme,
 } from "@mui/material";
+import { useColorScheme } from "@mui/material/styles";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
 import { stashRedirect } from "ente-accounts/services/redirect";
 import { EnteLogo } from "ente-base/components/EnteLogo";
@@ -256,6 +257,9 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({
     otp,
     nextOTP,
 }) => {
+    const { systemMode } = useColorScheme();
+    const isDarkMode = systemMode === "dark";
+
     return (
         <Box
             sx={(theme) => ({
@@ -277,7 +281,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({
                             right: "-41px",
                             width: "107px",
                             height: "26px",
-                            backgroundColor: "#390C4F",
+                            bgcolor: isDarkMode ? "#390C4F" : "#f6f6f6",
                             transform: "rotate(43deg)",
                             zIndex: 0,
                         }}

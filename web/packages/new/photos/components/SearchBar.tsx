@@ -3,6 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
     Box,
     Divider,
@@ -38,6 +39,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
+import { sidebarSearchOptionsForString } from "../services/search/sidebar-search-registry";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import {
@@ -162,6 +164,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const [value, setValue] = useState<SearchOption | null>(null);
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
 
     const theme = useTheme();
 
@@ -186,7 +189,11 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         const type = value?.suggestion.type;
         // Collection and people suggestions are handled differently - our
         // caller will switch to the corresponding view, dismissing search.
-        if (type == "collection" || type == "person") {
+        if (
+            type == "collection" ||
+            type == "person" ||
+            type == "sidebarAction"
+        ) {
             setValue(null);
             setInputValue("");
         } else {
@@ -248,6 +255,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     };
 
     const handleFocus = () => {
+        setIsFocused(true);
         // A workaround to show the suggestions again for the current non-empty
         // search string if the user focuses back on the input field after
         // moving focus elsewhere.
@@ -257,6 +265,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 prevInputValue: "",
             });
         }
+    };
+
+    const handleBlur = () => {
+        setIsFocused(false);
     };
 
     return (
@@ -272,7 +284,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onInputChange={handleInputChange}
                 isClearable
                 escapeClearsValue
+                menuIsOpen={isFocused && inputValue !== ""}
                 onFocus={handleFocus}
+                onBlur={handleBlur}
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
@@ -304,7 +318,16 @@ const SearchInputWrapper = styled("div")`
     margin: auto;
 `;
 
-const loadOptions = pDebounce(searchOptionsForString, 250);
+const loadOptions = pDebounce(async (input: string) => {
+    const [sidebarActions, photoOptions] = await Promise.all([
+        sidebarSearchOptionsForString(input),
+        searchOptionsForString(input),
+    ]);
+
+    return [...photoOptions, ...sidebarActions];
+}, 250);
+
+// const loadOptions = pDebounce(searchOptionsForString, 250);
 
 const createSelectStyles = (
     theme: Theme,
@@ -358,13 +381,13 @@ const createSelectStyles = (
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
     // The shortcut UI element will be shown once the search bar supports searching the settings as well.
-    // const isMac =
-    //     typeof navigator !== "undefined" &&
-    //     navigator.userAgent.toUpperCase().includes("MAC");
-    // const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
+    const isMac =
+        typeof navigator !== "undefined" &&
+        navigator.userAgent.toUpperCase().includes("MAC");
+    const shortcutKey = isMac ? "⌘ K" : "Ctrl + K";
 
-    // const hasValue =
-    //     props.getValue().length > 0 || props.selectProps.inputValue;
+    const hasValue =
+        props.getValue().length > 0 || props.selectProps.inputValue;
 
     return (
         <SelectComponents.Control {...props}>
@@ -388,7 +411,7 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
                     {iconForOption(props.getValue()[0])}
                 </Box>
                 {children}
-                {/* {!hasValue && (
+                {!hasValue && (
                     <Box
                         sx={{
                             display: ["none", "none", "inline-flex"],
@@ -407,7 +430,7 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => {
                     >
                         {shortcutKey}
                     </Box>
-                )} */}
+                )}
             </Stack>
         </SelectComponents.Control>
     );
@@ -419,6 +442,8 @@ const iconForOption = (option: SearchOption | undefined) => {
             return <ImageIcon />;
         case "date":
             return <CalendarIcon />;
+        case "sidebarAction":
+            return <SettingsIcon />;
         case "location":
         case "city":
             return <LocationIcon />;
@@ -549,20 +574,16 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     </SelectComponents.Option>
 );
 
-const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
-        <Typography variant="mini" sx={{ color: "text.muted" }}>
-            {labelForOption(option)}
-        </Typography>
-        <Stack
-            direction="row"
-            sx={{
-                gap: 1,
-                alignItems: "center",
-                justifyContent: "space-between",
-            }}
-        >
-            <Box>
+const OptionContents = ({ data: option }: { data: SearchOption }) => {
+    if (option.suggestion.type === "sidebarAction") {
+        return (
+            <Stack
+                className="option-contents"
+                sx={{ gap: "4px", px: 2, py: 1 }}
+            >
+                <Typography variant="mini" sx={{ color: "text.muted" }}>
+                    {labelForOption(option)}
+                </Typography>
                 <Typography
                     sx={{
                         color: "text.base",
@@ -573,22 +594,52 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                     {option.suggestion.label}
                 </Typography>
                 <Typography sx={{ color: "text.muted" }}>
-                    {t("photos_count", { count: option.fileCount })}
+                    {option.suggestion.path.join(" > ")}
                 </Typography>
-            </Box>
+            </Stack>
+        );
+    }
+    return (
+        <Stack className="option-contents" sx={{ gap: "4px", px: 2, py: 1 }}>
+            <Typography variant="mini" sx={{ color: "text.muted" }}>
+                {labelForOption(option)}
+            </Typography>
+            <Stack
+                direction="row"
+                sx={{
+                    gap: 1,
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                }}
+            >
+                <Box>
+                    <Typography
+                        sx={{
+                            color: "text.base",
+                            fontWeight: "medium",
+                            wordBreak: "break-word",
+                        }}
+                    >
+                        {option.suggestion.label}
+                    </Typography>
+                    <Typography sx={{ color: "text.muted" }}>
+                        {t("photos_count", { count: option.fileCount })}
+                    </Typography>
+                </Box>
 
-            <Stack direction="row" sx={{ gap: 1 }}>
-                {option.previewFiles.map((file) => (
-                    <ItemCard
-                        key={file.id}
-                        coverFile={file}
-                        TileComponent={PreviewItemTile}
-                    />
-                ))}
+                <Stack direction="row" sx={{ gap: 1 }}>
+                    {option.previewFiles.map((file) => (
+                        <ItemCard
+                            key={file.id}
+                            coverFile={file}
+                            TileComponent={PreviewItemTile}
+                        />
+                    ))}
+                </Stack>
             </Stack>
         </Stack>
-    </Stack>
-);
+    );
+};
 
 const labelForOption = (option: SearchOption) => {
     switch (option.suggestion.type) {
@@ -618,5 +669,8 @@ const labelForOption = (option: SearchOption) => {
 
         case "person":
             return t("people");
+
+        case "sidebarAction":
+            return t("settings");
     }
 };

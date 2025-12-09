@@ -5,7 +5,7 @@ maintainer:
   email: auth@ente.io
 licenses:
   - GPLv3
-icon: assets/icons/auth-icon.png
+icon: assets/icons/io.ente.auth.png
 installed_size: 36000
 
 metainfo: linux/packaging/enteauth.appdata.xml
@@ -45,3 +45,4 @@ postremove_scripts:
   - fi
 
 startup_notify: false
+startup_wm_class: io.ente.auth

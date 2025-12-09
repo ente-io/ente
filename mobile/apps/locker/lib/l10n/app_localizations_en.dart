@@ -372,7 +372,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get creatingShareLink => 'Creating link...';
 
   @override
-  String get shareThisLink => 'Anyone with this link can access your item.';
+  String get shareThisLink =>
+      'This link allows anyone who receives it to access your item. You can remove access at any time by deleting the link.';
 
   @override
   String get copyLink => 'Copy link';
@@ -536,6 +537,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportBug => 'Report bug';
+
+  @override
+  String get logsDialogBodyLocker =>
+      'This will send logs to help us debug your issue.';
 
   @override
   String get social => 'Social';
@@ -1129,6 +1134,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get uploadError => 'Upload error';
 
   @override
+  String get uploadStorageLimitErrorTitle => 'Storage limit reached';
+
+  @override
+  String get uploadStorageLimitErrorBody =>
+      'You\'ve run out of storage space. Free up space to continue uploading.';
+
+  @override
+  String get uploadFileCountLimitErrorTitle => 'File limit reached';
+
+  @override
+  String get uploadFileCountLimitErrorBody =>
+      'You\'ve reached your file limit. Upgrade to a paid plan for more storage.';
+
+  @override
+  String get uploadFileCountLimitErrorToast =>
+      'Action failed. You\'ve reached your file limit.';
+
+  @override
+  String get uploadFileTooLargeErrorTitle => 'File too large';
+
+  @override
+  String get uploadFileTooLargeErrorBody =>
+      'This file is larger than the maximum supported upload size of 10GB.';
+
+  @override
   String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';
 
   @override
@@ -1273,11 +1303,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginToEnteAccount => 'Log in to your Ente account';
 
   @override
-  String get unlockLockerPaidPlanTitle => 'Coming soon!';
+  String get unlockLockerNewUserTitle => 'Join Ente to use Locker';
 
   @override
-  String get unlockLockerPaidPlanBody =>
-      'Locker is currently available only to paid customers of Ente Photos.';
+  String get unlockLockerNewUserBody =>
+      'Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.';
 
   @override
   String get checkoutEntePhotos => 'Checkout Ente Photos';
@@ -1434,4 +1464,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String fileCount(String used, String max) {
     return '$used / $max';
   }
+
+  @override
+  String get sorry => 'Sorry';
+
+  @override
+  String get subscribe => 'Subscribe';
+
+  @override
+  String get subscriptionRequiredForSharing =>
+      'You need an active paid subscription to enable sharing.';
 }
