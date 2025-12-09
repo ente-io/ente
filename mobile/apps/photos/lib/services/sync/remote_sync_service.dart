@@ -564,10 +564,6 @@ class RemoteSyncService {
     final collection =
         await _collectionsService.getOrCreateForPath(deviceCollection.name);
     await _db.updateDeviceCollection(deviceCollection.id, collection.id);
-    await deviceFolderSelectionCache.setCollectionIdMapping(
-      collection.id,
-      deviceCollection.id,
-    );
     return collection.id;
   }
 

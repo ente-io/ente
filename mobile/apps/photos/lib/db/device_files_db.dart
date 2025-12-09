@@ -22,7 +22,6 @@ class DeviceFolderSelectionCache {
   DeviceFolderSelectionCache(this._flagService);
 
   final Set<String> _selectedPathIds = <String>{};
-  final Map<int, String> _collectionIdToPathId = <int, String>{};
   bool _initialized = false;
   Completer<void>? _initCompleter;
 
@@ -36,13 +35,9 @@ class DeviceFolderSelectionCache {
     try {
       final deviceCollections = await FilesDB.instance.getDeviceCollections();
       _selectedPathIds.clear();
-      _collectionIdToPathId.clear();
       for (final dc in deviceCollections) {
         if (dc.shouldBackup) {
           _selectedPathIds.add(dc.id);
-        }
-        if (dc.hasCollectionID()) {
-          _collectionIdToPathId[dc.collectionID!] = dc.id;
         }
       }
       _initialized = true;
@@ -56,12 +51,9 @@ class DeviceFolderSelectionCache {
 
   /// Returns true if the path is selected for backup.
   Future<bool> isSelected(String pathId) async {
+    if (!_flagService.enableBackupFolderSync) return false;
     await _ensureInitialized();
     return _selectedPathIds.contains(pathId);
-  }
-
-  String? getPathIdForCollectionId(int collectionId) {
-    return _collectionIdToPathId[collectionId];
   }
 
   Future<void> update(Map<String, bool> updates) async {
@@ -76,17 +68,10 @@ class DeviceFolderSelectionCache {
     }
   }
 
-  Future<void> setCollectionIdMapping(int collectionId, String pathId) async {
-    if (!_flagService.enableBackupFolderSync) return;
-    await _ensureInitialized();
-    _collectionIdToPathId[collectionId] = pathId;
-  }
-
   void clear() {
-    _selectedPathIds.clear();
-    _collectionIdToPathId.clear();
     _initialized = false;
     _initCompleter = null;
+    _selectedPathIds.clear();
   }
 }
 
