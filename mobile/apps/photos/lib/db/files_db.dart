@@ -1500,36 +1500,16 @@ class FilesDB with SqlDbBase {
     int collectionId,
   ) async {
     final db = await instance.sqliteAsyncDB;
-    // If the localID exists in any other collection, delete the pending row for this
-    // collection; otherwise, clear collection/queueSource so it can be re-mapped.
-    final existsInOtherCollection = (await db.getAll(
+    // Delete the pending upload entry. It will be repopulated on next sync
+    // if the file still qualifies for backup.
+    await db.execute(
       '''
-      SELECT 1 FROM $filesTable
-      WHERE $columnLocalID = ? AND $columnCollectionID != ?
-      LIMIT 1;
+      DELETE FROM $filesTable
+      WHERE $columnLocalID = ? AND $columnCollectionID = ?
+      AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
       ''',
       [localId, collectionId],
-    ))
-        .isNotEmpty;
-
-    if (existsInOtherCollection) {
-      await db.execute(
-        '''
-        DELETE FROM $filesTable WHERE $columnLocalID = ? AND $columnCollectionID = ?
-        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
-        ''',
-        [localId, collectionId],
-      );
-    } else {
-      await db.execute(
-        '''
-        UPDATE $filesTable SET $columnCollectionID = NULL, $columnQueueSource = NULL
-        WHERE $columnLocalID = ? AND $columnCollectionID = ?
-        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
-        ''',
-        [localId, collectionId],
-      );
-    }
+    );
   }
 
   Future<Set<String>> getLocalIDsPresentInEntries(
