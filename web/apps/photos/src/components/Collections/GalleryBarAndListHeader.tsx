@@ -11,7 +11,7 @@ import {
     isSaveComplete,
     type SaveGroup,
 } from "ente-gallery/components/utils/save-groups";
-import { NotificationsSidebar } from "ente-gallery/components/viewer/NotificationsSidebar";
+import { FeedSidebar } from "ente-gallery/components/viewer/FeedSidebar";
 import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
@@ -106,8 +106,8 @@ export const GalleryBarAndListHeader: React.FC<
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
         useModalVisibility();
     const {
-        show: showCollectionNotifications,
-        props: collectionNotificationsVisibilityProps,
+        show: showCollectionFeed,
+        props: collectionFeedVisibilityProps,
     } = useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
@@ -156,7 +156,7 @@ export const GalleryBarAndListHeader: React.FC<
                         }
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
-                        onCollectionNotifications={showCollectionNotifications}
+                        onCollectionFeed={showCollectionFeed}
                     />
                 ) : activePerson ? (
                     <PeopleHeader
@@ -178,7 +178,7 @@ export const GalleryBarAndListHeader: React.FC<
         activePerson,
         showCollectionShare,
         showCollectionCast,
-        showCollectionNotifications,
+        showCollectionFeed,
         // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
@@ -237,8 +237,8 @@ export const GalleryBarAndListHeader: React.FC<
                 {...collectionCastVisibilityProps}
                 collection={activeCollection}
             />
-            <NotificationsSidebar
-                {...collectionNotificationsVisibilityProps}
+            <FeedSidebar
+                {...collectionFeedVisibilityProps}
                 albumName={activeCollection?.name ?? ""}
             />
         </>

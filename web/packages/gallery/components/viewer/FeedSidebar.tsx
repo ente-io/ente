@@ -7,7 +7,7 @@ import React from "react";
 // Types
 // =============================================================================
 
-export interface NotificationsSidebarProps extends ModalVisibilityProps {
+export interface FeedSidebarProps extends ModalVisibilityProps {
     /**
      * The name of the album to display in the header.
      */
@@ -19,9 +19,9 @@ export interface NotificationsSidebarProps extends ModalVisibilityProps {
 // =============================================================================
 
 /**
- * A sidebar panel for displaying notifications for an album.
+ * A sidebar panel for displaying the feed for an album.
  */
-export const NotificationsSidebar: React.FC<NotificationsSidebarProps> = ({
+export const FeedSidebar: React.FC<FeedSidebarProps> = ({
     open,
     onClose,
     albumName,
