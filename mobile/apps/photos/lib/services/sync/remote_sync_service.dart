@@ -517,6 +517,9 @@ class RemoteSyncService {
             pendingUpload.queueSource == manualQueueSource) {
           continue;
         }
+        if (pendingUpload.generatedID == null) {
+          continue;
+        }
         entriesToDelete.add(pendingUpload.generatedID!);
         if (pendingUpload.localID != null) {
           localIDsToCleanup.add(pendingUpload.localID!);
