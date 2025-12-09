@@ -851,16 +851,16 @@
       }
     }
   },
-  "favorite": "Favorite",
-  "unfavorite": "Unfavorite",
-  "addingToFavorites": "Adding to Favorites...",
-  "removingFromFavorites": "Removing from Favorites...",
-  "markingAsFavorites": "Marking as Favorites...",
-  "fileMarkedAsFavorite": "Item marked as favorite",
-  "fileRemovedFromFavorites": "Item removed from favorites",
-  "filesMarkedAsFavorites": "{count, plural, =1{1 item marked as favorite} other{{count} items marked as favorites}}",
-  "@filesMarkedAsFavorites": {
-    "description": "Success message when items are marked as favorites",
+  "important": "Important",
+  "unimportant": "Unimportant",
+  "addingToImportant": "Marking as important...",
+  "removingFromImportant": "Removing from important...",
+  "markingAsImportant": "Marking as important...",
+  "fileMarkedAsImportant": "Item marked as important",
+  "fileRemovedFromImportant": "Item removed from important",
+  "filesMarkedAsImportant": "{count, plural, =1{1 item marked as important} other{{count} items marked as important}}",
+  "@filesMarkedAsImportant": {
+    "description": "Success message when items are marked as important",
     "placeholders": {
       "count": {
         "type": "int",
@@ -868,10 +868,10 @@
       }
     }
   },
-  "allFilesAlreadyMarkedAsFavorites": "All items are already marked as favorites",
-  "failedToMarkFilesAsFavorites": "Failed to mark items as favorites: {error}",
-  "@failedToMarkFilesAsFavorites": {
-    "description": "Error message when marking items as favorites fails",
+  "allFilesAlreadyMarkedAsImportant": "All items are already marked as important",
+  "failedToMarkFilesAsImportant": "Failed to mark items as important: {error}",
+  "@failedToMarkFilesAsImportant": {
+    "description": "Error message when marking items as important fails",
     "placeholders": {
       "error": {
         "type": "String",
@@ -879,14 +879,17 @@
       }
     }
   },
-  "failedToUpdateFavoriteStatus": "Failed to update favorite status: {error}",
-  "@failedToUpdateFavoriteStatus": {
-    "description": "Error message when updating favorite status fails",
+  "failedToUpdateImportantStatus": "Failed to update important status: {error}",
+  "@failedToUpdateImportantStatus": {
+    "description": "Error message when updating important status fails",
     "placeholders": {
       "error": {
         "type": "String",
         "example": "Network error"
       }
     }
-  }
+  },
+  "sorry": "Sorry",
+  "subscribe": "Subscribe",
+  "subscriptionRequiredForSharing": "You need a paid subscription to share links"
 }

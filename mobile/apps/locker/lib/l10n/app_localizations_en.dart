@@ -1466,48 +1466,58 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get favorite => 'Favorite';
+  String get important => 'Important';
 
   @override
-  String get unfavorite => 'Unfavorite';
+  String get unimportant => 'Unimportant';
 
   @override
-  String get addingToFavorites => 'Adding to Favorites...';
+  String get addingToImportant => 'Marking as important...';
 
   @override
-  String get removingFromFavorites => 'Removing from Favorites...';
+  String get removingFromImportant => 'Removing from important...';
 
   @override
-  String get markingAsFavorites => 'Marking as Favorites...';
+  String get markingAsImportant => 'Marking as important...';
 
   @override
-  String get fileMarkedAsFavorite => 'Item marked as favorite';
+  String get fileMarkedAsImportant => 'Item marked as important';
 
   @override
-  String get fileRemovedFromFavorites => 'Item removed from favorites';
+  String get fileRemovedFromImportant => 'Item removed from important';
 
   @override
-  String filesMarkedAsFavorites(int count) {
+  String filesMarkedAsImportant(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count items marked as favorites',
-      one: '1 item marked as favorite',
+      other: '$count items marked as important',
+      one: '1 item marked as important',
     );
     return '$_temp0';
   }
 
   @override
-  String get allFilesAlreadyMarkedAsFavorites =>
-      'All items are already marked as favorites';
+  String get allFilesAlreadyMarkedAsImportant =>
+      'All items are already marked as important';
 
   @override
-  String failedToMarkFilesAsFavorites(String error) {
-    return 'Failed to mark items as favorites: $error';
+  String failedToMarkFilesAsImportant(String error) {
+    return 'Failed to mark items as important: $error';
   }
 
   @override
-  String failedToUpdateFavoriteStatus(String error) {
-    return 'Failed to update favorite status: $error';
+  String failedToUpdateImportantStatus(String error) {
+    return 'Failed to update important status: $error';
   }
+
+  @override
+  String get sorry => 'Sorry';
+
+  @override
+  String get subscribe => 'Subscribe';
+
+  @override
+  String get subscriptionRequiredForSharing =>
+      'You need a paid subscription to share links';
 }

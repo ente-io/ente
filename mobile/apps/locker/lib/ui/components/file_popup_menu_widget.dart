@@ -91,21 +91,23 @@ class FilePopupMenuWidget extends StatelessWidget {
         ),
       ),
       PopupMenuItem<String>(
-        value: 'toggle_favorite',
+        value: 'toggle_important',
         padding: EdgeInsets.zero,
         height: 0,
         child: FutureBuilder<bool>(
           future: FileActions.isFavorite(file),
           initialData: false,
           builder: (context, snapshot) {
-            final isFavorite = snapshot.data ?? false;
+            final isImportant = snapshot.data ?? false;
             return PopupMenuItemWidget(
               icon: Icon(
-                isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
+                isImportant ? Icons.star_rounded : Icons.star_border_rounded,
                 color: colorScheme.textBase,
                 size: 20,
               ),
-              label: isFavorite ? "Unimportant" : "Important",
+              label: isImportant
+                  ? context.l10n.unimportant
+                  : context.l10n.important,
               isFirst: false,
               isLast: false,
             );
@@ -175,8 +177,8 @@ class FilePopupMenuWidget extends StatelessWidget {
       case 'edit':
         _editFile(context);
         break;
-      case 'toggle_favorite':
-        _toggleFavorite(context);
+      case 'toggle_important':
+        _toggleImportant(context);
         break;
       case 'download':
         _downloadFile(context);
@@ -212,8 +214,8 @@ class FilePopupMenuWidget extends StatelessWidget {
     await FileActions.editFile(context, file);
   }
 
-  Future<void> _toggleFavorite(BuildContext context) async {
-    await FileActions.toggleFavorite(
+  Future<void> _toggleImportant(BuildContext context) async {
+    await FileActions.toggleImportant(
       context,
       file,
     );

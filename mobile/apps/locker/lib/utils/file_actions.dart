@@ -417,25 +417,25 @@ class FileActions {
     }
   }
 
-  /// Toggles favorite/important status of a single file
-  static Future<void> toggleFavorite(
+  /// Toggles important status of a single file
+  static Future<void> toggleImportant(
     BuildContext context,
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
-    final isCurrentlyFavorite = await isFavorite(file);
+    final isCurrentlyImportant = await isFavorite(file);
     final dialog = createProgressDialog(
       context,
-      isCurrentlyFavorite
-          ? context.l10n.removingFromFavorites
-          : context.l10n.addingToFavorites,
+      isCurrentlyImportant
+          ? context.l10n.removingFromImportant
+          : context.l10n.addingToImportant,
       isDismissible: false,
     );
 
     try {
       await dialog.show();
 
-      if (isCurrentlyFavorite) {
+      if (isCurrentlyImportant) {
         await FavoritesService.instance.removeFromFavorites(context, file);
       } else {
         await FavoritesService.instance.addToFavorites(context, file);
@@ -444,27 +444,29 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        final message = !isCurrentlyFavorite
-            ? context.l10n.fileMarkedAsFavorite
-            : context.l10n.fileRemovedFromFavorites;
-        SnackBarUtils.showInfoSnackBar(context, message);
+        showToast(
+          context,
+          !isCurrentlyImportant
+              ? context.l10n.fileMarkedAsImportant
+              : context.l10n.fileRemovedFromImportant,
+        );
       }
 
       onSuccess?.call();
     } catch (e, stackTrace) {
-      _logger.severe("Failed to toggle favorite status: $e", e, stackTrace);
+      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
-          context.l10n.failedToUpdateFavoriteStatus(e.toString()),
+          context.l10n.somethingWentWrong,
         );
       }
     }
   }
 
-  /// Marks multiple files as important/favorite
+  /// Marks multiple files as important
   static Future<void> markMultipleAsImportant(
     BuildContext context,
     List<EnteFile> files, {
@@ -472,7 +474,7 @@ class FileActions {
   }) async {
     final dialog = createProgressDialog(
       context,
-      context.l10n.markingAsFavorites,
+      context.l10n.markingAsImportant,
       isDismissible: false,
     );
 
@@ -490,9 +492,9 @@ class FileActions {
       if (filesToMark.isEmpty) {
         await dialog.hide();
         if (context.mounted) {
-          SnackBarUtils.showInfoSnackBar(
+          showToast(
             context,
-            context.l10n.allFilesAlreadyMarkedAsFavorites,
+            context.l10n.allFilesAlreadyMarkedAsImportant,
           );
         }
         return;
@@ -507,25 +509,25 @@ class FileActions {
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showInfoSnackBar(
+        showToast(
           context,
-          context.l10n.filesMarkedAsFavorites(filesToMark.length),
+          context.l10n.filesMarkedAsImportant(filesToMark.length),
         );
       }
 
       onSuccess?.call();
     } catch (e, stackTrace) {
       _logger.severe(
-        "Failed to mark multiple files as favorites: $e",
+        "Failed to mark multiple files as important: $e",
         e,
         stackTrace,
       );
       await dialog.hide();
 
       if (context.mounted) {
-        SnackBarUtils.showWarningSnackBar(
+        showToast(
           context,
-          context.l10n.failedToMarkFilesAsFavorites(e.toString()),
+          context.l10n.failedToMarkFilesAsImportant(e.toString()),
         );
       }
     }

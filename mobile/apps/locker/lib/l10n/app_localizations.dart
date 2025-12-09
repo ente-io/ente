@@ -2518,71 +2518,89 @@ abstract class AppLocalizations {
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
 
-  /// No description provided for @favorite.
+  /// No description provided for @important.
   ///
   /// In en, this message translates to:
-  /// **'Favorite'**
-  String get favorite;
+  /// **'Important'**
+  String get important;
 
-  /// No description provided for @unfavorite.
+  /// No description provided for @unimportant.
   ///
   /// In en, this message translates to:
-  /// **'Unfavorite'**
-  String get unfavorite;
+  /// **'Unimportant'**
+  String get unimportant;
 
-  /// No description provided for @addingToFavorites.
+  /// No description provided for @addingToImportant.
   ///
   /// In en, this message translates to:
-  /// **'Adding to Favorites...'**
-  String get addingToFavorites;
+  /// **'Marking as important...'**
+  String get addingToImportant;
 
-  /// No description provided for @removingFromFavorites.
+  /// No description provided for @removingFromImportant.
   ///
   /// In en, this message translates to:
-  /// **'Removing from Favorites...'**
-  String get removingFromFavorites;
+  /// **'Removing from important...'**
+  String get removingFromImportant;
 
-  /// No description provided for @markingAsFavorites.
+  /// No description provided for @markingAsImportant.
   ///
   /// In en, this message translates to:
-  /// **'Marking as Favorites...'**
-  String get markingAsFavorites;
+  /// **'Marking as important...'**
+  String get markingAsImportant;
 
-  /// No description provided for @fileMarkedAsFavorite.
+  /// No description provided for @fileMarkedAsImportant.
   ///
   /// In en, this message translates to:
-  /// **'Item marked as favorite'**
-  String get fileMarkedAsFavorite;
+  /// **'Item marked as important'**
+  String get fileMarkedAsImportant;
 
-  /// No description provided for @fileRemovedFromFavorites.
+  /// No description provided for @fileRemovedFromImportant.
   ///
   /// In en, this message translates to:
-  /// **'Item removed from favorites'**
-  String get fileRemovedFromFavorites;
+  /// **'Item removed from important'**
+  String get fileRemovedFromImportant;
 
-  /// Success message when items are marked as favorites
+  /// Success message when items are marked as important
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 item marked as favorite} other{{count} items marked as favorites}}'**
-  String filesMarkedAsFavorites(int count);
+  /// **'{count, plural, =1{1 item marked as important} other{{count} items marked as important}}'**
+  String filesMarkedAsImportant(int count);
 
-  /// No description provided for @allFilesAlreadyMarkedAsFavorites.
+  /// No description provided for @allFilesAlreadyMarkedAsImportant.
   ///
   /// In en, this message translates to:
-  /// **'All items are already marked as favorites'**
-  String get allFilesAlreadyMarkedAsFavorites;
+  /// **'All items are already marked as important'**
+  String get allFilesAlreadyMarkedAsImportant;
 
-  /// Error message when marking items as favorites fails
+  /// Error message when marking items as important fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to mark items as favorites: {error}'**
-  String failedToMarkFilesAsFavorites(String error);
+  /// **'Failed to mark items as important: {error}'**
+  String failedToMarkFilesAsImportant(String error);
 
-  /// Error message when updating favorite status fails
+  /// Error message when updating important status fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to update favorite status: {error}'**
-  String failedToUpdateFavoriteStatus(String error);
+  /// **'Failed to update important status: {error}'**
+  String failedToUpdateImportantStatus(String error);
+
+  /// No description provided for @sorry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry'**
+  String get sorry;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
 }
 
 class _AppLocalizationsDelegate
