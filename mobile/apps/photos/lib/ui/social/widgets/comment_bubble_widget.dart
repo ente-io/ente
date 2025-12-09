@@ -93,77 +93,113 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
+    final bubbleTextColor =
+        widget.isOwnComment ? colorScheme.backgroundBase : colorScheme.textBase;
+    final bubbleBackgroundColor =
+        widget.isOwnComment ? colorScheme.primary500 : colorScheme.fillBaseGrey;
+
     return Padding(
       padding: EdgeInsets.only(
-        left: widget.isOwnComment ? 48 : 16,
-        right: widget.isOwnComment ? 16 : 48,
-        top: 8,
-        bottom: 8,
+        left: widget.isOwnComment ? 48 : 20,
+        right: widget.isOwnComment ? 20 : 48,
+        top: 12,
+        bottom: 28,
       ),
       child: Column(
         crossAxisAlignment: widget.isOwnComment
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
         children: [
-          // Parent quote (if reply)
-          if (widget.comment.isReply) _buildParentQuote(colorScheme, textTheme),
-
-          // Comment bubble
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: widget.isOwnComment
-                  ? colorScheme.primary500.withValues(alpha: 0.15)
-                  : colorScheme.fillFaint,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft: Radius.circular(widget.isOwnComment ? 16 : 4),
-                bottomRight: Radius.circular(widget.isOwnComment ? 4 : 16),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              widget.comment.data,
-              style: textTheme.body,
+              formatRelativeTime(widget.comment.createdAt),
+              style: textTheme.mini.copyWith(color: colorScheme.textMuted),
             ),
           ),
-
-          const SizedBox(height: 4),
-
-          // Timestamp and actions row
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                formatRelativeTime(widget.comment.createdAt),
-                style: textTheme.mini.copyWith(color: colorScheme.textMuted),
-              ),
-              const SizedBox(width: 8),
-              if (!_isLoadingReactions)
-                CommentActionsCapsule(
+          _buildBubble(
+            colorScheme: colorScheme,
+            textTheme: textTheme,
+            textColor: bubbleTextColor,
+            bubbleColor: bubbleBackgroundColor,
+          ),
+          if (!_isLoadingReactions) ...[
+            const SizedBox(height: 2),
+            Transform.translate(
+              offset: const Offset(0, -12),
+              child: Align(
+                alignment: widget.isOwnComment
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: CommentActionsCapsule(
                   isLiked: _isLiked,
                   likeCount: _reactions.where((r) => !r.isDeleted).length,
                   onLikeTap: _toggleLike,
                   onReplyTap: widget.onReplyTap,
                 ),
-            ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBubble({
+    required EnteColorScheme colorScheme,
+    required EnteTextTheme textTheme,
+    required Color textColor,
+    required Color bubbleColor,
+  }) {
+    final bubbleBorderRadius = BorderRadius.only(
+      topLeft: const Radius.circular(18),
+      topRight: const Radius.circular(18),
+      bottomLeft: Radius.circular(widget.isOwnComment ? 18 : 10),
+      bottomRight: Radius.circular(widget.isOwnComment ? 10 : 18),
+    );
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+      decoration: BoxDecoration(
+        color: bubbleColor,
+        borderRadius: bubbleBorderRadius,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.comment.isReply)
+            _buildInlineParent(
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+              textColor: textColor,
+            ),
+          Text(
+            widget.comment.data,
+            style: textTheme.body.copyWith(
+              color: textColor,
+              height: 1.25,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildParentQuote(
-    EnteColorScheme colorScheme,
-    EnteTextTheme textTheme,
-  ) {
+  Widget _buildInlineParent({
+    required EnteColorScheme colorScheme,
+    required EnteTextTheme textTheme,
+    required Color textColor,
+  }) {
     if (_isLoadingParent) {
       return Container(
-        margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.only(bottom: 8),
+        height: 16,
+        width: 16,
+        alignment: Alignment.centerLeft,
         child: const SizedBox(
-          width: 16,
-          height: 16,
+          width: 14,
+          height: 14,
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       );
@@ -172,21 +208,26 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     final parentText = _parentComment?.data ?? "Original comment unavailable";
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(left: 10),
       decoration: BoxDecoration(
-        color: colorScheme.primary500.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
         border: Border(
           left: BorderSide(
-            color: colorScheme.primary500,
-            width: 3,
+            color: widget.isOwnComment
+                ? colorScheme.backgroundBase.withValues(alpha: 0.6)
+                : colorScheme.strokeMuted,
+            width: 2,
           ),
         ),
       ),
-      padding: const EdgeInsets.all(8),
       child: Text(
         parentText,
-        style: textTheme.small.copyWith(color: colorScheme.textMuted),
+        style: textTheme.small.copyWith(
+          color: widget.isOwnComment
+              ? colorScheme.backgroundBase.withValues(alpha: 0.9)
+              : colorScheme.textMuted,
+          height: 1.2,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

@@ -162,16 +162,21 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          "${_comments.length} comments",
-          style: textTheme.body,
-        ),
+        automaticallyImplyLeading: false,
+        titleSpacing: 16,
         backgroundColor: colorScheme.backgroundBase,
         elevation: 0,
+        title: Text(
+          "${_comments.length} comments",
+          style: textTheme.largeBold,
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
       body: Column(
         children: [
@@ -181,6 +186,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 : ListView.builder(
                     controller: _scrollController,
                     reverse: true,
+                    padding: const EdgeInsets.only(
+                      top: 12,
+                      left: 4,
+                      right: 4,
+                      bottom: 24,
+                    ),
                     itemCount: _comments.length + (_hasMoreComments ? 1 : 0),
                     itemBuilder: (context, index) {
                       if (index == _comments.length) {

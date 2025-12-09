@@ -21,10 +21,11 @@ class CommentActionsCapsule extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
-        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.backgroundBase,
+        border: Border.all(color: colorScheme.strokeFaint),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -35,7 +36,7 @@ class CommentActionsCapsule extends StatelessWidget {
               children: [
                 Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,
-                  size: 16,
+                  size: 18,
                   color:
                       isLiked ? colorScheme.primary500 : colorScheme.textMuted,
                 ),
@@ -56,7 +57,7 @@ class CommentActionsCapsule extends StatelessWidget {
             onTap: onReplyTap,
             child: Icon(
               Icons.reply,
-              size: 16,
+              size: 18,
               color: colorScheme.textMuted,
             ),
           ),
