@@ -216,9 +216,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     controller: _scrollController,
                     reverse: true,
                     padding: const EdgeInsets.only(
-                      top: 12,
-                      left: 4,
-                      right: 4,
+                      top: 24,
+                      left: 16,
+                      right: 16,
                       bottom: 24,
                     ),
                     itemCount: _comments.length + (_hasMoreComments ? 1 : 0),

@@ -6,7 +6,6 @@ import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/theme/text_style.dart";
 import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/social/widgets/comment_actions_capsule.dart";
 import "package:photos/utils/social/relative_time_formatter.dart";
@@ -95,110 +94,71 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    final bubbleTextColor =
-        widget.isOwnComment ? colorScheme.backgroundBase : colorScheme.textBase;
-    final bubbleBackgroundColor =
-        widget.isOwnComment ? colorScheme.primary700 : colorScheme.fillBaseGrey;
-
     return Padding(
       padding: EdgeInsets.only(
-        left: widget.isOwnComment ? 48 : 20,
-        right: widget.isOwnComment ? 20 : 48,
-        top: 12,
-        bottom: 28,
+        right: widget.isOwnComment ? 24 : 0,
+        top: 8,
+        bottom: 8,
       ),
       child: Column(
         crossAxisAlignment: widget.isOwnComment
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
         children: [
+          _Header(
+            isOwnComment: widget.isOwnComment,
+            user: widget.user,
+            createdAt: widget.comment.createdAt,
+            currentUserID: widget.currentUserID,
+          ),
+          const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _Header(
-              isOwnComment: widget.isOwnComment,
-              user: widget.user,
-              createdAt: widget.comment.createdAt,
-              currentUserID: widget.currentUserID,
-            ),
-          ),
-          _buildBubble(
-            colorScheme: colorScheme,
-            textTheme: textTheme,
-            textColor: bubbleTextColor,
-            bubbleColor: bubbleBackgroundColor,
-          ),
-          if (!_isLoadingReactions) ...[
-            const SizedBox(height: 2),
-            Transform.translate(
-              offset: const Offset(0, -12),
-              child: Align(
-                alignment: widget.isOwnComment
-                    ? Alignment.centerRight
-                    : Alignment.centerLeft,
-                child: CommentActionsCapsule(
-                  isLiked: _isLiked,
-                  onLikeTap: _toggleLike,
-                  onReplyTap: widget.onReplyTap,
+            padding: EdgeInsets.only(left: widget.isOwnComment ? 0 : 24),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _CommentBubble(
+                  comment: widget.comment,
+                  isOwnComment: widget.isOwnComment,
+                  isLoadingParent: _isLoadingParent,
+                  parentComment: _parentComment,
                 ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBubble({
-    required EnteColorScheme colorScheme,
-    required EnteTextTheme textTheme,
-    required Color textColor,
-    required Color bubbleColor,
-  }) {
-    final bubbleBorderRadius = BorderRadius.only(
-      topLeft: Radius.circular(widget.isOwnComment ? 20 : 6),
-      topRight: Radius.circular(widget.isOwnComment ? 6 : 20),
-      bottomLeft: const Radius.circular(20),
-      bottomRight: const Radius.circular(20),
-    );
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
-      decoration: BoxDecoration(
-        color: bubbleColor,
-        borderRadius: bubbleBorderRadius,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.comment.isReply)
-            _buildInlineParent(
-              colorScheme: colorScheme,
-              textTheme: textTheme,
-              textColor: textColor,
-            ),
-          Text(
-            widget.comment.data,
-            style: textTheme.small.copyWith(
-              color: textColor,
-              height: 22 / 14,
-              fontWeight: FontWeight.w500,
+                if (!_isLoadingReactions)
+                  Positioned(
+                    right: -16,
+                    bottom: -17,
+                    child: CommentActionsCapsule(
+                      isLiked: _isLiked,
+                      onLikeTap: _toggleLike,
+                      onReplyTap: widget.onReplyTap,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildInlineParent({
-    required EnteColorScheme colorScheme,
-    required EnteTextTheme textTheme,
-    required Color textColor,
-  }) {
-    if (_isLoadingParent) {
+class _InlineParentQuote extends StatelessWidget {
+  final bool isLoading;
+  final Comment? parentComment;
+  final bool isOwnComment;
+
+  const _InlineParentQuote({
+    required this.isLoading,
+    required this.parentComment,
+    required this.isOwnComment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    if (isLoading) {
       return Container(
         margin: const EdgeInsets.only(bottom: 8),
         height: 16,
@@ -212,7 +172,7 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
       );
     }
 
-    final parentText = _parentComment?.data ?? "Original comment unavailable";
+    final parentText = parentComment?.data ?? "Original comment unavailable";
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -220,8 +180,8 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
       decoration: BoxDecoration(
         border: Border(
           left: BorderSide(
-            color: widget.isOwnComment
-                ? colorScheme.backgroundBase.withValues(alpha: 0.6)
+            color: isOwnComment
+                ? textBaseDark.withValues(alpha: 0.6)
                 : colorScheme.strokeMuted,
             width: 2,
           ),
@@ -231,12 +191,71 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
         parentText,
         style: textTheme.tiny.copyWith(
           height: 1.7,
-          color: widget.isOwnComment
-              ? colorScheme.backgroundBase.withValues(alpha: 0.9)
+          color: isOwnComment
+              ? textBaseDark.withValues(alpha: 0.9)
               : colorScheme.textMuted,
         ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+}
+
+class _CommentBubble extends StatelessWidget {
+  final Comment comment;
+  final bool isOwnComment;
+  final bool isLoadingParent;
+  final Comment? parentComment;
+
+  const _CommentBubble({
+    required this.comment,
+    required this.isOwnComment,
+    required this.isLoadingParent,
+    required this.parentComment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    final textColor = isOwnComment ? textBaseDark : colorScheme.textBase;
+    final bubbleColor =
+        isOwnComment ? const Color(0xFF0DAF35) : colorScheme.fillBaseGrey;
+
+    final bubbleBorderRadius = BorderRadius.only(
+      topLeft: Radius.circular(isOwnComment ? 20 : 6),
+      topRight: Radius.circular(isOwnComment ? 6 : 20),
+      bottomLeft: const Radius.circular(20),
+      bottomRight: const Radius.circular(20),
+    );
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+      decoration: BoxDecoration(
+        color: bubbleColor,
+        borderRadius: bubbleBorderRadius,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (comment.isReply)
+            _InlineParentQuote(
+              isLoading: isLoadingParent,
+              parentComment: parentComment,
+              isOwnComment: isOwnComment,
+            ),
+          Text(
+            comment.data,
+            style: textTheme.small.copyWith(
+              color: textColor,
+              height: 22 / 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -276,43 +295,47 @@ class _Header extends StatelessWidget {
       );
     }
 
-    final headerText = Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Text(
-          name,
-          style: textTheme.small.copyWith(
-            color: colorScheme.textMuted,
-            height: 20 / 14,
-            fontWeight: FontWeight.w500,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(width: 4),
-        Transform.translate(
-          offset: const Offset(0, 1),
-          child: Text(
-            '•',
-            style: textTheme.tiny.copyWith(
-              color: colorScheme.textMuted,
-              height: 1,
-              fontWeight: FontWeight.w600,
+    final baseNameStyle = textTheme.small.copyWith(
+      color: colorScheme.textMuted,
+      height: 20 / 14,
+      fontWeight: FontWeight.w500,
+    );
+
+    final headerText = Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: name, style: baseNameStyle),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.baseline,
+            baseline: TextBaseline.alphabetic,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                '•',
+                style: baseNameStyle.copyWith(
+                  fontSize: (baseNameStyle.fontSize ?? 14) * 0.65,
+                  height: 1,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          timestamp,
-          style: textTheme.tiny.copyWith(
-            color: colorScheme.textMuted,
-            height: 14 / 10,
-            fontWeight: FontWeight.w500,
+          TextSpan(
+            text: timestamp,
+            style: textTheme.tiny.copyWith(
+              color: colorScheme.textMuted,
+              height: 14 / 10,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textHeightBehavior: const TextHeightBehavior(
+        applyHeightToFirstAscent: false,
+        applyHeightToLastDescent: false,
+      ),
     );
 
     return Row(

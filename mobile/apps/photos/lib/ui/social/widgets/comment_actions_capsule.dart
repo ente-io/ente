@@ -16,13 +16,19 @@ class CommentActionsCapsule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final background = Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF161616)
+        : const Color(0xFFF5F5F7);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
-        border: Border.all(color: colorScheme.strokeFaint),
-        borderRadius: BorderRadius.circular(18),
+        color: background,
+        border: Border.all(
+          color: colorScheme.backgroundBase,
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(42),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -35,7 +41,7 @@ class CommentActionsCapsule extends StatelessWidget {
               color: isLiked ? colorScheme.primary500 : colorScheme.textMuted,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           GestureDetector(
             onTap: onReplyTap,
             child: Icon(
