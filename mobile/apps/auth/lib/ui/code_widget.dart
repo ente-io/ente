@@ -237,8 +237,18 @@ class _CodeWidgetState extends State<CodeWidget> {
 
           return Actions(
             actions: {
-              CopyIntent: CopyAction(context, widget.code),
-              CopyNextIntent: CopyNextAction(context, widget.code),
+              CopyIntent: CallbackAction<CopyIntent>(
+                onInvoke: (intent) => _copyCurrentOTPToClipboard(),
+              ),
+              CopyNextIntent: CallbackAction<CopyNextIntent>(
+                onInvoke: (intent) {
+                  if (!widget.code.type.isTOTPCompatible) {
+                    showToast(context, context.l10n.notSupportedForHOTP);
+                    return;
+                  }
+                  _copyNextToClipboard();
+                },
+              ),
             },
             child: Stack(
               children: [
