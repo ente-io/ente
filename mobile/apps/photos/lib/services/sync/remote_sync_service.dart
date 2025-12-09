@@ -594,15 +594,25 @@ class RemoteSyncService {
   }
 
   Future<List<EnteFile>> _getFilesToBeUploaded() async {
-    // rank files by time.
-    final bool shouldRemoveVideos = !_config.shouldBackupVideos();
+    // Note: "only backup new photos" filtering is applied at the local sync
+    // stage (see _syncDeviceCollectionFilesForUpload) where we filter by
+    // localID before setting collectionID. Files that reach here with a
+    // collectionID but no uploadedFileID either:
+    // 1. Passed the only-new filter during auto-backup sync, OR
+    // 2. Were manually added by the user to a collection
+    // In case 2, we should NOT filter them out - user explicitly chose them.
+    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
+    if (originalFiles.isEmpty) {
+      return originalFiles;
+    }
+    final bool shouldRemoveVideos =
+        !_config.shouldBackupVideos() || bgWithoutResumableUpload;
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(EnteFile file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
     }
 
     final List<EnteFile> filesToBeUploaded = [];
-    final List<EnteFile> originalFiles = await _db.getFilesPendingForUpload();
     int ignoredForUpload = 0;
     int skippedVideos = 0;
 
