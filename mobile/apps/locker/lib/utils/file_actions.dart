@@ -407,12 +407,12 @@ class FileActions {
     }
   }
 
-  /// Checks if a file is marked as favorite/important
-  static Future<bool> isFavorite(EnteFile file) async {
+  /// Checks if a file is marked as important
+  static Future<bool> isImportant(EnteFile file) async {
     try {
       return await FavoritesService.instance.isFavorite(file);
     } catch (e) {
-      _logger.severe("Error checking favorite status: $e");
+      _logger.severe("Error checking important status: $e");
       return false;
     }
   }
@@ -423,7 +423,7 @@ class FileActions {
     EnteFile file, {
     VoidCallback? onSuccess,
   }) async {
-    final isCurrentlyImportant = await isFavorite(file);
+    final isCurrentlyImportant = await isImportant(file);
     final dialog = createProgressDialog(
       context,
       isCurrentlyImportant
@@ -483,8 +483,8 @@ class FileActions {
 
       final List<EnteFile> filesToMark = [];
       for (final file in files) {
-        final isFav = await FavoritesService.instance.isFavorite(file);
-        if (!isFav) {
+        final isFileImportant = await isImportant(file);
+        if (!isFileImportant) {
           filesToMark.add(file);
         }
       }

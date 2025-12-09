@@ -95,7 +95,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         padding: EdgeInsets.zero,
         height: 0,
         child: FutureBuilder<bool>(
-          future: FileActions.isFavorite(file),
+          future: FileActions.isImportant(file),
           initialData: false,
           builder: (context, snapshot) {
             final isImportant = snapshot.data ?? false;
