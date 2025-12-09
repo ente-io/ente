@@ -50,6 +50,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import type { SelectedState } from "utils/file";
 import type { FileListWithViewerProps } from "../FileListWithViewer";
 import { FileListWithViewer } from "../FileListWithViewer";
 import { calculateOptimalZoom, getMapCenter } from "../TripLayout/mapHelpers";
@@ -75,7 +76,7 @@ interface CollectionMapDialogProps
             | "onSelectPerson"
         > {
     collectionSummary: CollectionSummary;
-    activeCollection: Collection;
+    activeCollection: Collection | undefined;
     onRemotePull?: (opts?: RemotePullOpts) => Promise<void>;
 }
 
@@ -168,7 +169,7 @@ function useCurrentUser() {
  */
 function useMapData(
     open: boolean,
-    activeCollection: Collection,
+    activeCollection: Collection | undefined,
     onGenericError: (e: unknown) => void,
 ): MapDataResult {
     const [state, setState] = useState<MapDataState>({
@@ -214,7 +215,7 @@ function useMapData(
     );
 
     useEffect(() => {
-        if (!open) return;
+        if (!open || !activeCollection) return;
 
         const loadMapData = async () => {
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -824,14 +825,14 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const visualFeedback = useMemo(() => onVisualFeedback, [onVisualFeedback]);
 
     // Empty selection state since we don't support selection in map view
-    const emptySelected = useMemo(
+    const emptySelected = useMemo<SelectedState>(
         () => ({
             ownCount: 0,
             count: 0,
             context: undefined,
-            collectionID: activeCollection.id,
+            collectionID: activeCollection?.id,
         }),
-        [activeCollection.id],
+        [activeCollection?.id],
     );
     const noOpSetSelected = useCallback(() => {
         /* no-op */
@@ -1052,12 +1053,7 @@ interface MapLayoutProps {
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
     onSetOpenFileViewer?: (open: boolean) => void;
-    selected: {
-        ownCount: number;
-        count: number;
-        context: undefined;
-        collectionID: number;
-    };
+    selected: SelectedState;
     setSelected: () => void;
 }
 
@@ -1172,12 +1168,7 @@ interface CollectionSidebarProps {
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
     onSetOpenFileViewer?: (open: boolean) => void;
-    selected: {
-        ownCount: number;
-        count: number;
-        context: undefined;
-        collectionID: number;
-    };
+    selected: SelectedState;
     setSelected: () => void;
 }
 
