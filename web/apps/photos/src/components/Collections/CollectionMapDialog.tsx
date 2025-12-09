@@ -488,6 +488,7 @@ function createMarkerIcon(
                 position: relative;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             ">
               <div style="
                   width: ${pinSize}px;
@@ -573,6 +574,7 @@ function createClusterIcon(
                 cursor: pointer;
                 transition: all 0.3s ease;
                 overflow: visible;
+                filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
             ">
               <div style="
                   width: ${pinSize}px;
@@ -770,6 +772,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     const mapComponents = useMapComponents();
     const user = useCurrentUser();
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [markerClickFileID, setMarkerClickFileID] = useState<
+        number | undefined
+    >(undefined);
     const optimalZoom = calculateOptimalZoom();
 
     const {
@@ -940,6 +945,11 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                 selected={emptySelected}
                 setSelected={noOpSetSelected}
                 onSetOpenFileViewer={handleSetFileViewerOpen}
+                markerClickFileID={markerClickFileID}
+                onMarkerClick={setMarkerClickFileID}
+                onMarkerClickFileIDHandled={() =>
+                    setMarkerClickFileID(undefined)
+                }
             />
         );
     }, [
@@ -975,6 +985,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         visiblePhotos,
         onClose,
         handleSetFileViewerOpen,
+        markerClickFileID,
     ]);
 
     return (
@@ -1002,9 +1013,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                     bgcolor: "background.default",
                 }}
             >
-                <DialogContent
-                    sx={{ padding: "0 !important", height: "100%" }}
-                >
+                <DialogContent sx={{ padding: "0 !important", height: "100%" }}>
                     {body}
                 </DialogContent>
             </Box>
@@ -1052,6 +1061,9 @@ interface MapLayoutProps {
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
     onSetOpenFileViewer?: (open: boolean) => void;
+    markerClickFileID?: number;
+    onMarkerClick?: (fileID: number) => void;
+    onMarkerClickFileIDHandled?: () => void;
     selected: {
         ownCount: number;
         count: number;
@@ -1090,6 +1102,9 @@ function MapLayout({
     onSelectCollection,
     onSelectPerson,
     onSetOpenFileViewer,
+    markerClickFileID,
+    onMarkerClick,
+    onMarkerClickFileIDHandled,
     selected,
     setSelected,
 }: MapLayoutProps) {
@@ -1121,6 +1136,8 @@ function MapLayout({
                 selected={selected}
                 setSelected={setSelected}
                 onSetOpenFileViewer={onSetOpenFileViewer}
+                openFileID={markerClickFileID}
+                onOpenFileIDHandled={onMarkerClickFileIDHandled}
             />
             <Box sx={{ width: "100%", height: "100%" }}>
                 <MapCanvas
@@ -1131,6 +1148,7 @@ function MapLayout({
                     thumbByFileID={thumbByFileID}
                     createClusterCustomIcon={createClusterCustomIcon}
                     onVisiblePhotosChange={onVisiblePhotosChange}
+                    onMarkerClick={onMarkerClick}
                 />
             </Box>
         </Box>
@@ -1172,6 +1190,8 @@ interface CollectionSidebarProps {
     onSelectCollection?: FileListWithViewerProps["onSelectCollection"];
     onSelectPerson?: FileListWithViewerProps["onSelectPerson"];
     onSetOpenFileViewer?: (open: boolean) => void;
+    openFileID?: number;
+    onOpenFileIDHandled?: () => void;
     selected: {
         ownCount: number;
         count: number;
@@ -1212,6 +1232,8 @@ function CollectionSidebar({
     onSelectCollection,
     onSelectPerson,
     onSetOpenFileViewer,
+    openFileID,
+    onOpenFileIDHandled,
     selected,
     setSelected,
 }: CollectionSidebarProps) {
@@ -1330,6 +1352,8 @@ function CollectionSidebar({
                             header={coverHeader}
                             onScroll={handleScroll}
                             onVisibleDateChange={handleVisibleDateChange}
+                            openFileID={openFileID}
+                            onOpenFileIDHandled={onOpenFileIDHandled}
                         />
                     ) : (
                         <EmptyState>
@@ -1374,6 +1398,7 @@ interface MapCanvasProps {
     thumbByFileID: Map<number, string>;
     createClusterCustomIcon: (cluster: unknown) => unknown;
     onVisiblePhotosChange: (photosInView: JourneyPoint[]) => void;
+    onMarkerClick?: (fileID: number) => void;
 }
 
 const MapCanvas = React.memo(function MapCanvas({
@@ -1384,6 +1409,7 @@ const MapCanvas = React.memo(function MapCanvas({
     thumbByFileID,
     createClusterCustomIcon,
     onVisiblePhotosChange,
+    onMarkerClick,
 }: MapCanvasProps) {
     const { MapContainer, TileLayer, Marker, useMap, MarkerClusterGroup } =
         mapComponents;
@@ -1436,6 +1462,9 @@ const MapCanvas = React.memo(function MapCanvas({
                         key={`${photo.fileId}-${thumbByFileID.has(photo.fileId)}`}
                         position={[photo.lat, photo.lng]}
                         icon={markerIcons.get(photo.fileId) ?? undefined}
+                        eventHandlers={{
+                            click: () => onMarkerClick?.(photo.fileId),
+                        }}
                     />
                 ))}
             </MarkerClusterGroup>
