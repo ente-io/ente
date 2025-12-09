@@ -1817,9 +1817,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             void onRemotePull({ silent: true });
         } catch (e) {
             log.error("Could not update public link", e);
-            if (
-                await isMuseumHTTPError(e, 403, "LINK_EDIT_NOT_ALLOWED")
-            ) {
+            if (await isMuseumHTTPError(e, 403, "LINK_EDIT_NOT_ALLOWED")) {
                 setErrorMessage(t("link_edit_disabled_for_free_accounts"));
             } else {
                 setErrorMessage(t("generic_error"));
