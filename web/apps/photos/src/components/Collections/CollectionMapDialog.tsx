@@ -863,21 +863,10 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
                     typeof next === "function"
                         ? (next as (prev: boolean) => boolean)(isFileViewerOpen)
                         : next;
-
-                if (nextValue && !hasClosingPreview) {
-                    createClosingPreview();
-                }
                 setIsFileViewerOpen(nextValue);
             },
-            [createClosingPreview, hasClosingPreview, isFileViewerOpen],
+            [isFileViewerOpen],
         );
-    useEffect(() => {
-        if (open && !isFileViewerOpen && hasClosingPreview) {
-            const timeout = window.setTimeout(cleanupClosingPreview, 120);
-            return () => window.clearTimeout(timeout);
-        }
-        return undefined;
-    }, [cleanupClosingPreview, hasClosingPreview, isFileViewerOpen, open]);
 
     // Convert visible JourneyPoints to EnteFiles for FileListWithViewer
     const visibleFiles = useMemo(() => {
@@ -1050,30 +1039,38 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
     ]);
 
     return (
-        <>
-            <Dialog
-                fullScreen
-                keepMounted
-                open={open && !isFileViewerOpen}
-                onClose={handleClose}
+        <Dialog
+            fullScreen
+            keepMounted
+            open={open}
+            onClose={handleClose}
+            sx={{
+                // When the FileViewer is open, lower this dialog's z-index below
+                // PhotoSwipe's z-index (1199) so that FileViewer appears on top.
+                // This avoids the visual glitch caused by closing/reopening the
+                // dialog during transitions.
+                ...(isFileViewerOpen && {
+                    zIndex: (theme) =>
+                        `calc(${theme.zIndex.drawer} - 2) !important`,
+                }),
+            }}
+        >
+            <Box
+                sx={{
+                    position: "relative",
+                    width: "100vw",
+                    height: "100vh",
+                    bgcolor: "background.default",
+                }}
+                ref={dialogRootRef}
             >
-                <Box
-                    sx={{
-                        position: "relative",
-                        width: "100vw",
-                        height: "100vh",
-                        bgcolor: "background.default",
-                    }}
-                    ref={dialogRootRef}
+                <DialogContent
+                    sx={{ padding: "0 !important", height: "100%" }}
                 >
-                    <DialogContent
-                        sx={{ padding: "0 !important", height: "100%" }}
-                    >
-                        {body}
-                    </DialogContent>
-                </Box>
-            </Dialog>
-        </>
+                    {body}
+                </DialogContent>
+            </Box>
+        </Dialog>
     );
 };
 
