@@ -75,6 +75,24 @@ class SocialDebugScreen extends StatelessWidget {
                           showShortToast(context, "Deleted $count comments");
                         },
                       ),
+                      const SizedBox(height: 24),
+                      MenuItemWidget(
+                        captionedTextWidget: const CaptionedTextWidget(
+                          title: "Delete all reactions",
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        trailingWidget: Icon(
+                          Icons.chevron_right_outlined,
+                          color: colorScheme.strokeBase,
+                        ),
+                        singleBorderRadius: 8,
+                        alignCaptionedTextToLeft: true,
+                        onTap: () async {
+                          final count =
+                              await SocialDB.instance.deleteAllReactions();
+                          showShortToast(context, "Deleted $count reactions");
+                        },
+                      ),
                     ],
                   ),
                 );

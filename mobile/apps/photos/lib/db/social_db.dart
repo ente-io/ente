@@ -218,6 +218,14 @@ class SocialDB {
     return deletedCount;
   }
 
+  /// Delete all reactions from the database
+  Future<int> deleteAllReactions() async {
+    final db = await database;
+    final deletedCount = await db.delete(reactionsTable);
+    _logger.info('Deleted $deletedCount reactions');
+    return deletedCount;
+  }
+
   /// Seeds the database with example comments and reactions for testing.
   Future<void> seedExampleData() async {}
 
