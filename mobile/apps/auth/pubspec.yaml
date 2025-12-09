@@ -100,6 +100,7 @@ dependencies:
   intl: ^0.20.2
   io: ^1.0.4
   json_annotation: ^4.5.0
+  launcher_icon_switcher: ^0.0.2
   local_auth: ^2.3.0
   local_auth_android: ^1.0.37
   local_auth_darwin: ^1.2.2
@@ -163,6 +164,7 @@ flutter:
   assets:
     - assets/
     - assets/icons/
+    - assets/launcher_icon/
     - assets/simple-icons/icons/
     - assets/simple-icons/_data/
     - assets/custom-icons/icons/

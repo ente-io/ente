@@ -72,9 +72,10 @@ class InfoFileService {
         infoKey: infoData,
       };
 
-      // Update title if it's different
+      // Update title if it's different from current display name
+      // Use displayName (which considers editedName) instead of title (original name)
       final updatedTitle = getInfoFileTitle(updatedInfoItem);
-      if (existingFile.title != updatedTitle) {
+      if (existingFile.displayName != updatedTitle) {
         metadataUpdates[editNameKey] = updatedTitle;
         metadataUpdates[editTimeKey] = DateTime.now().millisecondsSinceEpoch;
       }

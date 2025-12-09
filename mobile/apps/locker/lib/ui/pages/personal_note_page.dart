@@ -4,7 +4,6 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
@@ -25,7 +24,6 @@ class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
 
 class _PersonalNotePageState
     extends BaseInfoPageState<PersonalNoteData, PersonalNotePage> {
-  static const String _defaultTitle = 'Note title';
   static const double _editorMinWidth = 320.0;
   static const double _editorMaxWidth = 720.0;
   static const double _editorWidthFactor = 0.92;
@@ -54,7 +52,6 @@ class _PersonalNotePageState
   @override
   void loadExistingData() {
     _syncControllers(
-      selectAllTitle: true,
       triggerSetState: false,
       updateInitial: true,
     );
@@ -64,7 +61,6 @@ class _PersonalNotePageState
   void refreshUIWithCurrentData() {
     super.refreshUIWithCurrentData();
     _syncControllers(
-      selectAllTitle: false,
       triggerSetState: true,
       updateInitial: true,
     );
@@ -111,7 +107,9 @@ class _PersonalNotePageState
 
   @override
   bool validateForm() {
-    return _contentController.text.trim().isNotEmpty;
+    final title = _nameController.text.trim();
+    final content = _contentController.text.trim();
+    return title.isNotEmpty && content.isNotEmpty;
   }
 
   @override
@@ -315,6 +313,8 @@ class _PersonalNotePageState
     }
     _titleFocusNode.canRequestFocus = isEditing;
 
+    final colorScheme = getEnteColorScheme(context);
+
     return TextField(
       controller: _nameController,
       focusNode: _titleFocusNode,
@@ -322,10 +322,12 @@ class _PersonalNotePageState
       showCursor: isEditing,
       enableInteractiveSelection: true,
       style: textTheme.h3Bold,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         border: InputBorder.none,
         isDense: true,
         contentPadding: EdgeInsets.zero,
+        hintText: context.l10n.noteNameHint,
+        hintStyle: textTheme.h3Bold.copyWith(color: colorScheme.textFaint),
       ),
       textCapitalization: TextCapitalization.sentences,
       maxLines: 1,
@@ -333,21 +335,13 @@ class _PersonalNotePageState
   }
 
   void _syncControllers({
-    bool selectAllTitle = false,
     bool triggerSetState = true,
     bool updateInitial = false,
   }) {
     _isControllerSyncInProgress = true;
     try {
       final data = currentData;
-      final trimmedTitle = data?.title.trim() ?? '';
-      final effectiveTitle =
-          trimmedTitle.isEmpty ? _defaultTitle : trimmedTitle;
-      final shouldSelectAll = selectAllTitle && trimmedTitle.isEmpty;
-      _updateTitleController(
-        effectiveTitle,
-        selectAll: shouldSelectAll,
-      );
+      _nameController.text = data?.title ?? '';
       _contentController.text = data?.content ?? '';
       if (updateInitial) {
         _initialContent = _contentController.text;
@@ -393,14 +387,6 @@ class _PersonalNotePageState
     if (_isControllerSyncInProgress) {
       return;
     }
-
-    final titleText = _nameController.text.trim();
-    final contentText = _contentController.text.trim();
-    if (titleText == _defaultTitle && contentText.isNotEmpty) {
-      final generatedTitle = _formatCurrentTimestamp();
-      _updateTitleController(generatedTitle);
-    }
-
     _notifyFormChanged();
   }
 
@@ -414,38 +400,11 @@ class _PersonalNotePageState
     return _contentController.text.trim() != _initialContent.trim();
   }
 
-  void _updateTitleController(String value, {bool selectAll = false}) {
-    _nameController.value = TextEditingValue(
-      text: value,
-      selection: selectAll
-          ? TextSelection(baseOffset: 0, extentOffset: value.length)
-          : TextSelection.collapsed(offset: value.length),
-    );
-  }
-
-  String _formatCurrentTimestamp() {
-    final now = DateTime.now();
-    final monthAbbreviation = DateFormat('MMM').format(now);
-    final day = DateFormat('d').format(now);
-    final year = DateFormat('yyyy').format(now);
-    final time = DateFormat('h:mma').format(now).toLowerCase();
-    return '$monthAbbreviation $day, $year - $time';
-  }
-
   void _onTitleFocusChanged() {
     if (_isControllerSyncInProgress) {
       return;
     }
-
-    if (_titleFocusNode.hasFocus) {
-      if (_nameController.text.trim() == _defaultTitle) {
-        _updateTitleController('');
-      }
-    } else {
-      if (_nameController.text.trim().isEmpty) {
-        _updateTitleController(_defaultTitle);
-      }
-    }
+    _notifyFormChanged();
   }
 
   void _onContentFocusChanged() {
@@ -478,7 +437,6 @@ class _PersonalNotePageState
     }
 
     _syncControllers(
-      selectAllTitle: false,
       triggerSetState: true,
       updateInitial: false,
     );

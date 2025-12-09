@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Храните ваши коды двухфакторной аутентификации в безопасности",
   "onBoardingGetStarted": "Начать",
-  "setupFirstAccount": "Настройте свой первый аккаунт",
   "allTabEmptyHint": "Ничего не найдено. Нажмите +, чтобы добавить код, или откройте Корзину, чтобы восстановить его.",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"

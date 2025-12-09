@@ -1392,11 +1392,35 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                     child: TextField(
                       controller: customEmojiController,
                       textInputAction: TextInputAction.done,
+                      onTap: () {
+                        final text = customEmojiController.text;
+                        customEmojiController.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: text.length,
+                        );
+                      },
                       onChanged: (value) {
                         final trimmed = value.trim();
-                        final firstGrapheme = trimmed.isEmpty
+                        final firstGrapheme = trimmed.characters.isEmpty
                             ? ""
                             : trimmed.characters.take(1).toString();
+                        if (firstGrapheme.isEmpty) {
+                          customEmoji = "";
+                          customEmojiController.value = const TextEditingValue(
+                            text: "",
+                            selection: TextSelection.collapsed(offset: 0),
+                          );
+                          return;
+                        }
+                        if (!_isEmoji(firstGrapheme)) {
+                          customEmojiController.value = TextEditingValue(
+                            text: customEmoji,
+                            selection: TextSelection.collapsed(
+                              offset: customEmoji.length,
+                            ),
+                          );
+                          return;
+                        }
                         customEmojiController.value = TextEditingValue(
                           text: firstGrapheme,
                           selection: TextSelection.collapsed(
@@ -1407,7 +1431,7 @@ Future<String?> _pickEmoji(BuildContext context, String current) async {
                       },
                       onSubmitted: (value) {
                         final trimmed = value.trim();
-                        if (trimmed.isEmpty) return;
+                        if (trimmed.isEmpty || !_isEmoji(trimmed)) return;
                         selected = trimmed.characters.take(1).toString();
                         Navigator.of(context).pop();
                       },
@@ -1465,3 +1489,17 @@ const _tightTextHeightBehavior = TextHeightBehavior(
   applyHeightToFirstAscent: false,
   applyHeightToLastDescent: false,
 );
+
+bool _isEmoji(String value) {
+  if (value.isEmpty) return false;
+  final codePoints = value.runes;
+  for (final codePoint in codePoints) {
+    if ((codePoint >= 0x1F300 && codePoint <= 0x1FAFF) ||
+        (codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF) ||
+        (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) ||
+        (codePoint >= 0x2600 && codePoint <= 0x27BF)) {
+      return true;
+    }
+  }
+  return false;
+}

@@ -9,6 +9,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/settings/app_icon_selection_screen.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
@@ -66,6 +67,24 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           },
         ),
         sectionOptionSpacing,
+        if (Platform.isIOS || Platform.isAndroid) ...[
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: l10n.appIcon,
+            ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () async {
+              // ignore: unawaited_futures
+              routeToPage(
+                context,
+                const AppIconSelectionScreen(),
+              );
+            },
+          ),
+          sectionOptionSpacing,
+        ],
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.showLargeIcons,

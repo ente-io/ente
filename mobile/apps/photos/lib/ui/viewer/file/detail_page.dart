@@ -190,9 +190,10 @@ class _BodyState extends State<_Body> {
               return FileAppBar(
                 _files![selectedIndex],
                 _onFileRemoved,
-                widget.config.mode == DetailPageMode.full,
+                _onEditFileRequested,
                 enableFullScreenNotifier: InheritedDetailPageState.of(context)
                     .enableFullScreenNotifier,
+                mode: widget.config.mode,
               );
             },
             valueListenable: _selectedIndexNotifier,
@@ -207,35 +208,32 @@ class _BodyState extends State<_Body> {
               _buildPageView(),
               ValueListenableBuilder(
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return FileBottomBar(
-                    _files![selectedIndex],
-                    _onEditFileRequested,
-                    widget.config.mode == DetailPageMode.minimalistic &&
-                        !isGuestView,
-                    onFileRemoved: _onFileRemoved,
-                    userID: Configuration.instance.getUserID(),
-                    enableFullScreenNotifier:
-                        InheritedDetailPageState.of(context)
-                            .enableFullScreenNotifier,
-                    isLocalOnlyContext: widget.config.isLocalOnlyContext,
-                  );
+                  return widget.config.mode == DetailPageMode.minimalistic
+                      ? const SizedBox()
+                      : FileBottomBar(
+                          _files![selectedIndex],
+                          onFileRemoved: _onFileRemoved,
+                          userID: Configuration.instance.getUserID(),
+                          enableFullScreenNotifier:
+                              InheritedDetailPageState.of(context)
+                                  .enableFullScreenNotifier,
+                          isLocalOnlyContext: widget.config.isLocalOnlyContext,
+                        );
                 },
                 valueListenable: _selectedIndexNotifier,
               ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,
                 builder: (BuildContext context, int selectedIndex, _) {
-                  return TextDetectionOverlayButton(
-                    file: _files![selectedIndex],
-                    enableFullScreenNotifier:
-                        InheritedDetailPageState.of(context)
-                            .enableFullScreenNotifier,
-                    isGuestView: isGuestView,
-                    showOnlyInfoButton:
-                        widget.config.mode == DetailPageMode.minimalistic &&
-                            !isGuestView,
-                    userID: Configuration.instance.getUserID(),
-                  );
+                  return widget.config.mode == DetailPageMode.minimalistic
+                      ? const SizedBox.shrink()
+                      : TextDetectionOverlayButton(
+                          file: _files![selectedIndex],
+                          enableFullScreenNotifier:
+                              InheritedDetailPageState.of(context)
+                                  .enableFullScreenNotifier,
+                          isGuestView: isGuestView,
+                        );
                 },
               ),
               ValueListenableBuilder(

@@ -258,6 +258,7 @@
   "shareWithNonenteUsers": "与非 Ente 用户共享",
   "createPublicLink": "创建公开链接",
   "sendLink": "发送链接",
+  "qrCode": "二维码",
   "sendQrCode": "发送二维码",
   "copyLink": "复制链接",
   "copyEmbedHtml": "复制嵌入 HTML",
@@ -350,7 +351,7 @@
   "removeFromAlbumTitle": "要从相册中移除吗？",
   "removeFromAlbum": "从相册中移除",
   "itemsWillBeRemovedFromAlbum": "所选项目将从此相册中移除",
-  "removeShareItemsWarning": "您要删除的某些项目是由其他人添加的，您将无法访问它们",
+  "removeShareItemsWarning": "除了照片所有者之外，本相册中的部分照片将不对任何其他浏览者开放。",
   "addingToFavorites": "正在添加到收藏...",
   "removingFromFavorites": "正在从收藏中删除...",
   "sorryCouldNotAddToFavorites": "抱歉，无法添加到收藏！",
@@ -2081,5 +2082,91 @@
     "description": "Fallback message when the faces timeline cannot be displayed yet"
   },
   "playfulKids": "童趣时光",
-  "coastalCliffs": "海边峭壁"
+  "coastalCliffs": "海边峭壁",
+  "ritualsTitle": "仪式",
+  "ritualAddTooltip": "添加仪式",
+  "ritualActivityHeading": "活动",
+  "ritualDefaultHeatmapTitle": "每日一拍",
+  "ritualUntitled": "未命名仪式",
+  "ritualShareUnavailable": "暂时无法分享，请稍后重试。",
+  "ritualNotificationMessage": "立即拍照",
+  "ritualCameraNotFound": "在此设备上未找到相机。",
+  "ritualCameraStartError": "无法启动相机，请检查权限",
+  "ritualCaptureError": "无法拍摄照片。请重试。",
+  "ritualPhotoLimit": "您最多可以添加 {maxPhotos, plural, other {# 张照片。}}",
+  "@ritualPhotoLimit": {
+    "placeholders": {
+      "maxPhotos": {
+        "type": "int",
+        "description": "Maximum number of photos allowed"
+      }
+    }
+  },
+  "ritualCaptureAtLeastOne": "先至少拍一张照片。",
+  "ritualAlbumMissing": "仪式相册缺失。请编辑仪式以设置相册。",
+  "ritualAddedToAlbum": "已添加到相册",
+  "ritualAddedToAlbumWithName": "已添加到 {albumName}",
+  "@ritualAddedToAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "The target album name"
+      }
+    }
+  },
+  "ritualAddToAlbumFailure": "无法向此相册添加照片： {error}",
+  "@ritualAddToAlbumFailure": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "description": "Error message for album add failure"
+      }
+    }
+  },
+  "ritualBackToList": "回到仪式",
+  "ritualNoPhotosYet": "暂无照片",
+  "ritualSetAlbumToLaunchCamera": "设置一个相册，记录下这个启动相机的仪式。",
+  "ritualDefaultCameraTitle": "拍照",
+  "ritualBadgeMessage7": "7天过去了！坚持不懈让你看起来状态很好。继续加油！",
+  "ritualBadgeMessage14": "已经坚持了14天！你的仪式正在变成一种习惯。太棒了！",
+  "ritualBadgeMessage30": "连续30天！真是传奇般的稳定性。太棒了！",
+  "ritualBadgeMessageDefault": "你最近状态超好！",
+  "ritualBadgeNewTitle": "新成就",
+  "ritualBadgePreparing": "准备中...",
+  "ritualStreaksLabel": "连胜",
+  "ritualCreateYourOwn": "创建你自己的仪式",
+  "ritualGetDailyReminders": "每日提醒",
+  "ritualAlbumNotSet": "相册未设置",
+  "ritualOpenCameraTooltip": "打开仪式相机",
+  "ritualEditorLabel": "仪式编辑器",
+  "ritualNew": "新仪式",
+  "ritualEdit": "编辑仪式",
+  "ritualEnterPrompt": "输入您的仪式",
+  "ritualEnterDescription": "请输入描述",
+  "ritualDayLabel": "天",
+  "ritualNotificationsOffHint": "通知已关闭。点击日期即可开启通知。",
+  "ritualTimeLabel": "时间",
+  "ritualAlbumLabel": "相册",
+  "ritualSave": "保存仪式",
+  "ritualUpdate": "更新仪式",
+  "ritualSelectAlbumTitle": "选择相册",
+  "ritualSearchOrCreate": "搜索或新建",
+  "ritualNoAlbumsYet": "暂无相册",
+  "ritualNoMatchingAlbums": "没有匹配的相册",
+  "ritualCreateAlbumWithName": "创建“{albumName}“",
+  "@ritualCreateAlbumWithName": {
+    "placeholders": {
+      "albumName": {
+        "type": "String",
+        "description": "Album name typed by the user"
+      }
+    }
+  },
+  "ritualCreateNew": "新建",
+  "ritualAlbumSelectionPlaceholder": "选择相册",
+  "ritualPickEmojiTitle": "选择一个表情",
+  "ritualCustomKeyboardLabel": "自定义（键盘）",
+  "ritualEmojiKeyboardHint": "按下即可打开表情符号键盘",
+  "ritualEmojiUseAction": "使用",
+  "ritualSearchEmpty": "养成拍照的习惯，并为此建立一套仪式。"
 }

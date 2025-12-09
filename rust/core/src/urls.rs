@@ -1,7 +1,6 @@
+//! URL construction utilities.
+
 /// Generate the download URL for a file.
-///
-/// - If api_base_url is production (https://api.ente.io), return CDN URL
-/// - Otherwise, return direct API URL
 pub fn file_download_url(api_base_url: &str, file_id: i64) -> String {
     if api_base_url == "https://api.ente.io" {
         format!("https://files.ente.io/?fileID={}", file_id)

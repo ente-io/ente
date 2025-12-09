@@ -629,7 +629,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteName => 'Title';
 
   @override
-  String get noteNameHint => 'Hint text';
+  String get noteNameHint => 'Note title';
 
   @override
   String get noteContent => 'Content';
@@ -1473,5 +1473,5 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionRequiredForSharing =>
-      'You need an active paid subscription to enable sharing.';
+      'You need a paid subscription to share links';
 }
