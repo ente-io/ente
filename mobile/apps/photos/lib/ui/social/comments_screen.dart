@@ -193,6 +193,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                       }
                       final comment = _comments[index];
                       return CommentBubbleWidget(
+                        key: ValueKey(comment.id),
                         comment: comment,
                         isOwnComment: comment.userID == _currentUserID,
                         currentUserID: _currentUserID,

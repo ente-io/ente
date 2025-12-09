@@ -45,6 +45,17 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
     _loadData();
   }
 
+  @override
+  void didUpdateWidget(CommentBubbleWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.comment.id != oldWidget.comment.id) {
+      _parentComment = null;
+      _reactions = [];
+      _isLiked = false;
+      _loadData();
+    }
+  }
+
   Future<void> _loadData() async {
     // Load parent if reply
     if (widget.comment.isReply && widget.onFetchParent != null) {
