@@ -169,6 +169,7 @@ function useCurrentUser() {
  */
 function useMapData(
     open: boolean,
+    collectionSummary: CollectionSummary,
     activeCollection: Collection | undefined,
     onGenericError: (e: unknown) => void,
 ): MapDataResult {
@@ -215,13 +216,16 @@ function useMapData(
     );
 
     useEffect(() => {
-        if (!open || !activeCollection) return;
+        if (!open) return;
 
         const loadMapData = async () => {
             setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
             try {
-                const files = await getFilesForCollection(activeCollection);
+                const files = await getFilesForCollection(
+                    collectionSummary,
+                    activeCollection,
+                );
                 const locationPoints = extractLocationPoints(files); // transforms the files into JourneyData[]
 
                 if (locationPoints.length) {
@@ -278,7 +282,7 @@ function useMapData(
         };
 
         void loadMapData();
-    }, [open, activeCollection, onGenericError, loadAllThumbs]);
+    }, [open, collectionSummary, activeCollection, onGenericError, loadAllThumbs]);
 
     const removeFiles = useCallback((fileIDs: number[]) => {
         if (!fileIDs.length) return;
@@ -714,9 +718,16 @@ function sortPhotosByTimestamp(photos: JourneyPoint[]): JourneyPoint[] {
  * target collection, removes duplicates by ID, and returns the unique set.
  */
 async function getFilesForCollection(
-    activeCollection: Collection,
+    collectionSummary: CollectionSummary,
+    activeCollection: Collection | undefined,
 ): Promise<EnteFile[]> {
     const allFiles = await savedCollectionFiles();
+    if (collectionSummary.type === "all") {
+        return uniqueFilesByID(allFiles);
+    }
+    if (!activeCollection) {
+        return [];
+    }
     const filtered = allFiles.filter(
         (file) => file.collectionID === activeCollection.id,
     );
@@ -784,7 +795,7 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
         error,
         removeFiles: removeFilesFromMap,
         updateFileVisibility,
-    } = useMapData(open, activeCollection, onGenericError);
+    } = useMapData(open, collectionSummary, activeCollection, onGenericError);
 
     const { visiblePhotos, setVisiblePhotos } = useVisiblePhotos();
 
@@ -830,9 +841,9 @@ export const CollectionMapDialog: React.FC<CollectionMapDialogProps> = ({
             ownCount: 0,
             count: 0,
             context: undefined,
-            collectionID: activeCollection?.id,
+            collectionID: activeCollection?.id ?? collectionSummary.id,
         }),
-        [activeCollection?.id],
+        [activeCollection?.id, collectionSummary.id],
     );
     const noOpSetSelected = useCallback(() => {
         /* no-op */

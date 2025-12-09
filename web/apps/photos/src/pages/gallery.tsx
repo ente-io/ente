@@ -1396,6 +1396,8 @@ const Page: React.FC = () => {
                     setSelected={setSelected}
                     // TODO: Incorrect assertion, need to update the type
                     activeCollectionID={activeCollectionID!}
+                    activeCollectionSummary={activeCollectionSummary}
+                    activeCollection={activeCollection}
                     activePersonID={activePerson?.id}
                     isInIncomingSharedCollection={activeCollectionSummary?.attributes.has(
                         "sharedIncoming",

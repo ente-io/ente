@@ -1,4 +1,7 @@
-import { styled } from "@mui/material";
+import { IconButton, Tooltip, styled } from "@mui/material";
+import { CollectionMapDialog } from "components/Collections/CollectionMapDialog";
+import { useModalVisibility } from "ente-base/components/utils/modal";
+import { useBaseContext } from "ente-base/context";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
 import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
@@ -10,8 +13,12 @@ import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { moveToTrash } from "ente-new/photos/services/collection";
+import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import { updateMapEnabled } from "ente-new/photos/services/settings";
+import { GlobalIcon } from "hugeicons-react";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -48,6 +55,8 @@ export type FileListWithViewerProps = {
      * pull from remote.
      */
     onRemotePull: () => Promise<void>;
+    activeCollectionSummary?: CollectionSummary;
+    activeCollection?: Collection;
     /**
      * A function that can be used to create a UI notification to track the
      * progress of user-initiated download, and to cancel it if needed.
@@ -119,6 +128,8 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     setSelected,
     activeCollectionID,
     activePersonID,
+    activeCollectionSummary,
+    activeCollection,
     favoriteFileIDs,
     emailByUserID,
     listBorderRadius,
@@ -144,6 +155,10 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 }) => {
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const { show: showMapDialog, props: mapDialogVisibilityProps } =
+        useModalVisibility();
+    const { onGenericError } = useBaseContext();
+    const { mapEnabled } = useSettingsSnapshot();
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -199,6 +214,45 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         };
     }, [enableImageEditing]);
 
+    const shouldShowMapButton =
+        activeCollectionSummary?.type === "all" &&
+        activeCollectionSummary.fileCount > 0;
+
+    const handleShowMap = useCallback(async () => {
+        if (!activeCollectionSummary) return;
+        if (!mapEnabled) {
+            try {
+                await updateMapEnabled(true);
+            } catch (e) {
+                onGenericError(e);
+                return;
+            }
+        }
+        showMapDialog();
+    }, [activeCollectionSummary, mapEnabled, onGenericError, showMapDialog]);
+
+    const headerWithMap = useMemo(() => {
+        if (!shouldShowMapButton || !header) return header;
+        return {
+            ...header,
+            component: (
+                <HeaderWithMap>
+                    <HeaderMain>{header.component}</HeaderMain>
+                    <Tooltip title={t("map")}>
+                        <IconButton
+                            className="map-button"
+                            size="small"
+                            aria-label={t("map")}
+                            onClick={handleShowMap}
+                        >
+                            <GlobalIcon size={24} />
+                        </IconButton>
+                    </Tooltip>
+                </HeaderWithMap>
+            ),
+        };
+    }, [header, handleShowMap, shouldShowMapButton]);
+
     return (
         <Container>
             <AutoSizer>
@@ -208,7 +262,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
-                            header,
+                            header: headerWithMap,
                             footer,
                             user,
                             disableGrouping,
@@ -259,6 +313,25 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onAddFileToCollection={onAddFileToCollection}
                 activeCollectionID={activeCollectionID}
             />
+            {shouldShowMapButton && (
+                <CollectionMapDialog
+                    {...mapDialogVisibilityProps}
+                    collectionSummary={activeCollectionSummary}
+                    activeCollection={activeCollection}
+                    onRemotePull={onRemotePull}
+                    {...{
+                        onAddSaveGroup,
+                        onMarkTempDeleted,
+                        onAddFileToCollection,
+                        onRemoteFilesPull,
+                        onVisualFeedback,
+                        fileNormalCollectionIDs,
+                        collectionNameByID,
+                        onSelectCollection,
+                        onSelectPerson,
+                    }}
+                />
+            )}
         </Container>
     );
 };
@@ -266,6 +339,23 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
 const Container = styled("div")`
     flex: 1;
     width: 100%;
+`;
+
+const HeaderWithMap = styled("div")`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    width: 100%;
+    & > .map-button {
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+`;
+
+const HeaderMain = styled("div")`
+    flex: 1;
+    min-width: 0;
 `;
 
 /**
