@@ -275,7 +275,7 @@ jobs:
                   updateOnlyUnreleased: true
 
     build-macos:
-        runs-on: macos-latest
+        runs-on: macos-15
 
         defaults:
             run:
