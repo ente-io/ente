@@ -339,28 +339,12 @@ class FileUploader {
   Future<void> _cleanupAndSkip(FileUploadItem entry, Error error) async {
     final localId = entry.file.localID;
     if (localId != null) {
-      await _cleanupPendingUpload(localId, entry.collectionID);
+      await FilesDB.instance.cleanupByLocalIDAndCollection(
+        localId,
+        entry.collectionID,
+      );
     }
     _removeAndSkip(entry, error);
-  }
-
-  /// Helper to cleanup a file entry from the database by localID and collectionID.
-  /// This is used when a file should be removed from pending uploads (e.g., folder
-  /// deselected, file too old for only-new backup preference).
-  /// Errors are logged at warning level but not rethrown to avoid blocking the upload flow.
-  Future<void> _cleanupPendingUpload(String localID, int collectionID) async {
-    try {
-      await FilesDB.instance.cleanupByLocalIDAndCollection(
-        localID,
-        collectionID,
-      );
-    } catch (e, s) {
-      _logger.warning(
-        "Failed to cleanup pending upload localID=$localID, collectionID=$collectionID",
-        e,
-        s,
-      );
-    }
   }
 
   Future<bool> _skipPendingEntryIfFilteredOut(

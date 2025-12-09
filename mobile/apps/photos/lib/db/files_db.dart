@@ -1467,21 +1467,33 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
+  /// Cleanup a file entry from the database by localID and collectionID.
+  /// This is used when a file should be removed from pending uploads (e.g., folder
+  /// deselected, file too old for only-new backup preference).
+  /// Errors are logged at warning level but not rethrown to avoid blocking the upload flow.
   Future<void> cleanupByLocalIDAndCollection(
     String localId,
     int collectionId,
   ) async {
-    final db = await instance.sqliteAsyncDB;
-    // Delete the pending upload entry. It will be repopulated on next sync
-    // if the file still qualifies for backup.
-    await db.execute(
-      '''
-      DELETE FROM $filesTable
-      WHERE $columnLocalID = ? AND $columnCollectionID = ?
-      AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
-      ''',
-      [localId, collectionId],
-    );
+    try {
+      final db = await instance.sqliteAsyncDB;
+      // Delete the pending upload entry. It will be repopulated on next sync
+      // if the file still qualifies for backup.
+      await db.execute(
+        '''
+        DELETE FROM $filesTable
+        WHERE $columnLocalID = ? AND $columnCollectionID = ?
+        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+        ''',
+        [localId, collectionId],
+      );
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to cleanup pending upload localID=$localId, collectionID=$collectionId",
+        e,
+        s,
+      );
+    }
   }
 
   Future<Set<String>> getLocalIDsPresentInEntries(
