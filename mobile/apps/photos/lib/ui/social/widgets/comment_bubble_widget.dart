@@ -1,15 +1,19 @@
 import "package:flutter/material.dart";
+import "package:photos/extensions/user_extension.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
+import "package:photos/ui/sharing/user_avator_widget.dart";
 import "package:photos/ui/social/widgets/comment_actions_capsule.dart";
 import "package:photos/utils/social/relative_time_formatter.dart";
 
 class CommentBubbleWidget extends StatefulWidget {
   final Comment comment;
+  final User user;
   final bool isOwnComment;
   final int currentUserID;
   final int collectionID;
@@ -19,6 +23,7 @@ class CommentBubbleWidget extends StatefulWidget {
 
   const CommentBubbleWidget({
     required this.comment,
+    required this.user,
     required this.isOwnComment,
     required this.currentUserID,
     required this.collectionID,
@@ -112,9 +117,11 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text(
-              formatRelativeTime(widget.comment.createdAt),
-              style: textTheme.mini.copyWith(color: colorScheme.textMuted),
+            child: _Header(
+              isOwnComment: widget.isOwnComment,
+              user: widget.user,
+              createdAt: widget.comment.createdAt,
+              currentUserID: widget.currentUserID,
             ),
           ),
           _buildBubble(
@@ -231,6 +238,89 @@ class _CommentBubbleWidgetState extends State<CommentBubbleWidget> {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  final bool isOwnComment;
+  final User user;
+  final int createdAt;
+  final int currentUserID;
+
+  const _Header({
+    required this.isOwnComment,
+    required this.user,
+    required this.createdAt,
+    required this.currentUserID,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final name = user.displayName ?? user.email;
+    final timestamp = formatRelativeTime(createdAt);
+
+    if (isOwnComment) {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          timestamp,
+          style: textTheme.mini.copyWith(color: colorScheme.textMuted),
+        ),
+      );
+    }
+
+    final headerText = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          name,
+          style: textTheme.small.copyWith(color: colorScheme.textBase),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(width: 6),
+        Container(
+          width: 4,
+          height: 4,
+          decoration: BoxDecoration(
+            color: colorScheme.textMuted,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          timestamp,
+          style: textTheme.mini.copyWith(color: colorScheme.textMuted),
+        ),
+      ],
+    );
+
+    return Row(
+      mainAxisAlignment:
+          isOwnComment ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        if (!isOwnComment) ...[
+          UserAvatarWidget(
+            user,
+            currentUserID: currentUserID,
+            type: AvatarType.small,
+          ),
+          const SizedBox(width: 10),
+          Flexible(child: headerText),
+        ] else ...[
+          Flexible(child: headerText),
+          const SizedBox(width: 10),
+          UserAvatarWidget(
+            user,
+            currentUserID: currentUserID,
+            type: AvatarType.small,
+          ),
+        ],
+      ],
     );
   }
 }

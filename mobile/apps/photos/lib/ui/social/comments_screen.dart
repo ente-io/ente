@@ -1,8 +1,10 @@
 import "package:flutter/material.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/models/social/reaction.dart";
 import "package:photos/models/social/social_data_provider.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/social/widgets/comment_bubble_widget.dart";
 import "package:photos/ui/social/widgets/comment_input_widget.dart";
@@ -30,6 +32,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   bool _isLoadingMore = false;
   bool _hasMoreComments = true;
   int _offset = 0;
+  final Map<int, User> _userCache = {};
 
   late final TextEditingController _textController;
   late final FocusNode _inputFocusNode;
@@ -124,6 +127,27 @@ class _CommentsScreenState extends State<CommentsScreen> {
     _inputFocusNode.requestFocus();
   }
 
+  User _getUserForComment(Comment comment) {
+    if (_userCache.containsKey(comment.userID)) {
+      return _userCache[comment.userID]!;
+    }
+
+    if (comment.isAnonymous) {
+      final user = User(
+        id: comment.userID,
+        email: "${comment.anonUserID ?? "anonymous"}@unknown.com",
+        name: comment.anonUserID ?? "Anonymous",
+      );
+      _userCache[comment.userID] = user;
+      return user;
+    }
+
+    final user = CollectionsService.instance
+        .getFileOwner(comment.userID, widget.collectionID);
+    _userCache[comment.userID] = user;
+    return user;
+  }
+
   void _dismissReply() {
     setState(() => _replyingTo = null);
   }
@@ -206,6 +230,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                       return CommentBubbleWidget(
                         key: ValueKey(comment.id),
                         comment: comment,
+                        user: _getUserForComment(comment),
                         isOwnComment: comment.userID == _currentUserID,
                         currentUserID: _currentUserID,
                         collectionID: widget.collectionID,
