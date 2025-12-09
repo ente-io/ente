@@ -332,7 +332,7 @@ jobs:
                   path: mobile/apps/auth/artifacts/*
 
     build-macos:
-        runs-on: macos-latest
+        runs-on: macos-15
         needs: build-android-linux
 
         defaults:
