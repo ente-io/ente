@@ -357,9 +357,8 @@ class FileUploader {
     Error? skipReason;
 
     if (flagService.enableBackupFolderSync) {
-      final queueSource = pendingEntry.file.queueSource;
-      final isSelected = queueSource != null &&
-          await deviceFolderSelectionCache.isSelected(queueSource);
+      final isSelected = await deviceFolderSelectionCache
+          .isSelected(pendingEntry.file.queueSource!);
       if (!isSelected) {
         skipReason = BackupFolderDeselectedError();
       }
