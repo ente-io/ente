@@ -1,10 +1,8 @@
-import "package:ente_ui/components/captioned_text_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/drawer/common_settings.dart";
 import "package:url_launcher/url_launcher.dart";
 
 class AboutSectionWidget extends StatelessWidget {
@@ -15,65 +13,44 @@ class AboutSectionWidget extends StatelessWidget {
     return ExpandableMenuItemWidget(
       title: context.l10n.about,
       selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Icons.info_outline,
+      leadingIcon: HugeIcons.strokeRoundedInformationCircle,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: context.l10n.weAreOpenSource,
-          ),
-          trailingIcon: Icons.chevron_right_outlined,
+        ExpandableChildItem(
+          title: context.l10n.weAreOpenSource,
+          trailingIcon: Icons.chevron_right,
           onTap: () async {
             // ignore: unawaited_futures
             launchUrl(Uri.parse("https://github.com/ente-io/ente"));
           },
         ),
-        sectionOptionSpacing,
-        AboutMenuItemWidget(
+        ExpandableChildItem(
           title: context.l10n.privacy,
-          url: "https://ente.io/privacy",
+          trailingIcon: Icons.chevron_right,
+          onTap: () async {
+            await PlatformUtil.openWebView(
+              context,
+              context.l10n.privacy,
+              "https://ente.io/privacy",
+            );
+          },
         ),
-        sectionOptionSpacing,
-        AboutMenuItemWidget(
+        ExpandableChildItem(
           title: context.l10n.termsOfServicesTitle,
-          url: "https://ente.io/terms",
+          trailingIcon: Icons.chevron_right,
+          onTap: () async {
+            await PlatformUtil.openWebView(
+              context,
+              context.l10n.termsOfServicesTitle,
+              "https://ente.io/terms",
+            );
+          },
         ),
-        sectionOptionSpacing,
       ],
-    );
-  }
-}
-
-class AboutMenuItemWidget extends StatelessWidget {
-  final String title;
-  final String url;
-  final String? webPageTitle;
-  const AboutMenuItemWidget({
-    required this.title,
-    required this.url,
-    this.webPageTitle,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return MenuItemWidget(
-      captionedTextWidget: CaptionedTextWidget(
-        title: title,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
-      onTap: () async {
-        await PlatformUtil.openWebView(
-          context,
-          webPageTitle ?? title,
-          url,
-        );
-      },
     );
   }
 }
