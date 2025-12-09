@@ -184,7 +184,8 @@ class SyncService {
         }
         return !collectionIDs.contains(file.collectionID);
       },
-      UserCancelledUploadError(),
+      BackupFolderDeselectedError(),
+      skip: true,
     );
   }
 
