@@ -293,28 +293,24 @@ class FileUploader {
     final bool Function(EnteFile) fn,
     final Error reason,
   ) {
-    final List<FileUploadItem> entriesToRemove = [];
-    // For BackupTooOldForPreferenceError, only remove auto-synced files.
-    // Manual uploads should be preserved.
-    final bool isOnlyNewFilter = reason is BackupTooOldForPreferenceError;
+    final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
-      // Only-new applies to auto-sync uploads; manual uploads (queueSource null) bypass it.
-      // Folder deselection is handled separately in _pollQueue for auto-sync items only.
-      if (isOnlyNewFilter && pendingUpload.value.isManualUpload) {
-        return;
-      }
       if (fn(pendingUpload.value.file)) {
-        entriesToRemove.add(pendingUpload.value);
+        uploadsToBeRemoved.add(pendingUpload.key);
       }
     });
-    for (final entry in entriesToRemove) {
-      _removeAndSkip(entry, reason);
+    for (final id in uploadsToBeRemoved) {
+      _queue.remove(id)?.completer.completeError(reason);
+      _allBackups[id] = _allBackups[id]!
+          .copyWith(status: BackupItemStatus.retry, error: reason);
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
     _logger.info(
-      'number of entries removed from queue ${entriesToRemove.length}',
+      'number of enteries removed from queue ${uploadsToBeRemoved.length}',
     );
+    _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 
   void _removeAndSkip(FileUploadItem entry, [Error? error]) {

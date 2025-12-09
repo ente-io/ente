@@ -515,59 +515,30 @@ class RemoteSyncService {
       2) Delete files who localIDs is also present in other collections.
       3) For Remaining files, set the collectionID as -1
      */
-    if (collectionIDs.isEmpty) {
-      return;
-    }
-
-    final Set<int> collectionIDSet = collectionIDs.toSet();
-    final Set<String> uploadingLocalIDs = _uploader.getActiveUploadLocalIDs();
-
-    // Remove queued/not-started and lingering backup items for deselected
-    // collections (auto-sync only). Active uploads are left untouched and
-    // resolved by _pollQueue.
-    _uploader.removeSkippedUploads(
-      predicate: (file) =>
-          file.queueSource != null &&
-          file.collectionID != null &&
-          collectionIDSet.contains(file.collectionID) &&
-          !uploadingLocalIDs.contains(file.localID),
-      reason: BackupFolderDeselectedError(),
-    );
-
-    _logger.info("Removing files for collections $collectionIDSet");
-    for (final collectionID in collectionIDSet) {
+    _logger.info("Removing files for collections $collectionIDs");
+    for (int collectionID in collectionIDs) {
       final List<EnteFile> pendingUploads =
           await _db.getPendingUploadForCollection(collectionID);
-
-      // Consider only auto-sync entries that are not actively uploading.
-      pendingUploads.removeWhere(
-        (file) =>
-            file.queueSource == null ||
-            file.localID == null ||
-            uploadingLocalIDs.contains(file.localID),
-      );
-
       if (pendingUploads.isEmpty) {
         continue;
+      } else {
+        _logger.info(
+          "RemovingFiles $collectionIDs: pendingUploads "
+          "${pendingUploads.length}",
+        );
       }
-
-      _logger.info(
-        "RemovingFiles $collectionID: pendingAutoSyncUploads "
-        "${pendingUploads.length}",
-      );
-
       final Set<String> localIDsInOtherFileEntries =
           await _db.getLocalIDsPresentInEntries(
         pendingUploads,
         collectionID,
       );
       _logger.info(
-        "RemovingFiles $collectionID: filesInOtherCollection "
+        "RemovingFiles $collectionIDs: filesInOtherCollection "
         "${localIDsInOtherFileEntries.length}",
       );
       final List<EnteFile> entriesToUpdate = [];
       final List<int> entriesToDelete = [];
-      for (final EnteFile pendingUpload in pendingUploads) {
+      for (EnteFile pendingUpload in pendingUploads) {
         if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
           entriesToDelete.add(pendingUpload.generatedID!);
         } else {
