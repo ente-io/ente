@@ -237,24 +237,24 @@ class _CodeWidgetState extends State<CodeWidget> {
         builder: (context, selectedIds, child) {
           final isSelected = selectedIds.contains(widget.code.selectionKey);
 
-          return Actions(
-            actions: {
-              CopyIntent: CallbackAction<CopyIntent>(
-                onInvoke: (intent) => _copyCurrentOTPToClipboard(),
-              ),
-              CopyNextIntent: CallbackAction<CopyNextIntent>(
-                onInvoke: (intent) {
-                  if (!widget.code.type.isTOTPCompatible) {
-                    showToast(context, context.l10n.notSupportedForHOTP);
-                    return;
-                  }
-                  _copyNextToClipboard();
+          return Stack(
+            children: [
+              Actions(
+                actions: {
+                  CopyIntent: CallbackAction<CopyIntent>(
+                    onInvoke: (intent) => _copyCurrentOTPToClipboard(),
+                  ),
+                  CopyNextIntent: CallbackAction<CopyNextIntent>(
+                    onInvoke: (intent) {
+                      if (!widget.code.type.isTOTPCompatible) {
+                        showToast(context, context.l10n.notSupportedForHOTP);
+                        return;
+                      }
+                      _copyNextToClipboard();
+                    },
+                  ),
                 },
-              ),
-            },
-            child: Stack(
-              children: [
-                AnimatedContainer(
+                child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
@@ -310,27 +310,27 @@ class _CodeWidgetState extends State<CodeWidget> {
                     ),
                   ),
                 ),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    ignoring: true,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 180),
-                      curve: Curves.easeInOut,
-                      opacity: isSelected ? 1 : 0,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: colorScheme.primary400,
-                            width: 2,
-                          ),
+              ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeInOut,
+                    opacity: isSelected ? 1 : 0,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: colorScheme.primary400,
+                          width: 2,
                         ),
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       );
