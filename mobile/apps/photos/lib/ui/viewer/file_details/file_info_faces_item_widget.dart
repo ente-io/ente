@@ -147,6 +147,19 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   Widget _buildPeopleGrid(double thumbnailWidth) {
     final children = <Widget>[];
 
+    // Add manual person widgets first
+    for (final person in _manualPersons) {
+      children.add(
+        _ManualPersonTag(
+          person: person,
+          thumbnailWidth: thumbnailWidth,
+          onTap: () => _openPersonPage(person),
+          isEditMode: _isEditMode,
+          onRemove: () => _onRemoveManualPerson(person),
+        ),
+      );
+    }
+
     // Add face widgets
     for (final faceInfo in _defaultFaces) {
       children.add(
@@ -159,19 +172,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           width: thumbnailWidth,
           isEditMode: _isEditMode,
           reloadAllFaces: () => loadFaces(isRefresh: true),
-        ),
-      );
-    }
-
-    // Add manual person widgets
-    for (final person in _manualPersons) {
-      children.add(
-        _ManualPersonTag(
-          person: person,
-          thumbnailWidth: thumbnailWidth,
-          onTap: () => _openPersonPage(person),
-          isEditMode: _isEditMode,
-          onRemove: () => _onRemoveManualPerson(person),
         ),
       );
     }
