@@ -164,7 +164,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     const resolvedMode =
         colorSchemeMode === "system"
             ? systemMode
-            : colorSchemeMode ?? theme.palette.mode;
+            : (colorSchemeMode ?? theme.palette.mode);
     const isDarkMode = resolvedMode === "dark";
 
     const annotatedFiles = useMemo(
