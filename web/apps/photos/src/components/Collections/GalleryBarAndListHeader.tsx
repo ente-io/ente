@@ -53,6 +53,10 @@ type GalleryBarAndListHeaderProps = Omit<
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
+    /**
+     * The files currently being displayed in the gallery (for the feed sidebar).
+     */
+    files: EnteFile[];
 } & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
     Pick<
         CollectionShareProps,
@@ -98,6 +102,7 @@ export const GalleryBarAndListHeader: React.FC<
     onAddSaveGroup,
     onSelectPerson,
     setFileListHeader,
+    files,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -240,6 +245,7 @@ export const GalleryBarAndListHeader: React.FC<
             <FeedSidebar
                 {...collectionFeedVisibilityProps}
                 albumName={activeCollection?.name ?? ""}
+                files={files}
             />
         </>
     );

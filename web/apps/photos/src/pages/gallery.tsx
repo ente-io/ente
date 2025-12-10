@@ -1319,6 +1319,7 @@ const Page: React.FC = () => {
                 setActiveCollectionID={handleShowCollectionSummaryWithID}
                 onRemotePull={remotePull}
                 onSelectPerson={handleSelectPerson}
+                files={filteredFiles}
             />
 
             <Upload
