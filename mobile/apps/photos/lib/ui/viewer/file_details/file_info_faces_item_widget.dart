@@ -58,6 +58,9 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
 
     try {
+      if (isRefresh) {
+        await PersonService.instance.refreshPersonCache();
+      }
       final result = await _fetchFaceData();
       if (mounted) {
         setState(() {
@@ -151,6 +154,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     for (final person in _manualPersons) {
       children.add(
         _ManualPersonTag(
+          key: ValueKey(person.remoteID),
           person: person,
           thumbnailWidth: thumbnailWidth,
           onTap: () => _openPersonPage(person),
@@ -634,6 +638,7 @@ class _ManualPersonTag extends StatelessWidget {
   final VoidCallback? onRemove;
 
   const _ManualPersonTag({
+    super.key,
     required this.person,
     required this.thumbnailWidth,
     required this.onTap,

@@ -1,4 +1,4 @@
-import "dart:async" show unawaited;
+import "dart:async";
 import 'dart:developer' as dev show log;
 import "dart:math" show Random, min;
 
@@ -141,6 +141,7 @@ class ClusterFeedbackService<T> {
     PersonEntity p,
   ) async {
     try {
+      Future<void>? manualAssignmentUpdate;
       // Get file IDs being removed
       final fileIDsToRemove =
           files.map((file) => file.uploadedFileID).whereType<int>().toSet();
@@ -156,7 +157,9 @@ class ClusterFeedbackService<T> {
         final updatedPerson = p.copyWith(
           data: p.data.copyWith(manuallyAssigned: updatedManual),
         );
-        unawaited(PersonService.instance.updatePerson(updatedPerson));
+        manualAssignmentUpdate = PersonService.instance.updatePerson(
+          updatedPerson,
+        );
       }
 
       // Get the relevant faces to be removed
@@ -170,6 +173,9 @@ class ClusterFeedbackService<T> {
 
       // If no faces to remove (might have been only manually assigned files)
       if (faceIDs.isEmpty) {
+        if (manualAssignmentUpdate != null) {
+          await manualAssignmentUpdate;
+        }
         if (manualToRemove.isNotEmpty) {
           Bus.instance.fire(PeopleChangedEvent());
         } else {
@@ -219,6 +225,10 @@ class ClusterFeedbackService<T> {
       // Update remote so new sync does not undo this change
       await PersonService.instance
           .removeFacesFromPerson(person: p, faceIDs: faceIDs.toSet());
+
+      if (manualAssignmentUpdate != null) {
+        await manualAssignmentUpdate;
+      }
 
       Bus.instance.fire(PeopleChangedEvent());
       return;
