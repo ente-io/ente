@@ -171,16 +171,15 @@ class PersonData {
             : List<String>.from(
                 json['rejectedFaceIDs'],
               );
-    final manuallyAssigned = (json['manuallyAssigned'] == null ||
-            json['manuallyAssigned'].length == 0 ||
-            json['manuallyAssigned'] is! Iterable)
-        ? <int>[]
-        : List<int>.from(
-            (json['manuallyAssigned'] as Iterable<dynamic>).map<int?>((value) {
+    final manualAssignmentData = json['manuallyAssigned'];
+    final manuallyAssigned = manualAssignmentData is Iterable
+        ? List<int>.from(
+            manualAssignmentData.map<int?>((value) {
               if (value is num) return value.toInt();
               return int.tryParse(value.toString());
             }).whereType<int>(),
-          );
+          )
+        : <int>[];
     return PersonData(
       name: json['name'] as String,
       assigned: assigned,

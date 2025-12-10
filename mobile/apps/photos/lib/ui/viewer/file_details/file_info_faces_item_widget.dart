@@ -15,6 +15,8 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final Logger _logger = Logger("FacesItemWidget");
@@ -33,6 +35,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   bool _isLoading = true;
   List<_FaceInfo> _defaultFaces = [];
   List<_FaceInfo> _remainingFaces = [];
+  List<PersonEntity> _manualPersons = [];
   NoFacesReason? _errorReason;
 
   @override
@@ -52,6 +55,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         setState(() {
           _defaultFaces = result.defaultFaces;
           _remainingFaces = result.remainingFaces;
+          _manualPersons = result.manualPersons;
           _errorReason = result.errorReason;
           if (!isRefresh) {
             _isLoading = false;
@@ -97,10 +101,14 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       );
     }
 
-    if (_errorReason != null ||
-        (_defaultFaces.isEmpty && _remainingFaces.isEmpty)) {
+    final hasFaceData = _defaultFaces.isNotEmpty || _remainingFaces.isNotEmpty;
+    final hasManual = _manualPersons.isNotEmpty;
+    if (!hasFaceData && !hasManual) {
       return _buildNoFacesWidget();
     }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final thumbnailWidth = screenWidth * 0.16;
 
     return Expanded(
       child: Column(
@@ -116,7 +124,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                   height: 24,
                   child: Center(
                     child: Text(
-                      AppLocalizations.of(context).faces,
+                      AppLocalizations.of(context).people,
                       style: getEnteTextTheme(context).small,
                     ),
                   ),
@@ -126,19 +134,25 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             ],
           ),
           const SizedBox(height: 20),
-          if (_defaultFaces.isNotEmpty) _buildFaceGrid(_defaultFaces),
+          if (_defaultFaces.isNotEmpty)
+            _buildFaceGrid(_defaultFaces, thumbnailWidth),
+          if (_manualPersons.isNotEmpty) ...[
+            if (_defaultFaces.isNotEmpty) const SizedBox(height: 16),
+            _buildManualPersonGrid(thumbnailWidth),
+          ],
           if (_remainingFaces.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildRemainingFacesSection(),
+            _buildRemainingFacesSection(thumbnailWidth),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildFaceGrid(List<_FaceInfo> faceInfoList) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final thumbnailWidth = screenWidth * 0.16;
+  Widget _buildFaceGrid(
+    List<_FaceInfo> faceInfoList,
+    double thumbnailWidth,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
       child: Wrap(
@@ -155,6 +169,25 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                 width: thumbnailWidth,
                 isEditMode: _isEditMode,
                 reloadAllFaces: () => loadFaces(isRefresh: true),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildManualPersonGrid(double thumbnailWidth) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: Wrap(
+        runSpacing: 8,
+        spacing: 12,
+        children: _manualPersons
+            .map(
+              (person) => _ManualPersonTag(
+                person: person,
+                thumbnailWidth: thumbnailWidth,
+                onTap: () => _openPersonPage(person),
               ),
             )
             .toList(),
@@ -223,6 +256,34 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     return faceInfoList;
   }
 
+  List<PersonEntity> _getManualPersonsForFile(
+    Map<String, PersonEntity> persons,
+    List<_FaceInfo> defaultFaces,
+    List<_FaceInfo> remainingFaces,
+  ) {
+    final uploadedFileID = widget.file.uploadedFileID;
+    if (uploadedFileID == null) return [];
+
+    final existingPersonIDs = <String>{
+      ...defaultFaces.map((face) => face.person?.remoteID).whereType<String>(),
+      ...remainingFaces
+          .map((face) => face.person?.remoteID)
+          .whereType<String>(),
+    };
+
+    final manualPersons = persons.values.where((person) {
+      if (existingPersonIDs.contains(person.remoteID)) {
+        return false;
+      }
+      return person.data.manuallyAssigned.contains(uploadedFileID);
+    }).toList();
+
+    manualPersons.sort(
+      (a, b) => a.data.name.toLowerCase().compareTo(b.data.name.toLowerCase()),
+    );
+    return manualPersons;
+  }
+
   Widget _buildNoFacesWidget() {
     final reason = _errorReason ?? NoFacesReason.noFacesFound;
     return Expanded(
@@ -236,7 +297,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Widget _buildRemainingFacesSection() {
+  Widget _buildRemainingFacesSection(double thumbnailWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -268,7 +329,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         ),
         if (_showRemainingFaces) ...[
           const SizedBox(height: 16),
-          _buildFaceGrid(_remainingFaces),
+          _buildFaceGrid(_remainingFaces, thumbnailWidth),
         ],
       ],
     );
@@ -316,19 +377,27 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],
+        manualPersons: const [],
         errorReason: NoFacesReason.fileNotUploaded,
       );
     }
+
+    // Fetch persons map early so we can check for manual assignments
+    // even when no faces are detected
+    final persons = await PersonService.instance.getPersonsMap();
 
     final mlDataDB = MLDataDB.instance;
     final faces =
         await mlDataDB.getFacesForGivenFileID(widget.file.uploadedFileID!);
 
     if (faces == null) {
+      final manualPersons = _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],
-        errorReason: NoFacesReason.fileNotAnalyzed,
+        manualPersons: manualPersons,
+        errorReason:
+            manualPersons.isEmpty ? NoFacesReason.fileNotAnalyzed : null,
       );
     }
 
@@ -336,7 +405,6 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     final faceIdsToClusterIds = await mlDataDB.getFaceIdsToClusterIds(
       faces.map((face) => face.faceID).toList(),
     );
-    final persons = await PersonService.instance.getPersonsMap();
     final clusterIDToPerson = await mlDataDB.getClusterIDToPersonID();
     final faceCrops =
         await getCachedFaceCrops(widget.file, faces, useTempCache: true);
@@ -355,49 +423,67 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         return _FaceDataResult(
           defaultFaces: [],
           remainingFaces: [],
+          manualPersons: const [],
           errorReason: NoFacesReason.fileAnalysisFailed,
         );
       }
     }
     if (defaultFaces.isEmpty && remainingFaces.isEmpty) {
+      final manualPersons = _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],
-        errorReason: NoFacesReason.noFacesFound,
+        manualPersons: manualPersons,
+        errorReason: manualPersons.isEmpty ? NoFacesReason.noFacesFound : null,
       );
     }
 
     if (faceCrops == null) {
+      final manualPersons = _getManualPersonsForFile(persons, [], []);
       return _FaceDataResult(
         defaultFaces: [],
         remainingFaces: [],
-        errorReason: NoFacesReason.faceThumbnailGenerationFailed,
+        manualPersons: manualPersons,
+        errorReason: manualPersons.isEmpty
+            ? NoFacesReason.faceThumbnailGenerationFailed
+            : null,
       );
     }
     for (final face in defaultFaces) {
       if (faceCrops[face.faceID] == null) {
+        final manualPersons = _getManualPersonsForFile(persons, [], []);
         return _FaceDataResult(
           defaultFaces: [],
           remainingFaces: [],
-          errorReason: NoFacesReason.faceThumbnailGenerationFailed,
+          manualPersons: manualPersons,
+          errorReason: manualPersons.isEmpty
+              ? NoFacesReason.faceThumbnailGenerationFailed
+              : null,
         );
       }
     }
 
+    final defaultFacesInfo = await _buildFaceInfoList(
+      defaultFaces,
+      faceIdsToClusterIds,
+      persons,
+      clusterIDToPerson,
+      faceCrops,
+    );
+    final remainingFacesInfo = await _buildFaceInfoList(
+      remainingFaces,
+      faceIdsToClusterIds,
+      persons,
+      clusterIDToPerson,
+      faceCrops,
+    );
     return _FaceDataResult(
-      defaultFaces: await _buildFaceInfoList(
-        defaultFaces,
-        faceIdsToClusterIds,
+      defaultFaces: defaultFacesInfo,
+      remainingFaces: remainingFacesInfo,
+      manualPersons: _getManualPersonsForFile(
         persons,
-        clusterIDToPerson,
-        faceCrops,
-      ),
-      remainingFaces: await _buildFaceInfoList(
-        remainingFaces,
-        faceIdsToClusterIds,
-        persons,
-        clusterIDToPerson,
-        faceCrops,
+        defaultFacesInfo,
+        remainingFacesInfo,
       ),
     );
   }
@@ -406,16 +492,29 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   void _toggleRemainingFaces() =>
       setState(() => _showRemainingFaces = !_showRemainingFaces);
+
+  Future<void> _openPersonPage(PersonEntity person) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PeoplePage(
+          person: person,
+          searchResult: null,
+        ),
+      ),
+    );
+  }
 }
 
 class _FaceDataResult {
   final List<_FaceInfo> defaultFaces;
   final List<_FaceInfo> remainingFaces;
+  final List<PersonEntity> manualPersons;
   final NoFacesReason? errorReason;
 
   _FaceDataResult({
     required this.defaultFaces,
     required this.remainingFaces,
+    required this.manualPersons,
     this.errorReason,
   });
 }
@@ -432,6 +531,82 @@ class _FaceInfo {
     this.clusterID,
     this.person,
   });
+}
+
+class _ManualPersonTag extends StatelessWidget {
+  final PersonEntity person;
+  final double thumbnailWidth;
+  final VoidCallback onTap;
+
+  const _ManualPersonTag({
+    required this.person,
+    required this.thumbnailWidth,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final displayName = person.data.isIgnored
+        ? '(' + AppLocalizations.of(context).ignored + ')'
+        : person.data.name.trim();
+
+    return Semantics(
+      button: true,
+      label: displayName,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Column(
+            children: [
+              Container(
+                height: thumbnailWidth,
+                width: thumbnailWidth,
+                decoration: const ShapeDecoration(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(
+                      Radius.elliptical(16, 12),
+                    ),
+                    side: BorderSide.none,
+                  ),
+                ),
+                child: ClipRRect(
+                  child: SizedBox(
+                    width: thumbnailWidth,
+                    height: thumbnailWidth,
+                    child: ClipPath(
+                      clipper: ShapeBorderClipper(
+                        shape: ContinuousRectangleBorder(
+                          borderRadius: BorderRadius.circular(52),
+                        ),
+                      ),
+                      child: PersonFaceWidget(
+                        personId: person.remoteID,
+                        keepAlive: true,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: thumbnailWidth,
+                child: Center(
+                  child: Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 enum NoFacesReason {
