@@ -1092,12 +1092,28 @@ const ContentContainer = styled(Box)(({ theme }) => ({
 }));
 
 // Feed Item Components
-const FeedItemContainer = styled(Box)(() => ({
+const FeedItemContainer = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "flex-start",
     gap: 12,
     marginBottom: 40,
     cursor: "pointer",
+    position: "relative",
+    "&:not(:last-child)::before": {
+        content: '""',
+        position: "absolute",
+        left: 16,
+        top: 33,
+        bottom: -40,
+        width: 2,
+        backgroundImage:
+            "repeating-linear-gradient(to bottom, #E6E6E6 0px, #E6E6E6 8px, transparent 8px, transparent 16px)",
+        borderRadius: 1,
+        ...theme.applyStyles("dark", {
+            backgroundImage:
+                "repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.18) 0px, rgba(255, 255, 255, 0.18) 8px, transparent 8px, transparent 16px)",
+        }),
+    },
     "&:last-child": {
         marginBottom: 0,
     },
@@ -1112,6 +1128,8 @@ const IconContainer = styled(Box)(({ theme }) => ({
     flexShrink: 0,
     backgroundColor: "#fff",
     borderRadius: "50%",
+    position: "relative",
+    zIndex: 1,
     ...theme.applyStyles("dark", {
         backgroundColor: "#2a2a2a",
     }),
