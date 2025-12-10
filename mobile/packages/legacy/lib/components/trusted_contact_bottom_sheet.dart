@@ -198,9 +198,9 @@ class _TrustedContactBottomSheetState extends State<TrustedContactBottomSheet> {
           child: Text(
             label,
             style: textTheme.bodyBold.copyWith(
-              color: colorScheme.warning700,
+              color: colorScheme.warning400,
               decoration: TextDecoration.underline,
-              decorationColor: colorScheme.warning700,
+              decorationColor: colorScheme.warning400,
             ),
           ),
         ),

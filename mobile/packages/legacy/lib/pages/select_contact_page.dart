@@ -405,8 +405,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
       builder: (context) {
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.backdropBase,
-            border: Border(top: BorderSide(color: colorScheme.strokeFaint)),
+            color: colorScheme.backgroundElevated2,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
@@ -429,12 +428,12 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
                           child: Container(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colorScheme.backgroundElevated,
+                              color: colorScheme.fillFaint,
                             ),
                             padding: const EdgeInsets.all(8),
                             child: Icon(
                               Icons.close,
-                              size: 24,
+                              size: 20,
                               color: colorScheme.textBase,
                             ),
                           ),

@@ -203,7 +203,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
               ),
             if (recoverySession != null &&
                 recoverySession!.status == "READY") ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Center(
                 child: GestureDetector(
                   onTap: () => _showCancelRecoverySheet(),
@@ -233,7 +233,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
             ],
             if (recoverySession == null ||
                 recoverySession!.status != "READY") ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Center(
                 child: GestureDetector(
                   onTap: () async {

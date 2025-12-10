@@ -94,7 +94,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TitleBarTitleWidget(
                 title: context.strings.legacy,
               ),
@@ -501,7 +501,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           backgroundColor: colorScheme.primary700,
           onTap: () => Navigator.of(context).pop("accept"),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         Center(
           child: GestureDetector(
             onTap: () => Navigator.of(context).pop("decline"),
@@ -599,7 +599,7 @@ class _WarningBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Image.asset("assets/warning-grey.png", width: 20, height: 20),
+          Image.asset("assets/warning-red.png", width: 20, height: 20),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
