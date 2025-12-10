@@ -722,21 +722,34 @@ function sortPhotosByTimestamp(photos: JourneyPoint[]): JourneyPoint[] {
 }
 
 /**
+ * Returns true if the file is visible (not archived or hidden).
+ */
+function isFileVisible(file: EnteFile): boolean {
+    const visibility = file.magicMetadata?.data.visibility;
+    // Files without visibility metadata are considered visible (default state)
+    return visibility === undefined || visibility === ItemVisibility.visible;
+}
+
+/**
  * Loads every file stored in IndexedDB, filters those belonging to the
- * target collection, removes duplicates by ID, and returns the unique set.
+ * target collection, removes duplicates by ID, filters out hidden/archived
+ * files, and returns the unique set of visible files.
  */
 async function getFilesForCollection(
     collectionSummary: CollectionSummary,
     activeCollection: Collection | undefined,
 ): Promise<EnteFile[]> {
     const allFiles = await savedCollectionFiles();
+    // Filter out hidden and archived files to prevent leaking items users expect to remain hidden
+    const visibleFiles = allFiles.filter(isFileVisible);
+
     if (collectionSummary.type === "all") {
-        return uniqueFilesByID(allFiles);
+        return uniqueFilesByID(visibleFiles);
     }
     if (!activeCollection) {
         return [];
     }
-    const filtered = allFiles.filter(
+    const filtered = visibleFiles.filter(
         (file) => file.collectionID === activeCollection.id,
     );
     return uniqueFilesByID(filtered);
