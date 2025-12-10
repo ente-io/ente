@@ -644,13 +644,8 @@ class RemoteSyncService {
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
       );
 
-      // Step 1: Verify media location access permission
       await _uploader.verifyMediaLocationAccess();
-
-      // Step 2: Check network availability for upload
       await _uploader.checkNetworkForUpload();
-
-      // Step 3: Fetch upload URLs from server
       await _uploader.fetchUploadURLs(toBeUploaded);
     } else {}
     final List<Future> futures = [];
