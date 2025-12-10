@@ -1324,6 +1324,8 @@
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
+  "removePersonTag": "Remove person tag",
+  "areYouSureRemoveThisPersonTag": "Are you sure you want to remove this person tag?",
   "autoPairDesc": "Auto pair works only with devices that support Chromecast.",
   "manualPairDesc": "Pair with PIN works with any screen you wish to view your album on.",
   "connectToDevice": "Connect to device",

@@ -570,8 +570,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   Future<void> _onRemoveManualPerson(PersonEntity person) async {
     final result = await showChoiceActionSheet(
       context,
-      title: AppLocalizations.of(context).removePersonLabel,
-      body: AppLocalizations.of(context).areYouSureRemoveThisFaceFromPerson,
+      title: AppLocalizations.of(context).removePersonTag,
+      body: AppLocalizations.of(context).areYouSureRemoveThisPersonTag,
       firstButtonLabel: AppLocalizations.of(context).remove,
       firstButtonType: ButtonType.critical,
       secondButtonLabel: AppLocalizations.of(context).cancel,
