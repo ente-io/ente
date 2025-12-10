@@ -314,12 +314,18 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   Widget _buildNoFacesWidget() {
     final reason = _errorReason ?? NoFacesReason.noFacesFound;
+    final showManualTagOption = flagService.manualTagFileToPerson &&
+        reason == NoFacesReason.noFacesFound;
+    final label = showManualTagOption
+        ? "No faces detected, tap to add."
+        : getNoFaceReasonText(context, reason);
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(right: 12, top: 8),
         child: ChipButtonWidget(
-          getNoFaceReasonText(context, reason),
+          label,
           noChips: true,
+          onTap: showManualTagOption ? _openAddFilesToPersonPage : null,
         ),
       ),
     );
