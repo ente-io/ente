@@ -499,6 +499,17 @@ class RemoteSyncService {
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
+  /// Removes auto-queued files pending upload for the given collections.
+  ///
+  /// For each collection:
+  /// 1) Get list of all files not uploaded yet (pending uploads).
+  /// 2) Skip files that were manually queued or have no queueSource
+  ///    (preserves user intent for manual uploads).
+  /// 3) Delete the remaining auto-queued entries from the database.
+  /// 4) Clean up any associated multipart upload tracks.
+  ///
+  /// If the folder is re-enabled for backup, files will be re-queued during
+  /// the next sync cycle.
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
     _logger.info("Removing files for collections $collectionIDs");
 
