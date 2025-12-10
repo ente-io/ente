@@ -1,4 +1,5 @@
 import { IconButton, Tooltip, styled } from "@mui/material";
+import { useColorScheme, useTheme } from "@mui/material/styles";
 import { CollectionMapDialog } from "components/Collections/CollectionMapDialog";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
@@ -18,7 +19,6 @@ import { moveToTrash } from "ente-new/photos/services/collection";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { updateMapEnabled } from "ente-new/photos/services/settings";
-import { GlobalIcon } from "hugeicons-react";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -159,6 +159,13 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         useModalVisibility();
     const { onGenericError } = useBaseContext();
     const { mapEnabled } = useSettingsSnapshot();
+    const { mode: colorSchemeMode, systemMode } = useColorScheme();
+    const theme = useTheme();
+    const resolvedMode =
+        colorSchemeMode === "system"
+            ? systemMode
+            : colorSchemeMode ?? theme.palette.mode;
+    const isDarkMode = resolvedMode === "dark";
 
     const annotatedFiles = useMemo(
         (): FileListAnnotatedFile[] =>
@@ -245,13 +252,18 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                             aria-label={t("map")}
                             onClick={handleShowMap}
                         >
-                            <GlobalIcon size={24} />
+                            <MapIcon
+                                src="/images/gallery-globe/globe.svg"
+                                alt=""
+                                aria-hidden
+                                $isDarkMode={isDarkMode}
+                            />
                         </IconButton>
                     </Tooltip>
                 </HeaderWithMap>
             ),
         };
-    }, [header, handleShowMap, shouldShowMapButton]);
+    }, [header, handleShowMap, isDarkMode, shouldShowMapButton]);
 
     return (
         <Container>
@@ -357,6 +369,16 @@ const HeaderMain = styled("div")`
     flex: 1;
     min-width: 0;
 `;
+
+const MapIcon = styled("img")<{ $isDarkMode: boolean }>(
+    ({ theme, $isDarkMode }) => ({
+        display: "block",
+        width: 24,
+        height: 24,
+        filter:
+            $isDarkMode || theme.palette.mode === "dark" ? "invert(1)" : "none",
+    }),
+);
 
 /**
  * See: [Note: Timeline date string]

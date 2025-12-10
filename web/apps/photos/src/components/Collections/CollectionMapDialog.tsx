@@ -1230,6 +1230,7 @@ function CollectionSidebar({
     const [scrollOffset, setScrollOffset] = useState(0);
     const shouldShowCover = collectionSummary.type !== "all";
     const theme = useTheme();
+    const isDarkMode = theme.palette.mode === "dark";
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
     // Get cover image: prioritize collection's coverFile, fallback to first photo
@@ -1386,7 +1387,7 @@ function CollectionSidebar({
                     )}
                 </FileListContainer>
             </SidebarContainer>
-            <SidebarGradient />
+            {isDarkMode && <SidebarGradient />}
         </SidebarWrapper>
     );
 }
