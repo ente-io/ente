@@ -11,8 +11,10 @@ import {
     Stack,
     styled,
     Typography,
+    useMediaQuery,
     type IconButtonProps,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { ensureLocalUser } from "ente-accounts/services/user";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
@@ -282,7 +284,13 @@ function useMapData(
         };
 
         void loadMapData();
-    }, [open, collectionSummary, activeCollection, onGenericError, loadAllThumbs]);
+    }, [
+        open,
+        collectionSummary,
+        activeCollection,
+        onGenericError,
+        loadAllThumbs,
+    ]);
 
     const removeFiles = useCallback((fileIDs: number[]) => {
         if (!fileIDs.length) return;
@@ -1220,6 +1228,9 @@ function CollectionSidebar({
         undefined,
     );
     const [scrollOffset, setScrollOffset] = useState(0);
+    const shouldShowCover = collectionSummary.type !== "all";
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
     // Get cover image: prioritize collection's coverFile, fallback to first photo
     const coverFile = collectionSummary.coverFile;
@@ -1234,8 +1245,9 @@ function CollectionSidebar({
     }, [coverFile, mapPhotos, thumbByFileID]);
 
     // Create header component for FileListWithViewer (cover scrolls with content)
-    const coverHeader = useMemo(
-        () => ({
+    const coverHeader = useMemo(() => {
+        if (!shouldShowCover) return undefined;
+        return {
             component: (
                 <MapCover
                     name={collectionSummary.name}
@@ -1246,14 +1258,14 @@ function CollectionSidebar({
             ),
             height: COVER_HEADER_HEIGHT,
             extendToInlineEdges: true,
-        }),
-        [
-            collectionSummary.name,
-            collectionSummary.fileCount,
-            coverImageUrl,
-            onClose,
-        ],
-    );
+        };
+    }, [
+        shouldShowCover,
+        collectionSummary.name,
+        collectionSummary.fileCount,
+        coverImageUrl,
+        onClose,
+    ]);
 
     // Handle scroll events from the file list
     const handleScroll = useCallback((offset: number) => {
@@ -1265,13 +1277,25 @@ function CollectionSidebar({
         setCurrentDate(date);
     }, []);
 
-    // Only show sticky date after scrolling past the cover header
-    const showStickyDate = scrollOffset > COVER_HEADER_HEIGHT && currentDate;
+    // Only show sticky date after scrolling past the cover header, or always for "All"
+    const showStickyHeader =
+        !shouldShowCover ||
+        (scrollOffset > COVER_HEADER_HEIGHT && !!currentDate);
+    const hasScrolled = scrollOffset > 0;
+    const hideDateForAllNoScroll = !shouldShowCover && !hasScrolled;
+    const hideDateForMobileNoScroll = isMobile && !hasScrolled;
+    const visibleDate =
+        currentDate && !hideDateForAllNoScroll && !hideDateForMobileNoScroll
+            ? currentDate
+            : undefined;
 
     return (
         <SidebarWrapper>
             <SidebarContainer>
-                <StickyDateHeader visible={!!showStickyDate}>
+                <StickyDateHeader
+                    visible={showStickyHeader}
+                    variant={shouldShowCover ? "overlay" : "static"}
+                >
                     <Box
                         sx={{
                             display: "flex",
@@ -1291,7 +1315,7 @@ function CollectionSidebar({
                                 sx={{ color: "text.muted", fontSize: "14px" }}
                             >
                                 {collectionSummary.fileCount} memories
-                                {currentDate && ` · ${currentDate}`}
+                                {visibleDate && ` · ${visibleDate}`}
                             </Typography>
                         </Box>
                         <IconButton
@@ -1340,12 +1364,14 @@ function CollectionSidebar({
                         />
                     ) : (
                         <EmptyState>
-                            <MapCover
-                                name={collectionSummary.name}
-                                coverImageUrl={coverImageUrl}
-                                totalCount={collectionSummary.fileCount}
-                                onClose={onClose}
-                            />
+                            {shouldShowCover && (
+                                <MapCover
+                                    name={collectionSummary.name}
+                                    coverImageUrl={coverImageUrl}
+                                    totalCount={collectionSummary.fileCount}
+                                    onClose={onClose}
+                                />
+                            )}
                             <Typography variant="body" sx={{ fontWeight: 600 }}>
                                 {t("no_photos_found_here", {
                                     defaultValue: "No photos found here",
@@ -1494,7 +1520,7 @@ const MapControls = React.memo(function MapControls({
                     top: 24,
                     zIndex: 1000,
                     [theme.breakpoints.up("md")]: {
-                        left: "calc(24px + clamp(450px, 35vw, 600px) + 12px)",
+                        left: "calc(24px + clamp(450px, 30vw, 600px) + 12px)",
                     },
                 })}
             >
@@ -1884,8 +1910,8 @@ const SidebarWrapper = styled(Box)(({ theme }) => ({
         top: 16,
         bottom: 16,
         right: "auto",
-        width: "35%",
         height: "auto",
+        width: "30%",
         maxWidth: "600px",
         minWidth: "450px",
     },
@@ -1937,9 +1963,13 @@ const FileListContainer = styled(Box)(({ theme }) => ({
     },
 }));
 
-const StickyDateHeader = styled(Box)<{ visible: boolean }>(
-    ({ theme, visible }) => ({
-        position: "absolute",
+const StickyDateHeader = styled(Box)<{
+    visible: boolean;
+    variant: "overlay" | "static";
+}>(({ theme, visible, variant }) => {
+    const isStatic = variant === "static";
+    return {
+        position: isStatic ? "relative" : "absolute",
         top: 0,
         left: 0,
         right: 0,
@@ -1947,13 +1977,15 @@ const StickyDateHeader = styled(Box)<{ visible: boolean }>(
         backgroundColor: theme.vars.palette.background.paper,
         padding: "28px 24px 24px 24px",
         borderBottom: `1px solid ${theme.vars.palette.divider}`,
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(-10px)",
-        pointerEvents: visible ? "auto" : "none",
-        transition: "opacity 0.25s ease-out, transform 0.25s ease-out",
+        opacity: isStatic || visible ? 1 : 0,
+        transform: isStatic || visible ? "translateY(0)" : "translateY(-10px)",
+        pointerEvents: isStatic || visible ? "auto" : "none",
+        transition: isStatic
+            ? "none"
+            : "opacity 0.25s ease-out, transform 0.25s ease-out",
         [theme.breakpoints.down("md")]: { padding: "24px 20px 20px 20px" },
-    }),
-);
+    };
+});
 
 const CenteredBoxContainer = styled(Box)({
     width: "100%",
