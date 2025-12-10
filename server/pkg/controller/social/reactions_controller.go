@@ -1,34 +1,35 @@
-package reactions
+package social
 
 import (
 	"github.com/ente-io/museum/ente"
+	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/museum/pkg/controller/access"
-	"github.com/ente-io/museum/pkg/controller/social"
-	"github.com/ente-io/museum/pkg/repo"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 
-// Controller orchestrates reactions operations.
-type Controller struct {
-	Repo       *repo.ReactionsRepository
+// ReactionsController orchestrates reactions operations.
+type ReactionsController struct {
+	Repo       *socialrepo.ReactionsRepository
 	AccessCtrl access.Controller
 }
 
 // UpsertReactionRequest holds the payload for creating or updating a reaction.
 type UpsertReactionRequest struct {
-	Actor         social.Actor
+	Actor         Actor
 	ID            string
 	CollectionID  int64
 	FileID        *int64
 	CommentID     *string
-	Payload       []byte
+	Cipher        string
+	Nonce         string
 	RequireAccess bool
 }
 
-// DiffRequest describes paging for reactions.
-type DiffRequest struct {
-	Actor         social.Actor
+// ReactionDiffRequest describes paging for reactions.
+type ReactionDiffRequest struct {
+	Actor         Actor
 	CollectionID  int64
 	Since         int64
 	Limit         int
@@ -37,15 +38,23 @@ type DiffRequest struct {
 	RequireAccess bool
 }
 
-// DeleteRequest contains parameters to remove a reaction.
-type DeleteRequest struct {
-	Actor         social.Actor
+// ReactionDeleteRequest contains parameters to remove a reaction.
+type ReactionDeleteRequest struct {
+	Actor         Actor
 	ReactionID    string
 	RequireAccess bool
 }
 
 // Upsert creates or updates a reaction entry.
-func (c *Controller) Upsert(ctx *gin.Context, req UpsertReactionRequest) (string, error) {
+func (c *ReactionsController) Upsert(ctx *gin.Context, req UpsertReactionRequest) (string, error) {
+	var err error
+	req.ID, err = NormalizeReactionID(req.ID)
+	if err != nil {
+		return "", stacktrace.Propagate(err, "")
+	}
+	if len(req.Cipher) == 0 || len(req.Nonce) == 0 {
+		return "", ente.ErrBadRequest
+	}
 	userID, hasUserID := req.Actor.UserIDValue()
 	if req.RequireAccess && req.Actor.IsAnonymous() {
 		return "", ente.ErrAuthenticationRequired
@@ -68,12 +77,13 @@ func (c *Controller) Upsert(ctx *gin.Context, req UpsertReactionRequest) (string
 			return "", stacktrace.Propagate(err, "")
 		}
 	}
-	reaction := ente.Reaction{
+	reaction := socialentity.Reaction{
 		ID:           req.ID,
 		CollectionID: req.CollectionID,
 		FileID:       req.FileID,
 		CommentID:    req.CommentID,
-		Payload:      req.Payload,
+		Cipher:       req.Cipher,
+		Nonce:        req.Nonce,
 	}
 	if req.Actor.IsAnonymous() {
 		reaction.UserID = -1
@@ -89,7 +99,7 @@ func (c *Controller) Upsert(ctx *gin.Context, req UpsertReactionRequest) (string
 }
 
 // Diff returns reaction windows for the provided scope.
-func (c *Controller) Diff(ctx *gin.Context, req DiffRequest) ([]ente.Reaction, bool, error) {
+func (c *ReactionsController) Diff(ctx *gin.Context, req ReactionDiffRequest) ([]socialentity.Reaction, bool, error) {
 	userID, hasUserID := req.Actor.UserIDValue()
 	if req.RequireAccess {
 		if !hasUserID || userID <= 0 {
@@ -106,7 +116,7 @@ func (c *Controller) Diff(ctx *gin.Context, req DiffRequest) ([]ente.Reaction, b
 }
 
 // Delete removes a reaction if the actor owns it.
-func (c *Controller) Delete(ctx *gin.Context, req DeleteRequest) error {
+func (c *ReactionsController) Delete(ctx *gin.Context, req ReactionDeleteRequest) error {
 	userID, hasUserID := req.Actor.UserIDValue()
 	reaction, err := c.Repo.GetByID(ctx.Request.Context(), req.ReactionID)
 	if err != nil {

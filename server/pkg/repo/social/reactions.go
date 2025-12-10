@@ -1,4 +1,4 @@
-package repo
+package social
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ente-io/museum/ente"
+	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 )
@@ -15,13 +16,14 @@ type ReactionsRepository struct {
 	DB *sql.DB
 }
 
-func (repo *ReactionsRepository) Upsert(ctx context.Context, reaction ente.Reaction) (string, error) {
+func (repo *ReactionsRepository) Upsert(ctx context.Context, reaction socialentity.Reaction) (string, error) {
 	var id string
 	err := repo.DB.QueryRowContext(ctx, `
-        INSERT INTO reactions (id, collection_id, file_id, comment_id, user_id, anon_user_id, payload, is_deleted)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE)
+        INSERT INTO reactions (id, collection_id, file_id, comment_id, user_id, anon_user_id, cipher, nonce, is_deleted)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE)
         ON CONFLICT (actor_key, unique_key)
-        DO UPDATE SET payload = EXCLUDED.payload,
+        DO UPDATE SET cipher = EXCLUDED.cipher,
+                      nonce = EXCLUDED.nonce,
                       is_deleted = FALSE,
                       updated_at = now_utc_micro_seconds()
         RETURNING id
@@ -32,7 +34,8 @@ func (repo *ReactionsRepository) Upsert(ctx context.Context, reaction ente.React
 		reaction.CommentID,
 		reaction.UserID,
 		reaction.AnonUserID,
-		reaction.Payload,
+		reaction.Cipher,
+		reaction.Nonce,
 	).Scan(&id)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
@@ -48,7 +51,8 @@ func (repo *ReactionsRepository) SoftDeleteByID(ctx context.Context, id string, 
 	result, err := repo.DB.ExecContext(ctx, `
         UPDATE reactions
         SET is_deleted = TRUE,
-            payload = NULL,
+            cipher = NULL,
+            nonce = NULL,
             updated_at = now_utc_micro_seconds()
         WHERE id = $1
           AND actor_key = $2
@@ -66,16 +70,17 @@ func (repo *ReactionsRepository) SoftDeleteByID(ctx context.Context, id string, 
 	return nil
 }
 
-func (repo *ReactionsRepository) GetByID(ctx context.Context, id string) (*ente.Reaction, error) {
+func (repo *ReactionsRepository) GetByID(ctx context.Context, id string) (*socialentity.Reaction, error) {
 	var (
 		file    sql.NullInt64
 		comment sql.NullString
 		anon    sql.NullString
-		payload []byte
+		cipher  sql.NullString
+		nonce   sql.NullString
 	)
-	reaction := &ente.Reaction{}
+	reaction := &socialentity.Reaction{}
 	err := repo.DB.QueryRowContext(ctx, `
-        SELECT id, collection_id, file_id, comment_id, user_id, anon_user_id, payload, is_deleted, created_at, updated_at
+        SELECT id, collection_id, file_id, comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
         FROM reactions
         WHERE id = $1
     `, id).Scan(
@@ -85,7 +90,8 @@ func (repo *ReactionsRepository) GetByID(ctx context.Context, id string) (*ente.
 		&comment,
 		&reaction.UserID,
 		&anon,
-		&payload,
+		&cipher,
+		&nonce,
 		&reaction.IsDeleted,
 		&reaction.CreatedAt,
 		&reaction.UpdatedAt,
@@ -102,15 +108,18 @@ func (repo *ReactionsRepository) GetByID(ctx context.Context, id string) (*ente.
 	if anon.Valid {
 		reaction.AnonUserID = &anon.String
 	}
-	if payload != nil {
-		reaction.Payload = payload
+	if cipher.Valid {
+		reaction.Cipher = cipher.String
+	}
+	if nonce.Valid {
+		reaction.Nonce = nonce.String
 	}
 	return reaction, nil
 }
 
-func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64, commentID *string) ([]ente.Reaction, bool, error) {
+func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64, commentID *string) ([]socialentity.Reaction, bool, error) {
 	query := `
-        SELECT id, collection_id, file_id, comment_id, user_id, anon_user_id, payload, is_deleted, created_at, updated_at
+        SELECT id, collection_id, file_id, comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
         FROM reactions
         WHERE collection_id = $1
           AND updated_at > $2
@@ -125,14 +134,15 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
 	}
 	defer rows.Close()
 
-	reactions := make([]ente.Reaction, 0, limit+1)
+	reactions := make([]socialentity.Reaction, 0, limit+1)
 	for rows.Next() {
 		var (
 			file     sql.NullInt64
 			comment  sql.NullString
 			anon     sql.NullString
-			payload  []byte
-			reaction ente.Reaction
+			cipher   sql.NullString
+			nonce    sql.NullString
+			reaction socialentity.Reaction
 		)
 		if err := rows.Scan(
 			&reaction.ID,
@@ -141,7 +151,8 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
 			&comment,
 			&reaction.UserID,
 			&anon,
-			&payload,
+			&cipher,
+			&nonce,
 			&reaction.IsDeleted,
 			&reaction.CreatedAt,
 			&reaction.UpdatedAt,
@@ -157,8 +168,11 @@ func (repo *ReactionsRepository) GetDiff(ctx context.Context, collectionID int64
 		if anon.Valid {
 			reaction.AnonUserID = &anon.String
 		}
-		if payload != nil {
-			reaction.Payload = payload
+		if cipher.Valid {
+			reaction.Cipher = cipher.String
+		}
+		if nonce.Valid {
+			reaction.Nonce = nonce.String
 		}
 		reactions = append(reactions, reaction)
 	}

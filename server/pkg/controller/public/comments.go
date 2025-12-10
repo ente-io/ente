@@ -2,13 +2,13 @@ package public
 
 import (
 	"context"
-	"encoding/json"
 	"sort"
 
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/comments"
-	"github.com/ente-io/museum/pkg/controller/social"
+	socialentity "github.com/ente-io/museum/ente/social"
+	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/repo"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
@@ -16,30 +16,33 @@ import (
 
 const maxCommentPayloadSize = 20 * 1024
 
-// PublicCommentsController handles comments exposed via public collection links.
-type PublicCommentsController struct {
-	CommentCtrl   *comments.Controller
-	CommentsRepo  *repo.CommentsRepository
-	ReactionsRepo *repo.ReactionsRepository
+// CommentsController handles comments exposed via public collection links.
+type CommentsController struct {
+	CommentCtrl   *socialcontroller.CommentsController
+	CommentsRepo  *socialrepo.CommentsRepository
+	ReactionsRepo *socialrepo.ReactionsRepository
 	UserRepo      *repo.UserRepository
 	UserAuthRepo  *repo.UserAuthRepository
+	AnonUsersRepo *socialrepo.AnonUsersRepository
 	JwtSecret     []byte
 }
 
 // CommentRequest models incoming payload for creating a comment.
 type CommentRequest struct {
-	ID              string          `json:"id" binding:"required"`
-	FileID          *int64          `json:"fileID"`
-	ParentCommentID *string         `json:"parentCommentID"`
-	Payload         json.RawMessage `json:"payload" binding:"required"`
-	AnonUserID      *string         `json:"anonUserID"`
-	AnonToken       string          `json:"anonToken"`
+	ID              string  `json:"id"`
+	FileID          *int64  `json:"fileID"`
+	ParentCommentID *string `json:"parentCommentID"`
+	Cipher          string  `json:"cipher" binding:"required"`
+	Nonce           string  `json:"nonce" binding:"required"`
+	AnonUserID      *string `json:"anonUserID"`
+	AnonToken       string  `json:"anonToken"`
 }
 
 type CommentUpdateRequest struct {
-	Payload    json.RawMessage `json:"payload" binding:"required"`
-	AnonUserID *string         `json:"anonUserID"`
-	AnonToken  string          `json:"anonToken"`
+	Cipher     string  `json:"cipher" binding:"required"`
+	Nonce      string  `json:"nonce" binding:"required"`
+	AnonUserID *string `json:"anonUserID"`
+	AnonToken  string  `json:"anonToken"`
 }
 
 type CommentDeleteRequest struct {
@@ -51,48 +54,65 @@ type participant struct {
 	EmailMasked string `json:"emailMasked"`
 }
 
-func (c *PublicCommentsController) CreateComment(ctx *gin.Context, collectionID int64, req CommentRequest) (string, error) {
-	if len(req.Payload) == 0 || len(req.Payload) > maxCommentPayloadSize {
+func (c *CommentsController) CreateComment(ctx *gin.Context, collectionID int64, req CommentRequest) (string, error) {
+	if len(req.Cipher) == 0 || len(req.Cipher) > maxCommentPayloadSize {
+		return "", ente.ErrBadRequest
+	}
+	if len(req.Nonce) == 0 {
 		return "", ente.ErrBadRequest
 	}
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return "", err
 	}
-	createReq := comments.CreateCommentRequest{
+	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+		return "", err
+	}
+	createReq := socialcontroller.CreateCommentRequest{
 		Actor:           actor,
 		CollectionID:    collectionID,
 		FileID:          req.FileID,
 		ParentCommentID: req.ParentCommentID,
-		Payload:         req.Payload,
+		Cipher:          req.Cipher,
+		Nonce:           req.Nonce,
 		ID:              req.ID,
 		RequireAccess:   false,
 	}
 	return c.CommentCtrl.Create(ctx, createReq)
 }
 
-func (c *PublicCommentsController) UpdateComment(ctx *gin.Context, collectionID int64, commentID string, req CommentUpdateRequest) error {
-	if len(req.Payload) == 0 || len(req.Payload) > maxCommentPayloadSize {
+func (c *CommentsController) UpdateComment(ctx *gin.Context, collectionID int64, commentID string, req CommentUpdateRequest) error {
+	if len(req.Cipher) == 0 || len(req.Cipher) > maxCommentPayloadSize {
+		return ente.ErrBadRequest
+	}
+	if len(req.Nonce) == 0 {
 		return ente.ErrBadRequest
 	}
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return err
 	}
-	updateReq := comments.UpdateCommentRequest{
+	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+		return err
+	}
+	updateReq := socialcontroller.UpdateCommentRequest{
 		Actor:     actor,
 		CommentID: commentID,
-		Payload:   req.Payload,
+		Cipher:    req.Cipher,
+		Nonce:     req.Nonce,
 	}
 	return c.CommentCtrl.UpdatePayload(ctx, updateReq)
 }
 
-func (c *PublicCommentsController) DeleteComment(ctx *gin.Context, collectionID int64, commentID string, req CommentDeleteRequest) error {
+func (c *CommentsController) DeleteComment(ctx *gin.Context, collectionID int64, commentID string, req CommentDeleteRequest) error {
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return err
 	}
-	deleteReq := comments.DeleteCommentRequest{
+	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+		return err
+	}
+	deleteReq := socialcontroller.DeleteCommentRequest{
 		Actor:         actor,
 		CommentID:     commentID,
 		RequireAccess: false,
@@ -100,9 +120,9 @@ func (c *PublicCommentsController) DeleteComment(ctx *gin.Context, collectionID 
 	return c.CommentCtrl.Delete(ctx, deleteReq)
 }
 
-func (c *PublicCommentsController) ListComments(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64) ([]ente.Comment, bool, error) {
-	diffReq := comments.DiffRequest{
-		Actor:         social.Actor{},
+func (c *CommentsController) ListComments(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64) ([]socialentity.Comment, bool, error) {
+	diffReq := socialcontroller.CommentDiffRequest{
+		Actor:         socialcontroller.Actor{},
 		CollectionID:  collectionID,
 		Since:         since,
 		Limit:         limit,
@@ -112,7 +132,7 @@ func (c *PublicCommentsController) ListComments(ctx *gin.Context, collectionID i
 	return c.CommentCtrl.Diff(ctx, diffReq)
 }
 
-func (c *PublicCommentsController) Participants(ctx context.Context, collectionID int64) ([]participant, error) {
+func (c *CommentsController) Participants(ctx context.Context, collectionID int64) ([]participant, error) {
 	ids := map[int64]struct{}{}
 	commentIDs, err := c.CommentsRepo.GetActiveUserIDs(ctx, collectionID)
 	if err != nil {
@@ -142,4 +162,8 @@ func (c *PublicCommentsController) Participants(ctx context.Context, collectionI
 		participants[idx] = participant{EmailMasked: maskedEmail}
 	}
 	return participants, nil
+}
+
+func (c *CommentsController) ListAnonProfiles(ctx *gin.Context, collectionID int64) ([]socialentity.AnonUser, error) {
+	return c.AnonUsersRepo.ListByCollection(ctx.Request.Context(), collectionID)
 }

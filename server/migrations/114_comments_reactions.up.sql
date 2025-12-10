@@ -3,11 +3,12 @@
 
 -- App supplies nanoid strings for primary keys; no pgcrypto dependency.
 
--- Helper: null payload when tombstoned
-CREATE OR REPLACE FUNCTION tg_null_payload_on_delete() RETURNS trigger AS $$
+-- Helper: null cipher when tombstoned
+CREATE OR REPLACE FUNCTION tg_null_cipher_on_delete() RETURNS trigger AS $$
 BEGIN
   IF NEW.is_deleted THEN
-    NEW.payload := NULL;
+    NEW.cipher := NULL;
+    NEW.nonce := NULL;
   END IF;
   RETURN NEW;
 END; $$ LANGUAGE plpgsql;
@@ -46,13 +47,31 @@ BEGIN
   RETURN NEW;
 END; $$ LANGUAGE plpgsql;
 
+-- Anonymous users table storing encrypted profile metadata for public commenters
+CREATE TABLE IF NOT EXISTS anon_users (
+  id TEXT PRIMARY KEY,
+  collection_id BIGINT NOT NULL,
+  cipher TEXT NOT NULL,
+  nonce TEXT NOT NULL,
+  created_at BIGINT NOT NULL DEFAULT now_utc_micro_seconds(),
+  updated_at BIGINT NOT NULL DEFAULT now_utc_micro_seconds()
+);
+
+CREATE INDEX IF NOT EXISTS idx_anon_users_collection
+  ON anon_users (collection_id);
+
+CREATE TRIGGER update_anon_users_updated_at
+  BEFORE UPDATE ON anon_users
+  FOR EACH ROW EXECUTE PROCEDURE trigger_updated_at_microseconds_column();
+
 -- Soft-delete all reactions for a comment when the comment is tombstoned
 CREATE OR REPLACE FUNCTION tg_soft_delete_reactions_on_comment_delete() RETURNS trigger AS $$
 BEGIN
   IF NEW.is_deleted AND (OLD.is_deleted IS DISTINCT FROM NEW.is_deleted) THEN
     UPDATE reactions
        SET is_deleted = TRUE,
-           payload = NULL,
+           cipher = NULL,
+           nonce = NULL,
            updated_at = now_utc_micro_seconds()
      WHERE comment_id = NEW.id
        AND is_deleted = FALSE;
@@ -71,21 +90,23 @@ CREATE TABLE IF NOT EXISTS comments (
   user_id BIGINT NOT NULL,
   anon_user_id TEXT NULL,
 
-  payload JSONB, -- encrypted blob; nullable when deleted
+  cipher TEXT,
+  nonce TEXT,
 
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
 
   created_at BIGINT NOT NULL DEFAULT now_utc_micro_seconds(),
   updated_at BIGINT NOT NULL DEFAULT now_utc_micro_seconds(),
 
-  CONSTRAINT comments_payload_on_delete CHECK (
-    (is_deleted = FALSE AND payload IS NOT NULL) OR
-    (is_deleted = TRUE  AND payload IS NULL)
+  CONSTRAINT comments_cipher_on_delete CHECK (
+    (is_deleted = FALSE AND cipher IS NOT NULL AND nonce IS NOT NULL) OR
+    (is_deleted = TRUE  AND cipher IS NULL AND nonce IS NULL)
   ),
   CONSTRAINT comments_user_or_anon_chk CHECK (
     (user_id = -1 AND anon_user_id IS NOT NULL) OR
     (user_id > 0  AND anon_user_id IS NULL)
-  )
+  ),
+  CONSTRAINT fk_comments_anon_user FOREIGN KEY (anon_user_id) REFERENCES anon_users (id)
 );
 
 -- Indexes for comments
@@ -110,9 +131,9 @@ CREATE INDEX IF NOT EXISTS idx_comments_collection_updated_at
   ON comments (collection_id, updated_at);
 
 -- Triggers for comments
-CREATE TRIGGER comments_null_payload_on_delete
+CREATE TRIGGER comments_null_cipher_on_delete
   BEFORE INSERT OR UPDATE ON comments
-  FOR EACH ROW EXECUTE PROCEDURE tg_null_payload_on_delete();
+  FOR EACH ROW EXECUTE PROCEDURE tg_null_cipher_on_delete();
 
 CREATE TRIGGER update_comments_updated_at
   BEFORE UPDATE ON comments
@@ -145,7 +166,8 @@ CREATE TABLE IF NOT EXISTS reactions (
     END
   ) STORED,
 
-  payload JSONB,           -- encrypted reaction payload; nullable when deleted
+  cipher TEXT,
+  nonce TEXT,
 
   is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -160,9 +182,9 @@ CREATE TABLE IF NOT EXISTS reactions (
   ),
 
   -- Enforce payload nulling on tombstone
-  CONSTRAINT reactions_payload_on_delete CHECK (
-    (is_deleted = FALSE AND payload IS NOT NULL) OR
-    (is_deleted = TRUE  AND payload IS NULL)
+  CONSTRAINT reactions_cipher_on_delete CHECK (
+    (is_deleted = FALSE AND cipher IS NOT NULL AND nonce IS NOT NULL) OR
+    (is_deleted = TRUE  AND cipher IS NULL AND nonce IS NULL)
   ),
 
   -- Unified identity for target to enforce one-per-user-per-target
@@ -178,7 +200,8 @@ CREATE TABLE IF NOT EXISTS reactions (
   CONSTRAINT reactions_user_or_anon_chk CHECK (
     (user_id = -1 AND anon_user_id IS NOT NULL) OR
     (user_id > 0  AND anon_user_id IS NULL)
-  )
+  ),
+  CONSTRAINT fk_reactions_anon_user FOREIGN KEY (anon_user_id) REFERENCES anon_users (id)
 );
 
 -- Indexes for reactions
@@ -204,9 +227,9 @@ CREATE INDEX IF NOT EXISTS idx_reactions_anon
   WHERE is_deleted = FALSE;
 
 -- Triggers for reactions
-CREATE TRIGGER reactions_null_payload_on_delete
+CREATE TRIGGER reactions_null_cipher_on_delete
   BEFORE INSERT OR UPDATE ON reactions
-  FOR EACH ROW EXECUTE PROCEDURE tg_null_payload_on_delete();
+  FOR EACH ROW EXECUTE PROCEDURE tg_null_cipher_on_delete();
 
 CREATE TRIGGER update_reactions_updated_at
   BEFORE UPDATE ON reactions

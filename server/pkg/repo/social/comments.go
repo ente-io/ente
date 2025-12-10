@@ -1,10 +1,11 @@
-package repo
+package social
 
 import (
 	"context"
 	"database/sql"
 
 	"github.com/ente-io/museum/ente"
+	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
 )
@@ -14,10 +15,10 @@ type CommentsRepository struct {
 	DB *sql.DB
 }
 
-func (repo *CommentsRepository) Insert(ctx context.Context, comment ente.Comment) error {
+func (repo *CommentsRepository) Insert(ctx context.Context, comment socialentity.Comment) error {
 	_, err := repo.DB.ExecContext(ctx, `
-        INSERT INTO comments (id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, payload, is_deleted)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO comments (id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `,
 		comment.ID,
 		comment.CollectionID,
@@ -25,20 +26,22 @@ func (repo *CommentsRepository) Insert(ctx context.Context, comment ente.Comment
 		comment.ParentCommentID,
 		comment.UserID,
 		comment.AnonUserID,
-		comment.Payload,
+		comment.Cipher,
+		comment.Nonce,
 		false,
 	)
 	return stacktrace.Propagate(err, "")
 }
 
-func (repo *CommentsRepository) UpdatePayload(ctx context.Context, id string, payload []byte) error {
+func (repo *CommentsRepository) UpdateCipher(ctx context.Context, id string, cipher string, nonce string) error {
 	result, err := repo.DB.ExecContext(ctx, `
         UPDATE comments
-        SET payload = $1,
+        SET cipher = $1,
+            nonce = $2,
             updated_at = now_utc_micro_seconds()
-        WHERE id = $2
+        WHERE id = $3
           AND is_deleted = FALSE
-    `, payload, id)
+    `, cipher, nonce, id)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
@@ -56,7 +59,8 @@ func (repo *CommentsRepository) SoftDelete(ctx context.Context, id string) error
 	result, err := repo.DB.ExecContext(ctx, `
         UPDATE comments
         SET is_deleted = TRUE,
-            payload = NULL,
+            cipher = NULL,
+            nonce = NULL,
             updated_at = now_utc_micro_seconds()
         WHERE id = $1
           AND is_deleted = FALSE
@@ -74,16 +78,17 @@ func (repo *CommentsRepository) SoftDelete(ctx context.Context, id string) error
 	return nil
 }
 
-func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*ente.Comment, error) {
+func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*socialentity.Comment, error) {
 	var (
-		fileID  sql.NullInt64
-		parent  sql.NullString
-		anon    sql.NullString
-		payload []byte
+		fileID sql.NullInt64
+		parent sql.NullString
+		anon   sql.NullString
+		cipher sql.NullString
+		nonce  sql.NullString
 	)
-	comment := &ente.Comment{}
+	comment := &socialentity.Comment{}
 	err := repo.DB.QueryRowContext(ctx, `
-        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, payload, is_deleted, created_at, updated_at
+        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
         FROM comments
         WHERE id = $1
     `, id).Scan(
@@ -93,7 +98,8 @@ func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*ente.C
 		&parent,
 		&comment.UserID,
 		&anon,
-		&payload,
+		&cipher,
+		&nonce,
 		&comment.IsDeleted,
 		&comment.CreatedAt,
 		&comment.UpdatedAt,
@@ -110,15 +116,18 @@ func (repo *CommentsRepository) GetByID(ctx context.Context, id string) (*ente.C
 	if anon.Valid {
 		comment.AnonUserID = &anon.String
 	}
-	if payload != nil {
-		comment.Payload = payload
+	if cipher.Valid {
+		comment.Cipher = cipher.String
+	}
+	if nonce.Valid {
+		comment.Nonce = nonce.String
 	}
 	return comment, nil
 }
 
-func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64) ([]ente.Comment, bool, error) {
+func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64, since int64, limit int, fileID *int64) ([]socialentity.Comment, bool, error) {
 	query := `
-        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, payload, is_deleted, created_at, updated_at
+        SELECT id, collection_id, file_id, parent_comment_id, user_id, anon_user_id, cipher, nonce, is_deleted, created_at, updated_at
         FROM comments
         WHERE collection_id = $1
           AND updated_at > $2
@@ -132,14 +141,15 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 	}
 	defer rows.Close()
 
-	comments := make([]ente.Comment, 0, limit+1)
+	comments := make([]socialentity.Comment, 0, limit+1)
 	for rows.Next() {
 		var (
 			file    sql.NullInt64
 			parent  sql.NullString
 			anon    sql.NullString
-			payload []byte
-			comment ente.Comment
+			cipher  sql.NullString
+			nonce   sql.NullString
+			comment socialentity.Comment
 		)
 		if err := rows.Scan(
 			&comment.ID,
@@ -148,7 +158,8 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 			&parent,
 			&comment.UserID,
 			&anon,
-			&payload,
+			&cipher,
+			&nonce,
 			&comment.IsDeleted,
 			&comment.CreatedAt,
 			&comment.UpdatedAt,
@@ -164,8 +175,11 @@ func (repo *CommentsRepository) GetDiff(ctx context.Context, collectionID int64,
 		if anon.Valid {
 			comment.AnonUserID = &anon.String
 		}
-		if payload != nil {
-			comment.Payload = payload
+		if cipher.Valid {
+			comment.Cipher = cipher.String
+		}
+		if nonce.Valid {
+			comment.Nonce = nonce.String
 		}
 		comments = append(comments, comment)
 	}

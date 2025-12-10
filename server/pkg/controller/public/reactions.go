@@ -1,32 +1,33 @@
 package public
 
 import (
-	"encoding/json"
-
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/reactions"
-	"github.com/ente-io/museum/pkg/controller/social"
+	socialentity "github.com/ente-io/museum/ente/social"
+	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/repo"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/gin-gonic/gin"
 )
 
 const maxReactionPayloadSize = 2 * 1024
 
-// PublicReactionsController exposes reactions for public collections.
-type PublicReactionsController struct {
-	ReactionCtrl  *reactions.Controller
-	ReactionsRepo *repo.ReactionsRepository
+// ReactionsController exposes reactions for public collections.
+type ReactionsController struct {
+	ReactionCtrl  *socialcontroller.ReactionsController
+	ReactionsRepo *socialrepo.ReactionsRepository
+	AnonUsersRepo *socialrepo.AnonUsersRepository
 	UserAuthRepo  *repo.UserAuthRepository
 	JwtSecret     []byte
 }
 
 type ReactionRequest struct {
-	ID         string          `json:"id" binding:"required"`
-	FileID     *int64          `json:"fileID"`
-	CommentID  *string         `json:"commentID"`
-	Payload    json.RawMessage `json:"payload" binding:"required"`
-	AnonUserID *string         `json:"anonUserID"`
-	AnonToken  string          `json:"anonToken"`
+	ID         string  `json:"id"`
+	FileID     *int64  `json:"fileID"`
+	CommentID  *string `json:"commentID"`
+	Cipher     string  `json:"cipher" binding:"required"`
+	Nonce      string  `json:"nonce" binding:"required"`
+	AnonUserID *string `json:"anonUserID"`
+	AnonToken  string  `json:"anonToken"`
 }
 
 type ReactionDeleteRequest struct {
@@ -34,8 +35,11 @@ type ReactionDeleteRequest struct {
 	AnonToken  string  `json:"anonToken"`
 }
 
-func (c *PublicReactionsController) UpsertReaction(ctx *gin.Context, collectionID int64, req ReactionRequest) (string, error) {
-	if len(req.Payload) == 0 || len(req.Payload) > maxReactionPayloadSize {
+func (c *ReactionsController) UpsertReaction(ctx *gin.Context, collectionID int64, req ReactionRequest) (string, error) {
+	if len(req.Cipher) == 0 || len(req.Cipher) > maxReactionPayloadSize {
+		return "", ente.ErrBadRequest
+	}
+	if len(req.Nonce) == 0 {
 		return "", ente.ErrBadRequest
 	}
 	if req.FileID != nil && req.CommentID != nil {
@@ -45,24 +49,31 @@ func (c *PublicReactionsController) UpsertReaction(ctx *gin.Context, collectionI
 	if err != nil {
 		return "", err
 	}
-	upsertReq := reactions.UpsertReactionRequest{
+	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+		return "", err
+	}
+	upsertReq := socialcontroller.UpsertReactionRequest{
 		Actor:         actor,
 		ID:            req.ID,
 		CollectionID:  collectionID,
 		FileID:        req.FileID,
 		CommentID:     req.CommentID,
-		Payload:       req.Payload,
+		Cipher:        req.Cipher,
+		Nonce:         req.Nonce,
 		RequireAccess: false,
 	}
 	return c.ReactionCtrl.Upsert(ctx, upsertReq)
 }
 
-func (c *PublicReactionsController) DeleteReaction(ctx *gin.Context, collectionID int64, reactionID string, req ReactionDeleteRequest) error {
+func (c *ReactionsController) DeleteReaction(ctx *gin.Context, collectionID int64, reactionID string, req ReactionDeleteRequest) error {
 	actor, err := resolvePublicActor(ctx, c.UserAuthRepo, c.JwtSecret, req.AnonUserID, req.AnonToken, true)
 	if err != nil {
 		return err
 	}
-	deleteReq := reactions.DeleteRequest{
+	if err := ensureAnonUserForCollection(ctx.Request.Context(), c.AnonUsersRepo, collectionID, actor); err != nil {
+		return err
+	}
+	deleteReq := socialcontroller.ReactionDeleteRequest{
 		Actor:         actor,
 		ReactionID:    reactionID,
 		RequireAccess: false,
@@ -70,9 +81,9 @@ func (c *PublicReactionsController) DeleteReaction(ctx *gin.Context, collectionI
 	return c.ReactionCtrl.Delete(ctx, deleteReq)
 }
 
-func (c *PublicReactionsController) ListReactions(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64, commentID *string) ([]ente.Reaction, bool, error) {
-	diffReq := reactions.DiffRequest{
-		Actor:         social.Actor{},
+func (c *ReactionsController) ListReactions(ctx *gin.Context, collectionID int64, since int64, limit int, fileID *int64, commentID *string) ([]socialentity.Reaction, bool, error) {
+	diffReq := socialcontroller.ReactionDiffRequest{
+		Actor:         socialcontroller.Actor{},
 		CollectionID:  collectionID,
 		Since:         since,
 		Limit:         limit,

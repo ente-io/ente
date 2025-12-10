@@ -5,18 +5,21 @@ import (
 	"sort"
 
 	"github.com/ente-io/museum/ente"
+	socialentity "github.com/ente-io/museum/ente/social"
 	"github.com/ente-io/museum/pkg/controller/access"
 	"github.com/ente-io/museum/pkg/repo"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 
 // Controller combines comments and reactions for unified endpoints.
 type Controller struct {
-	CommentsRepo   *repo.CommentsRepository
-	ReactionsRepo  *repo.ReactionsRepository
+	CommentsRepo   *socialrepo.CommentsRepository
+	ReactionsRepo  *socialrepo.ReactionsRepository
 	CollectionRepo *repo.CollectionRepository
 	AccessCtrl     access.Controller
+	AnonUsersRepo  *socialrepo.AnonUsersRepository
 }
 
 // UnifiedDiffRequest describes paging parameters for the social diff.
@@ -36,8 +39,15 @@ type CollectionCount struct {
 	Reactions    int64 `json:"reactions"`
 }
 
+// AnonProfilesRequest describes the parameters for listing anonymous profiles.
+type AnonProfilesRequest struct {
+	Actor         Actor
+	CollectionID  int64
+	RequireAccess bool
+}
+
 // UnifiedDiff returns comments and reactions snapshots side by side.
-func (c *Controller) UnifiedDiff(ctx *gin.Context, req UnifiedDiffRequest) ([]ente.Comment, []ente.Reaction, bool, bool, error) {
+func (c *Controller) UnifiedDiff(ctx *gin.Context, req UnifiedDiffRequest) ([]socialentity.Comment, []socialentity.Reaction, bool, bool, error) {
 	if req.RequireAccess {
 		userID, hasUserID := req.Actor.UserIDValue()
 		if !hasUserID || userID <= 0 {
@@ -109,4 +119,21 @@ func (c *Controller) CountActiveCollections(ctx context.Context, userID int64) (
 		})
 	}
 	return results, nil
+}
+
+// ListAnonProfiles returns encrypted anonymous profiles for a collection when allowed.
+func (c *Controller) ListAnonProfiles(ctx *gin.Context, req AnonProfilesRequest) ([]socialentity.AnonUser, error) {
+	if req.RequireAccess {
+		userID, hasUserID := req.Actor.UserIDValue()
+		if !hasUserID || userID <= 0 {
+			return nil, ente.ErrAuthenticationRequired
+		}
+		if _, err := c.AccessCtrl.GetCollection(ctx, &access.GetCollectionParams{
+			CollectionID: req.CollectionID,
+			ActorUserID:  userID,
+		}); err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+	}
+	return c.AnonUsersRepo.ListByCollection(ctx.Request.Context(), req.CollectionID)
 }

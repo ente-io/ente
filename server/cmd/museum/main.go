@@ -42,15 +42,13 @@ import (
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/access"
 	authenticatorCtrl "github.com/ente-io/museum/pkg/controller/authenticator"
-	commentCtrl "github.com/ente-io/museum/pkg/controller/comments"
 	dataCleanupCtrl "github.com/ente-io/museum/pkg/controller/data_cleanup"
 	"github.com/ente-io/museum/pkg/controller/email"
 	embeddingCtrl "github.com/ente-io/museum/pkg/controller/embedding"
 	"github.com/ente-io/museum/pkg/controller/family"
 	"github.com/ente-io/museum/pkg/controller/lock"
-	reactionCtrl "github.com/ente-io/museum/pkg/controller/reactions"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
-	socialCtrlPkg "github.com/ente-io/museum/pkg/controller/social"
+	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/user"
 	userEntityCtrl "github.com/ente-io/museum/pkg/controller/userentity"
@@ -64,6 +62,7 @@ import (
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
 	userEntityRepo "github.com/ente-io/museum/pkg/repo/userentity"
 	"github.com/ente-io/museum/pkg/utils/billing"
@@ -266,21 +265,23 @@ func main() {
 	}
 
 	accessCtrl := access.NewAccessController(collectionRepo, fileRepo)
-	commentsRepo := &repo.CommentsRepository{DB: db}
-	reactionsRepo := &repo.ReactionsRepository{DB: db}
-	commentsController := &commentCtrl.Controller{
+	commentsRepo := &socialrepo.CommentsRepository{DB: db}
+	reactionsRepo := &socialrepo.ReactionsRepository{DB: db}
+	anonUsersRepo := &socialrepo.AnonUsersRepository{DB: db}
+	commentsController := &socialcontroller.CommentsController{
 		Repo:       commentsRepo,
 		AccessCtrl: accessCtrl,
 	}
-	reactionsController := &reactionCtrl.Controller{
+	reactionsController := &socialcontroller.ReactionsController{
 		Repo:       reactionsRepo,
 		AccessCtrl: accessCtrl,
 	}
-	socialController := &socialCtrlPkg.Controller{
+	socialController := &socialcontroller.Controller{
 		CommentsRepo:   commentsRepo,
 		ReactionsRepo:  reactionsRepo,
 		CollectionRepo: collectionRepo,
 		AccessCtrl:     accessCtrl,
+		AnonUsersRepo:  anonUsersRepo,
 	}
 	fileDataCtrl := filedata.New(fileDataRepo, accessCtrl, objectCleanupController, s3Config, fileRepo, collectionRepo)
 
@@ -336,22 +337,25 @@ func main() {
 		UserRepo:              userRepo,
 		JwtSecret:             jwtSecretBytes,
 	}
-	publicCommentsCtrl := &publicCtrl.PublicCommentsController{
+	publicCommentsCtrl := &publicCtrl.CommentsController{
 		CommentCtrl:   commentsController,
 		CommentsRepo:  commentsRepo,
 		ReactionsRepo: reactionsRepo,
 		UserRepo:      userRepo,
 		UserAuthRepo:  userAuthRepo,
+		AnonUsersRepo: anonUsersRepo,
 		JwtSecret:     jwtSecretBytes,
 	}
-	publicReactionsCtrl := &publicCtrl.PublicReactionsController{
+	publicReactionsCtrl := &publicCtrl.ReactionsController{
 		ReactionCtrl:  reactionsController,
 		ReactionsRepo: reactionsRepo,
+		AnonUsersRepo: anonUsersRepo,
 		UserAuthRepo:  userAuthRepo,
 		JwtSecret:     jwtSecretBytes,
 	}
 	anonIdentityCtrl := &publicCtrl.AnonIdentityController{
-		JwtSecret: jwtSecretBytes,
+		JwtSecret:     jwtSecretBytes,
+		AnonUsersRepo: anonUsersRepo,
 	}
 
 	collectionController := &collections.CollectionController{
@@ -419,10 +423,12 @@ func main() {
 		CollectionLinkRepo:   collectionLinkRepo,
 		PublicCollectionCtrl: collectionLinkCtrl,
 		CollectionRepo:       collectionRepo,
+		AnonUsersRepo:        anonUsersRepo,
 		Cache:                accessTokenCache,
 		BillingCtrl:          billingController,
 		DiscordController:    discordController,
 		RemoteStoreRepo:      remoteStoreRepository,
+		AnonIdentitySecret:   jwtSecretBytes,
 	}
 	fileLinkMiddleware := &middleware.FileLinkMiddleware{
 		FileLinkRepo:      fileLinkRepo,
@@ -474,7 +480,11 @@ func main() {
 	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionLinkMiddleware.Authenticate(urlSanitizer))
+	publicCollectionAPI.Use(
+		rateLimiter.GlobalRateLimiter(),
+		collectionLinkMiddleware.Authenticate(urlSanitizer),
+		rateLimiter.APIRateLimitMiddleware(urlSanitizer),
+	)
 	fileLinkApi := server.Group("/file-link")
 	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
 
@@ -567,6 +577,7 @@ func main() {
 	privateAPI.DELETE("/reactions/:reactionID", reactionsHandler.Delete)
 
 	privateAPI.GET("/social/diff", socialHandler.UnifiedDiff)
+	privateAPI.GET("/social/anon-profiles", socialHandler.AnonProfiles)
 	privateAPI.GET("/comments-reactions/counts", socialHandler.Counts)
 
 	emergencyCtrl := &emergency.Controller{
@@ -696,6 +707,7 @@ func main() {
 	publicCollectionAPI.POST("/reactions", publicSocialHandler.CreateReaction)
 	publicCollectionAPI.DELETE("/reactions/:reactionID", publicSocialHandler.DeleteReaction)
 	publicCollectionAPI.GET("/participants/masked-emails", publicSocialHandler.Participants)
+	publicCollectionAPI.GET("/anon-profiles", publicSocialHandler.AnonProfiles)
 	publicCollectionAPI.POST("/anon-identity", publicSocialHandler.CreateAnonIdentity)
 
 	castAPI := server.Group("/cast")

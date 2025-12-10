@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/ente-io/museum/ente"
@@ -14,24 +13,31 @@ import (
 
 // PublicCommentsHandler handles public collection social APIs.
 type PublicCommentsHandler struct {
-	CommentsCtrl     *public.PublicCommentsController
-	ReactionsCtrl    *public.PublicReactionsController
+	CommentsCtrl     *public.CommentsController
+	ReactionsCtrl    *public.ReactionsController
 	AnonIdentityCtrl *public.AnonIdentityController
 }
 
+const (
+	maxPublicCommentCipherSize  = 20 * 1024
+	maxPublicReactionCipherSize = 2 * 1024
+)
+
 type publicCommentPayload struct {
-	ID              string          `json:"id" binding:"required"`
-	FileID          *int64          `json:"fileID"`
-	ParentCommentID *string         `json:"parentCommentID"`
-	Payload         json.RawMessage `json:"payload" binding:"required"`
-	AnonUserID      *string         `json:"anonUserID"`
-	AnonToken       string          `json:"anonToken"`
+	ID              string  `json:"id"`
+	FileID          *int64  `json:"fileID"`
+	ParentCommentID *string `json:"parentCommentID"`
+	Cipher          string  `json:"cipher" binding:"required"`
+	Nonce           string  `json:"nonce" binding:"required"`
+	AnonUserID      *string `json:"anonUserID"`
+	AnonToken       string  `json:"anonToken"`
 }
 
 type publicCommentEditPayload struct {
-	Payload    json.RawMessage `json:"payload" binding:"required"`
-	AnonUserID *string         `json:"anonUserID"`
-	AnonToken  string          `json:"anonToken"`
+	Cipher     string  `json:"cipher" binding:"required"`
+	Nonce      string  `json:"nonce" binding:"required"`
+	AnonUserID *string `json:"anonUserID"`
+	AnonToken  string  `json:"anonToken"`
 }
 
 type publicAnonPayload struct {
@@ -40,17 +46,23 @@ type publicAnonPayload struct {
 }
 
 type publicReactionPayload struct {
-	ID         string          `json:"id" binding:"required"`
-	FileID     *int64          `json:"fileID"`
-	CommentID  *string         `json:"commentID"`
-	Payload    json.RawMessage `json:"payload" binding:"required"`
-	AnonUserID *string         `json:"anonUserID"`
-	AnonToken  string          `json:"anonToken"`
+	ID         string  `json:"id"`
+	FileID     *int64  `json:"fileID"`
+	CommentID  *string `json:"commentID"`
+	Cipher     string  `json:"cipher" binding:"required"`
+	Nonce      string  `json:"nonce" binding:"required"`
+	AnonUserID *string `json:"anonUserID"`
+	AnonToken  string  `json:"anonToken"`
 }
 
 type publicReactionDeletePayload struct {
 	AnonUserID *string `json:"anonUserID"`
 	AnonToken  string  `json:"anonToken"`
+}
+
+type publicAnonIdentityPayload struct {
+	Cipher string `json:"cipher" binding:"required"`
+	Nonce  string `json:"nonce" binding:"required"`
 }
 
 func (h *PublicCommentsHandler) CreateComment(c *gin.Context) {
@@ -59,12 +71,17 @@ func (h *PublicCommentsHandler) CreateComment(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxPublicCommentCipherSize || len(payload.Nonce) == 0 {
+		handler.Error(c, ente.ErrBadRequest)
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	controllerReq := public.CommentRequest{
 		ID:              payload.ID,
 		FileID:          payload.FileID,
 		ParentCommentID: payload.ParentCommentID,
-		Payload:         payload.Payload,
+		Cipher:          payload.Cipher,
+		Nonce:           payload.Nonce,
 		AnonUserID:      payload.AnonUserID,
 		AnonToken:       payload.AnonToken,
 	}
@@ -82,6 +99,10 @@ func (h *PublicCommentsHandler) UpdateComment(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxPublicCommentCipherSize || len(payload.Nonce) == 0 {
+		handler.Error(c, ente.ErrBadRequest)
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	commentID := c.Param("commentID")
 	if commentID == "" {
@@ -89,7 +110,8 @@ func (h *PublicCommentsHandler) UpdateComment(c *gin.Context) {
 		return
 	}
 	controllerReq := public.CommentUpdateRequest{
-		Payload:    payload.Payload,
+		Cipher:     payload.Cipher,
+		Nonce:      payload.Nonce,
 		AnonUserID: payload.AnonUserID,
 		AnonToken:  payload.AnonToken,
 	}
@@ -154,12 +176,17 @@ func (h *PublicCommentsHandler) CreateReaction(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxPublicReactionCipherSize || len(payload.Nonce) == 0 {
+		handler.Error(c, ente.ErrBadRequest)
+		return
+	}
 	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
 	controllerReq := public.ReactionRequest{
 		ID:         payload.ID,
 		FileID:     payload.FileID,
 		CommentID:  payload.CommentID,
-		Payload:    payload.Payload,
+		Cipher:     payload.Cipher,
+		Nonce:      payload.Nonce,
 		AnonUserID: payload.AnonUserID,
 		AnonToken:  payload.AnonToken,
 	}
@@ -236,10 +263,34 @@ func (h *PublicCommentsHandler) Participants(c *gin.Context) {
 }
 
 func (h *PublicCommentsHandler) CreateAnonIdentity(c *gin.Context) {
-	resp, err := h.AnonIdentityCtrl.Create(c)
+	var payload publicAnonIdentityPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if len(payload.Cipher) == 0 || len(payload.Nonce) == 0 {
+		handler.Error(c, ente.ErrBadRequest)
+		return
+	}
+	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
+	resp, err := h.AnonIdentityCtrl.Create(c, public.CreateAnonIdentityRequest{
+		CollectionID: collectionID,
+		Cipher:       payload.Cipher,
+		Nonce:        payload.Nonce,
+	})
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
 	c.JSON(http.StatusCreated, resp)
+}
+
+func (h *PublicCommentsHandler) AnonProfiles(c *gin.Context) {
+	collectionID := auth.MustGetPublicAccessContext(c).CollectionID
+	profiles, err := h.CommentsCtrl.ListAnonProfiles(c, collectionID)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"profiles": profiles})
 }

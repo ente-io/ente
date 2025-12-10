@@ -6,46 +6,54 @@ import (
 	"strings"
 
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/social"
+	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 )
 
-func resolvePublicActor(c *gin.Context, userAuthRepo *repo.UserAuthRepository, jwtSecret []byte, bodyAnonID *string, bodyAnonToken string, requireIdentity bool) (social.Actor, error) {
+func resolvePublicActor(c *gin.Context, userAuthRepo *repo.UserAuthRepository, jwtSecret []byte, bodyAnonID *string, bodyAnonToken string, requireIdentity bool) (socialcontroller.Actor, error) {
+	if ctxAnonID, ok := auth.GetPublicAnonUserID(c); ok && ctxAnonID != nil && *ctxAnonID != "" {
+		actor := socialcontroller.Actor{AnonUserID: ctxAnonID}
+		if err := actor.ValidateAnon(); err != nil {
+			return socialcontroller.Actor{}, err
+		}
+		return actor, nil
+	}
 	if token := auth.GetToken(c); token != "" {
 		app := auth.GetApp(c)
 		userID, expired, err := userAuthRepo.GetUserIDWithToken(token, app)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return social.Actor{}, ente.ErrAuthenticationRequired
+				return socialcontroller.Actor{}, ente.ErrAuthenticationRequired
 			}
-			return social.Actor{}, stacktrace.Propagate(err, "")
+			return socialcontroller.Actor{}, stacktrace.Propagate(err, "")
 		}
 		if expired {
-			return social.Actor{}, ente.ErrAuthenticationRequired
+			return socialcontroller.Actor{}, ente.ErrAuthenticationRequired
 		}
-		return social.Actor{UserID: &userID}, nil
+		return socialcontroller.Actor{UserID: &userID}, nil
+
 	}
 
 	anonID, anonToken := extractAnonIdentity(c, bodyAnonID, bodyAnonToken)
 	if anonID == nil || anonToken == "" {
 		if requireIdentity {
-			return social.Actor{}, ente.ErrAuthenticationRequired
+			return socialcontroller.Actor{}, ente.ErrAuthenticationRequired
 		}
-		return social.Actor{}, nil
+		return socialcontroller.Actor{}, nil
 	}
 	claim, err := ente.ParseAnonymousIdentityToken(jwtSecret, anonToken)
 	if err != nil {
-		return social.Actor{}, stacktrace.Propagate(err, "")
+		return socialcontroller.Actor{}, stacktrace.Propagate(err, "")
 	}
 	if claim.Subject != *anonID {
-		return social.Actor{}, ente.ErrBadRequest
+		return socialcontroller.Actor{}, ente.ErrBadRequest
 	}
-	actor := social.Actor{AnonUserID: anonID}
+	actor := socialcontroller.Actor{AnonUserID: anonID}
 	if err := actor.ValidateAnon(); err != nil {
-		return social.Actor{}, err
+		return socialcontroller.Actor{}, err
 	}
 	return actor, nil
 }

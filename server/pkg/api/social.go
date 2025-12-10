@@ -77,3 +77,26 @@ func (h *SocialHandler) Counts(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"counts": counts})
 }
+
+func (h *SocialHandler) AnonProfiles(c *gin.Context) {
+	collectionID, err := strconv.ParseInt(c.Query("collectionID"), 10, 64)
+	if err != nil || collectionID <= 0 {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "invalid collectionID"))
+		return
+	}
+	userID := auth.GetUserID(c.Request.Header)
+	if userID <= 0 {
+		handler.Error(c, ente.ErrAuthenticationRequired)
+		return
+	}
+	profiles, err := h.Controller.ListAnonProfiles(c, social.AnonProfilesRequest{
+		Actor:         social.Actor{UserID: &userID},
+		CollectionID:  collectionID,
+		RequireAccess: true,
+	})
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"profiles": profiles})
+}

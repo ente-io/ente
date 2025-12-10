@@ -1,12 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/reactions"
 	"github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
@@ -18,24 +16,24 @@ const maxReactionPayloadBytes = 2 * 1024
 
 // ReactionsHandler exposes authenticated reaction APIs.
 type ReactionsHandler struct {
-	Controller *reactions.Controller
+	Controller *social.ReactionsController
 }
 
 type reactionPayload struct {
-	ID           string          `json:"id" binding:"required"`
-	CollectionID int64           `json:"collectionID" binding:"required"`
-	FileID       *int64          `json:"fileID"`
-	CommentID    *string         `json:"commentID"`
-	Payload      json.RawMessage `json:"payload" binding:"required"`
+	ID           string  `json:"id"`
+	CollectionID int64   `json:"collectionID" binding:"required"`
+	FileID       *int64  `json:"fileID"`
+	CommentID    *string `json:"commentID"`
+	Cipher       string  `json:"cipher" binding:"required"`
+	Nonce        string  `json:"nonce" binding:"required"`
 }
-
 func (h *ReactionsHandler) Upsert(c *gin.Context) {
 	var payload reactionPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	if len(payload.Payload) == 0 || len(payload.Payload) > maxReactionPayloadBytes {
+	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxReactionPayloadBytes || len(payload.Nonce) == 0 {
 		handler.Error(c, ente.ErrBadRequest)
 		return
 	}
@@ -48,13 +46,14 @@ func (h *ReactionsHandler) Upsert(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := reactions.UpsertReactionRequest{
+	req := social.UpsertReactionRequest{
 		Actor:         social.Actor{UserID: &userID},
 		ID:            payload.ID,
 		CollectionID:  payload.CollectionID,
 		FileID:        payload.FileID,
 		CommentID:     payload.CommentID,
-		Payload:       payload.Payload,
+		Cipher:        payload.Cipher,
+		Nonce:         payload.Nonce,
 		RequireAccess: true,
 	}
 	id, err := h.Controller.Upsert(c, req)
@@ -96,7 +95,7 @@ func (h *ReactionsHandler) Diff(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := reactions.DiffRequest{
+	req := social.ReactionDiffRequest{
 		Actor:         social.Actor{UserID: &userID},
 		CollectionID:  collectionID,
 		Since:         since,
@@ -124,7 +123,7 @@ func (h *ReactionsHandler) Delete(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := reactions.DeleteRequest{
+	req := social.ReactionDeleteRequest{
 		Actor:         social.Actor{UserID: &userID},
 		ReactionID:    reactionID,
 		RequireAccess: true,

@@ -1,12 +1,10 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller/comments"
 	"github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
@@ -18,19 +16,21 @@ const maxCommentPayloadBytes = 20 * 1024
 
 // CommentsHandler exposes authenticated comment APIs.
 type CommentsHandler struct {
-	Controller *comments.Controller
+	Controller *social.CommentsController
 }
 
 type createCommentPayload struct {
-	ID              string          `json:"id" binding:"required"`
-	CollectionID    int64           `json:"collectionID" binding:"required"`
-	FileID          *int64          `json:"fileID"`
-	ParentCommentID *string         `json:"parentCommentID"`
-	Payload         json.RawMessage `json:"payload" binding:"required"`
+	ID              string  `json:"id"`
+	CollectionID    int64   `json:"collectionID" binding:"required"`
+	FileID          *int64  `json:"fileID"`
+	ParentCommentID *string `json:"parentCommentID"`
+	Cipher          string  `json:"cipher" binding:"required"`
+	Nonce           string  `json:"nonce" binding:"required"`
 }
 
 type updateCommentPayload struct {
-	Payload json.RawMessage `json:"payload" binding:"required"`
+	Cipher string `json:"cipher" binding:"required"`
+	Nonce  string `json:"nonce" binding:"required"`
 }
 
 func (h *CommentsHandler) Create(c *gin.Context) {
@@ -39,7 +39,7 @@ func (h *CommentsHandler) Create(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	if len(payload.Payload) == 0 || len(payload.Payload) > maxCommentPayloadBytes {
+	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxCommentPayloadBytes || len(payload.Nonce) == 0 {
 		handler.Error(c, ente.ErrBadRequest)
 		return
 	}
@@ -48,12 +48,13 @@ func (h *CommentsHandler) Create(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := comments.CreateCommentRequest{
+	req := social.CreateCommentRequest{
 		Actor:           social.Actor{UserID: &userID},
 		CollectionID:    payload.CollectionID,
 		FileID:          payload.FileID,
 		ParentCommentID: payload.ParentCommentID,
-		Payload:         payload.Payload,
+		Cipher:          payload.Cipher,
+		Nonce:           payload.Nonce,
 		ID:              payload.ID,
 		RequireAccess:   true,
 	}
@@ -91,7 +92,7 @@ func (h *CommentsHandler) Diff(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := comments.DiffRequest{
+	req := social.CommentDiffRequest{
 		Actor:         social.Actor{UserID: &userID},
 		CollectionID:  collectionID,
 		Since:         since,
@@ -118,7 +119,7 @@ func (h *CommentsHandler) Update(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	if len(payload.Payload) == 0 || len(payload.Payload) > maxCommentPayloadBytes {
+	if len(payload.Cipher) == 0 || len(payload.Cipher) > maxCommentPayloadBytes || len(payload.Nonce) == 0 {
 		handler.Error(c, ente.ErrBadRequest)
 		return
 	}
@@ -127,10 +128,11 @@ func (h *CommentsHandler) Update(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := comments.UpdateCommentRequest{
+	req := social.UpdateCommentRequest{
 		Actor:         social.Actor{UserID: &userID},
 		CommentID:     commentID,
-		Payload:       payload.Payload,
+		Cipher:        payload.Cipher,
+		Nonce:         payload.Nonce,
 		RequireAccess: true,
 	}
 	if err := h.Controller.UpdatePayload(c, req); err != nil {
@@ -151,7 +153,7 @@ func (h *CommentsHandler) Delete(c *gin.Context) {
 		handler.Error(c, ente.ErrAuthenticationRequired)
 		return
 	}
-	req := comments.DeleteCommentRequest{
+	req := social.DeleteCommentRequest{
 		Actor:         social.Actor{UserID: &userID},
 		CommentID:     commentID,
 		RequireAccess: true,
