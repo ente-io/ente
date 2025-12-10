@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:typed_data";
 
+import "package:dotted_border/dotted_border.dart";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
@@ -9,14 +10,20 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
-import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart"
+    show ManualPersonAssignmentResult, PersonService;
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
+import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
 final Logger _logger = Logger("FacesItemWidget");
@@ -116,30 +123,17 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: SizedBox(
-                  height: 24,
-                  child: Center(
-                    child: Text(
-                      AppLocalizations.of(context).people,
-                      style: getEnteTextTheme(context).small,
-                    ),
-                  ),
-                ),
+              Text(
+                AppLocalizations.of(context).people,
+                style: getEnteTextTheme(context).small,
               ),
               _editStateButton(),
             ],
           ),
           const SizedBox(height: 20),
-          if (_defaultFaces.isNotEmpty)
-            _buildFaceGrid(_defaultFaces, thumbnailWidth),
-          if (_manualPersons.isNotEmpty) ...[
-            if (_defaultFaces.isNotEmpty) const SizedBox(height: 16),
-            _buildManualPersonGrid(thumbnailWidth),
-          ],
+          _buildPeopleGrid(thumbnailWidth),
           if (_remainingFaces.isNotEmpty) ...[
             const SizedBox(height: 16),
             _buildRemainingFacesSection(thumbnailWidth),
@@ -149,48 +143,80 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Widget _buildFaceGrid(
-    List<_FaceInfo> faceInfoList,
-    double thumbnailWidth,
-  ) {
+  Widget _buildPeopleGrid(double thumbnailWidth) {
+    final children = <Widget>[];
+
+    // Add face widgets
+    for (final faceInfo in _defaultFaces) {
+      children.add(
+        FileInfoFaceWidget(
+          widget.file,
+          faceInfo.face,
+          faceCrop: faceInfo.faceCrop,
+          person: faceInfo.person,
+          clusterID: faceInfo.clusterID,
+          width: thumbnailWidth,
+          isEditMode: _isEditMode,
+          reloadAllFaces: () => loadFaces(isRefresh: true),
+        ),
+      );
+    }
+
+    // Add manual person widgets
+    for (final person in _manualPersons) {
+      children.add(
+        _ManualPersonTag(
+          person: person,
+          thumbnailWidth: thumbnailWidth,
+          onTap: () => _openPersonPage(person),
+          isEditMode: _isEditMode,
+          onRemove: () => _onRemoveManualPerson(person),
+        ),
+      );
+    }
+
+    // Add "Add person" button at the end
+    if (widget.file.uploadedFileID != null) {
+      children.add(_buildAddPersonButton(thumbnailWidth));
+    }
+
     return Padding(
       padding: const EdgeInsets.only(right: 12.0),
       child: Wrap(
         runSpacing: 8,
         spacing: 12,
-        children: faceInfoList
-            .map(
-              (faceInfo) => FileInfoFaceWidget(
-                widget.file,
-                faceInfo.face,
-                faceCrop: faceInfo.faceCrop,
-                person: faceInfo.person,
-                clusterID: faceInfo.clusterID,
-                width: thumbnailWidth,
-                isEditMode: _isEditMode,
-                reloadAllFaces: () => loadFaces(isRefresh: true),
-              ),
-            )
-            .toList(),
+        children: children,
       ),
     );
   }
 
-  Widget _buildManualPersonGrid(double thumbnailWidth) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12.0),
-      child: Wrap(
-        runSpacing: 8,
-        spacing: 12,
-        children: _manualPersons
-            .map(
-              (person) => _ManualPersonTag(
-                person: person,
-                thumbnailWidth: thumbnailWidth,
-                onTap: () => _openPersonPage(person),
-              ),
-            )
-            .toList(),
+  Widget _buildAddPersonButton(double thumbnailWidth) {
+    final colorScheme = getEnteColorScheme(context);
+    const strokeWidth = 1.0;
+    final innerSize = thumbnailWidth - strokeWidth * 2;
+    return GestureDetector(
+      onTap: _openAddFilesToPersonPage,
+      child: DottedBorder(
+        color: colorScheme.strokeMuted,
+        strokeWidth: strokeWidth,
+        dashPattern: const [4, 4],
+        padding: EdgeInsets.zero,
+        customPath: (size) {
+          return ContinuousRectangleBorder(
+            borderRadius: BorderRadius.circular(52),
+          ).getOuterPath(Rect.fromLTWH(0, 0, size.width, size.height));
+        },
+        child: SizedBox(
+          height: innerSize,
+          width: innerSize,
+          child: Center(
+            child: Icon(
+              Icons.person_add_alt_1_outlined,
+              color: colorScheme.strokeMuted,
+              size: 24,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -297,6 +323,30 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
+  Widget _buildFaceGrid(List<_FaceInfo> faceInfoList, double thumbnailWidth) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: Wrap(
+        runSpacing: 8,
+        spacing: 12,
+        children: faceInfoList
+            .map(
+              (faceInfo) => FileInfoFaceWidget(
+                widget.file,
+                faceInfo.face,
+                faceCrop: faceInfo.faceCrop,
+                person: faceInfo.person,
+                clusterID: faceInfo.clusterID,
+                width: thumbnailWidth,
+                isEditMode: _isEditMode,
+                reloadAllFaces: () => loadFaces(isRefresh: true),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
   Widget _buildRemainingFacesSection(double thumbnailWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,39 +386,34 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   }
 
   Widget _editStateButton() {
-    return SizedBox(
-      height: 36,
-      child: _isEditMode
-          ? Padding(
-              padding: const EdgeInsets.only(top: 12.0, right: 12.0),
-              child: Center(
-                child: GestureDetector(
-                  onTap: _toggleEditMode,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: getEnteColorScheme(context).primary500,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context).done,
-                      style: getEnteTextTheme(context).small.copyWith(
-                            color: getEnteColorScheme(context).primary500,
-                          ),
-                    ),
-                  ),
-                ),
+    if (_isEditMode) {
+      return Padding(
+        padding: const EdgeInsets.only(right: 12.0, top: 11, bottom: 10),
+        child: GestureDetector(
+          onTap: _toggleEditMode,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: getEnteColorScheme(context).primary500,
+                width: 1,
               ),
-            )
-          : IconButtonWidget(
-              icon: Icons.edit,
-              iconButtonType: IconButtonType.secondary,
-              onTap: _toggleEditMode,
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Text(
+              AppLocalizations.of(context).done,
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: getEnteColorScheme(context).primary500,
+                  ),
+            ),
+          ),
+        ),
+      );
+    }
+    return IconButtonWidget(
+      icon: Icons.edit,
+      iconButtonType: IconButtonType.secondary,
+      onTap: _toggleEditMode,
     );
   }
 
@@ -493,6 +538,41 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
   void _toggleRemainingFaces() =>
       setState(() => _showRemainingFaces = !_showRemainingFaces);
 
+  Future<void> _openAddFilesToPersonPage() async {
+    final result =
+        await Navigator.of(context).push<ManualPersonAssignmentResult>(
+      MaterialPageRoute(
+        builder: (context) => AddFilesToPersonPage(files: [widget.file]),
+      ),
+    );
+    if (result != null) {
+      await loadFaces(isRefresh: true);
+    }
+  }
+
+  Future<void> _onRemoveManualPerson(PersonEntity person) async {
+    final result = await showChoiceActionSheet(
+      context,
+      title: AppLocalizations.of(context).removePersonLabel,
+      body: AppLocalizations.of(context).areYouSureRemoveThisFaceFromPerson,
+      firstButtonLabel: AppLocalizations.of(context).remove,
+      firstButtonType: ButtonType.critical,
+      secondButtonLabel: AppLocalizations.of(context).cancel,
+      isCritical: true,
+    );
+    if (result?.action == ButtonAction.first) {
+      try {
+        await ClusterFeedbackService.instance.removeFilesFromPerson(
+          [widget.file],
+          person,
+        );
+        await loadFaces(isRefresh: true);
+      } catch (e, s) {
+        _logger.severe('Error removing manual person assignment', e, s);
+      }
+    }
+  }
+
   Future<void> _openPersonPage(PersonEntity person) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -537,15 +617,20 @@ class _ManualPersonTag extends StatelessWidget {
   final PersonEntity person;
   final double thumbnailWidth;
   final VoidCallback onTap;
+  final bool isEditMode;
+  final VoidCallback? onRemove;
 
   const _ManualPersonTag({
     required this.person,
     required this.thumbnailWidth,
     required this.onTap,
+    this.isEditMode = false,
+    this.onRemove,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final displayName = person.data.isIgnored
         ? '(' + AppLocalizations.of(context).ignored + ')'
         : person.data.name.trim();
@@ -557,37 +642,64 @@ class _ManualPersonTag extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
+          onTap: isEditMode ? onRemove : onTap,
           child: Column(
             children: [
-              Container(
-                height: thumbnailWidth,
-                width: thumbnailWidth,
-                decoration: const ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.elliptical(16, 12),
-                    ),
-                    side: BorderSide.none,
-                  ),
-                ),
-                child: ClipRRect(
-                  child: SizedBox(
-                    width: thumbnailWidth,
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
                     height: thumbnailWidth,
-                    child: ClipPath(
-                      clipper: ShapeBorderClipper(
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(52),
+                    width: thumbnailWidth,
+                    decoration: const ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.elliptical(16, 12),
+                        ),
+                        side: BorderSide.none,
+                      ),
+                    ),
+                    child: ClipRRect(
+                      child: SizedBox(
+                        width: thumbnailWidth,
+                        height: thumbnailWidth,
+                        child: ClipPath(
+                          clipper: ShapeBorderClipper(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(52),
+                            ),
+                          ),
+                          child: PersonFaceWidget(
+                            personId: person.remoteID,
+                            keepAlive: true,
+                          ),
                         ),
                       ),
-                      child: PersonFaceWidget(
-                        personId: person.remoteID,
-                        keepAlive: true,
-                      ),
                     ),
                   ),
-                ),
+                  if (isEditMode)
+                    Positioned(
+                      right: -5,
+                      top: -5,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: colorScheme.warning500,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: colorScheme.backgroundBase,
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.remove,
+                          size: 12,
+                          color: colorScheme.backgroundBase,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               SizedBox(

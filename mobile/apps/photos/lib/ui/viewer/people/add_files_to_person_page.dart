@@ -58,7 +58,7 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("(i) Add to person"),
+        title: const Text("(i) Add person"),
         centerTitle: false,
       ),
       body: FutureBuilder<List<GenericSearchResult>>(
