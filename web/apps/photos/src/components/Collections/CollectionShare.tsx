@@ -1878,6 +1878,10 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onUpdate={handlePublicURLUpdate}
                     />
                 </RowButtonGroup>
+                <ManageComments
+                    {...{ onRootClose, publicURL }}
+                    onUpdate={handlePublicURLUpdate}
+                />
                 <RowButtonGroup>
                     <RowButton
                         startIcon={
@@ -2251,6 +2255,142 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
                 />
             </Stack>
         </Dialog>
+    );
+};
+
+type CommentPermission = "anyone" | "signed_in" | "no_one";
+
+const commentPermissionOptions: {
+    value: CommentPermission;
+    label: string;
+    caption: string;
+    description: string;
+}[] = [
+    {
+        value: "anyone",
+        label: "Anyone (anonymous allowed)",
+        caption: "Anonymous",
+        description:
+            "Anyone with the link can comment, even without signing in.",
+    },
+    {
+        value: "signed_in",
+        label: "Signed-in only",
+        caption: "Signed-in",
+        description: "Only people signed in to Ente can comment on this memory.",
+    },
+    {
+        value: "no_one",
+        label: "No one",
+        caption: "No one",
+        description: "Comments are turned off for this memory.",
+    },
+];
+
+const getCommentPermissionCaption = (permission: CommentPermission) => {
+    const option = commentPermissionOptions.find((o) => o.value === permission);
+    return option?.caption ?? "Anonymous";
+};
+
+const ManageComments: React.FC<ManagePublicLinkSettingDrawerProps> = ({
+    onRootClose,
+    publicURL: _publicURL,
+    onUpdate: _onUpdate,
+}) => {
+    const {
+        show: showCommentOptions,
+        props: commentOptionsVisibilityProps,
+    } = useModalVisibility();
+
+    // TODO: Replace with actual state from publicURL when backend is ready
+    const [viewComments, setViewComments] = useState(true);
+    const [commentPermission, setCommentPermission] =
+        useState<CommentPermission>("anyone");
+    const [loadingPermission, setLoadingPermission] =
+        useState<CommentPermission | null>(null);
+
+    const handleViewCommentsToggle = () => {
+        setViewComments(!viewComments);
+        // TODO: Add actual update call when backend is ready
+    };
+
+    const handleCommentPermissionChange =
+        (permission: CommentPermission) => async () => {
+            if (permission === commentPermission) return;
+
+            setLoadingPermission(permission);
+            try {
+                // TODO: Replace with actual API call when backend is ready
+                await wait(500);
+                setCommentPermission(permission);
+            } finally {
+                setLoadingPermission(null);
+            }
+        };
+
+    const selectedOption = commentPermissionOptions.find(
+        (o) => o.value === commentPermission,
+    );
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowSwitch
+                    label={"View comments"}
+                    checked={viewComments}
+                    onClick={handleViewCommentsToggle}
+                />
+                <RowButtonDivider />
+                <RowButton
+                    onClick={showCommentOptions}
+                    endIcon={<ChevronRightIcon />}
+                    label={"Who can comment"}
+                    caption={getCommentPermissionCaption(commentPermission)}
+                />
+            </RowButtonGroup>
+            <TitledNestedSidebarDrawer
+                anchor="right"
+                {...commentOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={"Who can comment"}
+            >
+                <Stack sx={{ py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {commentPermissionOptions.map(
+                            ({ value, label }, index) => (
+                                <React.Fragment key={value}>
+                                    <RowButton
+                                        fontWeight="regular"
+                                        onClick={handleCommentPermissionChange(
+                                            value,
+                                        )}
+                                        label={label}
+                                        disabled={loadingPermission !== null}
+                                        endIcon={
+                                            loadingPermission === value ? (
+                                                <RowButtonEndActivityIndicator />
+                                            ) : commentPermission === value &&
+                                              !loadingPermission ? (
+                                                <DoneIcon />
+                                            ) : undefined
+                                        }
+                                    />
+                                    {index !=
+                                        commentPermissionOptions.length - 1 && (
+                                        <RowButtonDivider />
+                                    )}
+                                </React.Fragment>
+                            ),
+                        )}
+                    </RowButtonGroup>
+                    {selectedOption && (
+                        <RowButtonGroupHint>
+                            {selectedOption.description}
+                        </RowButtonGroupHint>
+                    )}
+                </Stack>
+            </TitledNestedSidebarDrawer>
+        </>
     );
 };
 
