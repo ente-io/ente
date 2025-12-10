@@ -42,6 +42,14 @@ Open `Settings > Preferences > Advanced > Map` and toggle the map settings on or
 2. Tap the globe icon (Your map) in the location section
 3. Explore your photos on the map
 
+**On web/desktop:**
+
+1. Open the album you want to view
+2. Click the three-dot menu in the header
+3. Choose **Map**
+
+> **Note**: To see all albums on the map, click the globe icon in the header.
+
 **View a specific album on the map:**
 
 1. Open the album
