@@ -5,6 +5,7 @@ import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
+import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
@@ -34,6 +35,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "ente-new/photos/components/gallery/ListHeader";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import {
     defaultHiddenCollectionUserFacingName,
     deleteCollection,
@@ -54,13 +56,27 @@ import {
     savedCollectionFiles,
     savedCollections,
 } from "ente-new/photos/services/photos-fdb";
+import { updateMapEnabled } from "ente-new/photos/services/settings";
 import { emptyTrash } from "ente-new/photos/services/trash";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import React, { useCallback, useRef } from "react";
 import { Trans } from "react-i18next";
+import type { FileListWithViewerProps } from "../FileListWithViewer";
+import { CollectionMapDialog } from "./CollectionMapDialog";
 
-export interface CollectionHeaderProps {
+export interface CollectionHeaderProps
+    extends Pick<
+        FileListWithViewerProps,
+        | "onMarkTempDeleted"
+        | "onAddFileToCollection"
+        | "onRemoteFilesPull"
+        | "onVisualFeedback"
+        | "fileNormalCollectionIDs"
+        | "collectionNameByID"
+        | "onSelectCollection"
+        | "onSelectPerson"
+    > {
     collectionSummary: CollectionSummary;
     // TODO: This can be undefined
     activeCollection: Collection;
@@ -125,14 +141,25 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
     onCollectionCast,
     onAddSaveGroup,
     isActiveCollectionDownloadInProgress,
+    onMarkTempDeleted,
+    onAddFileToCollection,
+    onRemoteFilesPull,
+    onVisualFeedback,
+    fileNormalCollectionIDs,
+    collectionNameByID,
+    onSelectCollection,
+    onSelectPerson,
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
+    const { mapEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
     const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
+    const { show: showMapDialog, props: mapDialogVisibilityProps } =
         useModalVisibility();
 
     const { type: collectionSummaryType, fileCount } = collectionSummary;
@@ -344,6 +371,18 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         updateCollectionSortOrder(activeCollection, false),
     );
 
+    const handleShowMap = useCallback(async () => {
+        if (!mapEnabled) {
+            try {
+                await updateMapEnabled(true);
+            } catch (e) {
+                onGenericError(e);
+                return;
+            }
+        }
+        showMapDialog();
+    }, [mapEnabled, onGenericError, showMapDialog]);
+
     let menuOptions: React.ReactNode[] = [];
     // MUI doesn't let us use fragments to pass multiple menu items, so we need
     // to instead put them in an array. This also necessitates giving each a
@@ -460,6 +499,15 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 >
                     {t("sort_by")}
                 </OverflowMenuOption>,
+                shouldShowMapOption(collectionSummary) && (
+                    <OverflowMenuOption
+                        key="map"
+                        onClick={handleShowMap}
+                        startIcon={<MapOutlinedIcon />}
+                    >
+                        {t("map")}
+                    </OverflowMenuOption>
+                ),
                 collectionSummary.attributes.has("pinned") ? (
                     <OverflowMenuOption
                         key="unpin"
@@ -567,6 +615,21 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
             />
+            <CollectionMapDialog
+                {...mapDialogVisibilityProps}
+                collectionSummary={collectionSummary}
+                activeCollection={activeCollection}
+                onRemotePull={onRemotePull}
+                onAddSaveGroup={onAddSaveGroup}
+                onMarkTempDeleted={onMarkTempDeleted}
+                onAddFileToCollection={onAddFileToCollection}
+                onRemoteFilesPull={onRemoteFilesPull}
+                onVisualFeedback={onVisualFeedback}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionNameByID={collectionNameByID}
+                onSelectCollection={onSelectCollection}
+                onSelectPerson={onSelectPerson}
+            />
             <SingleInputDialog
                 {...albumNameInputVisibilityProps}
                 title={t("rename_album")}
@@ -643,6 +706,13 @@ const showDownloadQuickOption = ({ type, attributes }: CollectionSummary) =>
     type == "hiddenItems" ||
     attributes.has("favorites") ||
     attributes.has("shared");
+
+const shouldShowMapOption = ({ type, fileCount }: CollectionSummary) =>
+    fileCount > 0 &&
+    type !== "all" &&
+    type !== "archiveItems" &&
+    type !== "trash" &&
+    type !== "hiddenItems";
 
 type DownloadQuickOptionProps = OptionProps & {
     collectionSummary: CollectionSummary;

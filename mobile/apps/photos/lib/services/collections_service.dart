@@ -1277,6 +1277,10 @@ class CollectionsService {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
+      if (e.response?.statusCode == 403 &&
+          e.response?.data?['code'] == 'LINK_EDIT_NOT_ALLOWED') {
+        throw LinkEditNotAllowedError();
+      }
       rethrow;
     } catch (e, s) {
       _logger.severe("failed to update ShareUrl", e, s);
@@ -2213,9 +2217,21 @@ class CollectionsService {
       }
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom", type: EventType.deletedFromRemote,));
-      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom", type: EventType.deletedFromRemote,));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collectionID,
+          batch,
+          "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          batch,
+          source: "removeFrom",
+          type: EventType.deletedFromRemote,
+        ),
+      );
     }
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
@@ -2250,7 +2266,13 @@ class CollectionsService {
         type: EventType.deletedFromRemote,
       ),
     );
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "suggestDelete", type: EventType.deletedFromRemote,));
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(
+        files,
+        source: "suggestDelete",
+        type: EventType.deletedFromRemote,
+      ),
+    );
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 

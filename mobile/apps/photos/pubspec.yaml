@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.27-beta+1227
+version: 1.2.29-beta+1229
 publish_to: none
 
 environment:
@@ -147,7 +147,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/ente-io/mobile_ocr
-      ref: 4f3aa1660d94eae0a9caa292d076dad72a978ddf
+      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"

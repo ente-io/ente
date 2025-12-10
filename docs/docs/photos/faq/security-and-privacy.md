@@ -20,6 +20,10 @@ derivation functions. Since only you know your password, only you can decrypt
 your files. For technical details, please see our
 [architecture document](https://ente.io/architecture).
 
+### Can Ente see the metadata of my photos and videos? {#can-ente-see-metadata}
+
+No. Just like the photos and videos, all metadata (including exif creation time, location, description etc) is also end-to-end encrypted.
+
 ### How is my data encrypted? {#data-encryption}
 
 We use the following encryption algorithms:
@@ -152,6 +156,13 @@ Yes, we recommend enabling 2FA for an additional layer of security. We support:
 - WebAuthn/FIDO2 for hardware security keys
 
 You can set up 2FA in the settings of our mobile or desktop apps.
+
+### Can I contact support using PGP? {#support-pgp}
+
+Yes. You can send encrypted messages to [pgp@ente.io](mailto:pgp@ente.io). The
+public key is published on [openpgp.org](https://keys.openpgp.org/) and is also
+available at [ente.io/pgp/pgp.asc](https://ente.io/pgp/pgp.asc). The fingerprint
+is `D71B F781 998B 4AED 01A2  0AF6 02BD D83A 56EA 68E2`.
 
 ## Sharing and Collaboration
 

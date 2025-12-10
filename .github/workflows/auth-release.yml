@@ -275,7 +275,7 @@ jobs:
                   updateOnlyUnreleased: true
 
     build-macos:
-        runs-on: macos-13 # latest is 12
+        runs-on: macos-15
 
         defaults:
             run:
@@ -300,7 +300,7 @@ jobs:
 
             - name: Install code signing dependencies
               run: |
-                  pip3 install codemagic-cli-tools
+                  pip3 install codemagic-cli-tools --break-system-packages
 
             - name: Add provisioning profiles
               run: |
@@ -332,7 +332,7 @@ jobs:
 
             - name: Install build dependencies
               run: |
-                  python3 -m pip install setuptools
+                  pip3 install setuptools --break-system-packages
                   npm install -g appdmg
 
             - name: Create artifacts directory
