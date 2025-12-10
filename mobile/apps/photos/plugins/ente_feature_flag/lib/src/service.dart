@@ -84,8 +84,6 @@ class FlagService {
 
   bool get useNativeVideoEditor => true;
 
-  bool get useWidgetV2 => internalUser;
-
   bool get enableOnlyBackupFuturePhotos => internalUser;
 
   bool get facesTimeline => internalUser;
