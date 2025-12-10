@@ -111,14 +111,19 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
 
     return _galleryType == GalleryType.homepage
         ? _body()
-        : PopScope(
-            canPop: widget.selectedFiles.files.isEmpty,
-            onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) {
-                widget.selectedFiles.clearAll();
-              }
+        : ValueListenableBuilder(
+            valueListenable: _hasSelectedFilesNotifier,
+            builder: (context, hasSelectedFiles, child) {
+              return PopScope(
+                canPop: !hasSelectedFiles,
+                onPopInvokedWithResult: (didPop, _) {
+                  if (!didPop) {
+                    widget.selectedFiles.clearAll();
+                  }
+                },
+                child: _body(),
+              );
             },
-            child: _body(),
           );
   }
 
