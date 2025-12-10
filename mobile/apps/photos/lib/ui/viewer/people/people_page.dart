@@ -17,7 +17,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
-import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -128,8 +128,10 @@ class _PeoplePageState extends State<PeoplePage> {
   }
 
   Future<List<EnteFile>> _loadPersonFiles() async {
-    final sortedFiles = await PersonService.instance.loadPersonFiles(
+    final sortedFiles = await SearchService.instance.getFilesForPersonID(
       _person.remoteID,
+      includeManualAssigned: true,
+      sortOnTime: true,
     );
     files = sortedFiles;
     return sortedFiles;

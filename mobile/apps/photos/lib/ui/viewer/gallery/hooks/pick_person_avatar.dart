@@ -9,6 +9,7 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/bottom_of_title_bar_widget.dart";
@@ -49,8 +50,11 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
   });
 
   Future<FileLoadResult> loadPersonFiles() async {
-    final sortedFiles =
-        await PersonService.instance.loadPersonFiles(personEntity.remoteID);
+    final sortedFiles = await SearchService.instance.getFilesForPersonID(
+      personEntity.remoteID,
+      includeManualAssigned: false,
+      sortOnTime: true,
+    );
     return FileLoadResult(sortedFiles, false);
   }
 
