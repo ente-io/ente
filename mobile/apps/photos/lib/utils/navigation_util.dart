@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Future<T?> routeToPage<T extends Object>(
@@ -15,7 +14,9 @@ Future<T?> routeToPage<T extends Object>(
   } else {
     return Navigator.of(context).push(
       SwipeableRouteBuilder(
-        builder: (context) => page,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return page;
+        },
       ),
     );
   }
@@ -59,19 +60,28 @@ PageRouteBuilder<T> _buildPageRoute<T extends Object>(Widget page) {
   );
 }
 
-class SwipeableRouteBuilder<T> extends PageRoute<T>
-    with CupertinoRouteTransitionMixin<T> {
-  final WidgetBuilder builder;
+class SwipeableRouteBuilder<T> extends PageRoute<T> {
+  final RoutePageBuilder pageBuilder;
+  final PageTransitionsBuilder matchingBuilder =
+      const CupertinoPageTransitionsBuilder(); // Default iOS/macOS (to get the swipe right to go back gesture)
+  // final PageTransitionsBuilder matchingBuilder = const FadeUpwardsPageTransitionsBuilder(); // Default Android/Linux/Windows
 
-  SwipeableRouteBuilder({required this.builder});
+  SwipeableRouteBuilder({required this.pageBuilder});
 
   @override
-  Widget buildContent(BuildContext context) {
-    return builder(context);
+  Null get barrierColor => null;
+
+  @override
+  Null get barrierLabel => null;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return pageBuilder(context, animation, secondaryAnimation);
   }
-
-  @override
-  String? get title => null;
 
   @override
   bool get maintainState => true;
@@ -80,6 +90,25 @@ class SwipeableRouteBuilder<T> extends PageRoute<T>
   Duration get transitionDuration => const Duration(
         milliseconds: 300,
       ); // Can give custom Duration, unlike in MaterialPageRoute
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return matchingBuilder.buildTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+
+  @override
+  bool get opaque => false;
 }
 
 class TransparentRoute extends PageRoute<void> {
