@@ -84,7 +84,7 @@ services:
       interval: 60s
       timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 120s
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
