@@ -1020,7 +1020,7 @@ const SidebarDrawer = styled(Drawer)(({ theme }) => ({
         height: "calc(100% - 32px)",
         margin: "16px",
         borderRadius: "36px",
-        backgroundColor: "#fff",
+        backgroundColor: "#FAFAFA",
         padding: "24px 24px 32px 24px",
         boxShadow: "none",
         border: "1px solid #E0E0E0",
@@ -1096,7 +1096,6 @@ const FeedItemContainer = styled(Box)(() => ({
     display: "flex",
     alignItems: "flex-start",
     gap: 12,
-    marginLeft: -6,
     marginBottom: 40,
     cursor: "pointer",
     "&:last-child": {
@@ -1104,13 +1103,18 @@ const FeedItemContainer = styled(Box)(() => ({
     },
 }));
 
-const IconContainer = styled(Box)(() => ({
+const IconContainer = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    width: 32,
-    height: 32,
+    width: 33,
+    height: 33,
     flexShrink: 0,
+    backgroundColor: "#fff",
+    borderRadius: "50%",
+    ...theme.applyStyles("dark", {
+        backgroundColor: "#2a2a2a",
+    }),
 }));
 
 const FeedItemContent = styled(Box)(() => ({
@@ -1134,7 +1138,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
     fontWeight: 600,
     backgroundColor: "#E0E0E0",
     color: "#666",
-    border: "2px solid #fff",
+    border: "2px solid #FAFAFA",
     marginLeft: -8,
     "&:first-of-type": {
         marginLeft: 0,
