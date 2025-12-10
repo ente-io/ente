@@ -547,6 +547,11 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
       setState(() => _showRemainingFaces = !_showRemainingFaces);
 
   Future<void> _openAddFilesToPersonPage() async {
+    final hasPersons =
+        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
+    if (!mounted || !hasPersons) {
+      return;
+    }
     final result =
         await Navigator.of(context).push<ManualPersonAssignmentResult>(
       MaterialPageRoute(

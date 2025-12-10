@@ -15,27 +15,14 @@ import "package:photos/utils/dialog_util.dart";
 class AddFilesToPersonPage extends StatefulWidget {
   final List<EnteFile> files;
 
+  static final Logger _logger = Logger("AddFilesToPersonPage");
+
   const AddFilesToPersonPage({
     required this.files,
     super.key,
   });
 
-  @override
-  State<AddFilesToPersonPage> createState() => _AddFilesToPersonPageState();
-}
-
-class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
-  late Future<List<GenericSearchResult>> _personsFuture;
-  final _logger = Logger("AddFilesToPersonPage");
-
-  @override
-  void initState() {
-    super.initState();
-    assert(widget.files.isNotEmpty);
-    _personsFuture = _loadPersons();
-  }
-
-  Future<List<GenericSearchResult>> _loadPersons() async {
+  static Future<List<GenericSearchResult>> loadNamedPersons() async {
     final results = await SearchService.instance
         .getAllFace(null, minClusterSize: kMinimumClusterSizeAllFaces);
     final named = results
@@ -45,6 +32,44 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
         )
         .toList();
     return named;
+  }
+
+  static Future<bool> ensureNamedPersonsExist(BuildContext context) async {
+    try {
+      final persons = await loadNamedPersons();
+      if (!context.mounted) {
+        return false;
+      }
+      if (persons.isEmpty) {
+        showShortToast(
+          context,
+          "Please name a person in the People section first",
+        );
+        return false;
+      }
+      return true;
+    } catch (error, stackTrace) {
+      _logger.severe(
+        "Failed to load persons for manual tagging pre-check",
+        error,
+        stackTrace,
+      );
+      return true;
+    }
+  }
+
+  @override
+  State<AddFilesToPersonPage> createState() => _AddFilesToPersonPageState();
+}
+
+class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
+  late Future<List<GenericSearchResult>> _personsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    assert(widget.files.isNotEmpty);
+    _personsFuture = AddFilesToPersonPage.loadNamedPersons();
   }
 
   @override
@@ -67,7 +92,7 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
-            _logger.severe(
+            AddFilesToPersonPage._logger.severe(
               "Failed to load persons for manual tagging",
               snapshot.error,
               snapshot.stackTrace,
@@ -160,7 +185,8 @@ class _AddFilesToPersonPageState extends State<AddFilesToPersonPage> {
       Navigator.of(context).pop(result);
     } catch (e, s) {
       await dialog.hide();
-      _logger.severe("Failed to add files to person", e, s);
+      AddFilesToPersonPage._logger
+          .severe("Failed to add files to person", e, s);
       if (!mounted) {
         return;
       }

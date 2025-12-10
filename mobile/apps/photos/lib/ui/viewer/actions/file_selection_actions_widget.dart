@@ -775,6 +775,11 @@ class _FileSelectionActionsWidgetState
       );
       return;
     }
+    final hasPersons =
+        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
+    if (!mounted || !hasPersons) {
+      return;
+    }
     final result = await routeToPage(
       context,
       AddFilesToPersonPage(files: filesWithIds),
