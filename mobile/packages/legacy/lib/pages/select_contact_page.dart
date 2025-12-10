@@ -488,7 +488,7 @@ class _AddContactBottomSheetState extends State<AddContactBottomSheet> {
         onTap: _onVerifyTap,
         child: Text(
           context.strings.verifyIDLabel,
-          style: textTheme.body.copyWith(
+          style: textTheme.bodyBold.copyWith(
             color: canAdd
                 ? getEnteColorScheme(context).primary700
                 : getEnteColorScheme(context).textMuted,

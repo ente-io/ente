@@ -3,7 +3,7 @@ import "dart:async";
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_legacy/components/alert_bottom_sheet.dart";
 import "package:ente_legacy/components/gradient_button.dart";
-import "package:ente_legacy/components/invite_bottom_sheet.dart";
+import "package:ente_legacy/components/invite_reject_bottom_sheet.dart";
 import "package:ente_legacy/components/trusted_contact_bottom_sheet.dart";
 import "package:ente_legacy/models/emergency_models.dart";
 import "package:ente_legacy/pages/other_contact_page.dart";
@@ -17,7 +17,6 @@ import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/loading_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/components/menu_section_title.dart";
-import "package:ente_ui/components/notification_widget.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/toast_util.dart";
@@ -130,11 +129,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                     if (index == 0) {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
-                        child: NotificationWidget(
-                          startIcon: Icons.warning_amber_rounded,
+                        child: _WarningBanner(
                           text: context.strings.recoveryWarning,
-                          actionIcon: null,
-                          onTap: () {},
                         ),
                       );
                     }
@@ -425,11 +421,11 @@ class _EmergencyPageState extends State<EmergencyPage> {
       final confirmed = await showAlertBottomSheet<bool>(
         context,
         title: isPending
-            ? context.strings.cancelInviteTitle
-            : context.strings.removeContactTitle,
+            ? context.strings.cancelInvite
+            : context.strings.removeContact,
         message: isPending
-            ? context.strings.cancelInviteMessage
-            : context.strings.removeContactMessage,
+            ? context.strings.cancelInviteDesc
+            : context.strings.removeContactDesc,
         assetPath: "assets/warning-grey.png",
         buttons: [
           SizedBox(
@@ -445,7 +441,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         ],
       );
 
-      if (confirmed!) {
+      if (confirmed == true) {
         await EmergencyContactService.instance
             .updateContact(contact, ContactState.userRevokedContact);
         info?.contacts.remove(contact);
@@ -492,12 +488,37 @@ class _EmergencyPageState extends State<EmergencyPage> {
     BuildContext context,
     EmergencyContact contact,
   ) async {
-    final result = await showInviteBottomSheet(
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    final result = await showEmailBottomSheet<String>(
       context,
       email: contact.user.email,
+      message: context.strings.legacyInvite(contact.user.email),
+      buttons: [
+        GradientButton(
+          text: context.strings.acceptTrustInvite,
+          backgroundColor: colorScheme.primary700,
+          onTap: () => Navigator.of(context).pop("accept"),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop("decline"),
+            child: Text(
+              context.strings.declineTrustInvite,
+              style: textTheme.bodyBold.copyWith(
+                color: colorScheme.warning400,
+                decoration: TextDecoration.underline,
+                decorationColor: colorScheme.warning400,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
 
-    if (result == InviteAction.accept) {
+    if (result == "accept") {
       await EmergencyContactService.instance
           .updateContact(contact, ContactState.contactAccepted);
       final updatedContact =
@@ -507,7 +528,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
       if (mounted) {
         setState(() {});
       }
-    } else if (result == InviteAction.decline) {
+    } else if (result == "decline") {
       await EmergencyContactService.instance
           .updateContact(contact, ContactState.contactDenied);
       info?.othersEmergencyContact.remove(contact);
@@ -521,35 +542,31 @@ class _EmergencyPageState extends State<EmergencyPage> {
     final String emergencyContactEmail = session.emergencyContact.email;
     final colorScheme = getEnteColorScheme(context);
 
-    final confirmed = await showAlertBottomSheet<bool>(
+    final confirmed = await showEmailBottomSheet<bool>(
       context,
-      title: context.strings.recoveryWarning,
+      email: emergencyContactEmail,
       message: context.strings.recoveryWarningBody(emergencyContactEmail),
-      assetPath: "assets/warning-grey.png",
       buttons: [
-        SizedBox(
-          width: double.infinity,
-          child: GradientButton(
-            text: context.strings.rejectRecovery,
-            backgroundColor: colorScheme.warning700,
-            onTap: () => Navigator.of(context).pop(true),
-          ),
+        GradientButton(
+          text: context.strings.rejectRecovery,
+          backgroundColor: colorScheme.warning700,
+          onTap: () => Navigator.of(context).pop(true),
         ),
-        if (kDebugMode)
-          SizedBox(
-            width: double.infinity,
-            child: GradientButton(
-              text: "Approve recovery (to be removed)",
-              onTap: () async {
-                Navigator.of(context).pop();
-                await EmergencyContactService.instance.approveRecovery(session);
-                if (mounted) {
-                  setState(() {});
-                }
-                unawaited(_fetchData());
-              },
-            ),
+        if (kDebugMode) ...[
+          const SizedBox(height: 8),
+          GradientButton(
+            text: "Approve recovery (to be removed)",
+            backgroundColor: colorScheme.primary700,
+            onTap: () async {
+              Navigator.of(context).pop();
+              await EmergencyContactService.instance.approveRecovery(session);
+              if (mounted) {
+                setState(() {});
+              }
+              unawaited(_fetchData());
+            },
           ),
+        ],
       ],
     );
 
@@ -561,5 +578,39 @@ class _EmergencyPageState extends State<EmergencyPage> {
       }
       unawaited(_fetchData());
     }
+  }
+}
+
+class _WarningBanner extends StatelessWidget {
+  final String text;
+
+  const _WarningBanner({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colorScheme.warning400.withOpacity(0.13),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Image.asset("assets/warning-grey.png", width: 20, height: 20),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              text,
+              style: textTheme.bodyBold.copyWith(
+                color: colorScheme.warning400,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
