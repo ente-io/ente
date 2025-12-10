@@ -55,12 +55,17 @@ Future<void> handleLimitedOrFolderBackupFlow(
 Future<bool?> handleFolderSelectionBackupFlow(
   BuildContext context, {
   bool isFirstBackup = false,
+  bool fromOnlyNewPhotosToggle = false,
 }) async {
   if (_shouldRunFirstImportFlow()) {
     return _handleFirstImportFlow(context);
   }
 
-  return _navigateToFolderSelection(context, isFirstBackup: isFirstBackup);
+  return _navigateToFolderSelection(
+    context,
+    isFirstBackup: isFirstBackup,
+    fromOnlyNewPhotosToggle: fromOnlyNewPhotosToggle,
+  );
 }
 
 bool _shouldRunFirstImportFlow() =>
@@ -99,10 +104,14 @@ bool _hasMinimalPermission(PermissionState state) =>
 Future<bool?> _navigateToFolderSelection(
   BuildContext context, {
   required bool isFirstBackup,
+  bool fromOnlyNewPhotosToggle = false,
 }) =>
     routeToPage<bool>(
       context,
-      BackupFolderSelectionPage(isFirstBackup: isFirstBackup),
+      BackupFolderSelectionPage(
+        isFirstBackup: isFirstBackup,
+        fromOnlyNewPhotosToggle: fromOnlyNewPhotosToggle,
+      ),
     );
 
 Future<void> _showPermissionDeniedDialog(BuildContext context) =>
