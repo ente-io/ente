@@ -56,7 +56,7 @@ class WrappedMediaPreloader {
     }
     final EnteFile? cached = _cache[uploadedID];
     if (cached != null) {
-      return Future<EnteFile?>.value(null);
+      return Future<EnteFile?>.value(cached);
     }
     final Future<EnteFile?>? inFlight = _inFlight[uploadedID];
     if (inFlight != null) {
