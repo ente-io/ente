@@ -1,3 +1,4 @@
+import "dart:async" show unawaited;
 import 'dart:developer' as dev show log;
 import "dart:math" show Random, min;
 
@@ -140,6 +141,24 @@ class ClusterFeedbackService<T> {
     PersonEntity p,
   ) async {
     try {
+      // Get file IDs being removed
+      final fileIDsToRemove =
+          files.map((file) => file.uploadedFileID).whereType<int>().toSet();
+
+      // Check for manually assigned files to remove
+      final manualFileIDs = p.data.manuallyAssigned.toSet();
+      final manualToRemove = manualFileIDs.intersection(fileIDsToRemove);
+      if (manualToRemove.isNotEmpty) {
+        _logger.info(
+          'Removing ${manualToRemove.length} manually assigned files from person ${p.remoteID}',
+        );
+        final updatedManual = manualFileIDs.difference(manualToRemove).toList();
+        final updatedPerson = p.copyWith(
+          data: p.data.copyWith(manuallyAssigned: updatedManual),
+        );
+        unawaited(PersonService.instance.updatePerson(updatedPerson));
+      }
+
       // Get the relevant faces to be removed
       final faceIDs = await mlDataDB
           .getFaceIDsForPerson(p.remoteID)
@@ -148,12 +167,25 @@ class ClusterFeedbackService<T> {
         final fileID = getFileIdFromFaceId<int>(faceID);
         return files.any((file) => file.uploadedFileID == fileID);
       });
-      final embeddings = await mlDataDB.getFaceEmbeddingMapForFaces(faceIDs);
 
-      if (faceIDs.isEmpty || embeddings.isEmpty) {
+      // If no faces to remove (might have been only manually assigned files)
+      if (faceIDs.isEmpty) {
+        if (manualToRemove.isNotEmpty) {
+          Bus.instance.fire(PeopleChangedEvent());
+        } else {
+          _logger.warning(
+            'No faces or manually assigned files found for person ${p.remoteID} that match the given files',
+          );
+        }
+        return;
+      }
+
+      final embeddings = await mlDataDB.getFaceEmbeddingMapForFaces(faceIDs);
+      if (embeddings.isEmpty) {
         _logger.severe(
-          'No faces or embeddings found for person ${p.remoteID} that match the given files',
+          'No embeddings found for faces $faceIDs',
         );
+        Bus.instance.fire(PeopleChangedEvent());
         return;
       }
 
