@@ -9,6 +9,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/service_locator.dart" show flagService;
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart"
@@ -176,7 +177,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     }
 
     // Add "Add person" button at the end
-    if (widget.file.uploadedFileID != null) {
+    if (flagService.manualTagFileToPerson &&
+        widget.file.uploadedFileID != null) {
       children.add(_buildAddPersonButton(thumbnailWidth));
     }
 
