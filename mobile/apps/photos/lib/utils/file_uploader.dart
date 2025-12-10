@@ -354,11 +354,14 @@ class FileUploader {
       return false;
     }
 
+    final queueSource = pendingEntry.file.queueSource!;
+
     Error? skipReason;
 
     if (flagService.enableBackupFolderSync) {
-      final isSelected = await deviceFolderSelectionCache
-          .isSelected(pendingEntry.file.queueSource!);
+      final isSelected = await deviceFolderSelectionCache.isSelected(
+        queueSource,
+      );
       if (!isSelected) {
         skipReason = BackupFolderDeselectedError();
       }
@@ -376,7 +379,9 @@ class FileUploader {
       // concurrent _pollQueue calls before the async cleanup completes
       pendingEntry.status = UploadStatus.inProgress;
       await _cleanupAndSkip(pendingEntry, skipReason);
-      unawaited(_pollQueue());
+      // Schedule _pollQueue on next microtask to avoid deep recursion
+      // when many consecutive items are skipped
+      scheduleMicrotask(_pollQueue);
       return true;
     }
 
