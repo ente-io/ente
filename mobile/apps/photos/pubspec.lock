@@ -1780,8 +1780,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "7b3ba5032946ee80c24b43893c8e4d366bb1703a"
-      resolved-ref: "7b3ba5032946ee80c24b43893c8e4d366bb1703a"
+      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
+      resolved-ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
       url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"
