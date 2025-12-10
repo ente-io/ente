@@ -25,12 +25,11 @@ Future<ButtonResult?> showActionSheet({
   Widget? bodyWidget,
   String? body,
   String? bodyHighlight,
-  bool useRootNavigator = false,
 }) {
   return showMaterialModalBottomSheet(
     backgroundColor: Colors.transparent,
     barrierColor: backdropFaintDark,
-    useRootNavigator: useRootNavigator,
+    useRootNavigator: true,
     context: context,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
