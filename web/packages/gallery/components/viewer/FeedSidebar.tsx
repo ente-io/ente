@@ -265,6 +265,8 @@ const mockUsers: Map<number, string> = new Map([
     [3, "jay00723426@gmail.com"],
     [4, "Vishnu"],
     [5, "Priya"],
+    [6, "Ravi"],
+    [7, "Meera"],
 ]);
 
 /**
@@ -276,14 +278,14 @@ const generateMockComments = (files: EnteFile[]): Comment[] => {
     const fileID1 = files[0]?.id;
     const fileID2 = files[1]?.id ?? fileID1;
     const fileID3 = files[2]?.id ?? fileID1;
-    const fileID5 = files[4]?.id ?? fileID1;
+    const fileID4 = files[3]?.id ?? fileID1;
 
     return [
-        // Comment by jay on current user's photo (for "Commented on your photo")
+        // 3 people commented on photo 3 at different times
         {
             id: "c1",
             collectionID: 1,
-            fileID: fileID2,
+            fileID: fileID3,
             encData: {
                 text: "Amazing shot!",
                 userName: "jay00723426@gmail.com",
@@ -293,43 +295,96 @@ const generateMockComments = (files: EnteFile[]): Comment[] => {
             createdAt: Date.now() - 2 * 60 * 60 * 1000,
             updatedAt: Date.now() - 2 * 60 * 60 * 1000,
         },
-        // Current user's comment (for "Replied to your comment")
         {
             id: "c2",
             collectionID: 1,
             fileID: fileID3,
-            encData: { text: "Thanks!", userName: "Anand" },
+            encData: { text: "Love the colors!", userName: "Vishnu" },
             isDeleted: false,
-            userID: CURRENT_USER_ID,
+            userID: 4,
             createdAt: Date.now() - 3 * 60 * 60 * 1000,
             updatedAt: Date.now() - 3 * 60 * 60 * 1000,
         },
-        // Reply to current user's comment (for "Replied to your comment")
         {
             id: "c3",
             collectionID: 1,
             fileID: fileID3,
-            encData: {
-                text: "No problem!",
-                userName: "jay00723426@gmail.com",
-            },
-            parentCommentID: "c2",
+            encData: { text: "Beautiful!", userName: "Priya" },
             isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 2.5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 2.5 * 60 * 60 * 1000,
+            userID: 5,
+            createdAt: Date.now() - 4 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 4 * 60 * 60 * 1000,
         },
-        // Current user's reply (for "Liked your reply")
+        // 1 person commented on photo 4
         {
             id: "c4",
             collectionID: 1,
-            fileID: fileID5,
-            encData: { text: "Glad you like it!", userName: "Anand" },
-            parentCommentID: "c1",
+            fileID: fileID4,
+            encData: { text: "Nice one!", userName: "Meera" },
             isDeleted: false,
-            userID: CURRENT_USER_ID,
+            userID: 7,
             createdAt: Date.now() - 5 * 60 * 60 * 1000,
             updatedAt: Date.now() - 5 * 60 * 60 * 1000,
+        },
+        // Current user's comment (to be liked by 3 people)
+        {
+            id: "c_mine",
+            collectionID: 1,
+            fileID: fileID1,
+            encData: { text: "Thanks everyone!", userName: "Anand" },
+            isDeleted: false,
+            userID: CURRENT_USER_ID,
+            createdAt: Date.now() - 6 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 6 * 60 * 60 * 1000,
+        },
+        // 2 people replied to my comment
+        {
+            id: "c_reply1",
+            collectionID: 1,
+            fileID: fileID1,
+            encData: { text: "You're welcome!", userName: "Ravi" },
+            parentCommentID: "c_mine",
+            isDeleted: false,
+            userID: 6,
+            createdAt: Date.now() - 5.5 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 5.5 * 60 * 60 * 1000,
+        },
+        {
+            id: "c_reply2",
+            collectionID: 1,
+            fileID: fileID1,
+            encData: { text: "Great album!", userName: "Meera" },
+            parentCommentID: "c_mine",
+            isDeleted: false,
+            userID: 7,
+            createdAt: Date.now() - 5.3 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 5.3 * 60 * 60 * 1000,
+        },
+        // A comment from someone else (for current user to reply to)
+        {
+            id: "c_other",
+            collectionID: 1,
+            fileID: fileID2,
+            encData: {
+                text: "When was this taken?",
+                userName: "jay00723426@gmail.com",
+            },
+            isDeleted: false,
+            userID: 3,
+            createdAt: Date.now() - 8 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 8 * 60 * 60 * 1000,
+        },
+        // Current user's reply (to be liked by 3 people)
+        {
+            id: "c_my_reply",
+            collectionID: 1,
+            fileID: fileID2,
+            encData: { text: "Last weekend!", userName: "Anand" },
+            parentCommentID: "c_other",
+            isDeleted: false,
+            userID: CURRENT_USER_ID,
+            createdAt: Date.now() - 7 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 7 * 60 * 60 * 1000,
         },
     ];
 };
@@ -341,21 +396,19 @@ const generateMockReactions = (files: EnteFile[]): Reaction[] => {
     if (files.length === 0) return [];
 
     const fileID1 = files[0]?.id;
-    const fileID3 = files[2]?.id ?? fileID1;
-    const fileID4 = files[3]?.id ?? fileID1;
-    const fileID5 = files[4]?.id ?? fileID1;
+    const fileID2 = files[1]?.id ?? fileID1;
 
     return [
-        // 1. Liked your photo - jay and 1 other (file 1)
+        // 4 people liked photo 1 at different times (one should be the most recent of all reactions)
         {
             id: "r1",
             collectionID: 1,
             fileID: fileID1,
             encData: { name: "like" },
             isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 30 * 60 * 1000,
-            updatedAt: Date.now() - 30 * 60 * 1000,
+            userID: 3, // jay
+            createdAt: Date.now() - 10 * 60 * 1000, // 10 minutes ago (MOST RECENT)
+            updatedAt: Date.now() - 10 * 60 * 1000,
         },
         {
             id: "r2",
@@ -363,62 +416,112 @@ const generateMockReactions = (files: EnteFile[]): Reaction[] => {
             fileID: fileID1,
             encData: { name: "like" },
             isDeleted: false,
-            userID: 4,
-            createdAt: Date.now() - 45 * 60 * 1000,
-            updatedAt: Date.now() - 45 * 60 * 1000,
+            userID: 4, // Vishnu
+            createdAt: Date.now() - 30 * 60 * 1000, // 30 minutes ago
+            updatedAt: Date.now() - 30 * 60 * 1000,
         },
-        // 3. Liked your photo - jay and 1 other (file 3)
         {
             id: "r3",
             collectionID: 1,
-            fileID: fileID3,
+            fileID: fileID1,
             encData: { name: "like" },
             isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 1.5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 1.5 * 60 * 60 * 1000,
+            userID: 5, // Priya
+            createdAt: Date.now() - 45 * 60 * 1000, // 45 minutes ago
+            updatedAt: Date.now() - 45 * 60 * 1000,
         },
         {
             id: "r4",
             collectionID: 1,
-            fileID: fileID3,
+            fileID: fileID1,
             encData: { name: "like" },
             isDeleted: false,
-            userID: 4,
-            createdAt: Date.now() - 1.6 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 1.6 * 60 * 60 * 1000,
+            userID: 6, // Ravi
+            createdAt: Date.now() - 60 * 60 * 1000, // 1 hour ago
+            updatedAt: Date.now() - 60 * 60 * 1000,
         },
-        // 5. Liked your comment - jay and 1 other (comment c2)
+        // 2 people liked photo 2
         {
             id: "r5",
             collectionID: 1,
-            commentID: "c2",
+            fileID: fileID2,
             encData: { name: "like" },
             isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 4 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 4 * 60 * 60 * 1000,
+            userID: 7, // Meera
+            createdAt: Date.now() - 1.5 * 60 * 60 * 1000, // 1.5 hours ago
+            updatedAt: Date.now() - 1.5 * 60 * 60 * 1000,
         },
         {
             id: "r6",
             collectionID: 1,
-            commentID: "c2",
+            fileID: fileID2,
             encData: { name: "like" },
             isDeleted: false,
-            userID: 5,
-            createdAt: Date.now() - 4.1 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 4.1 * 60 * 60 * 1000,
+            userID: 3, // jay
+            createdAt: Date.now() - 1.6 * 60 * 60 * 1000, // 1.6 hours ago
+            updatedAt: Date.now() - 1.6 * 60 * 60 * 1000,
         },
-        // 6. Liked your reply - jay (reply c4)
+        // 3 people liked my comment (c_mine) at different times
         {
             id: "r7",
             collectionID: 1,
-            commentID: "c4",
+            commentID: "c_mine",
             encData: { name: "like" },
             isDeleted: false,
-            userID: 3,
-            createdAt: Date.now() - 4.5 * 60 * 60 * 1000,
-            updatedAt: Date.now() - 4.5 * 60 * 60 * 1000,
+            userID: 3, // jay
+            createdAt: Date.now() - 5.5 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 5.5 * 60 * 60 * 1000,
+        },
+        {
+            id: "r8",
+            collectionID: 1,
+            commentID: "c_mine",
+            encData: { name: "like" },
+            isDeleted: false,
+            userID: 4, // Vishnu
+            createdAt: Date.now() - 5.6 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 5.6 * 60 * 60 * 1000,
+        },
+        {
+            id: "r9",
+            collectionID: 1,
+            commentID: "c_mine",
+            encData: { name: "like" },
+            isDeleted: false,
+            userID: 5, // Priya
+            createdAt: Date.now() - 5.7 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 5.7 * 60 * 60 * 1000,
+        },
+        // 3 people liked my reply (c_my_reply)
+        {
+            id: "r10",
+            collectionID: 1,
+            commentID: "c_my_reply",
+            encData: { name: "like" },
+            isDeleted: false,
+            userID: 3, // jay
+            createdAt: Date.now() - 6.5 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 6.5 * 60 * 60 * 1000,
+        },
+        {
+            id: "r11",
+            collectionID: 1,
+            commentID: "c_my_reply",
+            encData: { name: "like" },
+            isDeleted: false,
+            userID: 4, // Vishnu
+            createdAt: Date.now() - 6.6 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 6.6 * 60 * 60 * 1000,
+        },
+        {
+            id: "r12",
+            collectionID: 1,
+            commentID: "c_my_reply",
+            encData: { name: "like" },
+            isDeleted: false,
+            userID: 5, // Priya
+            createdAt: Date.now() - 6.7 * 60 * 60 * 1000,
+            updatedAt: Date.now() - 6.7 * 60 * 60 * 1000,
         },
     ];
 };
@@ -996,6 +1099,9 @@ const FeedItemContainer = styled(Box)(() => ({
     marginLeft: -6,
     marginBottom: 40,
     cursor: "pointer",
+    "&:last-child": {
+        marginBottom: 0,
+    },
 }));
 
 const IconContainer = styled(Box)(() => ({
