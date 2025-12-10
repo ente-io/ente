@@ -1,13 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-<svg version="1.0" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" xml:space="preserve"
- xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="300mm" height="300mm" viewBox="0 0 16000 16000" preserveAspectRatio="xMidYMid meet">
-<g>
- <path fill="#2b87d3" d="M0 8000 l0 -8000 8000 0 8000 0 0 8000 0 8000 -8000 0 -8000 0 0 -8000z m13990 0 l0 -5990 -5990 0 -5990 0 0 5990 0 5990 5990 0 5990 0 0 -5990z"/>
- <path fill="#2b87d3" d="M2995 12998 c-3 -7 -4 -911 -3 -2008 l3 -1995 1005 0 1005 0 3 997 2 998 998 2 997 3 0 1005 0 1005 -2003 3 c-1597 2 -2004 0 -2007 -10z"/>
- <path fill="#2b87d3" d="M8995 12998 c-3 -7 -4 -461 -3 -1008 l3 -995 997 -3 998 -2 2 -998 3 -997 1005 0 1005 0 0 2005 0 2005 -2003 3 c-1597 2 -2004 0 -2007 -10z"/>
- <path fill="#2b87d3" d="M5995 9998 c-3 -7 -4 -911 -3 -2008 l3 -1995 2005 0 2005 0 0 2005 0 2005 -2003 3 c-1597 2 -2004 0 -2007 -10z"/>
- <path fill="#2b87d3" d="M2995 6998 c-3 -7 -4 -911 -3 -2008 l3 -1995 2005 0 2005 0 0 1005 0 1005 -997 3 -998 2 -2 998 -3 997 -1003 3 c-797 2 -1004 0 -1007 -10z"/>
- <path fill="#2b87d3" d="M10997 7003 c-4 -3 -7 -453 -7 -1000 l0 -993 -997 -2 -998 -3 0 -1005 0 -1005 2005 0 2005 0 0 2005 0 2005 -1001 3 c-550 1 -1004 -1 -1007 -5z"/>
- </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" fill-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" version="1.0" viewBox="0 0 16000 16000"><g fill="#2b87d3"><path d="M0 8000V0h16000v16000H0V8000zm13990 0V2010H2010v11980h11980V8000z"/><path d="M2995 12998c-3-7-4-911-3-2008l3-1995h2010l3 997 2 998 998 2 997 3v2010l-2003 3c-1597 2-2004 0-2007-10zM8995 12998c-3-7-4-461-3-1008l3-995 997-3 998-2 2-998 3-997h2010v4010l-2003 3c-1597 2-2004 0-2007-10z"/><path d="M5995 9998c-3-7-4-911-3-2008l3-1995h4010v4010l-2003 3c-1597 2-2004 0-2007-10z"/><path d="M2995 6998c-3-7-4-911-3-2008l3-1995h4010v2010l-997 3-998 2-2 998-3 997-1003 3c-797 2-1004 0-1007-10zM10997 7003c-4-3-7-453-7-1000v-993l-997-2-998-3V2995h4010v4010l-1001 3c-550 1-1004-1-1007-5z"/></g></svg>
