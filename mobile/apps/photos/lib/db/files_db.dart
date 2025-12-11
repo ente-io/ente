@@ -1100,7 +1100,7 @@ class FilesDB with SqlDbBase {
 
   // Sets the collectionID and queueSource for the files with given LocalIDs if
   // the corresponding file entries are not already mapped to some other
-  // collection. Only use this when enableBackupFolderSync flag is on.
+  // collection.
   Future<void> setCollectionIDAndQueueSourceForUnMappedLocalFiles(
     int collectionID,
     Set<String> localIDs,
