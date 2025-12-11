@@ -278,30 +278,22 @@ class _AlbumSelectionActionWidgetState
 
   Future<void> _onPinClickForSharee() async {
     for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites ||
-          collection.hasShareePinned()) {
+      if (collection.hasShareePinned()) {
         continue;
       }
 
       await updateShareeOrder(context, collection, 1);
-    }
-    if (hasFavorites) {
-      _showFavToast();
     }
     widget.selectedAlbums.clearAll();
   }
 
   Future<void> _onUnpinClickForSharee() async {
     for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites ||
-          !collection.hasShareePinned()) {
+      if (!collection.hasShareePinned()) {
         continue;
       }
 
       await updateShareeOrder(context, collection, 0);
-    }
-    if (hasFavorites) {
-      _showFavToast();
     }
     widget.selectedAlbums.clearAll();
   }
