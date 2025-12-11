@@ -69,6 +69,7 @@ class _PeoplePageState extends State<PeoplePage> {
   late SearchFilterDataProvider? _searchFilterDataProvider;
   ValueNotifier<Set<String>>? _timelineNotifier;
   VoidCallback? _timelineListener;
+  bool _memoryLanePrewarmStarted = false;
 
   bool get _memoryLaneEnabled => flagService.facesTimeline;
 
@@ -114,6 +115,7 @@ class _PeoplePageState extends State<PeoplePage> {
       _timelineListener = () {
         if (!mounted) return;
         setState(() {});
+        _maybePrewarmMemoryLane();
       };
       _timelineNotifier!.addListener(_timelineListener!);
       if (!MemoryLaneService.instance.hasReadyTimelineSync(
@@ -123,6 +125,8 @@ class _PeoplePageState extends State<PeoplePage> {
           _person.remoteID,
           trigger: "people_page_visit",
         );
+      } else {
+        _maybePrewarmMemoryLane();
       }
     }
   }
@@ -145,6 +149,24 @@ class _PeoplePageState extends State<PeoplePage> {
       _timelineNotifier!.removeListener(_timelineListener!);
     }
     super.dispose();
+  }
+
+  void _maybePrewarmMemoryLane() {
+    if (_memoryLanePrewarmStarted || !_memoryLaneEnabled) {
+      return;
+    }
+    final bool memoryLaneReady =
+        MemoryLaneService.instance.hasReadyTimelineSync(_person.remoteID);
+    if (!memoryLaneReady) {
+      return;
+    }
+    _memoryLanePrewarmStarted = true;
+    unawaited(
+      MemoryLaneService.instance.prewarmTimelineFrames(
+        _person.remoteID,
+        frameCount: 6,
+      ),
+    );
   }
 
   Future<void> _openMemoryLanePage() async {

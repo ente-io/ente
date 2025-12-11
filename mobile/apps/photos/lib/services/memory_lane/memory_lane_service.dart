@@ -706,6 +706,71 @@ class MemoryLaneService {
     }
   }
 
+  Future<void> prewarmTimelineFrames(
+    String personId, {
+    int frameCount = 6,
+  }) async {
+    if (!isFeatureEnabled) return;
+    try {
+      final timeline = await _cacheService.getTimeline(personId);
+      if (timeline == null || !timeline.isReady || timeline.entries.isEmpty) {
+        return;
+      }
+      final entries = timeline.entries.take(frameCount).toList();
+      if (entries.isEmpty) {
+        return;
+      }
+      final uniqueFileIds =
+          entries.map((entry) => entry.fileId).toSet().toList();
+      final filesById = await _filesDB.getFileIDToFileFromIDs(uniqueFileIds);
+      final Map<int, Future<List<Face>?>> facesFutures = {};
+      final stopwatch = Stopwatch()..start();
+      int warmed = 0;
+      for (final entry in entries) {
+        final file = filesById[entry.fileId];
+        if (file == null) {
+          continue;
+        }
+        final facesFuture = facesFutures.putIfAbsent(
+          entry.fileId,
+          () => _mlDataDB.getFacesForGivenFileID(entry.fileId),
+        );
+        final faces = await facesFuture;
+        final face = faces?.firstWhereOrNull(
+          (element) => element.faceID == entry.faceId,
+        );
+        if (face == null) {
+          continue;
+        }
+        try {
+          await getCachedFaceCrops(
+            file,
+            [face],
+            useFullFile: true,
+            useTempCache: false,
+          );
+          warmed += 1;
+        } catch (error, stackTrace) {
+          _logger.fine(
+            "Memory Lane prewarm failed for $personId file ${entry.fileId}",
+            error,
+            stackTrace,
+          );
+        }
+      }
+      _logger.fine(
+        "Memory Lane prewarm person=$personId warmed=$warmed "
+        "target=$frameCount elapsed=${stopwatch.elapsedMilliseconds}ms",
+      );
+    } catch (error, stackTrace) {
+      _logger.fine(
+        "Memory Lane prewarm error for $personId",
+        error,
+        stackTrace,
+      );
+    }
+  }
+
   Future<void> _refreshReadyPersonIds() async {
     final cache = await _cacheService.getCache();
     final current = cache.allTimelines
