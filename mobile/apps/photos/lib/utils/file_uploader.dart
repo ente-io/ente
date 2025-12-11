@@ -285,21 +285,6 @@ class FileUploader {
     _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 
-  void _removeAndSkip(FileUploadItem entry, [Error? error]) {
-    final localId = entry.file.localID;
-    if (localId == null) {
-      entry.completer.completeError(error ?? SilentlyCancelUploadsError());
-      return;
-    }
-    _queue.remove(localId);
-    _allBackups.remove(localId);
-    if (_totalCountInUploadSession > 0) {
-      _totalCountInUploadSession--;
-    }
-    Bus.instance.fire(BackupUpdatedEvent(_allBackups));
-    entry.completer.completeError(error ?? SilentlyCancelUploadsError());
-  }
-
   Future<void> _cleanupAndSkip(FileUploadItem entry, Error error) async {
     final localId = entry.file.localID;
     if (localId != null) {
@@ -307,8 +292,14 @@ class FileUploader {
         localId,
         entry.collectionID,
       );
+      _queue.remove(localId);
+      _allBackups.remove(localId);
+      if (_totalCountInUploadSession > 0) {
+        _totalCountInUploadSession--;
+      }
+      Bus.instance.fire(BackupUpdatedEvent(_allBackups));
     }
-    _removeAndSkip(entry, error);
+    entry.completer.completeError(error);
   }
 
   /// Checks if a pending upload should be skipped based on current backup preferences.
