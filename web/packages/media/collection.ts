@@ -721,6 +721,12 @@ export interface CollectionShareeMagicMetadataData {
      * Expected to be one of {@link ItemVisibility}.
      */
     visibility?: number;
+    /**
+     * An override to the sort ordering used for the collection by the sharee.
+     *
+     * Expected to be one of {@link CollectionOrder}.
+     */
+    order?: number;
 }
 
 /**
@@ -728,4 +734,5 @@ export interface CollectionShareeMagicMetadataData {
  */
 export const CollectionShareeMagicMetadataData = z.looseObject({
     visibility: z.number().nullish().transform(nullToUndefined),
+    order: z.number().nullish().transform(nullToUndefined),
 });
