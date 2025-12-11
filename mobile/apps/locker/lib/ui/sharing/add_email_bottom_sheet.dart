@@ -92,8 +92,7 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
                     const SizedBox(height: 20),
                     _buildExistingContactsSection(colorScheme, textTheme),
                   ],
-                  const SizedBox(height: 20),
-                  _buildShareLaterCheckbox(colorScheme, textTheme),
+                  // _buildShareLaterCheckbox(colorScheme, textTheme),
                   if (_shareLater) ...[
                     const SizedBox(height: 12),
                     _buildScheduleDateTimeRow(colorScheme, textTheme),
@@ -188,9 +187,16 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
           _selectedRole = role;
         });
       },
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.strokeFaint),
+      ),
       padding: EdgeInsets.zero,
       menuPadding: EdgeInsets.zero,
-      color: Colors.transparent,
+      color: colorScheme.backdropBase,
+      surfaceTintColor: Colors.transparent,
+      elevation: 15,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
@@ -203,9 +209,9 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
             HugeIcon(
               icon: _selectedRole == CollectionParticipantRole.viewer
                   ? HugeIcons.strokeRoundedView
-                  : HugeIcons.strokeRoundedUserGroup,
+                  : HugeIcons.strokeRoundedUserMultiple,
               color: colorScheme.textBase,
-              size: 24,
+              size: 20,
             ),
             const SizedBox(width: 4),
             HugeIcon(
@@ -238,7 +244,7 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
           padding: EdgeInsets.zero,
           child: PopupMenuItemWidget(
             icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedUserGroup,
+              icon: HugeIcons.strokeRoundedUserMultiple,
               color: colorScheme.textBase,
               size: 20,
             ),
@@ -279,49 +285,53 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Container(
-                constraints: const BoxConstraints(maxHeight: maxVisibleHeight),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: filteredUsers.length,
-                  itemBuilder: (context, index) {
-                    final user = filteredUsers[index];
-                    final isFirst = index == 0;
-                    final isLast = index == filteredUsers.length - 1;
-                    return Column(
-                      children: [
-                        if (!isFirst)
-                          DividerWidget(
-                            dividerType: DividerType.menu,
-                            bgColor: colorScheme.fillFaint,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  constraints:
+                      const BoxConstraints(maxHeight: maxVisibleHeight),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: filteredUsers.length,
+                    itemBuilder: (context, index) {
+                      final user = filteredUsers[index];
+                      final isFirst = index == 0;
+                      final isLast = index == filteredUsers.length - 1;
+                      return Column(
+                        children: [
+                          if (!isFirst)
+                            DividerWidget(
+                              dividerType: DividerType.menu,
+                              bgColor: colorScheme.fillFaint,
+                            ),
+                          MenuItemWidgetV2(
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: user.email,
+                            ),
+                            leadingIconSize: 24.0,
+                            leadingIconWidget: UserAvatarWidget(
+                              user,
+                              type: AvatarType.mini,
+                              config: Configuration.instance,
+                            ),
+                            menuItemColor: colorScheme.fillFaint,
+                            surfaceExecutionStates: false,
+                            onTap: () async {
+                              _textFieldFocusNode.unfocus();
+                              _textController.text = user.email;
+                              _email = user.email;
+                              _emailIsValid = true;
+                              setState(() {});
+                            },
+                            isTopBorderRadiusRemoved: !isFirst,
+                            isBottomBorderRadiusRemoved: !isLast,
                           ),
-                        MenuItemWidgetV2(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: user.email,
-                          ),
-                          leadingIconSize: 24.0,
-                          leadingIconWidget: UserAvatarWidget(
-                            user,
-                            type: AvatarType.mini,
-                            config: Configuration.instance,
-                          ),
-                          menuItemColor: colorScheme.fillFaint,
-                          surfaceExecutionStates: false,
-                          onTap: () async {
-                            _textFieldFocusNode.unfocus();
-                            _textController.text = user.email;
-                            _email = user.email;
-                            _emailIsValid = true;
-                            setState(() {});
-                          },
-                          isTopBorderRadiusRemoved: !isFirst,
-                          isBottomBorderRadiusRemoved: !isLast,
-                        ),
-                      ],
-                    );
-                  },
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -352,7 +362,8 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
       animation: _scrollController,
       builder: (context, child) {
         double thumbPosition = 0;
-        if (_scrollController.hasClients) {
+        if (_scrollController.hasClients &&
+            _scrollController.positions.length == 1) {
           final maxExtent = _scrollController.position.hasContentDimensions
               ? _scrollController.position.maxScrollExtent
               : 0.0;
