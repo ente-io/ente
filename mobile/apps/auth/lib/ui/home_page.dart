@@ -104,6 +104,7 @@ class _HomePageState extends State<HomePage> {
 
   late CodeSortKey _codeSortKey;
   final Set<LogicalKeyboardKey> _pressedKeys = <LogicalKeyboardKey>{};
+  final FocusNode _firstItemFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -1023,7 +1024,7 @@ class _HomePageState extends State<HomePage> {
               _pressedKeys.contains(LogicalKeyboardKey.control) ||
               _pressedKeys.contains(LogicalKeyboardKey.controlRight));
 
-      if (isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) {
+      if ((isMetaKeyPressed && event.logicalKey == LogicalKeyboardKey.keyF) || event.logicalKey == LogicalKeyboardKey.slash) {
         setState(() {
           _showSearchBox = true;
           searchBoxFocusNode.requestFocus();
@@ -1152,6 +1153,7 @@ class _HomePageState extends State<HomePage> {
     _textController.removeListener(_applyFilteringAndRefresh);
     ServicesBinding.instance.keyboard.removeHandler(_handleKeyEvent);
     searchBoxFocusNode.dispose();
+    _firstItemFocusNode.dispose();
 
     super.dispose();
   }
@@ -1396,6 +1398,12 @@ class _HomePageState extends State<HomePage> {
               onChanged: (val) {
                 _searchText = val;
                 _applyFilteringAndRefresh();
+              },
+              onSubmitted: (_) {
+                if (_filteredCodes.isNotEmpty) {
+                  // Move focus to the first item in the grid
+                  _firstItemFocusNode.requestFocus();
+                }
               },
               decoration: InputDecoration(
                 hintText: l10n.searchHint,
@@ -1785,6 +1793,7 @@ class _HomePageState extends State<HomePage> {
                             enableDesktopContextActions:
                                 PlatformUtil.isDesktop(),
                             selectedCodesBuilder: _selectedCodesForContextMenu,
+                            focusNode: index == 0 ? _firstItemFocusNode : null,
                           );
                         }),
                         itemCount: _filteredCodes.length,
