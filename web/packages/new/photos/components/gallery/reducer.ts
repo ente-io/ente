@@ -1536,6 +1536,14 @@ const createCollectionSummaries = (
             attributes.add("pinned");
             sortPriority = CollectionSummarySortPriority.pinned;
         }
+        // Check for sharee pinned (for incoming shared collections)
+        if (
+            type == "sharedIncoming" &&
+            collection.sharedMagicMetadata?.data.order == CollectionOrder.pinned
+        ) {
+            attributes.add("shareePinned");
+            sortPriority = CollectionSummarySortPriority.pinned;
+        }
 
         if (type == "sharedIncoming" && collectionType == "favorites") {
             // See: [Note: User and shared favorites] above.

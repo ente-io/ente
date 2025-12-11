@@ -107,12 +107,20 @@ class ShareeMagicMetadata {
   // null/false value -> no mute
   bool? mute;
 
-  ShareeMagicMetadata({required this.visibility, this.mute});
+  /* order is used for pinned collections for sharees.
+  Higher the value, higher the preference of the collection to show up first.
+  */
+  int? order;
+
+  ShareeMagicMetadata({required this.visibility, this.mute, this.order});
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = {magicKeyVisibility: visibility};
     if (mute != null) {
       result[muteKey] = mute!;
+    }
+    if (order != null) {
+      result[orderKey] = order!;
     }
     return result;
   }
@@ -128,6 +136,7 @@ class ShareeMagicMetadata {
     return ShareeMagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibleVisibility,
       mute: map[muteKey],
+      order: map[orderKey],
     );
   }
 }

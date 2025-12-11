@@ -46,6 +46,7 @@ import {
     updateCollectionOrder,
     updateCollectionSortOrder,
     updateCollectionVisibility,
+    updateShareeCollectionOrder,
 } from "ente-new/photos/services/collection";
 import {
     PseudoCollectionID,
@@ -152,7 +153,7 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useBaseContext();
     const { showLoadingBar, hideLoadingBar } = usePhotosAppContext();
-    const { mapEnabled } = useSettingsSnapshot();
+    const { mapEnabled, isShareePinEnabled } = useSettingsSnapshot();
     const overflowMenuIconRef = useRef<SVGSVGElement | null>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
@@ -347,6 +348,14 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
         updateCollectionOrder(activeCollection, CollectionOrder.default),
     );
 
+    const pinSharedAlbum = wrap(() =>
+        updateShareeCollectionOrder(activeCollection, CollectionOrder.pinned),
+    );
+
+    const unpinSharedAlbum = wrap(() =>
+        updateShareeCollectionOrder(activeCollection, CollectionOrder.default),
+    );
+
     const hideAlbum = wrap(async () => {
         await updateCollectionVisibility(
             activeCollection,
@@ -449,6 +458,28 @@ const CollectionHeaderOptions: React.FC<CollectionHeaderProps> = ({
 
         case "sharedIncoming":
             menuOptions = [
+                // Pin/Unpin for shared incoming collections (behind feature flag)
+                ...(isShareePinEnabled
+                    ? [
+                          collectionSummary.attributes.has("shareePinned") ? (
+                              <OverflowMenuOption
+                                  key="unpin"
+                                  onClick={unpinSharedAlbum}
+                                  startIcon={<PushPinOutlinedIcon />}
+                              >
+                                  {t("unpin_album")}
+                              </OverflowMenuOption>
+                          ) : (
+                              <OverflowMenuOption
+                                  key="pin"
+                                  onClick={pinSharedAlbum}
+                                  startIcon={<PushPinIcon />}
+                              >
+                                  {t("pin_album")}
+                              </OverflowMenuOption>
+                          ),
+                      ]
+                    : []),
                 collectionSummary.attributes.has("archived") ? (
                     <OverflowMenuOption
                         key="unarchive"

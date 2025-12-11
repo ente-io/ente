@@ -119,6 +119,35 @@ class _AlbumSelectionActionWidgetState
     );
 
     if (widget.sectionType == UISectionType.incomingCollections) {
+      // Pin/Unpin options for incoming collections (uses sharee metadata)
+      // Behind feature flag
+      if (flagService.enableShareePin) {
+        final hasShareePinnedAlbum = widget.selectedAlbums.albums.any(
+          (album) => album.hasShareePinned(),
+        );
+        final hasShareeUnpinnedAlbum = widget.selectedAlbums.albums.any(
+          (album) => !album.hasShareePinned(),
+        );
+
+        items.add(
+          SelectionActionButton(
+            labelText: "Pin",
+            icon: Icons.push_pin_rounded,
+            onTap: _onPinClickForSharee,
+            shouldShow: hasShareeUnpinnedAlbum,
+          ),
+        );
+
+        items.add(
+          SelectionActionButton(
+            labelText: "Unpin",
+            icon: CupertinoIcons.pin_slash,
+            onTap: _onUnpinClickForSharee,
+            shouldShow: hasShareePinnedAlbum,
+          ),
+        );
+      }
+
       items.add(
         SelectionActionButton(
           labelText: AppLocalizations.of(context).leaveAlbum,
@@ -240,6 +269,36 @@ class _AlbumSelectionActionWidgetState
       }
 
       await updateOrder(context, collection, collection.isPinned ? 0 : 0);
+    }
+    if (hasFavorites) {
+      _showFavToast();
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onPinClickForSharee() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites ||
+          collection.hasShareePinned()) {
+        continue;
+      }
+
+      await updateShareeOrder(context, collection, 1);
+    }
+    if (hasFavorites) {
+      _showFavToast();
+    }
+    widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _onUnpinClickForSharee() async {
+    for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites ||
+          !collection.hasShareePinned()) {
+        continue;
+      }
+
+      await updateShareeOrder(context, collection, 0);
     }
     if (hasFavorites) {
       _showFavToast();
