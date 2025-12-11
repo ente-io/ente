@@ -269,6 +269,35 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     );
   }
 
+  Widget _buildShareButton(EnteColorScheme colorScheme) {
+    if (isFavorite) {
+      return const SizedBox.shrink();
+    }
+    final canShare = collectionViewType == CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.sharedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        isQuickLink;
+    if (!canShare) {
+      return const SizedBox.shrink();
+    }
+    return GestureDetector(
+      onTap: _shareCollection,
+      child: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: colorScheme.backdropBase,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedShare08,
+          color: colorScheme.textBase,
+        ),
+      ),
+    );
+  }
+
   Widget _buildMenuButton(EnteColorScheme colorScheme) {
     if (isFavorite) {
       return SizedBox.fromSize();
@@ -412,6 +441,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 trailingWidgets: widget.isUncategorized
                     ? const []
                     : [
+                        _buildShareButton(colorScheme),
+                        const SizedBox(width: 12),
                         _buildMenuButton(colorScheme),
                       ],
               ),
