@@ -2,6 +2,7 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
@@ -219,6 +220,12 @@ class _BackupItemCardState extends State<BackupItemCard> {
                         color: Color(0xFFFDB816),
                       ),
                       onPressed: () async {
+                        // Set queueSource to manual only if it wasn't already set
+                        // to ensure this retry is not filtered out by backup folder sync logic
+                        // but preserve the original queueSource if it was manually set
+                        if (widget.item.file.queueSource == null) {
+                          widget.item.file.queueSource = manualQueueSource;
+                        }
                         await FileUploader.instance.upload(
                           widget.item.file,
                           widget.item.collectionID,
