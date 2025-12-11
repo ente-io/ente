@@ -49,7 +49,7 @@ or managing your secrets, please use our mobile or desktop app.
 2. Pull in all submodules with `git submodule update --init --recursive`
 
 3. Install dependencies using one of these methods:
-   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies and generate Rust bindings for shared packages.
+   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies.
    - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
 4. For Android, [setup your

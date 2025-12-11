@@ -53,7 +53,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 3. Enable repo git hooks `git config core.hooksPath hooks`
 
 4. Install dependencies using one of these methods:
-   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap && melos run codegen:rust`. This will install dependencies, generate localization files, and automatically generate Rust bindings.
+   - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos run codegen:rust`. This will install dependencies and generate Rust bindings.
    - **Using Flutter directly:** Run `flutter pub get`, then install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen` and run `flutter_rust_bridge_codegen generate` in both this folder and in `mobile/packages/rust`.
 
 5. On Android:

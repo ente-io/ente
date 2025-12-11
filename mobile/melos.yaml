@@ -26,25 +26,25 @@ scripts:
 
       # Generate Rust bindings for packages/rust
       echo "Generating flutter_rust_bridge bindings for packages/rust..."
-      (cd packages/rust && flutter_rust_bridge_codegen generate)
+      (cd packages/rust && flutter pub get && flutter_rust_bridge_codegen generate)
 
       # Generate Rust bindings for apps/photos
       echo "Generating flutter_rust_bridge bindings for apps/photos..."
-      (cd apps/photos && flutter_rust_bridge_codegen generate)
+      (cd apps/photos && flutter pub get && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for all packages using flutter_rust_bridge.
 
   codegen:rust:packages:
     run: |
       cargo install flutter_rust_bridge_codegen 2>/dev/null || true
       echo "Generating flutter_rust_bridge bindings for packages/rust..."
-      (cd packages/rust && flutter_rust_bridge_codegen generate)
+      (cd packages/rust && flutter pub get && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for packages/rust only.
 
   codegen:rust:photos:
     run: |
       cargo install flutter_rust_bridge_codegen 2>/dev/null || true
       echo "Generating flutter_rust_bridge bindings for apps/photos..."
-      (cd apps/photos && flutter_rust_bridge_codegen generate)
+      (cd apps/photos && flutter pub get && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for apps/photos only.
 
   # --- GLOBAL COMMANDS (run on all apps & packages) ---
