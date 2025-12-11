@@ -512,6 +512,20 @@ Yes! You can use Ente on as many devices as you want simultaneously. All your de
 
 The sync happens automatically in the background when devices are connected to the internet.
 
+### How much Ente storage do I need when importing my Google Photos Takeout? {#google-takeout-storage}
+
+When importing your Google Photos Takeout into Ente, your storage usage is based on your actual Google Photos library size — not the (much larger) Takeout ZIP size.
+
+For example, if Google Photos reports 30 GB used, but your Takeout export is 100 GB, you will need around 30 GB of Ente storage.
+
+Google includes duplicate copies of the same photos inside multiple album folders in the Takeout export. Ente detects these during import and only stores a single original.
+
+If any duplicates slip through and you temporarily hit your storage limit, you can clean them up using the desktop app's built-in deduplication tool:
+
+**Desktop app** → **Settings** → **Deduplicate files**
+
+This removes exact duplicates while keeping one original safely.
+
 ## File Support & Upload Limits
 
 ### What file formats does Ente support? {#file-formats}
