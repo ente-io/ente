@@ -2,15 +2,13 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:like_button/like_button.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
-import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file.dart";
 import "package:photos/services/favorites_service.dart";
-import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:rive/rive.dart" as rive;
 
 class FavoriteWidget extends StatefulWidget {
   final EnteFile file;
@@ -27,103 +25,169 @@ class FavoriteWidget extends StatefulWidget {
 class _FavoriteWidgetState extends State<FavoriteWidget> {
   late Logger _logger;
   bool _isLoading = false;
+  bool? _isFavorite;
+  late final rive.FileLoader _riveFileLoader;
+  rive.StateMachine? _stateMachine;
+  bool _hasSetInitialState = false;
 
   @override
   void initState() {
     super.initState();
     _logger = Logger("_FavoriteWidgetState");
+    _riveFileLoader = rive.FileLoader.fromAsset(
+      "assets/favorite_icon.riv",
+      riveFactory: rive.Factory.flutter,
+    );
+    _initializeFavoriteState();
   }
 
-  Future<bool> _fetchData() async {
-    return FavoritesService.instance.isFavorite(widget.file);
+  Future<void> _initializeFavoriteState() async {
+    final isFavorite = await FavoritesService.instance.isFavorite(widget.file);
+    if (mounted) {
+      setState(() {
+        _isFavorite = isFavorite;
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant FavoriteWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.file.uploadedFileID != widget.file.uploadedFileID) {
+      _hasSetInitialState = false;
+      _initializeFavoriteState();
+    }
+  }
+
+  @override
+  void dispose() {
+    _riveFileLoader.dispose();
+    super.dispose();
+  }
+
+  void _handleRiveLoaded(rive.RiveLoaded loaded) {
+    if (!mounted || _hasSetInitialState) return;
+
+    _stateMachine = loaded.controller.stateMachine;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _stateMachine == null || _isFavorite == null) return;
+      _setInitialAnimationState();
+    });
+  }
+
+  void _setInitialAnimationState() {
+    if (_isFavorite == null || _hasSetInitialState) return;
+    _hasSetInitialState = true;
+
+    if (_isFavorite!) {
+      _stateMachine?.trigger("Filled")?.fire();
+    } else {
+      _stateMachine?.trigger("Stroke")?.fire();
+    }
+  }
+
+  Future<void> _onTap() async {
+    if (_isLoading || _isFavorite == null || _stateMachine == null) return;
+
+    final bool currentlyFavorite = _isFavorite!;
+    final bool newFavoriteState = !currentlyFavorite;
+
+    if (widget.file.uploadedFileID == null ||
+        widget.file.ownerID != Configuration.instance.getUserID()!) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
+
+    bool hasError = false;
+
+    if (newFavoriteState) {
+      // Adding to favorites - play animation
+      _stateMachine?.trigger("Animation to filled")?.fire();
+
+      try {
+        await FavoritesService.instance.addToFavorites(
+          context,
+          widget.file.copyWith(),
+        );
+        _stateMachine?.trigger("Filled")?.fire();
+      } catch (e, s) {
+        _logger.severe(e, s);
+        hasError = true;
+        showToast(
+          context,
+          AppLocalizations.of(context).sorryCouldNotAddToFavorites,
+        );
+        _stateMachine?.trigger("Stroke")?.fire();
+      }
+    } else {
+      // Removing from favorites - go directly to stroke
+      _stateMachine?.trigger("Stroke")?.fire();
+
+      try {
+        await FavoritesService.instance.removeFromFavorites(
+          context,
+          widget.file.copyWith(),
+        );
+      } catch (e, s) {
+        _logger.severe(e, s);
+        hasError = true;
+        showToast(
+          context,
+          AppLocalizations.of(context).sorryCouldNotRemoveFromFavorites,
+        );
+        _stateMachine?.trigger("Filled")?.fire();
+      }
+    }
+
+    setState(() {
+      _isLoading = false;
+      if (!hasError) {
+        _isFavorite = newFavoriteState;
+      }
+    });
+
+    if (newFavoriteState && !hasError) {
+      unawaited(HapticFeedback.mediumImpact());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return FutureBuilder<bool>(
-      future: _fetchData(),
-      builder: (context, snapshot) {
-        final bool isLiked = snapshot.data ?? false;
-        return _isLoading
-            ? const EnteLoadingWidget(
-                size: 14,
-                padding: 2,
-              ) // Add this line
-            : LikeButton(
-                bubblesColor: BubblesColor(
-                  dotPrimaryColor: colorScheme.primary700,
-                  dotSecondaryColor: colorScheme.primary400,
-                ),
-                circleColor: CircleColor(
-                  start: colorScheme.primary400,
-                  end: colorScheme.primary300,
-                ),
-                size: 24,
-                isLiked: isLiked,
-                onTap: (oldValue) async {
-                  if (widget.file.uploadedFileID == null ||
-                      widget.file.ownerID !=
-                          Configuration.instance.getUserID()!) {
-                    setState(() {
-                      _isLoading = true; // Add this line
-                    });
-                  }
-                  final isLiked = !oldValue;
-                  bool hasError = false;
-                  if (isLiked) {
-                    try {
-                      await FavoritesService.instance.addToFavorites(
-                        context,
-                        widget.file.copyWith(),
-                      );
-                    } catch (e, s) {
-                      _logger.severe(e, s);
-                      hasError = true;
-                      showToast(
-                        context,
-                        AppLocalizations.of(context)
-                            .sorryCouldNotAddToFavorites,
-                      );
-                    }
-                  } else {
-                    try {
-                      await FavoritesService.instance
-                          .removeFromFavorites(context, widget.file.copyWith());
-                    } catch (e, s) {
-                      _logger.severe(e, s);
-                      hasError = true;
-                      showToast(
-                        context,
-                        AppLocalizations.of(context)
-                            .sorryCouldNotRemoveFromFavorites,
-                      );
-                    }
-                  }
-                  setState(() {
-                    _isLoading = false; // Add this line
-                  });
+    // Show blank while initial state is being fetched
+    if (_isFavorite == null || _isLoading) {
+      return const SizedBox(width: 24, height: 24);
+    }
 
-                  if (isLiked) {
-                    unawaited(HapticFeedback.mediumImpact());
-                  }
-
-                  return hasError ? oldValue : isLiked;
-                },
-                likeBuilder: (isLiked) {
-                  debugPrint(
-                    "File Upload ID ${widget.file.uploadedFileID} & collection ${widget.file.collectionID}",
-                  );
-                  return Icon(
-                    isLiked
-                        ? Icons.favorite_rounded
-                        : Icons.favorite_border_rounded,
-                    color: Colors.white, //same for both themes
-                    size: 24,
-                  );
-                },
+    return GestureDetector(
+      onTap: _onTap,
+      child: SizedBox(
+        width: 24,
+        height: 24,
+        child: rive.RiveWidgetBuilder(
+          fileLoader: _riveFileLoader,
+          stateMachineSelector: const rive.StateMachineNamed(
+            "State Machine 1",
+          ),
+          onLoaded: _handleRiveLoaded,
+          builder: (BuildContext context, rive.RiveState state) {
+            if (state is rive.RiveLoaded) {
+              return rive.RiveWidget(
+                controller: state.controller,
+                fit: rive.Fit.contain,
               );
-      },
+            }
+            if (state is rive.RiveFailed) {
+              _logger.warning(
+                "Failed to load Rive file: ${state.error}",
+              );
+            }
+            // Loading state
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
     );
   }
 }
