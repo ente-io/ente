@@ -311,9 +311,25 @@ class FileUploader {
     _removeAndSkip(entry, error);
   }
 
+  /// Checks if a pending upload should be skipped based on current backup preferences.
+  ///
+  /// Returns true if the entry was skipped, false otherwise.
+  ///
+  /// Skip conditions:
+  /// 1. Backup folder was deselected (only when enableBackupFolderSync flag is on)
+  /// 2. File is older than the "only new photos" preference epoch
+  ///
+  /// Note: Files with null queueSource (legacy queued files before this feature)
+  /// or manualQueueSource are treated as manual uploads and never skipped.
+  /// This ensures backward compatibility and preserves user intent for manual uploads.
   Future<bool> _skipPendingEntryIfFilteredOut(
     FileUploadItem? pendingEntry,
   ) async {
+    // Early exit if the feature flag is disabled
+    if (!flagService.enableBackupFolderSync) {
+      return false;
+    }
+
     if (pendingEntry == null || pendingEntry.isManualUpload) {
       return false;
     }
@@ -322,13 +338,11 @@ class FileUploader {
 
     Error? skipReason;
 
-    if (flagService.enableBackupFolderSync) {
-      final isSelected = await deviceFolderSelectionCache.isSelected(
-        queueSource,
-      );
-      if (!isSelected) {
-        skipReason = BackupFolderDeselectedError();
-      }
+    final isSelected = await deviceFolderSelectionCache.isSelected(
+      queueSource,
+    );
+    if (!isSelected) {
+      skipReason = BackupFolderDeselectedError();
     }
 
     final int? onlyNewSinceEpoch = backupPreferenceService.onlyNewSinceEpoch;

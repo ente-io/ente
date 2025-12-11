@@ -10,6 +10,7 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/download/file_url.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import "package:photos/utils/panorama_util.dart";
@@ -25,7 +26,17 @@ class EnteFile {
   String? title;
   String? deviceFolder;
   // Path ID for the device folder that queued this file (auto backup). Null for manual uploads.
-  String? queueSource;
+  String? _queueSource;
+
+  String? get queueSource => _queueSource;
+
+  /// Sets the queue source for backup tracking.
+  /// Only sets the value when enableBackupFolderSync flag is enabled.
+  set queueSource(String? value) {
+    if (value == null || flagService.enableBackupFolderSync) {
+      _queueSource = value;
+    }
+  }
   int? creationTime;
   int? modificationTime;
   int? updationTime;

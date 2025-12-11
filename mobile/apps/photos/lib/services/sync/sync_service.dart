@@ -176,16 +176,24 @@ class SyncService {
   }
 
   void onDeviceCollectionSet(Set<int> collectionIDs) {
+    if (flagService.enableBackupFolderSync) {
+      _uploader.removeFromQueueWhere(
+        (file) {
+          // Skip manual uploads
+          if (file.queueSource == null ||
+              file.queueSource == manualQueueSource) {
+            return false;
+          }
+          return !collectionIDs.contains(file.collectionID);
+        },
+        BackupFolderDeselectedError(),
+        skip: true,
+      );
+      return;
+    }
     _uploader.removeFromQueueWhere(
-      (file) {
-        // Skip manual uploads
-        if (file.queueSource == null || file.queueSource == manualQueueSource) {
-          return false;
-        }
-        return !collectionIDs.contains(file.collectionID);
-      },
-      BackupFolderDeselectedError(),
-      skip: true,
+      (file) => !collectionIDs.contains(file.collectionID),
+      UserCancelledUploadError(),
     );
   }
 
