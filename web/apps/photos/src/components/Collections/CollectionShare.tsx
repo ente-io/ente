@@ -2277,7 +2277,8 @@ const commentPermissionOptions: {
         value: "signed_in",
         label: "Signed-in only",
         caption: "Signed-in",
-        description: "Only people signed in to Ente can comment on this memory.",
+        description:
+            "Only people signed in to Ente can comment on this memory.",
     },
     {
         value: "no_one",
@@ -2294,13 +2295,12 @@ const getCommentPermissionCaption = (permission: CommentPermission) => {
 
 const ManageComments: React.FC<ManagePublicLinkSettingDrawerProps> = ({
     onRootClose,
-    publicURL: _publicURL,
-    onUpdate: _onUpdate,
+    // TODO: Use these when backend is ready
+    publicURL: _publicURL, // eslint-disable-line @typescript-eslint/no-unused-vars
+    onUpdate: _onUpdate, // eslint-disable-line @typescript-eslint/no-unused-vars
 }) => {
-    const {
-        show: showCommentOptions,
-        props: commentOptionsVisibilityProps,
-    } = useModalVisibility();
+    const { show: showCommentOptions, props: commentOptionsVisibilityProps } =
+        useModalVisibility();
 
     // TODO: Replace with actual state from publicURL when backend is ready
     const [viewComments, setViewComments] = useState(true);

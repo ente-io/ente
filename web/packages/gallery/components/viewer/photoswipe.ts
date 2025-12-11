@@ -25,6 +25,7 @@ import {
 import {
     commentSVGPath,
     createPSRegisterElementIconHTML,
+    heartFillSVGPath,
     heartSVGPath,
     settingsSVGPath,
 } from "./icons";
@@ -69,6 +70,11 @@ export interface FileViewerPhotoSwipeDelegate {
      * > remain in the disabled state (until the file viewer is closed).
      */
     toggleFavorite: (annotatedFile: FileViewerAnnotatedFile) => Promise<void>;
+    /**
+     * Return `true` if the provided file has a green_heart reaction from the
+     * current user.
+     */
+    isLiked: (annotatedFile: FileViewerAnnotatedFile) => boolean;
     /**
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
@@ -1132,6 +1138,26 @@ export class FileViewerPhotoSwipe {
         this.refreshCurrentSlideFavoriteButtonIfNeeded =
             updateFavoriteButtonIfNeeded;
 
+        const updateLikeButtonIfNeeded = () => {
+            const heartIconFill = document.getElementById(
+                "pswp__icn-heart-fill",
+            );
+            const heartIconOutline = document.getElementById("pswp__icn-heart");
+            if (!heartIconFill || !heartIconOutline) {
+                // Early return if we're not currently being shown.
+                return;
+            }
+
+            const af = currentAnnotatedFile();
+            const isLiked = delegate.isLiked(af);
+
+            // Show fill (green) if liked, show outline (white) if not liked
+            showIf(heartIconFill, isLiked);
+            showIf(heartIconOutline, !isLiked);
+        };
+
+        this.refreshCurrentSlideLikeButtonIfNeeded = updateLikeButtonIfNeeded;
+
         const handleToggleFavorite = () => void toggleFavorite();
 
         const handleToggleFavoriteIfEnabled = () => {
@@ -1455,6 +1481,9 @@ export class FileViewerPhotoSwipe {
                         e.preventDefault();
                         onViewLikes();
                     });
+                    // Update like button state on slide change and initially.
+                    pswp.on("change", updateLikeButtonIfNeeded);
+                    updateLikeButtonIfNeeded();
                 },
             });
         });
@@ -1827,6 +1856,12 @@ export class FileViewerPhotoSwipe {
      * refresh would cause, e.g., the pan and zoom to be reset.
      */
     refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
+
+    /**
+     * Refresh the like button (heart) on the current slide, asking the
+     * delegate for the latest like state.
+     */
+    refreshCurrentSlideLikeButtonIfNeeded: () => void;
 }
 
 // Requires the following imports to register the Web components we use:
@@ -1938,7 +1973,7 @@ const bottomRightControlsHTML = () => `
 <div class="pswp__caption"><p></p></div>
 <div class="pswp__action-buttons">
   <button class="pswp__action-button" aria-label="Like">
-    <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} /></svg>
+    <svg viewBox="0 0 30 26" fill="none">${heartSVGPath} id="pswp__icn-heart" />${heartFillSVGPath} id="pswp__icn-heart-fill" /></svg>
   </button>
   <button class="pswp__action-button pswp__action-button--comment" aria-label="Comment">
     <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>

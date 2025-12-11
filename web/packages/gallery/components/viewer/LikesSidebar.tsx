@@ -230,9 +230,10 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                                     fontWeight: 600,
                                                     fontSize: 14,
                                                     lineHeight: "20px",
-                                                    ...theme.applyStyles("dark", {
-                                                        color: "#fff",
-                                                    }),
+                                                    ...theme.applyStyles(
+                                                        "dark",
+                                                        { color: "#fff" },
+                                                    ),
                                                 })}
                                             >
                                                 {collection.name}
@@ -379,10 +380,7 @@ const CollectionBadge = styled(Box)(({ theme }) => ({
     fontWeight: 600,
     lineHeight: 1,
     minWidth: 14,
-    ...theme.applyStyles("dark", {
-        backgroundColor: "#fff",
-        color: "#000",
-    }),
+    ...theme.applyStyles("dark", { backgroundColor: "#fff", color: "#000" }),
 }));
 
 const CollectionDropdownMenu = styled(Box)(({ theme }) => ({
@@ -453,9 +451,7 @@ const LikerName = styled(Typography)(({ theme }) => ({
     fontWeight: 500,
     color: "#000",
     fontSize: 14,
-    ...theme.applyStyles("dark", {
-        color: "#fff",
-    }),
+    ...theme.applyStyles("dark", { color: "#fff" }),
 }));
 
 // Context Menu Overlay

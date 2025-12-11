@@ -260,7 +260,7 @@ type ThumbnailCache = Map<number, string>;
 const CURRENT_USER_ID = 2;
 
 // Mock user map for looking up user names by userID
-const mockUsers: Map<number, string> = new Map([
+const mockUsers = new Map<number, string>([
     [CURRENT_USER_ID, "Anand"],
     [3, "jay00723426@gmail.com"],
     [4, "Vishnu"],
@@ -825,7 +825,11 @@ const getActionText = (item: FeedItem): string => {
 const getUsersDisplayText = (users: FeedUser[]): string => {
     if (users.length === 0) return "";
     const firstName = truncateEmail(
-        getUserDisplayName(users[0]!.userID, users[0]!.userName, users[0]!.anonUserID),
+        getUserDisplayName(
+            users[0]!.userID,
+            users[0]!.userName,
+            users[0]!.anonUserID,
+        ),
     );
     if (users.length === 1) {
         return firstName;
@@ -1114,9 +1118,7 @@ const FeedItemContainer = styled(Box)(({ theme }) => ({
                 "repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.18) 0px, rgba(255, 255, 255, 0.18) 8px, transparent 8px, transparent 16px)",
         }),
     },
-    "&:last-child": {
-        marginBottom: 0,
-    },
+    "&:last-child": { marginBottom: 0 },
 }));
 
 const IconContainer = styled(Box)(({ theme }) => ({
@@ -1130,9 +1132,7 @@ const IconContainer = styled(Box)(({ theme }) => ({
     borderRadius: "50%",
     position: "relative",
     zIndex: 1,
-    ...theme.applyStyles("dark", {
-        backgroundColor: "#2a2a2a",
-    }),
+    ...theme.applyStyles("dark", { backgroundColor: "#2a2a2a" }),
 }));
 
 const FeedItemContent = styled(Box)(() => ({
@@ -1158,9 +1158,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
     color: "#666",
     border: "2px solid #FAFAFA",
     marginLeft: -8,
-    "&:first-of-type": {
-        marginLeft: 0,
-    },
+    "&:first-of-type": { marginLeft: 0 },
     ...theme.applyStyles("dark", {
         backgroundColor: "#3a3a3a",
         color: "#b0b0b0",
@@ -1175,9 +1173,7 @@ const UserNameText = styled(Typography)(({ theme }) => ({
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    ...theme.applyStyles("dark", {
-        color: "#fff",
-    }),
+    ...theme.applyStyles("dark", { color: "#fff" }),
 }));
 
 const ActionText = styled(Typography)(({ theme }) => ({
@@ -1186,9 +1182,7 @@ const ActionText = styled(Typography)(({ theme }) => ({
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.7)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
 const ThumbnailImage = styled("img")(() => ({

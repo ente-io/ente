@@ -202,7 +202,11 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
 
                 <ContentContainer>
                     <IllustrationWrapper>
-                        {isComment ? <CommentIllustration /> : <LikeIllustration />}
+                        {isComment ? (
+                            <CommentIllustration />
+                        ) : (
+                            <LikeIllustration />
+                        )}
                     </IllustrationWrapper>
 
                     <TitleSection>
@@ -229,7 +233,9 @@ export const AddNameModal: React.FC<AddNameModalProps> = ({
                         onClick={handleSubmit}
                         hasName={!!name.trim()}
                     >
-                        {isComment ? "Set name and comment" : "Set name and like"}
+                        {isComment
+                            ? "Set name and comment"
+                            : "Set name and like"}
                     </SubmitButton>
                 </ContentContainer>
             </DialogWrapper>
@@ -257,9 +263,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
             border: "1px solid rgba(255, 255, 255, 0.18)",
         }),
     },
-    "& .MuiBackdrop-root": {
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
+    "& .MuiBackdrop-root": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
 }));
 
 const DialogWrapper = styled(Box)(() => ({
@@ -274,9 +278,7 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
     backgroundColor: "#FAFAFA",
     color: "#000",
     padding: 10,
-    "&:hover": {
-        backgroundColor: "#F0F0F0",
-    },
+    "&:hover": { backgroundColor: "#F0F0F0" },
     ...theme.applyStyles("dark", {
         backgroundColor: "rgba(255, 255, 255, 0.12)",
         color: "#fff",
@@ -313,9 +315,7 @@ const Title = styled(Typography)(({ theme }) => ({
     lineHeight: "28px",
     letterSpacing: "-0.48px",
     color: "#000",
-    ...theme.applyStyles("dark", {
-        color: "#fff",
-    }),
+    ...theme.applyStyles("dark", { color: "#fff" }),
 }));
 
 const Subtitle = styled(Typography)(({ theme }) => ({
@@ -324,9 +324,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     lineHeight: "20px",
     color: "#666666",
     maxWidth: 295,
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.7)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -334,12 +332,8 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
         height: 54,
         backgroundColor: "#FAFAFA",
         borderRadius: 12,
-        "&::before": {
-            borderBottom: "1px solid #E0E0E0",
-        },
-        "&::after": {
-            borderBottom: "2px solid #08C225",
-        },
+        "&::before": { borderBottom: "1px solid #E0E0E0" },
+        "&::after": { borderBottom: "2px solid #08C225" },
         "&:hover:not(.Mui-disabled)::before": {
             borderBottom: "1px solid #BDBDBD",
         },
@@ -350,26 +344,19 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
         boxSizing: "border-box",
         fontSize: 16,
         color: "#000",
-        "&::placeholder": {
-            color: "#999",
-            opacity: 1,
-        },
+        "&::placeholder": { color: "#999", opacity: 1 },
     },
     ...theme.applyStyles("dark", {
         "& .MuiInput-root": {
             backgroundColor: "rgba(255, 255, 255, 0.08)",
-            "&::before": {
-                borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
-            },
+            "&::before": { borderBottom: "1px solid rgba(255, 255, 255, 0.3)" },
             "&:hover:not(.Mui-disabled)::before": {
                 borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
             },
         },
         "& .MuiInputBase-input": {
             color: "#fff",
-            "&::placeholder": {
-                color: "rgba(255, 255, 255, 0.5)",
-            },
+            "&::placeholder": { color: "rgba(255, 255, 255, 0.5)" },
         },
     }),
 }));
@@ -394,9 +381,7 @@ const SubmitButton = styled(Button)<{ hasName: boolean }>(
             boxShadow: "none",
         },
         ...theme.applyStyles("dark", {
-            backgroundColor: hasName
-                ? "#08C225"
-                : "rgba(255, 255, 255, 0.08)",
+            backgroundColor: hasName ? "#08C225" : "rgba(255, 255, 255, 0.08)",
             color: hasName ? "#fff" : "rgba(255, 255, 255, 0.5)",
             "&:hover": {
                 backgroundColor: hasName

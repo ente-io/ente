@@ -590,3 +590,16 @@ body:has(
         right: -12px;
     }
 }
+
+/* Heart (like) button icons - uses pswp__hidden class toggled by showIf() */
+#pswp__icn-heart-fill {
+    display: none;
+}
+
+#pswp__icn-heart-fill:not(.pswp__hidden) {
+    display: inline;
+}
+
+#pswp__icn-heart.pswp__hidden {
+    display: none;
+}

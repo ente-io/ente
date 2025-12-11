@@ -46,6 +46,12 @@ import {
     ImageEditorOverlay,
     type ImageEditorOverlayProps,
 } from "ente-new/photos/components/ImageEditorOverlay";
+import { getCollectionByID } from "ente-new/photos/services/collection";
+import {
+    addReaction,
+    deleteReaction,
+    getFileReactions,
+} from "ente-new/photos/services/reaction";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -54,6 +60,7 @@ import React, {
     useRef,
     useState,
 } from "react";
+import { AddNameModal } from "./AddNameModal";
 import { CommentsSidebar } from "./CommentsSidebar";
 import {
     fileInfoExifForFile,
@@ -61,9 +68,8 @@ import {
     type ItemData,
 } from "./data-source";
 import { LikeAlbumSelectorModal } from "./LikeAlbumSelectorModal";
+import { UnlikeAlbumSelectorModal } from "./UnlikeAlbumSelectorModal";
 import { LikesSidebar } from "./LikesSidebar";
-import { AddNameModal } from "./AddNameModal";
-import { PublicLikeModal } from "./PublicLikeModal";
 import {
     FileViewerPhotoSwipe,
     moreButtonID,
@@ -71,6 +77,7 @@ import {
     resetMoreMenuButtonOnMenuClose,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
+import { PublicLikeModal } from "./PublicLikeModal";
 
 /**
  * Derived data for a file that is needed to display the file viewer controls
@@ -402,6 +409,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const [isFullscreen, setIsFullscreen] = useState(false);
 
+    // Map of file ID to array of reactions (collectionId + reactionId) for the current user.
+    // For gallery view, we track reactions across all collections.
+    // For collection view, we only track the reaction in that collection.
+    interface FileReaction {
+        collectionId: number;
+        reactionId: string;
+    }
+    const [fileReactions, setFileReactions] = useState<
+        Map<number, FileReaction[]>
+    >(new Map());
+
+    const [openUnlikeAlbumSelector, setOpenUnlikeAlbumSelector] = useState(false);
+
     // If `true`, then we need to trigger a pull from remote when we close.
     const [, setNeedsRemotePull] = useState(false);
 
@@ -419,6 +439,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenComments(false);
         setOpenLikes(false);
         setOpenLikeAlbumSelector(false);
+        setOpenUnlikeAlbumSelector(false);
         setOpenPublicLikeModal(false);
         // No need to `resetMoreMenuButtonOnMenuClose` since we're closing
         // anyway and it'll be removed from the DOM.
@@ -451,31 +472,119 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleLikesClose = useCallback(() => setOpenLikes(false), []);
 
+    // Refs to access current state without causing re-renders
+    // when used in callbacks that are dependencies of the PhotoSwipe effect.
+    const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
+    activeAnnotatedFileRef.current = activeAnnotatedFile;
+
+    const fileReactionsRef = useRef(fileReactions);
+    fileReactionsRef.current = fileReactions;
+
     // Called when the like button (heart) is clicked.
     // - If public album (has ?t=): show PublicLikeModal
-    // - If collection context (has ?collection=): perform like action directly
-    // - If no collection context: show album selector modal
+    // - If gallery view: show album selector (like) OR unlike selector/direct delete
+    // - If collection view: toggle like in that collection
     const handleLikeClick = useCallback(() => {
         const searchParams =
             typeof window !== "undefined"
                 ? new URLSearchParams(window.location.search)
                 : new URLSearchParams();
         const isPublicAlbum = searchParams.has("t");
-        const hasCollectionContext = searchParams.has("collection");
 
         if (isPublicAlbum) {
             // Public album - show public like modal
             setOpenPublicLikeModal(true);
-        } else if (hasCollectionContext) {
-            // Collection context exists - perform like action directly
-            // TODO: Implement actual like action when API is available
-            const collectionId = searchParams.get("collection");
-            console.log(`Like action: collection=${collectionId}`);
-        } else {
-            // No collection context - show album selector modal
-            setOpenLikeAlbumSelector(true);
+            return;
         }
-    }, []);
+
+        const file = activeAnnotatedFileRef.current?.file;
+        if (!file) return;
+
+        const fileId = file.id;
+        const reactions = fileReactionsRef.current.get(fileId) ?? [];
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+
+        if (isGalleryView) {
+            // Gallery view
+            if (reactions.length === 0) {
+                // Not liked in any collection - show album selector to add
+                setOpenLikeAlbumSelector(true);
+            } else if (reactions.length === 1) {
+                // Liked in exactly one collection - delete directly
+                const reaction = reactions[0]!;
+                void (async () => {
+                    try {
+                        await deleteReaction(reaction.reactionId);
+                        log.info(`Deleted reaction: ${reaction.reactionId}`);
+                        setFileReactions((prev) => {
+                            const next = new Map(prev);
+                            next.delete(fileId);
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to delete reaction", e);
+                    }
+                })();
+            } else {
+                // Liked in multiple collections - show unlike album selector
+                setOpenUnlikeAlbumSelector(true);
+            }
+        } else {
+            // Collection view - toggle like in this specific collection
+            const existingReaction = reactions.find(
+                (r) => r.collectionId === activeCollectionID,
+            );
+
+            if (existingReaction) {
+                // Already liked in this collection - delete
+                void (async () => {
+                    try {
+                        await deleteReaction(existingReaction.reactionId);
+                        log.info(`Deleted reaction: ${existingReaction.reactionId}`);
+                        setFileReactions((prev) => {
+                            const next = new Map(prev);
+                            const updated = (prev.get(fileId) ?? []).filter(
+                                (r) => r.reactionId !== existingReaction.reactionId,
+                            );
+                            if (updated.length > 0) {
+                                next.set(fileId, updated);
+                            } else {
+                                next.delete(fileId);
+                            }
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to delete reaction", e);
+                    }
+                })();
+            } else {
+                // Not liked in this collection - add
+                void (async () => {
+                    try {
+                        const collection = await getCollectionByID(activeCollectionID);
+                        const reactionId = await addReaction(
+                            activeCollectionID,
+                            fileId,
+                            "green_heart",
+                            collection.key,
+                        );
+                        log.info(`Added reaction: ${reactionId}`);
+                        setFileReactions((prev) => {
+                            const next = new Map(prev);
+                            const existing = prev.get(fileId) ?? [];
+                            next.set(fileId, [
+                                ...existing,
+                                { collectionId: activeCollectionID, reactionId },
+                            ]);
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to add reaction", e);
+                    }
+                })();
+            }
+        }
+    }, [activeCollectionID]);
 
     const handleLikeAlbumSelectorClose = useCallback(
         () => setOpenLikeAlbumSelector(false),
@@ -492,6 +601,103 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // TODO: Implement actual like all action when API is available
         console.log("Like all action");
         setOpenLikeAlbumSelector(false);
+    }, []);
+
+    const handleUnlikeAlbumSelectorClose = useCallback(
+        () => setOpenUnlikeAlbumSelector(false),
+        [],
+    );
+
+    const handleToggleAlbumLike = useCallback(
+        (albumId: number, isCurrentlyLiked: boolean) => {
+            const file = activeAnnotatedFileRef.current?.file;
+            if (!file) return;
+
+            const fileId = file.id;
+
+            if (isCurrentlyLiked) {
+                // Unlike - delete the reaction
+                const reactions = fileReactionsRef.current.get(fileId) ?? [];
+                const reactionToDelete = reactions.find(
+                    (r) => r.collectionId === albumId,
+                );
+
+                if (reactionToDelete) {
+                    void (async () => {
+                        try {
+                            await deleteReaction(reactionToDelete.reactionId);
+                            log.info(`Deleted reaction: ${reactionToDelete.reactionId}`);
+                            setFileReactions((prev) => {
+                                const next = new Map(prev);
+                                const updated = (prev.get(fileId) ?? []).filter(
+                                    (r) => r.reactionId !== reactionToDelete.reactionId,
+                                );
+                                if (updated.length > 0) {
+                                    next.set(fileId, updated);
+                                } else {
+                                    next.delete(fileId);
+                                }
+                                return next;
+                            });
+                        } catch (e) {
+                            log.error("Failed to delete reaction", e);
+                        }
+                    })();
+                }
+            } else {
+                // Like - add a reaction
+                void (async () => {
+                    try {
+                        const collection = await getCollectionByID(albumId);
+                        const reactionId = await addReaction(
+                            albumId,
+                            fileId,
+                            "green_heart",
+                            collection.key,
+                        );
+                        log.info(`Added reaction: ${reactionId}`);
+                        setFileReactions((prev) => {
+                            const next = new Map(prev);
+                            const existing = prev.get(fileId) ?? [];
+                            next.set(fileId, [
+                                ...existing,
+                                { collectionId: albumId, reactionId },
+                            ]);
+                            return next;
+                        });
+                    } catch (e) {
+                        log.error("Failed to add reaction", e);
+                    }
+                })();
+            }
+            // Don't close - user might want to toggle more albums
+        },
+        [],
+    );
+
+    const handleUnlikeAll = useCallback(() => {
+        const file = activeAnnotatedFileRef.current?.file;
+        if (!file) return;
+
+        const fileId = file.id;
+        const reactions = fileReactionsRef.current.get(fileId) ?? [];
+
+        void (async () => {
+            try {
+                for (const reaction of reactions) {
+                    await deleteReaction(reaction.reactionId);
+                    log.info(`Deleted reaction: ${reaction.reactionId}`);
+                }
+                setFileReactions((prev) => {
+                    const next = new Map(prev);
+                    next.delete(fileId);
+                    return next;
+                });
+            } catch (e) {
+                log.error("Failed to delete reactions", e);
+            }
+        })();
+        setOpenUnlikeAlbumSelector(false);
     }, []);
 
     const handlePublicLikeModalClose = useCallback(
@@ -723,6 +929,25 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const haveUser = !!user;
 
+    // Compute all albums and liked album IDs for the unlike selector modal
+    const { allAlbumsForFile, likedAlbumIDs } = useMemo(() => {
+        const file = activeAnnotatedFile?.file;
+        if (!file) return { allAlbumsForFile: [], likedAlbumIDs: new Set<number>() };
+
+        // Get all collections the file belongs to
+        const collectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
+        const allAlbumsForFile = collectionIDs.map((id) => ({
+            id,
+            name: collectionNameByID?.get(id) ?? `Album ${id}`,
+        }));
+
+        // Get the set of liked album IDs
+        const reactions = fileReactions.get(file.id) ?? [];
+        const likedAlbumIDs = new Set(reactions.map((r) => r.collectionId));
+
+        return { allAlbumsForFile, likedAlbumIDs };
+    }, [activeAnnotatedFile, fileReactions, collectionNameByID, fileNormalCollectionIDs]);
+
     const getFiles = useCallback(() => files, [files]);
 
     const isFavorite = useCallback(
@@ -754,6 +979,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [onToggleFavorite, onGenericError, handleNeedsRemotePull],
     );
 
+    const isLiked = useCallback(
+        ({ file }: FileViewerAnnotatedFile) => {
+            const reactions = fileReactions.get(file.id);
+            return reactions !== undefined && reactions.length > 0;
+        },
+        [fileReactions],
+    );
+
     const updateFullscreenStatus = useCallback(() => {
         setIsFullscreen(!!document.fullscreenElement);
     }, []);
@@ -781,6 +1014,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             openComments ||
             openLikes ||
             openLikeAlbumSelector ||
+            openUnlikeAlbumSelector ||
             openPublicLikeModal ||
             !!moreMenuAnchorEl ||
             openImageEditor ||
@@ -814,6 +1048,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         openComments,
         openLikes,
         openLikeAlbumSelector,
+        openUnlikeAlbumSelector,
         openPublicLikeModal,
         moreMenuAnchorEl,
         openImageEditor,
@@ -927,6 +1162,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             isFavorite,
             isFavoritePending,
             toggleFavorite,
+            isLiked,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
         };
@@ -939,6 +1175,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegate.isFavorite = isFavorite;
         delegate.isFavoritePending = isFavoritePending;
         delegate.toggleFavorite = toggleFavorite;
+        delegate.isLiked = isLiked;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
@@ -946,6 +1183,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         isFavorite,
         isFavoritePending,
         toggleFavorite,
+        isLiked,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
     ]);
@@ -978,6 +1216,97 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
         }
     }, [favoriteFileIDs, pendingFavoriteUpdates, files, open]);
+
+    // Refresh like button when fileReactions changes.
+    useEffect(() => {
+        if (open && files.length) {
+            psRef.current?.refreshCurrentSlideLikeButtonIfNeeded();
+        }
+    }, [fileReactions, files, open]);
+
+    // Fetch reactions for the current file when it changes.
+    // Track by file ID to avoid re-fetching when activeAnnotatedFile object changes identity.
+    const activeFileID = activeAnnotatedFile?.file.id;
+    useEffect(() => {
+        if (!open || !activeFileID) return;
+
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+
+        void (async () => {
+            try {
+                if (isGalleryView) {
+                    // Gallery view: check ALL collections the file belongs to
+                    const collectionIDs = fileNormalCollectionIDs?.get(activeFileID) ?? [];
+                    const foundReactions: FileReaction[] = [];
+
+                    for (const collectionId of collectionIDs) {
+                        try {
+                            const collection = await getCollectionByID(collectionId);
+                            const reactions = await getFileReactions(
+                                collectionId,
+                                activeFileID,
+                                collection.key,
+                            );
+                            const userReaction = reactions.find(
+                                (r) =>
+                                    r.reactionType === "green_heart" &&
+                                    r.userID === user?.id,
+                            );
+                            if (userReaction) {
+                                foundReactions.push({
+                                    collectionId,
+                                    reactionId: userReaction.id,
+                                });
+                            }
+                        } catch {
+                            // Skip collections that fail to fetch
+                        }
+                    }
+
+                    setFileReactions((prev) => {
+                        const next = new Map(prev);
+                        if (foundReactions.length > 0) {
+                            next.set(activeFileID, foundReactions);
+                        } else {
+                            next.delete(activeFileID);
+                        }
+                        return next;
+                    });
+                } else {
+                    // Collection view: check only the active collection
+                    const collection = await getCollectionByID(activeCollectionID);
+                    const reactions = await getFileReactions(
+                        activeCollectionID,
+                        activeFileID,
+                        collection.key,
+                    );
+                    const userReaction = reactions.find(
+                        (r) =>
+                            r.reactionType === "green_heart" &&
+                            r.userID === user?.id,
+                    );
+                    setFileReactions((prev) => {
+                        const next = new Map(prev);
+                        if (userReaction) {
+                            next.set(activeFileID, [
+                                { collectionId: activeCollectionID, reactionId: userReaction.id },
+                            ]);
+                        } else {
+                            next.delete(activeFileID);
+                        }
+                        return next;
+                    });
+                }
+            } catch (e) {
+                log.error("Failed to fetch reactions", e);
+                setFileReactions((prev) => {
+                    const next = new Map(prev);
+                    next.delete(activeFileID);
+                    return next;
+                });
+            }
+        })();
+    }, [open, activeFileID, activeCollectionID, fileNormalCollectionIDs, user?.id]);
 
     useEffect(() => {
         if (open) {
@@ -1086,6 +1415,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 albums={mockAlbumsForLike}
                 onSelectAlbum={handleSelectAlbumForLike}
                 onLikeAll={handleLikeAll}
+            />
+            <UnlikeAlbumSelectorModal
+                open={openUnlikeAlbumSelector}
+                onClose={handleUnlikeAlbumSelectorClose}
+                albums={allAlbumsForFile}
+                likedAlbumIDs={likedAlbumIDs}
+                onToggleAlbum={handleToggleAlbumLike}
+                onUnlikeAll={handleUnlikeAll}
             />
             <PublicLikeModal
                 open={openPublicLikeModal}

@@ -22,6 +22,9 @@ const paths = {
     error: '<path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8" transform="translate(7, 5.7) scale(0.85)"',
     // Custom heart outline icon (30x26 viewBox)
     heart: '<path d="M12.4926 23.4794C8.64537 20.6025 1.02344 14.0254 1.02344 8.10676C1.02344 4.19475 3.89425 1.02344 7.84162 1.02344C9.88707 1.02344 11.9325 1.70526 14.6598 4.43253C17.3871 1.70526 19.4325 1.02344 21.478 1.02344C25.4253 1.02344 28.2962 4.19475 28.2962 8.10676C28.2962 14.0254 20.6743 20.6025 16.827 23.4794C15.5324 24.4474 13.7872 24.4474 12.4926 23.4794Z" stroke="white" stroke-width="2.04545" stroke-linecap="round" stroke-linejoin="round" fill="none"',
+    // Custom heart filled icon (30x26 viewBox) - green fill for liked state
+    "heart-fill":
+        '<path d="M12.4926 23.4794C8.64537 20.6025 1.02344 14.0254 1.02344 8.10676C1.02344 4.19475 3.89425 1.02344 7.84162 1.02344C9.88707 1.02344 11.9325 1.70526 14.6598 4.43253C17.3871 1.70526 19.4325 1.02344 21.478 1.02344C25.4253 1.02344 28.2962 4.19475 28.2962 8.10676C28.2962 14.0254 20.6743 20.6025 16.827 23.4794C15.5324 24.4474 13.7872 24.4474 12.4926 23.4794Z" stroke="#22c55e" stroke-width="2.04545" stroke-linecap="round" stroke-linejoin="round" fill="#22c55e"',
     // Custom comment bubble icon (28x28 viewBox, scaled to match heart)
     comment:
         '<path d="M13.636 25.9087C16.0633 25.9087 18.4361 25.189 20.4544 23.8404C22.4726 22.4919 24.0456 20.5751 24.9745 18.3326C25.9034 16.09 26.1465 13.6224 25.6729 11.2417C25.1994 8.86105 24.0305 6.67426 22.3141 4.95788C20.5978 3.24151 18.411 2.07265 16.0303 1.5991C13.6496 1.12556 11.182 1.3686 8.93944 2.29749C6.69689 3.22639 4.78015 4.79941 3.43161 6.81765C2.08306 8.83589 1.36328 11.2087 1.36328 13.636C1.36328 15.6651 1.85419 17.5783 2.72692 19.2637L1.36328 25.9087L8.00828 24.5451C9.69373 25.4178 11.6083 25.9087 13.636 25.9087Z" stroke="white" stroke-width="2.04545" stroke-linecap="round" stroke-linejoin="round" fill="none" transform="translate(1.5, 1.5) scale(0.9)"',
@@ -108,6 +111,13 @@ export const settingsSVGPath = `<path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32
  * Assumes `viewBox="0 0 30 26"`.
  */
 export const heartSVGPath = paths.heart;
+
+/**
+ * The path for the custom heart filled icon (green).
+ *
+ * Assumes `viewBox="0 0 30 26"`.
+ */
+export const heartFillSVGPath = paths["heart-fill"];
 
 /**
  * The path for the custom comment bubble icon.

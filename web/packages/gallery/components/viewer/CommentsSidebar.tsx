@@ -1167,9 +1167,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                     fontWeight: 600,
                                                     fontSize: 14,
                                                     lineHeight: "20px",
-                                                    ...theme.applyStyles("dark", {
-                                                        color: "#fff",
-                                                    }),
+                                                    ...theme.applyStyles(
+                                                        "dark",
+                                                        { color: "#fff" },
+                                                    ),
                                                 })}
                                             >
                                                 {collection.name}
@@ -1341,7 +1342,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     paddingLeft: "10px",
                                     paddingRight: "24px",
                                     ...theme.applyStyles("dark", {
-                                        borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
+                                        borderLeft:
+                                            "3px solid rgba(255, 255, 255, 0.3)",
                                     }),
                                 })}
                             >
@@ -1540,10 +1542,7 @@ const CollectionBadge = styled(Box)(({ theme }) => ({
     fontWeight: 600,
     lineHeight: 1,
     minWidth: 14,
-    ...theme.applyStyles("dark", {
-        backgroundColor: "#fff",
-        color: "#000",
-    }),
+    ...theme.applyStyles("dark", { backgroundColor: "#fff", color: "#000" }),
 }));
 
 const CollectionDropdownMenu = styled(Box)(({ theme }) => ({
@@ -1617,26 +1616,20 @@ const UserName = styled(Typography)(({ theme }) => ({
     fontWeight: 600,
     color: "#000",
     fontSize: 14,
-    ...theme.applyStyles("dark", {
-        color: "#fff",
-    }),
+    ...theme.applyStyles("dark", { color: "#fff" }),
 }));
 
 const Separator = styled(Typography)(({ theme }) => ({
     color: "#666",
     fontSize: 12,
     marginLeft: -4,
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.7)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
 const Timestamp = styled(Typography)(({ theme }) => ({
     color: "#666",
     fontSize: 12,
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.7)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
 const OwnTimestamp = styled(Typography)(({ theme }) => ({
@@ -1645,9 +1638,7 @@ const OwnTimestamp = styled(Typography)(({ theme }) => ({
     textAlign: "right",
     marginBottom: 4,
     paddingRight: 52,
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.7)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
 // Comment Bubbles
@@ -1678,31 +1669,29 @@ const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     borderRadius: isOwn ? "20px 6px 20px 20px" : "6px 20px 20px 20px",
     padding: "20px 40px 20px 20px",
     width: "fit-content",
-    ...(!isOwn &&
-        theme.applyStyles("dark", {
-            backgroundColor: "#363636",
-        })),
+    ...(!isOwn && theme.applyStyles("dark", { backgroundColor: "#363636" })),
 }));
 
-const CommentText = styled(Typography)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
-    color: isOwn ? "#fff" : "#000",
-    fontSize: 14,
-    whiteSpace: "pre-wrap",
-    ...(!isOwn &&
-        theme.applyStyles("dark", {
-            color: "#fff",
-        })),
-}));
+const CommentText = styled(Typography)<{ isOwn: boolean }>(
+    ({ isOwn, theme }) => ({
+        color: isOwn ? "#fff" : "#000",
+        fontSize: 14,
+        whiteSpace: "pre-wrap",
+        ...(!isOwn && theme.applyStyles("dark", { color: "#fff" })),
+    }),
+);
 
-const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
-    borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
-    paddingLeft: 10,
-    marginBottom: 16,
-    ...(!isOwn &&
-        theme.applyStyles("dark", {
-            borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
-        })),
-}));
+const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(
+    ({ isOwn, theme }) => ({
+        borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
+        paddingLeft: 10,
+        marginBottom: 16,
+        ...(!isOwn &&
+            theme.applyStyles("dark", {
+                borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
+            })),
+    }),
+);
 
 // Actions
 const ActionsContainer = styled(Box)(({ theme }) => ({

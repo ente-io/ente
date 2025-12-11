@@ -1,5 +1,12 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Button, Dialog, IconButton, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Dialog,
+    IconButton,
+    styled,
+    Typography,
+} from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import React from "react";
 
@@ -158,9 +165,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
             border: "1px solid rgba(255, 255, 255, 0.18)",
         }),
     },
-    "& .MuiBackdrop-root": {
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
+    "& .MuiBackdrop-root": { backgroundColor: "rgba(0, 0, 0, 0.5)" },
 }));
 
 const DialogWrapper = styled(Box)(() => ({
@@ -175,9 +180,7 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
     backgroundColor: "#FAFAFA",
     color: "#000",
     padding: 10,
-    "&:hover": {
-        backgroundColor: "#F0F0F0",
-    },
+    "&:hover": { backgroundColor: "#F0F0F0" },
     ...theme.applyStyles("dark", {
         backgroundColor: "rgba(255, 255, 255, 0.12)",
         color: "#fff",
@@ -214,9 +217,7 @@ const Title = styled(Typography)(({ theme }) => ({
     lineHeight: "28px",
     letterSpacing: "-0.48px",
     color: "#000",
-    ...theme.applyStyles("dark", {
-        color: "#fff",
-    }),
+    ...theme.applyStyles("dark", { color: "#fff" }),
 }));
 
 const Subtitle = styled(Typography)(({ theme }) => ({
@@ -225,9 +226,7 @@ const Subtitle = styled(Typography)(({ theme }) => ({
     lineHeight: "20px",
     color: "#666666",
     maxWidth: 295,
-    ...theme.applyStyles("dark", {
-        color: "rgba(255, 255, 255, 0.7)",
-    }),
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.7)" }),
 }));
 
 const ButtonsSection = styled(Box)(() => ({
@@ -251,16 +250,11 @@ const AnonymousButton = styled(Button)(({ theme }) => ({
     fontWeight: 500,
     textTransform: "none",
     color: "#000",
-    "&:hover": {
-        backgroundColor: "rgba(0, 0, 0, 0.08)",
-        border: "none",
-    },
+    "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.08)", border: "none" },
     ...theme.applyStyles("dark", {
         backgroundColor: "rgba(255, 255, 255, 0.08)",
         color: "#fff",
-        "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.12)",
-        },
+        "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.12)" },
     }),
 }));
 
@@ -277,7 +271,5 @@ const SignInButton = styled(Button)(() => ({
     fontWeight: 500,
     textTransform: "none",
     color: "#fff",
-    "&:hover": {
-        backgroundColor: "#07A820",
-    },
+    "&:hover": { backgroundColor: "#07A820" },
 }));

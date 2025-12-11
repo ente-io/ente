@@ -49,7 +49,7 @@ type GalleryBarAndListHeaderProps = Omit<
      */
     shouldHide: boolean;
     barCollectionSummaries: CollectionSummaries;
-    activeCollection: Collection;
+    activeCollection: Collection | undefined;
     setActiveCollectionID: (collectionID: number) => void;
     setFileListHeader: (header: FileListHeaderOrFooter) => void;
     saveGroups: SaveGroup[];
@@ -110,10 +110,8 @@ export const GalleryBarAndListHeader: React.FC<
         useModalVisibility();
     const { show: showCollectionCast, props: collectionCastVisibilityProps } =
         useModalVisibility();
-    const {
-        show: showCollectionFeed,
-        props: collectionFeedVisibilityProps,
-    } = useModalVisibility();
+    const { show: showCollectionFeed, props: collectionFeedVisibilityProps } =
+        useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -147,7 +145,7 @@ export const GalleryBarAndListHeader: React.FC<
 
         setFileListHeader({
             component:
-                mode != "people" ? (
+                mode != "people" && activeCollection ? (
                     <CollectionHeader
                         {...{
                             activeCollection,
@@ -178,6 +176,7 @@ export const GalleryBarAndListHeader: React.FC<
         shouldHide,
         mode,
         toShowCollectionSummaries,
+        activeCollection,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
@@ -224,29 +223,33 @@ export const GalleryBarAndListHeader: React.FC<
                 isInHiddenSection={mode == "hidden-albums"}
                 onRemotePull={onRemotePull}
             />
-            <CollectionShare
-                {...collectionShareVisibilityProps}
-                collectionSummary={
-                    toShowCollectionSummaries.get(activeCollectionID!)!
-                }
-                collection={activeCollection}
-                {...{
-                    user,
-                    emailByUserID,
-                    shareSuggestionEmails,
-                    setBlockingLoad,
-                    onRemotePull,
-                }}
-            />
-            <AlbumCastDialog
-                {...collectionCastVisibilityProps}
-                collection={activeCollection}
-            />
-            <FeedSidebar
-                {...collectionFeedVisibilityProps}
-                albumName={activeCollection?.name ?? ""}
-                files={files}
-            />
+            {activeCollection && (
+                <>
+                    <CollectionShare
+                        {...collectionShareVisibilityProps}
+                        collectionSummary={
+                            toShowCollectionSummaries.get(activeCollectionID!)!
+                        }
+                        collection={activeCollection}
+                        {...{
+                            user,
+                            emailByUserID,
+                            shareSuggestionEmails,
+                            setBlockingLoad,
+                            onRemotePull,
+                        }}
+                    />
+                    <AlbumCastDialog
+                        {...collectionCastVisibilityProps}
+                        collection={activeCollection}
+                    />
+                    <FeedSidebar
+                        {...collectionFeedVisibilityProps}
+                        albumName={activeCollection.name}
+                        files={files}
+                    />
+                </>
+            )}
         </>
     );
 };
