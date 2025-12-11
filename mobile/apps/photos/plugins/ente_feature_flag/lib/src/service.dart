@@ -93,6 +93,8 @@ class FlagService {
 
   bool get streamEnabledByDefault => internalUser;
 
+  bool get manualTagFileToPerson => internalUser && hasGrantedMLConsent;
+
   Future<void> tryRefreshFlags() async {
     try {
       await _fetch();
