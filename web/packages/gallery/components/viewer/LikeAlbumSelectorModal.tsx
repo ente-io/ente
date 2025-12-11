@@ -7,6 +7,29 @@ import React from "react";
 // Icons
 // =============================================================================
 
+const HeartFilledIcon: React.FC<{ size?: number; color?: string }> = ({
+    size = 18,
+    color = "#08C225",
+}) => (
+    <svg
+        width={size}
+        height={(size * 15) / 18}
+        viewBox="0 0 18 15"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ display: "block" }}
+    >
+        <path
+            d="M7.40825 13.8538C5.15122 12.1661 0.679688 8.30753 0.679688 4.83524C0.679688 2.54019 2.3639 0.679688 4.67969 0.679688C5.87969 0.679688 7.07969 1.07969 8.67969 2.67969C10.2797 1.07969 11.4797 0.679688 12.6797 0.679688C14.9954 0.679688 16.6797 2.54019 16.6797 4.83524C16.6797 8.30753 12.2082 12.1661 9.95113 13.8538C9.19161 14.4218 8.16777 14.4218 7.40825 13.8538Z"
+            fill={color}
+            stroke={color}
+            strokeWidth="1.36"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        />
+    </svg>
+);
+
 const HeartOutlineIcon: React.FC<{ size?: number; color?: string }> = ({
     size = 18,
     color = "#08C225",
@@ -108,9 +131,15 @@ export interface LikeAlbumSelectorModalProps extends ModalVisibilityProps {
      */
     albums: Album[];
     /**
-     * Called when user selects an album to like the photo in.
+     * Set of album IDs where the photo is currently liked.
      */
-    onSelectAlbum: (albumId: number) => void;
+    likedAlbumIDs: Set<number>;
+    /**
+     * Called when user clicks on an album to toggle like status.
+     * @param albumId The album ID
+     * @param isCurrentlyLiked Whether the album is currently liked
+     */
+    onToggleAlbum: (albumId: number, isCurrentlyLiked: boolean) => void;
     /**
      * Called when user clicks "Like all" to like in all albums.
      */
@@ -126,9 +155,13 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
     open,
     onClose,
     albums,
-    onSelectAlbum,
+    likedAlbumIDs,
+    onToggleAlbum,
     onLikeAll,
 }) => {
+    const likedCount = likedAlbumIDs.size;
+    const allLiked = likedCount === albums.length && albums.length > 0;
+
     return (
         <StyledDialog open={open} onClose={onClose}>
             <DialogWrapper>
@@ -149,7 +182,14 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
                     <AlbumsSection>
                         <AlbumsHeader>
                             <AlbumsCount>{albums.length} Albums</AlbumsCount>
-                            <LikeAllButton onClick={onLikeAll}>
+                            <LikeAllButton
+                                onClick={!allLiked ? onLikeAll : undefined}
+                                sx={{
+                                    opacity: !allLiked ? 1 : 0.5,
+                                    cursor: !allLiked ? "pointer" : "default",
+                                    pointerEvents: !allLiked ? "auto" : "none",
+                                }}
+                            >
                                 <Typography
                                     sx={(theme) => ({
                                         fontWeight: 500,
@@ -162,24 +202,40 @@ export const LikeAlbumSelectorModal: React.FC<LikeAlbumSelectorModalProps> = ({
                                 >
                                     Like all
                                 </Typography>
-                                <HeartOutlineIcon
-                                    size={16}
-                                    color="var(--mui-palette-text-base)"
-                                />
+                                {allLiked ? (
+                                    <HeartFilledIcon
+                                        size={16}
+                                        color="var(--mui-palette-text-base)"
+                                    />
+                                ) : (
+                                    <HeartOutlineIcon
+                                        size={16}
+                                        color="var(--mui-palette-text-base)"
+                                    />
+                                )}
                             </LikeAllButton>
                         </AlbumsHeader>
 
                         <AlbumsList>
-                            {albums.map((album) => (
-                                <AlbumItem key={album.id}>
-                                    <AlbumName>{album.name}</AlbumName>
-                                    <HeartButton
-                                        onClick={() => onSelectAlbum(album.id)}
-                                    >
-                                        <HeartOutlineIcon />
-                                    </HeartButton>
-                                </AlbumItem>
-                            ))}
+                            {albums.map((album) => {
+                                const isLiked = likedAlbumIDs.has(album.id);
+                                return (
+                                    <AlbumItem key={album.id}>
+                                        <AlbumName>{album.name}</AlbumName>
+                                        <HeartButton
+                                            onClick={() =>
+                                                onToggleAlbum(album.id, isLiked)
+                                            }
+                                        >
+                                            {isLiked ? (
+                                                <HeartFilledIcon />
+                                            ) : (
+                                                <HeartOutlineIcon />
+                                            )}
+                                        </HeartButton>
+                                    </AlbumItem>
+                                );
+                            })}
                         </AlbumsList>
                     </AlbumsSection>
                 </ContentContainer>
