@@ -1,11 +1,9 @@
 import "package:adaptive_theme/adaptive_theme.dart";
-import "package:ente_ui/components/captioned_text_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme_data.dart";
+import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/drawer/common_settings.dart";
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({super.key});
@@ -23,7 +21,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     AdaptiveTheme.getThemeMode().then(
       (value) {
         currentThemeMode = value ?? AdaptiveThemeMode.system;
-        debugPrint('theme value $value');
+        debugPrint("theme value $value");
         if (mounted) {
           setState(() => {});
         }
@@ -41,22 +39,16 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     return ExpandableMenuItemWidget(
       title: context.l10n.theme,
       selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Theme.of(context).brightness == Brightness.light
-          ? Icons.light_mode_outlined
-          : Icons.dark_mode_outlined,
+      leadingIcon: HugeIcons.strokeRoundedSun01,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.light),
-        sectionOptionSpacing,
-        _menuItem(context, AdaptiveThemeMode.dark),
-        sectionOptionSpacing,
         _menuItem(context, AdaptiveThemeMode.system),
-        sectionOptionSpacing,
+        _menuItem(context, AdaptiveThemeMode.dark),
+        _menuItem(context, AdaptiveThemeMode.light),
       ],
     );
   }
@@ -73,14 +65,11 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
-    return MenuItemWidget(
-      captionedTextWidget: CaptionedTextWidget(
-        title: _name(context, themeMode),
-        textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
-      ),
-      isExpandable: false,
+    final colorScheme = getEnteColorScheme(context);
+    return ExpandableChildItem(
+      title: _name(context, themeMode),
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
-      trailingExtraMargin: 4,
+      trailingIconColor: colorScheme.primary500,
       onTap: () async {
         AdaptiveTheme.of(context).setThemeMode(themeMode);
         currentThemeMode = themeMode;
