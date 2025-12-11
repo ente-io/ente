@@ -185,7 +185,10 @@ func (c *UserController) createAndInsertSRPSession(
 	srpVerifier string,
 	srpA string,
 ) (*string, *uuid.UUID, error) {
-	srpABytes := convertStringToBytes(srpA)
+	srpABytes, err := convertStringToBytes(srpA)
+	if err != nil {
+		return nil, nil, err
+	}
 	if len(srpABytes) != 512 {
 		return nil, nil, ente.NewBadRequestWithMessage("Invalid length for srpA")
 	}
@@ -204,7 +207,11 @@ func (c *UserController) createAndInsertSRPSession(
 
 	serverSecret := srp.GenKey()
 	srpParams := srp.GetParams(Srp4096Params)
-	srpServer := srp.NewServer(srpParams, convertStringToBytes(srpVerifier), serverSecret)
+	srpVerifierBytes, err := convertStringToBytes(srpVerifier)
+	if err != nil {
+		return nil, nil, err
+	}
+	srpServer := srp.NewServer(srpParams, srpVerifierBytes, serverSecret)
 
 	if srpServer == nil {
 		return nil, nil, stacktrace.NewError("server is nil")
@@ -236,7 +243,10 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 	sessionID uuid.UUID,
 	srpM1 string,
 ) (*string, error) {
-	srpM1Bytes := convertStringToBytes(srpM1)
+	srpM1Bytes, err := convertStringToBytes(srpM1)
+	if err != nil {
+		return nil, err
+	}
 	if len(srpM1Bytes) != 32 {
 		return nil, ente.NewBadRequestWithMessage(fmt.Sprintf("srpM1 size is %d, expected 32", len(srpM1Bytes)))
 	}
@@ -273,12 +283,23 @@ func (c *UserController) verifySRPSession(ctx context.Context,
 	}
 
 	srpParams := srp.GetParams(Srp4096Params)
-	srpServer := srp.NewServer(srpParams, convertStringToBytes(srpVerifier), convertStringToBytes(srpSession.ServerKey))
+	srpVerifierBytes, err := convertStringToBytes(srpVerifier)
+	if err != nil {
+		return nil, err
+	}
+	serverKeyBytes, err := convertStringToBytes(srpSession.ServerKey)
+	if err != nil {
+		return nil, err
+	}
+	srpServer := srp.NewServer(srpParams, srpVerifierBytes, serverKeyBytes)
 
 	if srpServer == nil {
 		return nil, stacktrace.NewError("server is nil")
 	}
-	srpABytes := convertStringToBytes(srpSession.SRP_A)
+	srpABytes, err := convertStringToBytes(srpSession.SRP_A)
+	if err != nil {
+		return nil, err
+	}
 
 	srpServer.SetA(srpABytes)
 
@@ -348,7 +369,10 @@ func fSrpAttributes(email string, hashKey []byte) (*ente.GetSRPAttributesRespons
 }
 
 func (c *UserController) fCreateSession(srpUserID string, srpA string) (*ente.CreateSRPSessionResponse, error) {
-	srpABytes := convertStringToBytes(srpA)
+	srpABytes, err := convertStringToBytes(srpA)
+	if err != nil {
+		return nil, err
+	}
 	if len(srpABytes) != 512 {
 		return nil, ente.NewBadRequestWithMessage("Invalid length for srpA")
 	}
@@ -361,7 +385,7 @@ func (c *UserController) fCreateSession(srpUserID string, srpA string) (*ente.Cr
 
 	// Generate realistic fake SRP data
 	serverSecret := make([]byte, 64) // Same size as real srp.GenKey()
-	_, err := rand.Read(serverSecret)
+	_, err = rand.Read(serverSecret)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "failed to generate server secret")
 	}
