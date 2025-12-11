@@ -260,6 +260,10 @@ export const sidebar = [
                         link: "/photos/faq/metadata-and-editing",
                     },
                     {
+                        text: "Migration",
+                        link: "/photos/faq/migration",
+                    },
+                    {
                         text: "Search and Discovery",
                         link: "/photos/faq/search-and-discovery",
                     },
