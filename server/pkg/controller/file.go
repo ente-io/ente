@@ -1055,6 +1055,9 @@ func (c *FileController) getObjectURL(s3Client *s3.S3, dc string, bucket *string
 
 // GetMultipartUploadURLs return collections of url to upload the parts of the files
 func (c *FileController) GetMultipartUploadURLs(ctx context.Context, userID int64, count int, app ente.App) (ente.MultipartUploadURLs, error) {
+	if count <= 0 || count > maxMultipartPartCount {
+		return ente.MultipartUploadURLs{}, stacktrace.Propagate(ente.ErrBadRequest, "multipart upload cannot exceed %d parts", maxMultipartPartCount)
+	}
 	err := c.UsageCtrl.CanUploadFile(ctx, userID, nil, app)
 	if err != nil {
 		return ente.MultipartUploadURLs{}, stacktrace.Propagate(err, "")
