@@ -1,4 +1,7 @@
+import "dart:async";
+
 import 'package:collection/collection.dart';
+import "package:ente_feature_flag/ente_feature_flag.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -11,6 +14,66 @@ import 'package:photos/models/upload_strategy.dart';
 import "package:photos/services/sync/import/model.dart";
 import 'package:sqflite/sqlite_api.dart';
 import 'package:tuple/tuple.dart';
+
+/// In-memory cache for device folder selection states to avoid repeated DB lookups.
+class DeviceFolderSelectionCache {
+  final FlagService _flagService;
+
+  DeviceFolderSelectionCache(this._flagService);
+
+  final Set<String> _selectedPathIds = <String>{};
+  bool _initialized = false;
+  Completer<void>? _initCompleter;
+
+  Future<void> _ensureInitialized() async {
+    if (!_flagService.enableBackupFolderSync) return;
+    if (_initialized) return;
+    if (_initCompleter != null) {
+      return _initCompleter!.future;
+    }
+    _initCompleter = Completer<void>();
+    try {
+      final deviceCollections = await FilesDB.instance.getDeviceCollections();
+      _selectedPathIds.clear();
+      for (final dc in deviceCollections) {
+        if (dc.shouldBackup) {
+          _selectedPathIds.add(dc.id);
+        }
+      }
+      _initialized = true;
+      _initCompleter!.complete();
+    } catch (e) {
+      _initCompleter!.completeError(e);
+      _initCompleter = null;
+      rethrow;
+    }
+  }
+
+  /// Returns true if the path is selected for backup.
+  Future<bool> isSelected(String pathId) async {
+    if (!_flagService.enableBackupFolderSync) return false;
+    await _ensureInitialized();
+    return _selectedPathIds.contains(pathId);
+  }
+
+  Future<void> update(Map<String, bool> updates) async {
+    if (!_flagService.enableBackupFolderSync) return;
+    await _ensureInitialized();
+    for (final entry in updates.entries) {
+      if (entry.value) {
+        _selectedPathIds.add(entry.key);
+      } else {
+        _selectedPathIds.remove(entry.key);
+      }
+    }
+  }
+
+  void clear() {
+    _initialized = false;
+    _initCompleter = null;
+    _selectedPathIds.clear();
+  }
+}
 
 extension DeviceFiles on FilesDB {
   static final Logger _logger = Logger("DeviceFilesDB");

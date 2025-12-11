@@ -41,6 +41,7 @@ class FilesDB with SqlDbBase {
   static const columnLocalID = 'local_id';
   static const columnTitle = 'title';
   static const columnDeviceFolder = 'device_folder';
+  static const columnQueueSource = 'queue_source';
   static const columnLatitude = 'latitude';
   static const columnLongitude = 'longitude';
   static const columnFileType = 'file_type';
@@ -90,6 +91,7 @@ class FilesDB with SqlDbBase {
     ...updateIndexes(),
     ...createEntityDataTable(),
     ...addAddedTime(),
+    ...addQueueSourceColumn(),
   ];
 
   static const List<String> _columnNames = [
@@ -100,6 +102,7 @@ class FilesDB with SqlDbBase {
     columnCollectionID,
     columnTitle,
     columnDeviceFolder,
+    columnQueueSource,
     columnLatitude,
     columnLongitude,
     columnFileType,
@@ -412,6 +415,14 @@ class FilesDB with SqlDbBase {
       ''',
       '''
         CREATE INDEX IF NOT EXISTS added_time_index ON $filesTable($columnAddedTime);
+      '''
+    ];
+  }
+
+  static List<String> addQueueSourceColumn() {
+    return [
+      '''
+        ALTER TABLE $filesTable ADD COLUMN $columnQueueSource TEXT;
       '''
     ];
   }
@@ -1087,6 +1098,37 @@ class FilesDB with SqlDbBase {
     );
   }
 
+  // Sets the collectionID and queueSource for the files with given LocalIDs if
+  // the corresponding file entries are not already mapped to some other
+  // collection.
+  Future<void> setCollectionIDAndQueueSourceForUnMappedLocalFiles(
+    int collectionID,
+    Set<String> localIDs,
+    String queueSource,
+  ) async {
+    if (localIDs.isEmpty) {
+      return;
+    }
+    final db = await instance.sqliteAsyncDB;
+    final idPlaceholders = List.filled(localIDs.length, '?').join(',');
+
+    final params = <Object?>[
+      collectionID,
+      queueSource,
+      ...localIDs,
+    ];
+
+    await db.execute(
+      '''
+      UPDATE $filesTable
+      SET $columnCollectionID = ?, $columnQueueSource = ?
+      WHERE $columnLocalID IN ($idPlaceholders) AND ($columnCollectionID IS NULL OR
+      $columnCollectionID = -1);
+    ''',
+      params,
+    );
+  }
+
   Future<void> markFilesForReUpload(
     int ownerID,
     String localID,
@@ -1435,6 +1477,91 @@ class FilesDB with SqlDbBase {
     );
     return convertToFiles(results);
   }
+
+  /// Cleanup a file entry from the database by localID and collectionID.
+  /// This is used when a file should be removed from pending uploads (e.g., folder
+  /// deselected, file too old for only-new backup preference).
+  /// Cleans up pending upload entries from a collection by localIDs.
+  ///
+  /// For each localID, if another entry already exists with null collectionID
+  /// and null uploadedFileID, the entry is deleted to avoid uniqueness
+  /// conflicts. Otherwise, the entry's collectionID and queueSource are set
+  /// to null, allowing it to be re-queued on next sync.
+  ///
+  /// Returns a record with counts of (deleted, updated) entries.
+  Future<({int deleted, int updated})> cleanupPendingUploadsFromCollection(
+    List<String> localIDs,
+    int collectionId,
+  ) async {
+    if (localIDs.isEmpty) {
+      return (deleted: 0, updated: 0);
+    }
+
+    try {
+      final db = await instance.sqliteAsyncDB;
+      final inParam = localIDs.map((id) => "'$id'").join(',');
+
+      // Find localIDs that already have entries with null collectionID
+      final existingRows = await db.getAll(
+        '''
+        SELECT $columnLocalID FROM $filesTable
+        WHERE $columnLocalID IN ($inParam)
+          AND ($columnCollectionID IS NULL OR $columnCollectionID = -1)
+          AND $columnUploadedFileID IS NULL;
+        ''',
+      );
+      final localIDsWithNullCollection = {
+        for (final row in existingRows) row[columnLocalID] as String,
+      };
+
+      final localIDsToDelete = localIDs
+          .where((id) => localIDsWithNullCollection.contains(id))
+          .toList();
+      final localIDsToUpdate = localIDs
+          .where((id) => !localIDsWithNullCollection.contains(id))
+          .toList();
+
+      // Delete entries that would conflict
+      if (localIDsToDelete.isNotEmpty) {
+        final deleteInParam = localIDsToDelete.map((id) => "'$id'").join(',');
+        await db.execute(
+          '''
+          DELETE FROM $filesTable
+          WHERE $columnLocalID IN ($deleteInParam)
+          AND $columnCollectionID = ?
+          AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+          ''',
+          [collectionId],
+        );
+      }
+
+      // Update remaining entries
+      if (localIDsToUpdate.isNotEmpty) {
+        final updateInParam = localIDsToUpdate.map((id) => "'$id'").join(',');
+        await db.execute(
+          '''
+          UPDATE $filesTable
+          SET $columnCollectionID = NULL, $columnQueueSource = NULL
+          WHERE $columnLocalID IN ($updateInParam)
+          AND $columnCollectionID = ?
+          AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+          ''',
+          [collectionId],
+        );
+      }
+
+      return (deleted: localIDsToDelete.length, updated: localIDsToUpdate.length);
+    } catch (e, s) {
+      _logger.warning(
+        "Failed to cleanup pending uploads for collectionID=$collectionId, localIDs=$localIDs",
+        e,
+        s,
+      );
+      return (deleted: 0, updated: 0);
+    }
+  }
+
+
 
   Future<Set<String>> getLocalIDsPresentInEntries(
     List<EnteFile> existingFiles,
@@ -1879,6 +2006,7 @@ class FilesDB with SqlDbBase {
       file.collectionID ?? -1,
       file.title,
       file.deviceFolder,
+      file.queueSource,
       latitude,
       longitude,
       getInt(file.fileType),
@@ -1938,6 +2066,7 @@ class FilesDB with SqlDbBase {
         row[columnCollectionID] == -1 ? null : row[columnCollectionID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
+    file.queueSource = row[columnQueueSource];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
       file.location = Location(
         latitude: row[columnLatitude],

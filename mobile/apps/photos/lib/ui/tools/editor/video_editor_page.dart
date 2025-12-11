@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import 'package:native_video_editor/native_video_editor.dart';
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
@@ -570,6 +571,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         newFile.creationTime = widget.file.creationTime;
         newFile.collectionID = widget.file.collectionID;
         newFile.location = widget.file.location;
+        newFile.queueSource = manualQueueSource;
         if (!newFile.hasLocation && widget.file.localID != null) {
           final assetEntity = await widget.file.getAsset;
           if (assetEntity != null) {

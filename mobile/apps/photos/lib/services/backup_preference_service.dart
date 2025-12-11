@@ -85,34 +85,23 @@ class BackupPreferenceService {
       sevenDaysAgo.month,
       sevenDaysAgo.day,
     ).microsecondsSinceEpoch;
-    if (threshold <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $threshold");
-      return;
-    }
     _logger.info(
       "Setting only-new backup threshold to $threshold (7 days ago at 12 AM)",
     );
-    await _prefs.setInt(_keyOnlyNewSinceEpoch, threshold);
+    await setOnlyNewSinceEpoch(threshold);
     await _ensureDefaultFolderSelection();
   }
 
   Future<void> setOnlyNewSinceNow() async {
     final now = DateTime.now().microsecondsSinceEpoch;
-    if (now <= 0) {
-      _logger.severe("Invalid timestamp for only-new backup: $now");
-      return;
-    }
     _logger.info("Setting only-new backup threshold to $now");
-    await _prefs.setInt(_keyOnlyNewSinceEpoch, now);
+    await setOnlyNewSinceEpoch(now);
   }
 
   Future<void> clearOnlyNewSinceEpoch() async {
     await _prefs.remove(_keyOnlyNewSinceEpoch);
   }
 
-  /// Auto-selects all device folders when the user hasn't made any manual
-  /// selection yet. This is used in onboarding flows to quickly opt into
-  /// backing up everything visible to the app.
   Future<void> _ensureDefaultFolderSelection() async {
     if (hasManualFolderSelection || hasSelectedAnyBackupFolder) {
       return;

@@ -5,32 +5,34 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart' show manualQueueSource;
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
-import "package:photos/events/diff_sync_complete_event.dart";
+import 'package:photos/events/diff_sync_complete_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import "package:photos/main.dart" show isProcessBg;
+import 'package:photos/main.dart' show isProcessBg;
 import 'package:photos/models/device_collection.dart';
-import "package:photos/models/file/extensions/file_props.dart";
+import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/upload_strategy.dart';
-import "package:photos/service_locator.dart";
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
-import "package:photos/services/language_service.dart";
+import 'package:photos/services/language_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
-import "package:photos/services/notification_service.dart";
+import 'package:photos/services/notification_service.dart';
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -412,10 +414,18 @@ class RemoteSyncService {
       }
 
       moreFilesMarkedForBackup = true;
-      await _db.setCollectionIDForUnMappedLocalFiles(
-        collectionID,
-        localIDsToSync,
-      );
+      if (flagService.enableBackupFolderSync) {
+        await _db.setCollectionIDAndQueueSourceForUnMappedLocalFiles(
+          collectionID,
+          localIDsToSync,
+          deviceCollection.id,
+        );
+      } else {
+        await _db.setCollectionIDForUnMappedLocalFiles(
+          collectionID,
+          localIDsToSync,
+        );
+      }
 
       // mark IDs as already synced if corresponding entry is present in
       // the collection. This can happen when a user has marked a folder
@@ -451,6 +461,7 @@ class RemoteSyncService {
             existingFile.collectionID = collectionID;
             existingFile.uploadedFileID = null;
             existingFile.ownerID = null;
+            existingFile.queueSource = deviceCollection.id;
             newFilesToInsert.add(existingFile);
             fileFoundForLocalIDs.add(localID);
           }
@@ -478,6 +489,7 @@ class RemoteSyncService {
     final Set<int> oldCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     await _db.updateDevicePathSyncStatus(syncStatusUpdate);
+    await deviceFolderSelectionCache.update(syncStatusUpdate);
     final Set<int> newCollectionIDsForAutoSync =
         await _db.getDeviceSyncCollectionIDs();
     SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
@@ -493,50 +505,102 @@ class RemoteSyncService {
     Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
+  /// Removes auto-queued files pending upload for the given collections.
+  ///
+  /// When enableBackupFolderSync is ON:
+  /// For each collection:
+  /// 1) Get list of all files not uploaded yet (pending uploads).
+  /// 2) Skip files that were manually queued or have no queueSource
+  ///    (preserves user intent for manual uploads).
+  /// 3) Clean up remaining auto-queued files via DB (handles uniqueness conflicts).
+  /// 4) Clean up any associated multipart upload tracks.
+  ///
+  /// When enableBackupFolderSync is OFF (legacy behavior):
+  /// For each collection:
+  /// 1) Get list of all files not uploaded yet (pending uploads).
+  /// 2) Delete files whose localIDs are also present in other collections.
+  /// 3) For remaining files, set the collectionID as null.
+  ///
+  /// If the folder is re-enabled for backup, files will be re-queued during
+  /// the next sync cycle.
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
-    /*
-      For each collection, perform following action
-      1) Get List of all files not uploaded yet
-      2) Delete files who localIDs is also present in other collections.
-      3) For Remaining files, set the collectionID as -1
-     */
     _logger.info("Removing files for collections $collectionIDs");
+
     for (int collectionID in collectionIDs) {
       final List<EnteFile> pendingUploads =
           await _db.getPendingUploadForCollection(collectionID);
       if (pendingUploads.isEmpty) {
         continue;
-      } else {
+      }
+
+      if (flagService.enableBackupFolderSync) {
+        // New behavior: use queueSource to filter, DB handles cleanup
+        final List<String> localIDsToCleanup = [];
+
+        for (EnteFile pendingUpload in pendingUploads) {
+          if (pendingUpload.queueSource == null ||
+              pendingUpload.queueSource == manualQueueSource) {
+            continue;
+          }
+          if (pendingUpload.localID != null) {
+            localIDsToCleanup.add(pendingUpload.localID!);
+          }
+        }
+
+        if (localIDsToCleanup.isEmpty) {
+          continue;
+        }
+
+        // DB method handles uniqueness conflicts internally
+        final result = await _db.cleanupPendingUploadsFromCollection(
+          localIDsToCleanup,
+          collectionID,
+        );
+
+        for (final localID in localIDsToCleanup) {
+          await UploadLocksDB.instance.deleteMultipartTrack(localID);
+        }
+
         _logger.info(
-          "RemovingFiles $collectionIDs: pendingUploads "
-          "${pendingUploads.length}",
+          "RemovingFiles $collectionID: deleted ${result.deleted}, "
+          "updated ${result.updated}",
+        );
+      } else {
+        // Legacy behavior: delete duplicates, nullify collectionID for rest
+        _logger.info(
+          "RemovingFiles $collectionID: pendingUploads ${pendingUploads.length}",
+        );
+
+        final Set<String> localIDsInOtherFileEntries =
+            await _db.getLocalIDsPresentInEntries(
+          pendingUploads,
+          collectionID,
+        );
+        _logger.info(
+          "RemovingFiles $collectionID: filesInOtherCollection "
+          "${localIDsInOtherFileEntries.length}",
+        );
+
+        final List<EnteFile> entriesToUpdate = [];
+        final List<int> entriesToDelete = [];
+
+        for (EnteFile pendingUpload in pendingUploads) {
+          if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
+            entriesToDelete.add(pendingUpload.generatedID!);
+          } else {
+            pendingUpload.collectionID = null;
+            entriesToUpdate.add(pendingUpload);
+          }
+        }
+
+        await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
+        await _db.insertMultiple(entriesToUpdate);
+
+        _logger.info(
+          "RemovingFiles $collectionID: deleted ${entriesToDelete.length} "
+          "and updated ${entriesToUpdate.length}",
         );
       }
-      final Set<String> localIDsInOtherFileEntries =
-          await _db.getLocalIDsPresentInEntries(
-        pendingUploads,
-        collectionID,
-      );
-      _logger.info(
-        "RemovingFiles $collectionIDs: filesInOtherCollection "
-        "${localIDsInOtherFileEntries.length}",
-      );
-      final List<EnteFile> entriesToUpdate = [];
-      final List<int> entriesToDelete = [];
-      for (EnteFile pendingUpload in pendingUploads) {
-        if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
-          entriesToDelete.add(pendingUpload.generatedID!);
-        } else {
-          pendingUpload.collectionID = null;
-          entriesToUpdate.add(pendingUpload);
-        }
-      }
-      await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
-      await _db.insertMultiple(entriesToUpdate);
-      _logger.info(
-        "RemovingFiles $collectionIDs: deleted "
-        "${entriesToDelete.length} and updated ${entriesToUpdate.length}",
-      );
     }
   }
 
@@ -595,6 +659,7 @@ class RemoteSyncService {
     final List<EnteFile> filesToBeUploaded = [];
     int ignoredForUpload = 0;
     int skippedVideos = 0;
+
     final whitelistedIDs =
         (_prefs.getStringList(_ignoreBackUpSettingsForIDs_) ?? <String>[])
             .toSet();
@@ -635,6 +700,7 @@ class RemoteSyncService {
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
       );
+
       await _uploader.verifyMediaLocationAccess();
       await _uploader.checkNetworkForUpload();
       await _uploader.fetchUploadURLs(toBeUploaded);
@@ -654,7 +720,12 @@ class RemoteSyncService {
               file.deviceFolder ?? 'Unknown Folder',
             ))
                 .id;
-        _uploadFile(file, collectionID, futures);
+        // Files queued from _uploadFiles are from background auto-sync
+        _uploadFile(
+          file,
+          collectionID,
+          futures,
+        );
       } catch (_) {}
     }
 
@@ -704,11 +775,21 @@ class RemoteSyncService {
       // Do nothing
     }
 
-    return _completedUploads > 0;
+    final hasUploaded = _completedUploads > 0;
+    return hasUploaded;
   }
 
-  void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
-    final future = _uploader.upload(file, collectionID).then((uploadedFile) {
+  void _uploadFile(
+    EnteFile file,
+    int collectionID,
+    List<Future> futures,
+  ) {
+    final future = _uploader
+        .upload(
+      file,
+      collectionID,
+    )
+        .then((uploadedFile) {
       return _onFileUploaded(uploadedFile);
     }).onError((error, stackTrace) {
       return _onFileUploadError(error, stackTrace, file);
@@ -752,6 +833,18 @@ class RemoteSyncService {
     EnteFile file,
   ) {
     if (error == null) {
+      return;
+    }
+    if (error is BackupFolderDeselectedError) {
+      return;
+    }
+    if (error is BackupTooOldForPreferenceError) {
+      return;
+    }
+    if (error is SilentlyCancelUploadsError) {
+      return;
+    }
+    if (error is UserCancelledUploadError) {
       return;
     }
     if (error is InvalidFileError) {

@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/cupertino.dart';
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -146,6 +147,7 @@ extension CollectionFileActions on CollectionActions {
           } else {
             for (final file in filesPendingUpload) {
               file.collectionID = collection.id;
+              file.queueSource = manualQueueSource;
             }
             // filesPendingUpload might be getting ignored during auto-upload
             // because the user deleted these files from ente in the past.
@@ -268,6 +270,7 @@ extension CollectionFileActions on CollectionActions {
         } else {
           for (final file in filesPendingUpload) {
             file.collectionID = collectionID;
+            file.queueSource = manualQueueSource;
           }
           // filesPendingUpload might be getting ignored during auto-upload
           // because the user deleted these files from ente in the past.

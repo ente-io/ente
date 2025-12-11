@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:logging/logging.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -130,6 +131,7 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
                   widget.file.collectionID = (await CollectionsService.instance
                           .getUncategorizedCollection())
                       .id;
+                  widget.file.queueSource = manualQueueSource;
                   await FilesDB.instance.insert(widget.file);
                 }
                 await RemoteSyncService.instance

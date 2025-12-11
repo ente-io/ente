@@ -10,6 +10,7 @@ import "package:flutter_svg/svg.dart";
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
@@ -97,6 +98,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
+      newFile.queueSource = manualQueueSource;
       if (!newFile.hasLocation && widget.originalFile.localID != null) {
         final assetEntity = await widget.originalFile.getAsset;
         if (assetEntity != null) {

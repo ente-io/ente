@@ -233,6 +233,7 @@ class Configuration {
     // Clear all service caches
     await SimilarImagesService.instance.clearCache();
     await IgnoredFilesService.instance.reset();
+    deviceFolderSelectionCache.clear();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
 
     // Clear additional caches (safe to call even if not initialized)
