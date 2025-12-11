@@ -190,13 +190,12 @@ class AlbumRowItemWidget extends StatelessWidget {
                         ),
                         if (!isOwner)
                           Align(
-                            alignment: Alignment.bottomRight,
+                            alignment: Alignment.topLeft,
                             child: Hero(
                               tag: tagPrefix + "_owner_other",
                               transitionOnUserGestures: true,
                               child: Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 4, bottom: 4),
+                                padding: const EdgeInsets.only(left: 4, top: 4),
                                 child: UserAvatarWidget(
                                   c.owner,
                                   thumbnailView: true,
