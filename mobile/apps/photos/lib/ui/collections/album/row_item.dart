@@ -104,6 +104,9 @@ class AlbumRowItemWidget extends StatelessWidget {
                               final bool isSelected =
                                   selectedAlbums?.isAlbumSelected(c) ?? false;
                               final String heroTag = tagPrefix + thumbnail.tag;
+                              // Show pin icon for owner's pinned albums OR sharee's pinned albums
+                              final bool showPin =
+                                  isOwner ? c.isPinned : c.hasShareePinned();
                               final thumbnailWidget = ThumbnailWidget(
                                 thumbnail,
                                 shouldShowArchiveStatus: isOwner
@@ -111,7 +114,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                                     : c.hasShareeArchived(),
                                 showFavForAlbumOnly: true,
                                 shouldShowSyncStatus: false,
-                                shouldShowPinIcon: isOwner && c.isPinned,
+                                shouldShowPinIcon: showPin,
                                 key: Key(heroTag),
                               );
                               return Hero(
