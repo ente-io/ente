@@ -765,12 +765,22 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     final double slotWidth = samplePainter.width;
     final double slotHeight = samplePainter.height;
     final String formattedCurrent = numberFormat.format(currentRounded);
-    final String fullText = captionType == _CaptionType.age
-        ? l10n.facesTimelineCaptionYearsOld(
-            name: widget.person.data.name,
-            count: currentRounded,
-          )
-        : l10n.facesTimelineCaptionYearsAgo(count: currentRounded);
+    String fullText;
+    if (captionType == _CaptionType.age) {
+      fullText = l10n.facesTimelineCaptionYearsOld(
+        name: widget.person.data.name,
+        count: currentRounded,
+      );
+    } else {
+      fullText = l10n.facesTimelineCaptionYearsAgo(count: currentRounded);
+      if (fullText.contains("#")) {
+        fullText = fullText.replaceAll("#", formattedCurrent);
+      }
+      final String name = widget.person.data.name;
+      if (name.isNotEmpty) {
+        fullText = "$name $fullText";
+      }
+    }
     final int insertionIndex = fullText.indexOf(formattedCurrent);
     final InlineSpan captionSpan;
     if (insertionIndex == -1) {
