@@ -9,14 +9,14 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/memory_lane_changed_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:photos/utils/standalone/task_queue.dart";
 
