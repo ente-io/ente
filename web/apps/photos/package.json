@@ -17,6 +17,7 @@
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-leaflet": "^5.0.0",
+        "react-leaflet-cluster": "^4.0.0",
         "react-select": "^5.10.2",
         "react-top-loading-bar": "^3.0.2",
         "react-virtualized-auto-sizer": "^1.0.26",

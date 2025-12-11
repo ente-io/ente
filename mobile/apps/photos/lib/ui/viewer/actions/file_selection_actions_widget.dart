@@ -40,6 +40,7 @@ import "package:photos/ui/tools/collage/collage_creator_page.dart";
 import "package:photos/ui/viewer/date/edit_date_sheet.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/location/update_location_data_widget.dart";
+import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/file_download_util.dart";
@@ -146,6 +147,8 @@ class _FileSelectionActionsWidgetState
         ownedAndPendingUploadFilesCount > 0 && split.ownedByOtherUsers.isEmpty;
 
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
+    final bool hasUploadedFileIDs =
+        widget.selectedFiles.files.any((file) => file.uploadedFileID != null);
     final showCollageOption = CollageCreatorPage.isValidCount(
           widget.selectedFiles.files.length,
         ) &&
@@ -256,6 +259,18 @@ class _FileSelectionActionsWidgetState
             ),
           );
         }
+      }
+
+      if (flagService.manualTagFileToPerson &&
+          widget.type != GalleryType.sharedPublicCollection) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.person_add_alt_1_outlined,
+            labelText: "(i) Add to person",
+            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
+            shouldShow: hasUploadedFileIDs,
+          ),
+        );
       }
 
       if (widget.type.showAddtoHiddenAlbum()) {
@@ -746,6 +761,68 @@ class _FileSelectionActionsWidgetState
     );
     if (result) {
       widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _onAddFilesToPerson() async {
+    final filesWithIds = widget.selectedFiles.files
+        .where((file) => file.uploadedFileID != null)
+        .toList();
+    if (filesWithIds.isEmpty) {
+      showShortToast(
+        context,
+        "Only uploaded files can be added to a person",
+      );
+      return;
+    }
+    final hasPersons =
+        await AddFilesToPersonPage.ensureNamedPersonsExist(context);
+    if (!mounted || !hasPersons) {
+      return;
+    }
+    final result = await routeToPage(
+      context,
+      AddFilesToPersonPage(files: filesWithIds),
+      forceCustomPageRoute: true,
+    );
+    if (result is! ManualPersonAssignmentResult) {
+      return;
+    }
+    final addedCount = result.addedFileIds.length;
+    if (addedCount > 0) {
+      final addedFiles = filesWithIds
+          .where(
+            (file) =>
+                file.uploadedFileID != null &&
+                result.addedFileIds.contains(file.uploadedFileID),
+          )
+          .toList();
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "manual-add-files-to-person",
+          person: result.person,
+          relevantFiles: addedFiles,
+        ),
+      );
+      final suffix = addedCount == 1 ? "file" : "files";
+      showToast(
+        context,
+        "Added $addedCount $suffix to ${result.person.data.name}",
+      );
+      widget.selectedFiles.clearAll();
+      if (mounted) {
+        setState(() => {});
+      }
+      return;
+    }
+    final alreadyCount = result.alreadyAssignedFileIds.length;
+    if (alreadyCount > 0) {
+      final suffix = alreadyCount == 1 ? "file is" : "files are";
+      showShortToast(
+        context,
+        "$alreadyCount $suffix already linked to ${result.person.data.name}",
+      );
     }
   }
 
