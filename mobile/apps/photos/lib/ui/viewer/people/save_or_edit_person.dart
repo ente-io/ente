@@ -653,11 +653,10 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     }
     final List<(PersonEntity, EnteFile, int)> personFileCounts = [];
     for (final person in persons) {
-      final clustersToFiles =
-          await SearchService.instance.getClusterFilesForPersonID(
+      final files = await SearchService.instance.getFilesForPersonID(
         person.remoteID,
+        sortOnTime: true,
       );
-      final files = clustersToFiles.values.expand((e) => e).toList();
       if (files.isEmpty) {
         debugPrint(
           "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",

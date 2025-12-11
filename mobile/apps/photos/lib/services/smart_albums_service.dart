@@ -143,11 +143,10 @@ class SmartAlbumsService {
           continue;
         }
 
-        final fileIds = (await SearchService.instance
-                .getClusterFilesForPersonID(personId))
-            .entries
-            .expand((e) => e.value)
-            .toList()
+        final fileIds = (await SearchService.instance.getFilesForPersonID(
+          personId,
+          sortOnTime: false,
+        ))
           ..removeWhere(
             (e) =>
                 e.uploadedFileID == null ||
