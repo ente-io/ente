@@ -456,6 +456,12 @@ class CollectionsService {
     // Sort incoming collections, then separate pinned from rest
     incoming.sort(
       (first, second) {
+        // Sharee-pinned collections should come first
+        final firstPinned = first.hasShareePinned();
+        final secondPinned = second.hasShareePinned();
+        if (firstPinned && !secondPinned) return -1;
+        if (!firstPinned && secondPinned) return 1;
+
         int comparison;
         if (sortKey == AlbumSortKey.albumName) {
           comparison = compareAsciiLowerCaseNatural(
@@ -476,18 +482,6 @@ class CollectionsService {
             : -comparison;
       },
     );
-
-    // Separate sharee-pinned collections to show them first
-    final List<Collection> pinnedIncoming = [];
-    final List<Collection> restIncoming = [];
-    for (final collection in incoming) {
-      if (collection.hasShareePinned()) {
-        pinnedIncoming.add(collection);
-      } else {
-        restIncoming.add(collection);
-      }
-    }
-    final sortedIncoming = pinnedIncoming + restIncoming;
 
     outgoing.sort(
       (first, second) {
@@ -512,7 +506,7 @@ class CollectionsService {
       },
     );
 
-    return SharedCollections(outgoing, sortedIncoming, quickLinks);
+    return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   Future<List<Collection>> getCollectionForOnEnteSection() async {

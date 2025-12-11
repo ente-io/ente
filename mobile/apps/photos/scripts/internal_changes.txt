@@ -1,3 +1,4 @@
+- Prateek: (i) Pin/Unpin for "Shared with you" albums (mobile + web)
 - Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
 - Laurens: (i) Manual people tagging
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
