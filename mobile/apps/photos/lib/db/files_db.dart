@@ -15,7 +15,6 @@ import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/location/location.dart';
 import "package:photos/models/metadata/common_keys.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqlite_async/sqlite_async.dart';
@@ -1085,33 +1084,44 @@ class FilesDB with SqlDbBase {
   // corresponding file entries are not already mapped to some other collection
   Future<void> setCollectionIDForUnMappedLocalFiles(
     int collectionID,
-    Set<String> localIDs, {
-    String? queueSource,
-  }) async {
+    Set<String> localIDs,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = localIDs.map((id) => "'$id'").join(',');
+    await db.execute(
+      '''
+      UPDATE $filesTable
+      SET $columnCollectionID = $collectionID
+      WHERE $columnLocalID IN ($inParam) AND ($columnCollectionID IS NULL OR 
+      $columnCollectionID = -1);
+    ''',
+    );
+  }
+
+  // Sets the collectionID and queueSource for the files with given LocalIDs if
+  // the corresponding file entries are not already mapped to some other
+  // collection. Only use this when enableBackupFolderSync flag is on.
+  Future<void> setCollectionIDAndQueueSourceForUnMappedLocalFiles(
+    int collectionID,
+    Set<String> localIDs,
+    String queueSource,
+  ) async {
     if (localIDs.isEmpty) {
       return;
     }
     final db = await instance.sqliteAsyncDB;
     final idPlaceholders = List.filled(localIDs.length, '?').join(',');
 
-    final setExpressions = <String>[
-      '$columnCollectionID = ?',
-    ];
     final params = <Object?>[
       collectionID,
+      queueSource,
+      ...localIDs,
     ];
-
-    if (queueSource != null && flagService.enableBackupFolderSync) {
-      setExpressions.add('$columnQueueSource = ?');
-      params.add(queueSource);
-    }
-
-    params.addAll(localIDs);
 
     await db.execute(
       '''
       UPDATE $filesTable
-      SET ${setExpressions.join(', ')}
+      SET $columnCollectionID = ?, $columnQueueSource = ?
       WHERE $columnLocalID IN ($idPlaceholders) AND ($columnCollectionID IS NULL OR
       $columnCollectionID = -1);
     ''',

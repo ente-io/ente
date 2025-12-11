@@ -414,11 +414,18 @@ class RemoteSyncService {
       }
 
       moreFilesMarkedForBackup = true;
-      await _db.setCollectionIDForUnMappedLocalFiles(
-        collectionID,
-        localIDsToSync,
-        queueSource: deviceCollection.id,
-      );
+      if (flagService.enableBackupFolderSync) {
+        await _db.setCollectionIDAndQueueSourceForUnMappedLocalFiles(
+          collectionID,
+          localIDsToSync,
+          deviceCollection.id,
+        );
+      } else {
+        await _db.setCollectionIDForUnMappedLocalFiles(
+          collectionID,
+          localIDsToSync,
+        );
+      }
 
       // mark IDs as already synced if corresponding entry is present in
       // the collection. This can happen when a user has marked a folder
