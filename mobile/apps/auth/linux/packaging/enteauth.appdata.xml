@@ -10,7 +10,7 @@
         <p>Auth has an app for every platform. Mobile, desktop and web. Your codes sync across all your devices, end-to-end encrypted.</p>
         <p>Auth also comes with Offline mode, tags, icons, pins, import/export and more</p>
     </description>
-    <launchable type="desktop-id">enteauth.desktop</launchable>
+    <launchable type="desktop-id">io.ente.auth.desktop</launchable>
     <url type="homepage">https://ente.io/auth</url>
     <screenshots>
         <screenshot type="default">
@@ -26,7 +26,7 @@
         <release version="4.0.3" date="2024-10-08" />
     </releases>
     <provides>
-        <id>enteauth.desktop</id>
+        <id>io.ente.auth.desktop</id>
     </provides>
     <content_rating type="oars-1.0" />
     <developer id="io.github.ente-io.ente">

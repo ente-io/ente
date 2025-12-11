@@ -70,7 +70,7 @@ cp "assets/generation-icons/icon-windows-linux.png" "$STAGING_DIR/usr/share/pixm
 
 # Copy desktop file
 echo -e "${YELLOW}Copying desktop file...${NC}"
-cp linux/packaging/enteauth.desktop "$STAGING_DIR/usr/share/applications/"
+cp linux/packaging/io.ente.auth.desktop "$STAGING_DIR/usr/share/applications/"
 
 # Create symlink
 echo -e "${YELLOW}Creating symlink...${NC}"
