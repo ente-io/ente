@@ -585,7 +585,8 @@ class CollectionActions {
     final isCollectionOwner = collection.owner.id == currentUserID;
     final bool canRemoveAllParticipants =
         collectionsService.canRemoveFilesFromAllParticipants(collection);
-    final bool isCollectionAdmin = canRemoveAllParticipants && !isCollectionOwner;
+    final bool isCollectionAdmin =
+        canRemoveAllParticipants && !isCollectionOwner;
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,

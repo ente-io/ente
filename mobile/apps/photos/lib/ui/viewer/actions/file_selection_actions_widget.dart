@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:ente_icons/ente_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
@@ -349,7 +350,7 @@ class _FileSelectionActionsWidgetState
       if (widget.type.showFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.favorite_border_rounded,
+            icon: EnteIcons.favoriteStroke,
             labelText: AppLocalizations.of(context).favorite,
             onTap: anyUploadedFiles ? _onFavoriteClick : null,
             shouldShow: ownedFilesCount > 0,
@@ -358,7 +359,7 @@ class _FileSelectionActionsWidgetState
       } else if (widget.type.showUnFavoriteOption()) {
         items.add(
           SelectionActionButton(
-            icon: Icons.favorite,
+            icon: EnteIcons.favoriteFilled,
             labelText: AppLocalizations.of(context).removeFromFavorite,
             onTap: _onUnFavoriteClick,
             shouldShow: ownedFilesCount > 0,
