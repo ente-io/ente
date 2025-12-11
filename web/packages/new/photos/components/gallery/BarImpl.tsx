@@ -6,7 +6,6 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { Overlay } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { Ellipsized2LineTypography } from "ente-base/components/Typography";
@@ -28,6 +27,7 @@ import type {
     CollectionsSortBy,
 } from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { t } from "i18next";
 import React, {
     memo,
