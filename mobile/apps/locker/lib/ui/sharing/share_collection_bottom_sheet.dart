@@ -2,7 +2,7 @@ import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
+import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
@@ -149,7 +149,7 @@ class _ShareCollectionBottomSheetState
                 dividerType: DividerType.menu,
                 bgColor: colorScheme.fillFaint,
               ),
-            MenuItemWidget(
+            MenuItemWidgetV2(
               captionedTextWidget: CaptionedTextWidget(
                 title: user.email,
               ),
@@ -172,7 +172,6 @@ class _ShareCollectionBottomSheetState
               surfaceExecutionStates: false,
               isTopBorderRadiusRemoved: !isFirst,
               isBottomBorderRadiusRemoved: !isLast,
-              singleBorderRadius: 8,
             ),
           ],
         );
