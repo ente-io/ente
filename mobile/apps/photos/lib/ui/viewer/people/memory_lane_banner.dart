@@ -6,19 +6,19 @@ import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/faces_timeline/faces_timeline_models.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
-class FacesTimelineBanner extends StatelessWidget {
+class MemoryLaneBanner extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final ImageProvider? thumbnail;
 
-  const FacesTimelineBanner({
+  const MemoryLaneBanner({
     required this.title,
     required this.onTap,
     this.thumbnail,
@@ -228,14 +228,14 @@ class _SparklePainter extends CustomPainter {
   }
 }
 
-class FacesTimelineBannerSection extends StatefulWidget {
+class MemoryLaneBannerSection extends StatefulWidget {
   final bool showBanner;
   final PersonEntity person;
   final VoidCallback? onTap;
-  final Future<FacesTimelinePersonTimeline?> Function(String personId)?
+  final Future<MemoryLanePersonTimeline?> Function(String personId)?
       loadTimeline;
 
-  const FacesTimelineBannerSection({
+  const MemoryLaneBannerSection({
     required this.showBanner,
     required this.person,
     this.onTap,
@@ -244,15 +244,15 @@ class FacesTimelineBannerSection extends StatefulWidget {
   });
 
   @override
-  State<FacesTimelineBannerSection> createState() =>
-      _FacesTimelineBannerSectionState();
+  State<MemoryLaneBannerSection> createState() =>
+      _MemoryLaneBannerSectionState();
 }
 
-class _FacesTimelineBannerSectionState
-    extends State<FacesTimelineBannerSection> {
-  final Logger _logger = Logger("FacesTimelineBannerSection");
+class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
+  final Logger _logger = Logger("MemoryLaneBannerSection");
   MemoryImage? _thumbnail;
   Future<void>? _thumbnailFuture;
+  bool _thumbnailResolved = false;
 
   @override
   void initState() {
@@ -261,7 +261,7 @@ class _FacesTimelineBannerSectionState
   }
 
   @override
-  void didUpdateWidget(covariant FacesTimelineBannerSection oldWidget) {
+  void didUpdateWidget(covariant MemoryLaneBannerSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     final bool personChanged =
         widget.person.remoteID != oldWidget.person.remoteID;
@@ -272,6 +272,7 @@ class _FacesTimelineBannerSectionState
     if (personChanged || bannerActivated || tapEnabled) {
       _thumbnail = null;
       _thumbnailFuture = null;
+      _thumbnailResolved = false;
     }
     _maybeLoadThumbnail();
   }
@@ -286,34 +287,52 @@ class _FacesTimelineBannerSectionState
   Future<void> _loadThumbnail() async {
     try {
       final loader =
-          widget.loadTimeline ?? FacesTimelineService.instance.getTimeline;
+          widget.loadTimeline ?? MemoryLaneService.instance.getTimeline;
       final timeline = await loader(widget.person.remoteID);
       if (!mounted || timeline == null || !timeline.isReady) {
+        _markThumbnailResolved();
         return;
       }
       if (timeline.entries.isEmpty) {
+        _markThumbnailResolved();
         return;
       }
       final MemoryImage? image = await _loadFaceThumbnail(
         timeline.entries.first,
       );
       if (!mounted || image == null) {
+        _markThumbnailResolved();
+        return;
+      }
+      await precacheImage(image, context);
+      if (!mounted) {
         return;
       }
       setState(() {
         _thumbnail = image;
+        _thumbnailResolved = true;
       });
     } catch (error, stackTrace) {
       _logger.warning(
-        "Failed to load faces timeline banner thumbnail for "
+        "Failed to load Memory Lane banner thumbnail for "
         "${widget.person.remoteID}",
         error,
         stackTrace,
       );
+      _markThumbnailResolved();
     }
   }
 
-  Future<MemoryImage?> _loadFaceThumbnail(FacesTimelineEntry entry) async {
+  void _markThumbnailResolved() {
+    if (!mounted || _thumbnailResolved) {
+      return;
+    }
+    setState(() {
+      _thumbnailResolved = true;
+    });
+  }
+
+  Future<MemoryImage?> _loadFaceThumbnail(MemoryLaneEntry entry) async {
     final file = await FilesDB.instance.getAnyUploadedFile(entry.fileId);
     if (file == null) {
       return null;
@@ -350,10 +369,10 @@ class _FacesTimelineBannerSectionState
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.showBanner || widget.onTap == null) {
+    if (!widget.showBanner || widget.onTap == null || !_thumbnailResolved) {
       return const SizedBox.shrink();
     }
-    return FacesTimelineBanner(
+    return MemoryLaneBanner(
       title: context.l10n.facesTimelineBannerTitle,
       onTap: widget.onTap!,
       thumbnail: _thumbnail,

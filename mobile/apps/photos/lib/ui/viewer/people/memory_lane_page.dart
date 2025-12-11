@@ -11,26 +11,27 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/faces_timeline/faces_timeline_models.dart";
+import "package:photos/models/file/file.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
-class FacesTimelinePage extends StatefulWidget {
+class MemoryLanePage extends StatefulWidget {
   final PersonEntity person;
 
-  const FacesTimelinePage({required this.person, super.key});
+  const MemoryLanePage({required this.person, super.key});
 
   @override
-  State<FacesTimelinePage> createState() => _FacesTimelinePageState();
+  State<MemoryLanePage> createState() => _MemoryLanePageState();
 }
 
-const LinearGradient _facesTimelineBackgroundGradient = LinearGradient(
+const LinearGradient _memoryLaneBackgroundGradient = LinearGradient(
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
   colors: [
@@ -43,7 +44,7 @@ const LinearGradient _facesTimelineBackgroundGradient = LinearGradient(
   stops: [0.0, 0.3, 0.52, 0.74, 1.0],
 );
 
-class _FacesTimelinePageState extends State<FacesTimelinePage>
+class _MemoryLanePageState extends State<MemoryLanePage>
     with TickerProviderStateMixin {
   static const _frameInterval = Duration(milliseconds: 800);
   static const _cardTransitionDuration = Duration(milliseconds: 520);
@@ -55,8 +56,10 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
   static const double _controlsHeightFallback = 140;
   // Wait for this many frames (or the available total) before auto-starting playback.
   static const int _initialFrameTarget = 120;
+  static const int _frameBuildConcurrency = 6;
+  static const double _appBarSideWidth = kToolbarHeight;
 
-  final Logger _logger = Logger("FacesTimelinePage");
+  final Logger _logger = Logger("MemoryLanePage");
   late final AnimationController _cardTransitionController;
   double _stackProgress = 0;
   late final ValueNotifier<double> _stackProgressNotifier;
@@ -126,7 +129,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 
   Future<void> _loadFrames() async {
     _hasMarkedTimelineSeen =
-        localSettings.hasSeenFacesTimeline(widget.person.remoteID);
+        localSettings.hasSeenMemoryLane(widget.person.remoteID);
     _playTimer?.cancel();
     if (mounted) {
       setState(() {
@@ -134,7 +137,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       });
     }
     try {
-      final timeline = await FacesTimelineService.instance.getTimeline(
+      final timeline = await MemoryLaneService.instance.getTimeline(
         widget.person.remoteID,
       );
       if (!mounted) {
@@ -186,14 +189,24 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
         ..value = 0;
 
       int loadedCount = 0;
-      for (final entry in entries) {
-        final frame = await _buildFrame(entry);
-        if (!mounted) {
-          return;
-        }
-        loadedCount += 1;
-        _handleFrameLoaded(frame, loadedCount);
-      }
+      final uniqueFileIds =
+          entries.map((entry) => entry.fileId).toSet().toList();
+      final filesById =
+          await FilesDB.instance.getFileIDToFileFromIDs(uniqueFileIds);
+      final Map<int, Future<List<Face>?>> facesFutures = {};
+
+      await _buildFramesInParallel(
+        entries: entries,
+        filesById: filesById,
+        facesFutures: facesFutures,
+        onFrameReady: (builtFrame) {
+          if (!mounted) {
+            return;
+          }
+          loadedCount += 1;
+          _handleFrameLoaded(builtFrame, loadedCount);
+        },
+      );
 
       if (!mounted) {
         return;
@@ -237,7 +250,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     }
     _hasMarkedTimelineSeen = true;
     unawaited(
-      localSettings.markFacesTimelineSeen(widget.person.remoteID),
+      localSettings.markMemoryLaneSeen(widget.person.remoteID),
     );
   }
 
@@ -274,25 +287,97 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     return math.max(1, rounded.toString().length);
   }
 
-  Future<_TimelineFrame> _buildFrame(FacesTimelineEntry entry) async {
-    final file = await FilesDB.instance.getAnyUploadedFile(entry.fileId);
+  Future<void> _buildFramesInParallel({
+    required List<MemoryLaneEntry> entries,
+    required Map<int, EnteFile> filesById,
+    required Map<int, Future<List<Face>?>> facesFutures,
+    required void Function(_TimelineFrame builtFrame) onFrameReady,
+  }) async {
+    final readyFrames = <int, _TimelineFrame?>{};
+    final completer = Completer<void>();
+    int nextEmitIndex = 0;
+    int inFlight = 0;
+    int started = 0;
+
+    void maybeComplete() {
+      if (!completer.isCompleted &&
+          nextEmitIndex >= entries.length &&
+          inFlight == 0 &&
+          started >= entries.length) {
+        completer.complete();
+      }
+    }
+
+    void emitReady() {
+      while (readyFrames.containsKey(nextEmitIndex)) {
+        final _TimelineFrame? built = readyFrames.remove(nextEmitIndex);
+        if (built != null) {
+          onFrameReady(built);
+        }
+        nextEmitIndex += 1;
+      }
+      maybeComplete();
+    }
+
+    void startNext() {
+      while (inFlight < _frameBuildConcurrency && started < entries.length) {
+        final int index = started;
+        started += 1;
+        inFlight += 1;
+        final entry = entries[index];
+        final facesFuture = facesFutures.putIfAbsent(
+          entry.fileId,
+          () => MLDataDB.instance.getFacesForGivenFileID(entry.fileId),
+        );
+        _buildFrame(
+          entry,
+          file: filesById[entry.fileId],
+          facesFuture: facesFuture,
+        ).then((built) {
+          readyFrames[index] = built;
+        }).catchError((error, stackTrace) {
+          readyFrames[index] = null;
+        }).whenComplete(() {
+          inFlight -= 1;
+          emitReady();
+          startNext();
+        });
+      }
+      maybeComplete();
+    }
+
+    startNext();
+    return completer.future;
+  }
+
+  Future<_TimelineFrame> _buildFrame(
+    MemoryLaneEntry entry, {
+    EnteFile? file,
+    Future<List<Face>?>? facesFuture,
+  }) async {
+    EnteFile? effectiveFile = file;
+    effectiveFile ??= await FilesDB.instance.getAnyUploadedFile(entry.fileId);
     MemoryImage? image;
-    if (file != null) {
-      final faces = await MLDataDB.instance.getFacesForGivenFileID(
-        entry.fileId,
-      );
+    Uint8List? bytes;
+    if (effectiveFile != null) {
+      final List<Face>? faces;
+      if (facesFuture != null) {
+        faces = await facesFuture;
+      } else {
+        faces = await MLDataDB.instance.getFacesForGivenFileID(entry.fileId);
+      }
       final Face? face = faces?.firstWhereOrNull(
         (element) => element.faceID == entry.faceId,
       );
       if (face != null) {
         try {
           final cropMap = await getCachedFaceCrops(
-            file,
+            effectiveFile,
             [face],
             useFullFile: true,
             useTempCache: false,
           );
-          final Uint8List? bytes = cropMap?[face.faceID];
+          bytes = cropMap?[face.faceID];
           if (bytes != null && bytes.isNotEmpty) {
             image = MemoryImage(bytes);
           }
@@ -324,13 +409,14 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
       captionValue = _yearsBetween(creationDate, DateTime.now());
     }
     captionValue = captionValue.clamp(0, double.infinity);
-    return _TimelineFrame(
+    final timelineFrame = _TimelineFrame(
       entry: entry,
       image: image,
       creationDate: creationDate,
       captionType: captionType,
       captionValue: captionValue,
     );
+    return timelineFrame;
   }
 
   void _scheduleCardGapUpdate(double candidateGap) {
@@ -499,7 +585,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
           );
           return DecoratedBox(
             decoration: const BoxDecoration(
-              gradient: _facesTimelineBackgroundGradient,
+              gradient: _memoryLaneBackgroundGradient,
             ),
             child: Scaffold(
               backgroundColor: Colors.transparent,
@@ -509,9 +595,27 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                 elevation: 0,
                 scrolledUnderElevation: 0,
                 foregroundColor: colorScheme.textBase,
-                title: Text(
-                  title,
-                  style: titleStyle,
+                automaticallyImplyLeading: false,
+                title: Row(
+                  children: [
+                    const SizedBox(
+                      width: _appBarSideWidth,
+                      height: kToolbarHeight,
+                      child: BackButton(),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          title,
+                          style: titleStyle,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: _appBarSideWidth),
+                  ],
                 ),
               ),
               body: Stack(
@@ -677,7 +781,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
             ];
             final children = orderedSlices.isEmpty
                 ? [
-                    _FacesTimelineCard(
+                    _MemoryLaneCard(
                       key: ValueKey<int>(_currentIndex),
                       frame: _frames[_currentIndex],
                       distance: 0,
@@ -689,7 +793,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
                   ]
                 : orderedSlices
                     .map(
-                      (slice) => _FacesTimelineCard(
+                      (slice) => _MemoryLaneCard(
                         key: ValueKey<int>(slice.index),
                         frame: _frames[slice.index],
                         distance: slice.distance,
@@ -746,12 +850,22 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
     final double slotWidth = samplePainter.width;
     final double slotHeight = samplePainter.height;
     final String formattedCurrent = numberFormat.format(currentRounded);
-    final String fullText = captionType == _CaptionType.age
-        ? l10n.facesTimelineCaptionYearsOld(
-            name: widget.person.data.name,
-            count: currentRounded,
-          )
-        : l10n.facesTimelineCaptionYearsAgo(count: currentRounded);
+    String fullText;
+    if (captionType == _CaptionType.age) {
+      fullText = l10n.facesTimelineCaptionYearsOld(
+        name: widget.person.data.name,
+        count: currentRounded,
+      );
+    } else {
+      fullText = l10n.facesTimelineCaptionYearsAgo(count: currentRounded);
+      if (fullText.contains("#")) {
+        fullText = fullText.replaceAll("#", formattedCurrent);
+      }
+      final String name = widget.person.data.name;
+      if (name.isNotEmpty) {
+        fullText = "$name $fullText";
+      }
+    }
     final int insertionIndex = fullText.indexOf(formattedCurrent);
     final InlineSpan captionSpan;
     if (insertionIndex == -1) {
@@ -850,7 +964,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
             thumbColor: Colors.white,
             overlayColor: Colors.transparent,
             trackShape: const RoundedRectSliderTrackShape(),
-            thumbShape: const _FacesTimelineSliderThumbShape(),
+            thumbShape: const _MemoryLaneSliderThumbShape(),
           ),
           child: Slider(
             value: sliderValue.toDouble(),
@@ -970,7 +1084,7 @@ class _FacesTimelinePageState extends State<FacesTimelinePage>
 }
 
 class _TimelineFrame {
-  final FacesTimelineEntry entry;
+  final MemoryLaneEntry entry;
   final MemoryImage? image;
   final DateTime creationDate;
   final _CaptionType captionType;
@@ -995,7 +1109,7 @@ class _CardSlice {
   });
 }
 
-class _FacesTimelineCard extends StatelessWidget {
+class _MemoryLaneCard extends StatelessWidget {
   static const double _cardRadius = 28;
 
   final _TimelineFrame frame;
@@ -1005,7 +1119,7 @@ class _FacesTimelineCard extends StatelessWidget {
   final double cardHeight;
   final bool blurEnabled;
 
-  const _FacesTimelineCard({
+  const _MemoryLaneCard({
     required this.frame,
     required this.distance,
     required this.isDarkMode,
@@ -1259,8 +1373,8 @@ double _yearsBetween(DateTime start, DateTime end) {
   return days / 365.25;
 }
 
-class _FacesTimelineSliderThumbShape extends SliderComponentShape {
-  const _FacesTimelineSliderThumbShape();
+class _MemoryLaneSliderThumbShape extends SliderComponentShape {
+  const _MemoryLaneSliderThumbShape();
 
   static const double _thumbRadius = 12;
 

@@ -2,10 +2,10 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/ui/viewer/people/faces_timeline_banner.dart";
+import "package:photos/ui/viewer/people/memory_lane_banner.dart";
 
 void main() {
-  group("FacesTimelineBannerSection", () {
+  group("MemoryLaneBannerSection", () {
     late PersonEntity person;
 
     setUp(() {
@@ -20,7 +20,7 @@ void main() {
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FacesTimelineBannerSection(
+          home: MemoryLaneBannerSection(
             showBanner: true,
             person: person,
             onTap: () {},
@@ -31,8 +31,8 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byType(FacesTimelineBanner), findsOneWidget);
-      final context = tester.element(find.byType(FacesTimelineBanner));
+      expect(find.byType(MemoryLaneBanner), findsOneWidget);
+      final context = tester.element(find.byType(MemoryLaneBanner));
       final l10n = AppLocalizations.of(context)!;
       expect(find.text(l10n.facesTimelineBannerTitle), findsOneWidget);
     });
@@ -42,7 +42,7 @@ void main() {
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FacesTimelineBannerSection(
+          home: MemoryLaneBannerSection(
             showBanner: false,
             person: person,
             onTap: () {},
@@ -51,7 +51,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(FacesTimelineBanner), findsNothing);
+      expect(find.byType(MemoryLaneBanner), findsNothing);
     });
 
     testWidgets("hides banner when tap callback is missing", (tester) async {
@@ -59,7 +59,7 @@ void main() {
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: FacesTimelineBannerSection(
+          home: MemoryLaneBannerSection(
             showBanner: true,
             person: person,
             onTap: null,
@@ -68,7 +68,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(FacesTimelineBanner), findsNothing);
+      expect(find.byType(MemoryLaneBanner), findsNothing);
     });
   });
 }

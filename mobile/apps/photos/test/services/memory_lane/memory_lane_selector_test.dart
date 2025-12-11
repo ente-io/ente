@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 
 Map<String, dynamic> _buildFace(
   String faceId,
@@ -19,7 +19,7 @@ Map<String, dynamic> _buildFace(
 }
 
 void main() {
-  group("Faces timeline selection", () {
+  group("Memory lane selection", () {
     test("returns ready when at least five eligible years are present", () {
       final faces = <Map<String, dynamic>>[];
       for (int year = 2010; year < 2015; year++) {
@@ -292,25 +292,25 @@ void main() {
   group("minimum eligible creation time", () {
     test("returns null when birthdate missing", () {
       expect(
-        FacesTimelineService.minimumEligibleCreationTimeMicros(null),
+        MemoryLaneService.minimumEligibleCreationTimeMicros(null),
         isNull,
       );
       expect(
-        FacesTimelineService.minimumEligibleCreationTimeMicros(""),
+        MemoryLaneService.minimumEligibleCreationTimeMicros(""),
         isNull,
       );
     });
 
     test("returns null for invalid birthdate string", () {
       expect(
-        FacesTimelineService.minimumEligibleCreationTimeMicros("invalid"),
+        MemoryLaneService.minimumEligibleCreationTimeMicros("invalid"),
         isNull,
       );
     });
 
     test("computes fifth birthday cutoff", () {
       final birthDate = DateTime(2010, 6, 15);
-      final cutoff = FacesTimelineService.minimumEligibleCreationTimeMicros(
+      final cutoff = MemoryLaneService.minimumEligibleCreationTimeMicros(
         "2010-06-15",
       );
       final expected =
@@ -320,7 +320,7 @@ void main() {
     });
 
     test("clamps day for leap birthdays", () {
-      final cutoff = FacesTimelineService.minimumEligibleCreationTimeMicros(
+      final cutoff = MemoryLaneService.minimumEligibleCreationTimeMicros(
         "2012-02-29",
       );
       final expected = DateTime(2017, 2, 28).microsecondsSinceEpoch;
