@@ -2,7 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:photos/generated/intl/app_localizations.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/ui/viewer/people/faces_timeline_banner.dart";
+import "package:photos/ui/viewer/people/memory_lane_banner.dart";
 
 void main() {
   group("FacesTimelineBannerSection", () {

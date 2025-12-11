@@ -6,10 +6,10 @@ import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/faces_timeline/faces_timeline_models.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 

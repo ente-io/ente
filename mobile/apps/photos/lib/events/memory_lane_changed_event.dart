@@ -1,5 +1,5 @@
 import "package:photos/events/event.dart";
-import "package:photos/models/faces_timeline/faces_timeline_models.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 
 class FacesTimelineChangedEvent extends Event {
   final String personId;

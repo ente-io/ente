@@ -3,12 +3,12 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/faces_timeline_changed_event.dart";
-import "package:photos/models/faces_timeline/faces_timeline_models.dart";
+import "package:photos/events/memory_lane_changed_event.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/faces_timeline/faces_timeline_cache_service.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class FacesTimelineDebugPanel extends StatefulWidget {

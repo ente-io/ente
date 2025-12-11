@@ -1,5 +1,5 @@
 import "package:flutter_test/flutter_test.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 
 Map<String, dynamic> _buildFace(
   String faceId,
