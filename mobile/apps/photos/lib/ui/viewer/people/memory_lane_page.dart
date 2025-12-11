@@ -127,10 +127,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     _stackProgressNotifier.value = value;
   }
 
-  String _ms(Duration duration) => "${duration.inMilliseconds}ms";
-
   Future<void> _loadFrames() async {
-    final loadStopwatch = Stopwatch()..start();
     _hasMarkedTimelineSeen =
         localSettings.hasSeenMemoryLane(widget.person.remoteID);
     _playTimer?.cancel();
@@ -140,16 +137,8 @@ class _MemoryLanePageState extends State<MemoryLanePage>
       });
     }
     try {
-      final timelineStopwatch = Stopwatch()..start();
       final timeline = await MemoryLaneService.instance.getTimeline(
         widget.person.remoteID,
-      );
-      final timelineFetchTime = timelineStopwatch.elapsed;
-      _logger.info(
-        "memory_lane timeline_fetch person=${widget.person.remoteID} "
-        "elapsed=${_ms(timelineFetchTime)} "
-        "status=${timeline?.status.name ?? "null"} "
-        "entries=${timeline?.entries.length ?? 0}",
       );
       if (!mounted) {
         return;
@@ -206,7 +195,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
           await FilesDB.instance.getFileIDToFileFromIDs(uniqueFileIds);
       final Map<int, Future<List<Face>?>> facesFutures = {};
 
-      final frameStats = await _buildFramesInParallel(
+      await _buildFramesInParallel(
         entries: entries,
         filesById: filesById,
         facesFutures: facesFutures,
@@ -215,11 +204,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
             return;
           }
           loadedCount += 1;
-          _handleFrameLoaded(
-            builtFrame.frame,
-            loadedCount,
-            buildDuration: builtFrame.buildDuration,
-          );
+          _handleFrameLoaded(builtFrame, loadedCount);
         },
       );
 
@@ -229,15 +214,6 @@ class _MemoryLanePageState extends State<MemoryLanePage>
       setState(() {
         _allFramesLoaded = true;
       });
-      final double averageFrameMs =
-          loadedCount > 0 ? frameStats.totalFrameMs / loadedCount : 0;
-      _logger.info(
-        "memory_lane load_complete person=${widget.person.remoteID} "
-        "frames=$loadedCount total=${_ms(loadStopwatch.elapsed)} "
-        "avgFrameMs=${averageFrameMs.toStringAsFixed(1)} "
-        "firstFrame=${frameStats.firstFrameDuration != null ? _ms(frameStats.firstFrameDuration!) : "n/a"} "
-        "expected=$_expectedFrameCount",
-      );
       _maybeMarkTimelineSeen();
     } catch (error, stackTrace) {
       _logger.severe(
@@ -278,11 +254,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     );
   }
 
-  void _handleFrameLoaded(
-    _TimelineFrame frame,
-    int loadedCount, {
-    Duration? buildDuration,
-  }) {
+  void _handleFrameLoaded(_TimelineFrame frame, int loadedCount) {
     final bool isFirstFrame = _frames.isEmpty;
     final int digitCount = _captionDigitCount(frame.captionValue);
     setState(() {
@@ -301,20 +273,10 @@ class _MemoryLanePageState extends State<MemoryLanePage>
       }
     });
     if (isFirstFrame) {
-      if (buildDuration != null) {
-        _logger.info(
-          "memory_lane first_frame_ready person=${widget.person.remoteID} "
-          "duration=${_ms(buildDuration)}",
-        );
-      }
       _updateStackProgress(0);
     }
     if (!_hasStartedPlayback && loadedCount >= _initialFrameThreshold) {
       _hasStartedPlayback = true;
-      _logger.info(
-        "memory_lane auto_start person=${widget.person.remoteID} "
-        "loaded=$loadedCount threshold=$_initialFrameThreshold",
-      );
       _startPlayback();
       _logPlaybackStart(_expectedFrameCount);
     }
@@ -325,40 +287,31 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     return math.max(1, rounded.toString().length);
   }
 
-  Future<_FrameBuildStats> _buildFramesInParallel({
+  Future<void> _buildFramesInParallel({
     required List<MemoryLaneEntry> entries,
     required Map<int, EnteFile> filesById,
     required Map<int, Future<List<Face>?>> facesFutures,
-    required void Function(_BuiltFrame builtFrame) onFrameReady,
+    required void Function(_TimelineFrame builtFrame) onFrameReady,
   }) async {
-    final readyFrames = <int, _BuiltFrame?>{};
-    final completer = Completer<_FrameBuildStats>();
+    final readyFrames = <int, _TimelineFrame?>{};
+    final completer = Completer<void>();
     int nextEmitIndex = 0;
     int inFlight = 0;
     int started = 0;
-    int totalFrameMs = 0;
-    Duration? firstFrameDuration;
 
     void maybeComplete() {
       if (!completer.isCompleted &&
           nextEmitIndex >= entries.length &&
           inFlight == 0 &&
           started >= entries.length) {
-        completer.complete(
-          _FrameBuildStats(
-            totalFrameMs: totalFrameMs,
-            firstFrameDuration: firstFrameDuration,
-          ),
-        );
+        completer.complete();
       }
     }
 
     void emitReady() {
       while (readyFrames.containsKey(nextEmitIndex)) {
-        final _BuiltFrame? built = readyFrames.remove(nextEmitIndex);
+        final _TimelineFrame? built = readyFrames.remove(nextEmitIndex);
         if (built != null) {
-          totalFrameMs += built.buildDuration.inMilliseconds;
-          firstFrameDuration ??= built.buildDuration;
           onFrameReady(built);
         }
         nextEmitIndex += 1;
@@ -383,12 +336,6 @@ class _MemoryLanePageState extends State<MemoryLanePage>
         ).then((built) {
           readyFrames[index] = built;
         }).catchError((error, stackTrace) {
-          _logger.warning(
-            "memory_lane frame_build_failed person=${widget.person.remoteID} "
-            "fileId=${entry.fileId} faceId=${entry.faceId}",
-            error,
-            stackTrace,
-          );
           readyFrames[index] = null;
         }).whenComplete(() {
           inFlight -= 1;
@@ -403,46 +350,27 @@ class _MemoryLanePageState extends State<MemoryLanePage>
     return completer.future;
   }
 
-  Future<_BuiltFrame> _buildFrame(
+  Future<_TimelineFrame> _buildFrame(
     MemoryLaneEntry entry, {
     EnteFile? file,
     Future<List<Face>?>? facesFuture,
   }) async {
-    final totalStopwatch = Stopwatch()..start();
-    final Stopwatch stepStopwatch = Stopwatch()..start();
-    Duration fileFetchDuration = Duration.zero;
-    Duration facesFetchDuration = Duration.zero;
-    Duration cropFetchDuration = Duration.zero;
-    bool fileFound = false;
-    int facesCount = 0;
-    String cropStatus = "skipped";
     EnteFile? effectiveFile = file;
     effectiveFile ??= await FilesDB.instance.getAnyUploadedFile(entry.fileId);
-    fileFetchDuration = stepStopwatch.elapsed;
-    stepStopwatch
-      ..reset()
-      ..start();
     MemoryImage? image;
     Uint8List? bytes;
     if (effectiveFile != null) {
-      fileFound = true;
       final List<Face>? faces;
       if (facesFuture != null) {
         faces = await facesFuture;
       } else {
         faces = await MLDataDB.instance.getFacesForGivenFileID(entry.fileId);
       }
-      facesFetchDuration = stepStopwatch.elapsed;
-      stepStopwatch
-        ..reset()
-        ..start();
-      facesCount = faces?.length ?? 0;
       final Face? face = faces?.firstWhereOrNull(
         (element) => element.faceID == entry.faceId,
       );
       if (face != null) {
         try {
-          final cropStopwatch = Stopwatch()..start();
           final cropMap = await getCachedFaceCrops(
             effectiveFile,
             [face],
@@ -450,39 +378,18 @@ class _MemoryLanePageState extends State<MemoryLanePage>
             useTempCache: false,
           );
           bytes = cropMap?[face.faceID];
-          cropFetchDuration = cropStopwatch.elapsed;
           if (bytes != null && bytes.isNotEmpty) {
             image = MemoryImage(bytes);
-            cropStatus = "hit";
-          } else {
-            cropStatus = "empty";
           }
         } catch (error, stackTrace) {
-          cropStatus = "error";
           _logger.warning(
             "Failed to fetch face crop for ${entry.faceId}",
             error,
             stackTrace,
           );
         }
-      } else {
-        cropStatus = "face_missing";
       }
-    } else {
-      cropStatus = "file_missing";
     }
-    final totalDuration = totalStopwatch.elapsed;
-    _logger.fine(
-      "memory_lane frame_build person=${widget.person.remoteID} "
-      "fileId=${entry.fileId} faceId=${entry.faceId} "
-      "fileMs=${_ms(fileFetchDuration)} "
-      "facesMs=${_ms(facesFetchDuration)} "
-      "cropMs=${_ms(cropFetchDuration)} "
-      "totalMs=${_ms(totalDuration)} "
-      "fileFound=$fileFound faces=$facesCount "
-      "cropStatus=$cropStatus imageReady=${image != null} "
-      "bytes=${bytes?.length ?? 0}",
-    );
     final creationDate = DateTime.fromMicrosecondsSinceEpoch(
       entry.creationTimeMicros,
     );
@@ -509,7 +416,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
       captionType: captionType,
       captionValue: captionValue,
     );
-    return _BuiltFrame(frame: timelineFrame, buildDuration: totalDuration);
+    return timelineFrame;
   }
 
   void _scheduleCardGapUpdate(double candidateGap) {
@@ -1576,24 +1483,4 @@ int _maxValueForDigits(int digits) {
     value = (value * 10) + 9;
   }
   return value;
-}
-
-class _BuiltFrame {
-  final _TimelineFrame frame;
-  final Duration buildDuration;
-
-  const _BuiltFrame({
-    required this.frame,
-    required this.buildDuration,
-  });
-}
-
-class _FrameBuildStats {
-  final int totalFrameMs;
-  final Duration? firstFrameDuration;
-
-  const _FrameBuildStats({
-    required this.totalFrameMs,
-    required this.firstFrameDuration,
-  });
 }
