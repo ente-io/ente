@@ -289,7 +289,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 onBlur={handleBlur}
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
-                    shouldShowEmptyState(inputValue) ? (
+                    inputValue ? (
+                        t("no_results")
+                    ) : shouldShowEmptyState(inputValue) ? (
                         <EmptyState
                             onSelectPeople={handleSelectPeople}
                             onSelectPerson={handleSelectPerson}

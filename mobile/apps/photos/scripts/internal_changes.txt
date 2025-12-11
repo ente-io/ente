@@ -1,3 +1,5 @@
+- Prateek: Change behaviour of bottom action sheet for iOS (test every sheet)
+- Laurens: (i) Manual people tagging
 - Prateek: (i) Video streaming bitrate changes & enable streaming by default
 - Prateek: (i) Add "Start with latest backups"  (last 7 days onwards)
 - Neeraj: (i) Admin Role + Suggest Delete feature
