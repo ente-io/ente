@@ -10,6 +10,7 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
+import JSZip from "jszip";
 import {
     safeDirectoryName,
     safeFileName,
@@ -89,6 +90,8 @@ const downloadAndSave = async (
     isHiddenCollectionSummary?: boolean,
 ) => {
     const electron = globalThis.electron;
+    const ZIP_MAX_FILE_COUNT = 50;
+    const ZIP_MAX_TOTAL_BYTES = 200 * 1024 * 1024; // Conservative cap to avoid blowing up memory during zip generation.
 
     const total = files.length;
     if (!files.length) {
@@ -118,6 +121,56 @@ const downloadAndSave = async (
     let isDownloading = false;
     let updateSaveGroup: UpdateSaveGroup = () => undefined;
 
+    const buildZipBatches = (filesToBatch: EnteFile[]) => {
+        const batches: EnteFile[][] = [];
+        let current: EnteFile[] = [];
+        let currentBytes = 0;
+
+        for (const file of filesToBatch) {
+            const size = file.info?.fileSize;
+            if (size !== undefined && size > ZIP_MAX_TOTAL_BYTES) return undefined;
+
+            const wouldExceedCount = current.length >= ZIP_MAX_FILE_COUNT;
+            const wouldExceedBytes =
+                size !== undefined && currentBytes + size > ZIP_MAX_TOTAL_BYTES;
+
+            if (current.length && (wouldExceedCount || wouldExceedBytes)) {
+                batches.push(current);
+                current = [];
+                currentBytes = 0;
+            }
+
+            current.push(file);
+            if (size !== undefined) currentBytes += size;
+        }
+
+        if (current.length) batches.push(current);
+        return batches;
+    };
+
+    const saveSingleFile = async (file: EnteFile) => {
+        if (electron && downloadDirPath) {
+            await saveFileDesktop(electron, file, downloadDirPath);
+        } else {
+            await saveAsFile(file);
+        }
+        updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
+    };
+
+    const addFileToZip = async (zip: JSZip, file: EnteFile) => {
+        const fileBlob = await downloadManager.fileBlob(file);
+        const fileName = fileFileName(file);
+
+        if (file.metadata.fileType == FileType.livePhoto) {
+            const { imageFileName, imageData, videoFileName, videoData } =
+                await decodeLivePhoto(fileName, fileBlob);
+            zip.file(imageFileName, imageData);
+            zip.file(videoFileName, videoData);
+        } else {
+            zip.file(fileName, fileBlob);
+        }
+    };
+
     const downloadFiles = async (
         filesToDownload: EnteFile[],
         resetFailedCount = false,
@@ -131,19 +184,124 @@ const downloadAndSave = async (
         failedFiles.length = 0;
 
         try {
-            for (const file of filesToDownload) {
-                if (canceller.signal.aborted) break;
-                try {
-                    if (electron && downloadDirPath) {
-                        await saveFileDesktop(electron, file, downloadDirPath);
-                    } else {
-                        await saveAsFile(file);
+            const zipBatches =
+                !electron && filesToDownload.length > 1
+                    ? buildZipBatches(filesToDownload)
+                    : undefined;
+            const shouldZip = !!zipBatches?.length;
+            const useZip = shouldZip && !resetFailedCount; // retries always go individual to avoid repeat failures.
+
+            if (!useZip) {
+                for (const file of filesToDownload) {
+                    if (canceller.signal.aborted) break;
+                    try {
+                        await saveSingleFile(file);
+                    } catch (e) {
+                        log.error("File download failed", e);
+                        failedFiles.push(file);
+                        updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
                     }
-                    updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
-                } catch (e) {
-                    log.error("File download failed", e);
-                    failedFiles.push(file);
-                    updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
+                }
+            } else {
+                const downloadIndividually = async (
+                    filesFallback: EnteFile[],
+                ) => {
+                    const previousFailures = [...failedFiles];
+                    failedFiles.length = 0;
+                    for (const file of filesFallback) {
+                        if (canceller.signal.aborted) break;
+                        try {
+                            await saveSingleFile(file);
+                        } catch (e) {
+                            log.error("File download failed", e);
+                            failedFiles.push(file);
+                            updateSaveGroup((g) => ({
+                                ...g,
+                                failed: g.failed + 1,
+                            }));
+                        }
+                    }
+                    for (const file of previousFailures) {
+                        if (!failedFiles.includes(file)) failedFiles.push(file);
+                    }
+                };
+
+                const totalParts = zipBatches?.length ?? 0;
+                let partNumber = 1;
+                for (const batch of zipBatches ?? []) {
+                    const zip = new JSZip();
+                    const successfulFiles: EnteFile[] = [];
+
+                    try {
+                        for (const file of batch) {
+                            if (canceller.signal.aborted) break;
+                            try {
+                                await addFileToZip(zip, file);
+                                successfulFiles.push(file);
+                            } catch (e) {
+                                log.error("File download failed", e);
+                                failedFiles.push(file);
+                                updateSaveGroup((g) => ({
+                                    ...g,
+                                    failed: g.failed + 1,
+                                }));
+                            }
+                        }
+
+                        if (
+                            !canceller.signal.aborted &&
+                            successfulFiles.length &&
+                            !failedFiles.length
+                        ) {
+                            try {
+                                const zipBlob = await zip.generateAsync(
+                                    {
+                                        type: "blob",
+                                        compression: "STORE",
+                                        streamFiles: true,
+                                    },
+                                    (metadata) => {
+                                        // Abort zip generation if user cancels.
+                                        if (canceller.signal.aborted) {
+                                            throw new Error("zip-cancelled");
+                                        }
+                                        // We don't push progress to UI to keep it simple.
+                                        return metadata;
+                                    },
+                                );
+                                await saveBlobPartAsFile(
+                                    zipBlob,
+                                    zipFileName(
+                                        title,
+                                        totalParts > 1 ? partNumber : undefined,
+                                    ),
+                                    "application/zip",
+                                );
+                                updateSaveGroup((g) => ({
+                                    ...g,
+                                    success: g.success + successfulFiles.length,
+                                }));
+                                partNumber++;
+                            } catch (e) {
+                                log.error("Zip creation failed", e);
+                                failedFiles.push(...successfulFiles);
+                                updateSaveGroup((g) => ({
+                                    ...g,
+                                    failed: g.failed + successfulFiles.length,
+                                }));
+                                await downloadIndividually(batch);
+                            }
+                        }
+                    } catch (e) {
+                        log.error("Zip creation failed", e);
+                        if ((e as Error).message === "zip-cancelled") break;
+                        failedFiles.push(...successfulFiles);
+                        updateSaveGroup((g) => ({
+                            ...g,
+                            failed: g.failed + successfulFiles.length,
+                        }));
+                        await downloadIndividually(batch);
+                    }
                 }
             }
 
@@ -198,14 +356,30 @@ const saveAsFile = async (file: EnteFile) => {
 /**
  * Save the given {@link blob} as a file in the user's download folder.
  */
-const saveBlobPartAsFile = async (blobPart: BlobPart, fileName: string) =>
-    createTypedObjectURL(blobPart, fileName).then((url) =>
+const saveBlobPartAsFile = async (
+    blobPart: BlobPart,
+    fileName: string,
+    mimeType?: string,
+) =>
+    createTypedObjectURL(blobPart, fileName, mimeType).then((url) =>
         saveAsFileAndRevokeObjectURL(url, fileName),
     );
 
-const createTypedObjectURL = async (blobPart: BlobPart, fileName: string) => {
+const createTypedObjectURL = async (
+    blobPart: BlobPart,
+    fileName: string,
+    mimeType?: string,
+) => {
     const blob = blobPart instanceof Blob ? blobPart : new Blob([blobPart]);
-    const { mimeType } = await detectFileTypeInfo(new File([blob], fileName));
+    if (!mimeType) {
+        try {
+            ({ mimeType } = await detectFileTypeInfo(
+                new File([blob], fileName),
+            ));
+        } catch (e) {
+            log.error("Failed to detect mime type", e);
+        }
+    }
     return URL.createObjectURL(new Blob([blob], { type: mimeType }));
 };
 
@@ -286,4 +460,16 @@ const saveFileDesktop = async (
     } else {
         await writeStreamToFile(await createExportName(fileName), stream);
     }
+};
+
+const sanitizeZipFileName = (name: string) =>
+    name.replace(/[\\/:*?"<>|]/g, "_").trim() || "ente-download";
+
+const baseZipName = (title: string) =>
+    sanitizeZipFileName(title).replace(/\.zip$/i, "");
+
+const zipFileName = (title: string, part?: number) => {
+    const base = baseZipName(title);
+    const nameWithPart = part ? `${base}-part${part}` : base;
+    return `${nameWithPart}.zip`;
 };
