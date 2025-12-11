@@ -29,13 +29,13 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/account/user_service.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/faces_timeline/faces_timeline_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
+import 'package:photos/services/memory_lane/memory_lane_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -319,13 +319,13 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
-    await FacesTimelineService.instance.init();
+    await MemoryLaneService.instance.init();
     if (flagService.facesTimeline) {
-      FacesTimelineService.instance
+      MemoryLaneService.instance
           .queueFullRecompute(trigger: "startup")
           .ignore();
     } else {
-      _logger.info("Faces timeline disabled via feature flag");
+      _logger.info("Memory Lane disabled via feature flag");
     }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();

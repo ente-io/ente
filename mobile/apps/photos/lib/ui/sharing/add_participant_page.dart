@@ -531,9 +531,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     }
   }
 
-  String _adminActionLabel(int count) => count == 1
-      ? "(i) Add admin"
-      : "(i) Add admins";
+  String _adminActionLabel(int count) =>
+      count == 1 ? "(i) Add admin" : "(i) Add admins";
 
   String _adminSuccessMessage(int count) {
     if (count == 0) {

@@ -50,7 +50,7 @@ class LocalSettings {
   static const _kInternalUserDisabled = "ls.internal_user_disabled";
   static const _kWrapped2025ResumeIndex = "ls.wrapped_2025_resume_index";
   static const _kWrapped2025Complete = "ls.wrapped_2025_complete";
-  static const _facesTimelineSeenKey = "faces_timeline_seen_person_ids";
+  static const _memoryLaneSeenKey = "faces_timeline_seen_person_ids";
 
   final SharedPreferences _prefs;
 
@@ -186,23 +186,23 @@ class LocalSettings {
     await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
   }
 
-  bool hasSeenFacesTimeline(String personId) {
-    final seenIds = _prefs.getStringList(_facesTimelineSeenKey);
+  bool hasSeenMemoryLane(String personId) {
+    final seenIds = _prefs.getStringList(_memoryLaneSeenKey);
     if (seenIds == null || seenIds.isEmpty) {
       return false;
     }
     return seenIds.contains(personId);
   }
 
-  Future<void> markFacesTimelineSeen(String personId) async {
+  Future<void> markMemoryLaneSeen(String personId) async {
     final List<String> seenIds = List<String>.from(
-      _prefs.getStringList(_facesTimelineSeenKey) ?? [],
+      _prefs.getStringList(_memoryLaneSeenKey) ?? [],
     );
     if (seenIds.contains(personId)) {
       return;
     }
     seenIds.add(personId);
-    await _prefs.setStringList(_facesTimelineSeenKey, seenIds);
+    await _prefs.setStringList(_memoryLaneSeenKey, seenIds);
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see

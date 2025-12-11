@@ -2014,11 +2014,11 @@
   "riverCruises": "Вид на реку",
   "facesTimelineBannerTitle": "Линия воспоминаний",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Смотрите фотографии {name} на протяжении многих лет",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2076,7 +2076,7 @@
   },
   "facesTimelineUnavailable": "Таймлайн готовиться...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Игра детей",
   "coastalCliffs": "Скалы у моря"
