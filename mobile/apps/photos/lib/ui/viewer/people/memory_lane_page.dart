@@ -55,6 +55,7 @@ class _MemoryLanePageState extends State<MemoryLanePage>
   static const double _controlsHeightFallback = 140;
   // Wait for this many frames (or the available total) before auto-starting playback.
   static const int _initialFrameTarget = 120;
+  static const double _appBarSideWidth = kToolbarHeight;
 
   final Logger _logger = Logger("MemoryLanePage");
   late final AnimationController _cardTransitionController;
@@ -509,9 +510,27 @@ class _MemoryLanePageState extends State<MemoryLanePage>
                 elevation: 0,
                 scrolledUnderElevation: 0,
                 foregroundColor: colorScheme.textBase,
-                title: Text(
-                  title,
-                  style: titleStyle,
+                automaticallyImplyLeading: false,
+                title: Row(
+                  children: [
+                    const SizedBox(
+                      width: _appBarSideWidth,
+                      height: kToolbarHeight,
+                      child: BackButton(),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          title,
+                          style: titleStyle,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: _appBarSideWidth),
+                  ],
                 ),
               ),
               body: Stack(
