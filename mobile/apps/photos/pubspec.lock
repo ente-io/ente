@@ -616,6 +616,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_icons:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_icons"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_photos_rust:
     dependency: "direct main"
     description:

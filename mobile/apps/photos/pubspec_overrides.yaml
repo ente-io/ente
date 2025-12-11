@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_cast,ente_cast_normal,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,watcher,win32,log_viewer,native_video_editor,ente_qr_ui
+# melos_managed_dependency_overrides: ente_cast,ente_cast_normal,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,watcher,win32,log_viewer,native_video_editor,ente_qr_ui,ente_icons,ente_rust
 dependency_overrides:
   ente_cast:
     path: plugins/ente_cast
@@ -42,3 +42,7 @@ dependency_overrides:
     path: ../../packages/native_video_editor
   ente_qr_ui:
     path: ../../packages/qr
+  ente_icons:
+    path: ../../packages/ente_icons
+  ente_rust:
+    path: ../../packages/rust
