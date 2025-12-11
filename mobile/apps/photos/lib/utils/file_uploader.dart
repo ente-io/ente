@@ -444,7 +444,7 @@ class FileUploader {
       if (file.fileType == FileType.video) {
         _videoUploadCounter--;
       }
-      _pollQueue();
+      unawaited(_pollQueue());
     }
   }
 
