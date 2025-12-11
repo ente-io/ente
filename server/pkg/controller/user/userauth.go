@@ -540,12 +540,12 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 
 }
 
-func convertStringToBytes(s string) []byte {
+func convertStringToBytes(s string) ([]byte, error) {
 	b, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
-		panic(fmt.Sprintf("failed to base64dDecode string %s", s))
+		return nil, ente.NewBadRequestWithMessage("invalid base64 encoding")
 	}
-	return b
+	return b, nil
 }
 
 func convertBytesToString(b []byte) string {

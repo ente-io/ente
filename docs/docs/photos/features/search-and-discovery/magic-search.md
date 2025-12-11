@@ -130,7 +130,7 @@ Magic search works even better when combined with descriptions (captions) you've
 **On mobile and desktop:**
 
 1. Open a photo
-2. Tap the info button (i)
+2. Tap the overflow menu (⋮) and select **Info** on mobile, or click the info button (i) on desktop
 3. Enter your description or caption
 4. Save
 

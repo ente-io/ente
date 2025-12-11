@@ -10,17 +10,14 @@ import "package:ente_lock_screen/auth_util.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_lock_screen/lock_screen_settings.dart";
 import "package:ente_lock_screen/ui/lock_screen_options.dart";
-import "package:ente_ui/components/captioned_text_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/navigation_util.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/drawer/common_settings.dart";
 import "package:logging/logging.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
@@ -31,20 +28,7 @@ class SecuritySectionWidget extends StatefulWidget {
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
-  final _config = Configuration.instance;
-  late bool _hasLoggedIn;
-  final Logger _logger = Logger('SecuritySectionWidget');
-
-  @override
-  void initState() {
-    _hasLoggedIn = _config.hasConfiguredAccount();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  final Logger _logger = Logger("SecuritySectionWidget");
 
   @override
   Widget build(BuildContext context) {
@@ -52,100 +36,77 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     return ExpandableMenuItemWidget(
       title: l10n.security,
       selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Icons.local_police_outlined,
+      leadingIcon: HugeIcons.strokeRoundedSecurityCheck,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     final l10n = context.l10n;
-    final List<Widget> children = [];
-    // if (_hasLoggedIn) {
-    //   children.addAll(
-    //     [
-    //       sectionOptionSpacing,
-    //       MenuItemWidget(
-    //         captionedTextWidget: CaptionedTextWidget(
-    //           title: l10n.emailVerificationToggle,
-    //           makeTextBold: true,
-    //         ),
-    //         trailingWidget: ToggleSwitchWidget(
-    //           value: () => UserService.instance.hasEmailMFAEnabled(),
-    //           onChanged: () async {
-    //             final hasAuthenticated = await LocalAuthenticationService
-    //                 .instance
-    //                 .requestLocalAuthentication(
-    //               context,
-    //               l10n.authToChangeEmailVerificationSetting,
-    //             );
-    //             final isEmailMFAEnabled =
-    //                 UserService.instance.hasEmailMFAEnabled();
-    //             if (hasAuthenticated) {
-    //               await updateEmailMFA(!isEmailMFAEnabled);
-    //             }
-    //           },
-    //         ),
-    //       ),
-    //       sectionOptionSpacing,
-    //       MenuItemWidget(
-    //         captionedTextWidget: CaptionedTextWidget(
-    //           title: context.l10n.passkey,
-    //           makeTextBold: true,
-    //         ),
-    //         trailingIcon: Icons.chevron_right_outlined,
-    //         onTap: () async {
-    //           final hasAuthenticated = await LocalAuthenticationService.instance
-    //               .requestLocalAuthentication(
-    //             context,
-    //             l10n.authToViewPasskey,
-    //           );
-    //           if (hasAuthenticated) {
-    //             await onPasskeyClick(context);
-    //           }
-    //         },
-    //       ),
-    //       sectionOptionSpacing,
-    //     ],
-    //   );
-    // } else {
-    //   children.add(sectionOptionSpacing);
-    // }
-    children.addAll([
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: context.l10n.appLock,
-        ),
-        surfaceExecutionStates: false,
-        trailingIcon: Icons.chevron_right_outlined,
-        onTap: () async {
-          if (await LockScreenSettings.instance.isDeviceSupported()) {
-            final bool result = await requestAuthentication(
-              context,
-              context.l10n.authToChangeLockscreenSetting,
-            );
-            if (result) {
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) {
-                    return const LockScreenOptions();
-                  },
-                ),
+    return Column(
+      children: [
+        // TODO: Enable when ready
+        // ExpandableChildItem(
+        //   title: l10n.emailVerificationToggle,
+        //   trailingWidget: ToggleSwitchWidget(
+        //     value: () => UserService.instance.hasEmailMFAEnabled(),
+        //     onChanged: () async {
+        //       final hasAuthenticated = await LocalAuthenticationService
+        //           .instance
+        //           .requestLocalAuthentication(
+        //         context,
+        //         l10n.authToChangeEmailVerificationSetting,
+        //       );
+        //       final isEmailMFAEnabled =
+        //           UserService.instance.hasEmailMFAEnabled();
+        //       if (hasAuthenticated) {
+        //         await updateEmailMFA(!isEmailMFAEnabled);
+        //       }
+        //     },
+        //   ),
+        // ),
+        // TODO: Enable when ready
+        // ExpandableChildItem(
+        //   title: l10n.passkey,
+        //   trailingIcon: Icons.chevron_right,
+        //   onTap: () async {
+        //     final hasAuthenticated = await LocalAuthenticationService.instance
+        //         .requestLocalAuthentication(
+        //       context,
+        //       l10n.authToViewPasskey,
+        //     );
+        //     if (hasAuthenticated) {
+        //       await onPasskeyClick(context);
+        //     }
+        //   },
+        // ),
+        ExpandableChildItem(
+          title: l10n.appLock,
+          trailingIcon: Icons.chevron_right,
+          onTap: () async {
+            if (await LockScreenSettings.instance.isDeviceSupported()) {
+              final bool result = await requestAuthentication(
+                context,
+                context.l10n.authToChangeLockscreenSetting,
+              );
+              if (result) {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return const LockScreenOptions();
+                    },
+                  ),
+                );
+              }
+            } else {
+              await showErrorDialog(
+                context,
+                context.l10n.noSystemLockFound,
+                context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
               );
             }
-          } else {
-            await showErrorDialog(
-              context,
-              context.l10n.noSystemLockFound,
-              context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
-            );
-          }
-        },
-      ),
-      sectionOptionSpacing,
-    ]);
-
-    return Column(
-      children: children,
+          },
+        ),
+      ],
     );
   }
 

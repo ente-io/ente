@@ -19,6 +19,12 @@ import "package:photos/services/entity_service.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
+typedef ManualPersonAssignmentResult = ({
+  PersonEntity person,
+  List<int> addedFileIds,
+  List<int> alreadyAssignedFileIds,
+});
+
 class PersonService {
   final EntityService entityService;
   final MLDataDB faceMLDataDB;
@@ -566,6 +572,55 @@ class PersonService {
       }
     }
     return updatedPerson;
+  }
+
+  Future<ManualPersonAssignmentResult> addManualFileAssignments({
+    required String personID,
+    required Set<int> fileIDs,
+  }) async {
+    final person = await getPerson(personID);
+    if (person == null) {
+      throw Exception("Person $personID not found");
+    }
+    if (fileIDs.isEmpty) {
+      return (
+        person: person,
+        addedFileIds: const <int>[],
+        alreadyAssignedFileIds: const <int>[],
+      );
+    }
+    final existingClusterFileIds =
+        await faceMLDataDB.getFileIdToClusterIDSet(personID);
+    final manualFileIDs = person.data.manuallyAssigned.toSet();
+    final addedFileIDs = <int>[];
+    final alreadyAssigned = <int>[];
+    for (final id in fileIDs) {
+      if (existingClusterFileIds.containsKey(id) ||
+          manualFileIDs.contains(id)) {
+        alreadyAssigned.add(id);
+        continue;
+      }
+      addedFileIDs.add(id);
+    }
+    if (addedFileIDs.isEmpty) {
+      return (
+        person: person,
+        addedFileIds: const <int>[],
+        alreadyAssignedFileIds: alreadyAssigned,
+      );
+    }
+    final updatedPerson = person.copyWith(
+      data: person.data.copyWith(
+        manuallyAssigned: [...manualFileIDs, ...addedFileIDs],
+      ),
+    );
+    await updatePerson(updatedPerson);
+    await refreshPersonCache();
+    return (
+      person: updatedPerson,
+      addedFileIds: addedFileIDs,
+      alreadyAssignedFileIds: alreadyAssigned,
+    );
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {

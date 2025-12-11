@@ -88,7 +88,7 @@ class _PeoplePageState extends State<PeoplePage> {
       }
     });
 
-    filesFuture = loadPersonFiles();
+    filesFuture = _loadPersonFiles();
 
     _filesUpdatedEvent = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((
       event,
@@ -127,22 +127,12 @@ class _PeoplePageState extends State<PeoplePage> {
     }
   }
 
-  Future<List<EnteFile>> loadPersonFiles() async {
-    final result = await SearchService.instance.getClusterFilesForPersonID(
+  Future<List<EnteFile>> _loadPersonFiles() async {
+    final sortedFiles = await SearchService.instance.getFilesForPersonID(
       _person.remoteID,
+      includeManualAssigned: true,
+      sortOnTime: true,
     );
-    if (result.isEmpty) {
-      _logger.severe(
-        "No files found for person with id ${_person.remoteID}, can't load files",
-      );
-      return [];
-    }
-    final Set<EnteFile> resultFiles = {};
-    for (final e in result.entries) {
-      resultFiles.addAll(e.value);
-    }
-    final List<EnteFile> sortedFiles = List<EnteFile>.from(resultFiles);
-    sortedFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
     files = sortedFiles;
     return sortedFiles;
   }
@@ -231,7 +221,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                           tagPrefix: widget.tagPrefix,
                                           selectedFiles: _selectedFiles,
                                           personFiles: personFiles,
-                                          loadPersonFiles: loadPersonFiles,
+                                          loadPersonFiles: _loadPersonFiles,
                                           personEntity: _person,
                                           facesTimelineEnabled: featureEnabled,
                                           showTimelineBanner:
@@ -249,7 +239,7 @@ class _PeoplePageState extends State<PeoplePage> {
                                 tagPrefix: widget.tagPrefix,
                                 selectedFiles: _selectedFiles,
                                 personFiles: personFiles,
-                                loadPersonFiles: loadPersonFiles,
+                                loadPersonFiles: _loadPersonFiles,
                                 personEntity: _person,
                                 facesTimelineEnabled: featureEnabled,
                                 showTimelineBanner: showFacesTimelineBanner,

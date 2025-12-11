@@ -1,3 +1,5 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:photos/core/constants.dart';
@@ -25,12 +27,13 @@ Future<ButtonResult?> showActionSheet({
   Widget? bodyWidget,
   String? body,
   String? bodyHighlight,
-  bool useRootNavigator = false,
 }) {
   return showMaterialModalBottomSheet(
     backgroundColor: Colors.transparent,
     barrierColor: backdropFaintDark,
-    useRootNavigator: useRootNavigator,
+    // On iOS setting it to false causes previous page to shift
+    // So we're explicitly setting it to true
+    useRootNavigator: Platform.isIOS ? true : false,
     context: context,
     isDismissible: isDismissible,
     enableDrag: enableDrag,
