@@ -106,7 +106,7 @@ class Collection {
   }
 
   bool hasShareePinned() {
-    return sharedMmdVersion > 0 && (sharedMagicMetadata.order ?? 0) != 0;
+    return (sharedMagicMetadata.order ?? 0) != 0;
   }
 
   // hasLink returns true if there's any link attached to the collection
