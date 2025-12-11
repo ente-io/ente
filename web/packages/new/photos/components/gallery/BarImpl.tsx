@@ -6,6 +6,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { Overlay } from "ente-base/components/containers";
 import { FilledIconButton } from "ente-base/components/mui";
 import { Ellipsized2LineTypography } from "ente-base/components/Typography";
@@ -539,7 +540,9 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
         {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
-        {(attributes.has("pinned") || attributes.has("shareePinned")) && (
+        {(attributes.has("pinned") ||
+            (attributes.has("shareePinned") &&
+                settingsSnapshot().isShareePinEnabled)) && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
