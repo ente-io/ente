@@ -13,8 +13,8 @@ command:
   bootstrap:
     hooks:
       post: |
-        # Activate flutter_rust_bridge if not already activated
-        dart pub global activate flutter_rust_bridge 2>/dev/null || true
+        # Install flutter_rust_bridge_codegen if not already installed
+        cargo install flutter_rust_bridge_codegen 2>/dev/null || true
 
         # Generate Rust bindings for packages/rust
         echo "Generating flutter_rust_bridge bindings for packages/rust..."
@@ -37,8 +37,8 @@ scripts:
 
   codegen:rust:
     run: |
-      # Activate flutter_rust_bridge if not already activated
-      dart pub global activate flutter_rust_bridge 2>/dev/null || true
+      # Install flutter_rust_bridge_codegen if not already installed
+      cargo install flutter_rust_bridge_codegen 2>/dev/null || true
 
       # Generate Rust bindings for packages/rust
       echo "Generating flutter_rust_bridge bindings for packages/rust..."
@@ -51,14 +51,14 @@ scripts:
 
   codegen:rust:packages:
     run: |
-      dart pub global activate flutter_rust_bridge 2>/dev/null || true
+      cargo install flutter_rust_bridge_codegen 2>/dev/null || true
       echo "Generating flutter_rust_bridge bindings for packages/rust..."
       (cd packages/rust && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for packages/rust only.
 
   codegen:rust:photos:
     run: |
-      dart pub global activate flutter_rust_bridge 2>/dev/null || true
+      cargo install flutter_rust_bridge_codegen 2>/dev/null || true
       echo "Generating flutter_rust_bridge bindings for apps/photos..."
       (cd apps/photos && flutter_rust_bridge_codegen generate)
     description: Generate Rust bindings for apps/photos only.
