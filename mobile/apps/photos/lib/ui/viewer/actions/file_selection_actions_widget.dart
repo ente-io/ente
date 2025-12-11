@@ -957,7 +957,6 @@ class _FileSelectionActionsWidgetState
     try {
       final actionResult = await showActionSheet(
         context: context,
-        useRootNavigator: true,
         buttons: [
           ButtonWidget(
             labelText: AppLocalizations.of(context).yesRemove,
