@@ -288,8 +288,8 @@ class FileUploader {
   Future<void> _cleanupAndSkip(FileUploadItem entry, Error error) async {
     final localId = entry.file.localID;
     if (localId != null) {
-      await FilesDB.instance.cleanupByLocalIDAndCollection(
-        localId,
+      await FilesDB.instance.cleanupPendingUploadsFromCollection(
+        [localId],
         entry.collectionID,
       );
       _queue.remove(localId);

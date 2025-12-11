@@ -1481,7 +1481,6 @@ class FilesDB with SqlDbBase {
   /// Cleanup a file entry from the database by localID and collectionID.
   /// This is used when a file should be removed from pending uploads (e.g., folder
   /// deselected, file too old for only-new backup preference).
-  /// Errors are logged at warning level but not rethrown to avoid blocking the upload flow.
   /// Cleans up pending upload entries from a collection by localIDs.
   ///
   /// For each localID, if another entry already exists with null collectionID
@@ -1498,78 +1497,71 @@ class FilesDB with SqlDbBase {
       return (deleted: 0, updated: 0);
     }
 
-    final db = await instance.sqliteAsyncDB;
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-
-    // Find localIDs that already have entries with null collectionID
-    final existingRows = await db.getAll(
-      '''
-      SELECT $columnLocalID FROM $filesTable
-      WHERE $columnLocalID IN ($inParam)
-        AND ($columnCollectionID IS NULL OR $columnCollectionID = -1)
-        AND $columnUploadedFileID IS NULL;
-      ''',
-    );
-    final localIDsWithNullCollection = {
-      for (final row in existingRows) row[columnLocalID] as String,
-    };
-
-    final localIDsToDelete = localIDs
-        .where((id) => localIDsWithNullCollection.contains(id))
-        .toList();
-    final localIDsToUpdate = localIDs
-        .where((id) => !localIDsWithNullCollection.contains(id))
-        .toList();
-
-    // Delete entries that would conflict
-    if (localIDsToDelete.isNotEmpty) {
-      final deleteInParam = localIDsToDelete.map((id) => "'$id'").join(',');
-      await db.execute(
-        '''
-        DELETE FROM $filesTable
-        WHERE $columnLocalID IN ($deleteInParam)
-        AND $columnCollectionID = ?
-        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
-        ''',
-        [collectionId],
-      );
-    }
-
-    // Update remaining entries
-    if (localIDsToUpdate.isNotEmpty) {
-      final updateInParam = localIDsToUpdate.map((id) => "'$id'").join(',');
-      await db.execute(
-        '''
-        UPDATE $filesTable
-        SET $columnCollectionID = NULL, $columnQueueSource = NULL
-        WHERE $columnLocalID IN ($updateInParam)
-        AND $columnCollectionID = ?
-        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
-        ''',
-        [collectionId],
-      );
-    }
-
-    return (deleted: localIDsToDelete.length, updated: localIDsToUpdate.length);
-  }
-
-  /// Cleans up a single pending upload entry by localID and collectionID.
-  ///
-  /// Convenience wrapper around [cleanupPendingUploadsFromCollection].
-  Future<void> cleanupByLocalIDAndCollection(
-    String localId,
-    int collectionId,
-  ) async {
     try {
-      await cleanupPendingUploadsFromCollection([localId], collectionId);
+      final db = await instance.sqliteAsyncDB;
+      final inParam = localIDs.map((id) => "'$id'").join(',');
+
+      // Find localIDs that already have entries with null collectionID
+      final existingRows = await db.getAll(
+        '''
+        SELECT $columnLocalID FROM $filesTable
+        WHERE $columnLocalID IN ($inParam)
+          AND ($columnCollectionID IS NULL OR $columnCollectionID = -1)
+          AND $columnUploadedFileID IS NULL;
+        ''',
+      );
+      final localIDsWithNullCollection = {
+        for (final row in existingRows) row[columnLocalID] as String,
+      };
+
+      final localIDsToDelete = localIDs
+          .where((id) => localIDsWithNullCollection.contains(id))
+          .toList();
+      final localIDsToUpdate = localIDs
+          .where((id) => !localIDsWithNullCollection.contains(id))
+          .toList();
+
+      // Delete entries that would conflict
+      if (localIDsToDelete.isNotEmpty) {
+        final deleteInParam = localIDsToDelete.map((id) => "'$id'").join(',');
+        await db.execute(
+          '''
+          DELETE FROM $filesTable
+          WHERE $columnLocalID IN ($deleteInParam)
+          AND $columnCollectionID = ?
+          AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+          ''',
+          [collectionId],
+        );
+      }
+
+      // Update remaining entries
+      if (localIDsToUpdate.isNotEmpty) {
+        final updateInParam = localIDsToUpdate.map((id) => "'$id'").join(',');
+        await db.execute(
+          '''
+          UPDATE $filesTable
+          SET $columnCollectionID = NULL, $columnQueueSource = NULL
+          WHERE $columnLocalID IN ($updateInParam)
+          AND $columnCollectionID = ?
+          AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+          ''',
+          [collectionId],
+        );
+      }
+
+      return (deleted: localIDsToDelete.length, updated: localIDsToUpdate.length);
     } catch (e, s) {
       _logger.warning(
-        "Failed to cleanup pending upload localID=$localId, collectionID=$collectionId",
+        "Failed to cleanup pending uploads for collectionID=$collectionId, localIDs=$localIDs",
         e,
         s,
       );
+      return (deleted: 0, updated: 0);
     }
   }
+
+
 
   Future<Set<String>> getLocalIDsPresentInEntries(
     List<EnteFile> existingFiles,
