@@ -200,9 +200,9 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.all(8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
