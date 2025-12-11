@@ -11,7 +11,7 @@ important documents in the cloud with secure sharing capabilities.
 
 3. Install dependencies using one of these methods:
    - **Using Melos (recommended):** Install Melos with `dart pub global activate melos`, then from any folder inside `mobile/`, run `melos bootstrap`. This will install dependencies and generate Rust bindings for shared packages.
-   - **Using Flutter directly:** Run `flutter pub get`, then run `flutter gen-l10n` to generate localization files.
+   - **Using Flutter directly:** Run `flutter pub get` in `packages/strings` and this folder
 
 4. For Android, [setup your
    keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
