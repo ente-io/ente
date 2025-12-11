@@ -13,12 +13,12 @@ import "package:photos/services/memory_lane/memory_lane_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/face/face_thumbnail_cache.dart";
 
-class FacesTimelineBanner extends StatelessWidget {
+class MemoryLaneBanner extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final ImageProvider? thumbnail;
 
-  const FacesTimelineBanner({
+  const MemoryLaneBanner({
     required this.title,
     required this.onTap,
     this.thumbnail,
@@ -228,14 +228,14 @@ class _SparklePainter extends CustomPainter {
   }
 }
 
-class FacesTimelineBannerSection extends StatefulWidget {
+class MemoryLaneBannerSection extends StatefulWidget {
   final bool showBanner;
   final PersonEntity person;
   final VoidCallback? onTap;
-  final Future<FacesTimelinePersonTimeline?> Function(String personId)?
+  final Future<MemoryLanePersonTimeline?> Function(String personId)?
       loadTimeline;
 
-  const FacesTimelineBannerSection({
+  const MemoryLaneBannerSection({
     required this.showBanner,
     required this.person,
     this.onTap,
@@ -244,13 +244,12 @@ class FacesTimelineBannerSection extends StatefulWidget {
   });
 
   @override
-  State<FacesTimelineBannerSection> createState() =>
-      _FacesTimelineBannerSectionState();
+  State<MemoryLaneBannerSection> createState() =>
+      _MemoryLaneBannerSectionState();
 }
 
-class _FacesTimelineBannerSectionState
-    extends State<FacesTimelineBannerSection> {
-  final Logger _logger = Logger("FacesTimelineBannerSection");
+class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
+  final Logger _logger = Logger("MemoryLaneBannerSection");
   MemoryImage? _thumbnail;
   Future<void>? _thumbnailFuture;
 
@@ -261,7 +260,7 @@ class _FacesTimelineBannerSectionState
   }
 
   @override
-  void didUpdateWidget(covariant FacesTimelineBannerSection oldWidget) {
+  void didUpdateWidget(covariant MemoryLaneBannerSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     final bool personChanged =
         widget.person.remoteID != oldWidget.person.remoteID;
@@ -286,7 +285,7 @@ class _FacesTimelineBannerSectionState
   Future<void> _loadThumbnail() async {
     try {
       final loader =
-          widget.loadTimeline ?? FacesTimelineService.instance.getTimeline;
+          widget.loadTimeline ?? MemoryLaneService.instance.getTimeline;
       final timeline = await loader(widget.person.remoteID);
       if (!mounted || timeline == null || !timeline.isReady) {
         return;
@@ -313,7 +312,7 @@ class _FacesTimelineBannerSectionState
     }
   }
 
-  Future<MemoryImage?> _loadFaceThumbnail(FacesTimelineEntry entry) async {
+  Future<MemoryImage?> _loadFaceThumbnail(MemoryLaneEntry entry) async {
     final file = await FilesDB.instance.getAnyUploadedFile(entry.fileId);
     if (file == null) {
       return null;
@@ -353,7 +352,7 @@ class _FacesTimelineBannerSectionState
     if (!widget.showBanner || widget.onTap == null) {
       return const SizedBox.shrink();
     }
-    return FacesTimelineBanner(
+    return MemoryLaneBanner(
       title: context.l10n.facesTimelineBannerTitle,
       onTap: widget.onTap!,
       thumbnail: _thumbnail,

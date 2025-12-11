@@ -56,7 +56,7 @@ class PeoplePage extends StatefulWidget {
 
 class _PeoplePageState extends State<PeoplePage> {
   final Logger _logger = Logger("_PeoplePageState");
-  final Logger _timelineLogger = Logger("FacesTimelineInteractions");
+  final Logger _timelineLogger = Logger("MemoryLaneInteractions");
   final _selectedFiles = SelectedFiles();
   List<EnteFile>? files;
   Future<List<EnteFile>> filesFuture = Future.value([]);
@@ -70,7 +70,7 @@ class _PeoplePageState extends State<PeoplePage> {
   ValueNotifier<Set<String>>? _timelineNotifier;
   VoidCallback? _timelineListener;
 
-  bool get _facesTimelineEnabled => flagService.facesTimeline;
+  bool get _memoryLaneEnabled => flagService.facesTimeline;
 
   @override
   void initState() {
@@ -109,17 +109,17 @@ class _PeoplePageState extends State<PeoplePage> {
                 widget.searchResult!.getHierarchicalSearchFilter(),
           )
         : null;
-    if (_facesTimelineEnabled) {
-      _timelineNotifier = FacesTimelineService.instance.readyPersonIds;
+    if (_memoryLaneEnabled) {
+      _timelineNotifier = MemoryLaneService.instance.readyPersonIds;
       _timelineListener = () {
         if (!mounted) return;
         setState(() {});
       };
       _timelineNotifier!.addListener(_timelineListener!);
-      if (!FacesTimelineService.instance.hasReadyTimelineSync(
+      if (!MemoryLaneService.instance.hasReadyTimelineSync(
         _person.remoteID,
       )) {
-        FacesTimelineService.instance.schedulePersonRecompute(
+        MemoryLaneService.instance.schedulePersonRecompute(
           _person.remoteID,
           trigger: "people_page_visit",
         );
@@ -147,10 +147,10 @@ class _PeoplePageState extends State<PeoplePage> {
     super.dispose();
   }
 
-  Future<void> _openFacesTimelinePage() async {
-    if (!_facesTimelineEnabled) return;
+  Future<void> _openMemoryLanePage() async {
+    if (!_memoryLaneEnabled) return;
     _timelineLogger.info("banner_tap person=${_person.remoteID}");
-    await routeToPage(context, FacesTimelinePage(person: _person));
+    await routeToPage(context, MemoryLanePage(person: _person));
     if (!mounted) {
       return;
     }
@@ -160,16 +160,16 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    final bool featureEnabled = _facesTimelineEnabled;
-    final bool facesTimelineReady = featureEnabled
-        ? FacesTimelineService.instance.hasReadyTimelineSync(
+    final bool featureEnabled = _memoryLaneEnabled;
+    final bool memoryLaneReady = featureEnabled
+        ? MemoryLaneService.instance.hasReadyTimelineSync(
             _person.remoteID,
           )
         : false;
-    final bool hasSeenFacesTimeline =
-        localSettings.hasSeenFacesTimeline(_person.remoteID);
-    final bool showFacesTimelineBanner =
-        featureEnabled && facesTimelineReady && !hasSeenFacesTimeline;
+    final bool hasSeenMemoryLane =
+        localSettings.hasSeenMemoryLane(_person.remoteID);
+    final bool showMemoryLaneBanner =
+        featureEnabled && memoryLaneReady && !hasSeenMemoryLane;
 
     return GalleryBoundariesProvider(
       child: GalleryFilesState(
@@ -187,9 +187,9 @@ class _PeoplePageState extends State<PeoplePage> {
                     : _person.data.name,
                 _selectedFiles,
                 _person,
-                facesTimelineReady: facesTimelineReady,
-                onFacesTimelineTap: featureEnabled && facesTimelineReady
-                    ? _openFacesTimelinePage
+                memoryLaneReady: memoryLaneReady,
+                onMemoryLaneTap: featureEnabled && memoryLaneReady
+                    ? _openMemoryLanePage
                     : null,
               ),
             ),
@@ -223,15 +223,15 @@ class _PeoplePageState extends State<PeoplePage> {
                                           personFiles: personFiles,
                                           loadPersonFiles: _loadPersonFiles,
                                           personEntity: _person,
-                                          facesTimelineEnabled: featureEnabled,
+                                          memoryLaneEnabled: featureEnabled,
                                           showTimelineBanner:
-                                              showFacesTimelineBanner,
-                                          onTimelineTap: featureEnabled &&
-                                                  facesTimelineReady
-                                              ? () => unawaited(
-                                                    _openFacesTimelinePage(),
-                                                  )
-                                              : null,
+                                              showMemoryLaneBanner,
+                                          onTimelineTap:
+                                              featureEnabled && memoryLaneReady
+                                                  ? () => unawaited(
+                                                        _openMemoryLanePage(),
+                                                      )
+                                                  : null,
                                         );
                                 },
                               )
@@ -241,14 +241,13 @@ class _PeoplePageState extends State<PeoplePage> {
                                 personFiles: personFiles,
                                 loadPersonFiles: _loadPersonFiles,
                                 personEntity: _person,
-                                facesTimelineEnabled: featureEnabled,
-                                showTimelineBanner: showFacesTimelineBanner,
-                                onTimelineTap:
-                                    featureEnabled && facesTimelineReady
-                                        ? () => unawaited(
-                                              _openFacesTimelinePage(),
-                                            )
-                                        : null,
+                                memoryLaneEnabled: featureEnabled,
+                                showTimelineBanner: showMemoryLaneBanner,
+                                onTimelineTap: featureEnabled && memoryLaneReady
+                                    ? () => unawaited(
+                                          _openMemoryLanePage(),
+                                        )
+                                    : null,
                               ),
                         FileSelectionOverlayBar(
                           PeoplePage.overlayType,
@@ -282,7 +281,7 @@ class _Gallery extends StatefulWidget {
   final List<EnteFile> personFiles;
   final Future<List<EnteFile>> Function() loadPersonFiles;
   final PersonEntity personEntity;
-  final bool facesTimelineEnabled;
+  final bool memoryLaneEnabled;
   final bool showTimelineBanner;
   final VoidCallback? onTimelineTap;
 
@@ -292,7 +291,7 @@ class _Gallery extends StatefulWidget {
     required this.personFiles,
     required this.loadPersonFiles,
     required this.personEntity,
-    required this.facesTimelineEnabled,
+    required this.memoryLaneEnabled,
     this.showTimelineBanner = false,
     this.onTimelineTap,
   });
@@ -303,7 +302,7 @@ class _Gallery extends StatefulWidget {
 
 class _GalleryState extends State<_Gallery> {
   bool userDismissedPersonGallerySuggestion = false;
-  final Logger _timelineLogger = Logger("FacesTimelineBanner");
+  final Logger _timelineLogger = Logger("MemoryLaneBanner");
   bool _loggedTimelineImpression = false;
 
   @override
@@ -358,14 +357,13 @@ class _GalleryState extends State<_Gallery> {
                     },
                   ),
                 ),
-          FacesTimelineBannerSection(
-            showBanner:
-                widget.facesTimelineEnabled && widget.showTimelineBanner,
+          MemoryLaneBannerSection(
+            showBanner: widget.memoryLaneEnabled && widget.showTimelineBanner,
             person: widget.personEntity,
-            onTap: widget.facesTimelineEnabled ? widget.onTimelineTap : null,
+            onTap: widget.memoryLaneEnabled ? widget.onTimelineTap : null,
           ),
-          if (widget.facesTimelineEnabled)
-            FacesTimelineDebugPanel(person: widget.personEntity),
+          if (widget.memoryLaneEnabled)
+            MemoryLaneDebugPanel(person: widget.personEntity),
           !userDismissedPersonGallerySuggestion
               ? Dismissible(
                   key: const Key("personGallerySuggestion"),

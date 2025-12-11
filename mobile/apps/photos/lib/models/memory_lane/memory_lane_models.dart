@@ -1,34 +1,34 @@
 import "dart:convert";
 
-enum FacesTimelineStatus { ready, ineligible }
+enum MemoryLaneStatus { ready, ineligible }
 
-FacesTimelineStatus facesTimelineStatusFromString(String value) {
+MemoryLaneStatus memoryLaneStatusFromString(String value) {
   switch (value) {
     case "ready":
-      return FacesTimelineStatus.ready;
+      return MemoryLaneStatus.ready;
     case "ineligible":
-      return FacesTimelineStatus.ineligible;
+      return MemoryLaneStatus.ineligible;
     default:
       throw ArgumentError.value(value, "value", "Unsupported timeline status");
   }
 }
 
-String facesTimelineStatusToString(FacesTimelineStatus status) {
+String memoryLaneStatusToString(MemoryLaneStatus status) {
   switch (status) {
-    case FacesTimelineStatus.ready:
+    case MemoryLaneStatus.ready:
       return "ready";
-    case FacesTimelineStatus.ineligible:
+    case MemoryLaneStatus.ineligible:
       return "ineligible";
   }
 }
 
-class FacesTimelineEntry {
+class MemoryLaneEntry {
   final String faceId;
   final int fileId;
   final int creationTimeMicros;
   final int year;
 
-  const FacesTimelineEntry({
+  const MemoryLaneEntry({
     required this.faceId,
     required this.fileId,
     required this.creationTimeMicros,
@@ -42,8 +42,8 @@ class FacesTimelineEntry {
         "year": year,
       };
 
-  factory FacesTimelineEntry.fromJson(Map<String, dynamic> json) {
-    return FacesTimelineEntry(
+  factory MemoryLaneEntry.fromJson(Map<String, dynamic> json) {
+    return MemoryLaneEntry(
       faceId: json["faceId"] as String,
       fileId: json["fileId"] as int,
       creationTimeMicros: json["creationTime"] as int,
@@ -52,49 +52,48 @@ class FacesTimelineEntry {
   }
 }
 
-class FacesTimelinePersonTimeline {
+class MemoryLanePersonTimeline {
   final String personId;
-  final FacesTimelineStatus status;
+  final MemoryLaneStatus status;
   final int updatedAtMicros;
-  final List<FacesTimelineEntry> entries;
+  final List<MemoryLaneEntry> entries;
 
-  const FacesTimelinePersonTimeline({
+  const MemoryLanePersonTimeline({
     required this.personId,
     required this.status,
     required this.updatedAtMicros,
     required this.entries,
   });
 
-  bool get isReady => status == FacesTimelineStatus.ready;
+  bool get isReady => status == MemoryLaneStatus.ready;
 
   Map<String, dynamic> toJson() => {
         "personId": personId,
-        "status": facesTimelineStatusToString(status),
+        "status": memoryLaneStatusToString(status),
         "updatedAt": updatedAtMicros,
         "entries": entries.map((entry) => entry.toJson()).toList(),
       };
 
-  factory FacesTimelinePersonTimeline.fromJson(Map<String, dynamic> json) {
+  factory MemoryLanePersonTimeline.fromJson(Map<String, dynamic> json) {
     final Iterable entriesJson = json["entries"] as Iterable? ?? [];
-    return FacesTimelinePersonTimeline(
+    return MemoryLanePersonTimeline(
       personId: json["personId"] as String,
-      status: facesTimelineStatusFromString(json["status"] as String),
+      status: memoryLaneStatusFromString(json["status"] as String),
       updatedAtMicros: json["updatedAt"] as int,
       entries: entriesJson
           .map(
-            (entry) =>
-                FacesTimelineEntry.fromJson(entry as Map<String, dynamic>),
+            (entry) => MemoryLaneEntry.fromJson(entry as Map<String, dynamic>),
           )
           .toList(growable: false),
     );
   }
 
-  FacesTimelinePersonTimeline copyWith({
-    FacesTimelineStatus? status,
+  MemoryLanePersonTimeline copyWith({
+    MemoryLaneStatus? status,
     int? updatedAtMicros,
-    List<FacesTimelineEntry>? entries,
+    List<MemoryLaneEntry>? entries,
   }) {
-    return FacesTimelinePersonTimeline(
+    return MemoryLanePersonTimeline(
       personId: personId,
       status: status ?? this.status,
       updatedAtMicros: updatedAtMicros ?? this.updatedAtMicros,
@@ -103,7 +102,7 @@ class FacesTimelinePersonTimeline {
   }
 }
 
-class FacesTimelineComputeLogEntry {
+class MemoryLaneComputeLogEntry {
   final String personId;
   final String? name;
   final String? birthDate;
@@ -111,7 +110,7 @@ class FacesTimelineComputeLogEntry {
   final int lastComputedMicros;
   final int logicVersion;
 
-  const FacesTimelineComputeLogEntry({
+  const MemoryLaneComputeLogEntry({
     required this.personId,
     required this.faceCount,
     required this.lastComputedMicros,
@@ -129,8 +128,8 @@ class FacesTimelineComputeLogEntry {
         "logicVersion": logicVersion,
       };
 
-  factory FacesTimelineComputeLogEntry.fromJson(Map<String, dynamic> json) {
-    return FacesTimelineComputeLogEntry(
+  factory MemoryLaneComputeLogEntry.fromJson(Map<String, dynamic> json) {
+    return MemoryLaneComputeLogEntry(
       personId: json["personId"] as String,
       name: json["name"] as String?,
       birthDate: json["birthDate"] as String?,
@@ -140,14 +139,14 @@ class FacesTimelineComputeLogEntry {
     );
   }
 
-  FacesTimelineComputeLogEntry copyWith({
+  MemoryLaneComputeLogEntry copyWith({
     String? name,
     String? birthDate,
     int? faceCount,
     int? lastComputedMicros,
     int? logicVersion,
   }) {
-    return FacesTimelineComputeLogEntry(
+    return MemoryLaneComputeLogEntry(
       personId: personId,
       name: name ?? this.name,
       birthDate: birthDate ?? this.birthDate,
@@ -158,23 +157,23 @@ class FacesTimelineComputeLogEntry {
   }
 }
 
-class FacesTimelineCachePayload {
+class MemoryLaneCachePayload {
   static const currentVersion = 1;
   static const currentComputeLogVersion = 1;
 
   final int version;
-  final Map<String, FacesTimelinePersonTimeline> timelines;
+  final Map<String, MemoryLanePersonTimeline> timelines;
   final int computeLogVersion;
-  final Map<String, FacesTimelineComputeLogEntry> computeLog;
+  final Map<String, MemoryLaneComputeLogEntry> computeLog;
 
-  const FacesTimelineCachePayload({
+  const MemoryLaneCachePayload({
     required this.version,
     required this.timelines,
     required this.computeLogVersion,
     required this.computeLog,
   });
 
-  FacesTimelineCachePayload.empty()
+  MemoryLaneCachePayload.empty()
       : version = currentVersion,
         timelines = {},
         computeLogVersion = currentComputeLogVersion,
@@ -191,18 +190,17 @@ class FacesTimelineCachePayload {
 
   String toEncodedJson() => jsonEncode(toJson());
 
-  FacesTimelinePersonTimeline? operator [](String personId) =>
-      timelines[personId];
+  MemoryLanePersonTimeline? operator [](String personId) => timelines[personId];
 
-  Iterable<FacesTimelinePersonTimeline> get allTimelines => timelines.values;
+  Iterable<MemoryLanePersonTimeline> get allTimelines => timelines.values;
 
-  FacesTimelineCachePayload copyWithTimeline(
-    FacesTimelinePersonTimeline timeline,
+  MemoryLaneCachePayload copyWithTimeline(
+    MemoryLanePersonTimeline timeline,
   ) {
     final updatedTimelines =
-        Map<String, FacesTimelinePersonTimeline>.from(timelines);
+        Map<String, MemoryLanePersonTimeline>.from(timelines);
     updatedTimelines[timeline.personId] = timeline;
-    return FacesTimelineCachePayload(
+    return MemoryLaneCachePayload(
       version: version,
       timelines: updatedTimelines,
       computeLogVersion: computeLogVersion,
@@ -210,14 +208,12 @@ class FacesTimelineCachePayload {
     );
   }
 
-  FacesTimelineCachePayload copyWithoutPerson(String personId) {
+  MemoryLaneCachePayload copyWithoutPerson(String personId) {
     final updatedTimelines =
-        Map<String, FacesTimelinePersonTimeline>.from(timelines)
-          ..remove(personId);
-    final updatedLog =
-        Map<String, FacesTimelineComputeLogEntry>.from(computeLog)
-          ..remove(personId);
-    return FacesTimelineCachePayload(
+        Map<String, MemoryLanePersonTimeline>.from(timelines)..remove(personId);
+    final updatedLog = Map<String, MemoryLaneComputeLogEntry>.from(computeLog)
+      ..remove(personId);
+    return MemoryLaneCachePayload(
       version: version,
       timelines: updatedTimelines,
       computeLogVersion: computeLogVersion,
@@ -225,13 +221,12 @@ class FacesTimelineCachePayload {
     );
   }
 
-  FacesTimelineCachePayload copyWithComputeLogEntry(
-    FacesTimelineComputeLogEntry entry,
+  MemoryLaneCachePayload copyWithComputeLogEntry(
+    MemoryLaneComputeLogEntry entry,
   ) {
-    final updatedLog =
-        Map<String, FacesTimelineComputeLogEntry>.from(computeLog);
+    final updatedLog = Map<String, MemoryLaneComputeLogEntry>.from(computeLog);
     updatedLog[entry.personId] = entry;
-    return FacesTimelineCachePayload(
+    return MemoryLaneCachePayload(
       version: version,
       timelines: timelines,
       computeLogVersion: computeLogVersion,
@@ -239,11 +234,11 @@ class FacesTimelineCachePayload {
     );
   }
 
-  FacesTimelineCachePayload copyWithComputeLog({
-    required Map<String, FacesTimelineComputeLogEntry> entries,
+  MemoryLaneCachePayload copyWithComputeLog({
+    required Map<String, MemoryLaneComputeLogEntry> entries,
     required int logVersion,
   }) {
-    return FacesTimelineCachePayload(
+    return MemoryLaneCachePayload(
       version: version,
       timelines: timelines,
       computeLogVersion: logVersion,
@@ -251,25 +246,25 @@ class FacesTimelineCachePayload {
     );
   }
 
-  factory FacesTimelineCachePayload.fromJson(Map<String, dynamic> json) {
+  factory MemoryLaneCachePayload.fromJson(Map<String, dynamic> json) {
     final int jsonVersion = json["version"] as int? ?? currentVersion;
     final peopleJson = json["people"] as Map<String, dynamic>? ?? {};
-    final timelines = <String, FacesTimelinePersonTimeline>{};
+    final timelines = <String, MemoryLanePersonTimeline>{};
     for (final entry in peopleJson.entries) {
-      timelines[entry.key] = FacesTimelinePersonTimeline.fromJson(
+      timelines[entry.key] = MemoryLanePersonTimeline.fromJson(
         Map<String, dynamic>.from(entry.value as Map),
       );
     }
     final computeLogVersion =
         json["computeLogVersion"] as int? ?? currentComputeLogVersion;
     final computeLogJson = json["computeLog"] as Map<String, dynamic>? ?? {};
-    final computeLog = <String, FacesTimelineComputeLogEntry>{};
+    final computeLog = <String, MemoryLaneComputeLogEntry>{};
     for (final entry in computeLogJson.entries) {
-      computeLog[entry.key] = FacesTimelineComputeLogEntry.fromJson(
+      computeLog[entry.key] = MemoryLaneComputeLogEntry.fromJson(
         Map<String, dynamic>.from(entry.value as Map),
       );
     }
-    return FacesTimelineCachePayload(
+    return MemoryLaneCachePayload(
       version: jsonVersion,
       timelines: timelines,
       computeLogVersion: computeLogVersion,

@@ -1,16 +1,16 @@
 import "package:photos/events/event.dart";
 import "package:photos/models/memory_lane/memory_lane_models.dart";
 
-class FacesTimelineChangedEvent extends Event {
+class MemoryLaneChangedEvent extends Event {
   final String personId;
-  final FacesTimelineStatus status;
+  final MemoryLaneStatus status;
 
-  FacesTimelineChangedEvent({
+  MemoryLaneChangedEvent({
     required this.personId,
     required this.status,
   });
 
-  bool get isReady => status == FacesTimelineStatus.ready;
+  bool get isReady => status == MemoryLaneStatus.ready;
 
   @override
   String get reason =>

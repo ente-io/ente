@@ -319,13 +319,13 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(entityService, MLDataDB.instance, preferences);
-    await FacesTimelineService.instance.init();
+    await MemoryLaneService.instance.init();
     if (flagService.facesTimeline) {
-      FacesTimelineService.instance
+      MemoryLaneService.instance
           .queueFullRecompute(trigger: "startup")
           .ignore();
     } else {
-      _logger.info("Faces timeline disabled via feature flag");
+      _logger.info("Memory Lane disabled via feature flag");
     }
     EnteWakeLockService.instance.init(preferences);
     wrappedService.scheduleInitialLoad();
