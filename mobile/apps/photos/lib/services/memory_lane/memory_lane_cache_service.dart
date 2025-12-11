@@ -182,7 +182,7 @@ class MemoryLaneCacheService {
       _cache = MemoryLaneCachePayload.fromJson(decoded);
       return _cache!;
     } catch (error, stackTrace) {
-      _logger.severe("Failed to read faces timeline cache", error, stackTrace);
+      _logger.severe("Failed to read Memory Lane cache", error, stackTrace);
       _cache = MemoryLaneCachePayload.empty();
       await _writeCacheUnsafe();
       return _cache!;
@@ -199,7 +199,7 @@ class MemoryLaneCacheService {
     try {
       await file.writeAsString(payload.toEncodedJson(), flush: true);
     } catch (error, stackTrace) {
-      _logger.severe("Failed to write faces timeline cache", error, stackTrace);
+      _logger.severe("Failed to write Memory Lane cache", error, stackTrace);
       rethrow;
     }
   }

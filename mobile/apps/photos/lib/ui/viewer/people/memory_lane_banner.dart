@@ -304,7 +304,7 @@ class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
       });
     } catch (error, stackTrace) {
       _logger.warning(
-        "Failed to load faces timeline banner thumbnail for "
+        "Failed to load Memory Lane banner thumbnail for "
         "${widget.person.remoteID}",
         error,
         stackTrace,
