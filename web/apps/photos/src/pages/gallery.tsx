@@ -1403,6 +1403,7 @@ const Page: React.FC = () => {
                         pendingVisibilityUpdates,
                         onAddSaveGroup,
                     }}
+                    collectionSummaries={normalCollectionSummaries}
                     emailByUserID={state.emailByUserID}
                     onToggleFavorite={handleFileViewerToggleFavorite}
                     onFileVisibilityUpdate={

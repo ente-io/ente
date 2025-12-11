@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
     Box,
+    CircularProgress,
     Drawer,
     IconButton,
     Stack,
@@ -9,7 +10,16 @@ import {
     Typography,
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
-import React, { useState } from "react";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
+import type { EnteFile } from "ente-media/file";
+import { getCollectionByID } from "ente-new/photos/services/collection";
+import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+import {
+    getFileReactions,
+    type Reaction,
+} from "ente-new/photos/services/reaction";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 // =============================================================================
 // Icons
@@ -54,70 +64,43 @@ const HeartFilledIcon: React.FC = () => (
 // Types
 // =============================================================================
 
+/** A liker with display info. */
 interface Liker {
     id: string;
+    userID: number;
     userName: string;
-    userAvatar?: string;
 }
 
-interface Collection {
+/** Collection info for the dropdown. */
+interface CollectionInfo {
     id: number;
     name: string;
-    coverURL?: string;
     likeCount: number;
+    coverFile?: EnteFile;
 }
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-// Mock collections that contain this file
-const mockCollections: Collection[] = [
-    {
-        id: 1,
-        name: "Mindfulness",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        likeCount: 6,
-    },
-    {
-        id: 2,
-        name: "Meditation",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        likeCount: 12,
-    },
-    {
-        id: 3,
-        name: "Gratitude",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        likeCount: 8,
-    },
-    {
-        id: 4,
-        name: "Self-Reflection",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        likeCount: 3,
-    },
-];
-
-// Mock data - 6 dummy likers
-const mockLikers: Liker[] = [
-    { id: "1", userName: "Vishnu" },
-    { id: "2", userName: "Shanty" },
-    { id: "3", userName: "Lakshmi" },
-    { id: "4", userName: "Manav" },
-    { id: "5", userName: "Saraswati" },
-    { id: "6", userName: "Durga" },
-];
 
 // =============================================================================
 // Main Component
 // =============================================================================
 
-export type LikesSidebarProps = ModalVisibilityProps;
+export interface LikesSidebarProps extends ModalVisibilityProps {
+    /**
+     * The file whose likes are being displayed.
+     */
+    file?: EnteFile;
+    /**
+     * The currently active collection ID (when viewing from within a collection).
+     */
+    activeCollectionID?: number;
+    /**
+     * A mapping from file IDs to the IDs of collections they belong to.
+     */
+    fileNormalCollectionIDs?: Map<number, number[]>;
+    /**
+     * Collection summaries indexed by their IDs.
+     */
+    collectionSummaries?: CollectionSummaries;
+}
 
 /**
  * A sidebar panel for displaying users who liked a file.
@@ -125,21 +108,233 @@ export type LikesSidebarProps = ModalVisibilityProps;
 export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     open,
     onClose,
+    file,
+    activeCollectionID,
+    fileNormalCollectionIDs,
+    collectionSummaries,
 }) => {
-    const [selectedCollection, setSelectedCollection] = useState<Collection>(
-        mockCollections[0]!,
-    );
+    const [loading, setLoading] = useState(false);
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
 
-    // Check if opened from a collection context (has ?collection=... or ?t=... in URL)
-    // Public links use ?t= (access token) instead of ?collection=
-    const hasCollectionContext =
-        typeof window !== "undefined" &&
-        (new URLSearchParams(window.location.search).has("collection") ||
-            new URLSearchParams(window.location.search).has("t"));
+    // Reactions grouped by collection: collectionID -> reactions
+    const [reactionsByCollection, setReactionsByCollection] = useState<
+        Map<number, Reaction[]>
+    >(new Map());
 
-    const handleCollectionSelect = (collection: Collection) => {
-        setSelectedCollection(collection);
+    // User ID to email mapping built from fetched collections
+    const [userIDToEmail, setUserIDToEmail] = useState<Map<number, string>>(
+        new Map(),
+    );
+
+    // Selected collection for viewing likes (when in gallery view)
+    const [selectedCollectionID, setSelectedCollectionID] = useState<
+        number | undefined
+    >(undefined);
+
+    // Thumbnail URLs for each collection's cover file: collectionID -> URL
+    const [thumbnailURLs, setThumbnailURLs] = useState<Map<number, string>>(
+        new Map(),
+    );
+
+    // Check if opened from a collection context
+    const hasCollectionContext =
+        activeCollectionID !== undefined && activeCollectionID !== 0;
+
+    // Get all collections the file belongs to
+    const fileCollectionIDs = useMemo(() => {
+        if (!file) return [];
+        return fileNormalCollectionIDs?.get(file.id) ?? [];
+    }, [file, fileNormalCollectionIDs]);
+
+    // Build collection info list with like counts and cover files
+    const collectionsInfo = useMemo((): CollectionInfo[] => {
+        return fileCollectionIDs.map((collectionID) => {
+            const summary = collectionSummaries?.get(collectionID);
+            return {
+                id: collectionID,
+                name: summary?.name ?? `Album ${collectionID}`,
+                likeCount:
+                    reactionsByCollection
+                        .get(collectionID)
+                        ?.filter((r) => r.reactionType === "green_heart")
+                        .length ?? 0,
+                coverFile: summary?.coverFile,
+            };
+        });
+    }, [fileCollectionIDs, collectionSummaries, reactionsByCollection]);
+
+    // Currently selected collection info
+    const selectedCollectionInfo = useMemo(() => {
+        const targetID = hasCollectionContext
+            ? activeCollectionID
+            : selectedCollectionID;
+        return (
+            collectionsInfo.find((c) => c.id === targetID) ?? collectionsInfo[0]
+        );
+    }, [
+        hasCollectionContext,
+        activeCollectionID,
+        selectedCollectionID,
+        collectionsInfo,
+    ]);
+
+    // Get likers for the selected collection
+    const likers = useMemo((): Liker[] => {
+        if (!selectedCollectionInfo) return [];
+        const reactions =
+            reactionsByCollection.get(selectedCollectionInfo.id) ?? [];
+        return reactions
+            .filter((r) => r.reactionType === "green_heart")
+            .map((r) => ({
+                id: r.id,
+                userID: r.userID,
+                userName: userIDToEmail.get(r.userID) ?? `User ${r.userID}`,
+            }));
+    }, [selectedCollectionInfo, reactionsByCollection, userIDToEmail]);
+
+    // Fetch reactions when the sidebar opens or file changes
+    const fetchReactions = useCallback(async () => {
+        if (!file || !open) return;
+
+        setLoading(true);
+        const newReactionsByCollection = new Map<number, Reaction[]>();
+        const newUserIDToEmail = new Map<number, string>();
+
+        try {
+            if (hasCollectionContext && activeCollectionID) {
+                // Collection view: only fetch for the active collection
+                const collection = await getCollectionByID(activeCollectionID);
+
+                // Build user ID to email map from collection owner and sharees
+                if (collection.owner.email) {
+                    newUserIDToEmail.set(
+                        collection.owner.id,
+                        collection.owner.email,
+                    );
+                }
+                for (const sharee of collection.sharees) {
+                    if (sharee.email) {
+                        newUserIDToEmail.set(sharee.id, sharee.email);
+                    }
+                }
+
+                const reactions = await getFileReactions(
+                    activeCollectionID,
+                    file.id,
+                    collection.key,
+                );
+                newReactionsByCollection.set(activeCollectionID, reactions);
+            } else {
+                // Gallery view: fetch for all collections the file belongs to
+                for (const collectionID of fileCollectionIDs) {
+                    try {
+                        const collection =
+                            await getCollectionByID(collectionID);
+
+                        // Build user ID to email map from collection owner and sharees
+                        if (collection.owner.email) {
+                            newUserIDToEmail.set(
+                                collection.owner.id,
+                                collection.owner.email,
+                            );
+                        }
+                        for (const sharee of collection.sharees) {
+                            if (sharee.email) {
+                                newUserIDToEmail.set(sharee.id, sharee.email);
+                            }
+                        }
+
+                        const reactions = await getFileReactions(
+                            collectionID,
+                            file.id,
+                            collection.key,
+                        );
+                        newReactionsByCollection.set(collectionID, reactions);
+                    } catch (e) {
+                        log.error(
+                            `Failed to fetch reactions for collection ${collectionID}`,
+                            e,
+                        );
+                    }
+                }
+            }
+            setReactionsByCollection(newReactionsByCollection);
+            setUserIDToEmail(newUserIDToEmail);
+        } catch (e) {
+            log.error("Failed to fetch reactions", e);
+        } finally {
+            setLoading(false);
+        }
+    }, [
+        file,
+        open,
+        hasCollectionContext,
+        activeCollectionID,
+        fileCollectionIDs,
+    ]);
+
+    // Fetch reactions when the sidebar opens
+    useEffect(() => {
+        if (open) {
+            void fetchReactions();
+        }
+    }, [open, fetchReactions]);
+
+    // Set initial selected collection when file collection IDs are available
+    useEffect(() => {
+        if (
+            open &&
+            !hasCollectionContext &&
+            selectedCollectionID === undefined &&
+            fileCollectionIDs.length > 0
+        ) {
+            setSelectedCollectionID(fileCollectionIDs[0]);
+        }
+    }, [open, hasCollectionContext, selectedCollectionID, fileCollectionIDs]);
+
+    // Fetch thumbnails for each collection's cover file
+    useEffect(() => {
+        // Only fetch when open, don't clear when closing (avoids flash during animation)
+        if (!open || collectionsInfo.length === 0) {
+            return;
+        }
+
+        let didCancel = false;
+
+        const fetchThumbnails = async () => {
+            const urls = new Map<number, string>();
+            for (const collection of collectionsInfo) {
+                if (collection.coverFile) {
+                    try {
+                        const url =
+                            await downloadManager.renderableThumbnailURL(
+                                collection.coverFile,
+                            );
+                        if (!didCancel && url) {
+                            urls.set(collection.id, url);
+                        }
+                    } catch (e) {
+                        log.warn(
+                            `Failed to fetch thumbnail for collection ${collection.id}`,
+                            e,
+                        );
+                    }
+                }
+            }
+            if (!didCancel) {
+                setThumbnailURLs(urls);
+            }
+        };
+
+        void fetchThumbnails();
+
+        return () => {
+            didCancel = true;
+        };
+    }, [open, collectionsInfo]);
+
+    const handleCollectionSelect = (collectionID: number) => {
+        setSelectedCollectionID(collectionID);
         setCollectionDropdownOpen(false);
     };
 
@@ -164,9 +359,11 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                 ...theme.applyStyles("dark", { color: "#fff" }),
                             })}
                         >
-                            {`${mockLikers.length} likes`}
+                            {loading
+                                ? "Loading..."
+                                : `${likers.length} ${likers.length === 1 ? "like" : "likes"}`}
                         </Typography>
-                    ) : (
+                    ) : collectionsInfo.length > 1 ? (
                         <Box
                             sx={{
                                 position: "relative",
@@ -181,12 +378,21 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                 }
                             >
                                 <Box sx={{ position: "relative" }}>
-                                    <CollectionThumbnail
-                                        src={selectedCollection.coverURL}
-                                        alt={selectedCollection.name}
-                                    />
+                                    {selectedCollectionInfo &&
+                                    thumbnailURLs.get(
+                                        selectedCollectionInfo.id,
+                                    ) ? (
+                                        <CollectionThumbnail
+                                            src={thumbnailURLs.get(
+                                                selectedCollectionInfo.id,
+                                            )}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <CollectionThumbnailPlaceholder />
+                                    )}
                                     <CollectionBadge>
-                                        {selectedCollection.likeCount}
+                                        {selectedCollectionInfo?.likeCount ?? 0}
                                     </CollectionBadge>
                                 </Box>
                                 <Typography
@@ -200,26 +406,34 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                         }),
                                     })}
                                 >
-                                    {selectedCollection.name}
+                                    {selectedCollectionInfo?.name ?? "Album"}
                                 </Typography>
                                 <ChevronDownIcon />
                             </CollectionDropdownButton>
                             {collectionDropdownOpen && (
                                 <CollectionDropdownMenu>
-                                    {mockCollections.map((collection) => (
+                                    {collectionsInfo.map((collection) => (
                                         <CollectionDropdownItem
                                             key={collection.id}
                                             onClick={() =>
                                                 handleCollectionSelect(
-                                                    collection,
+                                                    collection.id,
                                                 )
                                             }
                                         >
                                             <Box sx={{ position: "relative" }}>
-                                                <CollectionThumbnail
-                                                    src={collection.coverURL}
-                                                    alt={collection.name}
-                                                />
+                                                {thumbnailURLs.get(
+                                                    collection.id,
+                                                ) ? (
+                                                    <CollectionThumbnail
+                                                        src={thumbnailURLs.get(
+                                                            collection.id,
+                                                        )}
+                                                        alt=""
+                                                    />
+                                                ) : (
+                                                    <CollectionThumbnailPlaceholder />
+                                                )}
                                                 <CollectionBadge>
                                                     {collection.likeCount}
                                                 </CollectionBadge>
@@ -243,6 +457,18 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                                 </CollectionDropdownMenu>
                             )}
                         </Box>
+                    ) : (
+                        <Typography
+                            sx={(theme) => ({
+                                color: "#000",
+                                fontWeight: 600,
+                                ...theme.applyStyles("dark", { color: "#fff" }),
+                            })}
+                        >
+                            {loading
+                                ? "Loading..."
+                                : `${likers.length} ${likers.length === 1 ? "like" : "likes"}`}
+                        </Typography>
                     )}
                     <CloseButton onClick={onClose}>
                         <CloseIcon sx={{ fontSize: 22 }} />
@@ -250,27 +476,36 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                 </Header>
 
                 <LikersContainer>
-                    {mockLikers.map((liker) => (
-                        <LikerRow key={liker.id}>
-                            <Avatar
-                                sx={(theme) => ({
-                                    width: 32,
-                                    height: 32,
-                                    fontSize: 14,
-                                    bgcolor: "#E0E0E0",
-                                    color: "#666",
-                                    ...theme.applyStyles("dark", {
-                                        bgcolor: "rgba(255, 255, 255, 0.16)",
-                                        color: "rgba(255, 255, 255, 0.7)",
-                                    }),
-                                })}
-                            >
-                                {liker.userName[0]}
-                            </Avatar>
-                            <LikerName>{liker.userName}</LikerName>
-                            <HeartFilledIcon />
-                        </LikerRow>
-                    ))}
+                    {loading ? (
+                        <LoadingContainer>
+                            <CircularProgress size={32} />
+                        </LoadingContainer>
+                    ) : likers.length === 0 ? (
+                        <EmptyMessage>No likes yet</EmptyMessage>
+                    ) : (
+                        likers.map((liker) => (
+                            <LikerRow key={liker.id}>
+                                <Avatar
+                                    sx={(theme) => ({
+                                        width: 32,
+                                        height: 32,
+                                        fontSize: 14,
+                                        bgcolor: "#E0E0E0",
+                                        color: "#666",
+                                        ...theme.applyStyles("dark", {
+                                            bgcolor:
+                                                "rgba(255, 255, 255, 0.16)",
+                                            color: "rgba(255, 255, 255, 0.7)",
+                                        }),
+                                    })}
+                                >
+                                    {liker.userName[0]?.toUpperCase() ?? "?"}
+                                </Avatar>
+                                <LikerName>{liker.userName}</LikerName>
+                                <HeartFilledIcon />
+                            </LikerRow>
+                        ))
+                    )}
                 </LikersContainer>
             </DrawerContentWrapper>
         </SidebarDrawer>
@@ -362,6 +597,12 @@ const CollectionThumbnail = styled("img")(() => ({
     height: 24,
     borderRadius: 5,
     objectFit: "cover",
+}));
+
+const CollectionThumbnailPlaceholder = styled(Box)(() => ({
+    width: 24,
+    height: 24,
+    borderRadius: 5,
     backgroundColor: "#08C225",
 }));
 
@@ -452,6 +693,20 @@ const LikerName = styled(Typography)(({ theme }) => ({
     color: "#000",
     fontSize: 14,
     ...theme.applyStyles("dark", { color: "#fff" }),
+}));
+
+const LoadingContainer = styled(Box)(() => ({
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "48px 0",
+}));
+
+const EmptyMessage = styled(Typography)(({ theme }) => ({
+    textAlign: "center",
+    padding: "48px 0",
+    color: "#666",
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.5)" }),
 }));
 
 // Context Menu Overlay

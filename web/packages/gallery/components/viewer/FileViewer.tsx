@@ -47,6 +47,7 @@ import {
     type ImageEditorOverlayProps,
 } from "ente-new/photos/components/ImageEditorOverlay";
 import { getCollectionByID } from "ente-new/photos/services/collection";
+import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import {
     addReaction,
     deleteReaction,
@@ -215,6 +216,10 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     fileNormalCollectionIDs?: FileInfoProps["fileCollectionIDs"];
     /**
+     * Collection summaries indexed by their IDs.
+     */
+    collectionSummaries?: CollectionSummaries;
+    /**
      * Called when there was some update performed within the file viewer that
      * necessitates us to pull the latest updates with remote.
      *
@@ -324,6 +329,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     pendingFavoriteUpdates,
     pendingVisibilityUpdates,
     fileNormalCollectionIDs,
+    collectionSummaries,
     collectionNameByID,
     onTriggerRemotePull,
     onRemoteFilesPull,
@@ -496,7 +502,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     const collectionId = collectionIDs[0]!;
                     void (async () => {
                         try {
-                            const collection = await getCollectionByID(collectionId);
+                            const collection =
+                                await getCollectionByID(collectionId);
                             const reactionId = await addReaction(
                                 collectionId,
                                 fileId,
@@ -506,7 +513,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             log.info(`Added reaction: ${reactionId}`);
                             setFileReactions((prev) => {
                                 const next = new Map(prev);
-                                next.set(fileId, [{ collectionId, reactionId }]);
+                                next.set(fileId, [
+                                    { collectionId, reactionId },
+                                ]);
                                 return next;
                             });
                         } catch (e) {
@@ -523,7 +532,9 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     try {
                         for (const reaction of reactions) {
                             await deleteReaction(reaction.reactionId);
-                            log.info(`Deleted reaction: ${reaction.reactionId}`);
+                            log.info(
+                                `Deleted reaction: ${reaction.reactionId}`,
+                            );
                         }
                         setFileReactions((prev) => {
                             const next = new Map(prev);
@@ -546,11 +557,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 void (async () => {
                     try {
                         await deleteReaction(existingReaction.reactionId);
-                        log.info(`Deleted reaction: ${existingReaction.reactionId}`);
+                        log.info(
+                            `Deleted reaction: ${existingReaction.reactionId}`,
+                        );
                         setFileReactions((prev) => {
                             const next = new Map(prev);
                             const updated = (prev.get(fileId) ?? []).filter(
-                                (r) => r.reactionId !== existingReaction.reactionId,
+                                (r) =>
+                                    r.reactionId !==
+                                    existingReaction.reactionId,
                             );
                             if (updated.length > 0) {
                                 next.set(fileId, updated);
@@ -567,7 +582,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 // Not liked in this collection - add
                 void (async () => {
                     try {
-                        const collection = await getCollectionByID(activeCollectionID);
+                        const collection =
+                            await getCollectionByID(activeCollectionID);
                         const reactionId = await addReaction(
                             activeCollectionID,
                             fileId,
@@ -580,7 +596,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             const existing = prev.get(fileId) ?? [];
                             next.set(fileId, [
                                 ...existing,
-                                { collectionId: activeCollectionID, reactionId },
+                                {
+                                    collectionId: activeCollectionID,
+                                    reactionId,
+                                },
                             ]);
                             return next;
                         });
@@ -615,11 +634,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     void (async () => {
                         try {
                             await deleteReaction(reactionToDelete.reactionId);
-                            log.info(`Deleted reaction: ${reactionToDelete.reactionId}`);
+                            log.info(
+                                `Deleted reaction: ${reactionToDelete.reactionId}`,
+                            );
                             setFileReactions((prev) => {
                                 const next = new Map(prev);
                                 const updated = (prev.get(fileId) ?? []).filter(
-                                    (r) => r.reactionId !== reactionToDelete.reactionId,
+                                    (r) =>
+                                        r.reactionId !==
+                                        reactionToDelete.reactionId,
                                 );
                                 if (updated.length > 0) {
                                     next.set(fileId, updated);
@@ -671,14 +694,21 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const fileId = file.id;
         const collectionIDs = fileNormalCollectionIDs?.get(fileId) ?? [];
         const existingReactions = fileReactionsRef.current.get(fileId) ?? [];
-        const likedCollectionIDs = new Set(existingReactions.map((r) => r.collectionId));
+        const likedCollectionIDs = new Set(
+            existingReactions.map((r) => r.collectionId),
+        );
 
         // Filter to only collections not already liked
-        const collectionsToLike = collectionIDs.filter((id) => !likedCollectionIDs.has(id));
+        const collectionsToLike = collectionIDs.filter(
+            (id) => !likedCollectionIDs.has(id),
+        );
 
         void (async () => {
             try {
-                const newReactions: { collectionId: number; reactionId: string }[] = [];
+                const newReactions: {
+                    collectionId: number;
+                    reactionId: string;
+                }[] = [];
                 for (const collectionId of collectionsToLike) {
                     const collection = await getCollectionByID(collectionId);
                     const reactionId = await addReaction(
@@ -935,7 +965,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // Compute all albums the file belongs to and which are liked for the modal
     const { allAlbumsForFile, likedAlbumIDs } = useMemo(() => {
         const file = activeAnnotatedFile?.file;
-        if (!file) return { allAlbumsForFile: [], likedAlbumIDs: new Set<number>() };
+        if (!file)
+            return { allAlbumsForFile: [], likedAlbumIDs: new Set<number>() };
 
         // Get all collections the file belongs to
         const collectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
@@ -949,7 +980,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const likedAlbumIDs = new Set(reactions.map((r) => r.collectionId));
 
         return { allAlbumsForFile, likedAlbumIDs };
-    }, [activeAnnotatedFile, collectionNameByID, fileNormalCollectionIDs, fileReactions]);
+    }, [
+        activeAnnotatedFile,
+        collectionNameByID,
+        fileNormalCollectionIDs,
+        fileReactions,
+    ]);
 
     const getFiles = useCallback(() => files, [files]);
 
@@ -1237,12 +1273,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             try {
                 if (isGalleryView) {
                     // Gallery view: check ALL collections the file belongs to
-                    const collectionIDs = fileNormalCollectionIDs?.get(activeFileID) ?? [];
+                    const collectionIDs =
+                        fileNormalCollectionIDs?.get(activeFileID) ?? [];
                     const foundReactions: FileReaction[] = [];
 
                     for (const collectionId of collectionIDs) {
                         try {
-                            const collection = await getCollectionByID(collectionId);
+                            const collection =
+                                await getCollectionByID(collectionId);
                             const reactions = await getFileReactions(
                                 collectionId,
                                 activeFileID,
@@ -1275,7 +1313,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     });
                 } else {
                     // Collection view: check only the active collection
-                    const collection = await getCollectionByID(activeCollectionID);
+                    const collection =
+                        await getCollectionByID(activeCollectionID);
                     const reactions = await getFileReactions(
                         activeCollectionID,
                         activeFileID,
@@ -1290,7 +1329,10 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         const next = new Map(prev);
                         if (userReaction) {
                             next.set(activeFileID, [
-                                { collectionId: activeCollectionID, reactionId: userReaction.id },
+                                {
+                                    collectionId: activeCollectionID,
+                                    reactionId: userReaction.id,
+                                },
                             ]);
                         } else {
                             next.delete(activeFileID);
@@ -1307,7 +1349,13 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 });
             }
         })();
-    }, [open, activeFileID, activeCollectionID, fileNormalCollectionIDs, user?.id]);
+    }, [
+        open,
+        activeFileID,
+        activeCollectionID,
+        fileNormalCollectionIDs,
+        user?.id,
+    ]);
 
     useEffect(() => {
         if (open) {
@@ -1409,7 +1457,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 open={openComments}
                 onClose={handleCommentsClose}
             />
-            <LikesSidebar open={openLikes} onClose={handleLikesClose} />
+            <LikesSidebar
+                open={openLikes}
+                onClose={handleLikesClose}
+                file={activeAnnotatedFile.file}
+                activeCollectionID={activeCollectionID}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionSummaries={collectionSummaries}
+            />
             <LikeAlbumSelectorModal
                 open={openLikeAlbumSelector}
                 onClose={handleLikeAlbumSelectorClose}
