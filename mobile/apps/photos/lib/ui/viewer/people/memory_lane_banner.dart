@@ -252,6 +252,7 @@ class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
   final Logger _logger = Logger("MemoryLaneBannerSection");
   MemoryImage? _thumbnail;
   Future<void>? _thumbnailFuture;
+  bool _thumbnailResolved = false;
 
   @override
   void initState() {
@@ -271,6 +272,7 @@ class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
     if (personChanged || bannerActivated || tapEnabled) {
       _thumbnail = null;
       _thumbnailFuture = null;
+      _thumbnailResolved = false;
     }
     _maybeLoadThumbnail();
   }
@@ -288,19 +290,27 @@ class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
           widget.loadTimeline ?? MemoryLaneService.instance.getTimeline;
       final timeline = await loader(widget.person.remoteID);
       if (!mounted || timeline == null || !timeline.isReady) {
+        _markThumbnailResolved();
         return;
       }
       if (timeline.entries.isEmpty) {
+        _markThumbnailResolved();
         return;
       }
       final MemoryImage? image = await _loadFaceThumbnail(
         timeline.entries.first,
       );
       if (!mounted || image == null) {
+        _markThumbnailResolved();
+        return;
+      }
+      await precacheImage(image, context);
+      if (!mounted) {
         return;
       }
       setState(() {
         _thumbnail = image;
+        _thumbnailResolved = true;
       });
     } catch (error, stackTrace) {
       _logger.warning(
@@ -309,7 +319,17 @@ class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
         error,
         stackTrace,
       );
+      _markThumbnailResolved();
     }
+  }
+
+  void _markThumbnailResolved() {
+    if (!mounted || _thumbnailResolved) {
+      return;
+    }
+    setState(() {
+      _thumbnailResolved = true;
+    });
   }
 
   Future<MemoryImage?> _loadFaceThumbnail(MemoryLaneEntry entry) async {
@@ -349,7 +369,7 @@ class _MemoryLaneBannerSectionState extends State<MemoryLaneBannerSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.showBanner || widget.onTap == null) {
+    if (!widget.showBanner || widget.onTap == null || !_thumbnailResolved) {
       return const SizedBox.shrink();
     }
     return MemoryLaneBanner(
