@@ -6,9 +6,11 @@ import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
+import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/alert_bottom_sheet.dart";
 import "package:locker/ui/components/gradient_button.dart";
 import "package:locker/ui/components/popup_menu_item_widget.dart";
 import "package:locker/ui/sharing/add_email_bottom_sheet.dart";
@@ -30,6 +32,7 @@ class ShareCollectionBottomSheet extends StatefulWidget {
 class _ShareCollectionBottomSheetState
     extends State<ShareCollectionBottomSheet> {
   late CollectionActions _collectionActions;
+  final ScrollController _scrollController = ScrollController();
 
   List<User> get _sharees => widget.collection.getSharees();
 
@@ -42,6 +45,12 @@ class _ShareCollectionBottomSheetState
   void initState() {
     super.initState();
     _collectionActions = CollectionActions();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -133,49 +142,143 @@ class _ShareCollectionBottomSheetState
         style: textTheme.small.copyWith(color: colorScheme.textMuted),
       );
     }
-
     final currentUserId = Configuration.instance.getUserID() ?? -1;
 
-    return Column(
-      children: List.generate(_sharees.length, (index) {
-        final user = _sharees[index];
-        final isFirst = index == 0;
-        final isLast = index == _sharees.length - 1;
+    const double maxVisibleHeight = 244.0;
+    final showScrollbar = _sharees.length > 4;
 
-        return Column(
-          children: [
-            if (!isFirst)
-              DividerWidget(
-                dividerType: DividerType.menu,
-                bgColor: colorScheme.fillFaint,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: maxVisibleHeight),
+              child: ListView.builder(
+                controller: _scrollController,
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: _sharees.length,
+                itemBuilder: (context, index) {
+                  final user = _sharees[index];
+                  final isFirst = index == 0;
+                  final isLast = index == _sharees.length - 1;
+
+                  return Column(
+                    children: [
+                      if (!isFirst)
+                        DividerWidget(
+                          dividerType: DividerType.menu,
+                          bgColor: colorScheme.fillFaint,
+                        ),
+                      MenuItemWidgetV2(
+                        captionedTextWidget: CaptionedTextWidget(
+                          title: user.email,
+                        ),
+                        leadingIconSize: 24,
+                        leadingIconWidget: UserAvatarWidget(
+                          user,
+                          currentUserID: currentUserId,
+                          config: Configuration.instance,
+                          type: AvatarType.mini,
+                        ),
+                        menuItemColor: colorScheme.fillFaint,
+                        trailingWidget: _isOwner
+                            ? _buildRolePopupMenu(user, colorScheme)
+                            : _buildRoleIcon(user, colorScheme),
+                        surfaceExecutionStates: false,
+                        isTopBorderRadiusRemoved: !isFirst,
+                        isBottomBorderRadiusRemoved: !isLast,
+                      ),
+                    ],
+                  );
+                },
               ),
-            MenuItemWidgetV2(
-              captionedTextWidget: CaptionedTextWidget(
-                title: user.email,
-              ),
-              leadingIconSize: 24,
-              leadingIconWidget: UserAvatarWidget(
-                user,
-                currentUserID: currentUserId,
-                config: Configuration.instance,
-                type: AvatarType.mini,
-              ),
-              menuItemColor: colorScheme.fillFaint,
-              trailingWidget:
-                  _isOwner ? _buildRolePopupMenu(user, colorScheme) : null,
-              trailingIcon: _isOwner
-                  ? null
-                  : (user.isViewer
-                      ? Icons.visibility_outlined
-                      : Icons.people_outline),
-              trailingIconIsMuted: true,
-              surfaceExecutionStates: false,
-              isTopBorderRadiusRemoved: !isFirst,
-              isBottomBorderRadiusRemoved: !isLast,
             ),
-          ],
+          ),
+        ),
+        if (showScrollbar) ...[
+          const SizedBox(width: 4),
+          _buildCustomScrollbar(
+            _sharees.length,
+            maxVisibleHeight,
+            colorScheme,
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildCustomScrollbar(
+    int itemCount,
+    double containerHeight,
+    colorScheme,
+  ) {
+    const visibleItems = 4;
+    final thumbHeightRatio = visibleItems / itemCount;
+    final thumbHeight = containerHeight * thumbHeightRatio;
+
+    return AnimatedBuilder(
+      animation: _scrollController,
+      builder: (context, child) {
+        double thumbPosition = 0;
+        if (_scrollController.hasClients &&
+            _scrollController.positions.length == 1) {
+          final maxExtent = _scrollController.position.hasContentDimensions
+              ? _scrollController.position.maxScrollExtent
+              : 0.0;
+          if (maxExtent > 0) {
+            final scrollFraction = _scrollController.offset / maxExtent;
+            thumbPosition = scrollFraction * (containerHeight - thumbHeight);
+          }
+        }
+
+        return SizedBox(
+          height: containerHeight,
+          width: 5,
+          child: Stack(
+            children: [
+              Container(
+                width: 5,
+                height: containerHeight,
+                decoration: BoxDecoration(
+                  color: colorScheme.strokeFaint,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              Positioned(
+                top: thumbPosition,
+                child: Container(
+                  width: 5,
+                  height: thumbHeight,
+                  decoration: BoxDecoration(
+                    color: colorScheme.strokeMuted,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
-      }),
+      },
+    );
+  }
+
+  Widget _buildRoleIcon(User user, colorScheme) {
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.backdropBase,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(8),
+      child: HugeIcon(
+        icon: user.isViewer
+            ? HugeIcons.strokeRoundedView
+            : HugeIcons.strokeRoundedUserMultiple,
+        color: colorScheme.textMuted,
+        size: 20,
+      ),
     );
   }
 
@@ -191,17 +294,28 @@ class _ShareCollectionBottomSheetState
         }
       },
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.strokeFaint),
       ),
       padding: EdgeInsets.zero,
       menuPadding: EdgeInsets.zero,
-      color: Colors.transparent,
-      child: HugeIcon(
-        icon: user.isViewer
-            ? HugeIcons.strokeRoundedView
-            : HugeIcons.strokeRoundedUserGroup,
-        color: colorScheme.textMuted,
-        size: 20,
+      color: colorScheme.backdropBase,
+      surfaceTintColor: Colors.transparent,
+      elevation: 15,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.all(8),
+        child: HugeIcon(
+          icon: user.isViewer
+              ? HugeIcons.strokeRoundedView
+              : HugeIcons.strokeRoundedUserMultiple,
+          color: colorScheme.textMuted,
+          size: 20,
+        ),
       ),
       itemBuilder: (context) => [
         PopupMenuItem<String>(
@@ -225,7 +339,7 @@ class _ShareCollectionBottomSheetState
           padding: EdgeInsets.zero,
           child: PopupMenuItemWidget(
             icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedUserGroup,
+              icon: HugeIcons.strokeRoundedUserMultiple,
               color: colorScheme.textBase,
               size: 20,
             ),
@@ -255,6 +369,26 @@ class _ShareCollectionBottomSheetState
   }
 
   Future<void> _setUserRole(User user, CollectionParticipantRole role) async {
+    final isDowngrade =
+        user.isCollaborator && role == CollectionParticipantRole.viewer;
+
+    if (isDowngrade) {
+      final confirmed = await showAlertBottomSheet(
+        context,
+        title: context.l10n.changePermissions,
+        message: context.l10n.cannotAddMoreFilesAfterBecomingViewer(
+          user.displayName ?? user.email,
+        ),
+        assetPath: "assets/warning-grey.png",
+        confirmButtonText: context.l10n.remove,
+        onConfirm: () {},
+      );
+
+      if (confirmed != true) {
+        return;
+      }
+    }
+
     final result = await _collectionActions.addEmailToCollection(
       context,
       widget.collection,
@@ -270,14 +404,26 @@ class _ShareCollectionBottomSheetState
   }
 
   Future<void> _removeSharee(User user) async {
-    final result = await _collectionActions.removeParticipant(
+    final confirmed = await showAlertBottomSheet(
       context,
-      widget.collection,
-      user,
+      title: context.l10n.removeWithQuestionMark,
+      message: context.l10n.removeParticipantBody(
+        user.displayName ?? user.email,
+      ),
+      assetPath: "assets/warning-grey.png",
+      confirmButtonText: context.l10n.remove,
+      onConfirm: () {},
     );
 
-    if (result && mounted) {
-      setState(() {});
+    if (confirmed == true && mounted) {
+      final result = await _collectionActions.removeParticipant(
+        context,
+        widget.collection,
+        user,
+      );
+      if (result && mounted) {
+        setState(() {});
+      }
     }
   }
 }
