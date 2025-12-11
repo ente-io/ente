@@ -129,8 +129,8 @@ type sizeResult struct {
 
 // Create adds an entry for a file in the respective tables
 func (c *FileController) Create(ctx *gin.Context, userID int64, file ente.File, userAgent string, app ente.App) (ente.File, error) {
-	fileChan := make(chan sizeResult)
-	thumbChan := make(chan sizeResult)
+	fileChan := make(chan sizeResult, 1)
+	thumbChan := make(chan sizeResult, 1)
 	go func() {
 		size, err := c.sizeOf(file.File.ObjectKey)
 		fileChan <- sizeResult{size, err}
