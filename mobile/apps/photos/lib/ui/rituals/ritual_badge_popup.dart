@@ -7,7 +7,7 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/activity/activity_models.dart";
+import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";

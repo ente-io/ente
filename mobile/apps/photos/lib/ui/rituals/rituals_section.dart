@@ -1,16 +1,16 @@
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/activity/activity_screen.dart";
-import "package:photos/ui/activity/ritual_camera_page.dart";
 import "package:photos/ui/collections/album/column_item.dart";
+import "package:photos/ui/rituals/all_rituals_screen.dart";
+import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/navigation_util.dart";
 

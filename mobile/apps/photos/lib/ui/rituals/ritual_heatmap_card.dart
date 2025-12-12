@@ -2,7 +2,7 @@ import "dart:math";
 
 import "package:flutter/material.dart";
 import "package:intl/intl.dart";
-import "package:photos/models/activity/activity_models.dart";
+import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 

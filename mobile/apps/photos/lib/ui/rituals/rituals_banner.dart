@@ -1,10 +1,10 @@
 import "package:flutter/material.dart";
-import "package:photos/models/activity/activity_models.dart";
+import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
-import "package:photos/ui/activity/activity_screen.dart";
+import "package:photos/ui/rituals/all_rituals_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class ActivityBanner extends StatelessWidget {
