@@ -101,7 +101,7 @@ class RitualsService {
       }
       final summary = await _buildSummary(rituals);
       final pendingBadge =
-          _resolvePendingBadge(rituals, summary.ritualLongestStreaks);
+          _resolvePendingBadge(rituals, summary.ritualProgress);
       stateNotifier.value = RitualsState(
         loading: false,
         summary: summary,
@@ -119,46 +119,46 @@ class RitualsService {
     }
   }
 
-  Future<RitualsSummary> _buildSummary(List<Ritual> rituals) async {
+  Future<RitualsSummary> _buildSummary(
+    List<Ritual> rituals,
+  ) async {
     final userId = Configuration.instance.getUserID();
+    final now = DateTime.now();
+    final todayMidnight = DateTime(now.year, now.month, now.day);
+    final monthStart = DateTime(now.year, now.month, 1);
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+    final monthEndInclusive =
+        lastDayOfMonth.isAfter(todayMidnight) ? todayMidnight : lastDayOfMonth;
     if (userId == null) {
       return RitualsSummary(
-        last365Days: _emptyDays(),
-        last7Days: _emptyDays().sublist(_emptyDays().length - 7),
-        currentStreak: 0,
-        longestStreak: 0,
-        badgesUnlocked: _badgeStates(0),
         ritualProgress: {},
         generatedAt: DateTime.now(),
-        ritualLongestStreaks: const {},
       );
     }
-    final today = DateTime.now();
-    final todayMidnight = DateTime(today.year, today.month, today.day);
-    final cutoffDate = todayMidnight.subtract(const Duration(days: 371));
-    final endOfToday = todayMidnight.add(
-      const Duration(
-        hours: 23,
-        minutes: 59,
-        seconds: 59,
-        milliseconds: 999,
-      ),
-    );
-    final startMicros = cutoffDate.microsecondsSinceEpoch;
-    final endMicros = endOfToday.microsecondsSinceEpoch;
-    final durations = <List<int>>[
-      [startMicros, endMicros + 1],
-    ];
-    final files = await FilesDB.instance.getFilesCreatedWithinDurations(
-      durations,
-      <int>{},
-      order: 'ASC',
-      dedupeUploadID: false,
-    );
+    final ritualAlbumIds = rituals
+        .map((r) => r.albumId)
+        .whereType<int>()
+        .where((id) => id > 0)
+        .toSet();
 
-    final Set<int> dayKeys = <int>{};
-    final Map<int, Set<int>> collectionRitualDays = {};
+    final Map<int, Set<int>> collectionDayKeys = {};
+    final Map<int, Map<int, EnteFile>> collectionRecentFilesByDay = {};
 
+    if (ritualAlbumIds.isEmpty) {
+      return RitualsSummary(
+        ritualProgress: const {},
+        generatedAt: DateTime.now(),
+      );
+    }
+
+    final files = await FilesDB.instance.getAllFilesFromCollections(
+      ritualAlbumIds,
+    );
+    final recentStart = DateTime(
+      todayMidnight.year,
+      todayMidnight.month,
+      todayMidnight.day - 4,
+    );
     for (final EnteFile file in files) {
       final bool ownerMatches =
           file.ownerID == null ? true : file.ownerID == userId;
@@ -168,92 +168,66 @@ class RitualsService {
         continue;
       }
       if (file.creationTime == null) continue;
+      final int? collectionId = file.collectionID;
+      if (collectionId == null || collectionId <= 0) continue;
+      if (!ritualAlbumIds.contains(collectionId)) continue;
+
       final date =
           DateTime.fromMicrosecondsSinceEpoch(file.creationTime!).toLocal();
       final bucket = DateTime(date.year, date.month, date.day);
+      if (bucket.isAfter(todayMidnight)) continue;
       final dayKey = bucket.millisecondsSinceEpoch;
-      if (bucket.isBefore(cutoffDate) || bucket.isAfter(todayMidnight)) {
+      collectionDayKeys.putIfAbsent(collectionId, () => <int>{}).add(dayKey);
+
+      if (bucket.isBefore(recentStart)) continue;
+      final byDay =
+          collectionRecentFilesByDay.putIfAbsent(collectionId, () => {});
+      final existing = byDay[dayKey];
+      if (existing == null) {
+        byDay[dayKey] = file;
         continue;
       }
-      dayKeys.add(dayKey);
-      if (file.collectionID != null && file.collectionID! > 0) {
-        collectionRitualDays
-            .putIfAbsent(file.collectionID!, () => <int>{})
-            .add(dayKey);
-      }
-    }
-
-    final List<RitualDay> last365Days = List.generate(372, (index) {
-      final day = cutoffDate.add(Duration(days: index));
-      final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
-      return RitualDay(date: day, isCompleted: dayKeys.contains(key));
-    });
-    final List<RitualDay> last7Days =
-        last365Days.sublist(last365Days.length - 7);
-
-    int longestStreak = 0;
-    int rolling = 0;
-    for (final day in last365Days) {
-      if (day.isCompleted) {
-        rolling += 1;
-        longestStreak = max(longestStreak, rolling);
-      } else {
-        rolling = 0;
-      }
-    }
-    int currentStreak = 0;
-    for (int i = last365Days.length - 1; i >= 0; i--) {
-      if (last365Days[i].isCompleted) {
-        currentStreak += 1;
-      } else {
-        break;
+      if ((existing.creationTime ?? -1) < (file.creationTime ?? -1)) {
+        byDay[dayKey] = file;
       }
     }
 
     final ritualProgress = <String, RitualProgress>{};
-    final ritualLongestStreaks = <String, int>{};
     for (final ritual in rituals) {
-      if (ritual.albumId == null) continue;
-      final dates = collectionRitualDays[ritual.albumId] ?? <int>{};
-      final longest = _longestStreakFromDayKeys(dates, cutoffDate);
-      ritualLongestStreaks[ritual.id] = longest;
+      final albumId = ritual.albumId;
+      if (albumId == null || albumId <= 0) continue;
+      final dates = collectionDayKeys[albumId] ?? <int>{};
+      final ritualLongestOverall = _longestScheduledStreakFromDayKeys(
+        dates,
+        ritual.daysOfWeek,
+        todayMidnight: todayMidnight,
+      );
+      final ritualCurrent = _currentScheduledStreakFromDayKeys(
+        dates,
+        ritual.daysOfWeek,
+        todayMidnight: todayMidnight,
+      );
+      final ritualLongestThisMonth = _longestScheduledStreakInRangeFromDayKeys(
+        dates,
+        ritual.daysOfWeek,
+        startDay: monthStart,
+        endDayInclusive: monthEndInclusive,
+      );
+
       ritualProgress[ritual.id] = RitualProgress(
         ritualId: ritual.id,
-        completedDays: dates
-            .map((millis) => DateTime.fromMillisecondsSinceEpoch(millis))
-            .toSet(),
+        completedDayKeys: dates,
+        recentFilesByDay: collectionRecentFilesByDay[albumId] ?? const {},
+        currentStreak: ritualCurrent,
+        longestStreakOverall: ritualLongestOverall,
+        longestStreakThisMonth: ritualLongestThisMonth,
       );
     }
 
     return RitualsSummary(
-      last365Days: last365Days,
-      last7Days: last7Days,
-      currentStreak: currentStreak,
-      longestStreak: longestStreak,
-      badgesUnlocked: _badgeStates(longestStreak),
       ritualProgress: ritualProgress,
       generatedAt: DateTime.now(),
-      ritualLongestStreaks: ritualLongestStreaks,
     );
-  }
-
-  List<RitualDay> _emptyDays() {
-    final today = DateTime.now();
-    final todayMidnight = DateTime(today.year, today.month, today.day);
-    final cutoffDate = todayMidnight.subtract(const Duration(days: 371));
-    return List.generate(
-      372,
-      (index) => RitualDay(
-        date: cutoffDate.add(Duration(days: index)),
-        isCompleted: false,
-      ),
-    );
-  }
-
-  Map<int, bool> _badgeStates(int streak) {
-    return {
-      for (final t in _badgeThresholds) t: streak >= t,
-    };
   }
 
   Set<int> _normalizeBadgeSet(Set<int> seen) {
@@ -449,12 +423,12 @@ class RitualsService {
 
   RitualBadgeUnlock? _resolvePendingBadge(
     List<Ritual> rituals,
-    Map<String, int> ritualLongestStreaks,
+    Map<String, RitualProgress> ritualProgress,
   ) {
-    _seedSeenBadgesForNewRituals(ritualLongestStreaks);
+    _seedSeenBadgesForNewRituals(ritualProgress);
     RitualBadgeUnlock? unlock;
     for (final ritual in rituals) {
-      final longest = ritualLongestStreaks[ritual.id] ?? 0;
+      final longest = ritualProgress[ritual.id]?.longestStreakOverall ?? 0;
       final seen = _seenRitualBadges[ritual.id] ?? <int>{};
       final newlyUnlocked = _badgeThresholds
           .where((t) => longest >= t && !seen.contains(t))
@@ -492,12 +466,45 @@ class RitualsService {
     }
   }
 
-  int _longestStreakFromDayKeys(Set<int> dayKeys, DateTime cutoffDate) {
+  int _currentScheduledStreakFromDayKeys(
+    Set<int> dayKeys,
+    List<bool> daysOfWeek, {
+    required DateTime todayMidnight,
+  }) {
     if (dayKeys.isEmpty) return 0;
+    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+
+    final start = _streakStartDateFromDayKeys(dayKeys, todayMidnight);
+    int current = 0;
+    for (var day = todayMidnight; !day.isBefore(start); day = _prevDay(day)) {
+      final dayIndex = day.weekday % 7; // Sunday -> 0
+      if (!daysOfWeek[dayIndex]) continue;
+
+      final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+      if (dayKeys.contains(key)) {
+        current += 1;
+      } else {
+        break;
+      }
+    }
+    return current;
+  }
+
+  int _longestScheduledStreakFromDayKeys(
+    Set<int> dayKeys,
+    List<bool> daysOfWeek, {
+    required DateTime todayMidnight,
+  }) {
+    if (dayKeys.isEmpty) return 0;
+    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+
+    final start = _streakStartDateFromDayKeys(dayKeys, todayMidnight);
     int longest = 0;
     int rolling = 0;
-    for (int offset = 0; offset < 372; offset++) {
-      final day = cutoffDate.add(Duration(days: offset));
+    for (var day = start; !day.isAfter(todayMidnight); day = _nextDay(day)) {
+      final dayIndex = day.weekday % 7; // Sunday -> 0
+      if (!daysOfWeek[dayIndex]) continue;
+
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
       if (dayKeys.contains(key)) {
         rolling += 1;
@@ -509,13 +516,64 @@ class RitualsService {
     return longest;
   }
 
+  int _longestScheduledStreakInRangeFromDayKeys(
+    Set<int> dayKeys,
+    List<bool> daysOfWeek, {
+    required DateTime startDay,
+    required DateTime endDayInclusive,
+  }) {
+    if (dayKeys.isEmpty) return 0;
+    if (!_hasAnyEnabledRitualDays(daysOfWeek)) return 0;
+    if (endDayInclusive.isBefore(startDay)) return 0;
+
+    int longest = 0;
+    int rolling = 0;
+    for (var day = startDay;
+        !day.isAfter(endDayInclusive);
+        day = _nextDay(day)) {
+      final dayIndex = day.weekday % 7; // Sunday -> 0
+      if (!daysOfWeek[dayIndex]) continue;
+
+      final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+      if (dayKeys.contains(key)) {
+        rolling += 1;
+        longest = max(longest, rolling);
+      } else {
+        rolling = 0;
+      }
+    }
+    return longest;
+  }
+
+  DateTime _streakStartDateFromDayKeys(
+    Set<int> dayKeys,
+    DateTime todayMidnight,
+  ) {
+    final minKey = dayKeys.reduce(min);
+    final minDay = DateTime.fromMillisecondsSinceEpoch(minKey);
+    final start = DateTime(minDay.year, minDay.month, minDay.day);
+    return start.isAfter(todayMidnight) ? todayMidnight : start;
+  }
+
+  bool _hasAnyEnabledRitualDays(List<bool> daysOfWeek) {
+    if (daysOfWeek.length != 7) return false;
+    for (final enabled in daysOfWeek) {
+      if (enabled) return true;
+    }
+    return false;
+  }
+
+  DateTime _nextDay(DateTime day) => DateTime(day.year, day.month, day.day + 1);
+
+  DateTime _prevDay(DateTime day) => DateTime(day.year, day.month, day.day - 1);
+
   void _seedSeenBadgesForNewRituals(
-    Map<String, int> ritualLongestStreaks,
+    Map<String, RitualProgress> ritualProgress,
   ) {
     if (_recentlyAddedRitualIds.isEmpty) return;
     bool changed = false;
     for (final ritualId in _recentlyAddedRitualIds) {
-      final longest = ritualLongestStreaks[ritualId] ?? 0;
+      final longest = ritualProgress[ritualId]?.longestStreakOverall ?? 0;
       if (longest <= 0) continue;
       final thresholds =
           _badgeThresholds.where((threshold) => longest >= threshold);

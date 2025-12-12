@@ -4,12 +4,12 @@ import "package:photos/models/rituals/ritual_models.dart";
 
 class AchievementsRow extends StatelessWidget {
   const AchievementsRow({
-    required this.summary,
+    required this.progress,
     this.onBadgeTap,
     super.key,
   });
 
-  final RitualsSummary? summary;
+  final RitualProgress? progress;
   final void Function(int days)? onBadgeTap;
 
   static const Map<int, String> _badgeAssets = {
@@ -20,11 +20,9 @@ class AchievementsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badges = summary?.badgesUnlocked ?? const <int, bool>{};
-    final unlocked = badges.entries
-        .where((entry) => entry.value && _badgeAssets.containsKey(entry.key))
-        .map((entry) => entry.key)
-        .toList();
+    final longest = progress?.longestStreakOverall ?? 0;
+    final unlocked =
+        _badgeAssets.keys.where((days) => longest >= days).toList();
 
     if (unlocked.isEmpty) {
       return const SizedBox.shrink();
