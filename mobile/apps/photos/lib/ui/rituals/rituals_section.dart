@@ -468,6 +468,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
       ritual?.timeOfDay ?? const TimeOfDay(hour: 9, minute: 0);
   String selectedEmoji = ritual?.icon ?? "📸";
   final formKey = GlobalKey<FormState>();
+  bool sendReminderEnabled = !days.every((selected) => !selected);
 
   await showGeneralDialog(
     context: context,
@@ -502,6 +503,40 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                           selectedAlbumId != null;
                       final bool allDaysOff =
                           days.every((selected) => !selected);
+                      const widgetBackgroundColor = Color(0xFFFAFAFA);
+                      final localizations =
+                          MaterialLocalizations.of(dialogContext);
+                      final int hour = selectedTime.hourOfPeriod == 0
+                          ? 12
+                          : selectedTime.hourOfPeriod;
+                      final String minute =
+                          selectedTime.minute.toString().padLeft(2, "0");
+                      final String period = selectedTime.period == DayPeriod.am
+                          ? localizations.anteMeridiemAbbreviation
+                          : localizations.postMeridiemAbbreviation;
+                      const timeTextStyle = TextStyle(
+                        color: Color(0xFF454545),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                      );
+
+                      Widget timeSegment(
+                        String text, {
+                        required TextStyle style,
+                      }) {
+                        return Container(
+                          width: 64,
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(text, style: style),
+                          ),
+                        );
+                      }
+
                       return Container(
                         decoration: BoxDecoration(
                           color: colorScheme.backgroundElevated,
@@ -526,7 +561,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                   children: [
                                     Text(
                                       ritual == null
-                                          ? context.l10n.ritualNew
+                                          ? "Create new ritual"
                                           : context.l10n.ritualEdit,
                                       style: textTheme.largeBold,
                                     ),
@@ -549,8 +584,9 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           width: 70,
                                           height: 70,
                                           decoration: BoxDecoration(
-                                            color: colorScheme.fillFaintPressed,
-                                            shape: BoxShape.circle,
+                                            color: widgetBackgroundColor,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
                                           ),
                                           child: Center(
                                             child: Text(
@@ -606,8 +642,11 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         decoration: InputDecoration(
                                           hintText:
                                               context.l10n.ritualEnterPrompt,
+                                          hintStyle: textTheme.body.copyWith(
+                                            color: const Color(0xFF969696),
+                                          ),
                                           filled: true,
-                                          fillColor: colorScheme.fillFaint,
+                                          fillColor: widgetBackgroundColor,
                                           contentPadding:
                                               const EdgeInsets.symmetric(
                                             horizontal: 14,
@@ -641,10 +680,10 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 20),
+                                const SizedBox(height: 28),
                                 _sectionLabel(
                                   context,
-                                  context.l10n.ritualDayLabel,
+                                  "Choose days for ritual",
                                 ),
                                 const SizedBox(height: 8),
                                 Container(
@@ -652,7 +691,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     vertical: 10,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: colorScheme.fillFaint,
+                                    color: widgetBackgroundColor,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: LayoutBuilder(
@@ -708,6 +747,28 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                   ),
                                 ),
                                 const SizedBox(height: 16),
+                                _sectionLabel(
+                                  context,
+                                  "Choose an album",
+                                ),
+                                const SizedBox(height: 8),
+                                GestureDetector(
+                                  onTap: () async {
+                                    final result = await _pickAlbum(context);
+                                    if (result != null) {
+                                      setState(() {
+                                        selectedAlbum = result;
+                                        selectedAlbumId = result.id;
+                                        selectedAlbumName = result.displayName;
+                                      });
+                                    }
+                                  },
+                                  child: _AlbumPreviewTile(
+                                    album: selectedAlbum,
+                                    fallbackName: selectedAlbumName,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
                                 if (allDaysOff)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -715,7 +776,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                       vertical: 14,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: colorScheme.fillFaint,
+                                      color: widgetBackgroundColor,
                                       borderRadius: BorderRadius.circular(18),
                                     ),
                                     child: Row(
@@ -740,80 +801,91 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     ),
                                   )
                                 else ...[
-                                  _sectionLabel(
-                                    context,
-                                    context.l10n.ritualTimeLabel,
+                                  Row(
+                                    children: [
+                                      _sectionLabel(
+                                        context,
+                                        "Send reminder",
+                                      ),
+                                      const Spacer(),
+                                      Switch.adaptive(
+                                        value: sendReminderEnabled,
+                                        activeColor: colorScheme.primary500,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            sendReminderEnabled = value;
+                                          });
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 8),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      final result = await showTimePicker(
-                                        context: context,
-                                        initialTime: selectedTime,
-                                      );
-                                      if (result != null) {
-                                        setState(() {
-                                          selectedTime = result;
-                                        });
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 14,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: colorScheme.fillFaint,
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              selectedTime.format(context),
-                                              style: textTheme.h3Bold,
+                                  if (sendReminderEnabled) ...[
+                                    const SizedBox(height: 4),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        final result = await showTimePicker(
+                                          context: context,
+                                          initialTime: selectedTime,
+                                        );
+                                        if (result != null) {
+                                          setState(() {
+                                            selectedTime = result;
+                                          });
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: widgetBackgroundColor,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                timeSegment(
+                                                  hour.toString(),
+                                                  style: timeTextStyle,
+                                                ),
+                                                const SizedBox(width: 9),
+                                                const Text(
+                                                  ":",
+                                                  style: timeTextStyle,
+                                                ),
+                                                const SizedBox(width: 9),
+                                                timeSegment(
+                                                  minute,
+                                                  style: timeTextStyle,
+                                                ),
+                                                const SizedBox(width: 9),
+                                                timeSegment(
+                                                  period,
+                                                  style: timeTextStyle,
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.all(10),
-                                            decoration: BoxDecoration(
-                                              color: colorScheme
-                                                  .backgroundElevated2,
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: const Icon(
+                                                Icons.schedule,
+                                                color: Color(0xFF454545),
+                                              ),
                                             ),
-                                            child: Icon(
-                                              Icons.schedule,
-                                              color: colorScheme.textMuted,
-                                            ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ],
-                                const SizedBox(height: 16),
-                                _sectionLabel(
-                                  context,
-                                  context.l10n.ritualAlbumLabel,
-                                ),
-                                const SizedBox(height: 8),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final result = await _pickAlbum(context);
-                                    if (result != null) {
-                                      setState(() {
-                                        selectedAlbum = result;
-                                        selectedAlbumId = result.id;
-                                        selectedAlbumName = result.displayName;
-                                      });
-                                    }
-                                  },
-                                  child: _AlbumPreviewTile(
-                                    album: selectedAlbum,
-                                    fallbackName: selectedAlbumName,
-                                  ),
-                                ),
                                 const SizedBox(height: 20),
                                 SizedBox(
                                   width: double.infinity,
@@ -824,11 +896,13 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                           : colorScheme.fillMuted,
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 16,
-                                        vertical: 14,
+                                        vertical: 18,
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(18),
                                       ),
+                                      side: BorderSide.none,
+                                      elevation: 0,
                                     ),
                                     onPressed: () async {
                                       if (!canSave) return;
@@ -848,7 +922,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     },
                                     child: Text(
                                       ritual == null
-                                          ? context.l10n.ritualSave
+                                          ? "Create ritual"
                                           : context.l10n.ritualUpdate,
                                       style: textTheme.bodyBold
                                           .copyWith(color: Colors.white),
@@ -1132,10 +1206,15 @@ class _AlbumPreviewTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final displayedName = album?.displayName ??
+        fallbackName ??
+        context.l10n.ritualAlbumSelectionPlaceholder;
+    final isPlaceholder =
+        album == null && (fallbackName == null || fallbackName!.trim().isEmpty);
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
+        color: const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -1152,10 +1231,10 @@ class _AlbumPreviewTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  album?.displayName ??
-                      fallbackName ??
-                      context.l10n.ritualAlbumSelectionPlaceholder,
-                  style: textTheme.smallBold,
+                  displayedName,
+                  style: textTheme.smallBold.copyWith(
+                    color: isPlaceholder ? const Color(0xFF969696) : null,
+                  ),
                 ),
               ],
             ),
@@ -1200,7 +1279,7 @@ class _AlbumThumbnail extends StatelessWidget {
         child: FutureBuilder<EnteFile?>(
           future: CollectionsService.instance.getCover(album!),
           builder: (context, snapshot) {
-            if (snapshot.hasData) {
+            if (snapshot.hasData && snapshot.data != null) {
               return ThumbnailWidget(
                 snapshot.data!,
                 showFavForAlbumOnly: true,
@@ -1208,7 +1287,16 @@ class _AlbumThumbnail extends StatelessWidget {
               );
             }
             return Container(
-              color: colorScheme.fillFaintPressed,
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: colorScheme.fillFaintPressed,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.photo_album_outlined,
+                color: colorScheme.textMuted,
+              ),
             );
           },
         ),
@@ -1242,8 +1330,7 @@ class _DayCircle extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color:
-              selected ? colorScheme.primary500 : colorScheme.fillFaintPressed,
+          color: selected ? colorScheme.primary500 : const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(size / 2),
         ),
         child: Center(
@@ -1283,10 +1370,13 @@ void _openRitualCamera(BuildContext context, Ritual ritual) {
 
 Widget _sectionLabel(BuildContext context, String label) {
   final textTheme = getEnteTextTheme(context);
-  final colorScheme = getEnteColorScheme(context);
   return Text(
     label,
-    style: textTheme.smallBold.copyWith(color: colorScheme.textMuted),
+    style: textTheme.small.copyWith(
+      color: const Color(0xFF666666),
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
   );
 }
 
