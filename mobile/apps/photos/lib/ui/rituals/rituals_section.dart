@@ -16,7 +16,6 @@ class RitualsSection extends StatelessWidget {
     this.selectedRitualId,
     this.onSelectionChanged,
     this.showHeader = true,
-    this.showStarterRitual = true,
     super.key,
   });
 
@@ -25,7 +24,6 @@ class RitualsSection extends StatelessWidget {
   final String? selectedRitualId;
   final ValueChanged<Ritual?>? onSelectionChanged;
   final bool showHeader;
-  final bool showStarterRitual;
 
   @override
   Widget build(BuildContext context) {
@@ -65,11 +63,6 @@ class RitualsSection extends StatelessWidget {
             const SizedBox(height: 8),
           ] else
             const SizedBox(height: 4),
-          if (showStarterRitual)
-            _StarterRitualCard(
-              isSelected: selectedRitualId == null,
-              onTap: () => onSelectionChanged?.call(null),
-            ),
           if (rituals.isEmpty)
             _CreateRitualCard(
               onTap: () async {
@@ -89,75 +82,6 @@ class RitualsSection extends StatelessWidget {
                   .toList(),
             ),
         ],
-      ),
-    );
-  }
-}
-
-class _StarterRitualCard extends StatelessWidget {
-  const _StarterRitualCard({
-    required this.isSelected,
-    this.onTap,
-  });
-
-  final bool isSelected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected
-              ? colorScheme.primary500
-              : colorScheme.backgroundElevated2,
-          width: 2,
-        ),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colorScheme.fillFaintPressed,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "📸",
-                      style: TextStyle(
-                        fontSize: 18,
-                        height: 1,
-                        decoration: TextDecoration.none,
-                      ),
-                      textHeightBehavior: _tightTextHeightBehavior,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.l10n.ritualDefaultHeatmapTitle,
-                    style: getEnteTextTheme(context).body,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
