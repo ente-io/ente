@@ -48,6 +48,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller/family"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
+	socialcontroller "github.com/ente-io/museum/pkg/controller/social"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/user"
 	userEntityCtrl "github.com/ente-io/museum/pkg/controller/userentity"
@@ -61,6 +62,7 @@ import (
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
+	socialrepo "github.com/ente-io/museum/pkg/repo/social"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
 	userEntityRepo "github.com/ente-io/museum/pkg/repo/userentity"
 	"github.com/ente-io/museum/pkg/utils/billing"
@@ -263,6 +265,24 @@ func main() {
 	}
 
 	accessCtrl := access.NewAccessController(collectionRepo, fileRepo)
+	commentsRepo := &socialrepo.CommentsRepository{DB: db}
+	reactionsRepo := &socialrepo.ReactionsRepository{DB: db}
+	anonUsersRepo := &socialrepo.AnonUsersRepository{DB: db}
+	commentsController := &socialcontroller.CommentsController{
+		Repo:       commentsRepo,
+		AccessCtrl: accessCtrl,
+	}
+	reactionsController := &socialcontroller.ReactionsController{
+		Repo:       reactionsRepo,
+		AccessCtrl: accessCtrl,
+	}
+	socialController := &socialcontroller.Controller{
+		CommentsRepo:   commentsRepo,
+		ReactionsRepo:  reactionsRepo,
+		CollectionRepo: collectionRepo,
+		AccessCtrl:     accessCtrl,
+		AnonUsersRepo:  anonUsersRepo,
+	}
 	fileDataCtrl := filedata.New(fileDataRepo, accessCtrl, objectCleanupController, s3Config, fileRepo, collectionRepo)
 
 	fileController := &controller.FileController{
@@ -316,6 +336,26 @@ func main() {
 		CollectionRepo:        collectionRepo,
 		UserRepo:              userRepo,
 		JwtSecret:             jwtSecretBytes,
+	}
+	publicCommentsCtrl := &publicCtrl.CommentsController{
+		CommentCtrl:   commentsController,
+		CommentsRepo:  commentsRepo,
+		ReactionsRepo: reactionsRepo,
+		UserRepo:      userRepo,
+		UserAuthRepo:  userAuthRepo,
+		AnonUsersRepo: anonUsersRepo,
+		JwtSecret:     jwtSecretBytes,
+	}
+	publicReactionsCtrl := &publicCtrl.ReactionsController{
+		ReactionCtrl:  reactionsController,
+		ReactionsRepo: reactionsRepo,
+		AnonUsersRepo: anonUsersRepo,
+		UserAuthRepo:  userAuthRepo,
+		JwtSecret:     jwtSecretBytes,
+	}
+	anonIdentityCtrl := &publicCtrl.AnonIdentityController{
+		JwtSecret:     jwtSecretBytes,
+		AnonUsersRepo: anonUsersRepo,
 	}
 
 	collectionController := &collections.CollectionController{
@@ -383,10 +423,12 @@ func main() {
 		CollectionLinkRepo:   collectionLinkRepo,
 		PublicCollectionCtrl: collectionLinkCtrl,
 		CollectionRepo:       collectionRepo,
+		AnonUsersRepo:        anonUsersRepo,
 		Cache:                accessTokenCache,
 		BillingCtrl:          billingController,
 		DiscordController:    discordController,
 		RemoteStoreRepo:      remoteStoreRepository,
+		AnonIdentitySecret:   jwtSecretBytes,
 	}
 	fileLinkMiddleware := &middleware.FileLinkMiddleware{
 		FileLinkRepo:      fileLinkRepo,
@@ -438,7 +480,11 @@ func main() {
 	familiesJwtAuthAPI.Use(rateLimiter.GlobalRateLimiter(), authMiddleware.TokenAuthMiddleware(jwt.FAMILIES.Ptr()), rateLimiter.APIRateLimitForUserMiddleware(urlSanitizer))
 
 	publicCollectionAPI := server.Group("/public-collection")
-	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionLinkMiddleware.Authenticate(urlSanitizer))
+	publicCollectionAPI.Use(
+		rateLimiter.GlobalRateLimiter(),
+		collectionLinkMiddleware.Authenticate(urlSanitizer),
+		rateLimiter.APIRateLimitMiddleware(urlSanitizer),
+	)
 	fileLinkApi := server.Group("/file-link")
 	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
 
@@ -513,6 +559,26 @@ func main() {
 	privateAPI.GET("/trash/v2/diff", trashHandler.GetDiffV2)
 	privateAPI.POST("/trash/delete", trashHandler.Delete)
 	privateAPI.POST("/trash/empty", trashHandler.Empty)
+	commentsHandler := &api.CommentsHandler{Controller: commentsController}
+	reactionsHandler := &api.ReactionsHandler{Controller: reactionsController}
+	socialHandler := &api.SocialHandler{Controller: socialController}
+	publicSocialHandler := &api.PublicCommentsHandler{
+		CommentsCtrl:     publicCommentsCtrl,
+		ReactionsCtrl:    publicReactionsCtrl,
+		AnonIdentityCtrl: anonIdentityCtrl,
+	}
+	privateAPI.GET("/comments/diff", commentsHandler.Diff)
+	privateAPI.POST("/comments", commentsHandler.Create)
+	privateAPI.PUT("/comments/:commentID", commentsHandler.Update)
+	privateAPI.DELETE("/comments/:commentID", commentsHandler.Delete)
+
+	privateAPI.GET("/reactions/diff", reactionsHandler.Diff)
+	privateAPI.PUT("/reactions", reactionsHandler.Upsert)
+	privateAPI.DELETE("/reactions/:reactionID", reactionsHandler.Delete)
+
+	privateAPI.GET("/social/diff", socialHandler.UnifiedDiff)
+	privateAPI.GET("/social/anon-profiles", socialHandler.AnonProfiles)
+	privateAPI.GET("/comments-reactions/counts", socialHandler.Counts)
 
 	emergencyCtrl := &emergency.Controller{
 		Repo:              &emergencyRepo.Repository{DB: db},
@@ -617,7 +683,6 @@ func main() {
 		FileDataCtrl:           fileDataCtrl,
 		StorageBonusController: storageBonusCtrl,
 	}
-
 	fileLinkApi.GET("/info", fileHandler.LinkInfo)
 	fileLinkApi.GET("/pass-info", fileHandler.PasswordInfo)
 	fileLinkApi.GET("/thumbnail", fileHandler.LinkThumbnail)
@@ -634,6 +699,16 @@ func main() {
 	publicCollectionAPI.GET("/multipart-upload-urls", publicCollectionHandler.GetMultipartUploadURLs)
 	publicCollectionAPI.POST("/file", publicCollectionHandler.CreateFile)
 	publicCollectionAPI.POST("/verify-password", publicCollectionHandler.VerifyPassword)
+	publicCollectionAPI.GET("/comments/diff", publicSocialHandler.CommentDiff)
+	publicCollectionAPI.POST("/comments", publicSocialHandler.CreateComment)
+	publicCollectionAPI.PUT("/comments/:commentID", publicSocialHandler.UpdateComment)
+	publicCollectionAPI.DELETE("/comments/:commentID", publicSocialHandler.DeleteComment)
+	publicCollectionAPI.GET("/reactions/diff", publicSocialHandler.ReactionDiff)
+	publicCollectionAPI.POST("/reactions", publicSocialHandler.CreateReaction)
+	publicCollectionAPI.DELETE("/reactions/:reactionID", publicSocialHandler.DeleteReaction)
+	publicCollectionAPI.GET("/participants/masked-emails", publicSocialHandler.Participants)
+	publicCollectionAPI.GET("/anon-profiles", publicSocialHandler.AnonProfiles)
+	publicCollectionAPI.POST("/anon-identity", publicSocialHandler.CreateAnonIdentity)
 
 	castAPI := server.Group("/cast")
 
