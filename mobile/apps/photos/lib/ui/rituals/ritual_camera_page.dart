@@ -21,6 +21,27 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
+void openRitualCamera(BuildContext context, Ritual ritual) {
+  final albumId = ritual.albumId;
+  if (albumId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.l10n.ritualSetAlbumToLaunchCamera,
+        ),
+      ),
+    );
+    return;
+  }
+  routeToPage(
+    context,
+    RitualCameraPage(
+      ritualId: ritual.id,
+      albumId: albumId,
+    ),
+  );
+}
+
 enum _CameraScreenMode { capture, review }
 
 class RitualCameraPage extends StatefulWidget {

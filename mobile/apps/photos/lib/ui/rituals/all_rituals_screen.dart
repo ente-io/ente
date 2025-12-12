@@ -14,6 +14,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/rituals/achievements_row.dart";
 import "package:photos/ui/rituals/ritual_badge_popup.dart";
+import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_heatmap_card.dart";
 import "package:photos/ui/rituals/rituals_section.dart";
 import "package:photos/utils/share_util.dart";
