@@ -96,7 +96,7 @@ const ChevronDownIcon: React.FC = () => (
         viewBox="0 0 20 20"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        style={{ marginLeft: -6 }}
+        style={{ marginLeft: -6, transform: "translateY(-2px)" }}
     >
         <path
             d="M10.0007 12.5004L6.46484 8.96544L7.64401 7.78711L10.0007 10.1438L12.3573 7.78711L13.5365 8.96544L10.0007 12.5004Z"
@@ -1132,6 +1132,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         fontWeight: 600,
                                         fontSize: 14,
                                         lineHeight: "20px",
+                                        marginBottom: "4px",
                                         ...theme.applyStyles("dark", {
                                             color: "#fff",
                                         }),
@@ -1167,6 +1168,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                     fontWeight: 600,
                                                     fontSize: 14,
                                                     lineHeight: "20px",
+                                                    marginBottom: "4px",
                                                     ...theme.applyStyles(
                                                         "dark",
                                                         { color: "#fff" },
@@ -1508,7 +1510,7 @@ const CollectionDropdownButton = styled(Box)(({ theme }) => ({
     alignItems: "center",
     justifyContent: "center",
     gap: 14,
-    padding: "5px 6px 4px 6px",
+    padding: "5px 6px 0px 6px",
     borderRadius: 12,
     backgroundColor: "#F0F0F0",
     cursor: "pointer",
@@ -1529,19 +1531,19 @@ const CollectionThumbnail = styled("img")(() => ({
 
 const CollectionBadge = styled(Box)(({ theme }) => ({
     position: "absolute",
-    bottom: 2,
+    bottom: 4,
     right: -4,
     display: "inline-flex",
-    padding: "3px 5px",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 34,
+    borderRadius: "50%",
     backgroundColor: "#FFF",
     color: "#000",
     fontSize: 10,
     fontWeight: 600,
     lineHeight: 1,
-    minWidth: 14,
+    minWidth: 16,
+    minHeight: 16,
     ...theme.applyStyles("dark", { backgroundColor: "#fff", color: "#000" }),
 }));
 
@@ -1554,8 +1556,8 @@ const CollectionDropdownMenu = styled(Box)(({ theme }) => ({
     justifyContent: "center",
     alignItems: "flex-start",
     width: 184,
-    padding: 6,
-    gap: 12,
+    padding: 4,
+    gap: 4,
     borderRadius: 12,
     border: "1px solid rgba(0, 0, 0, 0.08)",
     backgroundColor: "#F0F0F0",
@@ -1570,7 +1572,7 @@ const CollectionDropdownItem = styled(Box)(({ theme }) => ({
     display: "flex",
     alignItems: "center",
     gap: 14,
-    padding: "6px 6px 3px 6px",
+    padding: "5px 6px 0px 6px",
     borderRadius: 8,
     cursor: "pointer",
     width: "100%",
