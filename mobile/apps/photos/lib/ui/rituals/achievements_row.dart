@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/models/activity/activity_models.dart";
+import "package:photos/models/rituals/ritual_models.dart";
 
 class AchievementsRow extends StatelessWidget {
   const AchievementsRow({
