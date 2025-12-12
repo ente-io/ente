@@ -396,13 +396,14 @@ RitualsSummary ritualSummaryForRitual(
       .map(
         (day) => RitualDay(
           date: day.date,
-          isCompleted: dayKeys.contains(
-            DateTime(
-              day.date.year,
-              day.date.month,
-              day.date.day,
-            ).millisecondsSinceEpoch,
-          ),
+          isCompleted: _isRitualDayEnabled(ritual.daysOfWeek, day.date) &&
+              dayKeys.contains(
+                DateTime(
+                  day.date.year,
+                  day.date.month,
+                  day.date.day,
+                ).millisecondsSinceEpoch,
+              ),
         ),
       )
       .toList();
@@ -410,26 +411,10 @@ RitualsSummary ritualSummaryForRitual(
       ? last365Days.sublist(last365Days.length - 7)
       : List<RitualDay>.from(last365Days);
 
-  int longestStreak = 0;
-  int rolling = 0;
-  for (final day in last365Days) {
-    if (day.isCompleted) {
-      rolling += 1;
-      if (rolling > longestStreak) {
-        longestStreak = rolling;
-      }
-    } else {
-      rolling = 0;
-    }
-  }
-  int currentStreak = 0;
-  for (int i = last365Days.length - 1; i >= 0; i--) {
-    if (last365Days[i].isCompleted) {
-      currentStreak += 1;
-    } else {
-      break;
-    }
-  }
+  final now = DateTime.now();
+  final todayMidnight = DateTime(now.year, now.month, now.day);
+  final (currentStreak, longestStreak) =
+      _scheduledStreaks(dayKeys, ritual.daysOfWeek, todayMidnight);
 
   final unlockedBadges = <int, bool>{
     for (final entry in summary.badgesUnlocked.keys)
@@ -452,6 +437,75 @@ RitualsSummary ritualSummaryForRitual(
     ritualLongestStreaks: {ritual.id: longestStreak},
   );
 }
+
+bool _isRitualDayEnabled(List<bool> daysOfWeek, DateTime day) {
+  if (daysOfWeek.length != 7) return false;
+  final dayIndex = day.weekday % 7; // Sunday -> 0
+  return daysOfWeek[dayIndex];
+}
+
+// Streaks are computed only on days enabled by the ritual (Sunday-first).
+// A streak increments by 1 per enabled day that has at least one photo, and
+// breaks on the first enabled day that has no photo.
+(int current, int longest) _scheduledStreaks(
+  Set<int> completedDayKeys,
+  List<bool> daysOfWeek,
+  DateTime todayMidnight,
+) {
+  if (completedDayKeys.isEmpty) return (0, 0);
+  if (!_hasAnyEnabledRitualDays(daysOfWeek)) return (0, 0);
+
+  final start = _streakStartDateFromDayKeys(completedDayKeys, todayMidnight);
+
+  int longest = 0;
+  int rolling = 0;
+  for (var day = start; !day.isAfter(todayMidnight); day = _nextDay(day)) {
+    final dayIndex = day.weekday % 7; // Sunday -> 0
+    if (!daysOfWeek[dayIndex]) continue;
+
+    final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+    if (completedDayKeys.contains(key)) {
+      rolling += 1;
+      if (rolling > longest) longest = rolling;
+    } else {
+      rolling = 0;
+    }
+  }
+
+  int current = 0;
+  for (var day = todayMidnight; !day.isBefore(start); day = _prevDay(day)) {
+    final dayIndex = day.weekday % 7; // Sunday -> 0
+    if (!daysOfWeek[dayIndex]) continue;
+
+    final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+    if (completedDayKeys.contains(key)) {
+      current += 1;
+    } else {
+      break;
+    }
+  }
+
+  return (current, longest);
+}
+
+DateTime _streakStartDateFromDayKeys(Set<int> dayKeys, DateTime todayMidnight) {
+  final minKey = dayKeys.reduce(min);
+  final minDay = DateTime.fromMillisecondsSinceEpoch(minKey);
+  final start = DateTime(minDay.year, minDay.month, minDay.day);
+  return start.isAfter(todayMidnight) ? todayMidnight : start;
+}
+
+bool _hasAnyEnabledRitualDays(List<bool> daysOfWeek) {
+  if (daysOfWeek.length != 7) return false;
+  for (final enabled in daysOfWeek) {
+    if (enabled) return true;
+  }
+  return false;
+}
+
+DateTime _nextDay(DateTime day) => DateTime(day.year, day.month, day.day + 1);
+
+DateTime _prevDay(DateTime day) => DateTime(day.year, day.month, day.day - 1);
 
 class RitualHeatmapLegacy {
   RitualHeatmapLegacy._();
