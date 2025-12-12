@@ -357,6 +357,7 @@
   "sorryCouldNotAddToFavorites": "Sorry, could not add to favorites!",
   "sorryCouldNotRemoveFromFavorites": "Sorry, could not remove from favorites!",
   "subscribeToEnableSharing": "You need an active paid subscription to enable sharing.",
+  "subscribeToChangeLinkSetting": "You need a paid subscription to change this link setting.",
   "subscribe": "Subscribe",
   "canOnlyRemoveFilesOwnedByYou": "Can only remove files owned by you",
   "deleteSharedAlbum": "Delete shared album?",
@@ -1324,6 +1325,8 @@
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
+  "removePersonTag": "Remove person tag",
+  "areYouSureRemoveThisPersonTag": "Are you sure you want to remove this person tag?",
   "autoPairDesc": "Auto pair works only with devices that support Chromecast.",
   "manualPairDesc": "Pair with PIN works with any screen you wish to view your album on.",
   "connectToDevice": "Connect to device",
@@ -2020,11 +2023,11 @@
   "riverCruises": "River cruise views",
   "facesTimelineBannerTitle": "Memory Lane",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "See {name}'s photos across the years",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2082,7 +2085,7 @@
   },
   "facesTimelineUnavailable": "Faces timeline is preparing...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Playful kids",
   "coastalCliffs": "Cliffs by the sea",

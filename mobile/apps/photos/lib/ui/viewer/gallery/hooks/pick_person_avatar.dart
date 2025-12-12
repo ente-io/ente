@@ -5,7 +5,6 @@ import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_files.dart";
@@ -51,16 +50,11 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
   });
 
   Future<FileLoadResult> loadPersonFiles() async {
-    final result = await SearchService.instance
-        .getClusterFilesForPersonID(personEntity.remoteID);
-
-    final resultFiles = <EnteFile>{};
-    for (final e in result.entries) {
-      resultFiles.addAll(e.value);
-    }
-    final List<EnteFile> sortedFiles = List<EnteFile>.from(resultFiles);
-    sortedFiles.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
-
+    final sortedFiles = await SearchService.instance.getFilesForPersonID(
+      personEntity.remoteID,
+      includeManualAssigned: false,
+      sortOnTime: true,
+    );
     return FileLoadResult(sortedFiles, false);
   }
 

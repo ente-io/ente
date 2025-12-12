@@ -161,6 +161,10 @@ export interface FileListProps {
     /** The width we should occupy.*/
     width: number;
     /**
+     * Optional border radius to apply to the scrollable list container.
+     */
+    listBorderRadius?: string;
+    /**
      * The files to show, annotated with cached precomputed properties that are
      * frequently needed by the {@link FileList}.
      */
@@ -232,6 +236,14 @@ export interface FileListProps {
      * {@link annotatedFiles}.
      */
     onItemClick: (index: number) => void;
+    /**
+     * Called when the list scrolls, providing the current scroll offset.
+     */
+    onScroll?: (scrollOffset: number) => void;
+    /**
+     * Called when the visible date at the top of the viewport changes.
+     */
+    onVisibleDateChange?: (date: string | undefined) => void;
 }
 
 /**
@@ -240,6 +252,7 @@ export interface FileListProps {
 export const FileList: React.FC<FileListProps> = ({
     height,
     width,
+    listBorderRadius,
     mode,
     modePlus,
     header,
@@ -255,6 +268,8 @@ export const FileList: React.FC<FileListProps> = ({
     favoriteFileIDs,
     emailByUserID,
     onItemClick,
+    onScroll,
+    onVisibleDateChange,
 }) => {
     const [_items, setItems] = useState<FileListItem[]>([]);
     const items = useDeferredValue(_items);
@@ -700,6 +715,39 @@ export const FileList: React.FC<FileListProps> = ({
         }
     }, []);
 
+    // Track the last reported date to avoid unnecessary callbacks
+    const lastVisibleDateRef = useRef<string | undefined>(undefined);
+
+    const handleScroll = useCallback(
+        ({ scrollOffset }: { scrollOffset: number }) => {
+            onScroll?.(scrollOffset);
+
+            // Calculate which date is visible at the current scroll position
+            if (onVisibleDateChange && items.length > 0) {
+                let cumulativeHeight = 0;
+                let currentDate: string | undefined;
+
+                for (const item of items) {
+                    if (item.type === "date") {
+                        currentDate = item.groups[0]?.date;
+                    }
+                    cumulativeHeight += item.height;
+                    // Found the item that contains the scroll position
+                    if (cumulativeHeight > scrollOffset) {
+                        break;
+                    }
+                }
+
+                // Only call callback if date changed
+                if (currentDate !== lastVisibleDateRef.current) {
+                    lastVisibleDateRef.current = currentDate;
+                    onVisibleDateChange(currentDate);
+                }
+            }
+        },
+        [onScroll, onVisibleDateChange, items],
+    );
+
     if (!items.length) {
         return <></>;
     }
@@ -728,6 +776,12 @@ export const FileList: React.FC<FileListProps> = ({
             itemCount={items.length}
             overscanCount={3}
             useIsScrolling
+            onScroll={handleScroll}
+            style={
+                listBorderRadius
+                    ? { borderRadius: listBorderRadius }
+                    : undefined
+            }
         >
             {FileListRow}
         </VariableSizeList>

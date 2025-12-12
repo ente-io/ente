@@ -43,8 +43,10 @@ it with Ente.
     ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
     You'll see two options:
-    - **Select folder** (recommended): If you have multiple ZIP files, extract them all into one folder first, then select that folder. This ensures proper metadata matching ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).
+    - **Select folder (recommended): If you have multiple ZIP files, extract them all into one folder first, then select that folder. This ensures proper metadata matching ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).**
     - **Select zips**: Choose your ZIP files directly without extracting. Convenient but may not properly match metadata if files are split across ZIPs.
+
+        ![Google Takeout Selection](google-photos-6.webp)
 
 10. Choose where to import your photos:
 
@@ -52,6 +54,7 @@ it with Ente.
     - **Import to existing album** → Pick one of your current albums, or
     - **Create new album(s)** → Click "Create albums", then:
         - If your folder has subfolders: Choose between "Separate albums" (each folder becomes its own album) or "Single album" (everything goes into one album)
+          ![Select ZIP workflow in the Ente desktop app](google-photos-7.webp)
         - If it's a single folder: Just name your new album
 
     **If you selected ZIP files directly**:

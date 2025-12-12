@@ -219,7 +219,9 @@ class _TextDetectionOverlayButtonState
                     const SizedBox(width: 8),
                     Text(
                       "Select text",
-                      style: getEnteTextTheme(context).mini,
+                      style: getEnteTextTheme(context).mini.copyWith(
+                            color: Colors.white,
+                          ),
                     ),
                   ],
                 ),

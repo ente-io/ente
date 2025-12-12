@@ -88,6 +88,28 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		subscriptionAdminID = userID
 		subscriptionUserIDs = []int64{userID}
 	}
+
+	var subStorage int64
+	var bonus *bonus.ActiveStorageBonus
+	sub, err := c.BillingCtrl.GetActiveSubscription(subscriptionAdminID)
+	if err != nil {
+		subStorage = 0
+		if errors.Is(err, ente.ErrNoActiveSubscription) {
+			bonusRes, bonErr := c.UserCacheCtrl.GetActiveStorageBonus(ctx, subscriptionAdminID)
+			if bonErr != nil {
+				return stacktrace.Propagate(bonErr, "failed to get bonus data")
+			}
+			if bonusRes.GetMaxExpiry() <= 0 {
+				return stacktrace.Propagate(err, "all bonus & plan expired")
+			}
+			bonus = bonusRes
+		} else {
+			return stacktrace.Propagate(err, "")
+		}
+	} else {
+		subStorage = sub.Storage
+	}
+	// Plan expiry check is done at this point
 	var lockerUsage *repo.LockerUsage
 	var lUsageErr error
 	if app == ente.Locker {
@@ -124,28 +146,9 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
 				fmt.Sprintf("locker storage limit exceeded (limit %d, usage %d)", maxStorage, projectedLockerUsage))
 		}
+		return nil
 	}
 
-	var subStorage int64
-	var bonus *bonus.ActiveStorageBonus
-	sub, err := c.BillingCtrl.GetActiveSubscription(subscriptionAdminID)
-	if err != nil {
-		subStorage = 0
-		if errors.Is(err, ente.ErrNoActiveSubscription) {
-			bonusRes, bonErr := c.UserCacheCtrl.GetActiveStorageBonus(ctx, subscriptionAdminID)
-			if bonErr != nil {
-				return stacktrace.Propagate(bonErr, "failed to get bonus data")
-			}
-			if bonusRes.GetMaxExpiry() <= 0 {
-				return stacktrace.Propagate(err, "all bonus & plan expired")
-			}
-			bonus = bonusRes
-		} else {
-			return stacktrace.Propagate(err, "")
-		}
-	} else {
-		subStorage = sub.Storage
-	}
 	usage, err := c.UsageRepo.GetCombinedUsage(ctx, subscriptionUserIDs)
 	if err != nil {
 		return stacktrace.Propagate(err, "")

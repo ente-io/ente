@@ -2017,11 +2017,11 @@
   "riverCruises": "Cảnh quan trên sông",
   "facesTimelineBannerTitle": "Hồi Ức",
   "@facesTimelineBannerTitle": {
-    "description": "Title for the faces timeline suggestion banner shown on a person's page"
+    "description": "Title for the Memory Lane suggestion banner shown on a person's page"
   },
   "facesTimelineBannerSubtitle": "Xem ảnh của {name} qua từng năm",
   "@facesTimelineBannerSubtitle": {
-    "description": "Subtitle for faces timeline banner describing the timeline for a person",
+    "description": "Subtitle for Memory Lane banner describing the timeline for a person",
     "placeholders": {
       "name": {
         "type": "String",
@@ -2079,7 +2079,7 @@
   },
   "facesTimelineUnavailable": "Đang chuẩn bị dòng thời gian...",
   "@facesTimelineUnavailable": {
-    "description": "Fallback message when the faces timeline cannot be displayed yet"
+    "description": "Fallback message when the Memory Lane cannot be displayed yet"
   },
   "playfulKids": "Trẻ em vui chơi",
   "coastalCliffs": "Vách đá bên bờ biển",

@@ -122,6 +122,10 @@ class CollectionSharingService {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
+      if (e.response?.statusCode == 403 &&
+          e.response?.data?['code'] == 'LINK_EDIT_NOT_ALLOWED') {
+        throw LinkEditNotAllowedError();
+      }
       rethrow;
     } catch (e, s) {
       _logger.severe("failed to update ShareUrl", e, s);

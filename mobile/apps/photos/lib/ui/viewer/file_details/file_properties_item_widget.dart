@@ -1,5 +1,6 @@
 import "package:flutter/material.dart";
 import 'package:path/path.dart' as path;
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/theme/ente_theme.dart";
@@ -38,7 +39,8 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
           path.extension(widget.file.displayName).toUpperCase(),
       subtitleSection: _subTitleSection(),
       editOnTap: widget.file.uploadedFileID == null ||
-              widget.file.ownerID != widget.currentUserID
+              widget.file.ownerID != widget.currentUserID ||
+              widget.file.isTrash
           ? null
           : () async {
               await editFilename(context, widget.file);

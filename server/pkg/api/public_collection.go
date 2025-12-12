@@ -2,12 +2,13 @@ package api
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/controller/filedata"
 	"github.com/ente-io/museum/pkg/controller/public"
-	"net/http"
-	"strconv"
 
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
 
@@ -166,6 +167,11 @@ func (h *PublicCollectionHandler) CreateFile(c *gin.Context) {
 	}
 
 	enteApp := auth.GetApp(c)
+	accessContext := auth.MustGetPublicAccessContext(c)
+	if file.CollectionID != accessContext.CollectionID {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("can only update to associated collection"), ""))
+		return
+	}
 
 	fileRes, err := h.Controller.CreateFile(c, file, enteApp)
 	if err != nil {

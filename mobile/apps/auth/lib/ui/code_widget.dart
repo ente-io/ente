@@ -41,6 +41,7 @@ class CodeWidget extends StatefulWidget {
   final bool isReordering;
   final bool enableDesktopContextActions;
   final List<Code> Function()? selectedCodesBuilder;
+  final FocusNode? focusNode;
 
   const CodeWidget(
     this.code, {
@@ -50,6 +51,7 @@ class CodeWidget extends StatefulWidget {
     this.isReordering = false,
     this.enableDesktopContextActions = false,
     this.selectedCodesBuilder,
+    this.focusNode,
   });
 
   @override
@@ -269,7 +271,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        customBorder: RoundedRectangleBorder(
+                        focusNode: widget.focusNode,customBorder: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         // InkWell handles focus natively.

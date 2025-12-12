@@ -67,6 +67,7 @@ class BaseConfiguration {
     );
     await _setupKeys();
     await _setupFolders();
+    _logger.info("User ID: ${getUserID()}");
   }
 
   Future<void> logout({bool autoLogout = false}) async {

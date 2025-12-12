@@ -34,8 +34,8 @@ class PeopleAppBar extends StatefulWidget {
   final String? title;
   final SelectedFiles selectedFiles;
   final PersonEntity person;
-  final bool facesTimelineReady;
-  final Future<void> Function()? onFacesTimelineTap;
+  final bool memoryLaneReady;
+  final Future<void> Function()? onMemoryLaneTap;
 
   bool get isIgnored => person.data.isIgnored;
 
@@ -44,8 +44,8 @@ class PeopleAppBar extends StatefulWidget {
     this.title,
     this.selectedFiles,
     this.person, {
-    this.facesTimelineReady = false,
-    this.onFacesTimelineTap,
+    this.memoryLaneReady = false,
+    this.onMemoryLaneTap,
     super.key,
   });
 
@@ -226,7 +226,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
     final List<PopupMenuItem<PeoplePopupAction>> items = [];
     final bool showTimelineAction =
-        widget.facesTimelineReady && widget.onFacesTimelineTap != null;
+        widget.memoryLaneReady && widget.onMemoryLaneTap != null;
     if (showTimelineAction) {
       items.add(
         PopupMenuItem(
@@ -401,7 +401,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 ),
               );
             } else if (value == PeoplePopupAction.memoryLane) {
-              final callback = widget.onFacesTimelineTap;
+              final callback = widget.onMemoryLaneTap;
               if (callback != null) {
                 unawaited(callback());
               }

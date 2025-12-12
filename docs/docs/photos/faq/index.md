@@ -15,6 +15,7 @@ Jump to a category:
 - [Albums and Organization](#albums-and-organization)
 - [Backup and Sync](#backup-and-sync)
 - [Metadata and Editing](#metadata-and-editing)
+- [Migration](#migration)
 - [Search and Discovery](#search-and-discovery)
 - [Security and Privacy](#security-and-privacy)
 - [Storage and Plans](#storage-and-plans)
@@ -198,6 +199,13 @@ Jump to a category:
 - [Do metadata edits sync across devices?](/photos/faq/metadata-and-editing#edits-sync)
 - [Can I edit metadata on all platforms?](/photos/faq/metadata-and-editing#platform-support)
 - [Does Ente modify any file metadata?](/photos/faq/metadata-and-editing#modify-file-metadata)
+
+## Migration
+
+[View complete Migration FAQ →](/photos/faq/migration)
+
+### Importing from Google Photos
+- [How much Ente storage do I need when importing my Google Photos Takeout?](/photos/faq/migration#google-takeout-storage)
 
 ## Search and Discovery
 

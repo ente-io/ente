@@ -812,9 +812,11 @@
     }
   },
   "acceptTrustInvite": "Accept invite",
-  "addTrustedContact": "Add Trusted Contact",
+  "addTrustedContact": "Add trusted contact",
   "removeInvite": "Remove invite",
   "rejectRecovery": "Reject recovery",
+  "cannotUpdateRecoveryTime": "Cannot update recovery time",
+  "cannotUpdateRecoveryTimeMessage": "Recovery time cannot be changed while there is an active recovery session. Please reject or wait for the recovery to complete.",
   "recoveryInitiated": "Recovery initiated",
   "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
   "@recoveryInitiatedDesc": {
@@ -831,10 +833,10 @@
   },
   "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
   "declineTrustInvite": "Decline Invite",
-  "cancelAccountRecovery": "Cancel recovery",
+  "cancelRecovery": "Cancel recovery",
   "recoveryAccount": "Recover account",
   "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
-  "startAccountRecoveryTitle": "Start recovery",
+  "startRecovery": "Start recovery",
   "whyAddTrustContact": "Trusted contact can help in recovering your data.",
   "recoveryReady": "You can now recover {email}'s account by setting a new password.",
   "@recoveryReady": {
@@ -851,7 +853,7 @@
   "enterEmail": "Enter email",
   "verifyIDLabel": "Verify",
   "invalidEmailAddress": "Invalid email address",
-  "enterValidEmail": "Please enter a valid email address.",
+  "enterValidEmail": "That email doesn't seem to be valid. Please enter a valid email address",
   "addANewEmail": "Add a new email",
   "orPickAnExistingOne": "Or pick an existing one",
   "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
@@ -883,13 +885,134 @@
       }
     }
   },
-  "youCannotShareWithYourself": "You cannot share with yourself",
-  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "youCannotShareWithYourself": "You cannot add yourself as a legacy contact",
+  "emailNoEnteAccount": "{email} does not have an Ente account. Send them an invite to share files.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
   "inviteToEnte": "Invite to Ente",
   "lockerExistingUserRequired": "Locker is available to existing Ente users. Sign up for Ente Photos or Auth to get started.",
   "@lockerExistingUserRequired": {
     "description": "Error message shown when a user without an Ente account tries to use Locker"
+  },
+  "chooseFromAnExistingContact": "Choose from an existing contact",
+  "chooseARecoveryTime": "Choose a recovery time",
+  "addContact": "Add contact",
+  "nDays": "{count} days",
+  "@nDays": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "7"
+      }
+    }
+  },
+  "updateTime": "Update time",
+  "@updateTime": {
+    "description": "Button label to update the recovery time for a trusted contact"
+  },
+  "recoveryTimeUpdated": "Recovery time updated",
+  "@recoveryTimeUpdated": {
+    "description": "Toast message shown when recovery time is updated successfully"
+  },
+  "revokeInvite": "Revoke invite",
+  "@revokeInvite": {
+    "description": "Button label to revoke a pending trusted contact invite"
+  },
+  "trustedContactInvitePending": "You have invited {email} to be a trusted contact. They are yet to accept your invite.",
+  "@trustedContactInvitePending": {
+    "description": "Description shown when a trusted contact invite is pending",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "trustedContactAccepted": "You have added {email} as a trusted contact. They have accepted your invite.",
+  "@trustedContactAccepted": {
+    "description": "Description shown when a trusted contact has accepted the invite",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@example.com"
+      }
+    }
+  },
+  "letsTryThatAgain": "Let's try that again",
+  "cancelInvite": "Cancel invite",
+  "@cancelInvite": {
+    "description": "Title for cancel invite confirmation dialog"
+  },
+  "cancelInviteDesc": "If you delete this invite, you'll need to send a new one if you change your mind.",
+  "@cancelInviteDesc": {
+    "description": "Description for cancel invite confirmation dialog"
+  },
+  "removeContactDesc": "If you delete this contact, you'll need to send a new invitation, and the contact will have to accept it again.",
+  "@removeContactDesc": {
+    "description": "Description for remove contact confirmation dialog"
+  },
+  "removeContact": "Remove contact",
+  "@removeContact": {
+    "description": "Button label to remove a trusted contact"
+  },
+  "removeYourselfDesc": "If you remove yourself as a trusted contact, you'll lose access to {email}'s account after their inactivity period.",
+  "@removeYourselfDesc": {
+    "description": "Description for remove yourself as trusted contact confirmation dialog",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelRecoveryDesc": "Are you sure you want to cancel recovery of {email}'s account?",
+  "@cancelRecoveryDesc": {
+    "description": "Description for cancel recovery confirmation dialog",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "startRecoveryDesc": "Are you sure you want to initiate recovery for {email}'s account?",
+  "@startRecoveryDesc": {
+    "description": "Description for start recovery confirmation dialog",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "recoverAccountDesc": "You can recover {email}'s account in {days} days after starting the recovery process.",
+  "@recoverAccountDesc": {
+    "description": "Description for recover account page when recovery not started",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "recoverAccountAfter": "You can recover {email}'s account after {time}.",
+  "@recoverAccountAfter": {
+    "description": "Message when recovery is waiting",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "orRemoveYourself": "Or remove yourself as {email}'s trusted contact",
+  "@orRemoveYourself": {
+    "description": "Text shown before remove contact button in ready state",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
   }
 }
