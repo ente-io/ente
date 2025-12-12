@@ -1,10 +1,12 @@
 import "package:flutter/material.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/social/widgets/reply_preview_widget.dart";
 
 class CommentInputWidget extends StatelessWidget {
   final Comment? replyingTo;
+  final User? replyingToUser;
   final VoidCallback? onDismissReply;
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -12,6 +14,7 @@ class CommentInputWidget extends StatelessWidget {
 
   const CommentInputWidget({
     this.replyingTo,
+    this.replyingToUser,
     this.onDismissReply,
     required this.controller,
     required this.focusNode,
@@ -38,26 +41,28 @@ class CommentInputWidget extends StatelessWidget {
         top: 20,
       ),
       color: colorScheme.backgroundBase,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (replyingTo != null)
-            ReplyPreviewWidget(
-              replyingTo: replyingTo!,
-              onDismiss: onDismissReply!,
+      child: SafeArea(
+        top: false,
+        child: Container(
+          decoration: BoxDecoration(
+            color: textFieldFillColor,
+            border: Border.all(
+              color: textFieldBorderColor,
+              width: 2,
+              strokeAlign: BorderSide.strokeAlignOutside,
             ),
-          SafeArea(
-            top: false,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: textFieldBorderColor,
-                  width: 2,
-                  strokeAlign: BorderSide.strokeAlignOutside,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (replyingTo != null && replyingToUser != null)
+                ReplyPreviewWidget(
+                  replyingTo: replyingTo!,
+                  replyingToUser: replyingToUser!,
+                  onDismiss: onDismissReply!,
                 ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TextField(
+              TextField(
                 controller: controller,
                 focusNode: focusNode,
                 textInputAction: TextInputAction.send,
@@ -75,7 +80,7 @@ class CommentInputWidget extends StatelessWidget {
                   ),
                   border: InputBorder.none,
                   filled: true,
-                  fillColor: textFieldFillColor,
+                  fillColor: Colors.transparent,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 18,
                     vertical: 14,
@@ -101,9 +106,9 @@ class CommentInputWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -176,7 +176,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             alwaysShowSuccessState: false,
                             leadingIconWidget: UserAvatarWidget(
                               contact.emergencyContact,
-                              type: AvatarType.mini,
+                              type: AvatarType.md,
                               currentUserID: currentUserID,
                             ),
                             menuItemColor:
@@ -304,7 +304,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             leadingIconSize: 24.0,
                             leadingIconWidget: UserAvatarWidget(
                               currentUser.user,
-                              type: AvatarType.mini,
+                              type: AvatarType.md,
                               currentUserID: currentUserID,
                             ),
                             menuItemColor:

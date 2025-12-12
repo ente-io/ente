@@ -173,30 +173,39 @@ class _InlineParentQuote extends StatelessWidget {
     }
 
     final parentText = parentComment?.data ?? "Original comment unavailable";
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final lineColor = isOwnComment
+        ? (isDarkMode ? const Color(0x33000000) : const Color(0xFF08571C))
+        : const Color(0xFF8C8C8C);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.only(left: 10),
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: isOwnComment
-                ? textBaseDark.withValues(alpha: 0.6)
-                : colorScheme.strokeMuted,
-            width: 2,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 3,
+            height: 14,
+            decoration: BoxDecoration(
+              color: lineColor,
+              borderRadius: BorderRadius.circular(1.5),
+            ),
           ),
-        ),
-      ),
-      child: Text(
-        parentText,
-        style: textTheme.tiny.copyWith(
-          height: 1.7,
-          color: isOwnComment
-              ? textBaseDark.withValues(alpha: 0.9)
-              : colorScheme.textMuted,
-        ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+          const SizedBox(width: 10),
+          Text(
+            parentText,
+            style: textTheme.tiny.copyWith(
+              height: 1.7,
+              color: isOwnComment
+                  ? textBaseDark.withValues(alpha: 0.9)
+                  : colorScheme.textMuted,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -351,7 +360,9 @@ class _Header extends StatelessWidget {
           UserAvatarWidget(
             user,
             currentUserID: currentUserID,
-            type: AvatarType.small,
+            type: AvatarType.lg,
+            thumbnailView: true,
+            addStroke: false,
           ),
           const SizedBox(width: 10),
           Flexible(child: headerText),
@@ -361,7 +372,9 @@ class _Header extends StatelessWidget {
           UserAvatarWidget(
             user,
             currentUserID: currentUserID,
-            type: AvatarType.small,
+            type: AvatarType.lg,
+            thumbnailView: true,
+            addStroke: false,
           ),
         ],
       ],

@@ -1,13 +1,17 @@
 import "package:flutter/material.dart";
+import "package:photos/extensions/user_extension.dart";
+import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/social/comment.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class ReplyPreviewWidget extends StatelessWidget {
   final Comment replyingTo;
+  final User replyingToUser;
   final VoidCallback onDismiss;
 
   const ReplyPreviewWidget({
     required this.replyingTo,
+    required this.replyingToUser,
     required this.onDismiss,
     super.key,
   });
@@ -19,9 +23,9 @@ class ReplyPreviewWidget extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: colorScheme.fillFaint,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+      decoration: const BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Row(
         children: [
@@ -31,8 +35,10 @@ class ReplyPreviewWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Replying to User #${replyingTo.userID}...",
+                  "Replying to ${replyingToUser.displayName ?? replyingToUser.email}",
                   style: textTheme.small.copyWith(color: colorScheme.textMuted),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -44,16 +50,17 @@ class ReplyPreviewWidget extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: onDismiss,
-            child: Icon(
-              Icons.close,
-              size: 18,
-              color: colorScheme.textMuted,
-            ),
-          ),
         ],
       ),
     );
   }
 }
+
+// GestureDetector(
+//             onTap: onDismiss,
+//             child: Icon(
+//               Icons.close,
+//               size: 18,
+//               color: colorScheme.textMuted,
+//             ),
+//           ),
