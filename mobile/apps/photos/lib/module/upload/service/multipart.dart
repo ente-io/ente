@@ -88,7 +88,9 @@ class MultiPartUploader {
     List<String>? partMd5s,
   }) async {
     try {
-      if (flagService.internalUser && partMd5s != null && partMd5s.isNotEmpty) {
+      if (flagService.enableUploadV2 &&
+          partMd5s != null &&
+          partMd5s.isNotEmpty) {
         final response = await _enteDio.post(
           "/files/multipart-upload-url",
           data: {
