@@ -20,3 +20,7 @@ If any duplicates slip through and you temporarily hit your storage limit, you c
 `Desktop app → Settings → Deduplicate files`
 
 This removes exact duplicates while keeping one original safely.
+
+### Can I retry failed uploads?
+
+Yes. You can check the progress/info tab that appears during upload to determine the cause of failed uploads. You can also drag and drop the folder or files again. Ente will automatically ignore already backed up files and try to upload just the rest.
