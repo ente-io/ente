@@ -1,19 +1,19 @@
 import "package:flutter/material.dart";
 import "package:photos/models/base/id.dart";
 
-class ActivityDay {
+class RitualDay {
   final DateTime date;
-  final bool hasActivity;
+  final bool isCompleted;
 
-  const ActivityDay({
+  const RitualDay({
     required this.date,
-    required this.hasActivity,
+    required this.isCompleted,
   });
 }
 
-class ActivitySummary {
-  final List<ActivityDay> last365Days;
-  final List<ActivityDay> last7Days;
+class RitualsSummary {
+  final List<RitualDay> last365Days;
+  final List<RitualDay> last7Days;
   final int currentStreak;
   final int longestStreak;
   final Map<int, bool> badgesUnlocked;
@@ -21,7 +21,7 @@ class ActivitySummary {
   final DateTime generatedAt;
   final Map<String, int> ritualLongestStreaks;
 
-  const ActivitySummary({
+  const RitualsSummary({
     required this.last365Days,
     required this.last7Days,
     required this.currentStreak,
@@ -32,7 +32,7 @@ class ActivitySummary {
     required this.ritualLongestStreaks,
   });
 
-  bool get hasSevenDayFire => last7Days.every((d) => d.hasActivity);
+  bool get hasSevenDayFire => last7Days.every((d) => d.isCompleted);
 }
 
 class Ritual {
@@ -134,14 +134,14 @@ class RitualProgress {
   }
 }
 
-class ActivityState {
+class RitualsState {
   final bool loading;
-  final ActivitySummary? summary;
+  final RitualsSummary? summary;
   final List<Ritual> rituals;
   final String? error;
   final RitualBadgeUnlock? pendingBadge;
 
-  const ActivityState({
+  const RitualsState({
     required this.loading,
     required this.summary,
     required this.rituals,
@@ -149,7 +149,7 @@ class ActivityState {
     required this.pendingBadge,
   });
 
-  factory ActivityState.loading() => const ActivityState(
+  factory RitualsState.loading() => const RitualsState(
         loading: true,
         summary: null,
         rituals: [],
@@ -157,14 +157,14 @@ class ActivityState {
         pendingBadge: null,
       );
 
-  ActivityState copyWith({
+  RitualsState copyWith({
     bool? loading,
-    ActivitySummary? summary,
+    RitualsSummary? summary,
     List<Ritual>? rituals,
     String? error,
     RitualBadgeUnlock? pendingBadge,
   }) {
-    return ActivityState(
+    return RitualsState(
       loading: loading ?? this.loading,
       summary: summary ?? this.summary,
       rituals: rituals ?? this.rituals,

@@ -241,7 +241,7 @@ class _RitualsDiscoverySection extends StatelessWidget {
         children: [
           SectionHeader(SectionType.ritual, hasMore: false),
           SizedBox(height: 2),
-          ActivityBanner(),
+          RitualsBanner(),
         ],
       ),
     );

@@ -19,19 +19,19 @@ import "package:photos/ui/rituals/rituals_section.dart";
 import "package:photos/utils/share_util.dart";
 import "package:share_plus/share_plus.dart";
 
-class ActivityScreen extends StatefulWidget {
-  const ActivityScreen({super.key, this.ritual});
+class AllRitualsScreen extends StatefulWidget {
+  const AllRitualsScreen({super.key, this.ritual});
 
   final Ritual? ritual;
 
   @override
-  State<ActivityScreen> createState() => _ActivityScreenState();
+  State<AllRitualsScreen> createState() => _AllRitualsScreenState();
 }
 
-class _ActivityScreenState extends State<ActivityScreen> {
+class _AllRitualsScreenState extends State<AllRitualsScreen> {
   Ritual? _selectedRitual;
   final GlobalKey _shareButtonKey = GlobalKey();
-  static final Logger _logger = Logger("ActivityScreen");
+  static final Logger _logger = Logger("AllRitualsScreen");
 
   @override
   void initState() {
@@ -40,7 +40,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   @override
-  void didUpdateWidget(covariant ActivityScreen oldWidget) {
+  void didUpdateWidget(covariant AllRitualsScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.ritual != widget.ritual) {
       _selectedRitual = widget.ritual;
@@ -96,8 +96,8 @@ class _ActivityScreenState extends State<ActivityScreen> {
         ],
       ),
       body: SafeArea(
-        child: ValueListenableBuilder<ActivityState>(
-          valueListenable: activityService.stateNotifier,
+        child: ValueListenableBuilder<RitualsState>(
+          valueListenable: ritualsService.stateNotifier,
           builder: (context, state, _) {
             final summary = state.summary;
             Ritual? selectedRitual = _selectedRitual;
@@ -163,7 +163,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                             child: InkWell(
                               borderRadius: BorderRadius.circular(10),
                               onTap: summaryToShare != null
-                                  ? () => _shareActivity(
+                                  ? () => _shareRitualSummary(
                                         summaryToShare,
                                         shareTitle,
                                         emoji: shareEmoji,
@@ -190,7 +190,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                     ),
                   ),
                 ),
-                ActivityHeatmapCard(
+                RitualHeatmapCard(
                   summary: displaySummary,
                   headerTitle: heatmapTitle,
                   headerEmoji: heatmapEmoji,
@@ -209,15 +209,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
     );
   }
 
-  Future<void> _shareActivity(
-    ActivitySummary summary,
+  Future<void> _shareRitualSummary(
+    RitualsSummary summary,
     String title, {
     String? emoji,
   }) async {
-    _logger.info("Activity share: start");
-    _logger.fine("Activity share: precache assets begin");
-    await _precacheActivityShareAssets();
-    _logger.fine("Activity share: precache assets done");
+    _logger.info("Ritual share: start");
+    _logger.fine("Ritual share: precache assets begin");
+    await _precacheRitualShareAssets();
+    _logger.fine("Ritual share: precache assets done");
     OverlayEntry? entry;
     final prevPaintSize = debugPaintSizeEnabled;
     final prevPaintBaselines = debugPaintBaselinesEnabled;
@@ -245,7 +245,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
                   opacity: 0.01,
                   child: RepaintBoundary(
                     key: key,
-                    child: _ActivityShareCard(
+                    child: _RitualShareCard(
                       summary: summary,
                       title: title,
                       emoji: emoji,
@@ -258,7 +258,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         },
       );
       overlay.insert(entry);
-      _logger.fine("Activity share: overlay inserted, waiting for boundary");
+      _logger.fine("Ritual share: overlay inserted, waiting for boundary");
       final boundary = await _waitForBoundaryReady(repaintKey: key);
       bool needsPaint = false;
       assert(() {
@@ -266,7 +266,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         return true;
       }());
       _logger.fine(
-        "Activity share: boundary ready, size=${boundary.size}, needsPaint=$needsPaint",
+        "Ritual share: boundary ready, size=${boundary.size}, needsPaint=$needsPaint",
       );
       final double pixelRatio =
           (MediaQuery.of(context).devicePixelRatio * 1.6).clamp(2.0, 3.5);
@@ -274,27 +274,27 @@ class _ActivityScreenState extends State<ActivityScreen> {
       try {
         image = await boundary.toImage(pixelRatio: pixelRatio.toDouble());
       } catch (e, s) {
-        _logger.warning("Activity share: toImage failed", e, s);
+        _logger.warning("Ritual share: toImage failed", e, s);
         rethrow;
       }
       final ByteData? byteData;
       try {
         byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       } catch (e, s) {
-        _logger.warning("Activity share: toByteData failed", e, s);
+        _logger.warning("Ritual share: toByteData failed", e, s);
         rethrow;
       }
       final data = byteData?.buffer.asUint8List();
       if (data == null || data.isEmpty) {
-        throw StateError("Activity share image encoding produced no data");
+        throw StateError("Ritual share image encoding produced no data");
       }
       final dir = await getTemporaryDirectory();
       final file = File(
-        "${dir.path}/activity_share_${DateTime.now().millisecondsSinceEpoch}.png",
+        "${dir.path}/ritual_share_${DateTime.now().millisecondsSinceEpoch}.png",
       );
       await file.writeAsBytes(data, flush: true);
       _logger.info(
-        "Activity share: file written (${data.length} bytes) -> ${file.path}",
+        "Ritual share: file written (${data.length} bytes) -> ${file.path}",
       );
       await SharePlus.instance.share(
         ShareParams(
@@ -302,9 +302,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
           sharePositionOrigin: shareButtonRect(context, _shareButtonKey),
         ),
       );
-      _logger.info("Activity share: SharePlus invoked");
+      _logger.info("Ritual share: SharePlus invoked");
     } catch (e, s) {
-      _logger.warning("Failed to share activity", e, s);
+      _logger.warning("Failed to share ritual summary", e, s);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.ritualShareUnavailable)),
@@ -318,7 +318,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
   }
 
-  Future<void> _precacheActivityShareAssets() async {
+  Future<void> _precacheRitualShareAssets() async {
     const assets = [
       "assets/rituals/ente_io_black_white.png",
       "assets/splash-screen-icon.png",
@@ -328,7 +328,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         await precacheImage(AssetImage(asset), context);
       } catch (e, s) {
         _logger.warning(
-          "Activity share: failed to precache asset $asset",
+          "Ritual share: failed to precache asset $asset",
           e,
           s,
         );
@@ -352,15 +352,15 @@ class _ActivityScreenState extends State<ActivityScreen> {
       }());
       if (boundary == null) {
         _logger.fine(
-          "Activity share boundary missing (attempt ${attempt + 1})",
+          "Ritual share boundary missing (attempt ${attempt + 1})",
         );
       } else if (boundary.size.isEmpty) {
         _logger.fine(
-          "Activity share boundary has zero size (attempt ${attempt + 1})",
+          "Ritual share boundary has zero size (attempt ${attempt + 1})",
         );
       } else if (needsPaint) {
         _logger.fine(
-          "Activity share boundary needs paint (attempt ${attempt + 1}), waiting",
+          "Ritual share boundary needs paint (attempt ${attempt + 1}), waiting",
         );
       } else {
         return boundary;
@@ -388,7 +388,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return boundary;
   }
 
-  ActivitySummary _summaryForRitual(ActivitySummary summary, Ritual ritual) {
+  RitualsSummary _summaryForRitual(RitualsSummary summary, Ritual ritual) {
     final ritualProgress = summary.ritualProgress[ritual.id];
     final Set<int> dayKeys = ritualProgress == null
         ? <int>{}
@@ -400,9 +400,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
     final last365Days = summary.last365Days
         .map(
-          (day) => ActivityDay(
+          (day) => RitualDay(
             date: day.date,
-            hasActivity: dayKeys.contains(
+            isCompleted: dayKeys.contains(
               DateTime(
                 day.date.year,
                 day.date.month,
@@ -414,12 +414,12 @@ class _ActivityScreenState extends State<ActivityScreen> {
         .toList();
     final last7Days = last365Days.length >= 7
         ? last365Days.sublist(last365Days.length - 7)
-        : List<ActivityDay>.from(last365Days);
+        : List<RitualDay>.from(last365Days);
 
     int longestStreak = 0;
     int rolling = 0;
     for (final day in last365Days) {
-      if (day.hasActivity) {
+      if (day.isCompleted) {
         rolling += 1;
         if (rolling > longestStreak) {
           longestStreak = rolling;
@@ -430,7 +430,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     }
     int currentStreak = 0;
     for (int i = last365Days.length - 1; i >= 0; i--) {
-      if (last365Days[i].hasActivity) {
+      if (last365Days[i].isCompleted) {
         currentStreak += 1;
       } else {
         break;
@@ -442,7 +442,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
         entry: longestStreak >= entry,
     };
 
-    return ActivitySummary(
+    return RitualsSummary(
       last365Days: last365Days,
       last7Days: last7Days,
       currentStreak: currentStreak,
@@ -470,14 +470,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 }
 
-class _ActivityShareCard extends StatelessWidget {
-  const _ActivityShareCard({
+class _RitualShareCard extends StatelessWidget {
+  const _RitualShareCard({
     required this.summary,
     required this.title,
     this.emoji,
   });
 
-  final ActivitySummary summary;
+  final RitualsSummary summary;
   final String title;
   final String? emoji;
 
@@ -517,7 +517,7 @@ class _ActivityShareCard extends StatelessWidget {
                                   brightness: Brightness.light,
                                 ),
                           ),
-                          child: ActivityHeatmapCard(
+                          child: RitualHeatmapCard(
                             summary: summary,
                             compact: true,
                             allowHorizontalScroll: false,

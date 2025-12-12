@@ -64,7 +64,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
   Timer? _zoomHintTimer;
   bool _showZoomHint = false;
   static const int _maxCaptures = 20;
-  late final VoidCallback _activityListener;
+  late final VoidCallback _ritualsListener;
   static const double _thumbnailSize = 80;
   static const double _thumbnailSpacing = 12;
 
@@ -138,17 +138,17 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     WidgetsBinding.instance.addObserver(this);
     _pageController = PageController();
     _thumbScrollController = ScrollController();
-    _activityListener = _syncRitualFromActivity;
-    activityService.stateNotifier.addListener(_activityListener);
+    _ritualsListener = _syncRitualFromService;
+    ritualsService.stateNotifier.addListener(_ritualsListener);
     _loadAlbum();
-    _syncRitualFromActivity();
+    _syncRitualFromService();
     _initializeCamera();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    activityService.stateNotifier.removeListener(_activityListener);
+    ritualsService.stateNotifier.removeListener(_ritualsListener);
     _focusHideTimer?.cancel();
     _zoomHintTimer?.cancel();
     _controller?.dispose();
@@ -184,8 +184,8 @@ class _RitualCameraPageState extends State<RitualCameraPage>
     }
   }
 
-  void _syncRitualFromActivity() {
-    final rituals = activityService.stateNotifier.value.rituals;
+  void _syncRitualFromService() {
+    final rituals = ritualsService.stateNotifier.value.rituals;
     Ritual? match;
     for (final ritual in rituals) {
       if (ritual.id == widget.ritualId) {
@@ -342,7 +342,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
       );
       await _pausePreview();
       if (!mounted) return;
-      await routeToPage(navContext, const ActivityScreen())
+      await routeToPage(navContext, const AllRitualsScreen())
           .whenComplete(_resumePreview);
       return;
     }
@@ -656,7 +656,7 @@ class _RitualCameraPageState extends State<RitualCameraPage>
               onPressed: () async {
                 await _pausePreview();
                 if (!mounted) return;
-                await routeToPage(context, const ActivityScreen())
+                await routeToPage(context, const AllRitualsScreen())
                     .whenComplete(_resumePreview);
               },
               child: Text(context.l10n.ritualBackToList),
