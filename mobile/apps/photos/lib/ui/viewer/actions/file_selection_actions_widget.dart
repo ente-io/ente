@@ -171,7 +171,22 @@ class _FileSelectionActionsWidgetState
     //and set [shouldShow] to false for items that should not be shown and true
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
-    if (widget.type == GalleryType.deleteSuggestions) {
+    if (widget.type == GalleryType.trash) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.restore_outlined,
+          labelText: AppLocalizations.of(context).restore,
+          onTap: _restore,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_forever_outlined,
+          labelText: AppLocalizations.of(context).permanentlyDelete,
+          onTap: _permanentlyDelete,
+        ),
+      );
+    } else if (widget.type == GalleryType.deleteSuggestions) {
       items.add(
         SelectionActionButton(
           icon: Icons.delete_outline,
