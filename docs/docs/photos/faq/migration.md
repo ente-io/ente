@@ -20,3 +20,20 @@ If any duplicates slip through and you temporarily hit your storage limit, you c
 `Desktop app → Settings → Deduplicate files`
 
 This removes exact duplicates while keeping one original safely.
+
+### How can I import Google Photos on mobile? {#google-photos-mobile}
+
+We recommend using desktop for import. Google Takeout exports are often large in size, which can be challenging on mobile due to storage limits, slower processing, and battery drain.
+
+However, if you break the import into smaller chunks, mobile migration is definitely possible.
+
+**Mobile-only migration (slower but works)**
+
+1. Request your Google Takeout on a smaller scale (select specific albums or date ranges rather than everything at once)
+2. Download these smaller archives directly to your mobile device
+3. Upload them to Ente through the mobile app
+4. Repeat for the next batch of photos
+
+**Manual album upload**
+
+Download individual albums from Google Photos to your phone, then upload them to Ente one folder at a time through the mobile app.
