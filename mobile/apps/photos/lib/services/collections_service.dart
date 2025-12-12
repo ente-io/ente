@@ -487,8 +487,15 @@ class CollectionsService {
           await CollectionsService.instance.getCollectionIDToNewestFileTime();
     }
 
+    // Sort incoming collections, then separate pinned from rest
     incoming.sort(
       (first, second) {
+        // Sharee-pinned collections should come first
+        final firstPinned = first.hasShareePinned();
+        final secondPinned = second.hasShareePinned();
+        if (firstPinned && !secondPinned) return -1;
+        if (!firstPinned && secondPinned) return 1;
+
         int comparison;
         if (sortKey == AlbumSortKey.albumName) {
           comparison = compareAsciiLowerCaseNatural(
@@ -1310,6 +1317,10 @@ class CollectionsService {
     } on DioException catch (e) {
       if (e.response?.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
+      }
+      if (e.response?.statusCode == 403 &&
+          e.response?.data?['code'] == 'LINK_EDIT_NOT_ALLOWED') {
+        throw LinkEditNotAllowedError();
       }
       rethrow;
     } catch (e, s) {

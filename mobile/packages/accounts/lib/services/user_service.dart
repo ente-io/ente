@@ -146,7 +146,7 @@ class UserService {
           showErrorDialog(
             context,
             context.strings.oops,
-            "Registration is temporarily paused",
+            context.strings.lockerExistingUserRequired,
           ),
         );
       } else if (enteErrCode != null && enteErrCode == "LOCKER_ROLLOUT_LIMIT") {
@@ -217,6 +217,7 @@ class UserService {
       );
       final userDetails = UserDetails.fromMap(response.data);
       if (shouldCache) {
+        await _preferences.setString(keyUserDetails, userDetails.toJson());
         if (userDetails.profileData != null) {
           await _preferences.setBool(
             kIsEmailMFAEnabled,
@@ -532,11 +533,10 @@ class UserService {
         await showErrorDialog(
           context,
           context.strings.oops,
-          'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker',
+          context.strings.lockerExistingUserRequired,
         );
         return;
-      } else if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         await showErrorDialog(
           context,
           "We're out of beta seats for now",
@@ -949,10 +949,9 @@ class UserService {
         showErrorDialog(
           context,
           context.strings.oops,
-          'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker',
+          context.strings.lockerExistingUserRequired,
         );
-      } else if (enteErrCode != null &&
-          enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
+      } else if (enteErrCode != null && enteErrCode == 'LOCKER_ROLLOUT_LIMIT') {
         // ignore: unawaited_futures
         showErrorDialog(
           context,

@@ -1,70 +1,72 @@
-import 'dart:async';
+import "dart:async";
 import "dart:convert";
 import "dart:io";
 
 import "package:app_links/app_links.dart";
 import "package:ente_crypto/ente_crypto.dart";
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
+import "package:flutter/material.dart";
+import "package:flutter/scheduler.dart";
+import "package:flutter/services.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
-import 'package:logging/logging.dart';
+import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:move_to_background/move_to_background.dart";
 import "package:package_info_plus/package_info_plus.dart";
-import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/account_configured_event.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
+import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/ente_theme_data.dart";
+import "package:photos/events/account_configured_event.dart";
+import "package:photos/events/backup_folders_updated_event.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
-import 'package:photos/events/permission_granted_event.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/events/tab_changed_event.dart';
-import 'package:photos/events/trigger_logout_event.dart';
-import 'package:photos/events/user_logged_out_event.dart';
+import "package:photos/events/permission_granted_event.dart";
+import "package:photos/events/subscription_purchased_event.dart";
+import "package:photos/events/sync_status_update_event.dart";
+import "package:photos/events/tab_changed_event.dart";
+import "package:photos/events/trigger_logout_event.dart";
+import "package:photos/events/user_logged_out_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/activity/activity_models.dart";
 import "package:photos/models/collection/collection.dart";
-import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_albums.dart";
-import 'package:photos/models/selected_files.dart';
+import "package:photos/models/selected_files.dart";
 import "package:photos/service_locator.dart";
-import 'package:photos/services/account/user_service.dart';
+import "package:photos/services/account/user_service.dart";
 import "package:photos/services/album_home_widget_service.dart";
-import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/collections_service.dart';
+import "package:photos/services/app_lifecycle_service.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/memory_home_widget_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/people_home_widget_service.dart";
 import "package:photos/services/sync/diff_fetcher.dart";
-import 'package:photos/services/sync/local_sync_service.dart';
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:photos/services/sync/remote_sync_service.dart";
-import 'package:photos/states/user_details_state.dart';
-import 'package:photos/theme/colors.dart';
+import "package:photos/states/user_details_state.dart";
+import "package:photos/theme/colors.dart";
 import "package:photos/theme/effects.dart";
-import 'package:photos/theme/ente_theme.dart';
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/activity/ritual_badge_popup.dart";
 import "package:photos/ui/activity/ritual_camera_page.dart";
-import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import 'package:photos/ui/extents_page_view.dart';
-import 'package:photos/ui/home/grant_permissions_widget.dart';
-import 'package:photos/ui/home/header_widget.dart';
-import 'package:photos/ui/home/home_bottom_nav_bar.dart';
-import 'package:photos/ui/home/home_gallery_widget.dart';
-import 'package:photos/ui/home/landing_page_widget.dart';
+import "package:photos/ui/extents_page_view.dart";
+import "package:photos/ui/home/grant_permissions_widget.dart";
+import "package:photos/ui/home/header_widget.dart";
+import "package:photos/ui/home/home_bottom_nav_bar.dart";
+import "package:photos/ui/home/home_gallery_widget.dart";
+import "package:photos/ui/home/landing_page_widget.dart";
 import "package:photos/ui/home/loading_photos_widget.dart";
-import 'package:photos/ui/home/start_backup_hook_widget.dart';
-import 'package:photos/ui/notification/update/change_log_page.dart';
+import "package:photos/ui/home/start_backup_hook_widget.dart";
+import "package:photos/ui/notification/update/change_log_page.dart";
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
@@ -74,11 +76,11 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
-import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/ui/viewer/search_tab/search_tab.dart";
 import "package:photos/utils/collection_util.dart";
-import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
@@ -114,6 +116,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
   final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
       ValueNotifier<bool>(false);
+  RitualBadgeUnlock? _queuedRitualBadge;
+  bool _showingRitualBadge = false;
+  late final VoidCallback _activityStateListener;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -135,6 +140,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
+    _activityStateListener = () =>
+        _maybeShowRitualBadge(activityService.stateNotifier.value.pendingBadge);
+    activityService.stateNotifier.addListener(_activityStateListener);
 
     if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
@@ -142,6 +150,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       _selectedTabIndex = event.selectedIndex;
+      if (_selectedTabIndex == 0 && _queuedRitualBadge != null) {
+        final queued = _queuedRitualBadge;
+        _queuedRitualBadge = null;
+        _maybeShowRitualBadge(queued);
+      }
 
       if (event.selectedIndex == 3) {
         isOnSearchTabNotifier.value = true;
@@ -285,6 +298,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         .on<HomepageSwipeToSelectInProgressEvent>()
         .listen((inProgress) {
       _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeShowRitualBadge(
+        activityService.stateNotifier.value.pendingBadge,
+      );
     });
   }
 
@@ -516,6 +535,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
+    activityService.stateNotifier.removeListener(_activityStateListener);
     super.dispose();
   }
 
@@ -887,6 +907,39 @@ class _HomeWidgetState extends State<HomeWidget> {
             Scaffold.of(context).closeDrawer();
           })
         : null;
+  }
+
+  void _maybeShowRitualBadge(RitualBadgeUnlock? badge) {
+    if (!flagService.ritualsFlag) return;
+    if (badge == null) return;
+    if (_showingRitualBadge) {
+      _queuedRitualBadge ??= badge;
+      return;
+    }
+    if (_selectedTabIndex != 0) {
+      _queuedRitualBadge = badge;
+      return;
+    }
+    final badgeToShow = badge;
+    _queuedRitualBadge = null;
+    _showingRitualBadge = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        await activityService.markRitualBadgeSeen(
+          badgeToShow.ritual.id,
+          badgeToShow.days,
+        );
+        if (!mounted) return;
+        await showRitualBadgePopup(
+          context,
+          badge: badgeToShow,
+        );
+      } catch (e, s) {
+        _logger.severe("Failed to show ritual badge popup", e, s);
+      } finally {
+        _showingRitualBadge = false;
+      }
+    });
   }
 
   Future<bool> _initDeepLinks() async {

@@ -21,7 +21,6 @@ import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
@@ -34,6 +33,7 @@ import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
+import 'package:ente_auth/ui/home/widgets/auth_logo_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
@@ -1311,6 +1311,17 @@ class _HomePageState extends State<HomePage> {
             if (_isSettingsOpen) {
               scaffoldKey.currentState!.closeDrawer();
               return;
+            }
+
+            if (_showSearchBox) {
+              FocusScope.of(context).unfocus();
+              setState(() {
+                _showSearchBox = false;
+                _searchText = "";
+                _textController.clear();
+              });
+              _applyFilteringAndRefresh();
+              return;
             } else if (!Platform.isAndroid) {
               Navigator.of(context).pop();
               return;
@@ -1357,11 +1368,26 @@ class _HomePageState extends State<HomePage> {
     AppLocalizations l10n,
     bool isDesktop,
   ) {
+    final colorScheme = getEnteColorScheme(context);
+    final iconColor = colorScheme.textBase;
+
     return AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
+      leading: IconButton(
+        icon: HugeIcon(
+          icon: HugeIcons.strokeRoundedMenu01,
+          color: iconColor,
+          size: 22,
+          strokeWidth: 1.75,
+        ),
+        tooltip: l10n.settings,
+        onPressed: () {
+          scaffoldKey.currentState?.openDrawer();
+        },
+      ),
       title: !_showSearchBox
-          ? const Text('Ente Auth', style: brandStyleMedium)
+          ? const AuthLogoWidget(height: 18)
           : TextField(
               autocorrect: false,
               enableSuggestions: false,
@@ -1378,8 +1404,22 @@ class _HomePageState extends State<HomePage> {
               ),
               focusNode: searchBoxFocusNode,
             ),
-      centerTitle: isDesktop ? false : true,
+      centerTitle: true,
       actions: <Widget>[
+        if (isDesktop)
+          IconButton(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedSquareLock02,
+              color: iconColor,
+              size: 22,
+              strokeWidth: 1.75,
+            ),
+            tooltip: l10n.appLock,
+            padding: const EdgeInsets.all(8.0),
+            onPressed: () async {
+              await navigateToLockScreen();
+            },
+          ),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: SortCodeMenuWidget(
@@ -1396,21 +1436,18 @@ class _HomePageState extends State<HomePage> {
                 _applyFilteringAndRefresh();
               }
             },
+            iconColor: iconColor,
           ),
         ),
-        if (isDesktop)
-          IconButton(
-            icon: const Icon(Icons.lock),
-            tooltip: l10n.appLock,
-            padding: const EdgeInsets.all(8.0),
-            onPressed: () async {
-              await navigateToLockScreen();
-            },
-          ),
         IconButton(
-          icon: _showSearchBox
-              ? const Icon(Icons.clear)
-              : const Icon(Icons.search),
+          icon: HugeIcon(
+            icon: _showSearchBox
+                ? HugeIcons.strokeRoundedCancel01
+                : HugeIcons.strokeRoundedSearch01,
+            color: iconColor,
+            size: 22,
+            strokeWidth: 1.75,
+          ),
           tooltip: l10n.search,
           padding: const EdgeInsets.all(8.0),
           onPressed: () {
@@ -1549,6 +1586,9 @@ class _HomePageState extends State<HomePage> {
     final l10n = context.l10n;
     final crossAxisCount = _calculateGridColumnCount(context);
     _currentGridColumns = crossAxisCount;
+    final double keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final double gridBottomPadding =
+        80 + (_showSearchBox ? keyboardInset : 0);
     if (_hasLoaded) {
       final bool noCodesAnywhere = !hasNonTrashedCodes && !hasTrashedCodes;
       if (_filteredCodes.isEmpty && _searchText.isEmpty && noCodesAnywhere) {
@@ -1672,7 +1712,7 @@ class _HomePageState extends State<HomePage> {
                   final gridView = AlignedGridView.count(
                     crossAxisCount: crossAxisCount,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.only(bottom: 80),
+                    padding: EdgeInsets.only(bottom: gridBottomPadding),
                     itemBuilder: ((context, index) {
                       if (index == 0 && anyCodeHasError) {
                         return CodeErrorWidget(
@@ -1734,7 +1774,7 @@ class _HomePageState extends State<HomePage> {
                 child: _filteredCodes.isNotEmpty
                     ? AlignedGridView.count(
                         crossAxisCount: crossAxisCount,
-                        padding: const EdgeInsets.only(bottom: 80),
+                        padding: EdgeInsets.only(bottom: gridBottomPadding),
                         itemBuilder: ((context, index) {
                           final codeState = _filteredCodes[index];
                           return CodeWidget(

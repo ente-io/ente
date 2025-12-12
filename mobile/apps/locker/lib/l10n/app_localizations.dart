@@ -1189,7 +1189,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Hint text'**
+  /// **'Note title'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -2041,20 +2041,14 @@ abstract class AppLocalizations {
   /// Body shown when uploads fail because the locker already has the maximum file count
   ///
   /// In en, this message translates to:
-  /// **'Your individual or family account has hit the 1000-file limit.'**
+  /// **'You\'ve reached your file limit. Upgrade to a paid plan for more storage.'**
   String get uploadFileCountLimitErrorBody;
 
   /// Toast shown when info items fail to save due to hitting the file count limit
   ///
   /// In en, this message translates to:
-  /// **'Action failed. Your individual or family account has hit the 1000-file limit.'**
+  /// **'Action failed. You\'ve reached your file limit.'**
   String get uploadFileCountLimitErrorToast;
-
-  /// Message shown when uploads fail because the user does not have an active subscription
-  ///
-  /// In en, this message translates to:
-  /// **'Subscription required to save info items.'**
-  String get uploadSubscriptionRequiredErrorBody;
 
   /// Title shown when uploads fail because the file exceeds the supported size
   ///
@@ -2284,17 +2278,17 @@ abstract class AppLocalizations {
   /// **'Log in to your Ente account'**
   String get loginToEnteAccount;
 
-  /// No description provided for @unlockLockerPaidPlanTitle.
+  /// No description provided for @unlockLockerNewUserTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unlock Locker with a paid plan.'**
-  String get unlockLockerPaidPlanTitle;
+  /// **'Join Ente to use Locker'**
+  String get unlockLockerNewUserTitle;
 
-  /// No description provided for @unlockLockerPaidPlanBody.
+  /// No description provided for @unlockLockerNewUserBody.
   ///
   /// In en, this message translates to:
-  /// **'Locker is available only to Ente photos paid users. Upgrade to a paid plan from Photos to use Locker'**
-  String get unlockLockerPaidPlanBody;
+  /// **'Locker is currently available only to existing Ente users. You can create an account on Ente Photos to use Locker.'**
+  String get unlockLockerNewUserBody;
 
   /// No description provided for @checkoutEntePhotos.
   ///
@@ -2523,6 +2517,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{used} / {max}'**
   String fileCount(String used, String max);
+
+  /// No description provided for @sorry.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry'**
+  String get sorry;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get subscribe;
+
+  /// No description provided for @subscriptionRequiredForSharing.
+  ///
+  /// In en, this message translates to:
+  /// **'You need a paid subscription to share links'**
+  String get subscriptionRequiredForSharing;
 }
 
 class _AppLocalizationsDelegate

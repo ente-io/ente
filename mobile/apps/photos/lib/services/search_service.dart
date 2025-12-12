@@ -751,6 +751,59 @@ class SearchService {
     return clusterIDToFiles;
   }
 
+  Future<List<EnteFile>> getFilesForPersonID(
+    String personID, {
+    bool includeManualAssigned = true,
+    bool sortOnTime = true,
+  }) async {
+    final allFiles = await getAllFilesForSearch();
+    final uploadedIdToFile = <int, EnteFile>{};
+    for (final file in allFiles) {
+      final uploadedID = file.uploadedFileID;
+      if (uploadedID != null && !uploadedIdToFile.containsKey(uploadedID)) {
+        uploadedIdToFile[uploadedID] = file;
+      }
+    }
+    final Map<int, Set<String>> fileIdToClusterID =
+        await mlDataDB.getFileIdToClusterIDSet(personID);
+    final files = <EnteFile>[];
+    final addedFileIDs = <int>{};
+
+    for (final entry in fileIdToClusterID.entries) {
+      final file = uploadedIdToFile[entry.key];
+      if (file == null) {
+        continue;
+      }
+      if (addedFileIDs.add(entry.key)) {
+        files.add(file);
+      }
+    }
+    if (includeManualAssigned) {
+      final person = await PersonService.instance.getPerson(personID);
+      if (person != null) {
+        final manualIDs = person.data.manuallyAssigned.toSet();
+        if (manualIDs.isNotEmpty) {
+          for (final manualID in manualIDs) {
+            if (addedFileIDs.contains(manualID)) {
+              continue;
+            }
+            final file = uploadedIdToFile[manualID];
+            if (file != null) {
+              files.add(file);
+              addedFileIDs.add(manualID);
+            }
+          }
+        }
+      }
+    }
+    if (sortOnTime) {
+      files.sort(
+        (a, b) => (b.creationTime ?? 0).compareTo(a.creationTime ?? 0),
+      );
+    }
+    return files;
+  }
+
   Future<List<GenericSearchResult>> getAllFace(
     int? limit, {
     required int minClusterSize,
@@ -766,30 +819,63 @@ class SearchService {
       final List<GenericSearchResult> facesResult = [];
       final Map<String, List<EnteFile>> clusterIdToFiles = {};
       final Map<String, List<EnteFile>> personIdToFiles = {};
+      final Map<String, Set<int>> personIdToFileIds = {};
       final allFiles = await getAllFilesForSearch();
-      for (final f in allFiles) {
-        if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+      final Map<int, EnteFile> uploadedIdToFile = {};
+      for (final file in allFiles) {
+        final uploadedID = file.uploadedFileID;
+        if (uploadedID != null && !uploadedIdToFile.containsKey(uploadedID)) {
+          uploadedIdToFile[uploadedID] = file;
+        }
+      }
+
+      for (final entry in fileIdToClusterID.entries) {
+        final file = uploadedIdToFile[entry.key];
+        if (file == null) {
           continue;
         }
-        final clusterIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+        final clusterIds = entry.value;
         for (final cluster in clusterIds) {
           final PersonEntity? p =
               personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
           if (p != null) {
-            if (personIdToFiles.containsKey(p.remoteID)) {
-              personIdToFiles[p.remoteID]!.add(f);
-            } else {
-              personIdToFiles[p.remoteID] = [f];
-            }
+            final filesForPerson =
+                personIdToFiles.putIfAbsent(p.remoteID, () => []);
+            filesForPerson.add(file);
+            final fileIdsForPerson =
+                personIdToFileIds.putIfAbsent(p.remoteID, () => <int>{});
+            fileIdsForPerson.add(entry.key);
           } else {
             if (clusterIdToFiles.containsKey(cluster)) {
-              clusterIdToFiles[cluster]!.add(f);
+              clusterIdToFiles[cluster]!.add(file);
             } else {
-              clusterIdToFiles[cluster] = [f];
+              clusterIdToFiles[cluster] = [file];
             }
           }
         }
       }
+
+      for (final entry in personIdToPerson.entries) {
+        final personID = entry.key;
+        final manualIDs = entry.value.data.manuallyAssigned.toSet();
+        if (manualIDs.isEmpty) continue;
+
+        final filesForPerson =
+            personIdToFiles.putIfAbsent(personID, () => <EnteFile>[]);
+        final idSet = personIdToFileIds.putIfAbsent(personID, () => <int>{});
+
+        for (final manualID in manualIDs) {
+          if (idSet.contains(manualID)) {
+            continue;
+          }
+          final file = uploadedIdToFile[manualID];
+          if (file != null) {
+            filesForPerson.add(file);
+            idSet.add(manualID);
+          }
+        }
+      }
+
       // get sorted personId by files count
       final sortedPersonIds = personIdToFiles.keys.toList()
         ..sort(

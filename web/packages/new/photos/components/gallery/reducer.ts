@@ -20,6 +20,7 @@ import {
     isArchivedCollection,
     isHiddenCollection,
 } from "ente-new/photos/services/collection";
+import { settingsSnapshot } from "ente-new/photos/services/settings";
 import { sortTrashItems, type TrashItem } from "ente-new/photos/services/trash";
 import { splitByPredicate } from "ente-utils/array";
 import { includes } from "ente-utils/type-guards";
@@ -1534,6 +1535,16 @@ const createCollectionSummaries = (
         }
         if (collection.magicMetadata?.data.order == CollectionOrder.pinned) {
             attributes.add("pinned");
+            sortPriority = CollectionSummarySortPriority.pinned;
+        }
+        // Check for sharee pinned (for incoming shared collections)
+        // Only apply when the feature flag is enabled
+        if (
+            settingsSnapshot().isShareePinEnabled &&
+            type == "sharedIncoming" &&
+            collection.sharedMagicMetadata?.data.order == CollectionOrder.pinned
+        ) {
+            attributes.add("shareePinned");
             sortPriority = CollectionSummarySortPriority.pinned;
         }
 

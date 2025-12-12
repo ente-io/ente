@@ -55,6 +55,10 @@ export interface Settings {
      * `true` if public link surfaces should be shown to non-owners.
      */
     isSurfacePublicLinkEnabled: boolean;
+    /**
+     * `true` if sharee pin feature is enabled for shared albums.
+     */
+    isShareePinEnabled: boolean;
 
     /**
      * `true` if maps are enabled.
@@ -116,6 +120,7 @@ const createDefaultSettings = (): Settings => ({
     isInternalUser: false,
     isAdminRoleEnabled: false,
     isSurfacePublicLinkEnabled: false,
+    isShareePinEnabled: false,
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
@@ -210,6 +215,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     settings.isAdminRoleEnabled = (flags?.internalUser ?? false) || isDevBuild;
     settings.isSurfacePublicLinkEnabled =
         (flags?.internalUser ?? false) || isDevBuild;
+    settings.isShareePinEnabled = (flags?.internalUser ?? false) || isDevBuild;
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;

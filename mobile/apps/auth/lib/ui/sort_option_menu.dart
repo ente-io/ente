@@ -1,14 +1,18 @@
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SortCodeMenuWidget extends StatelessWidget {
   final CodeSortKey currentKey;
   final void Function(CodeSortKey) onSelected;
+  final Color? iconColor;
+
   const SortCodeMenuWidget({
     super.key,
     required this.currentKey,
     required this.onSelected,
+    this.iconColor,
   });
 
   @override
@@ -71,7 +75,15 @@ class SortCodeMenuWidget extends StatelessWidget {
           onSelected(CodeSortKey.values[selectedValue]);
         }
       },
-      child: const Icon(Icons.sort_outlined),
+      child: SvgPicture.asset(
+        'assets/svg/filter-icon.svg',
+        width: 26,
+        height: 26,
+        colorFilter: ColorFilter.mode(
+          iconColor ?? Theme.of(context).iconTheme.color!,
+          BlendMode.srcIn,
+        ),
+      ),
     );
   }
 }

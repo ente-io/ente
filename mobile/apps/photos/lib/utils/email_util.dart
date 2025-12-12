@@ -85,6 +85,7 @@ Future<void> sendLogs(
         buttonType: ButtonType.secondary,
         labelText: AppLocalizations.of(context).exportLogs,
         buttonAction: ButtonAction.third,
+        shouldSurfaceExecutionStates: false,
         onTap: () async {
           final zipFilePath = await getZippedLogsFile(context);
           await exportLogs(context, zipFilePath);

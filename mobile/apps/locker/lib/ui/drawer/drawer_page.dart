@@ -7,6 +7,7 @@ import "package:locker/events/user_details_refresh_event.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/legacy_collections_trash_widget.dart";
 import "package:locker/ui/components/usage_card_widget.dart";
+import "package:locker/ui/components/verify_identity_dialog.dart";
 import "package:locker/ui/drawer/app_version_widget.dart";
 import "package:locker/ui/drawer/drawer_title_bar_widget.dart";
 import "package:locker/ui/drawer/settings_widgets.dart";
@@ -47,22 +48,26 @@ class DrawerPage extends StatelessWidget {
 
     if (hasLoggedIn) {
       contents.add(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: AnimatedBuilder(
-              // [AnimatedBuilder] accepts any [Listenable] subtype.
-              animation: emailNotifier,
-              builder: (BuildContext context, Widget? child) {
-                return Text(
-                  emailNotifier.value!,
-                  style: enteTextTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              },
+        GestureDetector(
+          onDoubleTap: () => showVerifyIdentityDialog(context),
+          onLongPress: () => showVerifyIdentityDialog(context),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: AnimatedBuilder(
+                // [AnimatedBuilder] accepts any [Listenable] subtype.
+                animation: emailNotifier,
+                builder: (BuildContext context, Widget? child) {
+                  return Text(
+                    emailNotifier.value!,
+                    style: enteTextTheme.body.copyWith(
+                      color: colorScheme.textMuted,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),

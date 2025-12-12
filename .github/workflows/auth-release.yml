@@ -92,6 +92,10 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Update Linux AppData metadata
               run: |
                   APPDATA_FILE="linux/packaging/enteauth.appdata.xml"
@@ -165,11 +169,11 @@ jobs:
                   ./linux/packaging/build_rpm.sh
                   mv dist/*/*.rpm artifacts/ente-${{ github.ref_name }}-x86_64.rpm
                   # APPIMAGE
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
-                  flutter_distributor package --platform=linux --targets=appimage --skip-clean
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  fastforge package --platform=linux --targets=appimage --skip-clean
                   mv dist/**/*-*-linux.AppImage artifacts/ente-${{ github.ref_name }}-x86_64.AppImage
                   # DEB
-                  flutter_distributor package --platform=linux --targets=deb --skip-clean
+                  fastforge package --platform=linux --targets=deb --skip-clean
                   mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-x86_64.deb
 
             - name: Generate checksums
@@ -216,16 +220,19 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Create artifacts directory
               run: mkdir artifacts
 
             - name: Build Windows installer
               run: |
                   flutter config --enable-windows-desktop
-                  # dart pub global activate flutter_distributor
-                  dart pub global activate --source git https://github.com/ente-io/flutter_distributor_fork --git-ref develop --git-path packages/flutter_distributor
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
                   choco install innosetup -y
-                  flutter_distributor.bat package --platform=windows --targets=exe --skip-clean
+                  fastforge.bat package --platform=windows --targets=exe --skip-clean
                   shopt -s globstar
                   mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
               shell: bash
@@ -268,7 +275,7 @@ jobs:
                   updateOnlyUnreleased: true
 
     build-macos:
-        runs-on: macos-13 # latest is 12
+        runs-on: macos-15
 
         defaults:
             run:
@@ -287,9 +294,13 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Generate strings localizations
+              run: flutter gen-l10n
+              working-directory: mobile/packages/strings
+
             - name: Install code signing dependencies
               run: |
-                  pip3 install codemagic-cli-tools
+                  pip3 install codemagic-cli-tools --break-system-packages
 
             - name: Add provisioning profiles
               run: |
@@ -321,7 +332,7 @@ jobs:
 
             - name: Install build dependencies
               run: |
-                  python3 -m pip install setuptools
+                  pip3 install setuptools --break-system-packages
                   npm install -g appdmg
 
             - name: Create artifacts directory
@@ -330,8 +341,8 @@ jobs:
             - name: Build macOS DMG
               run: |
                   flutter config --enable-macos-desktop
-                  dart pub global activate flutter_distributor
-                  flutter_distributor package --platform=macos --targets=dmg --skip-clean
+                  dart pub global activate --source git https://github.com/ente-io/fastforgefork --git-ref develop --git-path packages/fastforge
+                  fastforge package --platform=macos --targets=dmg --skip-clean
                   mv dist/**/*-macos.dmg artifacts/ente-${{ github.ref_name }}.dmg
 
             - name: Code sign DMG

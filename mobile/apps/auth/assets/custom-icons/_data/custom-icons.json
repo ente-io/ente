@@ -543,6 +543,11 @@
       ]
     },
     {
+      "title": "Dupe",
+      "slug": "dupe",
+      "hex": "000000"
+    },
+    {
       "title": "eBay"
     },
     {
@@ -1806,7 +1811,8 @@
       ]
     },
     {
-      "title": "Ubisoft"
+      "title": "Ubisoft",
+      "hex":"000000"
     },
     {
       "title": "Ubuntu One",
@@ -2099,6 +2105,10 @@
     {
       "title": "Wordfence",
       "slug": "wordfence"
+    },
+    {
+      "title": "Hytale",
+      "slug": "hytale"
     }
   ]
 }

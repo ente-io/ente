@@ -1,6 +1,6 @@
 // The Android Gradle Plugin builds the native code with the Android NDK.
 
-group 'com.flutter_rust_bridge.rust_lib_photos'
+group 'com.flutter_rust_bridge.ente_photos_rust'
 version '1.0'
 
 buildscript {
@@ -26,7 +26,7 @@ apply plugin: 'com.android.library'
 
 android {
     if (project.android.hasProperty("namespace")) {
-        namespace 'com.flutter_rust_bridge.rust_lib_photos'
+        namespace 'com.flutter_rust_bridge.ente_photos_rust'
     }
 
     // Bumping the plugin compileSdkVersion requires all clients of this plugin
@@ -52,5 +52,5 @@ android {
 apply from: "../cargokit/gradle/plugin.gradle"
 cargokit {
     manifestDir = "../../rust"
-    libname = "rust_lib_photos"
+    libname = "ente_photos_rust"
 }

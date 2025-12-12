@@ -75,6 +75,10 @@ jobs:
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 
+            - name: Generate Rust bindings (Core)
+              run: flutter_rust_bridge_codegen generate
+              working-directory: mobile/packages/rust
+
             - name: Generate Rust bindings
               run: flutter_rust_bridge_codegen generate
 

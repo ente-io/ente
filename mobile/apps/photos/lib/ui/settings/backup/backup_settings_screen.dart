@@ -327,7 +327,10 @@ class BackupSettingsScreen extends StatelessWidget {
     }
 
     if (result.action == ButtonAction.first) {
-      final bool? selected = await handleFolderSelectionBackupFlow(context);
+      final bool? selected = await handleFolderSelectionBackupFlow(
+        context,
+        fromOnlyNewPhotosToggle: true,
+      );
       if (selected != true) {
         return false;
       }

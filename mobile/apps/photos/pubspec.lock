@@ -616,10 +616,31 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  ente_icons:
+    dependency: "direct main"
+    description:
+      path: "../../packages/ente_icons"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_photos_rust:
+    dependency: "direct main"
+    description:
+      path: rust_builder
+      relative: true
+    source: path
+    version: "0.0.1"
   ente_qr_ui:
     dependency: "direct main"
     description:
       path: "../../packages/qr"
+      relative: true
+    source: path
+    version: "0.0.1"
+  ente_rust:
+    dependency: "direct main"
+    description:
+      path: "../../packages/rust"
       relative: true
     source: path
     version: "0.0.1"
@@ -1766,8 +1787,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "8dba33ad89eea99683780469bc4d0ec4993d61c3"
-      resolved-ref: "8dba33ad89eea99683780469bc4d0ec4993d61c3"
+      ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
+      resolved-ref: f5ff2124c8424196ea3dc5cf493d98107a5276d4
       url: "https://github.com/ente-io/mobile_ocr"
     source: git
     version: "1.0.0"
@@ -2307,13 +2328,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.16"
-  rust_lib_photos:
-    dependency: "direct main"
-    description:
-      path: rust_builder
-      relative: true
-    source: path
-    version: "0.0.1"
   rxdart:
     dependency: transitive
     description:

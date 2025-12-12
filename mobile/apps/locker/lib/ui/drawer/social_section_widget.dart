@@ -1,12 +1,10 @@
-import 'dart:io';
+import "dart:io";
 
-import "package:ente_ui/components/captioned_text_widget.dart";
-import "package:ente_ui/components/menu_item_widget.dart";
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
-import "package:locker/ui/drawer/common_settings.dart";
-import 'package:url_launcher/url_launcher_string.dart';
+import "package:url_launcher/url_launcher_string.dart";
 
 class SocialSectionWidget extends StatelessWidget {
   const SocialSectionWidget({super.key});
@@ -17,7 +15,7 @@ class SocialSectionWidget extends StatelessWidget {
     return ExpandableMenuItemWidget(
       title: l10n.social,
       selectionOptionsWidget: _getSectionOptions(context),
-      leadingIcon: Icons.interests_outlined,
+      leadingIcon: HugeIcons.strokeRoundedGlobe,
     );
   }
 
@@ -25,62 +23,53 @@ class SocialSectionWidget extends StatelessWidget {
     final l10n = context.l10n;
 
     final List<Widget> options = [
-      sectionOptionSpacing,
-      SocialsMenuItemWidget(
+      _SocialsChildItem(
         l10n.blog,
         "https://ente.io/blog",
         launchInExternalApp: !Platform.isAndroid,
       ),
-      sectionOptionSpacing,
-      SocialsMenuItemWidget(
+      _SocialsChildItem(
         l10n.merchandise,
         "https://shop.ente.io",
         launchInExternalApp: !Platform.isAndroid,
       ),
-      const SocialsMenuItemWidget(
+      const _SocialsChildItem(
         "Twitter",
         "https://twitter.com/enteio",
       ),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget(
+      const _SocialsChildItem(
         "Mastodon",
         "https://fosstodon.org/@ente",
       ),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget(
+      const _SocialsChildItem(
         "Discord",
         "https://ente.io/discord",
       ),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget(
+      const _SocialsChildItem(
         "Reddit",
         "https://reddit.com/r/enteio",
       ),
-      sectionOptionSpacing,
     ];
     return Column(children: options);
   }
 }
 
-class SocialsMenuItemWidget extends StatelessWidget {
+class _SocialsChildItem extends StatelessWidget {
   final String text;
   final String url;
   final bool launchInExternalApp;
 
-  const SocialsMenuItemWidget(
+  const _SocialsChildItem(
     this.text,
     this.url, {
-    super.key,
     this.launchInExternalApp = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return MenuItemWidget(
-      captionedTextWidget: CaptionedTextWidget(
-        title: text,
-      ),
-      trailingIcon: Icons.chevron_right_outlined,
+    return ExpandableChildItem(
+      title: text,
+      trailingIcon: Icons.chevron_right,
       onTap: () async {
         // ignore: unawaited_futures
         launchUrlString(

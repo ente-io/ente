@@ -259,7 +259,8 @@ class WrappedService {
       return false;
     }
     final DateTime now = DateTime.now();
-    if (_dateOnly(now).isBefore(_dateOnly(_kAvailabilityStart))) {
+    if (!flagService.internalUser &&
+        _dateOnly(now).isBefore(_dateOnly(_kAvailabilityStart))) {
       return false;
     }
     final DateTime generatedDate = _dateOnly(result.generatedAt.toLocal());
