@@ -15,11 +15,8 @@ import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
 import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
-import {
-    getFileReactions,
-    type Reaction,
-} from "ente-new/photos/services/reaction";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { type UnifiedReaction } from "ente-new/photos/services/social";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 // =============================================================================
 // Icons
@@ -100,6 +97,10 @@ export interface LikesSidebarProps extends ModalVisibilityProps {
      * Collection summaries indexed by their IDs.
      */
     collectionSummaries?: CollectionSummaries;
+    /**
+     * Pre-fetched reactions by collection ID (includes both file and comment reactions).
+     */
+    prefetchedReactions?: Map<number, UnifiedReaction[]>;
 }
 
 /**
@@ -112,13 +113,14 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     activeCollectionID,
     fileNormalCollectionIDs,
     collectionSummaries,
+    prefetchedReactions,
 }) => {
     const [loading, setLoading] = useState(false);
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
 
     // Reactions grouped by collection: collectionID -> reactions
     const [reactionsByCollection, setReactionsByCollection] = useState<
-        Map<number, Reaction[]>
+        Map<number, UnifiedReaction[]>
     >(new Map());
 
     // User ID to email mapping built from fetched collections
@@ -163,19 +165,26 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
         });
     }, [fileCollectionIDs, collectionSummaries, reactionsByCollection]);
 
+    // Collections sorted by like count (descending) for dropdown
+    const sortedCollectionsInfo = useMemo(() => {
+        return [...collectionsInfo].sort((a, b) => b.likeCount - a.likeCount);
+    }, [collectionsInfo]);
+
     // Currently selected collection info
     const selectedCollectionInfo = useMemo(() => {
         const targetID = hasCollectionContext
             ? activeCollectionID
             : selectedCollectionID;
         return (
-            collectionsInfo.find((c) => c.id === targetID) ?? collectionsInfo[0]
+            collectionsInfo.find((c) => c.id === targetID) ??
+            sortedCollectionsInfo[0]
         );
     }, [
         hasCollectionContext,
         activeCollectionID,
         selectedCollectionID,
         collectionsInfo,
+        sortedCollectionsInfo,
     ]);
 
     // Get likers for the selected collection
@@ -192,105 +201,119 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
             }));
     }, [selectedCollectionInfo, reactionsByCollection, userIDToEmail]);
 
-    // Fetch reactions when the sidebar opens or file changes
-    const fetchReactions = useCallback(async () => {
-        if (!file || !open) return;
+    // Load reactions from prefetched data
+    const loadReactions = useCallback(async () => {
+        if (!file || !open || !prefetchedReactions) return;
 
         setLoading(true);
-        const newReactionsByCollection = new Map<number, Reaction[]>();
         const newUserIDToEmail = new Map<number, string>();
 
         try {
-            if (hasCollectionContext && activeCollectionID) {
-                // Collection view: only fetch for the active collection
-                const collection = await getCollectionByID(activeCollectionID);
+            // Determine which collections to process
+            const collectionIDsToFetch =
+                hasCollectionContext && activeCollectionID
+                    ? [activeCollectionID]
+                    : fileCollectionIDs;
 
-                // Build user ID to email map from collection owner and sharees
-                if (collection.owner.email) {
-                    newUserIDToEmail.set(
-                        collection.owner.id,
-                        collection.owner.email,
-                    );
-                }
-                for (const sharee of collection.sharees) {
-                    if (sharee.email) {
-                        newUserIDToEmail.set(sharee.id, sharee.email);
-                    }
-                }
+            // Fetch collection info for user emails (lightweight call)
+            for (const collectionID of collectionIDsToFetch) {
+                try {
+                    const collection = await getCollectionByID(collectionID);
 
-                const reactions = await getFileReactions(
-                    activeCollectionID,
-                    file.id,
-                    collection.key,
-                );
-                newReactionsByCollection.set(activeCollectionID, reactions);
-            } else {
-                // Gallery view: fetch for all collections the file belongs to
-                for (const collectionID of fileCollectionIDs) {
-                    try {
-                        const collection =
-                            await getCollectionByID(collectionID);
-
-                        // Build user ID to email map from collection owner and sharees
-                        if (collection.owner.email) {
-                            newUserIDToEmail.set(
-                                collection.owner.id,
-                                collection.owner.email,
-                            );
-                        }
-                        for (const sharee of collection.sharees) {
-                            if (sharee.email) {
-                                newUserIDToEmail.set(sharee.id, sharee.email);
-                            }
-                        }
-
-                        const reactions = await getFileReactions(
-                            collectionID,
-                            file.id,
-                            collection.key,
-                        );
-                        newReactionsByCollection.set(collectionID, reactions);
-                    } catch (e) {
-                        log.error(
-                            `Failed to fetch reactions for collection ${collectionID}`,
-                            e,
+                    // Build user ID to email map from collection owner and sharees
+                    if (collection.owner.email) {
+                        newUserIDToEmail.set(
+                            collection.owner.id,
+                            collection.owner.email,
                         );
                     }
+                    for (const sharee of collection.sharees) {
+                        if (sharee.email) {
+                            newUserIDToEmail.set(sharee.id, sharee.email);
+                        }
+                    }
+                } catch {
+                    // Skip collections that fail to fetch
                 }
             }
-            setReactionsByCollection(newReactionsByCollection);
+
+            // Use prefetched reactions (filter to only file reactions, not comment reactions)
+            const filteredReactions = new Map<number, UnifiedReaction[]>();
+            for (const [collectionID, reactions] of prefetchedReactions) {
+                const fileReactions = reactions.filter(
+                    (r) => !r.commentID && r.fileID === file.id,
+                );
+                filteredReactions.set(collectionID, fileReactions);
+            }
+
+            setReactionsByCollection(filteredReactions);
             setUserIDToEmail(newUserIDToEmail);
         } catch (e) {
-            log.error("Failed to fetch reactions", e);
+            log.error("Failed to load reactions", e);
         } finally {
             setLoading(false);
         }
     }, [
         file,
         open,
+        prefetchedReactions,
         hasCollectionContext,
         activeCollectionID,
         fileCollectionIDs,
     ]);
 
-    // Fetch reactions when the sidebar opens
-    useEffect(() => {
-        if (open) {
-            void fetchReactions();
-        }
-    }, [open, fetchReactions]);
+    // Track previous open state to detect when sidebar opens
+    const prevOpenRef = useRef(false);
 
-    // Set initial selected collection when file collection IDs are available
+    // Load reactions and set initial selection when the sidebar opens
     useEffect(() => {
-        if (
-            open &&
-            !hasCollectionContext &&
-            selectedCollectionID === undefined &&
-            fileCollectionIDs.length > 0
-        ) {
-            setSelectedCollectionID(fileCollectionIDs[0]);
+        if (open && !prevOpenRef.current) {
+            // Sidebar just opened - load reactions and set initial selection
+            void loadReactions();
+
+            // Set initial selection to album with most likes (gallery view only)
+            if (
+                !hasCollectionContext &&
+                prefetchedReactions &&
+                prefetchedReactions.size > 0
+            ) {
+                let maxCount = -1;
+                let bestCollectionID: number | undefined;
+                for (const [collectionID, reactions] of prefetchedReactions) {
+                    const count = reactions.filter(
+                        (r) =>
+                            !r.commentID &&
+                            r.fileID === file?.id &&
+                            r.reactionType === "green_heart",
+                    ).length;
+                    if (count > maxCount) {
+                        maxCount = count;
+                        bestCollectionID = collectionID;
+                    }
+                }
+                if (bestCollectionID !== undefined) {
+                    setSelectedCollectionID(bestCollectionID);
+                }
+            }
         }
-    }, [open, hasCollectionContext, selectedCollectionID, fileCollectionIDs]);
+        prevOpenRef.current = open;
+    }, [open, loadReactions, hasCollectionContext, prefetchedReactions, file?.id]);
+
+    // Update local state when prefetchedReactions changes (e.g., like/unlike from heart button)
+    useEffect(() => {
+        if (!open || !file || !prefetchedReactions) return;
+
+        // Filter to only file reactions (not comment reactions)
+        const filteredReactions = new Map<number, UnifiedReaction[]>();
+        for (const [collectionID, reactions] of prefetchedReactions) {
+            const fileReactions = reactions.filter(
+                (r) => !r.commentID && r.fileID === file.id,
+            );
+            filteredReactions.set(collectionID, fileReactions);
+        }
+
+        setReactionsByCollection(filteredReactions);
+    }, [open, file, prefetchedReactions]);
 
     // Fetch thumbnails for each collection's cover file
     useEffect(() => {
@@ -413,7 +436,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                             </CollectionDropdownButton>
                             {collectionDropdownOpen && (
                                 <CollectionDropdownMenu>
-                                    {collectionsInfo.map((collection) => (
+                                    {sortedCollectionsInfo.map((collection) => (
                                         <CollectionDropdownItem
                                             key={collection.id}
                                             onClick={() =>

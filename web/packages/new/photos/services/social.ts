@@ -1,0 +1,180 @@
+import { decryptBox } from "ente-base/crypto";
+import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
+import { apiURL } from "ente-base/origins";
+import { z } from "zod";
+import type { Comment, CommentData } from "./comment";
+
+/**
+ * Remove null byte padding from a decrypted reaction type.
+ */
+const unpadReaction = (paddedReaction: string): string =>
+    paddedReaction.replace(/\0+$/, "");
+
+/**
+ * A decrypted reaction from the unified diff endpoint.
+ */
+export interface UnifiedReaction {
+    id: string;
+    collectionID: number;
+    fileID?: number;
+    commentID?: string;
+    reactionType: string;
+    userID: number;
+    anonUserID?: string;
+    isDeleted: boolean;
+    createdAt: number;
+    updatedAt: number;
+}
+
+/**
+ * Result from the unified social diff endpoint.
+ */
+export interface UnifiedSocialDiff {
+    comments: Comment[];
+    reactions: UnifiedReaction[];
+    hasMoreComments: boolean;
+    hasMoreReactions: boolean;
+}
+
+/**
+ * Get comments and reactions for a file in a single request.
+ *
+ * @param collectionID The ID of the collection containing the file.
+ * @param fileID The ID of the file to get social data for.
+ * @param collectionKey The decrypted collection key (base64 encoded).
+ * @returns Comments and reactions for the file.
+ */
+export const getUnifiedSocialDiff = async (
+    collectionID: number,
+    fileID: number,
+    collectionKey: string,
+): Promise<UnifiedSocialDiff> => {
+    const res = await fetch(
+        await apiURL("/social/diff", {
+            collectionID,
+            fileID,
+            sinceTime: 0,
+            limit: 1000,
+        }),
+        { headers: await authenticatedRequestHeaders() },
+    );
+    ensureOk(res);
+    const data = UnifiedDiffResponse.parse(await res.json());
+
+    // Decrypt comments
+    const comments: Comment[] = [];
+    for (const comment of data.comments) {
+        if (comment.isDeleted || !comment.cipher || !comment.nonce) {
+            comments.push({
+                id: comment.id,
+                collectionID: comment.collectionID,
+                fileID: comment.fileID ?? undefined,
+                parentCommentID: comment.parentCommentID ?? undefined,
+                userID: comment.userID,
+                anonUserID: comment.anonUserID ?? undefined,
+                encData: { text: "", userName: "" },
+                isDeleted: comment.isDeleted,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+            });
+            continue;
+        }
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: comment.cipher, nonce: comment.nonce },
+                collectionKey,
+            );
+            const decryptedStr = new TextDecoder().decode(
+                Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+            );
+            const encData = JSON.parse(decryptedStr) as CommentData;
+            comments.push({
+                id: comment.id,
+                collectionID: comment.collectionID,
+                fileID: comment.fileID ?? undefined,
+                parentCommentID: comment.parentCommentID ?? undefined,
+                userID: comment.userID,
+                anonUserID: comment.anonUserID ?? undefined,
+                encData,
+                isDeleted: comment.isDeleted,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+            });
+        } catch {
+            // Skip comments that fail to decrypt
+        }
+    }
+
+    // Decrypt reactions
+    const reactions: UnifiedReaction[] = [];
+    for (const reaction of data.reactions) {
+        if (reaction.isDeleted || !reaction.cipher || !reaction.nonce) continue;
+        try {
+            const decryptedB64 = await decryptBox(
+                { encryptedData: reaction.cipher, nonce: reaction.nonce },
+                collectionKey,
+            );
+            const reactionType = unpadReaction(
+                new TextDecoder().decode(
+                    Uint8Array.from(atob(decryptedB64), (c) => c.charCodeAt(0)),
+                ),
+            );
+            reactions.push({
+                id: reaction.id,
+                collectionID: reaction.collectionID,
+                fileID: reaction.fileID ?? undefined,
+                commentID: reaction.commentID ?? undefined,
+                reactionType,
+                userID: reaction.userID,
+                anonUserID: reaction.anonUserID ?? undefined,
+                isDeleted: reaction.isDeleted,
+                createdAt: reaction.createdAt,
+                updatedAt: reaction.updatedAt,
+            });
+        } catch {
+            // Skip reactions that fail to decrypt
+        }
+    }
+
+    return {
+        comments,
+        reactions,
+        hasMoreComments: data.hasMoreComments,
+        hasMoreReactions: data.hasMoreReactions,
+    };
+};
+
+const RemoteComment = z.object({
+    id: z.string(),
+    collectionID: z.number(),
+    fileID: z.number().nullish(),
+    parentCommentID: z.string().nullish(),
+    userID: z.number(),
+    anonUserID: z.string().nullish(),
+    cipher: z.string().nullish(),
+    nonce: z.string().nullish(),
+    isDeleted: z.boolean(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+});
+
+const RemoteReaction = z.object({
+    id: z.string(),
+    collectionID: z.number(),
+    fileID: z.number().nullish(),
+    commentID: z.string().nullish(),
+    userID: z.number(),
+    anonUserID: z.string().nullish(),
+    cipher: z.string().nullish(),
+    nonce: z.string().nullish(),
+    isDeleted: z.boolean(),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+});
+
+const UnifiedDiffResponse = z.object({
+    comments: z.array(RemoteComment),
+    reactions: z.array(RemoteReaction),
+    hasMoreComments: z.boolean(),
+    hasMoreReactions: z.boolean(),
+});

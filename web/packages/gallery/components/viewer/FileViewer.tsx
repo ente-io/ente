@@ -48,15 +48,12 @@ import {
 } from "ente-new/photos/components/ImageEditorOverlay";
 import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+import { type Comment } from "ente-new/photos/services/comment";
+import { addReaction, deleteReaction } from "ente-new/photos/services/reaction";
 import {
-    getFileComments,
-    type Comment,
-} from "ente-new/photos/services/comment";
-import {
-    addReaction,
-    deleteReaction,
-    getFileReactions,
-} from "ente-new/photos/services/reaction";
+    getUnifiedSocialDiff,
+    type UnifiedReaction,
+} from "ente-new/photos/services/social";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -403,17 +400,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // Map of file ID to array of reactions (collectionId + reactionId) for the current user.
-    // For gallery view, we track reactions across all collections.
-    // For collection view, we only track the reaction in that collection.
-    interface FileReaction {
-        collectionId: number;
-        reactionId: string;
-    }
-    const [fileReactions, setFileReactions] = useState<
-        Map<number, FileReaction[]>
-    >(new Map());
-
     // Map of file ID to map of collection ID to array of comments.
     // For gallery view, we fetch comments from all collections.
     // For collection view, we only fetch comments from that collection.
@@ -421,11 +407,50 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         Map<number, Map<number, Comment[]>>
     >(new Map());
 
+    // Map of file ID to map of collection ID to array of all reactions.
+    // Includes both file reactions and comment reactions.
+    const [allReactions, setAllReactions] = useState<
+        Map<number, Map<number, UnifiedReaction[]>>
+    >(new Map());
+
     // Ref for fileComments to use in callbacks
     const fileCommentsRef = useRef(fileComments);
     useEffect(() => {
         fileCommentsRef.current = fileComments;
     }, [fileComments]);
+
+    // Ref for allReactions to use in callbacks
+    const allReactionsRef = useRef(allReactions);
+    useEffect(() => {
+        allReactionsRef.current = allReactions;
+    }, [allReactions]);
+
+    // Helper to get current user's file reactions from allReactions
+    const getUserFileReactions = useCallback(
+        (fileId: number): { collectionId: number; reactionId: string }[] => {
+            const fileReactionsMap = allReactionsRef.current.get(fileId);
+            if (!fileReactionsMap) return [];
+
+            const userReactions: { collectionId: number; reactionId: string }[] = [];
+            for (const [collectionId, reactions] of fileReactionsMap) {
+                const userFileReaction = reactions.find(
+                    (r) =>
+                        !r.commentID &&
+                        r.fileID === fileId &&
+                        r.reactionType === "green_heart" &&
+                        r.userID === user?.id,
+                );
+                if (userFileReaction) {
+                    userReactions.push({
+                        collectionId,
+                        reactionId: userFileReaction.id,
+                    });
+                }
+            }
+            return userReactions;
+        },
+        [user?.id],
+    );
 
     // If `true`, then we need to trigger a pull from remote when we close.
     const [, setNeedsRemotePull] = useState(false);
@@ -472,55 +497,99 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const handleCommentsClose = useCallback(() => setOpenComments(false), []);
 
-    // Re-fetch comments for the current file after a comment is added or deleted
-    const handleCommentsUpdate = useCallback(() => {
-        const fileID = activeAnnotatedFile?.file.id;
-        if (!fileID) return;
+    // Handle a new comment being added
+    const handleCommentAdded = useCallback(
+        (comment: Comment) => {
+            const fileID = comment.fileID;
+            if (!fileID) return;
 
-        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+            setFileComments((prev) => {
+                const next = new Map(prev);
+                const fileCommentsMap = new Map(prev.get(fileID) ?? new Map());
+                const collectionComments =
+                    fileCommentsMap.get(comment.collectionID) ?? [];
+                fileCommentsMap.set(comment.collectionID, [
+                    ...collectionComments,
+                    comment,
+                ]);
+                next.set(fileID, fileCommentsMap);
+                return next;
+            });
+        },
+        [],
+    );
 
-        void (async () => {
-            try {
-                const commentsMap = new Map<number, Comment[]>();
+    // Handle a comment being deleted
+    const handleCommentDeleted = useCallback(
+        (collectionID: number, commentID: string) => {
+            const fileID = activeAnnotatedFile?.file.id;
+            if (!fileID) return;
 
-                if (isGalleryView) {
-                    const collectionIDs =
-                        fileNormalCollectionIDs?.get(fileID) ?? [];
-
-                    for (const collectionId of collectionIDs) {
-                        try {
-                            const collection =
-                                await getCollectionByID(collectionId);
-                            const comments = await getFileComments(
-                                collectionId,
-                                fileID,
-                                collection.key,
-                            );
-                            commentsMap.set(collectionId, comments);
-                        } catch {
-                            // Skip collections that fail to fetch
-                        }
-                    }
-                } else {
-                    const collection = await getCollectionByID(activeCollectionID);
-                    const comments = await getFileComments(
-                        activeCollectionID,
-                        fileID,
-                        collection.key,
+            setFileComments((prev) => {
+                const next = new Map(prev);
+                const fileCommentsMap = prev.get(fileID);
+                if (fileCommentsMap) {
+                    const updatedMap = new Map(fileCommentsMap);
+                    const collectionComments = updatedMap.get(collectionID) ?? [];
+                    updatedMap.set(
+                        collectionID,
+                        collectionComments.map((c) =>
+                            c.id === commentID ? { ...c, isDeleted: true } : c,
+                        ),
                     );
-                    commentsMap.set(activeCollectionID, comments);
+                    next.set(fileID, updatedMap);
                 }
+                return next;
+            });
+        },
+        [activeAnnotatedFile],
+    );
 
-                setFileComments((prev) => {
-                    const next = new Map(prev);
-                    next.set(fileID, commentsMap);
-                    return next;
-                });
-            } catch (e) {
-                log.error("Failed to refresh comments", e);
-            }
-        })();
-    }, [activeAnnotatedFile, activeCollectionID, fileNormalCollectionIDs]);
+    // Handle a comment reaction being added
+    const handleCommentReactionAdded = useCallback(
+        (reaction: UnifiedReaction) => {
+            const fileID = activeAnnotatedFile?.file.id;
+            if (!fileID) return;
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                const fileReactionsMap = new Map(prev.get(fileID) ?? new Map());
+                const collectionReactions =
+                    fileReactionsMap.get(reaction.collectionID) ?? [];
+                fileReactionsMap.set(reaction.collectionID, [
+                    ...collectionReactions,
+                    reaction,
+                ]);
+                next.set(fileID, fileReactionsMap);
+                return next;
+            });
+        },
+        [activeAnnotatedFile],
+    );
+
+    // Handle a comment reaction being deleted
+    const handleCommentReactionDeleted = useCallback(
+        (collectionID: number, reactionID: string) => {
+            const fileID = activeAnnotatedFile?.file.id;
+            if (!fileID) return;
+
+            setAllReactions((prev) => {
+                const next = new Map(prev);
+                const fileReactionsMap = prev.get(fileID);
+                if (fileReactionsMap) {
+                    const updatedMap = new Map(fileReactionsMap);
+                    const collectionReactions = updatedMap.get(collectionID) ?? [];
+                    updatedMap.set(
+                        collectionID,
+                        collectionReactions.filter((r) => r.id !== reactionID),
+                    );
+                    next.set(fileID, updatedMap);
+                }
+                return next;
+            });
+        },
+        [activeAnnotatedFile],
+    );
 
     const handleViewLikes = useCallback(() => setOpenLikes(true), []);
 
@@ -530,9 +599,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // when used in callbacks that are dependencies of the PhotoSwipe effect.
     const activeAnnotatedFileRef = useRef(activeAnnotatedFile);
     activeAnnotatedFileRef.current = activeAnnotatedFile;
-
-    const fileReactionsRef = useRef(fileReactions);
-    fileReactionsRef.current = fileReactions;
 
     // Called when the like button (heart) is clicked.
     // - If public album (has ?t=): show PublicLikeModal
@@ -555,7 +621,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         if (!file) return;
 
         const fileId = file.id;
-        const reactions = fileReactionsRef.current.get(fileId) ?? [];
+        const reactions = getUserFileReactions(fileId);
         const isGalleryView = !activeCollectionID || activeCollectionID === 0;
 
         if (isGalleryView) {
@@ -578,11 +644,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                                 collection.key,
                             );
                             log.info(`Added reaction: ${reactionId}`);
-                            setFileReactions((prev) => {
+                            setAllReactions((prev) => {
                                 const next = new Map(prev);
-                                next.set(fileId, [
-                                    { collectionId, reactionId },
+                                const fileReactionsMap = new Map(prev.get(fileId) ?? new Map());
+                                const collectionReactions = fileReactionsMap.get(collectionId) ?? [];
+                                fileReactionsMap.set(collectionId, [
+                                    ...collectionReactions,
+                                    {
+                                        id: reactionId,
+                                        collectionID: collectionId,
+                                        fileID: fileId,
+                                        reactionType: "green_heart",
+                                        userID: user?.id ?? 0,
+                                        isDeleted: false,
+                                        createdAt: Date.now() * 1000,
+                                        updatedAt: Date.now() * 1000,
+                                    },
                                 ]);
+                                next.set(fileId, fileReactionsMap);
                                 return next;
                             });
                         } catch (e) {
@@ -597,15 +676,29 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 // Liked in one or more collections - unlike from all
                 void (async () => {
                     try {
+                        const deletedReactionIds = new Set<string>();
                         for (const reaction of reactions) {
                             await deleteReaction(reaction.reactionId);
+                            deletedReactionIds.add(reaction.reactionId);
                             log.info(
                                 `Deleted reaction: ${reaction.reactionId}`,
                             );
                         }
-                        setFileReactions((prev) => {
+                        setAllReactions((prev) => {
                             const next = new Map(prev);
-                            next.delete(fileId);
+                            const fileReactionsMap = prev.get(fileId);
+                            if (fileReactionsMap) {
+                                const updatedMap = new Map(fileReactionsMap);
+                                for (const [collectionId, collectionReactions] of updatedMap) {
+                                    updatedMap.set(
+                                        collectionId,
+                                        collectionReactions.filter(
+                                            (r) => !deletedReactionIds.has(r.id),
+                                        ),
+                                    );
+                                }
+                                next.set(fileId, updatedMap);
+                            }
                             return next;
                         });
                     } catch (e) {
@@ -627,17 +720,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                         log.info(
                             `Deleted reaction: ${existingReaction.reactionId}`,
                         );
-                        setFileReactions((prev) => {
+                        setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const updated = (prev.get(fileId) ?? []).filter(
-                                (r) =>
-                                    r.reactionId !==
-                                    existingReaction.reactionId,
-                            );
-                            if (updated.length > 0) {
-                                next.set(fileId, updated);
-                            } else {
-                                next.delete(fileId);
+                            const fileReactionsMap = prev.get(fileId);
+                            if (fileReactionsMap) {
+                                const updatedMap = new Map(fileReactionsMap);
+                                const collectionReactions = updatedMap.get(activeCollectionID) ?? [];
+                                updatedMap.set(
+                                    activeCollectionID,
+                                    collectionReactions.filter(
+                                        (r) => r.id !== existingReaction.reactionId,
+                                    ),
+                                );
+                                next.set(fileId, updatedMap);
                             }
                             return next;
                         });
@@ -658,16 +753,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             collection.key,
                         );
                         log.info(`Added reaction: ${reactionId}`);
-                        setFileReactions((prev) => {
+                        setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const existing = prev.get(fileId) ?? [];
-                            next.set(fileId, [
-                                ...existing,
+                            const fileReactionsMap = new Map(prev.get(fileId) ?? new Map());
+                            const collectionReactions = fileReactionsMap.get(activeCollectionID) ?? [];
+                            fileReactionsMap.set(activeCollectionID, [
+                                ...collectionReactions,
                                 {
-                                    collectionId: activeCollectionID,
-                                    reactionId,
+                                    id: reactionId,
+                                    collectionID: activeCollectionID,
+                                    fileID: fileId,
+                                    reactionType: "green_heart",
+                                    userID: user?.id ?? 0,
+                                    isDeleted: false,
+                                    createdAt: Date.now() * 1000,
+                                    updatedAt: Date.now() * 1000,
                                 },
                             ]);
+                            next.set(fileId, fileReactionsMap);
                             return next;
                         });
                     } catch (e) {
@@ -676,7 +779,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 })();
             }
         }
-    }, [activeCollectionID, fileNormalCollectionIDs]);
+    }, [activeCollectionID, fileNormalCollectionIDs, getUserFileReactions, user?.id]);
 
     const handleLikeAlbumSelectorClose = useCallback(
         () => setOpenLikeAlbumSelector(false),
@@ -692,7 +795,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             if (isCurrentlyLiked) {
                 // Unlike - delete the reaction
-                const reactions = fileReactionsRef.current.get(fileId) ?? [];
+                const reactions = getUserFileReactions(fileId);
                 const reactionToDelete = reactions.find(
                     (r) => r.collectionId === albumId,
                 );
@@ -704,17 +807,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             log.info(
                                 `Deleted reaction: ${reactionToDelete.reactionId}`,
                             );
-                            setFileReactions((prev) => {
+                            setAllReactions((prev) => {
                                 const next = new Map(prev);
-                                const updated = (prev.get(fileId) ?? []).filter(
-                                    (r) =>
-                                        r.reactionId !==
-                                        reactionToDelete.reactionId,
-                                );
-                                if (updated.length > 0) {
-                                    next.set(fileId, updated);
-                                } else {
-                                    next.delete(fileId);
+                                const fileReactionsMap = prev.get(fileId);
+                                if (fileReactionsMap) {
+                                    const updatedMap = new Map(fileReactionsMap);
+                                    const collectionReactions = updatedMap.get(albumId) ?? [];
+                                    updatedMap.set(
+                                        albumId,
+                                        collectionReactions.filter(
+                                            (r) => r.id !== reactionToDelete.reactionId,
+                                        ),
+                                    );
+                                    next.set(fileId, updatedMap);
                                 }
                                 return next;
                             });
@@ -735,13 +840,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             collection.key,
                         );
                         log.info(`Added reaction: ${reactionId}`);
-                        setFileReactions((prev) => {
+                        setAllReactions((prev) => {
                             const next = new Map(prev);
-                            const existing = prev.get(fileId) ?? [];
-                            next.set(fileId, [
-                                ...existing,
-                                { collectionId: albumId, reactionId },
+                            const fileReactionsMap = new Map(prev.get(fileId) ?? new Map());
+                            const collectionReactions = fileReactionsMap.get(albumId) ?? [];
+                            fileReactionsMap.set(albumId, [
+                                ...collectionReactions,
+                                {
+                                    id: reactionId,
+                                    collectionID: albumId,
+                                    fileID: fileId,
+                                    reactionType: "green_heart",
+                                    userID: user?.id ?? 0,
+                                    isDeleted: false,
+                                    createdAt: Date.now() * 1000,
+                                    updatedAt: Date.now() * 1000,
+                                },
                             ]);
+                            next.set(fileId, fileReactionsMap);
                             return next;
                         });
                     } catch (e) {
@@ -751,7 +867,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             }
             // Don't close - user might want to toggle more albums
         },
-        [],
+        [getUserFileReactions, user?.id],
     );
 
     const handleLikeAll = useCallback(() => {
@@ -760,7 +876,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         const fileId = file.id;
         const collectionIDs = fileNormalCollectionIDs?.get(fileId) ?? [];
-        const existingReactions = fileReactionsRef.current.get(fileId) ?? [];
+        const existingReactions = getUserFileReactions(fileId);
         const likedCollectionIDs = new Set(
             existingReactions.map((r) => r.collectionId),
         );
@@ -787,10 +903,26 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     log.info(`Added reaction: ${reactionId}`);
                     newReactions.push({ collectionId, reactionId });
                 }
-                setFileReactions((prev) => {
+                setAllReactions((prev) => {
                     const next = new Map(prev);
-                    const existing = prev.get(fileId) ?? [];
-                    next.set(fileId, [...existing, ...newReactions]);
+                    const fileReactionsMap = new Map(prev.get(fileId) ?? new Map());
+                    for (const { collectionId, reactionId } of newReactions) {
+                        const collectionReactions = fileReactionsMap.get(collectionId) ?? [];
+                        fileReactionsMap.set(collectionId, [
+                            ...collectionReactions,
+                            {
+                                id: reactionId,
+                                collectionID: collectionId,
+                                fileID: fileId,
+                                reactionType: "green_heart",
+                                userID: user?.id ?? 0,
+                                isDeleted: false,
+                                createdAt: Date.now() * 1000,
+                                updatedAt: Date.now() * 1000,
+                            },
+                        ]);
+                    }
+                    next.set(fileId, fileReactionsMap);
                     return next;
                 });
             } catch (e) {
@@ -798,7 +930,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             }
         })();
         setOpenLikeAlbumSelector(false);
-    }, [fileNormalCollectionIDs]);
+    }, [fileNormalCollectionIDs, getUserFileReactions, user?.id]);
 
     const handlePublicLikeModalClose = useCallback(
         () => setOpenPublicLikeModal(false),
@@ -1042,16 +1174,30 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             name: collectionNameByID?.get(id) ?? `Album ${id}`,
         }));
 
-        // Get the set of liked album IDs
-        const reactions = fileReactions.get(file.id) ?? [];
-        const likedAlbumIDs = new Set(reactions.map((r) => r.collectionId));
+        // Get the set of liked album IDs from allReactions
+        const fileReactionsMap = allReactions.get(file.id);
+        const likedAlbumIDs = new Set<number>();
+        if (fileReactionsMap) {
+            for (const [collectionId, reactions] of fileReactionsMap) {
+                const hasUserLike = reactions.some(
+                    (r) =>
+                        !r.commentID &&
+                        r.reactionType === "green_heart" &&
+                        r.userID === user?.id,
+                );
+                if (hasUserLike) {
+                    likedAlbumIDs.add(collectionId);
+                }
+            }
+        }
 
         return { allAlbumsForFile, likedAlbumIDs };
     }, [
         activeAnnotatedFile,
         collectionNameByID,
         fileNormalCollectionIDs,
-        fileReactions,
+        allReactions,
+        user?.id,
     ]);
 
     const getFiles = useCallback(() => files, [files]);
@@ -1087,10 +1233,22 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const isLiked = useCallback(
         ({ file }: FileViewerAnnotatedFile) => {
-            const reactions = fileReactions.get(file.id);
-            return reactions !== undefined && reactions.length > 0;
+            const fileReactionsMap = allReactions.get(file.id);
+            if (!fileReactionsMap) return false;
+
+            // Check if user has liked this file in any collection
+            for (const reactions of fileReactionsMap.values()) {
+                const hasUserLike = reactions.some(
+                    (r) =>
+                        !r.commentID &&
+                        r.reactionType === "green_heart" &&
+                        r.userID === user?.id,
+                );
+                if (hasUserLike) return true;
+            }
+            return false;
         },
-        [fileReactions],
+        [allReactions, user?.id],
     );
 
     const getCommentCount = useCallback(
@@ -1348,15 +1506,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         }
     }, [favoriteFileIDs, pendingFavoriteUpdates, files, open]);
 
-    // Refresh like button when fileReactions changes.
+    // Refresh like button when allReactions changes.
     useEffect(() => {
         if (open && files.length) {
             psRef.current?.refreshCurrentSlideLikeButtonIfNeeded();
         }
-    }, [fileReactions, files, open]);
+    }, [allReactions, files, open]);
 
-    // Fetch reactions for the current file when it changes.
-    // Track by file ID to avoid re-fetching when activeAnnotatedFile object changes identity.
+    // Fetch comments and reactions for the current file using unified endpoint.
     const activeFileID = activeAnnotatedFile?.file.id;
     useEffect(() => {
         if (!open || !activeFileID) return;
@@ -1365,131 +1522,27 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
         void (async () => {
             try {
-                if (isGalleryView) {
-                    // Gallery view: check ALL collections the file belongs to
-                    const collectionIDs =
-                        fileNormalCollectionIDs?.get(activeFileID) ?? [];
-                    const foundReactions: FileReaction[] = [];
-
-                    for (const collectionId of collectionIDs) {
-                        try {
-                            const collection =
-                                await getCollectionByID(collectionId);
-                            const reactions = await getFileReactions(
-                                collectionId,
-                                activeFileID,
-                                collection.key,
-                            );
-                            const userReaction = reactions.find(
-                                (r) =>
-                                    r.reactionType === "green_heart" &&
-                                    r.userID === user?.id,
-                            );
-                            if (userReaction) {
-                                foundReactions.push({
-                                    collectionId,
-                                    reactionId: userReaction.id,
-                                });
-                            }
-                        } catch {
-                            // Skip collections that fail to fetch
-                        }
-                    }
-
-                    setFileReactions((prev) => {
-                        const next = new Map(prev);
-                        if (foundReactions.length > 0) {
-                            next.set(activeFileID, foundReactions);
-                        } else {
-                            next.delete(activeFileID);
-                        }
-                        return next;
-                    });
-                } else {
-                    // Collection view: check only the active collection
-                    const collection =
-                        await getCollectionByID(activeCollectionID);
-                    const reactions = await getFileReactions(
-                        activeCollectionID,
-                        activeFileID,
-                        collection.key,
-                    );
-                    const userReaction = reactions.find(
-                        (r) =>
-                            r.reactionType === "green_heart" &&
-                            r.userID === user?.id,
-                    );
-                    setFileReactions((prev) => {
-                        const next = new Map(prev);
-                        if (userReaction) {
-                            next.set(activeFileID, [
-                                {
-                                    collectionId: activeCollectionID,
-                                    reactionId: userReaction.id,
-                                },
-                            ]);
-                        } else {
-                            next.delete(activeFileID);
-                        }
-                        return next;
-                    });
-                }
-            } catch (e) {
-                log.error("Failed to fetch reactions", e);
-                setFileReactions((prev) => {
-                    const next = new Map(prev);
-                    next.delete(activeFileID);
-                    return next;
-                });
-            }
-        })();
-    }, [
-        open,
-        activeFileID,
-        activeCollectionID,
-        fileNormalCollectionIDs,
-        user?.id,
-    ]);
-
-    // Fetch comments for the current file when it changes.
-    useEffect(() => {
-        if (!open || !activeFileID) return;
-
-        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
-
-        void (async () => {
-            try {
                 const commentsMap = new Map<number, Comment[]>();
+                const reactionsMap = new Map<number, UnifiedReaction[]>();
 
-                if (isGalleryView) {
-                    // Gallery view: fetch from ALL collections the file belongs to
-                    const collectionIDs =
-                        fileNormalCollectionIDs?.get(activeFileID) ?? [];
+                const collectionIDs = isGalleryView
+                    ? (fileNormalCollectionIDs?.get(activeFileID) ?? [])
+                    : [activeCollectionID];
 
-                    for (const collectionId of collectionIDs) {
-                        try {
-                            const collection =
-                                await getCollectionByID(collectionId);
-                            const comments = await getFileComments(
-                                collectionId,
-                                activeFileID,
-                                collection.key,
-                            );
-                            commentsMap.set(collectionId, comments);
-                        } catch {
-                            // Skip collections that fail to fetch
-                        }
+                for (const collectionId of collectionIDs) {
+                    try {
+                        const collection = await getCollectionByID(collectionId);
+                        const { comments, reactions } = await getUnifiedSocialDiff(
+                            collectionId,
+                            activeFileID,
+                            collection.key,
+                        );
+
+                        commentsMap.set(collectionId, comments);
+                        reactionsMap.set(collectionId, reactions);
+                    } catch {
+                        // Skip collections that fail to fetch
                     }
-                } else {
-                    // Collection view: fetch only from the active collection
-                    const collection =
-                        await getCollectionByID(activeCollectionID);
-                    const comments = await getFileComments(
-                        activeCollectionID,
-                        activeFileID,
-                        collection.key,
-                    );
-                    commentsMap.set(activeCollectionID, comments);
                 }
 
                 setFileComments((prev) => {
@@ -1497,9 +1550,20 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                     next.set(activeFileID, commentsMap);
                     return next;
                 });
+
+                setAllReactions((prev) => {
+                    const next = new Map(prev);
+                    next.set(activeFileID, reactionsMap);
+                    return next;
+                });
             } catch (e) {
-                log.error("Failed to fetch comments", e);
+                log.error("Failed to fetch social data", e);
                 setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.delete(activeFileID);
+                    return next;
+                });
+                setAllReactions((prev) => {
                     const next = new Map(prev);
                     next.delete(activeFileID);
                     return next;
@@ -1619,10 +1683,12 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 fileNormalCollectionIDs={fileNormalCollectionIDs}
                 collectionSummaries={collectionSummaries}
                 currentUserID={user?.id}
-                prefetchedComments={fileComments.get(
-                    activeAnnotatedFile.file.id,
-                )}
-                onCommentsUpdate={handleCommentsUpdate}
+                prefetchedComments={fileComments.get(activeAnnotatedFile.file.id)}
+                prefetchedReactions={allReactions.get(activeAnnotatedFile.file.id)}
+                onCommentAdded={handleCommentAdded}
+                onCommentDeleted={handleCommentDeleted}
+                onCommentReactionAdded={handleCommentReactionAdded}
+                onCommentReactionDeleted={handleCommentReactionDeleted}
             />
             <LikesSidebar
                 open={openLikes}
@@ -1631,6 +1697,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 activeCollectionID={activeCollectionID}
                 fileNormalCollectionIDs={fileNormalCollectionIDs}
                 collectionSummaries={collectionSummaries}
+                prefetchedReactions={allReactions.get(activeAnnotatedFile.file.id)}
             />
             <LikeAlbumSelectorModal
                 open={openLikeAlbumSelector}

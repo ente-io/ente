@@ -26,8 +26,8 @@ import {
 import {
     addCommentReaction,
     deleteReaction,
-    getCommentReactions,
 } from "ente-new/photos/services/reaction";
+import { type UnifiedReaction } from "ente-new/photos/services/social";
 import { t } from "i18next";
 import React, {
     useCallback,
@@ -331,15 +331,33 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      */
     currentUserID?: number;
     /**
-     * Pre-fetched comments by collection ID. If provided, the sidebar will use
-     * these instead of making its own API requests.
+     * Pre-fetched comments by collection ID.
      */
     prefetchedComments?: Map<number, Comment[]>;
     /**
-     * Called when comments are modified (added or deleted). The parent should
-     * refresh its comments data to stay in sync.
+     * Pre-fetched reactions by collection ID (includes both file and comment reactions).
      */
-    onCommentsUpdate?: () => void;
+    prefetchedReactions?: Map<number, UnifiedReaction[]>;
+    /**
+     * Called when a comment is successfully added. The parent should update its
+     * comments state to include this new comment.
+     */
+    onCommentAdded?: (comment: Comment) => void;
+    /**
+     * Called when a comment is successfully deleted. The parent should update its
+     * comments state to mark this comment as deleted.
+     */
+    onCommentDeleted?: (collectionID: number, commentID: string) => void;
+    /**
+     * Called when a comment reaction is added. The parent should update its
+     * reactions state to include this new reaction.
+     */
+    onCommentReactionAdded?: (reaction: UnifiedReaction) => void;
+    /**
+     * Called when a comment reaction is deleted. The parent should update its
+     * reactions state to remove this reaction.
+     */
+    onCommentReactionDeleted?: (collectionID: number, reactionID: string) => void;
 }
 
 /**
@@ -359,7 +377,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     collectionSummaries,
     currentUserID,
     prefetchedComments,
-    onCommentsUpdate,
+    prefetchedReactions,
+    onCommentAdded,
+    onCommentDeleted,
+    onCommentReactionAdded,
+    onCommentReactionDeleted,
 }) => {
     const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
@@ -400,6 +422,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [likedComments, setLikedComments] = useState<Map<string, string>>(
         new Map(),
     );
+
+    // All reactions by collection: collectionID -> reactions array
+    const [reactionsByCollection, setReactionsByCollection] = useState<
+        Map<number, UnifiedReaction[]>
+    >(new Map());
 
     // Focus input when replying to a comment
     useEffect(() => {
@@ -458,29 +485,26 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         sortedCollectionsInfo,
     ]);
 
-    // Load comments from prefetched data and fetch collection info for user emails.
+    // Load comments and reactions from prefetched data.
     const loadComments = useCallback(async () => {
         if (!file || !open || !prefetchedComments) return;
 
         setLoading(true);
-        const newCommentsByCollection = new Map<number, Comment[]>();
         const newUserIDToEmail = new Map<number, string>();
 
         try {
-            // Copy prefetched comments
-            for (const [collectionID, comments] of prefetchedComments) {
-                newCommentsByCollection.set(collectionID, comments);
-            }
-
-            // Fetch collection info for user emails
+            // Determine which collections to process
             const collectionIDsToFetch =
                 hasCollectionContext && activeCollectionID
                     ? [activeCollectionID]
                     : fileCollectionIDs;
 
+            // Fetch collection info for user emails (lightweight call)
             for (const collectionID of collectionIDsToFetch) {
                 try {
                     const collection = await getCollectionByID(collectionID);
+
+                    // Build user ID to email mapping
                     if (collection.owner.email) {
                         newUserIDToEmail.set(
                             collection.owner.id,
@@ -497,16 +521,19 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 }
             }
 
+            // Use prefetched data
+            setCommentsByCollection(prefetchedComments);
+            setReactionsByCollection(prefetchedReactions ?? new Map());
+
             // Set comments for the currently selected collection
             if (hasCollectionContext && activeCollectionID) {
-                const activeComments =
-                    newCommentsByCollection.get(activeCollectionID) ?? [];
+                const activeComments = prefetchedComments.get(activeCollectionID) ?? [];
                 setComments(activeComments);
             } else {
                 // For gallery view, find collection with most comments and set initial selection
                 let maxCount = -1;
                 let bestCollectionID: number | undefined;
-                for (const [collectionID, collectionComments] of newCommentsByCollection) {
+                for (const [collectionID, collectionComments] of prefetchedComments) {
                     const count = collectionComments.filter((c) => !c.isDeleted).length;
                     if (count > maxCount) {
                         maxCount = count;
@@ -515,11 +542,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 }
                 if (bestCollectionID !== undefined) {
                     setSelectedCollectionID(bestCollectionID);
-                    setComments(newCommentsByCollection.get(bestCollectionID) ?? []);
+                    setComments(prefetchedComments.get(bestCollectionID) ?? []);
                 }
             }
 
-            setCommentsByCollection(newCommentsByCollection);
             setUserIDToEmail(newUserIDToEmail);
         } catch (e) {
             log.error("Failed to load comments", e);
@@ -530,6 +556,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         file,
         open,
         prefetchedComments,
+        prefetchedReactions,
         hasCollectionContext,
         activeCollectionID,
         fileCollectionIDs,
@@ -620,54 +647,32 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         };
     }, [open, collectionsInfo]);
 
-    // Fetch liked state for comments
+    // Build liked comments map from reactions when selected collection changes
     useEffect(() => {
-        if (!open || comments.length === 0 || !selectedCollectionInfo) {
+        if (!open || !selectedCollectionInfo) {
+            setLikedComments(new Map());
             return;
         }
 
-        let didCancel = false;
+        const reactions = reactionsByCollection.get(selectedCollectionInfo.id);
+        if (!reactions) {
+            setLikedComments(new Map());
+            return;
+        }
 
-        const fetchLikedComments = async () => {
-            const newLikedComments = new Map<string, string>();
-            try {
-                const collection = await getCollectionByID(
-                    selectedCollectionInfo.id,
-                );
-                for (const comment of comments) {
-                    if (comment.isDeleted) continue;
-                    try {
-                        const reactions = await getCommentReactions(
-                            selectedCollectionInfo.id,
-                            comment.id,
-                            collection.key,
-                        );
-                        const userReaction = reactions.find(
-                            (r) =>
-                                r.reactionType === "green_heart" &&
-                                r.userID === currentUserID,
-                        );
-                        if (userReaction && !didCancel) {
-                            newLikedComments.set(comment.id, userReaction.id);
-                        }
-                    } catch {
-                        // Skip comments that fail to fetch reactions
-                    }
-                }
-                if (!didCancel) {
-                    setLikedComments(newLikedComments);
-                }
-            } catch (e) {
-                log.warn("Failed to fetch comment reactions", e);
+        // Find comment reactions that are likes from the current user
+        const newLikedComments = new Map<string, string>();
+        for (const reaction of reactions) {
+            if (
+                reaction.commentID &&
+                reaction.reactionType === "green_heart" &&
+                reaction.userID === currentUserID
+            ) {
+                newLikedComments.set(reaction.commentID, reaction.id);
             }
-        };
-
-        void fetchLikedComments();
-
-        return () => {
-            didCancel = true;
-        };
-    }, [open, comments, selectedCollectionInfo, currentUserID]);
+        }
+        setLikedComments(newLikedComments);
+    }, [open, selectedCollectionInfo, reactionsByCollection, currentUserID]);
 
     // Check if this is a public album (has ?t=... in URL)
     const isPublicAlbum =
@@ -711,8 +716,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 parentCommentID: replyingTo?.id,
                 isDeleted: false,
                 userID: currentUserID ?? 0,
-                createdAt: Date.now(),
-                updatedAt: Date.now(),
+                createdAt: Date.now() * 1000, // Microseconds to match server format
+                updatedAt: Date.now() * 1000,
             };
             setComments((prev) => [...prev, newComment]);
             setCommentsByCollection((prev) => {
@@ -725,8 +730,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             setCommentText("");
             setReplyingTo(null);
 
-            // Notify parent to refresh comments
-            onCommentsUpdate?.();
+            // Notify parent to update its comments state
+            onCommentAdded?.(newComment);
 
             // Scroll to bottom after adding comment
             setTimeout(() => {
@@ -751,8 +756,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             parentCommentID: replyingTo?.id,
             isDeleted: false,
             userID: currentUserID ?? 0,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: Date.now() * 1000, // Microseconds to match server format
+            updatedAt: Date.now() * 1000,
         };
         setComments((prev) => [...prev, newComment]);
         setCommentText("");
@@ -833,6 +838,21 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             next.delete(targetComment.id);
                             return next;
                         });
+                        // Update reactionsByCollection
+                        setReactionsByCollection((prev) => {
+                            const next = new Map(prev);
+                            const reactions = next.get(selectedCollectionInfo.id) ?? [];
+                            next.set(
+                                selectedCollectionInfo.id,
+                                reactions.filter((r) => r.id !== existingReactionID),
+                            );
+                            return next;
+                        });
+                        // Notify parent to update its reactions state
+                        onCommentReactionDeleted?.(
+                            selectedCollectionInfo.id,
+                            existingReactionID,
+                        );
                     } else {
                         // Like - add a reaction
                         const reactionID = await addCommentReaction(
@@ -841,11 +861,33 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             "green_heart",
                             collection.key,
                         );
+                        const newReaction: UnifiedReaction = {
+                            id: reactionID,
+                            collectionID: selectedCollectionInfo.id,
+                            commentID: targetComment.id,
+                            reactionType: "green_heart",
+                            userID: currentUserID ?? 0,
+                            isDeleted: false,
+                            createdAt: Date.now() * 1000,
+                            updatedAt: Date.now() * 1000,
+                        };
                         setLikedComments((prev) => {
                             const next = new Map(prev);
                             next.set(targetComment.id, reactionID);
                             return next;
                         });
+                        // Update reactionsByCollection
+                        setReactionsByCollection((prev) => {
+                            const next = new Map(prev);
+                            const reactions = next.get(selectedCollectionInfo.id) ?? [];
+                            next.set(selectedCollectionInfo.id, [
+                                ...reactions,
+                                newReaction,
+                            ]);
+                            return next;
+                        });
+                        // Notify parent to update its reactions state
+                        onCommentReactionAdded?.(newReaction);
                     }
                 } catch (e) {
                     log.error("Failed to toggle comment like", e);
@@ -881,8 +923,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         return next;
                     });
 
-                    // Notify parent to refresh comments
-                    onCommentsUpdate?.();
+                    // Notify parent to update its comments state
+                    onCommentDeleted?.(
+                        targetComment.collectionID,
+                        targetComment.id,
+                    );
                 } catch (e) {
                     log.error("Failed to delete comment", e);
                 }
