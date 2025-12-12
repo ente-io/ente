@@ -30,6 +30,7 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
+import "package:photos/models/search/hierarchical/camera_filter.dart";
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
@@ -477,6 +478,7 @@ class SearchService {
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
     final Map<String, List<EnteFile>> uploaderToFile = {};
+    final Map<String, List<EnteFile>> cameraToFiles = {};
     for (EnteFile eachFile in allFiles) {
       if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
         captionMatch.add(eachFile);
@@ -490,6 +492,10 @@ class SearchService {
           uploaderToFile[eachFile.uploaderName!] = [];
         }
         uploaderToFile[eachFile.uploaderName!]!.add(eachFile);
+      }
+      final cameraLabel = eachFile.cameraLabel;
+      if (cameraLabel != null && pattern.hasMatch(cameraLabel)) {
+        cameraToFiles.putIfAbsent(cameraLabel, () => []).add(eachFile);
       }
     }
     if (captionMatch.isNotEmpty) {
@@ -532,6 +538,22 @@ class SearchService {
             entry.value,
             hierarchicalSearchFilter: UploaderFilter(
               uploaderName: entry.key,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            ),
+          ),
+        );
+      }
+    }
+    if (cameraToFiles.isNotEmpty) {
+      for (final entry in cameraToFiles.entries) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.camera,
+            entry.key,
+            entry.value,
+            hierarchicalSearchFilter: CameraFilter(
+              cameraLabel: entry.key,
               occurrence: kMostRelevantFilter,
               matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
             ),

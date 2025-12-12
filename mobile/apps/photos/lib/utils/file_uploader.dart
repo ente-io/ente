@@ -980,6 +980,9 @@ class FileUploader {
         pubMetadata[offsetTimeKey] = exifTime.offsetTime;
       }
     }
+    if ((mediaUploadData.cameraModel ?? '').isNotEmpty) {
+      pubMetadata[cameraModelKey] = mediaUploadData.cameraModel;
+    }
     return pubMetadata;
   }
 
