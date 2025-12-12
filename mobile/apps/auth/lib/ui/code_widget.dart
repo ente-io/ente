@@ -248,9 +248,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                     onInvoke: (intent) {
                       if (!widget.code.type.isTOTPCompatible) {
                         showToast(context, context.l10n.notSupportedForHOTP);
-                        return;
+                        return null;
                       }
                       _copyNextToClipboard();
+                      return null;
                     },
                   ),
                 },
