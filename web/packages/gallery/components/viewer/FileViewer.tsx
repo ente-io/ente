@@ -49,6 +49,10 @@ import {
 import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import {
+    getFileComments,
+    type Comment,
+} from "ente-new/photos/services/comment";
+import {
     addReaction,
     deleteReaction,
     getFileReactions,
@@ -410,6 +414,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         Map<number, FileReaction[]>
     >(new Map());
 
+    // Map of file ID to map of collection ID to array of comments.
+    // For gallery view, we fetch comments from all collections.
+    // For collection view, we only fetch comments from that collection.
+    const [fileComments, setFileComments] = useState<
+        Map<number, Map<number, Comment[]>>
+    >(new Map());
+
+    // Ref for fileComments to use in callbacks
+    const fileCommentsRef = useRef(fileComments);
+    useEffect(() => {
+        fileCommentsRef.current = fileComments;
+    }, [fileComments]);
+
     // If `true`, then we need to trigger a pull from remote when we close.
     const [, setNeedsRemotePull] = useState(false);
 
@@ -454,6 +471,56 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleViewComments = useCallback(() => setOpenComments(true), []);
 
     const handleCommentsClose = useCallback(() => setOpenComments(false), []);
+
+    // Re-fetch comments for the current file after a comment is added or deleted
+    const handleCommentsUpdate = useCallback(() => {
+        const fileID = activeAnnotatedFile?.file.id;
+        if (!fileID) return;
+
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+
+        void (async () => {
+            try {
+                const commentsMap = new Map<number, Comment[]>();
+
+                if (isGalleryView) {
+                    const collectionIDs =
+                        fileNormalCollectionIDs?.get(fileID) ?? [];
+
+                    for (const collectionId of collectionIDs) {
+                        try {
+                            const collection =
+                                await getCollectionByID(collectionId);
+                            const comments = await getFileComments(
+                                collectionId,
+                                fileID,
+                                collection.key,
+                            );
+                            commentsMap.set(collectionId, comments);
+                        } catch {
+                            // Skip collections that fail to fetch
+                        }
+                    }
+                } else {
+                    const collection = await getCollectionByID(activeCollectionID);
+                    const comments = await getFileComments(
+                        activeCollectionID,
+                        fileID,
+                        collection.key,
+                    );
+                    commentsMap.set(activeCollectionID, comments);
+                }
+
+                setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(fileID, commentsMap);
+                    return next;
+                });
+            } catch (e) {
+                log.error("Failed to refresh comments", e);
+            }
+        })();
+    }, [activeAnnotatedFile, activeCollectionID, fileNormalCollectionIDs]);
 
     const handleViewLikes = useCallback(() => setOpenLikes(true), []);
 
@@ -1026,6 +1093,30 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         [fileReactions],
     );
 
+    const getCommentCount = useCallback(
+        ({ file }: FileViewerAnnotatedFile) => {
+            const commentsMap = fileComments.get(file.id);
+            if (!commentsMap) return 0;
+
+            const isGalleryView =
+                !activeCollectionID || activeCollectionID === 0;
+            if (isGalleryView) {
+                // Return the count from the collection with most comments
+                let maxCount = 0;
+                for (const comments of commentsMap.values()) {
+                    const count = comments.filter((c) => !c.isDeleted).length;
+                    if (count > maxCount) maxCount = count;
+                }
+                return maxCount;
+            } else {
+                // Return count from the active collection
+                const comments = commentsMap.get(activeCollectionID);
+                return comments?.filter((c) => !c.isDeleted).length ?? 0;
+            }
+        },
+        [fileComments, activeCollectionID],
+    );
+
     const updateFullscreenStatus = useCallback(() => {
         setIsFullscreen(!!document.fullscreenElement);
     }, []);
@@ -1200,6 +1291,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             isFavoritePending,
             toggleFavorite,
             isLiked,
+            getCommentCount,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
         };
@@ -1213,6 +1305,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegate.isFavoritePending = isFavoritePending;
         delegate.toggleFavorite = toggleFavorite;
         delegate.isLiked = isLiked;
+        delegate.getCommentCount = getCommentCount;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
@@ -1221,6 +1314,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         isFavoritePending,
         toggleFavorite,
         isLiked,
+        getCommentCount,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
     ]);
@@ -1357,6 +1451,70 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         user?.id,
     ]);
 
+    // Fetch comments for the current file when it changes.
+    useEffect(() => {
+        if (!open || !activeFileID) return;
+
+        const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+
+        void (async () => {
+            try {
+                const commentsMap = new Map<number, Comment[]>();
+
+                if (isGalleryView) {
+                    // Gallery view: fetch from ALL collections the file belongs to
+                    const collectionIDs =
+                        fileNormalCollectionIDs?.get(activeFileID) ?? [];
+
+                    for (const collectionId of collectionIDs) {
+                        try {
+                            const collection =
+                                await getCollectionByID(collectionId);
+                            const comments = await getFileComments(
+                                collectionId,
+                                activeFileID,
+                                collection.key,
+                            );
+                            commentsMap.set(collectionId, comments);
+                        } catch {
+                            // Skip collections that fail to fetch
+                        }
+                    }
+                } else {
+                    // Collection view: fetch only from the active collection
+                    const collection =
+                        await getCollectionByID(activeCollectionID);
+                    const comments = await getFileComments(
+                        activeCollectionID,
+                        activeFileID,
+                        collection.key,
+                    );
+                    commentsMap.set(activeCollectionID, comments);
+                }
+
+                setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(activeFileID, commentsMap);
+                    return next;
+                });
+            } catch (e) {
+                log.error("Failed to fetch comments", e);
+                setFileComments((prev) => {
+                    const next = new Map(prev);
+                    next.delete(activeFileID);
+                    return next;
+                });
+            }
+        })();
+    }, [open, activeFileID, activeCollectionID, fileNormalCollectionIDs]);
+
+    // Refresh comment count when fileComments changes.
+    useEffect(() => {
+        if (open && files.length) {
+            psRef.current?.refreshCurrentSlideCommentCountIfNeeded();
+        }
+    }, [fileComments, files, open]);
+
     useEffect(() => {
         if (open) {
             // We're open. Create psRef. This will show the file viewer dialog.
@@ -1456,6 +1614,15 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             <CommentsSidebar
                 open={openComments}
                 onClose={handleCommentsClose}
+                file={activeAnnotatedFile.file}
+                activeCollectionID={activeCollectionID}
+                fileNormalCollectionIDs={fileNormalCollectionIDs}
+                collectionSummaries={collectionSummaries}
+                currentUserID={user?.id}
+                prefetchedComments={fileComments.get(
+                    activeAnnotatedFile.file.id,
+                )}
+                onCommentsUpdate={handleCommentsUpdate}
             />
             <LikesSidebar
                 open={openLikes}

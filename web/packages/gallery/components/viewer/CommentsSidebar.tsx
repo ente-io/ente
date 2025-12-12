@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
     Avatar,
     Box,
+    CircularProgress,
     Drawer,
     IconButton,
     Menu,
@@ -12,8 +13,29 @@ import {
     Typography,
 } from "@mui/material";
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
+import log from "ente-base/log";
+import { downloadManager } from "ente-gallery/services/download";
+import type { EnteFile } from "ente-media/file";
+import { getCollectionByID } from "ente-new/photos/services/collection";
+import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
+import {
+    addComment,
+    deleteComment,
+    type Comment,
+} from "ente-new/photos/services/comment";
+import {
+    addCommentReaction,
+    deleteReaction,
+    getCommentReactions,
+} from "ente-new/photos/services/reaction";
 import { t } from "i18next";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { AddNameModal } from "./AddNameModal";
 import { PublicCommentModal } from "./PublicCommentModal";
 
@@ -55,17 +77,21 @@ const ReplyIcon: React.FC = () => (
     </svg>
 );
 
-const HeartIcon: React.FC = () => (
+interface HeartIconProps {
+    filled?: boolean;
+}
+
+const HeartIcon: React.FC<HeartIconProps> = ({ filled }) => (
     <svg
         width="16"
         height="14"
         viewBox="0 0 16 14"
-        fill="none"
+        fill={filled ? "#F24F4F" : "none"}
         xmlns="http://www.w3.org/2000/svg"
     >
         <path
             d="M6.63749 12.3742C4.66259 10.885 0.75 7.4804 0.75 4.41664C0.75 2.39161 2.22368 0.75 4.25 0.75C5.3 0.75 6.35 1.10294 7.75 2.51469C9.15 1.10294 10.2 0.75 11.25 0.75C13.2763 0.75 14.75 2.39161 14.75 4.41664C14.75 7.4804 10.8374 10.885 8.86251 12.3742C8.19793 12.8753 7.30207 12.8753 6.63749 12.3742Z"
-            stroke="currentColor"
+            stroke={filled ? "#F24F4F" : "currentColor"}
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -109,676 +135,24 @@ const ChevronDownIcon: React.FC = () => (
 // Types
 // =============================================================================
 
-interface Comment {
-    id: string;
-    collectionID: number;
-    fileID?: number;
-    encData: { text: string; userName: string; userAvatar?: string };
-    parentCommentID?: string;
-    isDeleted: boolean;
-    userID: number;
-    anonUserID?: string;
-    createdAt: number;
-    updatedAt: number;
-}
-
-interface Collection {
+/** Collection info for the dropdown. */
+interface CollectionInfo {
     id: number;
     name: string;
-    coverURL?: string;
     commentCount: number;
+    coverFile?: EnteFile;
 }
-
-// =============================================================================
-// Constants
-// =============================================================================
-
-// Mock current user ID (for determining if comment is from current user)
-const CURRENT_USER_ID = 2;
-
-// Mock collections that contain this file
-const mockCollections: Collection[] = [
-    {
-        id: 1,
-        name: "Mindfulness",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        commentCount: 4,
-    },
-    {
-        id: 2,
-        name: "Meditation",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        commentCount: 12,
-    },
-    {
-        id: 3,
-        name: "Gratitude",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        commentCount: 12,
-    },
-    {
-        id: 4,
-        name: "Self-Reflection",
-        coverURL:
-            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=100&h=100&fit=crop",
-        commentCount: 12,
-    },
-];
-
-// Mock data - realistic discussion between 4 friends about a Goa trip photo
-const mockComments: Comment[] = [
-    {
-        id: "1",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Omg this photo is amazing! The sunset colors are unreal",
-            userName: "Vishnu",
-        },
-        isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000,
-    },
-    {
-        id: "2",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "I know right! Took me forever to get the timing right",
-            userName: "Anand",
-        },
-        parentCommentID: "1",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 30000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 30000,
-    },
-    {
-        id: "3",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Remember how we almost missed this because Priya couldn't find her sandals",
-            userName: "Vishnu",
-        },
-        isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 60000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 60000,
-    },
-    {
-        id: "4",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "HEY those sandals were expensive okay! I wasn't leaving them behind",
-            userName: "Priya",
-        },
-        parentCommentID: "3",
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 120000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 120000,
-    },
-    {
-        id: "5",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "They were like 200 rupees from the beach stall lmao",
-            userName: "Shanthy",
-        },
-        parentCommentID: "3",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 180000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 180000,
-    },
-    {
-        id: "6",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Lol I remember that! We were literally running to the beach",
-            userName: "Anand",
-        },
-        parentCommentID: "3",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 240000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 240000,
-    },
-    {
-        id: "7",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Still expensive!! And they were cute",
-            userName: "Priya",
-        },
-        parentCommentID: "5",
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 300000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 300000,
-    },
-    {
-        id: "8",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Worth it though, look at this shot! Best photo from the whole trip imo",
-            userName: "Anand",
-        },
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 360000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 360000,
-    },
-    {
-        id: "9",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Agreed! Can you send me the full res version? Want to print it",
-            userName: "Shanthy",
-        },
-        parentCommentID: "8",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 420000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 420000,
-    },
-    {
-        id: "10",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Yeah I'll share the album link with everyone later today",
-            userName: "Anand",
-        },
-        parentCommentID: "9",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 480000,
-        updatedAt: Date.now() - 2 * 24 * 60 * 60 * 1000 + 480000,
-    },
-    {
-        id: "11",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Who took this btw? The composition is so good",
-            userName: "Priya",
-        },
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000,
-    },
-    {
-        id: "12",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "That would be me actually! Was experimenting with the angles",
-            userName: "Anand",
-        },
-        parentCommentID: "11",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 60000,
-        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 60000,
-    },
-    {
-        id: "13",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Don't let it go to your head, you also took 47 blurry photos that day",
-            userName: "Shanthy",
-        },
-        parentCommentID: "12",
-        isDeleted: true,
-        userID: 3,
-        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 120000,
-        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 120000,
-    },
-    {
-        id: "14",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "HAHAHA okay fair point", userName: "Anand" },
-        parentCommentID: "13",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 180000,
-        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 180000,
-    },
-    {
-        id: "15",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "Quality over quantity right?", userName: "Vishnu" },
-        parentCommentID: "13",
-        isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 240000,
-        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 240000,
-    },
-    {
-        id: "16",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Exactly! At least I got this one perfect",
-            userName: "Anand",
-        },
-        parentCommentID: "15",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 300000,
-        updatedAt: Date.now() - 1 * 24 * 60 * 60 * 1000 + 300000,
-    },
-    {
-        id: "17",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "We need to plan another trip soon. I miss Goa already",
-            userName: "Priya",
-        },
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 23 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 23 * 60 * 60 * 1000,
-    },
-    {
-        id: "18",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Same! Maybe December? End of year trip?",
-            userName: "Shanthy",
-        },
-        parentCommentID: "17",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 22 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 22 * 60 * 60 * 1000,
-    },
-    {
-        id: "19",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "December works for me! But not Goa again, somewhere new?",
-            userName: "Anand",
-        },
-        parentCommentID: "18",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 21 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 21 * 60 * 60 * 1000,
-    },
-    {
-        id: "20",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Ooh how about Kerala? Always wanted to go there",
-            userName: "Vishnu",
-        },
-        parentCommentID: "19",
-        isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 20 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 20 * 60 * 60 * 1000,
-    },
-    {
-        id: "21",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "YES Kerala! Backwaters and houseboats!",
-            userName: "Priya",
-        },
-        parentCommentID: "20",
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 19 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 19 * 60 * 60 * 1000,
-    },
-    {
-        id: "22",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "I've been wanting to try the houseboat thing for ages",
-            userName: "Anand",
-        },
-        parentCommentID: "20",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 18 * 60 * 60 * 1000 + 30000,
-        updatedAt: Date.now() - 18 * 60 * 60 * 1000 + 30000,
-    },
-    {
-        id: "23",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "I'm in! Let's make a group to plan this properly",
-            userName: "Shanthy",
-        },
-        parentCommentID: "20",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 18 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 18 * 60 * 60 * 1000,
-    },
-    {
-        id: "24",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "I'll create one tonight", userName: "Anand" },
-        parentCommentID: "23",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 17 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 17 * 60 * 60 * 1000,
-    },
-    {
-        id: "25",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Wait can we go back to how good this photo is though",
-            userName: "Priya",
-        },
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 12 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 12 * 60 * 60 * 1000,
-    },
-    {
-        id: "26",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "The way the light hits the water is so pretty",
-            userName: "Priya",
-        },
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 12 * 60 * 60 * 1000 + 30000,
-        updatedAt: Date.now() - 12 * 60 * 60 * 1000 + 30000,
-    },
-    {
-        id: "27",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Priya sending 3 messages in a row as usual",
-            userName: "Shanthy",
-        },
-        parentCommentID: "26",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 11 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 11 * 60 * 60 * 1000,
-    },
-    {
-        id: "28",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "I have a lot of thoughts okay!!", userName: "Priya" },
-        parentCommentID: "27",
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 10 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 10 * 60 * 60 * 1000,
-    },
-    {
-        id: "29",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "That's what we love about you", userName: "Anand" },
-        parentCommentID: "28",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 9 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 9 * 60 * 60 * 1000,
-    },
-    {
-        id: "30",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Aww thanks! See Shanthy, some people appreciate me",
-            userName: "Priya",
-        },
-        parentCommentID: "29",
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 8 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 8 * 60 * 60 * 1000,
-    },
-    {
-        id: "31",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "I appreciate you too, just in a bullying way",
-            userName: "Shanthy",
-        },
-        parentCommentID: "30",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 7 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 7 * 60 * 60 * 1000,
-    },
-    {
-        id: "32",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "This is why our friend group works lol",
-            userName: "Anand",
-        },
-        parentCommentID: "31",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 6 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 6 * 60 * 60 * 1000,
-    },
-    {
-        id: "33",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "The chaos is what makes it fun", userName: "Vishnu" },
-        parentCommentID: "32",
-        isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 5 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 5 * 60 * 60 * 1000,
-    },
-    {
-        id: "34",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Okay but seriously, this should be our group photo",
-            userName: "Shanthy",
-        },
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 3 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 3 * 60 * 60 * 1000,
-    },
-    {
-        id: "35",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Wait we're not even in the photo though",
-            userName: "Anand",
-        },
-        parentCommentID: "34",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 2 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 2 * 60 * 60 * 1000,
-    },
-    {
-        id: "36",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "That's the best part, no faces just vibes",
-            userName: "Shanthy",
-        },
-        parentCommentID: "35",
-        isDeleted: false,
-        userID: 3,
-        createdAt: Date.now() - 1 * 60 * 60 * 1000,
-        updatedAt: Date.now() - 1 * 60 * 60 * 1000,
-    },
-    {
-        id: "37",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "She has a point actually", userName: "Vishnu" },
-        parentCommentID: "36",
-        isDeleted: false,
-        userID: 1,
-        createdAt: Date.now() - 75 * 60 * 1000,
-        updatedAt: Date.now() - 75 * 60 * 1000,
-    },
-    {
-        id: "38",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Okay I'm convinced, vibes > faces",
-            userName: "Anand",
-        },
-        parentCommentID: "36",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 70 * 60 * 1000,
-        updatedAt: Date.now() - 70 * 60 * 1000,
-    },
-    {
-        id: "39",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Fine fine, approved as official group photo",
-            userName: "Priya",
-        },
-        parentCommentID: "36",
-        isDeleted: false,
-        userID: 4,
-        createdAt: Date.now() - 65 * 60 * 1000,
-        updatedAt: Date.now() - 65 * 60 * 1000,
-    },
-    {
-        id: "40",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Motion passed unanimously! I'll set it as the album cover",
-            userName: "Anand",
-        },
-        parentCommentID: "39",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 60 * 60 * 1000,
-        updatedAt: Date.now() - 60 * 60 * 1000,
-    },
-    {
-        id: "41",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "Occupy Mars", userName: "Elon" },
-        parentCommentID: "35",
-        isDeleted: false,
-        userID: 5,
-        createdAt: Date.now() - 45 * 60 * 1000,
-        updatedAt: Date.now() - 45 * 60 * 1000,
-    },
-    {
-        id: "42",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "You want to wake up in the morning and think the future is going to be great - and that's what being a spacefaring civilization is all about.\n\nIt's about believing in the future and thinking that the future will be better than the past.\n\nAnd I can't think of anything more exciting than going out there and being among the stars.",
-            userName: "Elon",
-        },
-        isDeleted: false,
-        userID: 5,
-        createdAt: Date.now() - 43 * 60 * 1000,
-        updatedAt: Date.now() - 43 * 60 * 1000,
-    },
-    {
-        id: "43",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "The stars await.", userName: "Elon" },
-        isDeleted: false,
-        userID: 5,
-        createdAt: Date.now() - 30 * 60 * 1000,
-        updatedAt: Date.now() - 30 * 60 * 1000,
-    },
-    {
-        id: "44",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "Haha.", userName: "Anand" },
-        parentCommentID: "42",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 14 * 60 * 1000,
-        updatedAt: Date.now() - 14 * 60 * 1000,
-    },
-    {
-        id: "45",
-        collectionID: 1,
-        fileID: 1,
-        encData: {
-            text: "Done! Album cover updated. Looks so good in the grid now",
-            userName: "Anand",
-        },
-        parentCommentID: "40",
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 20 * 60 * 1000,
-        updatedAt: Date.now() - 20 * 60 * 1000,
-    },
-    {
-        id: "46",
-        collectionID: 1,
-        fileID: 1,
-        encData: { text: "hehe", userName: "Anand" },
-        isDeleted: false,
-        userID: CURRENT_USER_ID,
-        createdAt: Date.now() - 2 * 60 * 1000,
-        updatedAt: Date.now() - 2 * 60 * 1000,
-    },
-];
 
 // =============================================================================
 // Utility Functions
 // =============================================================================
 
-const formatTimeAgo = (timestamp: number): string => {
-    const diff = Date.now() - timestamp;
+const formatTimeAgo = (timestampMicros: number): string => {
+    // Server timestamps are in microseconds, convert to milliseconds
+    const timestampMs = Math.floor(timestampMicros / 1000);
+    const diff = Date.now() - timestampMs;
     const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "now";
     if (minutes < 60) return `${minutes}m ago`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
@@ -852,12 +226,17 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
 interface QuotedReplyProps {
     parentComment: Comment;
     isOwn: boolean;
+    currentUserID?: number;
 }
 
 /**
  * Shows the quoted parent comment inside a reply bubble.
  */
-const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
+const QuotedReply: React.FC<QuotedReplyProps> = ({
+    parentComment,
+    isOwn,
+    currentUserID,
+}) => (
     <QuotedReplyContainer isOwn={isOwn}>
         {parentComment.isDeleted ? (
             <Typography
@@ -886,7 +265,7 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
                             })),
                     })}
                 >
-                    {parentComment.userID === CURRENT_USER_ID
+                    {parentComment.userID === currentUserID
                         ? "Me"
                         : parentComment.encData.userName}
                 </Typography>
@@ -909,15 +288,16 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({ parentComment, isOwn }) => (
 
 interface CommentActionsProps {
     onReply: () => void;
+    isLiked?: boolean;
 }
 
 /**
  * Action buttons (like, reply) shown below comment bubbles.
  */
-const CommentActions: React.FC<CommentActionsProps> = ({ onReply }) => (
+const CommentActions: React.FC<CommentActionsProps> = ({ onReply, isLiked }) => (
     <ActionsContainer>
         <ActionButton>
-            <HeartIcon />
+            <HeartIcon filled={isLiked} />
         </ActionButton>
         <ActionButton onClick={onReply}>
             <ReplyIcon />
@@ -929,7 +309,38 @@ const CommentActions: React.FC<CommentActionsProps> = ({ onReply }) => (
 // Main Component
 // =============================================================================
 
-export type CommentsSidebarProps = ModalVisibilityProps;
+export interface CommentsSidebarProps extends ModalVisibilityProps {
+    /**
+     * The file whose comments are being displayed.
+     */
+    file?: EnteFile;
+    /**
+     * The currently active collection ID (when viewing from within a collection).
+     */
+    activeCollectionID?: number;
+    /**
+     * A mapping from file IDs to the IDs of collections they belong to.
+     */
+    fileNormalCollectionIDs?: Map<number, number[]>;
+    /**
+     * Collection summaries indexed by their IDs.
+     */
+    collectionSummaries?: CollectionSummaries;
+    /**
+     * The current user's ID.
+     */
+    currentUserID?: number;
+    /**
+     * Pre-fetched comments by collection ID. If provided, the sidebar will use
+     * these instead of making its own API requests.
+     */
+    prefetchedComments?: Map<number, Comment[]>;
+    /**
+     * Called when comments are modified (added or deleted). The parent should
+     * refresh its comments data to stay in sync.
+     */
+    onCommentsUpdate?: () => void;
+}
 
 /**
  * A sidebar panel for displaying and managing comments on a file.
@@ -942,22 +353,53 @@ interface ContextMenuState {
 export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     open,
     onClose,
+    file,
+    activeCollectionID,
+    fileNormalCollectionIDs,
+    collectionSummaries,
+    currentUserID,
+    prefetchedComments,
+    onCommentsUpdate,
 }) => {
-    const [comment, setComment] = useState("");
+    const [commentText, setCommentText] = useState("");
     const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
     const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(
         null,
     );
-    const [selectedCollection, setSelectedCollection] = useState<Collection>(
-        mockCollections[0]!,
-    );
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
-    const [comments, setComments] = useState<Comment[]>(mockComments);
+    const [comments, setComments] = useState<Comment[]>([]);
     const [showPublicCommentModal, setShowPublicCommentModal] = useState(false);
     const [showAddNameModal, setShowAddNameModal] = useState(false);
     const [pendingComment, setPendingComment] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [sending, setSending] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const commentsContainerRef = useRef<HTMLDivElement>(null);
+
+    // Comments grouped by collection: collectionID -> comments
+    const [commentsByCollection, setCommentsByCollection] = useState<
+        Map<number, Comment[]>
+    >(new Map());
+
+    // User ID to email mapping built from fetched collections
+    const [userIDToEmail, setUserIDToEmail] = useState<Map<number, string>>(
+        new Map(),
+    );
+
+    // Selected collection for viewing comments (when in gallery view)
+    const [selectedCollectionID, setSelectedCollectionID] = useState<
+        number | undefined
+    >(undefined);
+
+    // Thumbnail URLs for each collection's cover file: collectionID -> URL
+    const [thumbnailURLs, setThumbnailURLs] = useState<Map<number, string>>(
+        new Map(),
+    );
+
+    // Comment reactions: commentID -> reactionID (for current user's likes)
+    const [likedComments, setLikedComments] = useState<Map<string, string>>(
+        new Map(),
+    );
 
     // Focus input when replying to a comment
     useEffect(() => {
@@ -966,46 +408,354 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     }, [replyingTo]);
 
-    // Check if opened from a collection context (has ?collection=... or ?t=... in URL)
-    // Public links use ?t= (access token) instead of ?collection=
+    // Check if opened from a collection context
     const hasCollectionContext =
-        typeof window !== "undefined" &&
-        (new URLSearchParams(window.location.search).has("collection") ||
-            new URLSearchParams(window.location.search).has("t"));
+        activeCollectionID !== undefined && activeCollectionID !== 0;
+
+    // Get all collections the file belongs to
+    const fileCollectionIDs = useMemo(() => {
+        if (!file) return [];
+        return fileNormalCollectionIDs?.get(file.id) ?? [];
+    }, [file, fileNormalCollectionIDs]);
+
+    // Build collection info list with comment counts and cover files
+    const collectionsInfo = useMemo((): CollectionInfo[] => {
+        return fileCollectionIDs.map((collectionID) => {
+            const summary = collectionSummaries?.get(collectionID);
+            return {
+                id: collectionID,
+                name: summary?.name ?? `Album ${collectionID}`,
+                commentCount:
+                    commentsByCollection
+                        .get(collectionID)
+                        ?.filter((c) => !c.isDeleted).length ?? 0,
+                coverFile: summary?.coverFile,
+            };
+        });
+    }, [fileCollectionIDs, collectionSummaries, commentsByCollection]);
+
+    // Collections sorted by comment count (descending) for dropdown
+    const sortedCollectionsInfo = useMemo(() => {
+        return [...collectionsInfo].sort(
+            (a, b) => b.commentCount - a.commentCount,
+        );
+    }, [collectionsInfo]);
+
+    // Currently selected collection info
+    const selectedCollectionInfo = useMemo(() => {
+        const targetID = hasCollectionContext
+            ? activeCollectionID
+            : selectedCollectionID;
+        return (
+            collectionsInfo.find((c) => c.id === targetID) ??
+            sortedCollectionsInfo[0]
+        );
+    }, [
+        hasCollectionContext,
+        activeCollectionID,
+        selectedCollectionID,
+        collectionsInfo,
+        sortedCollectionsInfo,
+    ]);
+
+    // Load comments from prefetched data and fetch collection info for user emails.
+    const loadComments = useCallback(async () => {
+        if (!file || !open || !prefetchedComments) return;
+
+        setLoading(true);
+        const newCommentsByCollection = new Map<number, Comment[]>();
+        const newUserIDToEmail = new Map<number, string>();
+
+        try {
+            // Copy prefetched comments
+            for (const [collectionID, comments] of prefetchedComments) {
+                newCommentsByCollection.set(collectionID, comments);
+            }
+
+            // Fetch collection info for user emails
+            const collectionIDsToFetch =
+                hasCollectionContext && activeCollectionID
+                    ? [activeCollectionID]
+                    : fileCollectionIDs;
+
+            for (const collectionID of collectionIDsToFetch) {
+                try {
+                    const collection = await getCollectionByID(collectionID);
+                    if (collection.owner.email) {
+                        newUserIDToEmail.set(
+                            collection.owner.id,
+                            collection.owner.email,
+                        );
+                    }
+                    for (const sharee of collection.sharees) {
+                        if (sharee.email) {
+                            newUserIDToEmail.set(sharee.id, sharee.email);
+                        }
+                    }
+                } catch {
+                    // Skip collections that fail to fetch
+                }
+            }
+
+            // Set comments for the currently selected collection
+            if (hasCollectionContext && activeCollectionID) {
+                const activeComments =
+                    newCommentsByCollection.get(activeCollectionID) ?? [];
+                setComments(activeComments);
+            } else {
+                // For gallery view, find collection with most comments and set initial selection
+                let maxCount = -1;
+                let bestCollectionID: number | undefined;
+                for (const [collectionID, collectionComments] of newCommentsByCollection) {
+                    const count = collectionComments.filter((c) => !c.isDeleted).length;
+                    if (count > maxCount) {
+                        maxCount = count;
+                        bestCollectionID = collectionID;
+                    }
+                }
+                if (bestCollectionID !== undefined) {
+                    setSelectedCollectionID(bestCollectionID);
+                    setComments(newCommentsByCollection.get(bestCollectionID) ?? []);
+                }
+            }
+
+            setCommentsByCollection(newCommentsByCollection);
+            setUserIDToEmail(newUserIDToEmail);
+        } catch (e) {
+            log.error("Failed to load comments", e);
+        } finally {
+            setLoading(false);
+        }
+    }, [
+        file,
+        open,
+        prefetchedComments,
+        hasCollectionContext,
+        activeCollectionID,
+        fileCollectionIDs,
+    ]);
+
+    // Load comments when the sidebar opens
+    useEffect(() => {
+        if (open) {
+            void loadComments();
+        }
+    }, [open, loadComments]);
+
+    // Set initial selected collection to the one with most comments (gallery view)
+    useEffect(() => {
+        if (
+            open &&
+            !hasCollectionContext &&
+            selectedCollectionID === undefined &&
+            commentsByCollection.size > 0
+        ) {
+            // Find the collection with the most comments
+            let maxCount = -1;
+            let bestCollectionID: number | undefined;
+            for (const [collectionID, collectionComments] of commentsByCollection) {
+                const count = collectionComments.filter((c) => !c.isDeleted).length;
+                if (count > maxCount) {
+                    maxCount = count;
+                    bestCollectionID = collectionID;
+                }
+            }
+            if (bestCollectionID !== undefined) {
+                setSelectedCollectionID(bestCollectionID);
+            }
+        }
+    }, [
+        open,
+        hasCollectionContext,
+        selectedCollectionID,
+        commentsByCollection,
+    ]);
+
+    // Update displayed comments when selected collection changes (gallery view)
+    useEffect(() => {
+        if (!hasCollectionContext && selectedCollectionID !== undefined) {
+            const collectionComments =
+                commentsByCollection.get(selectedCollectionID) ?? [];
+            setComments(collectionComments);
+        }
+    }, [hasCollectionContext, selectedCollectionID, commentsByCollection]);
+
+    // Fetch thumbnails for each collection's cover file
+    useEffect(() => {
+        if (!open || collectionsInfo.length === 0) {
+            return;
+        }
+
+        let didCancel = false;
+
+        const fetchThumbnails = async () => {
+            const urls = new Map<number, string>();
+            for (const collection of collectionsInfo) {
+                if (collection.coverFile) {
+                    try {
+                        const url =
+                            await downloadManager.renderableThumbnailURL(
+                                collection.coverFile,
+                            );
+                        if (!didCancel && url) {
+                            urls.set(collection.id, url);
+                        }
+                    } catch (e) {
+                        log.warn(
+                            `Failed to fetch thumbnail for collection ${collection.id}`,
+                            e,
+                        );
+                    }
+                }
+            }
+            if (!didCancel) {
+                setThumbnailURLs(urls);
+            }
+        };
+
+        void fetchThumbnails();
+
+        return () => {
+            didCancel = true;
+        };
+    }, [open, collectionsInfo]);
+
+    // Fetch liked state for comments
+    useEffect(() => {
+        if (!open || comments.length === 0 || !selectedCollectionInfo) {
+            return;
+        }
+
+        let didCancel = false;
+
+        const fetchLikedComments = async () => {
+            const newLikedComments = new Map<string, string>();
+            try {
+                const collection = await getCollectionByID(
+                    selectedCollectionInfo.id,
+                );
+                for (const comment of comments) {
+                    if (comment.isDeleted) continue;
+                    try {
+                        const reactions = await getCommentReactions(
+                            selectedCollectionInfo.id,
+                            comment.id,
+                            collection.key,
+                        );
+                        const userReaction = reactions.find(
+                            (r) =>
+                                r.reactionType === "green_heart" &&
+                                r.userID === currentUserID,
+                        );
+                        if (userReaction && !didCancel) {
+                            newLikedComments.set(comment.id, userReaction.id);
+                        }
+                    } catch {
+                        // Skip comments that fail to fetch reactions
+                    }
+                }
+                if (!didCancel) {
+                    setLikedComments(newLikedComments);
+                }
+            } catch (e) {
+                log.warn("Failed to fetch comment reactions", e);
+            }
+        };
+
+        void fetchLikedComments();
+
+        return () => {
+            didCancel = true;
+        };
+    }, [open, comments, selectedCollectionInfo, currentUserID]);
 
     // Check if this is a public album (has ?t=... in URL)
     const isPublicAlbum =
         typeof window !== "undefined" &&
         new URLSearchParams(window.location.search).has("t");
 
-    const handleSend = () => {
-        if (!comment.trim()) return;
+    const handleSend = async () => {
+        if (!commentText.trim() || !file || !selectedCollectionInfo) return;
 
         // For public albums, show the modal instead of directly sending
         if (isPublicAlbum) {
-            setPendingComment(comment.trim());
+            setPendingComment(commentText.trim());
             setShowPublicCommentModal(true);
             return;
         }
 
-        // For authenticated users, send directly
-        addComment(comment.trim(), "Anand");
+        // For authenticated users, send via API
+        const text = commentText.trim();
+        const collectionID = selectedCollectionInfo.id;
+
+        setSending(true);
+        try {
+            const collection = await getCollectionByID(collectionID);
+            const userName = userIDToEmail.get(currentUserID ?? 0) ?? "User";
+            const commentData = { text, userName };
+
+            const newCommentID = await addComment(
+                collectionID,
+                file.id,
+                commentData,
+                collection.key,
+                replyingTo?.id,
+            );
+
+            // Add the new comment to local state
+            const newComment: Comment = {
+                id: newCommentID,
+                collectionID,
+                fileID: file.id,
+                encData: commentData,
+                parentCommentID: replyingTo?.id,
+                isDeleted: false,
+                userID: currentUserID ?? 0,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+            };
+            setComments((prev) => [...prev, newComment]);
+            setCommentsByCollection((prev) => {
+                const next = new Map(prev);
+                const existing = next.get(collectionID) ?? [];
+                next.set(collectionID, [...existing, newComment]);
+                return next;
+            });
+
+            setCommentText("");
+            setReplyingTo(null);
+
+            // Notify parent to refresh comments
+            onCommentsUpdate?.();
+
+            // Scroll to bottom after adding comment
+            setTimeout(() => {
+                if (commentsContainerRef.current) {
+                    commentsContainerRef.current.scrollTop = 0;
+                }
+            }, 0);
+        } catch (e) {
+            log.error("Failed to add comment", e);
+        } finally {
+            setSending(false);
+        }
     };
 
-    const addComment = (text: string, userName: string) => {
+    const addLocalComment = (text: string, userName: string) => {
+        // Used for anonymous comments in public albums
         const newComment: Comment = {
             id: String(Date.now()),
-            collectionID: selectedCollection.id,
-            fileID: 1,
+            collectionID: selectedCollectionInfo?.id ?? 0,
+            fileID: file?.id,
             encData: { text, userName },
             parentCommentID: replyingTo?.id,
             isDeleted: false,
-            userID: CURRENT_USER_ID,
+            userID: currentUserID ?? 0,
             createdAt: Date.now(),
             updatedAt: Date.now(),
         };
         setComments((prev) => [...prev, newComment]);
-        setComment("");
+        setCommentText("");
         setReplyingTo(null);
         // Scroll to bottom after adding comment
         setTimeout(() => {
@@ -1028,7 +778,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
     const handleNameSubmit = (name: string) => {
         setShowAddNameModal(false);
-        addComment(pendingComment, name);
+        addLocalComment(pendingComment, name);
         setPendingComment("");
     };
 
@@ -1036,8 +786,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setReplyingTo(commentToReply);
     };
 
-    const handleCollectionSelect = (collection: Collection) => {
-        setSelectedCollection(collection);
+    const handleCollectionSelect = (collectionID: number) => {
+        setSelectedCollectionID(collectionID);
         setCollectionDropdownOpen(false);
     };
 
@@ -1058,20 +808,86 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setContextMenu(null);
     };
 
-    const handleContextMenuAction = (action: "like" | "reply" | "delete") => {
-        if (!contextMenu) return;
+    const handleContextMenuAction = async (
+        action: "like" | "reply" | "delete",
+    ) => {
+        if (!contextMenu || !selectedCollectionInfo) return;
+        const targetComment = contextMenu.comment;
+        setContextMenu(null);
+
         switch (action) {
             case "like":
-                // TODO: Like comment
+                try {
+                    const collection = await getCollectionByID(
+                        selectedCollectionInfo.id,
+                    );
+                    const existingReactionID = likedComments.get(
+                        targetComment.id,
+                    );
+
+                    if (existingReactionID) {
+                        // Unlike - delete the reaction
+                        await deleteReaction(existingReactionID);
+                        setLikedComments((prev) => {
+                            const next = new Map(prev);
+                            next.delete(targetComment.id);
+                            return next;
+                        });
+                    } else {
+                        // Like - add a reaction
+                        const reactionID = await addCommentReaction(
+                            selectedCollectionInfo.id,
+                            targetComment.id,
+                            "green_heart",
+                            collection.key,
+                        );
+                        setLikedComments((prev) => {
+                            const next = new Map(prev);
+                            next.set(targetComment.id, reactionID);
+                            return next;
+                        });
+                    }
+                } catch (e) {
+                    log.error("Failed to toggle comment like", e);
+                }
                 break;
             case "reply":
-                handleReply(contextMenu.comment);
+                handleReply(targetComment);
                 break;
             case "delete":
-                // TODO: Delete comment
+                try {
+                    await deleteComment(targetComment.id);
+
+                    // Update local state
+                    setComments((prev) =>
+                        prev.map((c) =>
+                            c.id === targetComment.id
+                                ? { ...c, isDeleted: true }
+                                : c,
+                        ),
+                    );
+                    setCommentsByCollection((prev) => {
+                        const next = new Map(prev);
+                        const collectionComments =
+                            next.get(targetComment.collectionID) ?? [];
+                        next.set(
+                            targetComment.collectionID,
+                            collectionComments.map((c) =>
+                                c.id === targetComment.id
+                                    ? { ...c, isDeleted: true }
+                                    : c,
+                            ),
+                        );
+                        return next;
+                    });
+
+                    // Notify parent to refresh comments
+                    onCommentsUpdate?.();
+                } catch (e) {
+                    log.error("Failed to delete comment", e);
+                }
                 break;
         }
-        setContextMenu(null);
     };
 
     // Filter out deleted comments and sort by timestamp (newest first for column-reverse layout)
@@ -1101,9 +917,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 ...theme.applyStyles("dark", { color: "#fff" }),
                             })}
                         >
-                            {`${sortedComments.length} ${t("comments")}`}
+                            {loading
+                                ? "Loading..."
+                                : `${sortedComments.length} ${t("comments")}`}
                         </Typography>
-                    ) : (
+                    ) : collectionsInfo.length > 1 ? (
                         <Box
                             sx={{
                                 position: "relative",
@@ -1118,12 +936,22 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 }
                             >
                                 <Box sx={{ position: "relative" }}>
-                                    <CollectionThumbnail
-                                        src={selectedCollection.coverURL}
-                                        alt={selectedCollection.name}
-                                    />
+                                    {selectedCollectionInfo &&
+                                    thumbnailURLs.get(
+                                        selectedCollectionInfo.id,
+                                    ) ? (
+                                        <CollectionThumbnail
+                                            src={thumbnailURLs.get(
+                                                selectedCollectionInfo.id,
+                                            )}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <CollectionThumbnailPlaceholder />
+                                    )}
                                     <CollectionBadge>
-                                        {selectedCollection.commentCount}
+                                        {selectedCollectionInfo?.commentCount ??
+                                            0}
                                     </CollectionBadge>
                                 </Box>
                                 <Typography
@@ -1138,26 +966,34 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                         }),
                                     })}
                                 >
-                                    {selectedCollection.name}
+                                    {selectedCollectionInfo?.name ?? "Album"}
                                 </Typography>
                                 <ChevronDownIcon />
                             </CollectionDropdownButton>
                             {collectionDropdownOpen && (
                                 <CollectionDropdownMenu>
-                                    {mockCollections.map((collection) => (
+                                    {sortedCollectionsInfo.map((collection) => (
                                         <CollectionDropdownItem
                                             key={collection.id}
                                             onClick={() =>
                                                 handleCollectionSelect(
-                                                    collection,
+                                                    collection.id,
                                                 )
                                             }
                                         >
                                             <Box sx={{ position: "relative" }}>
-                                                <CollectionThumbnail
-                                                    src={collection.coverURL}
-                                                    alt={collection.name}
-                                                />
+                                                {thumbnailURLs.get(
+                                                    collection.id,
+                                                ) ? (
+                                                    <CollectionThumbnail
+                                                        src={thumbnailURLs.get(
+                                                            collection.id,
+                                                        )}
+                                                        alt=""
+                                                    />
+                                                ) : (
+                                                    <CollectionThumbnailPlaceholder />
+                                                )}
                                                 <CollectionBadge>
                                                     {collection.commentCount}
                                                 </CollectionBadge>
@@ -1182,6 +1018,18 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                 </CollectionDropdownMenu>
                             )}
                         </Box>
+                    ) : (
+                        <Typography
+                            sx={(theme) => ({
+                                color: "#000",
+                                fontWeight: 600,
+                                ...theme.applyStyles("dark", { color: "#fff" }),
+                            })}
+                        >
+                            {loading
+                                ? "Loading..."
+                                : `${sortedComments.length} ${t("comments")}`}
+                        </Typography>
                     )}
                     <CloseButton onClick={onClose}>
                         <CloseIcon sx={{ fontSize: 22 }} />
@@ -1189,113 +1037,129 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                 </Header>
 
                 <CommentsContainer ref={commentsContainerRef}>
-                    {sortedComments.map((comment, index) => {
-                        const commentIsOwn = comment.userID === CURRENT_USER_ID;
-                        // With column-reverse, visual order is reversed from array order
-                        // Visual "above" = higher index, visual "below" = lower index
-                        const prevComment = sortedComments[index + 1];
-                        const nextComment = sortedComments[index - 1];
+                    {loading ? (
+                        <LoadingContainer>
+                            <CircularProgress size={32} />
+                        </LoadingContainer>
+                    ) : sortedComments.length === 0 ? (
+                        <EmptyMessage>No comments yet</EmptyMessage>
+                    ) : (
+                        sortedComments.map((comment, index) => {
+                            const commentIsOwn =
+                                comment.userID === currentUserID;
+                            // With column-reverse, visual order is reversed from array order
+                            // Visual "above" = higher index, visual "below" = lower index
+                            const prevComment = sortedComments[index + 1];
+                            const nextComment = sortedComments[index - 1];
 
-                        // 10 minutes in milliseconds
-                        const GROUP_TIME_THRESHOLD = 10 * 60 * 1000;
+                            // 10 minutes in microseconds (server timestamps are in microseconds)
+                            const GROUP_TIME_THRESHOLD = 10 * 60 * 1000 * 1000;
 
-                        // Comments are in same sequence if same user AND within 10 minutes
-                        const isSameSequenceAsPrev =
-                            prevComment &&
-                            prevComment.userID === comment.userID &&
-                            comment.createdAt - prevComment.createdAt <=
-                                GROUP_TIME_THRESHOLD;
-                        const isSameSequenceAsNext =
-                            nextComment &&
-                            nextComment.userID === comment.userID &&
-                            nextComment.createdAt - comment.createdAt <=
-                                GROUP_TIME_THRESHOLD;
+                            // Comments are in same sequence if same user AND within 10 minutes
+                            const isSameSequenceAsPrev =
+                                prevComment &&
+                                prevComment.userID === comment.userID &&
+                                comment.createdAt - prevComment.createdAt <=
+                                    GROUP_TIME_THRESHOLD;
+                            const isSameSequenceAsNext =
+                                nextComment &&
+                                nextComment.userID === comment.userID &&
+                                nextComment.createdAt - comment.createdAt <=
+                                    GROUP_TIME_THRESHOLD;
 
-                        const isFirstInSequence = !isSameSequenceAsPrev;
-                        const isLastInSequence = !isSameSequenceAsNext;
-                        const showHeader = isFirstInSequence && !commentIsOwn;
-                        const parentComment = comment.parentCommentID
-                            ? getParentComment(
-                                  comment.parentCommentID,
-                                  comments,
-                              )
-                            : undefined;
+                            const isFirstInSequence = !isSameSequenceAsPrev;
+                            const isLastInSequence = !isSameSequenceAsNext;
+                            const showHeader =
+                                isFirstInSequence && !commentIsOwn;
+                            const parentComment = comment.parentCommentID
+                                ? getParentComment(
+                                      comment.parentCommentID,
+                                      comments,
+                                  )
+                                : undefined;
 
-                        const showOwnTimestamp =
-                            commentIsOwn &&
-                            !!prevComment &&
-                            (prevComment.userID !== CURRENT_USER_ID ||
-                                !isSameSequenceAsPrev);
+                            const showOwnTimestamp =
+                                commentIsOwn && isFirstInSequence;
 
-                        return (
-                            <Box key={comment.id}>
-                                {showHeader && (
-                                    <CommentHeader
-                                        userName={comment.encData.userName}
-                                        timestamp={comment.createdAt}
-                                    />
-                                )}
-                                {showOwnTimestamp && (
-                                    <OwnTimestamp>
-                                        {formatTimeAgo(comment.createdAt)}
-                                    </OwnTimestamp>
-                                )}
-                                <CommentBubbleWrapper
-                                    isOwn={commentIsOwn}
-                                    isFirstOwn={
-                                        !showOwnTimestamp &&
-                                        commentIsOwn &&
-                                        !!prevComment &&
-                                        prevComment.userID !== CURRENT_USER_ID
-                                    }
-                                    isLastOwn={isLastInSequence}
-                                    isHighlighted={
-                                        contextMenu?.comment.id === comment.id
-                                    }
-                                >
-                                    <CommentBubbleInner
-                                        onContextMenu={(e) => {
-                                            const bubbleElement =
-                                                e.currentTarget.querySelector<HTMLElement>(
-                                                    "[data-comment-bubble]",
-                                                );
-                                            if (bubbleElement) {
-                                                handleContextMenu(
-                                                    e,
-                                                    comment,
-                                                    bubbleElement,
-                                                );
-                                            }
-                                        }}
+                            return (
+                                <Box key={comment.id}>
+                                    {showHeader && (
+                                        <CommentHeader
+                                            userName={comment.encData.userName}
+                                            timestamp={comment.createdAt}
+                                        />
+                                    )}
+                                    {showOwnTimestamp && (
+                                        <OwnTimestamp>
+                                            {formatTimeAgo(comment.createdAt)}
+                                        </OwnTimestamp>
+                                    )}
+                                    <CommentBubbleWrapper
+                                        isOwn={commentIsOwn}
+                                        isFirstOwn={
+                                            !showOwnTimestamp &&
+                                            commentIsOwn &&
+                                            !!prevComment &&
+                                            prevComment.userID !== currentUserID
+                                        }
+                                        isLastOwn={isLastInSequence}
+                                        isHighlighted={
+                                            contextMenu?.comment.id ===
+                                            comment.id
+                                        }
                                     >
-                                        <CommentBubble
-                                            isOwn={commentIsOwn}
-                                            data-comment-bubble
+                                        <CommentBubbleInner
+                                            onContextMenu={(e) => {
+                                                const bubbleElement =
+                                                    e.currentTarget.querySelector<HTMLElement>(
+                                                        "[data-comment-bubble]",
+                                                    );
+                                                if (bubbleElement) {
+                                                    handleContextMenu(
+                                                        e,
+                                                        comment,
+                                                        bubbleElement,
+                                                    );
+                                                }
+                                            }}
                                         >
-                                            {parentComment && (
-                                                <QuotedReply
-                                                    parentComment={
-                                                        parentComment
-                                                    }
+                                            <CommentBubble
+                                                isOwn={commentIsOwn}
+                                                data-comment-bubble
+                                            >
+                                                {parentComment && (
+                                                    <QuotedReply
+                                                        parentComment={
+                                                            parentComment
+                                                        }
+                                                        isOwn={commentIsOwn}
+                                                        currentUserID={
+                                                            currentUserID
+                                                        }
+                                                    />
+                                                )}
+                                                <CommentText
                                                     isOwn={commentIsOwn}
+                                                >
+                                                    {comment.encData.text}
+                                                </CommentText>
+                                            </CommentBubble>
+                                            {!contextMenu && (
+                                                <CommentActions
+                                                    onReply={() =>
+                                                        handleReply(comment)
+                                                    }
+                                                    isLiked={likedComments.has(
+                                                        comment.id,
+                                                    )}
                                                 />
                                             )}
-                                            <CommentText isOwn={commentIsOwn}>
-                                                {comment.encData.text}
-                                            </CommentText>
-                                        </CommentBubble>
-                                        {!contextMenu && (
-                                            <CommentActions
-                                                onReply={() =>
-                                                    handleReply(comment)
-                                                }
-                                            />
-                                        )}
-                                    </CommentBubbleInner>
-                                </CommentBubbleWrapper>
-                            </Box>
-                        );
-                    })}
+                                        </CommentBubbleInner>
+                                    </CommentBubbleWrapper>
+                                </Box>
+                            );
+                        })
+                    )}
                     <StyledMenu
                         anchorEl={contextMenu?.anchorEl}
                         open={Boolean(contextMenu)}
@@ -1312,8 +1176,18 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("like")}
                         >
-                            <HeartIcon />
-                            <span>Like</span>
+                            <HeartIcon
+                                filled={
+                                    !!contextMenu &&
+                                    likedComments.has(contextMenu.comment.id)
+                                }
+                            />
+                            <span>
+                                {contextMenu &&
+                                likedComments.has(contextMenu.comment.id)
+                                    ? "Unlike"
+                                    : "Like"}
+                            </span>
                         </StyledMenuItem>
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("reply")}
@@ -1366,7 +1240,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                     })}
                                 >
                                     Replying to{" "}
-                                    {replyingTo.userID === CURRENT_USER_ID
+                                    {replyingTo.userID === currentUserID
                                         ? "me"
                                         : replyingTo.encData.userName}
                                     ...
@@ -1417,13 +1291,17 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             autoFocus
                             placeholder="Say something nice!"
                             variant="standard"
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
+                            value={commentText}
+                            onChange={(e) => setCommentText(e.target.value)}
                             inputRef={inputRef}
                         />
                     </InputWrapper>
-                    <SendButton onClick={handleSend}>
-                        <SendIcon />
+                    <SendButton onClick={handleSend} disabled={sending}>
+                        {sending ? (
+                            <CircularProgress size={18} sx={{ color: "inherit" }} />
+                        ) : (
+                            <SendIcon />
+                        )}
                     </SendButton>
                 </InputContainer>
             </DrawerContentWrapper>
@@ -1552,6 +1430,27 @@ const CollectionBadge = styled(Box)(({ theme }) => ({
     minWidth: 16,
     minHeight: 16,
     ...theme.applyStyles("dark", { backgroundColor: "#fff", color: "#000" }),
+}));
+
+const CollectionThumbnailPlaceholder = styled(Box)(() => ({
+    width: 24,
+    height: 24,
+    borderRadius: 5,
+    backgroundColor: "#08C225",
+}));
+
+const LoadingContainer = styled(Box)(() => ({
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "48px 0",
+}));
+
+const EmptyMessage = styled(Typography)(({ theme }) => ({
+    textAlign: "center",
+    padding: "48px 0",
+    color: "#666",
+    ...theme.applyStyles("dark", { color: "rgba(255, 255, 255, 0.5)" }),
 }));
 
 const CollectionDropdownMenu = styled(Box)(({ theme }) => ({

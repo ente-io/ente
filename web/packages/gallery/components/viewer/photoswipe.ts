@@ -76,6 +76,14 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     isLiked: (annotatedFile: FileViewerAnnotatedFile) => boolean;
     /**
+     * Return the number of comments on the provided file.
+     *
+     * If the file is viewed from within a collection context, this should
+     * return the count of comments in that collection. Otherwise (gallery
+     * view), it should return the count from the collection with most comments.
+     */
+    getCommentCount: (annotatedFile: FileViewerAnnotatedFile) => number;
+    /**
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
      *
@@ -1158,6 +1166,23 @@ export class FileViewerPhotoSwipe {
 
         this.refreshCurrentSlideLikeButtonIfNeeded = updateLikeButtonIfNeeded;
 
+        const updateCommentCountIfNeeded = () => {
+            const commentCountElement = document.querySelector<HTMLElement>(
+                ".pswp__comment-count",
+            );
+            if (!commentCountElement) {
+                // Early return if we're not currently being shown.
+                return;
+            }
+
+            const af = currentAnnotatedFile();
+            const count = delegate.getCommentCount(af);
+            commentCountElement.textContent = String(count);
+        };
+
+        this.refreshCurrentSlideCommentCountIfNeeded =
+            updateCommentCountIfNeeded;
+
         const handleToggleFavorite = () => void toggleFavorite();
 
         const handleToggleFavoriteIfEnabled = () => {
@@ -1484,6 +1509,9 @@ export class FileViewerPhotoSwipe {
                     // Update like button state on slide change and initially.
                     pswp.on("change", updateLikeButtonIfNeeded);
                     updateLikeButtonIfNeeded();
+                    // Update comment count on slide change and initially.
+                    pswp.on("change", updateCommentCountIfNeeded);
+                    updateCommentCountIfNeeded();
                 },
             });
         });
@@ -1862,6 +1890,12 @@ export class FileViewerPhotoSwipe {
      * delegate for the latest like state.
      */
     refreshCurrentSlideLikeButtonIfNeeded: () => void;
+
+    /**
+     * Refresh the comment count on the current slide, asking the delegate
+     * for the latest comment count.
+     */
+    refreshCurrentSlideCommentCountIfNeeded: () => void;
 }
 
 // Requires the following imports to register the Web components we use:
