@@ -3,30 +3,29 @@ import "dart:async";
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/faces_timeline_changed_event.dart";
-import "package:photos/models/faces_timeline/faces_timeline_models.dart";
+import "package:photos/events/memory_lane_changed_event.dart";
+import "package:photos/models/memory_lane/memory_lane_models.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/faces_timeline/faces_timeline_cache_service.dart";
-import "package:photos/services/faces_timeline/faces_timeline_service.dart";
+import "package:photos/services/memory_lane/memory_lane_cache_service.dart";
+import "package:photos/services/memory_lane/memory_lane_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class FacesTimelineDebugPanel extends StatefulWidget {
+class MemoryLaneDebugPanel extends StatefulWidget {
   final PersonEntity person;
 
-  const FacesTimelineDebugPanel({required this.person, super.key});
+  const MemoryLaneDebugPanel({required this.person, super.key});
 
   @override
-  State<FacesTimelineDebugPanel> createState() =>
-      _FacesTimelineDebugPanelState();
+  State<MemoryLaneDebugPanel> createState() => _MemoryLaneDebugPanelState();
 }
 
-class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
-  FacesTimelinePersonTimeline? _timeline;
+class _MemoryLaneDebugPanelState extends State<MemoryLaneDebugPanel> {
+  MemoryLanePersonTimeline? _timeline;
   bool _loading = false;
   String? _error;
   String? _info;
-  StreamSubscription<FacesTimelineChangedEvent>? _timelineSubscription;
+  StreamSubscription<MemoryLaneChangedEvent>? _timelineSubscription;
 
   bool get _featureEnabled => flagService.facesTimeline;
 
@@ -36,7 +35,7 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
     if (kDebugMode && _featureEnabled) {
       _reloadTimeline();
       _timelineSubscription = Bus.instance
-          .on<FacesTimelineChangedEvent>()
+          .on<MemoryLaneChangedEvent>()
           .listen(_handleTimelineChanged);
     }
   }
@@ -47,7 +46,7 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
     super.dispose();
   }
 
-  void _handleTimelineChanged(FacesTimelineChangedEvent event) {
+  void _handleTimelineChanged(MemoryLaneChangedEvent event) {
     if (event.personId != widget.person.remoteID) return;
     _reloadTimeline();
   }
@@ -59,8 +58,8 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
       _error = null;
     });
     try {
-      final timeline = await FacesTimelineService.instance
-          .getTimeline(widget.person.remoteID);
+      final timeline =
+          await MemoryLaneService.instance.getTimeline(widget.person.remoteID);
       if (!mounted) return;
       setState(() {
         _timeline = timeline;
@@ -80,7 +79,7 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
   }
 
   Future<void> _forceRecompute() async {
-    FacesTimelineService.instance.schedulePersonRecompute(
+    MemoryLaneService.instance.schedulePersonRecompute(
       widget.person.remoteID,
       force: true,
       trigger: "debug_panel",
@@ -98,7 +97,7 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
       _error = null;
     });
     try {
-      await FacesTimelineCacheService.instance
+      await MemoryLaneCacheService.instance
           .removeTimeline(widget.person.remoteID);
       await _reloadTimeline();
       if (!mounted) return;
@@ -126,8 +125,8 @@ class _FacesTimelineDebugPanelState extends State<FacesTimelineDebugPanel> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     final timeline = _timeline;
-    final bool inReadySet = FacesTimelineService.instance
-        .hasReadyTimelineSync(widget.person.remoteID);
+    final bool inReadySet =
+        MemoryLaneService.instance.hasReadyTimelineSync(widget.person.remoteID);
     final DateTime? updatedAt = timeline == null
         ? null
         : DateTime.fromMicrosecondsSinceEpoch(timeline.updatedAtMicros)

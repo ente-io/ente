@@ -139,6 +139,7 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 		fileCopyList = append(fileCopyList, fileCopy)
 	}
 	oldToNewFileIDMap := make(map[int64]int64)
+	var mapMutex sync.Mutex
 	var wg sync.WaitGroup
 	errChan := make(chan error, len(fileCopyList))
 
@@ -151,7 +152,9 @@ func (fc *FileCopyController) CopyFiles(c *gin.Context, req ente.CopyFileSyncReq
 				errChan <- err
 				return
 			}
+			mapMutex.Lock()
 			oldToNewFileIDMap[fileCopy.SourceFile.ID] = newFile.ID
+			mapMutex.Unlock()
 		}(fileCopy)
 	}
 
