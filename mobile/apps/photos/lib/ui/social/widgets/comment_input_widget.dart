@@ -23,73 +23,87 @@ class CommentInputWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final bottomPadding = MediaQuery.viewInsetsOf(context).bottom;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textFieldFillColor =
+        isDarkMode ? const Color(0xFF212121) : const Color(0xFFF3F3F3);
+    final textFieldBorderColor = isDarkMode
+        ? colorScheme.backgroundBase
+        : const Color(0xFF000000).withValues(alpha: 0.02);
 
     return Container(
-      padding: EdgeInsets.only(
-        bottom: bottomPadding > 0
-            ? bottomPadding
-            : MediaQuery.of(context).padding.bottom,
-        left: 16,
-        right: 16,
-        top: 8,
+      padding: const EdgeInsets.only(
+        bottom: 20,
+        left: 18,
+        right: 18,
+        top: 20,
       ),
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
-        border: Border(top: BorderSide(color: colorScheme.strokeFaint)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (replyingTo != null)
-              ReplyPreviewWidget(
-                replyingTo: replyingTo!,
-                onDismiss: onDismissReply!,
+      color: colorScheme.backgroundBase,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (replyingTo != null)
+            ReplyPreviewWidget(
+              replyingTo: replyingTo!,
+              onDismiss: onDismissReply!,
+            ),
+          SafeArea(
+            top: false,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: textFieldBorderColor,
+                  width: 2,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+                borderRadius: BorderRadius.circular(20),
               ),
-            TextField(
-              controller: controller,
-              focusNode: focusNode,
-              textInputAction: TextInputAction.send,
-              onSubmitted: (_) => onSend(),
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                hintText: "Say something nice!",
-                hintStyle: textTheme.body.copyWith(
-                  color: colorScheme.textMuted,
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => onSend(),
+                textAlignVertical: TextAlignVertical.center,
+                style: textTheme.body.copyWith(
+                  height: 15 / 16,
+                  letterSpacing: -0.32,
+                  color: colorScheme.textBase.withValues(alpha: 0.8),
                 ),
-                border: InputBorder.none,
-                filled: true,
-                fillColor: colorScheme.fillFaint,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
-                ),
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: GestureDetector(
-                    onTap: onSend,
-                    child: Icon(
-                      Icons.send,
-                      color: colorScheme.textMuted,
-                      size: 22,
+                decoration: InputDecoration(
+                  hintText: "Say something nice!",
+                  hintStyle: textTheme.body.copyWith(
+                    color: colorScheme.textMuted,
+                  ),
+                  border: InputBorder.none,
+                  filled: true,
+                  fillColor: textFieldFillColor,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                  suffixIcon: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: GestureDetector(
+                      onTap: onSend,
+                      child: Icon(
+                        Icons.send_rounded,
+                        color: colorScheme.textBase.withValues(alpha: 0.8),
+                        size: 24,
+                      ),
                     ),
                   ),
-                ),
-                suffixIconConstraints: const BoxConstraints(minWidth: 36),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: colorScheme.strokeFaint),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide(color: colorScheme.strokeMuted),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: const BorderSide(color: Colors.transparent),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: const BorderSide(color: Colors.transparent),
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

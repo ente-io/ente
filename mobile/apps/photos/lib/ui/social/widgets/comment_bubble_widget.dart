@@ -219,10 +219,14 @@ class _CommentBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final textColor = isOwnComment ? textBaseDark : colorScheme.textBase;
-    final bubbleColor =
-        isOwnComment ? const Color(0xFF0DAF35) : colorScheme.fillBaseGrey;
+    final bubbleColor = isOwnComment
+        ? const Color(0xFF0DAF35)
+        : isDarkMode
+            ? const Color(0xFF212121)
+            : const Color(0xFFF0F0F0);
 
     final bubbleBorderRadius = BorderRadius.only(
       topLeft: Radius.circular(isOwnComment ? 20 : 6),
