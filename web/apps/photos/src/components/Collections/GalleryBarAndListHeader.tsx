@@ -19,6 +19,10 @@ import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "ente-new/photos/components/gallery/ListHeader";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
 import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
@@ -143,6 +147,9 @@ export const GalleryBarAndListHeader: React.FC<
     useEffect(() => {
         if (shouldHide) return;
 
+        const collectionSummary = toShowCollectionSummaries.get(
+            activeCollectionID!,
+        );
         setFileListHeader({
             component:
                 mode != "people" && activeCollection ? (
@@ -154,13 +161,18 @@ export const GalleryBarAndListHeader: React.FC<
                             onRemotePull,
                             onAddSaveGroup,
                         }}
-                        collectionSummary={
-                            toShowCollectionSummaries.get(activeCollectionID!)!
-                        }
+                        collectionSummary={collectionSummary!}
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
                         onCollectionFeed={showCollectionFeed}
                     />
+                ) : mode != "people" && collectionSummary ? (
+                    <GalleryItemsHeaderAdapter>
+                        <GalleryItemsSummary
+                            name={collectionSummary.name}
+                            fileCount={collectionSummary.fileCount}
+                        />
+                    </GalleryItemsHeaderAdapter>
                 ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
