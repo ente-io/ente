@@ -118,7 +118,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       ValueNotifier<bool>(false);
   RitualBadgeUnlock? _queuedRitualBadge;
   bool _showingRitualBadge = false;
-  late final VoidCallback _activityStateListener;
+  late final VoidCallback _ritualsStateListener;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -140,9 +140,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   void initState() {
     _logger.info("Building initstate");
     super.initState();
-    _activityStateListener = () =>
-        _maybeShowRitualBadge(activityService.stateNotifier.value.pendingBadge);
-    activityService.stateNotifier.addListener(_activityStateListener);
+    _ritualsStateListener = () => _maybeShowRitualBadge(
+          ritualsService.stateNotifier.value.pendingBadge,
+        );
+    ritualsService.stateNotifier.addListener(_ritualsStateListener);
 
     if (LocalSyncService.instance.hasCompletedFirstImportOrBypassed()) {
       syncWidget();
@@ -302,7 +303,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _maybeShowRitualBadge(
-        activityService.stateNotifier.value.pendingBadge,
+        ritualsService.stateNotifier.value.pendingBadge,
       );
     });
   }
@@ -535,7 +536,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
-    activityService.stateNotifier.removeListener(_activityStateListener);
+    ritualsService.stateNotifier.removeListener(_ritualsStateListener);
     super.dispose();
   }
 
@@ -925,7 +926,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _showingRitualBadge = true;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
-        await activityService.markRitualBadgeSeen(
+        await ritualsService.markRitualBadgeSeen(
           badgeToShow.ritual.id,
           badgeToShow.days,
         );

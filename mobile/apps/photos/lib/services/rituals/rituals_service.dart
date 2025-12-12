@@ -17,16 +17,16 @@ import "package:photos/services/language_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
-class ActivityService {
-  static final ActivityService instance = ActivityService._privateConstructor();
+class RitualsService {
+  static final RitualsService instance = RitualsService._privateConstructor();
 
-  ActivityService._privateConstructor();
+  RitualsService._privateConstructor();
 
   static const _notificationLookaheadDays = 60;
   static const _maxScheduledNotificationsPerRitual = 30;
-  final Logger _logger = Logger("ActivityService");
-  final ValueNotifier<ActivityState> stateNotifier =
-      ValueNotifier<ActivityState>(ActivityState.loading());
+  final Logger _logger = Logger("RitualsService");
+  final ValueNotifier<RitualsState> stateNotifier =
+      ValueNotifier<RitualsState>(RitualsState.loading());
   late SharedPreferences _preferences;
   Timer? _debounce;
   StreamSubscription<FilesUpdatedEvent>? _filesUpdatedSubscription;
@@ -41,7 +41,7 @@ class ActivityService {
     _preferences = ServiceLocator.instance.prefs;
     _seenRitualBadges = _loadSeenRitualBadges();
     if (!flagService.ritualsFlag) {
-      stateNotifier.value = const ActivityState(
+      stateNotifier.value = const RitualsState(
         loading: false,
         summary: null,
         rituals: [],
@@ -75,7 +75,7 @@ class ActivityService {
 
   Future<void> refresh({bool scheduleAllRituals = false}) async {
     if (!flagService.ritualsFlag) {
-      stateNotifier.value = const ActivityState(
+      stateNotifier.value = const RitualsState(
         loading: false,
         summary: null,
         rituals: [],
@@ -102,7 +102,7 @@ class ActivityService {
       final summary = await _buildSummary(rituals);
       final pendingBadge =
           _resolvePendingBadge(rituals, summary.ritualLongestStreaks);
-      stateNotifier.value = ActivityState(
+      stateNotifier.value = RitualsState(
         loading: false,
         summary: summary,
         rituals: rituals,
@@ -110,7 +110,7 @@ class ActivityService {
         pendingBadge: pendingBadge,
       );
     } catch (e, s) {
-      _logger.severe("Failed to refresh activity", e, s);
+      _logger.severe("Failed to refresh rituals", e, s);
       stateNotifier.value = stateNotifier.value.copyWith(
         loading: false,
         error: e.toString(),
@@ -119,10 +119,10 @@ class ActivityService {
     }
   }
 
-  Future<ActivitySummary> _buildSummary(List<Ritual> rituals) async {
+  Future<RitualsSummary> _buildSummary(List<Ritual> rituals) async {
     final userId = Configuration.instance.getUserID();
     if (userId == null) {
-      return ActivitySummary(
+      return RitualsSummary(
         last365Days: _emptyDays(),
         last7Days: _emptyDays().sublist(_emptyDays().length - 7),
         currentStreak: 0,
@@ -157,7 +157,7 @@ class ActivityService {
     );
 
     final Set<int> dayKeys = <int>{};
-    final Map<int, Set<int>> collectionActivity = {};
+    final Map<int, Set<int>> collectionRitualDays = {};
 
     for (final EnteFile file in files) {
       final bool ownerMatches =
@@ -177,24 +177,24 @@ class ActivityService {
       }
       dayKeys.add(dayKey);
       if (file.collectionID != null && file.collectionID! > 0) {
-        collectionActivity
+        collectionRitualDays
             .putIfAbsent(file.collectionID!, () => <int>{})
             .add(dayKey);
       }
     }
 
-    final List<ActivityDay> last365Days = List.generate(372, (index) {
+    final List<RitualDay> last365Days = List.generate(372, (index) {
       final day = cutoffDate.add(Duration(days: index));
       final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
-      return ActivityDay(date: day, hasActivity: dayKeys.contains(key));
+      return RitualDay(date: day, isCompleted: dayKeys.contains(key));
     });
-    final List<ActivityDay> last7Days =
+    final List<RitualDay> last7Days =
         last365Days.sublist(last365Days.length - 7);
 
     int longestStreak = 0;
     int rolling = 0;
     for (final day in last365Days) {
-      if (day.hasActivity) {
+      if (day.isCompleted) {
         rolling += 1;
         longestStreak = max(longestStreak, rolling);
       } else {
@@ -203,7 +203,7 @@ class ActivityService {
     }
     int currentStreak = 0;
     for (int i = last365Days.length - 1; i >= 0; i--) {
-      if (last365Days[i].hasActivity) {
+      if (last365Days[i].isCompleted) {
         currentStreak += 1;
       } else {
         break;
@@ -214,7 +214,7 @@ class ActivityService {
     final ritualLongestStreaks = <String, int>{};
     for (final ritual in rituals) {
       if (ritual.albumId == null) continue;
-      final dates = collectionActivity[ritual.albumId] ?? <int>{};
+      final dates = collectionRitualDays[ritual.albumId] ?? <int>{};
       final longest = _longestStreakFromDayKeys(dates, cutoffDate);
       ritualLongestStreaks[ritual.id] = longest;
       ritualProgress[ritual.id] = RitualProgress(
@@ -225,7 +225,7 @@ class ActivityService {
       );
     }
 
-    return ActivitySummary(
+    return RitualsSummary(
       last365Days: last365Days,
       last7Days: last7Days,
       currentStreak: currentStreak,
@@ -237,15 +237,15 @@ class ActivityService {
     );
   }
 
-  List<ActivityDay> _emptyDays() {
+  List<RitualDay> _emptyDays() {
     final today = DateTime.now();
     final todayMidnight = DateTime(today.year, today.month, today.day);
     final cutoffDate = todayMidnight.subtract(const Duration(days: 371));
     return List.generate(
       372,
-      (index) => ActivityDay(
+      (index) => RitualDay(
         date: cutoffDate.add(Duration(days: index)),
-        hasActivity: false,
+        isCompleted: false,
       ),
     );
   }
@@ -317,7 +317,7 @@ class ActivityService {
     if (isNew || albumChanged) {
       await refresh();
     } else {
-      // No activity data changes; just update rituals in state.
+      // No ritual completion data changes; just update rituals in state.
       stateNotifier.value = stateNotifier.value.copyWith(
         rituals: rituals,
         loading: false,

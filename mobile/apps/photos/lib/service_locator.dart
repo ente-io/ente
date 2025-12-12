@@ -205,10 +205,10 @@ SmartAlbumsService get smartAlbumsService {
   return _smartAlbumsService!;
 }
 
-ActivityService? _activityService;
-ActivityService get activityService {
-  _activityService ??= ActivityService.instance;
-  return _activityService!;
+RitualsService? _ritualsService;
+RitualsService get ritualsService {
+  _ritualsService ??= RitualsService.instance;
+  return _ritualsService!;
 }
 
 CollectionsService? _collectionsService;

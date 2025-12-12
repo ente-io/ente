@@ -7,24 +7,24 @@ import "package:photos/theme/text_style.dart";
 import "package:photos/ui/rituals/all_rituals_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class ActivityBanner extends StatelessWidget {
-  const ActivityBanner({super.key});
+class RitualsBanner extends StatelessWidget {
+  const RitualsBanner({super.key});
 
   @override
   Widget build(BuildContext context) {
     if (!flagService.ritualsFlag) {
       return const SizedBox.shrink();
     }
-    return ValueListenableBuilder<ActivityState>(
-      valueListenable: activityService.stateNotifier,
+    return ValueListenableBuilder<RitualsState>(
+      valueListenable: ritualsService.stateNotifier,
       builder: (context, state, _) {
         final summary = state.summary;
         final seven = summary?.last7Days ??
             List.generate(
               7,
-              (index) => ActivityDay(
+              (index) => RitualDay(
                 date: DateTime.now().subtract(Duration(days: 6 - index)),
-                hasActivity: false,
+                isCompleted: false,
               ),
             );
         final hasFire = summary?.hasSevenDayFire ?? false;
@@ -40,7 +40,7 @@ class ActivityBanner extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: () {
-                routeToPage(context, const ActivityScreen());
+                routeToPage(context, const AllRitualsScreen());
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -84,7 +84,7 @@ class ActivityBanner extends StatelessWidget {
                             children: seven.asMap().entries.map((entry) {
                               final bool isLast = entry.key == seven.length - 1;
                               final bool active =
-                                  entry.value.hasActivity || hasFire;
+                                  entry.value.isCompleted || hasFire;
                               final bool isToday =
                                   _isSameDay(entry.value.date, today);
                               final String label =

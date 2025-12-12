@@ -278,7 +278,7 @@ class _RitualCard extends StatelessWidget {
             } else {
               routeToPage(
                 context,
-                ActivityScreen(ritual: ritual),
+                AllRitualsScreen(ritual: ritual),
               );
             }
           },
@@ -378,7 +378,7 @@ class _RitualCard extends StatelessWidget {
                           await _showRitualEditor(context, ritual: ritual);
                           break;
                         case "delete":
-                          await activityService.deleteRitual(ritual.id);
+                          await ritualsService.deleteRitual(ritual.id);
                           break;
                       }
                     },
@@ -833,7 +833,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                     onPressed: () async {
                                       if (!canSave) return;
                                       final updated = (ritual ??
-                                              activityService
+                                              ritualsService
                                                   .createEmptyRitual())
                                           .copyWith(
                                         title: controller.text.trim(),
@@ -843,7 +843,7 @@ Future<void> _showRitualEditor(BuildContext context, {Ritual? ritual}) async {
                                         albumName: selectedAlbumName,
                                         icon: selectedEmoji,
                                       );
-                                      await activityService.saveRitual(updated);
+                                      await ritualsService.saveRitual(updated);
                                       Navigator.of(context).pop();
                                     },
                                     child: Text(

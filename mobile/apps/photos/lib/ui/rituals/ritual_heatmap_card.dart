@@ -6,8 +6,8 @@ import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class ActivityHeatmapCard extends StatelessWidget {
-  const ActivityHeatmapCard({
+class RitualHeatmapCard extends StatelessWidget {
+  const RitualHeatmapCard({
     required this.summary,
     this.compact = false,
     this.allowHorizontalScroll = false,
@@ -16,7 +16,7 @@ class ActivityHeatmapCard extends StatelessWidget {
     super.key,
   });
 
-  final ActivitySummary? summary;
+  final RitualsSummary? summary;
   final bool compact;
   final bool allowHorizontalScroll;
   final String? headerTitle;
@@ -28,9 +28,9 @@ class ActivityHeatmapCard extends StatelessWidget {
     final last365 = summary?.last365Days ??
         List.generate(
           372,
-          (i) => ActivityDay(
+          (i) => RitualDay(
             date: DateTime.now().subtract(Duration(days: 371 - i)),
-            hasActivity: false,
+            isCompleted: false,
           ),
         );
 
@@ -109,7 +109,7 @@ class _Heatmap extends StatelessWidget {
     required this.compact,
   });
 
-  final List<ActivityDay> days;
+  final List<RitualDay> days;
   final bool compact;
 
   @override
@@ -138,7 +138,7 @@ class _Heatmap extends StatelessWidget {
           )
         : todayMidnight.subtract(const Duration(days: 364));
 
-    final normalizedDayMap = <int, ActivityDay>{
+    final normalizedDayMap = <int, RitualDay>{
       for (final d in days)
         DateTime(d.date.year, d.date.month, d.date.day).millisecondsSinceEpoch:
             d,
@@ -153,28 +153,28 @@ class _Heatmap extends StatelessWidget {
     final int totalDays =
         gridEnd.difference(gridStart).inDays + 1; // inclusive of gridEnd
 
-    final List<ActivityDay?> gridDays = List.generate(totalDays, (index) {
+    final List<RitualDay?> gridDays = List.generate(totalDays, (index) {
       final date = gridStart.add(Duration(days: index));
       // Leading days before the 365-day window can still be active if present
       // in the extended map (we fetched extra days), otherwise remain empty.
       final key =
           DateTime(date.year, date.month, date.day).millisecondsSinceEpoch;
-      final activity = normalizedDayMap[key];
+      final dayEntry = normalizedDayMap[key];
       if (date.isBefore(firstDay)) {
-        return activity ??
-            ActivityDay(
+        return dayEntry ??
+            RitualDay(
               date: date,
-              hasActivity: false,
+              isCompleted: false,
             );
       }
-      return activity ??
-          ActivityDay(
+      return dayEntry ??
+          RitualDay(
             date: date,
-            hasActivity: false,
+            isCompleted: false,
           );
     });
 
-    final weeks = <List<ActivityDay?>>[];
+    final weeks = <List<RitualDay?>>[];
     for (int i = 0; i < gridDays.length; i += 7) {
       final slice = gridDays.skip(i).take(7).toList();
       while (slice.length < 7) {
@@ -186,7 +186,7 @@ class _Heatmap extends StatelessWidget {
     final monthLabels = <int, String>{};
     final seenMonths = <String>{};
 
-    for (final day in gridDays.whereType<ActivityDay>()) {
+    for (final day in gridDays.whereType<RitualDay>()) {
       if (day.date.day != 1) continue;
       final daysSinceStart = day.date.difference(gridStart).inDays;
       final rowIndex = daysSinceStart ~/ 7;
@@ -330,7 +330,7 @@ class _Heatmap extends StatelessWidget {
                                   .withValues(alpha: 0.28);
                               final color = cell.value == null
                                   ? Colors.transparent
-                                  : cell.value!.hasActivity
+                                  : cell.value!.isCompleted
                                       ? activeColor
                                       : inactiveColor;
                               return Row(

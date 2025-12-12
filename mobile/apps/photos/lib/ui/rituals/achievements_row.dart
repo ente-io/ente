@@ -9,7 +9,7 @@ class AchievementsRow extends StatelessWidget {
     super.key,
   });
 
-  final ActivitySummary? summary;
+  final RitualsSummary? summary;
   final void Function(int days)? onBadgeTap;
 
   static const Map<int, String> _badgeAssets = {
