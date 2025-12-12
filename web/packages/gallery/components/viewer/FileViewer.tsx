@@ -1012,14 +1012,16 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
     const handleCopyImage = useCallback(() => {
         handleMoreMenuCloseIfNeeded();
-        const imageURL = activeAnnotatedFile?.itemData.imageURL;
+        if (!activeAnnotatedFile) return;
+        const { imageURL } = activeAnnotatedFile.itemData;
+        if (!imageURL) return;
         // Safari does not copy if we do not call `navigator.clipboard.write`
         // synchronously within the click event handler, but it does supports
         // passing a promise in lieu of the blob.
         void window.navigator.clipboard
             .write([
                 new ClipboardItem({
-                    "image/png": createImagePNGBlob(imageURL!),
+                    "image/png": createImagePNGBlob(imageURL),
                 }),
             ])
             .catch(onGenericError);
@@ -1345,7 +1347,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const canCopyImage = useCallback(
         () =>
             activeAnnotatedFile?.annotation.showCopyImage &&
-            activeAnnotatedFile.itemData.imageURL,
+            !!activeAnnotatedFile.itemData.imageURL,
         [activeAnnotatedFile],
     );
 

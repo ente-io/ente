@@ -321,7 +321,7 @@ export class FileViewerPhotoSwipe {
 
         const currentFile = () => delegate.getFiles()[pswp.currIndex]!;
 
-        const currentAnnotatedFile = () => {
+        const currentAnnotatedFile = (): FileViewerAnnotatedFile => {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
             if (
@@ -329,10 +329,17 @@ export class FileViewerPhotoSwipe {
                 annotatedFile.file.id != file.id ||
                 annotatedFile.file.updationTime != file.updationTime
             ) {
-                annotatedFile = onAnnotate(file, currSlideData());
-                _currentAnnotatedFile = annotatedFile;
+                // Guard: slide data can be unavailable during state transitions.
+                // If unavailable, we keep using the cached annotatedFile.
+                const slideData = pswp.currSlide?.data as ItemData | undefined;
+                if (slideData) {
+                    annotatedFile = onAnnotate(file, slideData);
+                    _currentAnnotatedFile = annotatedFile;
+                }
             }
-            return annotatedFile;
+            // By design, this should never be undefined after the initial slide
+            // is shown. Use non-null assertion to maintain API contract.
+            return annotatedFile!;
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
