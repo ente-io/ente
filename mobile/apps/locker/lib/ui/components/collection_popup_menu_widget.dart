@@ -31,12 +31,14 @@ class CollectionPopupMenuWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
+      padding: EdgeInsets.zero,
       menuPadding: EdgeInsets.zero,
       color: colorScheme.backdropBase,
       surfaceTintColor: Colors.transparent,
       elevation: 15,
       offset: const Offset(-24, 24),
       shadowColor: Colors.black.withValues(alpha: 0.08),
+      constraints: const BoxConstraints(minWidth: 120),
       child: child ??
           HugeIcon(
             icon: HugeIcons.strokeRoundedMoreVertical,

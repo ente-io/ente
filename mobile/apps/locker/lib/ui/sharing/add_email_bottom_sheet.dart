@@ -198,6 +198,7 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
       surfaceTintColor: Colors.transparent,
       elevation: 15,
       shadowColor: Colors.black.withValues(alpha: 0.08),
+      constraints: const BoxConstraints(minWidth: 120),
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
