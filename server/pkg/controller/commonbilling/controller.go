@@ -16,6 +16,7 @@ type Controller struct {
 	UserRepo                    *repo.UserRepository
 	UsageRepo                   *repo.UsageRepository
 	BillingRepo                 *repo.BillingRepository
+	NotificationHistoryRepo     *repo.NotificationHistoryRepository
 }
 
 func NewController(
@@ -77,6 +78,7 @@ func (c *Controller) OnSubscriptionCancelled(userID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
+
 	go c.EmailNotificationController.OnSubscriptionCancelled(userID)
 	return nil
 }
