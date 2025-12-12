@@ -1,43 +1,37 @@
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:locker/ui/components/gradient_button.dart";
 
-Future<bool?> showAlertBottomSheet(
+Future<T?> showAlertBottomSheet<T>(
   BuildContext context, {
   required String title,
   required String message,
   required String assetPath,
-  required String confirmButtonText,
-  required VoidCallback onConfirm,
+  List<Widget>? buttons,
 }) {
-  return showModalBottomSheet<bool>(
+  return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     isDismissible: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => AlertBottomSheet(
+    builder: (context) => AlertBottomSheet<T>(
       title: title,
       message: message,
       assetPath: assetPath,
-      confirmButtonText: confirmButtonText,
-      onConfirm: onConfirm,
+      buttons: buttons,
     ),
   );
 }
 
-class AlertBottomSheet extends StatelessWidget {
+class AlertBottomSheet<T> extends StatelessWidget {
   final String title;
   final String message;
   final String assetPath;
-  final String confirmButtonText;
-  final VoidCallback onConfirm;
+  final List<Widget>? buttons;
 
   const AlertBottomSheet({
     required this.title,
     required this.message,
     required this.assetPath,
-    required this.confirmButtonText,
-    required this.onConfirm,
+    this.buttons,
     super.key,
   });
 
@@ -55,7 +49,6 @@ class AlertBottomSheet extends StatelessWidget {
         ),
       ),
       child: SafeArea(
-        top: false,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -79,18 +72,13 @@ class AlertBottomSheet extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  text: confirmButtonText,
-                  backgroundColor: colorScheme.warning400,
-                  onTap: () {
-                    onConfirm();
-                    Navigator.of(context).pop(true);
-                  },
-                ),
-              ),
+              if (buttons != null && buttons!.isNotEmpty) ...[
+                const SizedBox(height: 20),
+                for (int i = 0; i < buttons!.length; i++) ...[
+                  buttons![i],
+                  if (i < buttons!.length - 1) const SizedBox(height: 12),
+                ],
+              ],
             ],
           ),
         ),
@@ -105,7 +93,7 @@ class AlertBottomSheet extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           GestureDetector(
-            onTap: () => Navigator.of(context).pop(false),
+            onTap: () => Navigator.of(context).pop(),
             child: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,

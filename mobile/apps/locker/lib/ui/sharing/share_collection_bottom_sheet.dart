@@ -379,9 +379,18 @@ class _ShareCollectionBottomSheetState
         message: context.l10n.cannotAddMoreFilesAfterBecomingViewer(
           user.displayName ?? user.email,
         ),
+        buttons: [
+          SizedBox(
+            child: GradientButton(
+              backgroundColor: getEnteColorScheme(context).warning400,
+              text: context.l10n.yesConvertToViewer,
+              onTap: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ),
+        ],
         assetPath: "assets/warning-grey.png",
-        confirmButtonText: context.l10n.remove,
-        onConfirm: () {},
       );
 
       if (confirmed != true) {
@@ -411,8 +420,17 @@ class _ShareCollectionBottomSheetState
         user.displayName ?? user.email,
       ),
       assetPath: "assets/warning-grey.png",
-      confirmButtonText: context.l10n.remove,
-      onConfirm: () {},
+      buttons: [
+        SizedBox(
+          child: GradientButton(
+            backgroundColor: getEnteColorScheme(context).warning400,
+            text: context.l10n.yesRemove,
+            onTap: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+        ),
+      ],
     );
 
     if (confirmed == true && mounted) {
