@@ -1,6 +1,6 @@
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
-import "package:ente_ui/components/captioned_text_widget.dart";
+import "package:ente_ui/components/captioned_text_widget_v2.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget_v2.dart";
 import "package:ente_ui/theme/ente_theme.dart";
@@ -173,7 +173,7 @@ class _ShareCollectionBottomSheetState
                           bgColor: colorScheme.fillFaint,
                         ),
                       MenuItemWidgetV2(
-                        captionedTextWidget: CaptionedTextWidget(
+                        captionedTextWidget: CaptionedTextWidgetV2(
                           title: user.email,
                         ),
                         leadingIconSize: 24,
@@ -269,7 +269,7 @@ class _ShareCollectionBottomSheetState
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.backdropBase,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(8),
       child: HugeIcon(
@@ -309,7 +309,7 @@ class _ShareCollectionBottomSheetState
       child: Container(
         decoration: BoxDecoration(
           color: colorScheme.backdropBase,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
         padding: const EdgeInsets.all(8),
         child: HugeIcon(
