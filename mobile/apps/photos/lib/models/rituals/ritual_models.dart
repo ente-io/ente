@@ -1,38 +1,15 @@
 import "package:flutter/material.dart";
 import "package:photos/models/base/id.dart";
-
-class RitualDay {
-  final DateTime date;
-  final bool isCompleted;
-
-  const RitualDay({
-    required this.date,
-    required this.isCompleted,
-  });
-}
+import "package:photos/models/file/file.dart";
 
 class RitualsSummary {
-  final List<RitualDay> last365Days;
-  final List<RitualDay> last7Days;
-  final int currentStreak;
-  final int longestStreak;
-  final Map<int, bool> badgesUnlocked;
   final Map<String, RitualProgress> ritualProgress;
   final DateTime generatedAt;
-  final Map<String, int> ritualLongestStreaks;
 
   const RitualsSummary({
-    required this.last365Days,
-    required this.last7Days,
-    required this.currentStreak,
-    required this.longestStreak,
-    required this.badgesUnlocked,
     required this.ritualProgress,
     required this.generatedAt,
-    required this.ritualLongestStreaks,
   });
-
-  bool get hasSevenDayFire => last7Days.every((d) => d.isCompleted);
 }
 
 class Ritual {
@@ -116,21 +93,24 @@ class Ritual {
 
 class RitualProgress {
   final String ritualId;
-  final Set<DateTime> completedDays;
+  final Set<int> completedDayKeys;
+  final Map<int, EnteFile> recentFilesByDay;
+  final int currentStreak;
+  final int longestStreakOverall;
+  final int longestStreakThisMonth;
 
   const RitualProgress({
     required this.ritualId,
-    required this.completedDays,
+    required this.completedDayKeys,
+    this.recentFilesByDay = const {},
+    required this.currentStreak,
+    required this.longestStreakOverall,
+    required this.longestStreakThisMonth,
   });
 
   bool hasCompleted(DateTime day) {
-    final dayKey = DateTime(day.year, day.month, day.day);
-    return completedDays.any(
-      (d) =>
-          d.year == dayKey.year &&
-          d.month == dayKey.month &&
-          d.day == dayKey.day,
-    );
+    final key = DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
+    return completedDayKeys.contains(key);
   }
 }
 

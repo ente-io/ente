@@ -12,7 +12,6 @@ import "package:photos/utils/navigation_util.dart";
 class RitualsSection extends StatelessWidget {
   const RitualsSection({
     required this.rituals,
-    required this.progress,
     this.selectedRitualId,
     this.onSelectionChanged,
     this.showHeader = true,
@@ -20,7 +19,6 @@ class RitualsSection extends StatelessWidget {
   });
 
   final List<Ritual> rituals;
-  final Map<String, RitualProgress> progress;
   final String? selectedRitualId;
   final ValueChanged<Ritual?>? onSelectionChanged;
   final bool showHeader;

@@ -1,13 +1,9 @@
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/ui/rituals/achievements_row.dart";
-import "package:photos/ui/rituals/ritual_badge_popup.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
-import "package:photos/ui/rituals/ritual_heatmap_card.dart";
 import "package:photos/ui/rituals/rituals_section.dart";
 
 class AllRitualsScreen extends StatefulWidget {
@@ -88,7 +84,6 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
         child: ValueListenableBuilder<RitualsState>(
           valueListenable: ritualsService.stateNotifier,
           builder: (context, state, _) {
-            final summary = state.summary;
             Ritual? selectedRitual = _selectedRitual;
             if (selectedRitual != null) {
               final match = state.rituals.where(
@@ -106,7 +101,6 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
               children: [
                 RitualsSection(
                   rituals: state.rituals,
-                  progress: summary?.ritualProgress ?? const {},
                   showHeader: false,
                   selectedRitualId: selectedRitual?.id,
                   onSelectionChanged: (ritual) {
@@ -121,30 +115,5 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
         ),
       ),
     );
-  }
-
-  // TODO: lau: remove dead code?
-  // ignore: unused_element
-  Widget _buildAchievementsSection({
-    required RitualsSummary? summary,
-    required Ritual selectedRitual,
-  }) {
-    final displaySummary = summary != null
-        ? ritualSummaryForRitual(summary, selectedRitual)
-        : summary;
-    return AchievementsRow(
-      summary: displaySummary,
-      onBadgeTap: (days) => _showDebugBadge(selectedRitual, days),
-    );
-  }
-
-  Future<void> _showDebugBadge(Ritual ritual, int days) async {
-    if (!kDebugMode) return;
-    final badge = RitualBadgeUnlock(
-      ritual: ritual,
-      days: days,
-      generatedAt: DateTime.now(),
-    );
-    await showRitualBadgePopup(context, badge: badge);
   }
 }
