@@ -197,7 +197,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _shareCollection() async {
-    final collection = widget.collection;
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
           collectionViewType != CollectionViewType.sharedCollection &&
@@ -214,9 +213,13 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         backgroundColor: getEnteColorScheme(context).backgroundBase,
         isScrollControlled: true,
         builder: (context) => ShareCollectionBottomSheet(
-          collection: collection,
+          collection: _collection,
         ),
       );
+      // Refresh state after share sheet closes
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);

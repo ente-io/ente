@@ -1,3 +1,4 @@
+import "package:email_validator/email_validator.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_sharing/user_avator_widget.dart";
@@ -617,8 +618,7 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
   }
 
   bool _isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-    return emailRegex.hasMatch(email);
+    return EmailValidator.validate(email);
   }
 
   bool _isScheduledDateTimeValid() {
