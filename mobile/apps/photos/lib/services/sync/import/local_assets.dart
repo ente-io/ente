@@ -242,7 +242,7 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
       'modifiedDateTime',
     );
     final bool assetCreatedOrUpdatedAfterGivenTime =
-        max(createMs, modifiedMs) >= (fromTime / ~1000);
+        max(createMs, modifiedMs) >= (fromTime ~/ 1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       final file = await EnteFile.fromAsset(pathEntity.name, entity);
