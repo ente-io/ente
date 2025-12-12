@@ -12,3 +12,4 @@ ente-core = { path = "../../../../rust/core" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
+missing_docs = "warn"

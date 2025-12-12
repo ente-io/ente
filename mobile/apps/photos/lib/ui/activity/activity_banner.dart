@@ -33,7 +33,7 @@ class ActivityBanner extends StatelessWidget {
         final textTheme = getEnteTextTheme(context);
         final narrowWeekdays = MaterialLocalizations.of(context).narrowWeekdays;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Material(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(20),

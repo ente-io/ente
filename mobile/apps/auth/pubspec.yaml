@@ -56,7 +56,6 @@ dependencies:
   expansion_tile_card: ^3.0.0
   ffi: ^2.1.0
   figma_squircle: ^0.6.3
-  launcher_icon_switcher: ^0.0.2
   file_picker: ^10.3.2
   file_saver: ^0.3.1
   fixnum: ^1.1.0
@@ -101,6 +100,7 @@ dependencies:
   intl: ^0.20.2
   io: ^1.0.4
   json_annotation: ^4.5.0
+  launcher_icon_switcher: ^0.0.2
   local_auth: ^2.3.0
   local_auth_android: ^1.0.37
   local_auth_darwin: ^1.2.2

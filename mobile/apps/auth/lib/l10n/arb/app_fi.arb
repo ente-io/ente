@@ -8,7 +8,6 @@
   },
   "onBoardingBody": "Turvaa 2FA-koodisi",
   "onBoardingGetStarted": "Aloitetaan",
-  "setupFirstAccount": "Määritä ensimmäinen tilisi",
   "importScanQrCode": "Lue QR-koodi",
   "importEnterSetupKey": "Syötä asetusavain",
   "importAccountPageTitle": "Syötä tilin tiedot",

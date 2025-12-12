@@ -12,7 +12,6 @@
   "featureOpenSource": "オープンソースと\nセキュリティ専門家による監査",
   "signUp": "登録",
   "onBoardingGetStarted": "さあ、はじめよう",
-  "setupFirstAccount": "最初のアカウントを設定しましょう",
   "allTabEmptyHint": "まだ何もありません。+ をタップしてコードを追加するか、ゴミ箱を開いて復元してください。",
   "@allTabEmptyHint": {
     "description": "Shown when the All tab has no active codes but Trash contains codes"
@@ -543,23 +542,29 @@
   "errorGenericBody": "インポート中に予期しないエラーが発生しました。",
   "localBackupSettingsTitle": "ローカルバックアップ",
   "localBackupSidebarTitle": "ローカルバックアップ",
+  "enableAutomaticBackups": "自動バックアップ",
   "backupDescription": "データはデバイス上の場所に自動的にバックアップされます。項目が追加される度にバックアップが更新されます。",
   "currentLocation": "現在のバックアップ場所:",
   "securityNotice": "セキュリティ通知",
   "backupSecurityNotice": "この暗号化されたバックアップは2FAキーを保持しています。紛失した場合、アカウントを復元できない可能性があります。安全に保管してください！",
   "locationUpdatedAndBackupCreated": "場所が更新され、初期バックアップが作成されました！",
   "initialBackupCreated": "初期バックアップが作成されました！",
+  "backupCreated": "バックアップを作成しました！",
   "noDefaultBackupFolder": "デフォルトのバックアップフォルダを作成できませんでした。",
   "backupLocationChoiceDescription": "バックアップをどこに保存しますか？",
   "chooseBackupLocation": "バックアップ先を選択",
   "loadDefaultLocation": "既定の場所を読み込んでいます...",
   "couldNotDetermineLocation": "場所を特定できませんでした...",
   "saveBackup": "バックアップを保存",
+  "updateBackupPassword": "バックアップパスワードを更新",
+  "setBackupPassword": "バックアップパスワードを設定",
+  "setBackupFolder": "バックアップフォルダを設定",
+  "selectFolder": "フォルダを選択",
   "done": "完了",
   "addNew": "新規追加",
   "selected": "選択済み",
   "moveMultipleToTrashMessage": "{count} アイテムをゴミ箱に移動してもよろしいですか？",
-  "nSelected": "{count, plural, =1{1 つが} other{{count} が選択されました}}",
+  "nSelected": "{count, plural, =1{1 個選択} other{{count} 個選択}}",
   "@nSelected": {
     "description": "Text to indicate number of items selected",
     "placeholders": {
@@ -569,5 +574,20 @@
         "example": "5"
       }
     }
-  }
+  },
+  "pinnedCount": "{count, plural,=1 {1 個の項目を固定} other {{count} 個の項目を固定}}",
+  "@pinnedCount": {
+    "description": "Text to show number of items pinned",
+    "placeholders": {
+      "count": {
+        "description": "Number of items pinned",
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "submit": "送信",
+  "chooseIcon": "アイコンを選択",
+  "todaysLogs": "今日のログ",
+  "appIcon": "アプリアイコン"
 }

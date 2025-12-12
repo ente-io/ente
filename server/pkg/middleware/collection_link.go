@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"golang.org/x/net/idna"
 	"net/http"
@@ -72,10 +73,15 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				return
 			}
 			// validate if user still has active paid subscription
-			if err = m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID); err != nil {
+			isFreeUser, err := m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID)
+			if err != nil {
 				logrus.WithError(err).Warn("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
+			}
+			// Override device limit to 5 for free users
+			if isFreeUser {
+				publicCollectionSummary.DeviceLimit = public2.FreeUserDeviceLimit
 			}
 
 			// validate device limit
@@ -122,16 +128,28 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 		c.Next()
 	}
 }
-func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) error {
+// validateOwnersSubscription checks if the owner has an active subscription.
+// Returns (isFreeUser, error) where isFreeUser is true if user is on free plan but has active subscription.
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) (bool, error) {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
-		return stacktrace.Propagate(err, "")
+		return false, stacktrace.Propagate(err, "")
 	}
-	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+
+	isFreeUser := false
+	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
-		return stacktrace.Propagate(err, "failed to validate owners subscription")
+		if !errors.Is(err, ente.ErrSharingDisabledForFreeAccounts) {
+			return false, stacktrace.Propagate(err, "failed to validate owners subscription")
+		}
+		isFreeUser = true
+		// Free user - check if they have active subscription (not expired)
+		if err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false); err != nil {
+			return false, stacktrace.Propagate(err, "failed to validate owners subscription")
+		}
 	}
-	return m.validateOrigin(c, userID)
+
+	return isFreeUser, m.validateOrigin(c, userID)
 }
 
 func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,

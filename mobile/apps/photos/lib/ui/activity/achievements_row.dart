@@ -1,4 +1,3 @@
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/activity/activity_models.dart";
@@ -76,7 +75,7 @@ class _BadgeTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16),
       child: GestureDetector(
-        onTap: kDebugMode ? onTap : null,
+        onTap: onTap,
         child: Image.asset(
           asset,
           width: 92,

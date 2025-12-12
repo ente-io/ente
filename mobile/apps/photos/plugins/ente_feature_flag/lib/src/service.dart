@@ -84,9 +84,7 @@ class FlagService {
 
   bool get useNativeVideoEditor => true;
 
-  bool get useWidgetV2 => internalUser;
-
-  bool get enableOnlyBackupFuturePhotos => true;
+  bool get enableOnlyBackupFuturePhotos => internalUser;
 
   bool get facesTimeline => internalUser;
   bool get ritualsFlag => internalUser;
@@ -94,6 +92,8 @@ class FlagService {
   bool get pauseStreamDuringUpload => internalUser;
 
   bool get streamEnabledByDefault => internalUser;
+
+  bool get manualTagFileToPerson => internalUser && hasGrantedMLConsent;
 
   Future<void> tryRefreshFlags() async {
     try {

@@ -42,8 +42,8 @@ enum ResultType {
 
 enum SectionType {
   face,
-  magic,
   ritual,
+  magic,
   wrapped,
   location,
   album,
