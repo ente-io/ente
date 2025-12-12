@@ -1400,7 +1400,7 @@ class CollectionsService {
     }
     try {
       await _enteDio.post(
-        "/collection-actions/reject-delete-suggestions/",
+        "/collection-actions/reject-delete-suggestions",
         data: {"fileIDs": fileIDs},
       );
     } catch (e, s) {
