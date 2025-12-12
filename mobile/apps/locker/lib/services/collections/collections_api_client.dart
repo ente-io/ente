@@ -593,6 +593,7 @@ class CollectionApiClient {
     final collection = CollectionService.instance.getFromCache(collectionID);
     final updatedCollection = collection!.copyWith(sharees: sharees);
     await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_added"));
     return sharees;
   }
 
@@ -602,6 +603,7 @@ class CollectionApiClient {
     final collection = CollectionService.instance.getFromCache(collectionID);
     final updatedCollection = collection!.copyWith(sharees: sharees);
     await _updateCollectionInDB(updatedCollection);
+    Bus.instance.fire(CollectionsUpdatedEvent("email_share_removed"));
     return sharees;
   }
 

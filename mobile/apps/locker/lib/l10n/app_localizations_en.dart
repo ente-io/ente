@@ -1474,4 +1474,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get subscriptionRequiredForSharing =>
       'You need a paid subscription to share links';
+
+  @override
+  String get sharedWith => 'Shared with';
+
+  @override
+  String get shareLater => 'Share later';
+
+  @override
+  String get enterNameOrEmailToShareWith => 'Enter name or email to share with';
+
+  @override
+  String get chooseFromAnExistingContact => 'Choose from an existing contact';
+
+  @override
+  String get scheduleShare => 'Schedule share';
+
+  @override
+  String get addEmail => 'Add email';
+
+  @override
+  String get addNewEmail => 'Add new email';
+
+  @override
+  String get noSharedUsers => 'No shared users yet';
+
+  @override
+  String get removeAccess => 'Remove access';
 }

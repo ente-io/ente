@@ -2535,6 +2535,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You need a paid subscription to share links'**
   String get subscriptionRequiredForSharing;
+
+  /// No description provided for @sharedWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with'**
+  String get sharedWith;
+
+  /// No description provided for @shareLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Share later'**
+  String get shareLater;
+
+  /// No description provided for @enterNameOrEmailToShareWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter name or email to share with'**
+  String get enterNameOrEmailToShareWith;
+
+  /// No description provided for @chooseFromAnExistingContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from an existing contact'**
+  String get chooseFromAnExistingContact;
+
+  /// No description provided for @scheduleShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule share'**
+  String get scheduleShare;
+
+  /// No description provided for @addEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add email'**
+  String get addEmail;
+
+  /// No description provided for @addNewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add new email'**
+  String get addNewEmail;
+
+  /// No description provided for @noSharedUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'No shared users yet'**
+  String get noSharedUsers;
+
+  /// No description provided for @removeAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove access'**
+  String get removeAccess;
 }
 
 class _AppLocalizationsDelegate

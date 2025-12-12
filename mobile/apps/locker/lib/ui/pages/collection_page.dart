@@ -197,7 +197,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _shareCollection() async {
-    final collection = widget.collection;
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
           collectionViewType != CollectionViewType.sharedCollection &&
@@ -214,9 +213,13 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         backgroundColor: getEnteColorScheme(context).backgroundBase,
         isScrollControlled: true,
         builder: (context) => ShareCollectionBottomSheet(
-          collection: collection,
+          collection: _collection,
         ),
       );
+      // Refresh state after share sheet closes
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       await showGenericErrorDialog(context: context, error: e);
@@ -264,6 +267,35 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             //   selectedFiles: _selectedFiles,
             // ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareButton(EnteColorScheme colorScheme) {
+    if (isFavorite) {
+      return const SizedBox.shrink();
+    }
+    final canShare = collectionViewType == CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.sharedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        isQuickLink;
+    if (!canShare) {
+      return const SizedBox.shrink();
+    }
+    return GestureDetector(
+      onTap: _shareCollection,
+      child: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: colorScheme.backdropBase,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedShare08,
+          color: colorScheme.textBase,
         ),
       ),
     );
@@ -412,6 +444,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                 trailingWidgets: widget.isUncategorized
                     ? const []
                     : [
+                        _buildShareButton(colorScheme),
+                        const SizedBox(width: 12),
                         _buildMenuButton(colorScheme),
                       ],
               ),

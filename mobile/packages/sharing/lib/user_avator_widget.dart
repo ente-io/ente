@@ -1,7 +1,6 @@
 import "package:ente_configuration/base_configuration.dart";
 import "package:ente_sharing/extensions/user_extension.dart";
 import "package:ente_sharing/models/user.dart";
-import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
@@ -33,28 +32,15 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     final double size = getAvatarSize(widget.type);
-    return Container(
-      padding: const EdgeInsets.all(0.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
-          width: UserAvatarWidget.strokeWidth,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-      ),
-      child: SizedBox(
-        height: size,
-        width: size,
-        child: _FirstLetterCircularAvatar(
-          user: widget.user,
-          currentUserID: widget.currentUserID,
-          thumbnailView: widget.thumbnailView,
-          type: widget.type,
-          config: widget.config,
-        ),
+    return SizedBox(
+      height: size,
+      width: size,
+      child: _FirstLetterCircularAvatar(
+        user: widget.user,
+        currentUserID: widget.currentUserID,
+        thumbnailView: widget.thumbnailView,
+        type: widget.type,
+        config: widget.config,
       ),
     );
   }
@@ -102,28 +88,15 @@ class _FirstLetterCircularAvatarState
     final avatarStyle = getAvatarStyle(context, widget.type);
     final double size = avatarStyle.item1;
     final TextStyle textStyle = avatarStyle.item2;
-    return Container(
-      padding: const EdgeInsets.all(0.5),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: widget.thumbnailView
-              ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
-          width: UserAvatarWidget.strokeWidth,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-      ),
-      child: SizedBox(
-        height: size,
-        width: size,
-        child: CircleAvatar(
-          backgroundColor: decorationColor,
-          child: Text(
-            displayChar.toUpperCase(),
-            // fixed color
-            style: textStyle.copyWith(color: Colors.white),
-          ),
+    return SizedBox(
+      height: size,
+      width: size,
+      child: CircleAvatar(
+        backgroundColor: decorationColor,
+        child: Text(
+          displayChar.toUpperCase(),
+          // fixed color
+          style: textStyle.copyWith(color: Colors.white),
         ),
       ),
     );
