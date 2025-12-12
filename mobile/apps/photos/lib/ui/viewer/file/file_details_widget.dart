@@ -150,13 +150,14 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     //Make sure the bottom most tile is always the same one, that is it should
     //not be rendered only if a condition is met.
     final fileDetailsTiles = <Widget>[];
+    final bool canEditCaption = isFileOwner && !file.isTrash;
     fileDetailsTiles.add(
       !widget.file.isUploaded ||
-              (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
+              (!canEditCaption && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox(height: 16)
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 24),
-              child: isFileOwner
+              child: canEditCaption
                   ? FileCaptionWidget(file: widget.file)
                   : FileCaptionReadyOnly(caption: widget.file.caption!),
             ),
@@ -310,7 +311,9 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
         ],
       );
     }
-    fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
+    if (!file.isTrash) {
+      fileDetailsTiles.add(AlbumsItemWidget(file, _currentUserID));
+    }
 
     return SafeArea(
       top: false,
