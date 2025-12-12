@@ -91,6 +91,30 @@ class FilePopupMenuWidget extends StatelessWidget {
         ),
       ),
       PopupMenuItem<String>(
+        value: 'toggle_important',
+        padding: EdgeInsets.zero,
+        height: 0,
+        child: FutureBuilder<bool>(
+          future: FileActions.isImportant(file),
+          initialData: false,
+          builder: (context, snapshot) {
+            final isImportant = snapshot.data ?? false;
+            return PopupMenuItemWidget(
+              icon: Icon(
+                isImportant ? Icons.star_rounded : Icons.star_border_rounded,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+              label: isImportant
+                  ? context.l10n.unimportant
+                  : context.l10n.important,
+              isFirst: false,
+              isLast: false,
+            );
+          },
+        ),
+      ),
+      PopupMenuItem<String>(
         value: 'download',
         padding: EdgeInsets.zero,
         height: 0,
@@ -153,6 +177,9 @@ class FilePopupMenuWidget extends StatelessWidget {
       case 'edit':
         _editFile(context);
         break;
+      case 'toggle_important':
+        _toggleImportant(context);
+        break;
       case 'download':
         _downloadFile(context);
         break;
@@ -185,5 +212,12 @@ class FilePopupMenuWidget extends StatelessWidget {
 
   Future<void> _editFile(BuildContext context) async {
     await FileActions.editFile(context, file);
+  }
+
+  Future<void> _toggleImportant(BuildContext context) async {
+    await FileActions.toggleImportant(
+      context,
+      file,
+    );
   }
 }

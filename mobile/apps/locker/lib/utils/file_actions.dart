@@ -24,7 +24,7 @@ import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
 import "package:logging/logging.dart";
 
-/// Utility class for common file actions like edit, share, and delete
+/// Utility class for common file actions like edit, share, delete, and favorites
 class FileActions {
   static final _logger = Logger("FileActions");
 
@@ -404,6 +404,132 @@ class FileActions {
         context: context,
         error: e,
       );
+    }
+  }
+
+  /// Checks if a file is marked as important
+  static Future<bool> isImportant(EnteFile file) async {
+    try {
+      return await FavoritesService.instance.isFavorite(file);
+    } catch (e) {
+      _logger.severe("Error checking important status: $e");
+      return false;
+    }
+  }
+
+  /// Toggles important status of a single file
+  static Future<void> toggleImportant(
+    BuildContext context,
+    EnteFile file, {
+    VoidCallback? onSuccess,
+  }) async {
+    final isCurrentlyImportant = await isImportant(file);
+    final dialog = createProgressDialog(
+      context,
+      isCurrentlyImportant
+          ? context.l10n.removingFromImportant
+          : context.l10n.addingToImportant,
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      if (isCurrentlyImportant) {
+        await FavoritesService.instance.removeFromFavorites(context, file);
+      } else {
+        await FavoritesService.instance.addToFavorites(context, file);
+      }
+
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          !isCurrentlyImportant
+              ? context.l10n.fileMarkedAsImportant
+              : context.l10n.fileRemovedFromImportant,
+        );
+      }
+
+      onSuccess?.call();
+    } catch (e, stackTrace) {
+      _logger.severe("Failed to toggle important status: $e", e, stackTrace);
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.somethingWentWrong,
+        );
+      }
+    }
+  }
+
+  /// Marks multiple files as important
+  static Future<void> markMultipleAsImportant(
+    BuildContext context,
+    List<EnteFile> files, {
+    VoidCallback? onSuccess,
+  }) async {
+    final dialog = createProgressDialog(
+      context,
+      context.l10n.markingAsImportant,
+      isDismissible: false,
+    );
+
+    try {
+      await dialog.show();
+
+      final List<EnteFile> filesToMark = [];
+      for (final file in files) {
+        final isFileImportant = await isImportant(file);
+        if (!isFileImportant) {
+          filesToMark.add(file);
+        }
+      }
+
+      if (filesToMark.isEmpty) {
+        await dialog.hide();
+        if (context.mounted) {
+          showToast(
+            context,
+            context.l10n.allFilesAlreadyMarkedAsImportant,
+          );
+        }
+        return;
+      }
+
+      await FavoritesService.instance.updateFavorites(
+        context,
+        filesToMark,
+        true,
+      );
+
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.filesMarkedAsImportant(filesToMark.length),
+        );
+      }
+
+      onSuccess?.call();
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Failed to mark multiple files as important: $e",
+        e,
+        stackTrace,
+      );
+      await dialog.hide();
+
+      if (context.mounted) {
+        showToast(
+          context,
+          context.l10n.failedToMarkFilesAsImportant(e.toString()),
+        );
+      }
     }
   }
 }
