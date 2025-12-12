@@ -1323,11 +1323,18 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         </StyledMenuItem>
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("delete")}
-                            sx={{
+                            sx={(theme) => ({
                                 "&:hover": {
-                                    backgroundColor: "rgba(228, 7, 7, 0.2)",
+                                    backgroundColor: "#F24F4F",
+                                    color: "#fff",
                                 },
-                            }}
+                                ...theme.applyStyles("dark", {
+                                    "&:hover": {
+                                        backgroundColor: "#C53030",
+                                        color: "#fff",
+                                    },
+                                }),
+                            })}
                         >
                             <DeleteIcon />
                             <span>Delete</span>
