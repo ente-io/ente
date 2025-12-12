@@ -160,9 +160,10 @@
       "title": "Belo"
     },
     {
-      "title": "bestbuy",
+      "title": "Best Buy",
+      "slug": "bestbuy",
       "altNames": [
-        "Best Buy",
+        "BestBuy",
         "bestbuy.com"
       ]
     },
