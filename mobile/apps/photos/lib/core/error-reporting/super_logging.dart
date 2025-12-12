@@ -54,8 +54,18 @@ extension SuperLogRecord on LogRecord {
         if (id != null) {
           msg += "\n⤷ id: $id ";
         }
-        if (e.response?.data != null) {
-          msg += "\n⤷ type: ${e.type}\n⤷ error: ${e.response?.data}";
+        final responseData = e.response?.data;
+        if (responseData != null) {
+          // Skip logging response data if it exceeds 100KB
+          final contentLength = int.tryParse(
+            e.response?.headers.value('content-length') ?? '',
+          );
+          if (contentLength != null && contentLength > 102400) {
+            msg +=
+                "\n⤷ type: ${e.type}\n⤷ error: [response too large: $contentLength bytes]";
+          } else {
+            msg += "\n⤷ type: ${e.type}\n⤷ error: $responseData";
+          }
         } else {
           msg += "\n⤷ type: ${e.type}\n⤷ error: $error";
         }
