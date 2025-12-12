@@ -1,24 +1,14 @@
-import "dart:io";
-import "dart:math" as math;
-import "dart:ui" as ui;
-
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
-import "package:flutter/rendering.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:logging/logging.dart";
-import "package:path_provider/path_provider.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/rituals/achievements_row.dart";
 import "package:photos/ui/rituals/ritual_badge_popup.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_heatmap_card.dart";
 import "package:photos/ui/rituals/rituals_section.dart";
-import "package:photos/utils/share_util.dart";
-import "package:share_plus/share_plus.dart";
 
 class AllRitualsScreen extends StatefulWidget {
   const AllRitualsScreen({super.key, this.ritual});
@@ -31,8 +21,6 @@ class AllRitualsScreen extends StatefulWidget {
 
 class _AllRitualsScreenState extends State<AllRitualsScreen> {
   Ritual? _selectedRitual;
-  final GlobalKey _shareButtonKey = GlobalKey();
-  static final Logger _logger = Logger("AllRitualsScreen");
 
   @override
   void initState() {
@@ -50,7 +38,6 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final l10n = context.l10n;
     final ritualsEnabled = flagService.ritualsFlag;
     if (!ritualsEnabled) {
@@ -77,7 +64,7 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
             padding: const EdgeInsets.only(right: 16),
             child: IconButton(
               style: IconButton.styleFrom(
-                backgroundColor: colorScheme.fillFaint,
+                backgroundColor: const Color(0xFF1DB954),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -87,6 +74,7 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
               icon: const HugeIcon(
                 icon: HugeIcons.strokeRoundedPlusSign,
                 size: 24,
+                color: Colors.white,
               ),
               onPressed: () async {
                 await showRitualEditor(context, ritual: null);
@@ -112,21 +100,6 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
                 selectedRitual = null;
               }
             }
-            final displaySummary = summary != null && selectedRitual != null
-                ? _summaryForRitual(summary, selectedRitual)
-                : summary;
-            final summaryToShare = displaySummary;
-            final iconColor = Theme.of(context).iconTheme.color;
-            final String heatmapTitle = selectedRitual == null
-                ? l10n.ritualDefaultHeatmapTitle
-                : (selectedRitual.title.isEmpty
-                    ? l10n.ritualUntitled
-                    : selectedRitual.title);
-            final String heatmapEmoji =
-                selectedRitual?.icon ?? (selectedRitual == null ? "📸" : "");
-            final String shareTitle = heatmapTitle;
-            final String shareEmoji = heatmapEmoji;
-            final bool shareEnabled = summaryToShare != null;
             return ListView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.only(bottom: 48),
@@ -142,66 +115,6 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
                     });
                   },
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Row(
-                      children: [
-                        Text(
-                          l10n.ritualActivityHeading,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        const Spacer(),
-                        SizedBox(
-                          width: 48,
-                          height: 48,
-                          child: Material(
-                            key: _shareButtonKey,
-                            color: colorScheme.fillFaint,
-                            borderRadius: BorderRadius.circular(10),
-                            clipBehavior: Clip.antiAlias,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: summaryToShare != null
-                                  ? () => _shareRitualSummary(
-                                        summaryToShare,
-                                        shareTitle,
-                                        emoji: shareEmoji,
-                                      )
-                                  : null,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Center(
-                                  child: HugeIcon(
-                                    icon: HugeIcons.strokeRoundedShare08,
-                                    size: 24,
-                                    color: shareEnabled
-                                        ? iconColor
-                                        : Theme.of(context)
-                                            .disabledColor
-                                            .withValues(alpha: 0.7),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                RitualHeatmapCard(
-                  summary: displaySummary,
-                  headerTitle: heatmapTitle,
-                  headerEmoji: heatmapEmoji,
-                ),
-                if (selectedRitual != null)
-                  AchievementsRow(
-                    summary: displaySummary,
-                    onBadgeTap: (days) =>
-                        _showDebugBadge(selectedRitual!, days),
-                  ),
               ],
             );
           },
@@ -210,253 +123,18 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
     );
   }
 
-  Future<void> _shareRitualSummary(
-    RitualsSummary summary,
-    String title, {
-    String? emoji,
-  }) async {
-    _logger.info("Ritual share: start");
-    _logger.fine("Ritual share: precache assets begin");
-    await _precacheRitualShareAssets();
-    _logger.fine("Ritual share: precache assets done");
-    OverlayEntry? entry;
-    final prevPaintSize = debugPaintSizeEnabled;
-    final prevPaintBaselines = debugPaintBaselinesEnabled;
-    final prevPaintPointers = debugPaintPointersEnabled;
-    final prevRepaintRainbow = debugRepaintRainbowEnabled;
-    try {
-      debugPaintSizeEnabled = false;
-      debugPaintBaselinesEnabled = false;
-      debugPaintPointersEnabled = false;
-      debugRepaintRainbowEnabled = false;
-
-      final overlay = Overlay.maybeOf(context, rootOverlay: true);
-      if (overlay == null) {
-        throw StateError("Overlay not available for sharing");
-      }
-      final key = GlobalKey();
-      entry = OverlayEntry(
-        builder: (context) {
-          return Center(
-            child: Material(
-              type: MaterialType.transparency,
-              child: IgnorePointer(
-                child: Opacity(
-                  // Keep the share card invisible while still allowing it to paint.
-                  opacity: 0.01,
-                  child: RepaintBoundary(
-                    key: key,
-                    child: _RitualShareCard(
-                      summary: summary,
-                      title: title,
-                      emoji: emoji,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      );
-      overlay.insert(entry);
-      _logger.fine("Ritual share: overlay inserted, waiting for boundary");
-      final boundary = await _waitForBoundaryReady(repaintKey: key);
-      bool needsPaint = false;
-      assert(() {
-        needsPaint = boundary.debugNeedsPaint;
-        return true;
-      }());
-      _logger.fine(
-        "Ritual share: boundary ready, size=${boundary.size}, needsPaint=$needsPaint",
-      );
-      final double pixelRatio =
-          (MediaQuery.of(context).devicePixelRatio * 1.6).clamp(2.0, 3.5);
-      late final ui.Image image;
-      try {
-        image = await boundary.toImage(pixelRatio: pixelRatio.toDouble());
-      } catch (e, s) {
-        _logger.warning("Ritual share: toImage failed", e, s);
-        rethrow;
-      }
-      final ByteData? byteData;
-      try {
-        byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      } catch (e, s) {
-        _logger.warning("Ritual share: toByteData failed", e, s);
-        rethrow;
-      }
-      final data = byteData?.buffer.asUint8List();
-      if (data == null || data.isEmpty) {
-        throw StateError("Ritual share image encoding produced no data");
-      }
-      final dir = await getTemporaryDirectory();
-      final file = File(
-        "${dir.path}/ritual_share_${DateTime.now().millisecondsSinceEpoch}.png",
-      );
-      await file.writeAsBytes(data, flush: true);
-      _logger.info(
-        "Ritual share: file written (${data.length} bytes) -> ${file.path}",
-      );
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          sharePositionOrigin: shareButtonRect(context, _shareButtonKey),
-        ),
-      );
-      _logger.info("Ritual share: SharePlus invoked");
-    } catch (e, s) {
-      _logger.warning("Failed to share ritual summary", e, s);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.ritualShareUnavailable)),
-      );
-    } finally {
-      debugPaintSizeEnabled = prevPaintSize;
-      debugPaintBaselinesEnabled = prevPaintBaselines;
-      debugPaintPointersEnabled = prevPaintPointers;
-      debugRepaintRainbowEnabled = prevRepaintRainbow;
-      entry?.remove();
-    }
-  }
-
-  Future<void> _precacheRitualShareAssets() async {
-    const assets = [
-      "assets/rituals/ente_io_black_white.png",
-      "assets/splash-screen-icon.png",
-    ];
-    for (final asset in assets) {
-      try {
-        await precacheImage(AssetImage(asset), context);
-      } catch (e, s) {
-        _logger.warning(
-          "Ritual share: failed to precache asset $asset",
-          e,
-          s,
-        );
-      }
-    }
-  }
-
-  Future<RenderRepaintBoundary> _waitForBoundaryReady({
-    required GlobalKey repaintKey,
-  }) async {
-    const int maxAttempts = 8;
-    const Duration attemptDelay = Duration(milliseconds: 40);
-
-    for (int attempt = 0; attempt < maxAttempts; attempt++) {
-      final boundary = repaintKey.currentContext?.findRenderObject()
-          as RenderRepaintBoundary?;
-      bool needsPaint = false;
-      assert(() {
-        needsPaint = boundary?.debugNeedsPaint ?? false;
-        return true;
-      }());
-      if (boundary == null) {
-        _logger.fine(
-          "Ritual share boundary missing (attempt ${attempt + 1})",
-        );
-      } else if (boundary.size.isEmpty) {
-        _logger.fine(
-          "Ritual share boundary has zero size (attempt ${attempt + 1})",
-        );
-      } else if (needsPaint) {
-        _logger.fine(
-          "Ritual share boundary needs paint (attempt ${attempt + 1}), waiting",
-        );
-      } else {
-        return boundary;
-      }
-      await WidgetsBinding.instance.endOfFrame;
-      await Future.delayed(attemptDelay);
-    }
-
-    final boundary =
-        repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-    if (boundary == null) {
-      throw StateError("Render boundary unavailable");
-    }
-    if (boundary.size.isEmpty) {
-      throw StateError("Render boundary has zero size");
-    }
-    bool needsPaint = false;
-    assert(() {
-      needsPaint = boundary.debugNeedsPaint;
-      return true;
-    }());
-    if (needsPaint) {
-      throw StateError("Render boundary not ready to paint");
-    }
-    return boundary;
-  }
-
-  RitualsSummary _summaryForRitual(RitualsSummary summary, Ritual ritual) {
-    final ritualProgress = summary.ritualProgress[ritual.id];
-    final Set<int> dayKeys = ritualProgress == null
-        ? <int>{}
-        : ritualProgress.completedDays
-            .map(
-              (d) => DateTime(d.year, d.month, d.day).millisecondsSinceEpoch,
-            )
-            .toSet();
-
-    final last365Days = summary.last365Days
-        .map(
-          (day) => RitualDay(
-            date: day.date,
-            isCompleted: dayKeys.contains(
-              DateTime(
-                day.date.year,
-                day.date.month,
-                day.date.day,
-              ).millisecondsSinceEpoch,
-            ),
-          ),
-        )
-        .toList();
-    final last7Days = last365Days.length >= 7
-        ? last365Days.sublist(last365Days.length - 7)
-        : List<RitualDay>.from(last365Days);
-
-    int longestStreak = 0;
-    int rolling = 0;
-    for (final day in last365Days) {
-      if (day.isCompleted) {
-        rolling += 1;
-        if (rolling > longestStreak) {
-          longestStreak = rolling;
-        }
-      } else {
-        rolling = 0;
-      }
-    }
-    int currentStreak = 0;
-    for (int i = last365Days.length - 1; i >= 0; i--) {
-      if (last365Days[i].isCompleted) {
-        currentStreak += 1;
-      } else {
-        break;
-      }
-    }
-
-    final unlockedBadges = <int, bool>{
-      for (final entry in summary.badgesUnlocked.keys)
-        entry: longestStreak >= entry,
-    };
-
-    return RitualsSummary(
-      last365Days: last365Days,
-      last7Days: last7Days,
-      currentStreak: currentStreak,
-      longestStreak: longestStreak,
-      badgesUnlocked: unlockedBadges,
-      ritualProgress: {
-        ritual.id: RitualProgress(
-          ritualId: ritual.id,
-          completedDays: ritualProgress?.completedDays ?? <DateTime>{},
-        ),
-      },
-      generatedAt: summary.generatedAt,
-      ritualLongestStreaks: {ritual.id: longestStreak},
+  // TODO: lau: remove dead code?
+  // ignore: unused_element
+  Widget _buildAchievementsSection({
+    required RitualsSummary? summary,
+    required Ritual selectedRitual,
+  }) {
+    final displaySummary = summary != null
+        ? ritualSummaryForRitual(summary, selectedRitual)
+        : summary;
+    return AchievementsRow(
+      summary: displaySummary,
+      onBadgeTap: (days) => _showDebugBadge(selectedRitual, days),
     );
   }
 
@@ -468,91 +146,5 @@ class _AllRitualsScreenState extends State<AllRitualsScreen> {
       generatedAt: DateTime.now(),
     );
     await showRitualBadgePopup(context, badge: badge);
-  }
-}
-
-class _RitualShareCard extends StatelessWidget {
-  const _RitualShareCard({
-    required this.summary,
-    required this.title,
-    this.emoji,
-  });
-
-  final RitualsSummary summary;
-  final String title;
-  final String? emoji;
-
-  @override
-  Widget build(BuildContext context) {
-    const Color shareBackgroundColor = Color(0xFF08C225);
-    final String shareHeaderTitle =
-        (emoji ?? "").isNotEmpty ? "${emoji!} $title" : title;
-    final double maxWidth = math
-        .min(math.max(MediaQuery.of(context).size.width - 32, 360), 440)
-        .toDouble();
-    return Align(
-      alignment: Alignment.topCenter,
-      widthFactor: 1,
-      heightFactor: 1,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
-          color: shareBackgroundColor,
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxWidth),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 48),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Theme(
-                          data: Theme.of(context).copyWith(
-                            brightness: Brightness.light,
-                            colorScheme: Theme.of(context).colorScheme.copyWith(
-                                  brightness: Brightness.light,
-                                ),
-                          ),
-                          child: RitualHeatmapCard(
-                            summary: summary,
-                            compact: true,
-                            allowHorizontalScroll: false,
-                            headerTitle: shareHeaderTitle,
-                            headerEmoji: null,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Image.asset(
-                        "assets/rituals/ente_io_black_white.png",
-                        width: 62,
-                        height: 16,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Image.asset(
-                  "assets/splash-screen-icon.png",
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
