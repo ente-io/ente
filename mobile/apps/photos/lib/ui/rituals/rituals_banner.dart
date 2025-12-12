@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -15,132 +14,117 @@ class RitualsBanner extends StatelessWidget {
     if (!flagService.ritualsFlag) {
       return const SizedBox.shrink();
     }
-    return ValueListenableBuilder<RitualsState>(
-      valueListenable: ritualsService.stateNotifier,
-      builder: (context, state, _) {
-        final summary = state.summary;
-        final seven = summary?.last7Days ??
-            List.generate(
-              7,
-              (index) => RitualDay(
-                date: DateTime.now().subtract(Duration(days: 6 - index)),
-                isCompleted: false,
-              ),
-            );
-        final hasFire = summary?.hasSevenDayFire ?? false;
+    final List<DateTime> last7Days = List.generate(
+      7,
+      (index) => DateTime.now().subtract(Duration(days: 6 - index)),
+    );
 
-        final colorScheme = getEnteColorScheme(context);
-        final textTheme = getEnteTextTheme(context);
-        final narrowWeekdays = MaterialLocalizations.of(context).narrowWeekdays;
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            child: InkWell(
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final narrowWeekdays = MaterialLocalizations.of(context).narrowWeekdays;
+    final today = DateTime.now();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            routeToPage(context, const AllRitualsScreen());
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colorScheme.backgroundElevated2
+                  : const Color(0xFFFAFAFA),
               borderRadius: BorderRadius.circular(20),
-              onTap: () {
-                routeToPage(context, const AllRitualsScreen());
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? colorScheme.backgroundElevated2
-                      : const Color(0xFFFAFAFA),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: colorScheme.strokeFaint,
-                    width: 1,
-                  ),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 55,
-                      height: 55,
-                      child: Image.asset(
-                        "assets/rituals/take_a_photo.png",
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          const double baseCell = 30;
-                          const double minCell = baseCell * 0.8; // 24
-                          const double maxCell = baseCell * 1.3; // 39
-                          const double spacing = 4;
-                          double cellWidth =
-                              (constraints.maxWidth - (6 * spacing)) / 7;
-                          cellWidth = cellWidth.clamp(minCell, maxCell);
-                          final today = DateTime.now();
-
-                          return Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: seven.asMap().entries.map((entry) {
-                              final bool isLast = entry.key == seven.length - 1;
-                              final bool active =
-                                  entry.value.isCompleted || hasFire;
-                              final bool isToday =
-                                  _isSameDay(entry.value.date, today);
-                              final String label =
-                                  _dayLabel(narrowWeekdays, entry.value.date);
-                              final Widget pill = _DayPill(
-                                label: label,
-                                active: active,
-                                width: cellWidth,
-                                textTheme: textTheme,
-                                colorScheme: colorScheme,
-                              );
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  right: isLast ? 0 : spacing,
-                                ),
-                                child: SizedBox(
-                                  width: cellWidth,
-                                  height: cellWidth,
-                                  child: Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Positioned.fill(child: pill),
-                                      if (isToday)
-                                        Positioned(
-                                          bottom: -(cellWidth * 0.4),
-                                          left: (cellWidth - 6) / 2,
-                                          child: Container(
-                                            width: 6,
-                                            height: 6,
-                                            decoration: BoxDecoration(
-                                              color: colorScheme.primary500,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorScheme.blurStrokePressed,
-                    ),
-                  ],
-                ),
+              border: Border.all(
+                color: colorScheme.strokeFaint,
+                width: 1,
               ),
             ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 55,
+                  height: 55,
+                  child: Image.asset(
+                    "assets/rituals/take_a_photo.png",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      const double baseCell = 30;
+                      const double minCell = baseCell * 0.8; // 24
+                      const double maxCell = baseCell * 1.3; // 39
+                      const double spacing = 4;
+                      double cellWidth =
+                          (constraints.maxWidth - (6 * spacing)) / 7;
+                      cellWidth = cellWidth.clamp(minCell, maxCell);
+
+                      return Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: last7Days.asMap().entries.map((entry) {
+                          final bool isLast = entry.key == last7Days.length - 1;
+                          final bool isToday = _isSameDay(entry.value, today);
+                          final String label =
+                              _dayLabel(narrowWeekdays, entry.value);
+                          final Widget pill = _DayPill(
+                            label: label,
+                            active: true,
+                            width: cellWidth,
+                            textTheme: textTheme,
+                            colorScheme: colorScheme,
+                          );
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: isLast ? 0 : spacing,
+                            ),
+                            child: SizedBox(
+                              width: cellWidth,
+                              height: cellWidth,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Positioned.fill(child: pill),
+                                  if (isToday)
+                                    Positioned(
+                                      bottom: -(cellWidth * 0.4),
+                                      left: (cellWidth - 6) / 2,
+                                      child: Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.primary500,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: colorScheme.blurStrokePressed,
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
