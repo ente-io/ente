@@ -136,16 +136,27 @@ class _ShareCollectionBottomSheetState
   }
 
   Widget _buildShareesList(colorScheme, textTheme) {
-    if (_sharees.isEmpty) {
+    final currentUserId = Configuration.instance.getUserID() ?? -1;
+
+    final List<User> allUsers = [];
+
+    if (!_isOwner) {
+      final owner = widget.collection.owner;
+      owner.role = CollectionParticipantRole.owner.toStringVal();
+      allUsers.add(owner);
+    }
+
+    allUsers.addAll(_sharees);
+
+    if (allUsers.isEmpty) {
       return Text(
         context.l10n.noSharedUsers,
         style: textTheme.small.copyWith(color: colorScheme.textMuted),
       );
     }
-    final currentUserId = Configuration.instance.getUserID() ?? -1;
 
     const double maxVisibleHeight = 244.0;
-    final showScrollbar = _sharees.length > 4;
+    final showScrollbar = allUsers.length > 4;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,11 +170,13 @@ class _ShareCollectionBottomSheetState
                 controller: _scrollController,
                 shrinkWrap: true,
                 padding: EdgeInsets.zero,
-                itemCount: _sharees.length,
+                itemCount: allUsers.length,
                 itemBuilder: (context, index) {
-                  final user = _sharees[index];
+                  final user = allUsers[index];
                   final isFirst = index == 0;
-                  final isLast = index == _sharees.length - 1;
+                  final isLast = index == allUsers.length - 1;
+                  final role =
+                      CollectionParticipantRoleExtn.fromString(user.role);
 
                   return Column(
                     children: [
@@ -186,7 +199,7 @@ class _ShareCollectionBottomSheetState
                         menuItemColor: colorScheme.fillFaint,
                         trailingWidget: _isOwner
                             ? _buildRolePopupMenu(user, colorScheme)
-                            : _buildRoleIcon(user, colorScheme),
+                            : _buildRoleIcon(role, colorScheme),
                         surfaceExecutionStates: false,
                         isTopBorderRadiusRemoved: !isFirst,
                         isBottomBorderRadiusRemoved: !isLast,
@@ -201,7 +214,7 @@ class _ShareCollectionBottomSheetState
         if (showScrollbar) ...[
           const SizedBox(width: 4),
           _buildCustomScrollbar(
-            _sharees.length,
+            allUsers.length,
             maxVisibleHeight,
             colorScheme,
           ),
@@ -265,7 +278,15 @@ class _ShareCollectionBottomSheetState
     );
   }
 
-  Widget _buildRoleIcon(User user, colorScheme) {
+  Widget _buildRoleIcon(CollectionParticipantRole role, colorScheme) {
+    final icon = switch (role) {
+      CollectionParticipantRole.owner => HugeIcons.strokeRoundedCrown03,
+      CollectionParticipantRole.collaborator =>
+        HugeIcons.strokeRoundedUserMultiple,
+      CollectionParticipantRole.viewer => HugeIcons.strokeRoundedView,
+      _ => HugeIcons.strokeRoundedView,
+    };
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.backdropBase,
@@ -273,9 +294,7 @@ class _ShareCollectionBottomSheetState
       ),
       padding: const EdgeInsets.all(8),
       child: HugeIcon(
-        icon: user.isViewer
-            ? HugeIcons.strokeRoundedView
-            : HugeIcons.strokeRoundedUserMultiple,
+        icon: icon,
         color: colorScheme.textMuted,
         size: 20,
       ),
