@@ -143,6 +143,7 @@ class RitualsService {
 
     final Map<int, Set<int>> collectionDayKeys = {};
     final Map<int, Map<int, EnteFile>> collectionRecentFilesByDay = {};
+    final Map<int, Map<int, int>> collectionRecentFileCountsByDay = {};
 
     if (ritualAlbumIds.isEmpty) {
       return RitualsSummary(
@@ -154,11 +155,7 @@ class RitualsService {
     final files = await FilesDB.instance.getAllFilesFromCollections(
       ritualAlbumIds,
     );
-    final recentStart = DateTime(
-      todayMidnight.year,
-      todayMidnight.month,
-      todayMidnight.day - 4,
-    );
+    final recentStart = todayMidnight.subtract(const Duration(days: 42));
     for (final EnteFile file in files) {
       final bool ownerMatches =
           file.ownerID == null ? true : file.ownerID == userId;
@@ -180,6 +177,11 @@ class RitualsService {
       collectionDayKeys.putIfAbsent(collectionId, () => <int>{}).add(dayKey);
 
       if (bucket.isBefore(recentStart)) continue;
+      final countsByDay = collectionRecentFileCountsByDay.putIfAbsent(
+        collectionId,
+        () => <int, int>{},
+      );
+      countsByDay.update(dayKey, (value) => value + 1, ifAbsent: () => 1);
       final byDay =
           collectionRecentFilesByDay.putIfAbsent(collectionId, () => {});
       final existing = byDay[dayKey];
@@ -218,6 +220,8 @@ class RitualsService {
         ritualId: ritual.id,
         completedDayKeys: dates,
         recentFilesByDay: collectionRecentFilesByDay[albumId] ?? const {},
+        recentFileCountsByDay:
+            collectionRecentFileCountsByDay[albumId] ?? const {},
         currentStreak: ritualCurrent,
         longestStreakOverall: ritualLongestOverall,
         longestStreakThisMonth: ritualLongestThisMonth,
