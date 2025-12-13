@@ -95,6 +95,7 @@ class RitualProgress {
   final String ritualId;
   final Set<int> completedDayKeys;
   final Map<int, EnteFile> recentFilesByDay;
+  final Map<int, int> recentFileCountsByDay;
   final int currentStreak;
   final int longestStreakOverall;
   final int longestStreakThisMonth;
@@ -103,6 +104,7 @@ class RitualProgress {
     required this.ritualId,
     required this.completedDayKeys,
     this.recentFilesByDay = const {},
+    this.recentFileCountsByDay = const {},
     required this.currentStreak,
     required this.longestStreakOverall,
     required this.longestStreakThisMonth,
