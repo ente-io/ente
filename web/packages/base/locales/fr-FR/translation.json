@@ -247,7 +247,7 @@
     "sharing_already_shared": "Vous partagez déjà ceci avec {{email}}",
     "sharing_album_not_allowed": "Partage d'album non autorisé",
     "sharing_disabled_for_free_accounts": "Le partage est désactivé pour les comptes gratuits",
-    "link_edit_disabled_for_free_accounts": "",
+    "link_edit_disabled_for_free_accounts": "Vous avez besoin d'un abonnement payant pour modifier le paramètre de ce lien",
     "sharing_user_does_not_exist": "Impossible de trouver un utilisateur avec cet email",
     "search": "Recherche",
     "search_results": "Résultats de la recherche",
