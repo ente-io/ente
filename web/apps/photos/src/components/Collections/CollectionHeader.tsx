@@ -703,8 +703,9 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     </Tooltip>
 );
 
-const showFeedQuickOption = ({ type }: CollectionSummary) =>
-    type == "album" || type == "folder";
+const showFeedQuickOption = ({ type, attributes }: CollectionSummary) =>
+    type == "sharedIncoming" ||
+    ((type == "album" || type == "folder") && attributes.has("shared"));
 
 const FeedIcon: React.FC = () => (
     <svg
