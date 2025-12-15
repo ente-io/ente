@@ -441,6 +441,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         }
     }, [replyingTo]);
 
+    // Reset selected collection when the file changes (gallery view only)
+    useEffect(() => {
+        setSelectedCollectionID(undefined);
+    }, [file?.id]);
+
     // Check if opened from a collection context
     const hasCollectionContext =
         activeCollectionID !== undefined && activeCollectionID !== 0;
@@ -496,6 +501,35 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         collectionsInfo,
         sortedCollectionsInfo,
     ]);
+
+    // Check if the current user can delete a given comment.
+    // User can delete if: they authored the comment, OR they are owner/admin of the collection.
+    const canDeleteComment = useCallback(
+        (comment: Comment): boolean => {
+            // Comment author can always delete their own comment
+            if (comment.userID === currentUserID) {
+                return true;
+            }
+
+            // Check if user is owner or admin of the selected collection
+            const collectionID = selectedCollectionInfo?.id;
+            if (!collectionID || !collectionSummaries) {
+                return false;
+            }
+
+            const summary = collectionSummaries.get(collectionID);
+            if (!summary) {
+                return false;
+            }
+
+            // User is owner (sharedOutgoing) or admin (sharedIncomingAdmin)
+            return (
+                summary.attributes.has("sharedOutgoing") ||
+                summary.attributes.has("sharedIncomingAdmin")
+            );
+        },
+        [currentUserID, selectedCollectionInfo, collectionSummaries],
+    );
 
     // Load comments and reactions from prefetched data.
     const loadComments = useCallback(() => {
@@ -1250,24 +1284,29 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                             <ReplyIcon />
                             <span>Reply</span>
                         </StyledMenuItem>
-                        <StyledMenuItem
-                            onClick={() => handleContextMenuAction("delete")}
-                            sx={(theme) => ({
-                                "&:hover": {
-                                    backgroundColor: "#F24F4F",
-                                    color: "#fff",
-                                },
-                                ...theme.applyStyles("dark", {
-                                    "&:hover": {
-                                        backgroundColor: "#C53030",
-                                        color: "#fff",
-                                    },
-                                }),
-                            })}
-                        >
-                            <DeleteIcon />
-                            <span>Delete</span>
-                        </StyledMenuItem>
+                        {contextMenu &&
+                            canDeleteComment(contextMenu.comment) && (
+                                <StyledMenuItem
+                                    onClick={() =>
+                                        handleContextMenuAction("delete")
+                                    }
+                                    sx={(theme) => ({
+                                        "&:hover": {
+                                            backgroundColor: "#F24F4F",
+                                            color: "#fff",
+                                        },
+                                        ...theme.applyStyles("dark", {
+                                            "&:hover": {
+                                                backgroundColor: "#C53030",
+                                                color: "#fff",
+                                            },
+                                        }),
+                                    })}
+                                >
+                                    <DeleteIcon />
+                                    <span>Delete</span>
+                                </StyledMenuItem>
+                            )}
                     </StyledMenu>
                 </CommentsContainer>
 
