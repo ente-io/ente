@@ -8,21 +8,24 @@
         "ente-base": "*",
         "ente-utils": "*",
         "exifreader": "^4.32.0",
+        "fflate": "^0.8.2",
         "hls-video-element": "^1.5.8",
+        "jszip": "^3.10.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
         "localforage": "^1.10.0",
         "media-chrome": "^4.14.0",
-        "jszip": "^3.10.1",
         "photoswipe": "^5.4.4",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
-        "react-dropzone": "14.2.10"
+        "react-dropzone": "14.2.10",
+        "streamsaver": "^2.0.6"
     },
     "devDependencies": {
         "@types/leaflet": "^1.9.21",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
+        "@types/streamsaver": "^2.0.5",
         "ente-build-config": "*"
     }
 }

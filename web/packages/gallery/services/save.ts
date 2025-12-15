@@ -10,12 +10,12 @@ import type { EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
-import JSZip from "jszip";
 import {
     safeDirectoryName,
     safeFileName,
 } from "ente-new/photos/utils/native-fs";
 import { wait } from "ente-utils/promise";
+import { Zip, ZipPassThrough } from "fflate";
 import type {
     AddSaveGroup,
     UpdateSaveGroup,
@@ -90,8 +90,6 @@ const downloadAndSave = async (
     isHiddenCollectionSummary?: boolean,
 ) => {
     const electron = globalThis.electron;
-    const ZIP_MAX_FILE_COUNT = 50;
-    const ZIP_MAX_TOTAL_BYTES = 200 * 1024 * 1024; // Conservative cap to avoid blowing up memory during zip generation.
 
     const total = files.length;
     if (!files.length) {
@@ -120,33 +118,7 @@ const downloadAndSave = async (
     const failedFiles: EnteFile[] = [];
     let isDownloading = false;
     let updateSaveGroup: UpdateSaveGroup = () => undefined;
-
-    const buildZipBatches = (filesToBatch: EnteFile[]) => {
-        const batches: EnteFile[][] = [];
-        let current: EnteFile[] = [];
-        let currentBytes = 0;
-
-        for (const file of filesToBatch) {
-            const size = file.info?.fileSize;
-            if (size !== undefined && size > ZIP_MAX_TOTAL_BYTES) return undefined;
-
-            const wouldExceedCount = current.length >= ZIP_MAX_FILE_COUNT;
-            const wouldExceedBytes =
-                size !== undefined && currentBytes + size > ZIP_MAX_TOTAL_BYTES;
-
-            if (current.length && (wouldExceedCount || wouldExceedBytes)) {
-                batches.push(current);
-                current = [];
-                currentBytes = 0;
-            }
-
-            current.push(file);
-            if (size !== undefined) currentBytes += size;
-        }
-
-        if (current.length) batches.push(current);
-        return batches;
-    };
+    let retryAttempt = 0;
 
     const saveSingleFile = async (file: EnteFile) => {
         if (electron && downloadDirPath) {
@@ -155,20 +127,6 @@ const downloadAndSave = async (
             await saveAsFile(file);
         }
         updateSaveGroup((g) => ({ ...g, success: g.success + 1 }));
-    };
-
-    const addFileToZip = async (zip: JSZip, file: EnteFile) => {
-        const fileBlob = await downloadManager.fileBlob(file);
-        const fileName = fileFileName(file);
-
-        if (file.metadata.fileType == FileType.livePhoto) {
-            const { imageFileName, imageData, videoFileName, videoData } =
-                await decodeLivePhoto(fileName, fileBlob);
-            zip.file(imageFileName, imageData);
-            zip.file(videoFileName, videoData);
-        } else {
-            zip.file(fileName, fileBlob);
-        }
     };
 
     const downloadFiles = async (
@@ -180,128 +138,83 @@ const downloadAndSave = async (
         isDownloading = true;
         if (resetFailedCount) {
             updateSaveGroup((g) => ({ ...g, failed: 0 }));
+            retryAttempt += 1;
         }
         failedFiles.length = 0;
 
         try {
-            const zipBatches =
-                !electron && filesToDownload.length > 1
-                    ? buildZipBatches(filesToDownload)
-                    : undefined;
-            const shouldZip = !!zipBatches?.length;
-            const useZip = shouldZip && !resetFailedCount; // retries always go individual to avoid repeat failures.
+            const zipTitle =
+                retryAttempt > 0 ? `${title}-retry-${retryAttempt}` : title;
 
-            if (!useZip) {
-                for (const file of filesToDownload) {
-                    if (canceller.signal.aborted) break;
-                    try {
-                        await saveSingleFile(file);
-                    } catch (e) {
-                        log.error("File download failed", e);
-                        failedFiles.push(file);
-                        updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
-                    }
+            if (filesToDownload.length > 1) {
+                let writableOverride: WritableStreamHandle | undefined;
+                if (electron && downloadDirPath) {
+                    const zipExportName = await safeFileName(
+                        downloadDirPath,
+                        zipFileName(zipTitle),
+                        electron.fs.exists,
+                    );
+                    const zipPath = joinPath(downloadDirPath, zipExportName);
+                    writableOverride = await createNativeZipWritable(
+                        electron,
+                        zipPath,
+                    );
                 }
-            } else {
-                const downloadIndividually = async (
-                    filesFallback: EnteFile[],
-                ) => {
-                    const previousFailures = [...failedFiles];
-                    failedFiles.length = 0;
-                    for (const file of filesFallback) {
-                        if (canceller.signal.aborted) break;
-                        try {
-                            await saveSingleFile(file);
-                        } catch (e) {
-                            log.error("File download failed", e);
-                            failedFiles.push(file);
-                            updateSaveGroup((g) => ({
-                                ...g,
-                                failed: g.failed + 1,
-                            }));
-                        }
-                    }
-                    for (const file of previousFailures) {
-                        if (!failedFiles.includes(file)) failedFiles.push(file);
-                    }
-                };
 
-                const totalParts = zipBatches?.length ?? 0;
-                let partNumber = 1;
-                for (const batch of zipBatches ?? []) {
-                    const zip = new JSZip();
-                    const successfulFiles: EnteFile[] = [];
-
-                    try {
-                        for (const file of batch) {
-                            if (canceller.signal.aborted) break;
-                            try {
-                                await addFileToZip(zip, file);
-                                successfulFiles.push(file);
-                            } catch (e) {
-                                log.error("File download failed", e);
-                                failedFiles.push(file);
-                                updateSaveGroup((g) => ({
-                                    ...g,
-                                    failed: g.failed + 1,
-                                }));
-                            }
-                        }
-
-                        if (
-                            !canceller.signal.aborted &&
-                            successfulFiles.length &&
-                            !failedFiles.length
-                        ) {
-                            try {
-                                const zipBlob = await zip.generateAsync(
-                                    {
-                                        type: "blob",
-                                        compression: "STORE",
-                                        streamFiles: true,
-                                    },
-                                    (metadata) => {
-                                        // Abort zip generation if user cancels.
-                                        if (canceller.signal.aborted) {
-                                            throw new Error("zip-cancelled");
-                                        }
-                                        // We don't push progress to UI to keep it simple.
-                                        return metadata;
-                                    },
-                                );
-                                await saveBlobPartAsFile(
-                                    zipBlob,
-                                    zipFileName(
-                                        title,
-                                        totalParts > 1 ? partNumber : undefined,
-                                    ),
-                                    "application/zip",
-                                );
-                                updateSaveGroup((g) => ({
-                                    ...g,
-                                    success: g.success + successfulFiles.length,
-                                }));
-                                partNumber++;
-                            } catch (e) {
-                                log.error("Zip creation failed", e);
-                                failedFiles.push(...successfulFiles);
-                                updateSaveGroup((g) => ({
-                                    ...g,
-                                    failed: g.failed + successfulFiles.length,
-                                }));
-                                await downloadIndividually(batch);
-                            }
-                        }
-                    } catch (e) {
-                        log.error("Zip creation failed", e);
-                        if ((e as Error).message === "zip-cancelled") break;
-                        failedFiles.push(...successfulFiles);
+                // Try streaming ZIP first
+                const streamingResult = await streamFilesToZip({
+                    files: filesToDownload,
+                    title: zipTitle,
+                    signal: canceller.signal,
+                    writable: writableOverride,
+                    onFileSuccess: (_file, entryCount) => {
                         updateSaveGroup((g) => ({
                             ...g,
-                            failed: g.failed + successfulFiles.length,
+                            success: g.success + entryCount,
                         }));
-                        await downloadIndividually(batch);
+                    },
+                    onFileFailure: (file) => {
+                        if (!failedFiles.includes(file)) failedFiles.push(file);
+                        updateSaveGroup((g) => ({
+                            ...g,
+                            failed: g.failed + 1,
+                        }));
+                    },
+                });
+
+                if (streamingResult === "success") {
+                    if (!failedFiles.length) {
+                        updateSaveGroup((g) => ({ ...g, retry: undefined }));
                     }
+                    return;
+                }
+
+                if (streamingResult === "cancelled") {
+                    canceller.abort();
+                    return;
+                }
+
+                if (streamingResult !== "unavailable") {
+                    // Streaming started but was cancelled or failed; avoid double-downloading
+                    return;
+                }
+
+                // If streaming ZIP setup was unavailable (picker cancel/streamsaver missing),
+                // fall back to individual downloads
+                log.info(
+                    "Streaming ZIP unavailable, falling back to individual",
+                );
+            }
+
+            // Individual file downloads
+            for (const file of filesToDownload) {
+                if (canceller.signal.aborted) break;
+                try {
+                    await saveSingleFile(file);
+                } catch (e) {
+                    log.error("File download failed", e);
+                    failedFiles.push(file);
+                    updateSaveGroup((g) => ({ ...g, failed: g.failed + 1 }));
                 }
             }
 
@@ -462,14 +375,482 @@ const saveFileDesktop = async (
     }
 };
 
+/**
+ * Replace invalid filesystem characters (\ / : * ? " < > |) with underscores.
+ */
 const sanitizeZipFileName = (name: string) =>
     name.replace(/[\\/:*?"<>|]/g, "_").trim() || "ente-download";
 
+/** Sanitize title and strip any existing .zip extension. */
 const baseZipName = (title: string) =>
     sanitizeZipFileName(title).replace(/\.zip$/i, "");
 
+/** Generate ZIP filename, optionally with part number (e.g., "photos-part2.zip"). */
 const zipFileName = (title: string, part?: number) => {
     const base = baseZipName(title);
     const nameWithPart = part ? `${base}-part${part}` : base;
     return `${nameWithPart}.zip`;
+};
+
+// ============================================================================
+// Streaming ZIP support
+// ============================================================================
+
+/**
+ * Type augmentation for File System Access API (Chrome/Edge 86+).
+ * Falls back to StreamSaver.js on Firefox/Safari.
+ */
+declare global {
+    interface Window {
+        showSaveFilePicker?: (
+            options?: SaveFilePickerOptions,
+        ) => Promise<FileSystemFileHandle>;
+    }
+    interface SaveFilePickerOptions {
+        suggestedName?: string;
+        types?: { description?: string; accept: Record<string, string[]> }[];
+    }
+}
+
+/**
+ * Handle for managing a writable stream during ZIP creation.
+ * Abstracts File System Access API vs StreamSaver.js differences.
+ */
+interface WritableStreamHandle {
+    /** Writable stream accepting Uint8Array chunks. */
+    stream: WritableStream<Uint8Array>;
+    /** Finalize the file. Must be called on success. */
+    close: () => Promise<void>;
+    /** Abort and clean up. Call on error. */
+    abort: () => void;
+}
+
+/**
+ * Get a writable stream for ZIP file. Tries File System Access API first,
+ * falls back to StreamSaver.js. Returns null if cancelled, undefined if unavailable.
+ */
+const getWritableStreamForZip = async (
+    fileName: string,
+): Promise<WritableStreamHandle | null | undefined> => {
+    // Try File System Access API first (Chrome/Edge)
+    if (window.showSaveFilePicker) {
+        try {
+            const fileHandle = await window.showSaveFilePicker({
+                suggestedName: fileName,
+                types: [
+                    {
+                        description: "ZIP Archive",
+                        accept: { "application/zip": [".zip"] },
+                    },
+                ],
+            });
+            const writable = await fileHandle.createWritable();
+            return {
+                stream: writable,
+                close: () => writable.close(),
+                abort: () => void writable.abort(),
+            };
+        } catch (e) {
+            // User cancelled the picker
+            if (e instanceof DOMException && e.name === "AbortError") {
+                return null;
+            }
+            log.warn(
+                "File System Access API failed, falling back to StreamSaver",
+                e,
+            );
+        }
+    }
+
+    // Fall back to StreamSaver.js (Firefox/Safari)
+    try {
+        // Dynamically import streamsaver to avoid SSR issues (it references document)
+        const streamSaver = await import("streamsaver");
+        const fileStream = streamSaver.createWriteStream(fileName);
+        const writer = fileStream.getWriter();
+        return {
+            stream: new WritableStream<Uint8Array>({
+                write: (chunk) => writer.write(chunk),
+                close: () => writer.close(),
+                abort: () => writer.abort(),
+            }),
+            close: async () => {
+                await writer.close();
+            },
+            abort: () => {
+                void writer.abort().catch(() => {
+                    // Ignore errors during abort
+                });
+            },
+        };
+    } catch (e) {
+        log.error("StreamSaver fallback also failed", e);
+        return undefined;
+    }
+};
+
+/** Options for {@link streamFilesToZip}. */
+interface StreamingZipOptions {
+    /** Files to add (processed in order, live photos expanded to image+video). */
+    files: EnteFile[];
+    /** Title for ZIP filename. */
+    title: string;
+    /** AbortSignal to cancel the operation. */
+    signal: AbortSignal;
+    /** Optional pre-configured writable (for desktop native writes). */
+    writable?: WritableStreamHandle;
+    /** Called when a file is successfully added. */
+    onFileSuccess: (file: EnteFile, entryCount: number) => void;
+    /** Called when a file fails (after retries exhausted). */
+    onFileFailure: (file: EnteFile, error: unknown) => void;
+}
+
+/** Result: "success", "cancelled", "error", or "unavailable" (no streaming support). */
+type StreamingZipResult = "success" | "cancelled" | "error" | "unavailable";
+
+const STREAM_ZIP_MIN_CONCURRENCY = 2;
+const STREAM_ZIP_MAX_CONCURRENCY = 4;
+const STREAM_ZIP_MAX_RETRIES = 3;
+/** Base retry delay (multiplied by attempt number for backoff). */
+const STREAM_ZIP_RETRY_DELAY_MS = 400;
+
+/**
+ * Determine optimal concurrency based on available memory.
+ * Uses performance.memory (Chrome) or navigator.deviceMemory, defaults to 3.
+ */
+const getStreamZipConcurrency = () => {
+    try {
+        // Chrome provides heap info; keep headroom before allowing more parallel work.
+        const memory = (
+            performance as Performance & {
+                memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+            }
+        ).memory;
+        if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
+            const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
+            if (free > 400 * 1024 * 1024) return 4;
+            if (free > 160 * 1024 * 1024) return 3;
+            return 1; // very constrained, stream one at a time
+        }
+
+        // Fallback: navigator.deviceMemory returns approximate GBs available to JS.
+        const deviceMemory = (
+            navigator as Navigator & { deviceMemory?: number }
+        ).deviceMemory;
+        if (deviceMemory) {
+            if (deviceMemory >= 12) return 4;
+            if (deviceMemory >= 6) return 3;
+            if (deviceMemory >= 4) return 2;
+        }
+    } catch {
+        // Ignore and fall back to defaults below.
+    }
+
+    return 3;
+};
+
+/**
+ * Create a writable stream for desktop app using native filesystem via Electron.
+ * Uses TransformStream to bridge ZIP writes to native file streaming.
+ */
+const createNativeZipWritable = (
+    electron: Electron,
+    filePath: string,
+): WritableStreamHandle => {
+    const transform = new TransformStream<Uint8Array, Uint8Array>();
+    const writer = transform.writable.getWriter();
+
+    const writePromise = writeStream(electron, filePath, transform.readable);
+
+    const close = async () => {
+        await writer.close();
+        await writePromise;
+    };
+
+    const abort = () => {
+        void writer.abort().catch(() => undefined);
+    };
+
+    return {
+        stream: new WritableStream<Uint8Array>({
+            write: (chunk) => writer.write(chunk),
+            close,
+            abort,
+        }),
+        close,
+        abort,
+    };
+};
+
+/**
+ * Stream files to a ZIP archive using fflate.
+ *
+ * Downloads files with limited concurrency, writes them to ZIP in order using
+ * ZipPassThrough (no compression). Live photos expand to image+video entries.
+ * Failed files are retried, then skipped. Reports progress via callbacks.
+ */
+const streamFilesToZip = async ({
+    files,
+    title,
+    signal,
+    writable,
+    onFileSuccess,
+    onFileFailure,
+}: StreamingZipOptions): Promise<StreamingZipResult> => {
+    const zipName = zipFileName(title);
+    const handle = writable ?? (await getWritableStreamForZip(zipName));
+
+    if (handle === null) return "cancelled";
+    if (!handle) return "unavailable";
+
+    const { stream } = handle;
+    const writer = stream.getWriter();
+
+    let zipError: Error | undefined;
+    let writerClosed = false;
+    let writeChain = Promise.resolve();
+
+    const closeWriter = async () => {
+        if (writerClosed) return;
+        writerClosed = true;
+        try {
+            await writer.close();
+        } catch (e) {
+            log.warn("Failed to close ZIP writer", e);
+        }
+    };
+
+    const abortWriter = () => {
+        if (writerClosed) return;
+        writerClosed = true;
+        try {
+            void writer.abort();
+        } catch (e) {
+            log.warn("Failed to abort ZIP writer", e);
+        }
+    };
+
+    /** Queue write, serialize through promise chain, capture errors in zipError. */
+    const enqueueWrite = (data: Uint8Array) => {
+        writeChain = writeChain.then(() => writer.write(data));
+        writeChain = writeChain.catch((e: unknown) => {
+            zipError = e instanceof Error ? e : new Error(String(e));
+            throw zipError;
+        });
+        return writeChain;
+    };
+
+    const zip = new Zip((err, data) => {
+        if (err) {
+            zipError = err instanceof Error ? err : new Error(String(err));
+            return;
+        }
+        void enqueueWrite(data);
+    });
+
+    interface PreparedEntry {
+        name: string;
+        getData: () => Promise<Uint8Array | ReadableStream<Uint8Array>>;
+    }
+
+    interface PreparedFile {
+        file: EnteFile;
+        entries: PreparedEntry[];
+        entryCount: number;
+    }
+
+    /** Download and prepare file for ZIP (decodes live photos to image+video). */
+    const prepareFile = async (
+        file: EnteFile,
+    ): Promise<PreparedFile | null> => {
+        try {
+            const fileName = fileFileName(file);
+
+            if (file.metadata.fileType === FileType.livePhoto) {
+                const blob = await downloadManager.fileBlob(file);
+                if (signal.aborted) return null;
+
+                const { imageFileName, imageData, videoFileName, videoData } =
+                    await decodeLivePhoto(fileName, blob);
+
+                const imageBytes = new Uint8Array(
+                    imageData instanceof Blob
+                        ? await imageData.arrayBuffer()
+                        : imageData,
+                );
+                const videoBytes = new Uint8Array(
+                    videoData instanceof Blob
+                        ? await videoData.arrayBuffer()
+                        : videoData,
+                );
+
+                const entries: PreparedEntry[] = [
+                    { name: imageFileName, getData: () => Promise.resolve(imageBytes) },
+                    { name: videoFileName, getData: () => Promise.resolve(videoBytes) },
+                ];
+
+                return { file, entries, entryCount: 1 };
+            }
+
+            const getStream = async () => {
+                const stream = await downloadManager.fileStream(file);
+                if (!stream) throw new Error("Failed to get file stream");
+                return stream;
+            };
+
+            return {
+                file,
+                entries: [{ name: fileName, getData: getStream }],
+                entryCount: 1,
+            };
+        } catch (e) {
+            onFileFailure(file, e);
+            return null;
+        }
+    };
+
+    const preparedPromises: Promise<PreparedFile | null>[] = [];
+    const concurrency = Math.max(
+        STREAM_ZIP_MIN_CONCURRENCY,
+        Math.min(getStreamZipConcurrency(), STREAM_ZIP_MAX_CONCURRENCY),
+    );
+    let nextToSchedule = 0;
+    let active = 0;
+
+    /** Schedule next file prep if under concurrency limit. */
+    const scheduleNext = () => {
+        if (nextToSchedule >= files.length || active >= concurrency) return;
+        const index = nextToSchedule++;
+        const file = files[index]!;
+        const promise = prepareFile(file).finally(() => {
+            active--;
+            scheduleNext();
+        });
+        preparedPromises[index] = promise;
+        active++;
+        scheduleNext();
+    };
+
+    scheduleNext();
+
+    let lastCompletedIndex = -1;
+
+    /** Read stream to completion, returning all chunks. */
+    const readStreamFully = async (
+        stream: ReadableStream<Uint8Array>,
+    ): Promise<Uint8Array[]> => {
+        const reader = stream.getReader();
+        const chunks: Uint8Array[] = [];
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                if (signal.aborted) {
+                    void reader.cancel().catch(() => undefined);
+                    throw new DOMException("Aborted", "AbortError");
+                }
+                chunks.push(value);
+            }
+            return chunks;
+        } catch (e) {
+            void reader.cancel().catch(() => undefined);
+            throw e;
+        }
+    };
+
+    /** Add entry to ZIP with retries. Reads full data first for atomic writes. */
+    const addEntryToZipWithRetry = async (
+        file: EnteFile,
+        entry: PreparedEntry,
+    ) => {
+        let attempt = 0;
+        while (attempt < STREAM_ZIP_MAX_RETRIES) {
+            attempt++;
+            try {
+                // Read the full entry before adding it to the ZIP so transient
+                // stream errors don't leave a half-written entry behind.
+                const resolvedData = await entry.getData();
+                const chunks =
+                    resolvedData instanceof ReadableStream
+                        ? await readStreamFully(resolvedData)
+                        : [resolvedData];
+
+                const passThrough = new ZipPassThrough(entry.name);
+                zip.add(passThrough);
+                for (const chunk of chunks) {
+                    passThrough.push(chunk);
+                }
+                passThrough.push(new Uint8Array(0), true);
+
+                await writeChain;
+                if (zipError) throw zipError;
+                return;
+            } catch (e) {
+                if (signal.aborted || attempt === STREAM_ZIP_MAX_RETRIES) {
+                    throw e;
+                }
+                log.warn(
+                    `Retrying stream for file ${file.id} (attempt ${attempt})`,
+                    e,
+                );
+                await wait(STREAM_ZIP_RETRY_DELAY_MS * attempt);
+            }
+        }
+    };
+
+    try {
+        // Consume prepared files in order; preparation happens with limited concurrency
+        for (let i = 0; i < files.length; i++) {
+            if (signal.aborted) {
+                abortWriter();
+                return "cancelled";
+            }
+
+            const preparedPromise = preparedPromises[i];
+            if (!preparedPromise) {
+                continue;
+            }
+            const prepared = await preparedPromise;
+            const file = files[i]!;
+            if (prepared && !signal.aborted) {
+                try {
+                    for (const entry of prepared.entries) {
+                        await addEntryToZipWithRetry(file, entry);
+                    }
+                    onFileSuccess(file, prepared.entryCount);
+                } catch (e: unknown) {
+                    log.error(`Failed to add file ${file.id} to ZIP`, e);
+                    onFileFailure(file, e);
+                }
+            }
+            lastCompletedIndex = i;
+
+            if (zipError) {
+                throw zipError;
+            }
+        }
+
+        // Finalize the ZIP
+        zip.end();
+
+        // Wait for all pending writes to flush and close the writer
+        await writeChain;
+        if (zipError) throw zipError;
+
+        await closeWriter();
+
+        return "success";
+    } catch (e) {
+        if (!signal.aborted) {
+            // Mark any remaining files as failed so counts stay consistent
+            for (let i = lastCompletedIndex + 1; i < files.length; i++) {
+                const file = files[i]!;
+                onFileFailure(file, e);
+            }
+        }
+
+        log.error("Streaming ZIP creation failed", e);
+        abortWriter();
+        return signal.aborted ? "cancelled" : "error";
+    }
 };
