@@ -3,6 +3,7 @@ import "dart:ui" as ui;
 
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
@@ -189,14 +190,14 @@ class _RitualPageState extends State<RitualPage> {
             actions: [
               _TopActionButton(
                 background: actionBackground,
-                icon: Icons.photo_camera_outlined,
+                icon: HugeIcons.strokeRoundedCamera01,
                 onPressed: () => openRitualCamera(context, currentRitual),
                 tooltip: context.l10n.ritualOpenCameraTooltip,
               ),
               const SizedBox(width: 8),
               _TopActionButton(
                 background: actionBackground,
-                icon: Icons.ios_share,
+                icon: HugeIcons.strokeRoundedShare08,
                 buttonKey: _shareButtonKey,
                 onPressed: _sharing
                     ? null
@@ -301,7 +302,7 @@ class _TopActionButton extends StatelessWidget {
   });
 
   final Color background;
-  final IconData icon;
+  final List<List<dynamic>> icon;
   final Key? buttonKey;
   final VoidCallback? onPressed;
   final String tooltip;
@@ -318,8 +319,8 @@ class _TopActionButton extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         minimumSize: const Size(40, 40),
       ),
-      icon: Icon(
-        icon,
+      icon: HugeIcon(
+        icon: icon,
         size: 22,
         color: colorScheme.textBase,
       ),
@@ -346,6 +347,54 @@ class _OverflowMenuButton extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     return PopupMenuButton<_RitualOverflowAction>(
       tooltip: MaterialLocalizations.of(context).showMenuTooltip,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      color: colorScheme.backgroundElevated,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: colorScheme.strokeFaint, width: 1),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: _RitualOverflowAction.edit,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedPen01,
+                color: colorScheme.textBase,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(context.l10n.edit),
+            ],
+          ),
+        ),
+        PopupMenuDivider(
+          height: 0,
+          thickness: 1,
+          color: colorScheme.strokeFaint,
+        ),
+        PopupMenuItem(
+          value: _RitualOverflowAction.delete,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedDelete02,
+                color: Colors.red,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                context.l10n.delete,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
+        ),
+      ],
       onSelected: (action) {
         switch (action) {
           case _RitualOverflowAction.edit:
@@ -356,31 +405,6 @@ class _OverflowMenuButton extends StatelessWidget {
             break;
         }
       },
-      itemBuilder: (context) => [
-        PopupMenuItem(
-          value: _RitualOverflowAction.edit,
-          child: Row(
-            children: [
-              Icon(Icons.edit_outlined, color: colorScheme.textBase, size: 20),
-              const SizedBox(width: 10),
-              Text(context.l10n.edit),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: _RitualOverflowAction.delete,
-          child: Row(
-            children: [
-              const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-              const SizedBox(width: 10),
-              Text(
-                context.l10n.delete,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ],
-          ),
-        ),
-      ],
       child: Container(
         width: 40,
         height: 40,
@@ -389,8 +413,8 @@ class _OverflowMenuButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
-          child: Icon(
-            Icons.more_horiz,
+          child: HugeIcon(
+            icon: HugeIcons.strokeRoundedMoreVertical,
             size: 22,
             color: colorScheme.textBase,
           ),
