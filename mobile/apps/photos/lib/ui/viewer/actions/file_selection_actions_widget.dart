@@ -277,18 +277,6 @@ class _FileSelectionActionsWidgetState
         }
       }
 
-      if (flagService.manualTagFileToPerson &&
-          widget.type != GalleryType.sharedPublicCollection) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.person_add_alt_1_outlined,
-            labelText: "(i) Add to person",
-            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
-            shouldShow: hasUploadedFileIDs,
-          ),
-        );
-      }
-
       if (widget.type.showAddtoHiddenAlbum()) {
         items.add(
           SelectionActionButton(
@@ -388,6 +376,18 @@ class _FileSelectionActionsWidgetState
           onTap: _onGuestViewClick,
         ),
       );
+
+      if (flagService.manualTagFileToPerson &&
+          widget.type.showAddToPersonOption()) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.person_add_alt_1_outlined,
+            labelText: "(i) Add to person",
+            onTap: hasUploadedFileIDs ? _onAddFilesToPerson : null,
+            shouldShow: hasUploadedFileIDs,
+          ),
+        );
+      }
       if (widget.type != GalleryType.sharedPublicCollection) {
         items.add(
           SelectionActionButton(
