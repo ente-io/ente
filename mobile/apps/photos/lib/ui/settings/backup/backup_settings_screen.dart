@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/l10n/l10n.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/services/wake_lock_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -235,7 +236,10 @@ class BackupSettingsScreen extends StatelessWidget {
             _onlyNewToggleDebouncer.run(() async {
               await SyncService.instance.sync();
             });
-            if (backupPreferenceService.hasSkippedOnboardingPermission) {
+            // Only clear skip flag if first import is done (folders loaded),
+            // ensuring user can see gallery properly after skip is cleared
+            if (backupPreferenceService.hasSkippedOnboardingPermission &&
+                LocalSyncService.instance.hasCompletedFirstImport()) {
               await backupPreferenceService.setOnboardingPermissionSkipped(
                 false,
               );

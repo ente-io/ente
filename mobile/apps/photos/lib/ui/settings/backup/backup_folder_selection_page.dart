@@ -205,8 +205,16 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       ? GestureDetector(
                           key: const ValueKey("skipBackupButton"),
                           behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            Navigator.of(context).pop(false);
+                          onTap: () async {
+                            // Clear skip flag - user made explicit choice to skip
+                            if (backupPreferenceService
+                                .hasSkippedOnboardingPermission) {
+                              await backupPreferenceService
+                                  .setOnboardingPermissionSkipped(false);
+                            }
+                            if (context.mounted) {
+                              Navigator.of(context).pop(false);
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 8),
