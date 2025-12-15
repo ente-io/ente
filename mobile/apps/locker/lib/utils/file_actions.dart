@@ -6,7 +6,7 @@ import "package:locker/core/errors.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/services/favorites_service.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
@@ -43,16 +43,20 @@ class FileActions {
       'Opening edit dialog for file ${file.uploadedFileID}',
     );
 
-    final allCollections = await CollectionService.instance.getCollections();
+    final int currentUserID = Configuration.instance.getUserID()!;
+    if (file.ownerID != currentUserID) {
+      showToast(context, "Edit feature coming soon");
+      return;
+    }
+
+    final editableCollections =
+        await CollectionService.instance.getCollectionsForUI();
+
     final currentCollections =
         await CollectionService.instance.getCollectionsForFile(file);
 
     final favoriteCollection =
         await CollectionService.instance.getOrCreateImportantCollection();
-
-    final editableCollections = allCollections
-        .where((c) => c.type != CollectionType.uncategorized)
-        .toList();
 
     final currentCollectionIds = currentCollections.map((c) => c.id).toSet();
 

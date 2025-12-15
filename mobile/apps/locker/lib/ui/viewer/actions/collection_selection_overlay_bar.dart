@@ -375,7 +375,9 @@ class _CollectionSelectionOverlayBarState
     );
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
-          collectionViewType != CollectionViewType.sharedCollection &&
+          collectionViewType != CollectionViewType.sharedCollectionViewer &&
+          collectionViewType !=
+              CollectionViewType.sharedCollectionCollaborator &&
           collectionViewType != CollectionViewType.hiddenOwnedCollection &&
           collectionViewType != CollectionViewType.favorite)) {
         throw Exception(

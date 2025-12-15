@@ -199,7 +199,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   Future<void> _shareCollection() async {
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
-          collectionViewType != CollectionViewType.sharedCollection &&
+          collectionViewType != CollectionViewType.sharedCollectionViewer &&
+          collectionViewType !=
+              CollectionViewType.sharedCollectionCollaborator &&
           collectionViewType != CollectionViewType.hiddenOwnedCollection &&
           collectionViewType != CollectionViewType.favorite &&
           !isQuickLink)) {
@@ -277,8 +279,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       return const SizedBox.shrink();
     }
     final canShare = collectionViewType == CollectionViewType.ownedCollection ||
-        collectionViewType == CollectionViewType.sharedCollection ||
         collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        collectionViewType == CollectionViewType.sharedCollectionViewer ||
+        collectionViewType == CollectionViewType.sharedCollectionCollaborator ||
         isQuickLink;
     if (!canShare) {
       return const SizedBox.shrink();
@@ -349,7 +352,10 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             collectionViewType == CollectionViewType.hiddenOwnedCollection ||
             collectionViewType == CollectionViewType.quickLink) {
           totalItems = 2;
-        } else if (collectionViewType == CollectionViewType.sharedCollection) {
+        } else if (collectionViewType ==
+                CollectionViewType.sharedCollectionViewer ||
+            collectionViewType ==
+                CollectionViewType.sharedCollectionCollaborator) {
           totalItems = 1;
         }
 
@@ -395,7 +401,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           );
         }
 
-        if (collectionViewType == CollectionViewType.sharedCollection) {
+        if (collectionViewType == CollectionViewType.sharedCollectionViewer ||
+            collectionViewType ==
+                CollectionViewType.sharedCollectionCollaborator) {
           items.add(
             PopupMenuItem<String>(
               value: 'leave_collection',

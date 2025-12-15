@@ -123,7 +123,8 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       );
     }
 
-    if (collectionViewType == CollectionViewType.sharedCollection) {
+    if (collectionViewType == CollectionViewType.sharedCollectionViewer ||
+        collectionViewType == CollectionViewType.sharedCollectionCollaborator) {
       items.add(
         PopupMenuItem<String>(
           value: 'leave_collection',
