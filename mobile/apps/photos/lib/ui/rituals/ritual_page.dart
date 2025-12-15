@@ -1,14 +1,18 @@
 import "dart:io";
+import "dart:math" as math;
 import "dart:ui" as ui;
 
+import "package:ente_icons/ente_icons.dart";
 import "package:flutter/material.dart";
 import "package:flutter/rendering.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection_items.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/rituals/ritual_models.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -17,6 +21,7 @@ import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
 import "package:photos/ui/rituals/ritual_share_card.dart";
+import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
@@ -232,8 +237,9 @@ class _RitualPageState extends State<RitualPage> {
                 Center(
                   child: _StreakCircle(
                     streak: progress?.currentStreak ?? 0,
-                    background:
-                        isDark ? colorScheme.backgroundElevated2 : Colors.white,
+                    background: isDark
+                        ? colorScheme.backgroundElevated2
+                        : const Color(0xFFFAFAFA),
                     shadow: isDark
                         ? null
                         : const [
@@ -438,7 +444,45 @@ class _StreakCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final textColor = colorScheme.textBase;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final text = streak.toString();
+
+    const style = TextStyle(
+      fontFamily: "Nunito",
+      fontSize: 64,
+      fontWeight: FontWeight.w900,
+      letterSpacing: -1.6,
+      height: 1,
+    );
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textHeightBehavior: _tightTextHeightBehavior,
+    )..layout();
+
+    const iconSize = 24.0;
+    final iconOffset = Offset(
+      (painter.size.width / 2) - (iconSize * 0.15),
+      (painter.size.height / 2) - (iconSize * 0.15),
+    );
+
+    final streakTextGradient = _linearGradientFromCssAngle(
+      degrees: 178.24,
+      colors: const [
+        Color(0xFF545454),
+        Color(0xFF000000),
+      ],
+      stops: const [0.1192, 0.8251],
+    );
+    final streakLightningGradient = _linearGradientFromCssAngle(
+      degrees: 189.82,
+      colors: const [
+        Color(0xFFFF9501),
+        Color(0xFFFFD686),
+      ],
+      stops: const [0.2622, 0.9524],
+    );
+
     return Container(
       width: 132,
       height: 132,
@@ -448,29 +492,33 @@ class _StreakCircle extends StatelessWidget {
         boxShadow: shadow,
       ),
       child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
           children: [
-            Text(
-              streak.toString(),
-              textHeightBehavior: _tightTextHeightBehavior,
-              style: TextStyle(
-                fontFamily: "Nunito",
-                fontSize: 64,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -1.6,
-                height: 1,
-                color: textColor,
-              ),
-            ),
-            const SizedBox(width: 2),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: _LightningIcon(
-                size: 24,
-                color: Color(0xFFFFB800),
-              ),
+            isDark
+                ? Text(
+                    text,
+                    textHeightBehavior: _tightTextHeightBehavior,
+                    style: style.copyWith(color: colorScheme.textBase),
+                  )
+                : _GradientText(
+                    text,
+                    gradient: streakTextGradient,
+                    style: style,
+                    textHeightBehavior: _tightTextHeightBehavior,
+                  ),
+            Transform.translate(
+              offset: iconOffset,
+              child: isDark
+                  ? const _LightningIcon(
+                      size: iconSize,
+                      color: Color(0xFFFFB800),
+                    )
+                  : _LightningIcon(
+                      size: iconSize,
+                      gradient: streakLightningGradient,
+                    ),
             ),
           ],
         ),
@@ -530,7 +578,7 @@ class _StreakStatCard extends StatelessWidget {
         color:
             isDark ? colorScheme.backgroundElevated2 : const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.strokeFaint),
+        border: Border.all(color: colorScheme.strokeFaint, width: 1),
       ),
       child: Column(
         children: [
@@ -598,7 +646,7 @@ class _RecentDaysCard extends StatelessWidget {
         color:
             isDark ? colorScheme.backgroundElevated2 : const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.strokeFaint),
+        border: Border.all(color: colorScheme.strokeFaint, width: 1),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -676,7 +724,7 @@ class _RecentDaysCard extends StatelessWidget {
             ? RitualDayThumbnailVariant.camera
             : RitualDayThumbnailVariant.empty);
 
-    return RitualDayThumbnail(
+    final thumbnail = RitualDayThumbnail(
       day: day,
       variant: variant,
       width: tileWidth,
@@ -687,6 +735,23 @@ class _RecentDaysCard extends StatelessWidget {
       onCameraTap: isToday && !completed
           ? () => openRitualCamera(context, ritual)
           : null,
+    );
+    final photoFile = file;
+    if (variant != RitualDayThumbnailVariant.photo || photoFile == null) {
+      return thumbnail;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _openRitualAlbumAndFile(
+          context,
+          ritual: ritual,
+          file: photoFile,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        child: thumbnail,
+      ),
     );
   }
 }
@@ -703,48 +768,38 @@ class _AlbumChevronThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final tileHeight = width * (72 / 48);
+    const labelHeight = 28.0;
     return SizedBox(
       width: width,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: width,
-                height: tileHeight,
-                decoration: BoxDecoration(
-                  color: colorScheme.backgroundElevated,
-                  borderRadius: BorderRadius.circular(8),
+      height: tileHeight + 8 + labelHeight,
+      child: Center(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: isDark ? colorScheme.backgroundElevated : Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isDark
+                      ? colorScheme.strokeFaint
+                      : Colors.black.withValues(alpha: 0.06),
                 ),
-                child: Center(
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.black.withValues(alpha: 0.06),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      color: colorScheme.textBase,
-                      size: 22,
-                    ),
-                  ),
-                ),
+              ),
+              child: Icon(
+                Icons.chevron_right_rounded,
+                color: colorScheme.textBase,
+                size: 22,
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          const SizedBox(height: 28),
-        ],
+        ),
       ),
     );
   }
@@ -789,7 +844,7 @@ class _MonthOverviewCard extends StatelessWidget {
         color:
             isDark ? colorScheme.backgroundElevated2 : const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.strokeFaint),
+        border: Border.all(color: colorScheme.strokeFaint, width: 1),
       ),
       child: Column(
         children: [
@@ -798,7 +853,10 @@ class _MonthOverviewCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   monthLabel,
-                  style: textTheme.bodyBold,
+                  style: textTheme.bodyBold.copyWith(
+                    color:
+                        isDark ? colorScheme.textBase : const Color(0xFF454545),
+                  ),
                   textHeightBehavior: _tightTextHeightBehavior,
                 ),
               ),
@@ -808,7 +866,7 @@ class _MonthOverviewCard extends StatelessWidget {
                       ? colorScheme.backgroundElevated
                       : const Color(0xFFF3F3F3),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: colorScheme.strokeFaint),
+                  border: Border.all(color: colorScheme.strokeFaint, width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -871,16 +929,31 @@ class _MonthChevronButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return InkWell(
-      onTap: enabled ? onTap : null,
-      borderRadius: BorderRadius.circular(14),
-      child: SizedBox(
-        width: 36,
-        height: 34,
-        child: Icon(
-          icon,
-          size: 20,
-          color: enabled ? colorScheme.textBase : colorScheme.textFaint,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Material(
+        color: isDark ? colorScheme.backgroundElevated2 : Colors.white,
+        shape: CircleBorder(
+          side: BorderSide(
+            color: isDark
+                ? colorScheme.strokeFaint
+                : Colors.black.withValues(alpha: 0.06),
+            width: 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: enabled ? onTap : null,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: 28,
+            height: 28,
+            child: Icon(
+              icon,
+              size: 20,
+              color: enabled ? colorScheme.textBase : colorScheme.textFaint,
+            ),
+          ),
         ),
       ),
     );
@@ -926,6 +999,7 @@ class _MonthGrid extends StatelessWidget {
             lastStreakDay!.month,
             lastStreakDay!.day,
           ).millisecondsSinceEpoch;
+    final todayKey = todayMidnight.millisecondsSinceEpoch;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -947,12 +1021,24 @@ class _MonthGrid extends StatelessWidget {
             DateTime(day.year, day.month, day.day).millisecondsSinceEpoch;
         final enabled = _isEnabledDay(ritual, day);
         final completed = progress?.completedDayKeys.contains(dayKey) ?? false;
+        final isToday = dayKey == todayKey;
         final isFuture = day.isAfter(todayMidnight);
         final isLastStreakDay =
             lastStreakKey != null && dayKey == lastStreakKey;
 
         if (!enabled) {
           return const _CrossedOutDay(size: _cellSize);
+        }
+
+        if (completed && isToday) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Center(
+            child: _CompletedDayPill(
+              background:
+                  isDark ? colorScheme.backgroundElevated : Colors.white,
+              iconColor: const Color(0xFFFFB800),
+            ),
+          );
         }
 
         if (isLastStreakDay) {
@@ -962,17 +1048,10 @@ class _MonthGrid extends StatelessWidget {
         }
 
         if (completed) {
-          return Center(
-            child: Container(
-              width: _cellSize,
-              height: _cellSize,
-              decoration: const BoxDecoration(
-                color: Color(0xFF1DB954),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(
-                child: _LightningIcon(size: 16, color: Colors.white),
-              ),
+          return const Center(
+            child: _CompletedDayPill(
+              background: Color(0xFF1DB954),
+              iconColor: Colors.white,
             ),
           );
         }
@@ -988,6 +1067,33 @@ class _MonthGrid extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _CompletedDayPill extends StatelessWidget {
+  const _CompletedDayPill({
+    required this.background,
+    required this.iconColor,
+  });
+
+  final Color background;
+  final Color iconColor;
+
+  static const _radius = BorderRadius.all(Radius.circular(10));
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _MonthGrid._cellSize,
+      height: _MonthGrid._cellSize,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: _radius,
+      ),
+      child: Center(
+        child: _LightningIcon(size: 16, color: iconColor),
+      ),
     );
   }
 }
@@ -1009,7 +1115,8 @@ class _CrossedOutDay extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: ClipOval(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
           child: ColoredBox(
             color: background,
             child: CustomPaint(
@@ -1067,50 +1174,27 @@ class _CrossHatchPainter extends CustomPainter {
 class _LightningIcon extends StatelessWidget {
   const _LightningIcon({
     required this.size,
-    required this.color,
-  });
+    this.color,
+    this.gradient,
+  }) : assert(color != null || gradient != null);
 
   final double size;
-  final Color color;
+  final Color? color;
+  final Gradient? gradient;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.square(size),
-      painter: _LightningPainter(color: color),
+    final icon = Icon(
+      EnteIcons.lightningFilled,
+      size: size,
+      color: gradient == null ? color : Colors.white,
     );
-  }
-}
-
-class _LightningPainter extends CustomPainter {
-  const _LightningPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final w = size.width;
-    final h = size.height;
-
-    final path = Path()
-      ..moveTo(w * 0.58, h * 0.05)
-      ..lineTo(w * 0.22, h * 0.56)
-      ..lineTo(w * 0.50, h * 0.56)
-      ..lineTo(w * 0.36, h * 0.96)
-      ..lineTo(w * 0.80, h * 0.42)
-      ..lineTo(w * 0.54, h * 0.42)
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(_LightningPainter oldDelegate) {
-    return oldDelegate.color != color;
+    if (gradient == null) return icon;
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient!.createShader(bounds),
+      child: icon,
+    );
   }
 }
 
@@ -1138,6 +1222,109 @@ Future<void> _openRitualAlbum(BuildContext context, Ritual ritual) async {
   await routeToPage(
     context,
     CollectionPage(CollectionWithThumbnail(collection, thumbnail)),
+  );
+}
+
+Future<void> _openRitualAlbumAndFile(
+  BuildContext context, {
+  required Ritual ritual,
+  required EnteFile file,
+}) async {
+  final albumId = ritual.albumId;
+  if (albumId == null || albumId <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.ritualAlbumMissing),
+      ),
+    );
+    return;
+  }
+  final collection = CollectionsService.instance.getCollectionByID(albumId);
+  if (collection == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.ritualAlbumMissing),
+      ),
+    );
+    return;
+  }
+
+  final thumbnail = await CollectionsService.instance.getCover(collection);
+  if (!context.mounted) return;
+  routeToPage(
+    context,
+    CollectionPage(CollectionWithThumbnail(collection, thumbnail)),
+  ).ignore();
+
+  final files = await FilesDB.instance.getAllFilesCollection(collection.id);
+  final asc = collection.pubMagicMetadata.asc ?? false;
+  files.sort((a, b) {
+    final creationCompare =
+        (a.creationTime ?? 0).compareTo(b.creationTime ?? 0);
+    if (creationCompare != 0) {
+      return asc ? creationCompare : -creationCompare;
+    }
+    final modificationCompare =
+        (a.modificationTime ?? 0).compareTo(b.modificationTime ?? 0);
+    return asc ? modificationCompare : -modificationCompare;
+  });
+  final selectedIndex = files.indexOf(file);
+  if (selectedIndex < 0) return;
+
+  if (!context.mounted) return;
+  routeToPage(
+    context,
+    DetailPage(
+      DetailPageConfiguration(
+        files,
+        selectedIndex,
+        "ritual_${ritual.id}",
+      ),
+    ),
+    forceCustomPageRoute: true,
+  ).ignore();
+}
+
+class _GradientText extends StatelessWidget {
+  const _GradientText(
+    this.text, {
+    required this.gradient,
+    required this.style,
+    this.textHeightBehavior,
+  });
+
+  final String text;
+  final Gradient gradient;
+  final TextStyle style;
+  final TextHeightBehavior? textHeightBehavior;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) => gradient.createShader(bounds),
+      child: Text(
+        text,
+        style: style.copyWith(color: Colors.white),
+        textHeightBehavior: textHeightBehavior,
+      ),
+    );
+  }
+}
+
+LinearGradient _linearGradientFromCssAngle({
+  required double degrees,
+  required List<Color> colors,
+  List<double>? stops,
+}) {
+  final radians = degrees * math.pi / 180;
+  final dx = math.sin(radians);
+  final dy = -math.cos(radians);
+  return LinearGradient(
+    begin: Alignment(-dx, -dy),
+    end: Alignment(dx, dy),
+    colors: colors,
+    stops: stops,
   );
 }
 
@@ -1197,10 +1384,7 @@ List<String> _sundayFirstNarrowWeekdays(BuildContext context) {
   if (labels.length != 7) {
     return const ["S", "M", "T", "W", "T", "F", "S"];
   }
-  return <String>[
-    labels.last,
-    ...labels.sublist(0, 6),
-  ];
+  return labels;
 }
 
 const _tightTextHeightBehavior = TextHeightBehavior(
