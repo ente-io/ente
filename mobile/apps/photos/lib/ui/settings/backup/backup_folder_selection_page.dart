@@ -129,44 +129,40 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               ),
             ),
             const SizedBox(height: 20),
-            _deviceCollections == null
-                ? const SizedBox.shrink()
-                : GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 6, 64, 12),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _selectedDevicePathIDs.length ==
-                                  _allDevicePathIDs.length
-                              ? AppLocalizations.of(context).unselectAll
-                              : AppLocalizations.of(context).selectAll,
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            decoration: TextDecoration.underline,
-                            fontSize: 16,
-                          ),
-                        ),
+            if (_deviceCollections != null)
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  final hasSelectedAll =
+                      _selectedDevicePathIDs.length == _allDevicePathIDs.length;
+                  if (hasSelectedAll) {
+                    _selectedDevicePathIDs.clear();
+                  } else {
+                    _selectedDevicePathIDs.addAll(_allDevicePathIDs);
+                  }
+                  _deviceCollections!.sort((first, second) {
+                    return first.name
+                        .toLowerCase()
+                        .compareTo(second.name.toLowerCase());
+                  });
+                  setState(() {});
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 6, 64, 12),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _selectedDevicePathIDs.length == _allDevicePathIDs.length
+                          ? AppLocalizations.of(context).unselectAll
+                          : AppLocalizations.of(context).selectAll,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        fontSize: 16,
                       ),
                     ),
-                    onTap: () {
-                      final hasSelectedAll = _selectedDevicePathIDs.length ==
-                          _allDevicePathIDs.length;
-                      // Flip selection
-                      if (hasSelectedAll) {
-                        _selectedDevicePathIDs.clear();
-                      } else {
-                        _selectedDevicePathIDs.addAll(_allDevicePathIDs);
-                      }
-                      _deviceCollections!.sort((first, second) {
-                        return first.name
-                            .toLowerCase()
-                            .compareTo(second.name.toLowerCase());
-                      });
-                      setState(() {});
-                    },
                   ),
+                ),
+              ),
             Expanded(child: _getFolders()),
             SafeArea(
               top: false,
@@ -191,24 +187,22 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         ),
                       ),
                     ),
-                    _treatAsOnboarding
-                        ? const SizedBox(height: 20)
-                        : const SizedBox.shrink(),
-                    _treatAsOnboarding
-                        ? GestureDetector(
-                            key: const ValueKey("skipBackupButton"),
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              Navigator.of(context).pop(false);
-                            },
-                            child: Text(
-                              AppLocalizations.of(context).skip,
-                              style: textTheme.smallMuted.copyWith(
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
+                    if (_treatAsOnboarding) ...[
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        key: const ValueKey("skipBackupButton"),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.of(context).pop(false);
+                        },
+                        child: Text(
+                          AppLocalizations.of(context).skip,
+                          style: textTheme.smallMuted.copyWith(
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
