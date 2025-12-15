@@ -227,6 +227,7 @@ interface QuotedReplyProps {
     parentComment: Comment;
     isOwn: boolean;
     currentUserID?: number;
+    userIDToEmail?: Map<number, string>;
 }
 
 /**
@@ -236,39 +237,51 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
     parentComment,
     isOwn,
     currentUserID,
-}) => (
-    <QuotedReplyContainer isOwn={isOwn}>
-        {parentComment.isDeleted ? (
+    userIDToEmail,
+}) => {
+    // Get the author name - for deleted comments, fall back to email from userIDToEmail
+    const getAuthorName = (): string => {
+        if (parentComment.userID === currentUserID) {
+            return "Me";
+        }
+        if (!parentComment.isDeleted && parentComment.encData?.userName) {
+            return parentComment.encData.userName;
+        }
+        // For deleted comments, try to get email from userIDToEmail map
+        const email = userIDToEmail?.get(parentComment.userID);
+        return email ?? "Deleted user";
+    };
+
+    return (
+        <QuotedReplyContainer isOwn={isOwn}>
             <Typography
                 sx={(theme) => ({
+                    fontWeight: 600,
                     fontSize: 12,
-                    fontStyle: "italic",
-                    color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
+                    color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
                     ...(!isOwn &&
                         theme.applyStyles("dark", {
-                            color: "rgba(255, 255, 255, 0.5)",
+                            color: "rgba(255, 255, 255, 0.7)",
                         })),
                 })}
             >
-                (deleted)
+                {getAuthorName()}
             </Typography>
-        ) : (
-            <>
+            {parentComment.isDeleted ? (
                 <Typography
                     sx={(theme) => ({
-                        fontWeight: 600,
                         fontSize: 12,
-                        color: isOwn ? "rgba(255,255,255,0.9)" : "#666",
+                        fontStyle: "italic",
+                        color: isOwn ? "rgba(255,255,255,0.8)" : "#888",
                         ...(!isOwn &&
                             theme.applyStyles("dark", {
-                                color: "rgba(255, 255, 255, 0.7)",
+                                color: "rgba(255, 255, 255, 0.5)",
                             })),
                     })}
                 >
-                    {parentComment.userID === currentUserID
-                        ? "Me"
-                        : parentComment.encData.userName}
+                    (deleted)
                 </Typography>
+            ) : (
                 <Typography
                     sx={(theme) => ({
                         fontSize: 12,
@@ -281,10 +294,10 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
                 >
                     {truncateCommentText(parentComment.encData.text)}
                 </Typography>
-            </>
-        )}
-    </QuotedReplyContainer>
-);
+            )}
+        </QuotedReplyContainer>
+    );
+};
 
 interface CommentActionsProps {
     onReply: () => void;
@@ -1224,6 +1237,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                         isOwn={commentIsOwn}
                                                         currentUserID={
                                                             currentUserID
+                                                        }
+                                                        userIDToEmail={
+                                                            prefetchedUserIDToEmail
                                                         }
                                                     />
                                                 )}
