@@ -9,6 +9,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -208,8 +209,6 @@ class _ManualPersonGridTile extends StatelessWidget {
     required this.onTap,
   });
 
-  double get _borderRadius => 82 * (size / 102);
-
   @override
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context).small;
@@ -221,12 +220,7 @@ class _ManualPersonGridTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ClipPath(
-            clipper: ShapeBorderClipper(
-              shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(_borderRadius),
-              ),
-            ),
+          FaceThumbnailSquircleClip(
             child: Container(
               width: size,
               height: size,

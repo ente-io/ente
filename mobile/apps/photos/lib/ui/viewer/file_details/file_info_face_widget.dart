@@ -20,6 +20,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/file_face_widget.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -77,11 +78,9 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                 height: thumbnailWidth,
                 width: thumbnailWidth,
                 decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: const BorderRadius.all(
-                      Radius.elliptical(16, 12),
-                    ),
-                    side: widget.highlight
+                  shape: faceThumbnailSquircleBorder(
+                    side: thumbnailWidth,
+                    borderSide: widget.highlight
                         ? BorderSide(
                             color: getEnteColorScheme(context).primary700,
                             width: 1.0,
@@ -89,22 +88,11 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                         : BorderSide.none,
                   ),
                 ),
-                child: ClipRRect(
-                  child: SizedBox(
-                    width: thumbnailWidth,
-                    height: thumbnailWidth,
-                    child: ClipPath(
-                      clipper: ShapeBorderClipper(
-                        shape: ContinuousRectangleBorder(
-                          borderRadius: BorderRadius.circular(52),
-                        ),
-                      ),
-                      child: FileFaceWidget(
-                        key: ValueKey(widget.face.faceID),
-                        widget.file,
-                        faceCrop: widget.faceCrop,
-                      ),
-                    ),
+                child: FaceThumbnailSquircleClip(
+                  child: FileFaceWidget(
+                    key: ValueKey(widget.face.faceID),
+                    widget.file,
+                    faceCrop: widget.faceCrop,
                   ),
                 ),
               ),

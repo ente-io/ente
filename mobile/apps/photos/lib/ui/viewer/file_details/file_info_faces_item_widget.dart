@@ -22,6 +22,7 @@ import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file_details/file_info_face_widget.dart";
 import "package:photos/ui/viewer/people/add_files_to_person_page.dart";
+import "package:photos/ui/viewer/people/face_thumbnail_squircle.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -207,11 +208,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
         strokeWidth: strokeWidth,
         dashPattern: const [4, 4],
         padding: EdgeInsets.zero,
-        customPath: (size) {
-          return ContinuousRectangleBorder(
-            borderRadius: BorderRadius.circular(52),
-          ).getOuterPath(Rect.fromLTWH(0, 0, size.width, size.height));
-        },
+        customPath: faceThumbnailSquircleOuterPath,
         child: SizedBox(
           height: innerSize,
           width: innerSize,
@@ -669,29 +666,13 @@ class _ManualPersonTag extends StatelessWidget {
                   Container(
                     height: thumbnailWidth,
                     width: thumbnailWidth,
-                    decoration: const ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.elliptical(16, 12),
-                        ),
-                        side: BorderSide.none,
-                      ),
+                    decoration: ShapeDecoration(
+                      shape: faceThumbnailSquircleBorder(side: thumbnailWidth),
                     ),
-                    child: ClipRRect(
-                      child: SizedBox(
-                        width: thumbnailWidth,
-                        height: thumbnailWidth,
-                        child: ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(52),
-                            ),
-                          ),
-                          child: PersonFaceWidget(
-                            personId: person.remoteID,
-                            keepAlive: true,
-                          ),
-                        ),
+                    child: FaceThumbnailSquircleClip(
+                      child: PersonFaceWidget(
+                        personId: person.remoteID,
+                        keepAlive: true,
                       ),
                     ),
                   ),
