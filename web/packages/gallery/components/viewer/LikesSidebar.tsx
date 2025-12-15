@@ -13,10 +13,15 @@ import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import type { EnteFile } from "ente-media/file";
-import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 
 // =============================================================================
 // Icons
@@ -101,6 +106,10 @@ export interface LikesSidebarProps extends ModalVisibilityProps {
      * Pre-fetched reactions by collection ID (includes both file and comment reactions).
      */
     prefetchedReactions?: Map<number, UnifiedReaction[]>;
+    /**
+     * Pre-fetched user ID to email mapping.
+     */
+    prefetchedUserIDToEmail?: Map<number, string>;
 }
 
 /**
@@ -114,6 +123,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     fileNormalCollectionIDs,
     collectionSummaries,
     prefetchedReactions,
+    prefetchedUserIDToEmail,
 }) => {
     const [loading, setLoading] = useState(false);
     const [collectionDropdownOpen, setCollectionDropdownOpen] = useState(false);
@@ -122,11 +132,6 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     const [reactionsByCollection, setReactionsByCollection] = useState<
         Map<number, UnifiedReaction[]>
     >(new Map());
-
-    // User ID to email mapping built from fetched collections
-    const [userIDToEmail, setUserIDToEmail] = useState<Map<number, string>>(
-        new Map(),
-    );
 
     // Selected collection for viewing likes (when in gallery view)
     const [selectedCollectionID, setSelectedCollectionID] = useState<
@@ -201,46 +206,23 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
             .map((r) => ({
                 id: r.id,
                 userID: r.userID,
-                userName: userIDToEmail.get(r.userID) ?? `User ${r.userID}`,
+                userName:
+                    prefetchedUserIDToEmail?.get(r.userID) ??
+                    `User ${r.userID}`,
             }));
-    }, [selectedCollectionInfo, reactionsByCollection, userIDToEmail]);
+    }, [
+        selectedCollectionInfo,
+        reactionsByCollection,
+        prefetchedUserIDToEmail,
+    ]);
 
     // Load reactions from prefetched data
-    const loadReactions = useCallback(async () => {
+    const loadReactions = useCallback(() => {
         if (!file || !open || !prefetchedReactions) return;
 
         setLoading(true);
-        const newUserIDToEmail = new Map<number, string>();
 
         try {
-            // Determine which collections to process
-            const collectionIDsToFetch =
-                hasCollectionContext && activeCollectionID
-                    ? [activeCollectionID]
-                    : fileCollectionIDs;
-
-            // Fetch collection info for user emails (lightweight call)
-            for (const collectionID of collectionIDsToFetch) {
-                try {
-                    const collection = await getCollectionByID(collectionID);
-
-                    // Build user ID to email map from collection owner and sharees
-                    if (collection.owner.email) {
-                        newUserIDToEmail.set(
-                            collection.owner.id,
-                            collection.owner.email,
-                        );
-                    }
-                    for (const sharee of collection.sharees) {
-                        if (sharee.email) {
-                            newUserIDToEmail.set(sharee.id, sharee.email);
-                        }
-                    }
-                } catch {
-                    // Skip collections that fail to fetch
-                }
-            }
-
             // Use prefetched reactions (filter to only file reactions, not comment reactions)
             const filteredReactions = new Map<number, UnifiedReaction[]>();
             for (const [collectionID, reactions] of prefetchedReactions) {
@@ -251,20 +233,12 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
             }
 
             setReactionsByCollection(filteredReactions);
-            setUserIDToEmail(newUserIDToEmail);
         } catch (e) {
             log.error("Failed to load reactions", e);
         } finally {
             setLoading(false);
         }
-    }, [
-        file,
-        open,
-        prefetchedReactions,
-        hasCollectionContext,
-        activeCollectionID,
-        fileCollectionIDs,
-    ]);
+    }, [file, open, prefetchedReactions]);
 
     // Track previous open state to detect when sidebar opens
     const prevOpenRef = useRef(false);
@@ -273,7 +247,7 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     useEffect(() => {
         if (open && !prevOpenRef.current) {
             // Sidebar just opened - load reactions and set initial selection
-            void loadReactions();
+            loadReactions();
 
             // Set initial selection to album with most likes (gallery view only)
             if (
@@ -301,7 +275,13 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
             }
         }
         prevOpenRef.current = open;
-    }, [open, loadReactions, hasCollectionContext, prefetchedReactions, file?.id]);
+    }, [
+        open,
+        loadReactions,
+        hasCollectionContext,
+        prefetchedReactions,
+        file?.id,
+    ]);
 
     // Update local state when prefetchedReactions changes (e.g., like/unlike from heart button)
     useEffect(() => {

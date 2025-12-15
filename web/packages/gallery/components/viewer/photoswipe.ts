@@ -90,7 +90,9 @@ export interface FileViewerPhotoSwipeDelegate {
      * This is used for gallery view where the file might belong to a shared
      * collection even though we're not directly viewing that collection.
      */
-    shouldShowSocialButtons: (annotatedFile: FileViewerAnnotatedFile) => boolean;
+    shouldShowSocialButtons: (
+        annotatedFile: FileViewerAnnotatedFile,
+    ) => boolean;
     /**
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
@@ -1505,10 +1507,9 @@ export class FileViewerPhotoSwipe {
                     const captionEl =
                         element.querySelector<HTMLElement>(".pswp__caption")!;
                     // Get the action buttons container.
-                    const actionButtonsEl =
-                        element.querySelector<HTMLElement>(
-                            ".pswp__action-buttons",
-                        );
+                    const actionButtonsEl = element.querySelector<HTMLElement>(
+                        ".pswp__action-buttons",
+                    );
 
                     const updateSocialButtonsVisibility = () => {
                         if (!actionButtonsEl) return;
