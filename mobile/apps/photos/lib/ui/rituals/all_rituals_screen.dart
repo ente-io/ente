@@ -7,6 +7,8 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
+import "package:photos/ui/rituals/ritual_page.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class AllRitualsScreen extends StatelessWidget {
   const AllRitualsScreen({super.key, this.ritual});
@@ -183,6 +185,12 @@ class _RitualOverviewCard extends StatelessWidget {
     ];
 
     return GestureDetector(
+      onTap: () {
+        routeToPage(
+          context,
+          RitualPage(ritualId: ritual.id),
+        );
+      },
       onLongPress: () async {
         final action = await showModalBottomSheet<String>(
           context: context,
