@@ -1019,15 +1019,20 @@ class GalleryIndexUpdatedEvent {
 class ExponentialBouncingScrollPhysics extends BouncingScrollPhysics {
   const ExponentialBouncingScrollPhysics({
     this.frictionExponent = 7.0,
+    this.topFrictionExponent = 2.0,
     super.decelerationRate,
     super.parent,
   });
 
-  /// The exponent used in the friction calculation.
+  /// The exponent used in the friction calculation for bottom overscroll.
   ///
   /// A higher value will result in a more rapid increase in friction as the
   /// user overscrolls. Defaults to 7.0.
   final double frictionExponent;
+
+  /// The exponent used for top overscroll (pulling down).
+  /// Lower value means easier to pull. Defaults to 2.0.
+  final double topFrictionExponent;
 
   @override
   ExponentialBouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
@@ -1035,7 +1040,43 @@ class ExponentialBouncingScrollPhysics extends BouncingScrollPhysics {
       parent: buildParent(ancestor),
       decelerationRate: decelerationRate,
       frictionExponent: frictionExponent,
+      topFrictionExponent: topFrictionExponent,
     );
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    assert(offset != 0.0);
+    assert(position.minScrollExtent <= position.maxScrollExtent);
+
+    if (!position.outOfRange) return offset;
+
+    final double overscrollPastStart =
+        math.max(position.minScrollExtent - position.pixels, 0.0);
+    final double overscrollPastEnd =
+        math.max(position.pixels - position.maxScrollExtent, 0.0);
+    final double overscrollPast =
+        math.max(overscrollPastStart, overscrollPastEnd);
+    final bool easing = (overscrollPastStart > 0.0 && offset < 0.0) ||
+        (overscrollPastEnd > 0.0 && offset > 0.0);
+
+    final double overscrollFraction =
+        overscrollPast / position.viewportDimension;
+
+    // Use lower friction for top overscroll (pulling down to reveal animation)
+    final bool isTopOverscroll = overscrollPastStart > 0.0;
+    final double exponent =
+        isTopOverscroll ? topFrictionExponent : frictionExponent;
+
+    final double baseFactor = switch (decelerationRate) {
+      ScrollDecelerationRate.fast => 0.26,
+      ScrollDecelerationRate.normal => 0.52,
+    };
+    final double friction = easing
+        ? baseFactor * math.exp(-overscrollFraction * exponent)
+        : baseFactor;
+
+    return offset * friction;
   }
 
   @override
