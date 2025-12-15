@@ -528,6 +528,8 @@ const getStreamZipConcurrency = () => {
         ).memory;
         if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
             const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
+
+            console.log(free);
             if (free > 400 * 1024 * 1024) return 4;
             if (free > 160 * 1024 * 1024) return 3;
             return 1; // very constrained, stream one at a time
@@ -685,8 +687,14 @@ const streamFilesToZip = async ({
                 );
 
                 const entries: PreparedEntry[] = [
-                    { name: imageFileName, getData: () => Promise.resolve(imageBytes) },
-                    { name: videoFileName, getData: () => Promise.resolve(videoBytes) },
+                    {
+                        name: imageFileName,
+                        getData: () => Promise.resolve(imageBytes),
+                    },
+                    {
+                        name: videoFileName,
+                        getData: () => Promise.resolve(videoBytes),
+                    },
                 ];
 
                 return { file, entries, entryCount: 1 };
@@ -714,6 +722,8 @@ const streamFilesToZip = async ({
         STREAM_ZIP_MIN_CONCURRENCY,
         Math.min(getStreamZipConcurrency(), STREAM_ZIP_MAX_CONCURRENCY),
     );
+
+    console.log(concurrency);
     let nextToSchedule = 0;
     let active = 0;
 

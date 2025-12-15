@@ -10,7 +10,6 @@
         "exifreader": "^4.32.0",
         "fflate": "^0.8.2",
         "hls-video-element": "^1.5.8",
-        "jszip": "^3.10.1",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.2",
         "localforage": "^1.10.0",
