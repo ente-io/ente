@@ -514,25 +514,39 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     prefetchedComments.get(activeCollectionID) ?? [];
                 setComments(activeComments);
             } else {
-                // For gallery view, find collection with most comments and set initial selection
-                let maxCount = -1;
-                let bestCollectionID: number | undefined;
-                for (const [
-                    collectionID,
-                    collectionComments,
-                ] of prefetchedComments) {
-                    const count = collectionComments.filter(
-                        (c) => !c.isDeleted,
-                    ).length;
-                    if (count > maxCount) {
-                        maxCount = count;
-                        bestCollectionID = collectionID;
+                // For gallery view, only auto-select on initial load.
+                // Use functional update to check current selection without
+                // adding selectedCollectionID as a dependency.
+                setSelectedCollectionID((currentSelection) => {
+                    if (currentSelection !== undefined) {
+                        // Already have a selection, don't change it.
+                        // The useEffect that watches selectedCollectionID will
+                        // update the displayed comments.
+                        return currentSelection;
                     }
-                }
-                if (bestCollectionID !== undefined) {
-                    setSelectedCollectionID(bestCollectionID);
-                    setComments(prefetchedComments.get(bestCollectionID) ?? []);
-                }
+
+                    // Initial selection: find collection with most comments
+                    let maxCount = -1;
+                    let bestCollectionID: number | undefined;
+                    for (const [
+                        collectionID,
+                        collectionComments,
+                    ] of prefetchedComments) {
+                        const count = collectionComments.filter(
+                            (c) => !c.isDeleted,
+                        ).length;
+                        if (count > maxCount) {
+                            maxCount = count;
+                            bestCollectionID = collectionID;
+                        }
+                    }
+                    if (bestCollectionID !== undefined) {
+                        setComments(
+                            prefetchedComments.get(bestCollectionID) ?? [],
+                        );
+                    }
+                    return bestCollectionID;
+                });
             }
         } catch (e) {
             log.error("Failed to load comments", e);
