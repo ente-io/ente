@@ -215,7 +215,7 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
                 }),
             })}
         >
-            {userName[0]}
+            {userName[0]?.toUpperCase()}
         </Avatar>
         <UserName>{userName}</UserName>
         <Separator>•</Separator>
@@ -294,7 +294,10 @@ interface CommentActionsProps {
 /**
  * Action buttons (like, reply) shown below comment bubbles.
  */
-const CommentActions: React.FC<CommentActionsProps> = ({ onReply, isLiked }) => (
+const CommentActions: React.FC<CommentActionsProps> = ({
+    onReply,
+    isLiked,
+}) => (
     <ActionsContainer>
         <ActionButton>
             <HeartIcon filled={isLiked} />
@@ -339,6 +342,10 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      */
     prefetchedReactions?: Map<number, UnifiedReaction[]>;
     /**
+     * Pre-fetched user ID to email mapping.
+     */
+    prefetchedUserIDToEmail?: Map<number, string>;
+    /**
      * Called when a comment is successfully added. The parent should update its
      * comments state to include this new comment.
      */
@@ -357,7 +364,10 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
      * Called when a comment reaction is deleted. The parent should update its
      * reactions state to remove this reaction.
      */
-    onCommentReactionDeleted?: (collectionID: number, reactionID: string) => void;
+    onCommentReactionDeleted?: (
+        collectionID: number,
+        reactionID: string,
+    ) => void;
 }
 
 /**
@@ -378,6 +388,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     currentUserID,
     prefetchedComments,
     prefetchedReactions,
+    prefetchedUserIDToEmail,
     onCommentAdded,
     onCommentDeleted,
     onCommentReactionAdded,
@@ -402,11 +413,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [commentsByCollection, setCommentsByCollection] = useState<
         Map<number, Comment[]>
     >(new Map());
-
-    // User ID to email mapping built from fetched collections
-    const [userIDToEmail, setUserIDToEmail] = useState<Map<number, string>>(
-        new Map(),
-    );
 
     // Selected collection for viewing comments (when in gallery view)
     const [selectedCollectionID, setSelectedCollectionID] = useState<
@@ -449,7 +455,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const collectionsInfo = useMemo((): CollectionInfo[] => {
         return fileCollectionIDs
             .filter((collectionID) =>
-                collectionSummaries?.get(collectionID)?.attributes.has("shared"),
+                collectionSummaries
+                    ?.get(collectionID)
+                    ?.attributes.has("shared"),
             )
             .map((collectionID) => {
                 const summary = collectionSummaries?.get(collectionID);
@@ -490,55 +498,32 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     ]);
 
     // Load comments and reactions from prefetched data.
-    const loadComments = useCallback(async () => {
+    const loadComments = useCallback(() => {
         if (!file || !open || !prefetchedComments) return;
 
         setLoading(true);
-        const newUserIDToEmail = new Map<number, string>();
 
         try {
-            // Determine which collections to process
-            const collectionIDsToFetch =
-                hasCollectionContext && activeCollectionID
-                    ? [activeCollectionID]
-                    : fileCollectionIDs;
-
-            // Fetch collection info for user emails (lightweight call)
-            for (const collectionID of collectionIDsToFetch) {
-                try {
-                    const collection = await getCollectionByID(collectionID);
-
-                    // Build user ID to email mapping
-                    if (collection.owner.email) {
-                        newUserIDToEmail.set(
-                            collection.owner.id,
-                            collection.owner.email,
-                        );
-                    }
-                    for (const sharee of collection.sharees) {
-                        if (sharee.email) {
-                            newUserIDToEmail.set(sharee.id, sharee.email);
-                        }
-                    }
-                } catch {
-                    // Skip collections that fail to fetch
-                }
-            }
-
             // Use prefetched data
             setCommentsByCollection(prefetchedComments);
             setReactionsByCollection(prefetchedReactions ?? new Map());
 
             // Set comments for the currently selected collection
             if (hasCollectionContext && activeCollectionID) {
-                const activeComments = prefetchedComments.get(activeCollectionID) ?? [];
+                const activeComments =
+                    prefetchedComments.get(activeCollectionID) ?? [];
                 setComments(activeComments);
             } else {
                 // For gallery view, find collection with most comments and set initial selection
                 let maxCount = -1;
                 let bestCollectionID: number | undefined;
-                for (const [collectionID, collectionComments] of prefetchedComments) {
-                    const count = collectionComments.filter((c) => !c.isDeleted).length;
+                for (const [
+                    collectionID,
+                    collectionComments,
+                ] of prefetchedComments) {
+                    const count = collectionComments.filter(
+                        (c) => !c.isDeleted,
+                    ).length;
                     if (count > maxCount) {
                         maxCount = count;
                         bestCollectionID = collectionID;
@@ -549,8 +534,6 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     setComments(prefetchedComments.get(bestCollectionID) ?? []);
                 }
             }
-
-            setUserIDToEmail(newUserIDToEmail);
         } catch (e) {
             log.error("Failed to load comments", e);
         } finally {
@@ -563,13 +546,12 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         prefetchedReactions,
         hasCollectionContext,
         activeCollectionID,
-        fileCollectionIDs,
     ]);
 
     // Load comments when the sidebar opens
     useEffect(() => {
         if (open) {
-            void loadComments();
+            loadComments();
         }
     }, [open, loadComments]);
 
@@ -584,8 +566,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             // Find the collection with the most comments
             let maxCount = -1;
             let bestCollectionID: number | undefined;
-            for (const [collectionID, collectionComments] of commentsByCollection) {
-                const count = collectionComments.filter((c) => !c.isDeleted).length;
+            for (const [
+                collectionID,
+                collectionComments,
+            ] of commentsByCollection) {
+                const count = collectionComments.filter(
+                    (c) => !c.isDeleted,
+                ).length;
                 if (count > maxCount) {
                     maxCount = count;
                     bestCollectionID = collectionID;
@@ -700,7 +687,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setSending(true);
         try {
             const collection = await getCollectionByID(collectionID);
-            const userName = userIDToEmail.get(currentUserID ?? 0) ?? "User";
+            const userName =
+                prefetchedUserIDToEmail?.get(currentUserID ?? 0) ?? "User";
             const commentData = { text, userName };
 
             const newCommentID = await addComment(
@@ -845,10 +833,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         // Update reactionsByCollection
                         setReactionsByCollection((prev) => {
                             const next = new Map(prev);
-                            const reactions = next.get(selectedCollectionInfo.id) ?? [];
+                            const reactions =
+                                next.get(selectedCollectionInfo.id) ?? [];
                             next.set(
                                 selectedCollectionInfo.id,
-                                reactions.filter((r) => r.id !== existingReactionID),
+                                reactions.filter(
+                                    (r) => r.id !== existingReactionID,
+                                ),
                             );
                             return next;
                         });
@@ -883,7 +874,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         // Update reactionsByCollection
                         setReactionsByCollection((prev) => {
                             const next = new Map(prev);
-                            const reactions = next.get(selectedCollectionInfo.id) ?? [];
+                            const reactions =
+                                next.get(selectedCollectionInfo.id) ?? [];
                             next.set(selectedCollectionInfo.id, [
                                 ...reactions,
                                 newReaction,
@@ -1347,7 +1339,10 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                     </InputWrapper>
                     <SendButton onClick={handleSend} disabled={sending}>
                         {sending ? (
-                            <CircularProgress size={18} sx={{ color: "inherit" }} />
+                            <CircularProgress
+                                size={18}
+                                sx={{ color: "inherit" }}
+                            />
                         ) : (
                             <SendIcon />
                         )}
@@ -1626,6 +1621,7 @@ const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     borderRadius: isOwn ? "20px 6px 20px 20px" : "6px 20px 20px 20px",
     padding: "20px 40px 20px 20px",
     width: "fit-content",
+    maxWidth: "100%",
     ...(!isOwn && theme.applyStyles("dark", { backgroundColor: "#363636" })),
 }));
 
@@ -1634,6 +1630,7 @@ const CommentText = styled(Typography)<{ isOwn: boolean }>(
         color: isOwn ? "#fff" : "#000",
         fontSize: 14,
         whiteSpace: "pre-wrap",
+        overflowWrap: "break-word",
         ...(!isOwn && theme.applyStyles("dark", { color: "#fff" })),
     }),
 );
