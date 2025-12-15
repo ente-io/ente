@@ -896,9 +896,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             existingReactions.map((r) => r.collectionId),
         );
 
-        // Filter to only collections not already liked
+        // Filter to only shared collections not already liked
         const collectionsToLike = collectionIDs.filter(
-            (id) => !likedCollectionIDs.has(id),
+            (id) =>
+                !likedCollectionIDs.has(id) &&
+                collectionSummaries?.get(id)?.attributes.has("shared"),
         );
 
         void (async () => {
@@ -945,7 +947,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             }
         })();
         setOpenLikeAlbumSelector(false);
-    }, [fileNormalCollectionIDs, getUserFileReactions, user?.id]);
+    }, [fileNormalCollectionIDs, getUserFileReactions, user?.id, collectionSummaries]);
 
     const handlePublicLikeModalClose = useCallback(
         () => setOpenPublicLikeModal(false),

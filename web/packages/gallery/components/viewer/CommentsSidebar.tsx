@@ -445,20 +445,24 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         return fileNormalCollectionIDs?.get(file.id) ?? [];
     }, [file, fileNormalCollectionIDs]);
 
-    // Build collection info list with comment counts and cover files
+    // Build collection info list with comment counts and cover files (shared albums only)
     const collectionsInfo = useMemo((): CollectionInfo[] => {
-        return fileCollectionIDs.map((collectionID) => {
-            const summary = collectionSummaries?.get(collectionID);
-            return {
-                id: collectionID,
-                name: summary?.name ?? `Album ${collectionID}`,
-                commentCount:
-                    commentsByCollection
-                        .get(collectionID)
-                        ?.filter((c) => !c.isDeleted).length ?? 0,
-                coverFile: summary?.coverFile,
-            };
-        });
+        return fileCollectionIDs
+            .filter((collectionID) =>
+                collectionSummaries?.get(collectionID)?.attributes.has("shared"),
+            )
+            .map((collectionID) => {
+                const summary = collectionSummaries?.get(collectionID);
+                return {
+                    id: collectionID,
+                    name: summary?.name ?? `Album ${collectionID}`,
+                    commentCount:
+                        commentsByCollection
+                            .get(collectionID)
+                            ?.filter((c) => !c.isDeleted).length ?? 0,
+                    coverFile: summary?.coverFile,
+                };
+            });
     }, [fileCollectionIDs, collectionSummaries, commentsByCollection]);
 
     // Collections sorted by comment count (descending) for dropdown
