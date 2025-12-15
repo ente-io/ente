@@ -355,21 +355,22 @@ class _ShareCollectionBottomSheetState
             isLast: false,
           ),
         ),
-        PopupMenuItem<String>(
-          value: "collaborator",
-          height: 0,
-          padding: EdgeInsets.zero,
-          child: PopupMenuItemWidget(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedUserMultiple,
-              color: colorScheme.textBase,
-              size: 20,
-            ),
-            label: context.l10n.collaborator,
-            isFirst: false,
-            isLast: false,
-          ),
-        ),
+        // TODO: Re-enable collaborator option when ready
+        // PopupMenuItem<String>(
+        //   value: "collaborator",
+        //   height: 0,
+        //   padding: EdgeInsets.zero,
+        //   child: PopupMenuItemWidget(
+        //     icon: HugeIcon(
+        //       icon: HugeIcons.strokeRoundedUserMultiple,
+        //       color: colorScheme.textBase,
+        //       size: 20,
+        //     ),
+        //     label: context.l10n.collaborator,
+        //     isFirst: false,
+        //     isLast: false,
+        //   ),
+        // ),
         PopupMenuItem<String>(
           value: "remove",
           height: 0,

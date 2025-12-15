@@ -334,7 +334,7 @@ class CollectionActions {
       context,
       title: context.l10n.leaveCollection,
       message: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
-      assetPath: "assets/warning-red.png",
+      assetPath: "assets/warning-grey.png",
       buttons: [
         SizedBox(
           child: GradientButton(
