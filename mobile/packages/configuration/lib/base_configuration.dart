@@ -201,6 +201,18 @@ class BaseConfiguration {
       );
     } catch (e) {
       _logger.severe('master-key failed, incorrect password?', e);
+      // Check if this is a Sodium decryption failure
+      final errorStr = e.toString();
+      if (errorStr.contains('crypto_secretbox_open_easy')) {
+        // This indicates authenticated decryption failed
+        // Could be wrong password OR corrupted data
+        if (errorStr.contains('failed with -1')) {
+          throw Exception(
+            "Password verification failed. This could be due to an incorrect password or corrupted encryption data.",
+          );
+        }
+      }
+      // For other errors, preserve the original exception
       throw Exception("Incorrect password");
     }
     _logger.info("master-key done");
