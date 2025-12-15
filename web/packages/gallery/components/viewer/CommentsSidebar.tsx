@@ -79,12 +79,13 @@ const ReplyIcon: React.FC = () => (
 
 interface HeartIconProps {
     filled?: boolean;
+    small?: boolean;
 }
 
-const HeartIcon: React.FC<HeartIconProps> = ({ filled }) => (
+const HeartIcon: React.FC<HeartIconProps> = ({ filled, small }) => (
     <svg
-        width="16"
-        height="14"
+        width={small ? "13" : "16"}
+        height={small ? "11" : "14"}
         viewBox="0 0 16 14"
         fill={filled ? "#08C225" : "none"}
         xmlns="http://www.w3.org/2000/svg"
@@ -391,6 +392,7 @@ export interface CommentsSidebarProps extends ModalVisibilityProps {
 interface ContextMenuState {
     comment: Comment;
     anchorEl: HTMLElement;
+    isLiked: boolean;
 }
 
 export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
@@ -423,6 +425,8 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
     const [sending, setSending] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const commentsContainerRef = useRef<HTMLDivElement>(null);
+    // Ref to preserve isLiked state during context menu close animation
+    const contextMenuIsLikedRef = useRef(false);
 
     // Comments grouped by collection: collectionID -> comments
     const [commentsByCollection, setCommentsByCollection] = useState<
@@ -861,7 +865,13 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
             return;
         }
         e.preventDefault();
-        setContextMenu({ comment: targetComment, anchorEl: bubbleElement });
+        const isLiked = likedComments.has(targetComment.id);
+        contextMenuIsLikedRef.current = isLiked;
+        setContextMenu({
+            comment: targetComment,
+            anchorEl: bubbleElement,
+            isLiked,
+        });
     };
 
     const handleCloseContextMenu = () => {
@@ -1290,10 +1300,9 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("like")}
                         >
-                            <HeartIcon />
+                            <HeartIcon small />
                             <span>
-                                {contextMenu &&
-                                likedComments.has(contextMenu.comment.id)
+                                {contextMenuIsLikedRef.current
                                     ? "Unlike"
                                     : "Like"}
                             </span>
