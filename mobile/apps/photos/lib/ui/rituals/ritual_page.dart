@@ -239,16 +239,7 @@ class _RitualPageState extends State<RitualPage> {
                     streak: progress?.currentStreak ?? 0,
                     background: isDark
                         ? colorScheme.backgroundElevated2
-                        : const Color(0xFFFAFAFA),
-                    shadow: isDark
-                        ? null
-                        : const [
-                            BoxShadow(
-                              color: Color(0x0F000000),
-                              blurRadius: 24,
-                              offset: Offset(0, 10),
-                            ),
-                          ],
+                        : Theme.of(context).cardColor,
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -434,12 +425,10 @@ class _StreakCircle extends StatelessWidget {
   const _StreakCircle({
     required this.streak,
     required this.background,
-    this.shadow,
   });
 
   final int streak;
   final Color background;
-  final List<BoxShadow>? shadow;
 
   @override
   Widget build(BuildContext context) {
@@ -458,12 +447,36 @@ class _StreakCircle extends StatelessWidget {
       text: TextSpan(text: text, style: style),
       textDirection: Directionality.of(context),
       textHeightBehavior: _tightTextHeightBehavior,
+      textScaler: MediaQuery.textScalerOf(context),
     )..layout();
 
     const iconSize = 24.0;
-    final iconOffset = Offset(
-      (painter.size.width / 2) - (iconSize * 0.15),
-      (painter.size.height / 2) - (iconSize * 0.15),
+    const lightningIconSize = iconSize * 1.25;
+    Rect? rightMostDigitRect;
+    for (var index = 0; index < text.length; index++) {
+      final boxes = painter.getBoxesForSelection(
+        TextSelection(baseOffset: index, extentOffset: index + 1),
+        boxHeightStyle: ui.BoxHeightStyle.tight,
+        boxWidthStyle: ui.BoxWidthStyle.tight,
+      );
+      for (final box in boxes) {
+        final rect = box.toRect();
+        if (rightMostDigitRect == null ||
+            rect.right > rightMostDigitRect.right) {
+          rightMostDigitRect = rect;
+        }
+      }
+    }
+    final lastDigitRect = rightMostDigitRect ?? (Offset.zero & painter.size);
+    final anchor = Offset(
+      lastDigitRect.right - (painter.size.width / 2),
+      lastDigitRect.bottom - (painter.size.height / 2),
+    );
+    final horizontalCenterShiftFactor =
+        (0.25 - ((text.length - 1) * 0.065)).clamp(0.12, 0.25);
+    final iconOffset = anchor.translate(
+      iconSize * horizontalCenterShiftFactor,
+      -(iconSize * 1.1),
     );
 
     final streakTextGradient = _linearGradientFromCssAngle(
@@ -489,7 +502,6 @@ class _StreakCircle extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: background,
-        boxShadow: shadow,
       ),
       child: Center(
         child: Stack(
@@ -510,15 +522,18 @@ class _StreakCircle extends StatelessWidget {
                   ),
             Transform.translate(
               offset: iconOffset,
-              child: isDark
-                  ? const _LightningIcon(
-                      size: iconSize,
-                      color: Color(0xFFFFB800),
-                    )
-                  : _LightningIcon(
-                      size: iconSize,
-                      gradient: streakLightningGradient,
-                    ),
+              child: Transform.rotate(
+                angle: 16 * math.pi / 180,
+                child: isDark
+                    ? const _LightningIcon(
+                        size: lightningIconSize,
+                        color: Color(0xFFFFB800),
+                      )
+                    : _LightningIcon(
+                        size: lightningIconSize,
+                        gradient: streakLightningGradient,
+                      ),
+              ),
             ),
           ],
         ),
@@ -536,16 +551,33 @@ class _RitualHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final title =
         ritual.title.isEmpty ? context.l10n.ritualUntitled : ritual.title;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          ritual.icon,
-          style: textTheme.largeBold.copyWith(height: 1),
-          textHeightBehavior: _tightTextHeightBehavior,
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: isDark
+                ? colorScheme.backgroundElevated2
+                : const Color(0xFFFAFAFA),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                ritual.icon,
+                style: textTheme.largeBold.copyWith(height: 1),
+                textHeightBehavior: _tightTextHeightBehavior,
+              ),
+            ),
+          ),
         ),
         const SizedBox(width: 8),
         Text(
@@ -836,7 +868,7 @@ class _MonthOverviewCard extends StatelessWidget {
       Localizations.localeOf(context).toString(),
     ).format(visibleMonth);
 
-    final weekdayLabels = _sundayFirstNarrowWeekdays(context);
+    final weekdayLabels = _mondayFirstNarrowWeekdays(context);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
@@ -987,7 +1019,7 @@ class _MonthGrid extends StatelessWidget {
     final firstDay = DateTime(visibleMonth.year, visibleMonth.month, 1);
     final daysInMonth =
         DateTime(visibleMonth.year, visibleMonth.month + 1, 0).day;
-    final leadingEmpty = firstDay.weekday % 7; // Sunday-first
+    final leadingEmpty = (firstDay.weekday + 6) % 7; // Monday-first
     final totalDaysCells = leadingEmpty + daysInMonth;
     final trailingEmpty = (7 - (totalDaysCells % 7)) % 7;
     final totalCells = totalDaysCells + trailingEmpty;
@@ -1379,12 +1411,12 @@ bool _isEnabledDay(Ritual ritual, DateTime day) {
   return daysOfWeek[weekdayIndex];
 }
 
-List<String> _sundayFirstNarrowWeekdays(BuildContext context) {
+List<String> _mondayFirstNarrowWeekdays(BuildContext context) {
   final labels = MaterialLocalizations.of(context).narrowWeekdays;
   if (labels.length != 7) {
-    return const ["S", "M", "T", "W", "T", "F", "S"];
+    return const ["M", "T", "W", "T", "F", "S", "S"];
   }
-  return labels;
+  return [...labels.sublist(1), labels.first];
 }
 
 const _tightTextHeightBehavior = TextHeightBehavior(
