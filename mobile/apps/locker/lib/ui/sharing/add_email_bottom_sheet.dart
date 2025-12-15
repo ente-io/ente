@@ -10,6 +10,7 @@ import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:intl/intl.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/gradient_button.dart";
@@ -224,6 +225,8 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
           ],
         ),
       ),
+      // TODO: Re-enable collaborator option when ready
+      // For now, only viewer role is available in Locker
       itemBuilder: (context) => [
         PopupMenuItem<CollectionParticipantRole>(
           value: CollectionParticipantRole.viewer,
@@ -237,21 +240,6 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
             ),
             label: context.l10n.viewer,
             isFirst: true,
-            isLast: false,
-          ),
-        ),
-        PopupMenuItem<CollectionParticipantRole>(
-          value: CollectionParticipantRole.collaborator,
-          height: 0,
-          padding: EdgeInsets.zero,
-          child: PopupMenuItemWidget(
-            icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedUserMultiple,
-              color: colorScheme.textBase,
-              size: 20,
-            ),
-            label: context.l10n.collaborator,
-            isFirst: false,
             isLast: true,
           ),
         ),
@@ -598,9 +586,24 @@ class _AddEmailBottomSheetState extends State<AddEmailBottomSheet> {
     final Set<String> existingEmails = {};
 
     existingEmails.add(Configuration.instance.getEmail() ?? "");
+    final int ownerID = Configuration.instance.getUserID()!;
 
-    for (final sharee in widget.collection.sharees) {
-      existingEmails.add(sharee.email);
+    for (final c in CollectionService.instance.getActiveCollections()) {
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null &&
+              u.email.isNotEmpty &&
+              !existingEmails.contains(u.email)) {
+            existingEmails.add(u.email);
+            suggestedUsers.add(u);
+          }
+        }
+      } else if (c.owner.id != null &&
+          c.owner.email.isNotEmpty &&
+          !existingEmails.contains(c.owner.email)) {
+        existingEmails.add(c.owner.email);
+        suggestedUsers.add(c.owner);
+      }
     }
 
     final cachedUserDetails = UserService.instance.getCachedUserDetails();
