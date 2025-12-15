@@ -84,6 +84,14 @@ export interface FileViewerPhotoSwipeDelegate {
      */
     getCommentCount: (annotatedFile: FileViewerAnnotatedFile) => number;
     /**
+     * Return `true` if social buttons (like, comment) should be shown for the
+     * given file.
+     *
+     * This is used for gallery view where the file might belong to a shared
+     * collection even though we're not directly viewing that collection.
+     */
+    shouldShowSocialButtons: (annotatedFile: FileViewerAnnotatedFile) => boolean;
+    /**
      * Called when there is a keydown event, and our PhotoSwipe instance wants
      * to know if it should ignore it or handle it.
      *
@@ -126,6 +134,13 @@ type FileViewerPhotoSwipeOptions = Pick<
      * {@link showFavorite} file annotation are true.
      */
     haveUser: boolean;
+    /**
+     * `true` if the like and comment action buttons should be shown.
+     *
+     * These buttons are shown only when viewing files in a shared album
+     * (incoming or outgoing) or in a public album.
+     */
+    showSocialButtons: boolean;
     /**
      * Dynamic callbacks.
      *
@@ -223,6 +238,7 @@ export class FileViewerPhotoSwipe {
     constructor({
         initialIndex,
         haveUser,
+        showSocialButtons,
         showFullscreenButton,
         delegate,
         onClose,
@@ -1164,6 +1180,8 @@ export class FileViewerPhotoSwipe {
             }
 
             const af = currentAnnotatedFile();
+            // Guard: af may be undefined during initial setup.
+            if (!af) return;
             const isLiked = delegate.isLiked(af);
 
             // Show fill (green) if liked, show outline (white) if not liked
@@ -1183,6 +1201,8 @@ export class FileViewerPhotoSwipe {
             }
 
             const af = currentAnnotatedFile();
+            // Guard: af may be undefined during initial setup.
+            if (!af) return;
             const count = delegate.getCommentCount(af);
             commentCountElement.textContent = String(count);
         };
@@ -1484,6 +1504,28 @@ export class FileViewerPhotoSwipe {
                 onInit: (element, pswp) => {
                     const captionEl =
                         element.querySelector<HTMLElement>(".pswp__caption")!;
+                    // Get the action buttons container.
+                    const actionButtonsEl =
+                        element.querySelector<HTMLElement>(
+                            ".pswp__action-buttons",
+                        );
+
+                    const updateSocialButtonsVisibility = () => {
+                        if (!actionButtonsEl) return;
+                        // Show buttons if: static showSocialButtons is true
+                        // (public album) OR delegate says this file should
+                        // show buttons (file in shared collection).
+                        const af = currentAnnotatedFile();
+                        // Guard: af may be undefined during initial setup.
+                        if (!af) return;
+                        const shouldShow =
+                            showSocialButtons ||
+                            delegate.shouldShowSocialButtons(af);
+                        actionButtonsEl.style.display = shouldShow
+                            ? "flex"
+                            : "none";
+                    };
+
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
                         const captionText = truncateCaptionIfNeeded(alt);
@@ -1496,6 +1538,8 @@ export class FileViewerPhotoSwipe {
                             "ente-video",
                             fileType == FileType.video,
                         );
+                        // Update social buttons visibility on each slide change.
+                        updateSocialButtonsVisibility();
                     });
                     // Wire up click handler for the comment button.
                     const commentButton = element.querySelector<HTMLElement>(
@@ -1519,6 +1563,8 @@ export class FileViewerPhotoSwipe {
                     // Update comment count on slide change and initially.
                     pswp.on("change", updateCommentCountIfNeeded);
                     updateCommentCountIfNeeded();
+                    // Initial visibility check.
+                    updateSocialButtonsVisibility();
                 },
             });
         });
@@ -2018,7 +2064,7 @@ const bottomRightControlsHTML = () => `
   </button>
   <button class="pswp__action-button pswp__action-button--comment" aria-label="Comment">
     <svg viewBox="0 0 28 28" fill="none">${commentSVGPath} /></svg>
-    <span class="pswp__comment-count">42</span>
+    <span class="pswp__comment-count"></span>
   </button>
 </div>
 `;

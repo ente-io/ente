@@ -425,6 +425,18 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         allReactionsRef.current = allReactions;
     }, [allReactions]);
 
+    // Ref for collectionSummaries to use in callbacks without causing recreations
+    const collectionSummariesRef = useRef(collectionSummaries);
+    useEffect(() => {
+        collectionSummariesRef.current = collectionSummaries;
+    }, [collectionSummaries]);
+
+    // Ref for fileNormalCollectionIDs to use in callbacks without causing recreations
+    const fileNormalCollectionIDsRef = useRef(fileNormalCollectionIDs);
+    useEffect(() => {
+        fileNormalCollectionIDsRef.current = fileNormalCollectionIDs;
+    }, [fileNormalCollectionIDs]);
+
     // Helper to get current user's file reactions from allReactions
     const getUserFileReactions = useCallback(
         (fileId: number): { collectionId: number; reactionId: string }[] => {
@@ -625,8 +637,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         const isGalleryView = !activeCollectionID || activeCollectionID === 0;
 
         if (isGalleryView) {
-            // Gallery view
-            const collectionIDs = fileNormalCollectionIDs?.get(fileId) ?? [];
+            // Gallery view - only consider shared collections
+            const allCollectionIDs = fileNormalCollectionIDsRef.current?.get(fileId) ?? [];
+            const collectionIDs = allCollectionIDs.filter((id) =>
+                collectionSummariesRef.current?.get(id)?.attributes.has("shared"),
+            );
 
             if (reactions.length === 0) {
                 // Not liked in any collection
@@ -779,7 +794,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 })();
             }
         }
-    }, [activeCollectionID, fileNormalCollectionIDs, getUserFileReactions, user?.id]);
+    }, [activeCollectionID, getUserFileReactions, user?.id]);
 
     const handleLikeAlbumSelectorClose = useCallback(
         () => setOpenLikeAlbumSelector(false),
@@ -1163,18 +1178,65 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const haveUser = !!user;
 
-    // Compute all albums the file belongs to and which are liked for the modal
+    // Determine if social buttons (like, comment) should be shown.
+    // They're shown for public albums or when viewing a shared collection.
+    const showSocialButtons = useMemo(() => {
+        // Show for public albums (no logged-in user).
+        if (!haveUser) return true;
+        // In collection view: check if that specific collection is shared.
+        if (activeCollectionID && activeCollectionID !== 0 && collectionSummaries) {
+            const collectionSummary = collectionSummaries.get(activeCollectionID);
+            if (collectionSummary?.attributes.has("shared")) return true;
+        }
+        return false;
+    }, [haveUser, activeCollectionID, collectionSummaries]);
+
+    // Check if a file belongs to any shared collection (for gallery view).
+    const isFileInSharedCollection = useCallback(
+        (fileID: number): boolean => {
+            if (!collectionSummaries || !fileNormalCollectionIDs) return false;
+            const collectionIDs = fileNormalCollectionIDs.get(fileID) ?? [];
+            return collectionIDs.some((collectionID) => {
+                const summary = collectionSummaries.get(collectionID);
+                return summary?.attributes.has("shared");
+            });
+        },
+        [collectionSummaries, fileNormalCollectionIDs],
+    );
+
+    // Delegate callback to check if social buttons should be shown for a file.
+    const shouldShowSocialButtons_ = useCallback(
+        ({ file }: FileViewerAnnotatedFile): boolean => {
+            // If showSocialButtons is already true (public album or in shared
+            // collection view), this won't be called. This callback is only
+            // for gallery view where we need to check per-file.
+            //
+            // If we're in a specific collection context (not gallery view),
+            // return false - the collection's shared status is what matters,
+            // not whether the file happens to be in some other shared album.
+            const isGalleryView =
+                !activeCollectionID || activeCollectionID === 0;
+            if (!isGalleryView) return false;
+
+            return isFileInSharedCollection(file.id);
+        },
+        [isFileInSharedCollection, activeCollectionID],
+    );
+
+    // Compute shared albums the file belongs to and which are liked for the modal
     const { allAlbumsForFile, likedAlbumIDs } = useMemo(() => {
         const file = activeAnnotatedFile?.file;
         if (!file)
             return { allAlbumsForFile: [], likedAlbumIDs: new Set<number>() };
 
-        // Get all collections the file belongs to
+        // Get all collections the file belongs to, filtered to only shared ones
         const collectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
-        const allAlbumsForFile = collectionIDs.map((id) => ({
-            id,
-            name: collectionNameByID?.get(id) ?? `Album ${id}`,
-        }));
+        const allAlbumsForFile = collectionIDs
+            .filter((id) => collectionSummaries?.get(id)?.attributes.has("shared"))
+            .map((id) => ({
+                id,
+                name: collectionNameByID?.get(id) ?? `Album ${id}`,
+            }));
 
         // Get the set of liked album IDs from allReactions
         const fileReactionsMap = allReactions.get(file.id);
@@ -1197,6 +1259,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [
         activeAnnotatedFile,
         collectionNameByID,
+        collectionSummaries,
         fileNormalCollectionIDs,
         allReactions,
         user?.id,
@@ -1452,6 +1515,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             toggleFavorite,
             isLiked,
             getCommentCount,
+            shouldShowSocialButtons: shouldShowSocialButtons_,
             shouldIgnoreKeyboardEvent,
             performKeyAction,
         };
@@ -1466,6 +1530,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         delegate.toggleFavorite = toggleFavorite;
         delegate.isLiked = isLiked;
         delegate.getCommentCount = getCommentCount;
+        delegate.shouldShowSocialButtons = shouldShowSocialButtons_;
         delegate.shouldIgnoreKeyboardEvent = shouldIgnoreKeyboardEvent;
         delegate.performKeyAction = performKeyAction;
     }, [
@@ -1475,6 +1540,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         toggleFavorite,
         isLiked,
         getCommentCount,
+        shouldShowSocialButtons_,
         shouldIgnoreKeyboardEvent,
         performKeyAction,
     ]);
@@ -1515,12 +1581,19 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         }
     }, [allReactions, files, open]);
 
-    // Fetch comments and reactions for the current file using unified endpoint.
+    // Fetch comments and reactions for the current file (only for shared albums).
     const activeFileID = activeAnnotatedFile?.file.id;
     useEffect(() => {
         if (!open || !activeFileID) return;
 
+        // Only fetch social data if social buttons should be shown.
+        // In collection view, use showSocialButtons (based on that collection).
+        // In gallery view, check if the file is in any shared collection.
         const isGalleryView = !activeCollectionID || activeCollectionID === 0;
+        const shouldFetch =
+            showSocialButtons ||
+            (isGalleryView && isFileInSharedCollection(activeFileID));
+        if (!shouldFetch) return;
 
         void (async () => {
             try {
@@ -1572,7 +1645,14 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 });
             }
         })();
-    }, [open, activeFileID, activeCollectionID, fileNormalCollectionIDs]);
+    }, [
+        open,
+        activeFileID,
+        activeCollectionID,
+        fileNormalCollectionIDs,
+        showSocialButtons,
+        isFileInSharedCollection,
+    ]);
 
     // Refresh comment count when fileComments changes.
     useEffect(() => {
@@ -1589,6 +1669,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
+                showSocialButtons,
                 showFullscreenButton,
                 delegate: delegateRef.current!,
                 onClose: () => {
@@ -1618,6 +1699,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         // of existing ones. If any of these dependencies change unnecessarily,
         // then the file viewer will start getting reloaded even when it is
         // already open.
+        //
+        // Note: showSocialButtons is intentionally NOT included here even though
+        // it's passed to the constructor. The delegate's shouldShowSocialButtons
+        // handles dynamic visibility, and showSocialButtons only changes based on
+        // collectionSummaries which we don't want to trigger a full recreation.
         open,
         onClose,
         user,

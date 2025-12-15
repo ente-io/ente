@@ -142,11 +142,15 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
     const hasCollectionContext =
         activeCollectionID !== undefined && activeCollectionID !== 0;
 
-    // Get all collections the file belongs to
+    // Get shared collections the file belongs to
     const fileCollectionIDs = useMemo(() => {
         if (!file) return [];
-        return fileNormalCollectionIDs?.get(file.id) ?? [];
-    }, [file, fileNormalCollectionIDs]);
+        const allCollectionIDs = fileNormalCollectionIDs?.get(file.id) ?? [];
+        // Filter to only include shared collections
+        return allCollectionIDs.filter((id) =>
+            collectionSummaries?.get(id)?.attributes.has("shared"),
+        );
+    }, [file, fileNormalCollectionIDs, collectionSummaries]);
 
     // Build collection info list with like counts and cover files
     const collectionsInfo = useMemo((): CollectionInfo[] => {
