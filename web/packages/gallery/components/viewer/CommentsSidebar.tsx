@@ -86,12 +86,12 @@ const HeartIcon: React.FC<HeartIconProps> = ({ filled }) => (
         width="16"
         height="14"
         viewBox="0 0 16 14"
-        fill={filled ? "#F24F4F" : "none"}
+        fill={filled ? "#08C225" : "none"}
         xmlns="http://www.w3.org/2000/svg"
     >
         <path
             d="M6.63749 12.3742C4.66259 10.885 0.75 7.4804 0.75 4.41664C0.75 2.39161 2.22368 0.75 4.25 0.75C5.3 0.75 6.35 1.10294 7.75 2.51469C9.15 1.10294 10.2 0.75 11.25 0.75C13.2763 0.75 14.75 2.39161 14.75 4.41664C14.75 7.4804 10.8374 10.885 8.86251 12.3742C8.19793 12.8753 7.30207 12.8753 6.63749 12.3742Z"
-            stroke={filled ? "#F24F4F" : "currentColor"}
+            stroke={filled ? "#08C225" : "currentColor"}
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -301,6 +301,7 @@ const QuotedReply: React.FC<QuotedReplyProps> = ({
 
 interface CommentActionsProps {
     onReply: () => void;
+    onLike: () => void;
     isLiked?: boolean;
 }
 
@@ -309,10 +310,11 @@ interface CommentActionsProps {
  */
 const CommentActions: React.FC<CommentActionsProps> = ({
     onReply,
+    onLike,
     isLiked,
 }) => (
     <ActionsContainer>
-        <ActionButton>
+        <ActionButton onClick={onLike}>
             <HeartIcon filled={isLiked} />
         </ActionButton>
         <ActionButton onClick={onReply}>
@@ -866,6 +868,81 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
         setContextMenu(null);
     };
 
+    const handleLikeComment = async (targetComment: Comment) => {
+        if (!selectedCollectionInfo) return;
+
+        try {
+            const collection = await getCollectionByID(
+                selectedCollectionInfo.id,
+            );
+            const existingReactionID = likedComments.get(targetComment.id);
+
+            if (existingReactionID) {
+                // Unlike - delete the reaction
+                await deleteReaction(existingReactionID);
+                setLikedComments((prev) => {
+                    const next = new Map(prev);
+                    next.delete(targetComment.id);
+                    return next;
+                });
+                // Update reactionsByCollection
+                setReactionsByCollection((prev) => {
+                    const next = new Map(prev);
+                    const reactions =
+                        next.get(selectedCollectionInfo.id) ?? [];
+                    next.set(
+                        selectedCollectionInfo.id,
+                        reactions.filter((r) => r.id !== existingReactionID),
+                    );
+                    return next;
+                });
+                // Notify parent to update its reactions state
+                onCommentReactionDeleted?.(
+                    selectedCollectionInfo.id,
+                    existingReactionID,
+                );
+            } else {
+                // Like - add a reaction
+                const reactionID = await addCommentReaction(
+                    selectedCollectionInfo.id,
+                    targetComment.id,
+                    "green_heart",
+                    collection.key,
+                );
+                const newReaction: UnifiedReaction = {
+                    id: reactionID,
+                    collectionID: selectedCollectionInfo.id,
+                    commentID: targetComment.id,
+                    reactionType: "green_heart",
+                    userID: currentUserID ?? 0,
+                    isDeleted: false,
+                    createdAt: Date.now() * 1000,
+                    updatedAt: Date.now() * 1000,
+                };
+                setLikedComments((prev) => {
+                    const next = new Map(prev);
+                    next.set(targetComment.id, reactionID);
+                    return next;
+                });
+                // Update reactionsByCollection
+                setReactionsByCollection((prev) => {
+                    const next = new Map(prev);
+                    const reactions =
+                        next.get(selectedCollectionInfo.id) ?? [];
+                    next.set(selectedCollectionInfo.id, [
+                        ...reactions,
+                        newReaction,
+                    ]);
+                    return next;
+                });
+                // Notify parent to update its reactions state
+                onCommentReactionAdded?.(newReaction);
+            }
+        } catch (e) {
+            log.error("Failed to toggle comment like", e);
+        }
+    };
+
     const handleContextMenuAction = async (
         action: "like" | "reply" | "delete",
     ) => {
@@ -875,80 +952,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
 
         switch (action) {
             case "like":
-                try {
-                    const collection = await getCollectionByID(
-                        selectedCollectionInfo.id,
-                    );
-                    const existingReactionID = likedComments.get(
-                        targetComment.id,
-                    );
-
-                    if (existingReactionID) {
-                        // Unlike - delete the reaction
-                        await deleteReaction(existingReactionID);
-                        setLikedComments((prev) => {
-                            const next = new Map(prev);
-                            next.delete(targetComment.id);
-                            return next;
-                        });
-                        // Update reactionsByCollection
-                        setReactionsByCollection((prev) => {
-                            const next = new Map(prev);
-                            const reactions =
-                                next.get(selectedCollectionInfo.id) ?? [];
-                            next.set(
-                                selectedCollectionInfo.id,
-                                reactions.filter(
-                                    (r) => r.id !== existingReactionID,
-                                ),
-                            );
-                            return next;
-                        });
-                        // Notify parent to update its reactions state
-                        onCommentReactionDeleted?.(
-                            selectedCollectionInfo.id,
-                            existingReactionID,
-                        );
-                    } else {
-                        // Like - add a reaction
-                        const reactionID = await addCommentReaction(
-                            selectedCollectionInfo.id,
-                            targetComment.id,
-                            "green_heart",
-                            collection.key,
-                        );
-                        const newReaction: UnifiedReaction = {
-                            id: reactionID,
-                            collectionID: selectedCollectionInfo.id,
-                            commentID: targetComment.id,
-                            reactionType: "green_heart",
-                            userID: currentUserID ?? 0,
-                            isDeleted: false,
-                            createdAt: Date.now() * 1000,
-                            updatedAt: Date.now() * 1000,
-                        };
-                        setLikedComments((prev) => {
-                            const next = new Map(prev);
-                            next.set(targetComment.id, reactionID);
-                            return next;
-                        });
-                        // Update reactionsByCollection
-                        setReactionsByCollection((prev) => {
-                            const next = new Map(prev);
-                            const reactions =
-                                next.get(selectedCollectionInfo.id) ?? [];
-                            next.set(selectedCollectionInfo.id, [
-                                ...reactions,
-                                newReaction,
-                            ]);
-                            return next;
-                        });
-                        // Notify parent to update its reactions state
-                        onCommentReactionAdded?.(newReaction);
-                    }
-                } catch (e) {
-                    log.error("Failed to toggle comment like", e);
-                }
+                await handleLikeComment(targetComment);
                 break;
             case "reply":
                 handleReply(targetComment);
@@ -1254,6 +1258,11 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                                                     onReply={() =>
                                                         handleReply(comment)
                                                     }
+                                                    onLike={() =>
+                                                        handleLikeComment(
+                                                            comment,
+                                                        )
+                                                    }
                                                     isLiked={likedComments.has(
                                                         comment.id,
                                                     )}
@@ -1281,12 +1290,7 @@ export const CommentsSidebar: React.FC<CommentsSidebarProps> = ({
                         <StyledMenuItem
                             onClick={() => handleContextMenuAction("like")}
                         >
-                            <HeartIcon
-                                filled={
-                                    !!contextMenu &&
-                                    likedComments.has(contextMenu.comment.id)
-                                }
-                            />
+                            <HeartIcon />
                             <span>
                                 {contextMenu &&
                                 likedComments.has(contextMenu.comment.id)
