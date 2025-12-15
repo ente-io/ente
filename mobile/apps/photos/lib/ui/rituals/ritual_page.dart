@@ -1,5 +1,11 @@
+import "dart:io";
+import "dart:ui" as ui;
+
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:intl/intl.dart";
+import "package:logging/logging.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/collection/collection_items.dart";
 import "package:photos/models/rituals/ritual_models.dart";
@@ -9,8 +15,11 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/rituals/ritual_camera_page.dart";
 import "package:photos/ui/rituals/ritual_day_thumbnail.dart";
 import "package:photos/ui/rituals/ritual_editor_dialog.dart";
+import "package:photos/ui/rituals/ritual_share_card.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/share_util.dart";
+import "package:share_plus/share_plus.dart";
 
 class RitualPage extends StatefulWidget {
   const RitualPage({
@@ -25,7 +34,11 @@ class RitualPage extends StatefulWidget {
 }
 
 class _RitualPageState extends State<RitualPage> {
+  static final Logger _logger = Logger("RitualPage");
+
   late DateTime _visibleMonth;
+  final GlobalKey _shareButtonKey = GlobalKey();
+  bool _sharing = false;
 
   @override
   void initState() {
@@ -48,6 +61,81 @@ class _RitualPageState extends State<RitualPage> {
       setState(() {
         _visibleMonth = nextMonth;
       });
+    }
+  }
+
+  Future<void> _shareRitual({
+    required Ritual ritual,
+    required RitualProgress? progress,
+  }) async {
+    if (_sharing) return;
+    OverlayEntry? entry;
+    try {
+      setState(() {
+        _sharing = true;
+      });
+      final overlay = Overlay.maybeOf(context, rootOverlay: true);
+      if (overlay == null) {
+        throw StateError("Overlay not available for ritual share");
+      }
+      final repaintKey = GlobalKey();
+      entry = OverlayEntry(
+        builder: (_) => Center(
+          child: Material(
+            type: MaterialType.transparency,
+            child: IgnorePointer(
+              child: Opacity(
+                // Keep the share card invisible while still allowing it to paint.
+                opacity: 0.01,
+                child: RepaintBoundary(
+                  key: repaintKey,
+                  child: RitualShareCard(
+                    ritual: ritual,
+                    progress: progress,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      overlay.insert(entry);
+      final boundary = await _waitForBoundaryReady(repaintKey: repaintKey);
+      final double pixelRatio =
+          (MediaQuery.devicePixelRatioOf(context) * 1.8).clamp(2.4, 3.5);
+      final ui.Image image = await boundary.toImage(pixelRatio: pixelRatio);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final data = byteData?.buffer.asUint8List();
+      if (data == null || data.isEmpty) {
+        throw StateError("Unable to encode ritual share image");
+      }
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        "${dir.path}/ritual_share_${ritual.id}_${DateTime.now().millisecondsSinceEpoch}.png",
+      );
+      await file.writeAsBytes(data, flush: true);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          sharePositionOrigin: shareButtonRect(context, _shareButtonKey),
+        ),
+      );
+    } catch (e, s) {
+      _logger.warning("Failed to share ritual", e, s);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.ritualShareUnavailable),
+          ),
+        );
+      }
+    } finally {
+      entry?.remove();
+      if (mounted) {
+        setState(() {
+          _sharing = false;
+        });
+      }
     }
   }
 
@@ -109,7 +197,13 @@ class _RitualPageState extends State<RitualPage> {
               _TopActionButton(
                 background: actionBackground,
                 icon: Icons.ios_share,
-                onPressed: () {},
+                buttonKey: _shareButtonKey,
+                onPressed: _sharing
+                    ? null
+                    : () => _shareRitual(
+                          ritual: currentRitual,
+                          progress: progress,
+                        ),
                 tooltip: MaterialLocalizations.of(context).shareButtonLabel,
               ),
               const SizedBox(width: 8),
@@ -201,12 +295,14 @@ class _TopActionButton extends StatelessWidget {
   const _TopActionButton({
     required this.background,
     required this.icon,
+    this.buttonKey,
     required this.onPressed,
     required this.tooltip,
   });
 
   final Color background;
   final IconData icon;
+  final Key? buttonKey;
   final VoidCallback? onPressed;
   final String tooltip;
 
@@ -214,6 +310,7 @@ class _TopActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     return IconButton(
+      key: buttonKey,
       tooltip: tooltip,
       style: IconButton.styleFrom(
         backgroundColor: background,
@@ -1086,3 +1183,49 @@ const _tightTextHeightBehavior = TextHeightBehavior(
   applyHeightToFirstAscent: false,
   applyHeightToLastDescent: false,
 );
+
+Future<RenderRepaintBoundary> _waitForBoundaryReady({
+  required GlobalKey repaintKey,
+}) async {
+  const int maxAttempts = 8;
+  const Duration attemptDelay = Duration(milliseconds: 40);
+
+  for (int attempt = 0; attempt < maxAttempts; attempt++) {
+    final boundary =
+        repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    bool needsPaint = false;
+    assert(() {
+      needsPaint = boundary?.debugNeedsPaint ?? false;
+      return true;
+    }());
+    if (boundary == null) {
+      // no-op; wait and try again.
+    } else if (boundary.size.isEmpty) {
+      // no-op; wait and try again.
+    } else if (needsPaint) {
+      // no-op; wait and try again.
+    } else {
+      return boundary;
+    }
+    await WidgetsBinding.instance.endOfFrame;
+    await Future.delayed(attemptDelay);
+  }
+
+  final boundary =
+      repaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+  if (boundary == null) {
+    throw StateError("Render boundary unavailable for ritual share");
+  }
+  if (boundary.size.isEmpty) {
+    throw StateError("Render boundary has zero size for ritual share");
+  }
+  bool needsPaint = false;
+  assert(() {
+    needsPaint = boundary.debugNeedsPaint;
+    return true;
+  }());
+  if (needsPaint) {
+    throw StateError("Render boundary not ready to paint for ritual share");
+  }
+  return boundary;
+}
