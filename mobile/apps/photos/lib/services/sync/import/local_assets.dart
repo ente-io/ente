@@ -155,10 +155,27 @@ Future<List<AssetPathEntity>> _getGalleryList({
   }
 
   if (updateFromTime != null && updateToTime != null) {
-    filterOptionGroup.updateTimeCond = DateTimeCond(
-      min: DateTime.fromMillisecondsSinceEpoch(updateFromTime ~/ 1000),
-      max: DateTime.fromMillisecondsSinceEpoch(updateToTime ~/ 1000),
-    );
+    // Convert microseconds to milliseconds
+    final fromMs = updateFromTime ~/ 1000;
+    final toMs = updateToTime ~/ 1000;
+
+    // Validate timestamps are within valid DateTime range
+    // Valid range: approximately ±273,790 years from epoch
+    const minValidMs = -8640000000000000;
+    const maxValidMs = 8640000000000000;
+
+    if (fromMs >= minValidMs && fromMs <= maxValidMs &&
+        toMs >= minValidMs && toMs <= maxValidMs) {
+      filterOptionGroup.updateTimeCond = DateTimeCond(
+        min: DateTime.fromMillisecondsSinceEpoch(fromMs),
+        max: DateTime.fromMillisecondsSinceEpoch(toMs),
+      );
+    } else {
+      _logger.warning(
+        'Invalid timestamp range: fromMs=$fromMs, toMs=$toMs. '
+        'Skipping time filter.',
+      );
+    }
   }
   filterOptionGroup.containsPathModified = containsModifiedPath;
   final galleryList = await PhotoManager.getAssetPathList(
@@ -242,7 +259,7 @@ Future<Tuple2<Set<String>, List<EnteFile>>> _getLocalIDsAndFilesFromAssets(
       'modifiedDateTime',
     );
     final bool assetCreatedOrUpdatedAfterGivenTime =
-        max(createMs, modifiedMs) >= (fromTime / ~1000);
+        max(createMs, modifiedMs) >= (fromTime ~/ 1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       final file = await EnteFile.fromAsset(pathEntity.name, entity);
