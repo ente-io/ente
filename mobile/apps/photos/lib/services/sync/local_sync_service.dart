@@ -95,6 +95,14 @@ class LocalSyncService {
       final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
       _logger.info("${existingLocalFileIDs.length} localIDs were discovered");
 
+      // Defensive check: if we have local files but first import flag wasn't
+      // set, mark it complete. This handles edge cases like permission being
+      // granted after skip, or interrupted syncs.
+      if (!hasCompletedFirstImport() && existingLocalFileIDs.isNotEmpty) {
+        _prefs.setBool(kHasCompletedFirstImportKey, true).ignore();
+        _logger.info("First import marked complete: local files already exist");
+      }
+
       final syncStartTime = DateTime.now().microsecondsSinceEpoch;
       final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
       final startTime = DateTime.now().microsecondsSinceEpoch;
