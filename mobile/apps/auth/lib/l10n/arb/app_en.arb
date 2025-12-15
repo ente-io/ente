@@ -627,5 +627,6 @@
   "appIcon": "App icon",
   "importAndOTPGuide": "Export your backup from andOTP using the \"Backup\" option in Settings.\n\nIf your backup is encrypted, you will need to enter the backup password to decrypt it.",
   "enterPasswordToDecryptAndOTP": "Enter password to decrypt andOTP backup",
-  "failedToDecryptAndOTPBackup": "Failed to decrypt andOTP backup"
+  "failedToDecryptAndOTPBackup": "Failed to decrypt andOTP backup",
+  "notSupportedForHOTP": "Not supported for HOTP"
 }

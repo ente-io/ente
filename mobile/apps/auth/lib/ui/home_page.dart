@@ -32,6 +32,7 @@ import 'package:ente_auth/ui/components/note_dialog.dart';
 import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
+import 'package:ente_auth/ui/home/shortcuts.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/home/widgets/auth_logo_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
@@ -1342,7 +1343,14 @@ class _HomePageState extends State<HomePage> {
               bottom: false,
               child: Builder(
                 builder: (context) {
-                  return _getBody();
+                  return Shortcuts(
+                    shortcuts: <LogicalKeySet, Intent>{
+                      LogicalKeySet(LogicalKeyboardKey.keyC): const CopyIntent(),
+                      LogicalKeySet(LogicalKeyboardKey.keyN):
+                          const CopyNextIntent(),
+                    },
+                    child: _getBody(),
+                  );
                 },
               ),
             ),
