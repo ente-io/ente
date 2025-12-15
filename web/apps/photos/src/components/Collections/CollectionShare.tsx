@@ -1843,7 +1843,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             anchor="right"
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={t("share_album")}
+            title={t("manage_link")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
                 <ManageLayout
