@@ -12,6 +12,7 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
+import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
 import { type UnifiedReaction } from "ente-new/photos/services/social";
@@ -495,18 +496,13 @@ export const LikesSidebar: React.FC<LikesSidebarProps> = ({
                         likers.map((liker) => (
                             <LikerRow key={liker.id}>
                                 <Avatar
-                                    sx={(theme) => ({
+                                    sx={{
                                         width: 32,
                                         height: 32,
                                         fontSize: 14,
-                                        bgcolor: "#E0E0E0",
-                                        color: "#666",
-                                        ...theme.applyStyles("dark", {
-                                            bgcolor:
-                                                "rgba(255, 255, 255, 0.16)",
-                                            color: "rgba(255, 255, 255, 0.7)",
-                                        }),
-                                    })}
+                                        bgcolor: getAvatarColor(liker.userName),
+                                        color: "#fff",
+                                    }}
                                 >
                                     {liker.userName[0]?.toUpperCase() ?? "?"}
                                 </Avatar>

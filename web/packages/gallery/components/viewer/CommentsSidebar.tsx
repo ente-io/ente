@@ -15,6 +15,7 @@ import {
 import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
+import { getAvatarColor } from "ente-gallery/utils/avatar-colors";
 import type { EnteFile } from "ente-media/file";
 import { getCollectionByID } from "ente-new/photos/services/collection";
 import type { CollectionSummaries } from "ente-new/photos/services/collection-summary";
@@ -204,17 +205,13 @@ const CommentHeader: React.FC<CommentHeaderProps> = ({
 }) => (
     <CommentHeaderContainer>
         <Avatar
-            sx={(theme) => ({
+            sx={{
                 width: avatarSize,
                 height: avatarSize,
                 fontSize: 14,
-                bgcolor: "#E0E0E0",
-                color: "#666",
-                ...theme.applyStyles("dark", {
-                    bgcolor: "rgba(255, 255, 255, 0.16)",
-                    color: "rgba(255, 255, 255, 0.7)",
-                }),
-            })}
+                bgcolor: getAvatarColor(userName),
+                color: "#fff",
+            }}
         >
             {userName[0]?.toUpperCase()}
         </Avatar>
@@ -1676,7 +1673,12 @@ const OwnTimestamp = styled(Typography)(({ theme }) => ({
 }));
 
 // Comment Bubbles
-const CommentBubbleWrapper = styled(Box)<{
+const CommentBubbleWrapper = styled(Box, {
+    shouldForwardProp: (prop) =>
+        !["isOwn", "isFirstOwn", "isLastOwn", "isHighlighted"].includes(
+            prop as string,
+        ),
+})<{
     isOwn: boolean;
     isFirstOwn?: boolean;
     isLastOwn?: boolean;
@@ -1698,7 +1700,9 @@ const CommentBubbleInner = styled(Box)(() => ({
     maxWidth: 320,
 }));
 
-const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
+const CommentBubble = styled(Box, {
+    shouldForwardProp: (prop) => prop !== "isOwn",
+})<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     backgroundColor: isOwn ? "#0DAF35" : "#F0F0F0",
     borderRadius: isOwn ? "20px 6px 20px 20px" : "6px 20px 20px 20px",
     padding: "20px 40px 20px 20px",
@@ -1707,27 +1711,27 @@ const CommentBubble = styled(Box)<{ isOwn: boolean }>(({ isOwn, theme }) => ({
     ...(!isOwn && theme.applyStyles("dark", { backgroundColor: "#363636" })),
 }));
 
-const CommentText = styled(Typography)<{ isOwn: boolean }>(
-    ({ isOwn, theme }) => ({
-        color: isOwn ? "#fff" : "#000",
-        fontSize: 14,
-        whiteSpace: "pre-wrap",
-        overflowWrap: "break-word",
-        ...(!isOwn && theme.applyStyles("dark", { color: "#fff" })),
-    }),
-);
+const CommentText = styled(Typography, {
+    shouldForwardProp: (prop) => prop !== "isOwn",
+})<{ isOwn: boolean }>(({ isOwn, theme }) => ({
+    color: isOwn ? "#fff" : "#000",
+    fontSize: 14,
+    whiteSpace: "pre-wrap",
+    overflowWrap: "break-word",
+    ...(!isOwn && theme.applyStyles("dark", { color: "#fff" })),
+}));
 
-const QuotedReplyContainer = styled(Box)<{ isOwn: boolean }>(
-    ({ isOwn, theme }) => ({
-        borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
-        paddingLeft: 10,
-        marginBottom: 16,
-        ...(!isOwn &&
-            theme.applyStyles("dark", {
-                borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
-            })),
-    }),
-);
+const QuotedReplyContainer = styled(Box, {
+    shouldForwardProp: (prop) => prop !== "isOwn",
+})<{ isOwn: boolean }>(({ isOwn, theme }) => ({
+    borderLeft: `3px solid ${isOwn ? "rgba(255,255,255,0.5)" : "#ccc"}`,
+    paddingLeft: 10,
+    marginBottom: 16,
+    ...(!isOwn &&
+        theme.applyStyles("dark", {
+            borderLeft: "3px solid rgba(255, 255, 255, 0.3)",
+        })),
+}));
 
 // Actions
 const ActionsContainer = styled(Box)(({ theme }) => ({
