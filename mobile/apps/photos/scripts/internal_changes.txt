@@ -7,3 +7,4 @@
 - Neeraj: (i) Admin Role + Suggest Delete feature
 - Laurens: (i) People Memory Lane feature
 - Neeraj: (i) Show public link to album participants
+- Prateek: Fix backup folder selection page UI spacing and typography
