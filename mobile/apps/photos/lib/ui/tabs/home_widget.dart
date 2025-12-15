@@ -59,6 +59,7 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/extents_page_view.dart";
+import "package:photos/ui/home/christmas/christmas_pull_animation.dart";
 import "package:photos/ui/home/grant_permissions_widget.dart";
 import "package:photos/ui/home/header_widget.dart";
 import "package:photos/ui/home/home_bottom_nav_bar.dart";
@@ -104,6 +105,10 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
+  final ValueNotifier<double> _christmasPullOffsetNotifier =
+      ValueNotifier<double>(0);
+  final ValueNotifier<bool> _christmasPullReleasedNotifier =
+      ValueNotifier<bool>(false);
 
   // for receiving media files
   // ignore: unused_field
@@ -535,6 +540,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _publicAlbumLinkSubscription.cancel();
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
     _swipeToSelectInProgressNotifier.dispose();
+    _christmasPullOffsetNotifier.dispose();
+    _christmasPullReleasedNotifier.dispose();
     activityService.stateNotifier.removeListener(_activityStateListener);
     super.dispose();
   }
@@ -747,13 +754,39 @@ class _HomeWidgetState extends State<HomeWidget> {
                 )
               : null,
           onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
-          body: SafeArea(
-            bottom: false,
-            child: Builder(
-              builder: (context) {
-                return _getBody(context);
-              },
-            ),
+          body: Stack(
+            children: [
+              SafeArea(
+                bottom: false,
+                child: Builder(
+                  builder: (context) {
+                    return _getBody(context);
+                  },
+                ),
+              ),
+              ValueListenableBuilder<double>(
+                valueListenable: _christmasPullOffsetNotifier,
+                builder: (context, pullOffset, child) {
+                  if (pullOffset <= 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return ValueListenableBuilder<bool>(
+                    valueListenable: _christmasPullReleasedNotifier,
+                    builder: (context, isReleased, child) {
+                      return Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: ChristmasPullOverlay(
+                          pullOffset: pullOffset,
+                          isReleased: isReleased,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
           ),
 
           ///To fix the status bar not adapting it's color when switching
@@ -838,12 +871,30 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ],
                 );
               },
-              child: HomeGalleryWidget(
-                header: const HeaderWidget(),
-                footer: const SizedBox(
-                  height: 160,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is ScrollUpdateNotification) {
+                    final double overscroll = notification.metrics.pixels;
+                    if (overscroll < 0) {
+                      _christmasPullOffsetNotifier.value = -overscroll;
+                      _christmasPullReleasedNotifier.value = false;
+                    } else if (_christmasPullOffsetNotifier.value != 0) {
+                      _christmasPullOffsetNotifier.value = 0;
+                    }
+                  } else if (notification is ScrollEndNotification) {
+                    if (_christmasPullOffsetNotifier.value > 0) {
+                      _christmasPullReleasedNotifier.value = true;
+                    }
+                  }
+                  return false;
+                },
+                child: HomeGalleryWidget(
+                  header: const HeaderWidget(),
+                  footer: const SizedBox(
+                    height: 160,
+                  ),
+                  selectedFiles: _selectedFiles,
                 ),
-                selectedFiles: _selectedFiles,
               ),
             );
           },
