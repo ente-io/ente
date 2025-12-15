@@ -509,8 +509,10 @@ interface StreamingZipOptions {
 type StreamingZipResult = "success" | "cancelled" | "error" | "unavailable";
 
 const STREAM_ZIP_MIN_CONCURRENCY = 2;
-const STREAM_ZIP_MAX_CONCURRENCY = 4;
+const STREAM_ZIP_MAX_CONCURRENCY = 12;
 const STREAM_ZIP_MAX_RETRIES = 3;
+const STREAM_ZIP_CONCURRENCY_REFRESH_MS = 600;
+const STREAM_ZIP_BASE_WRITE_QUEUE_LIMIT = 16;
 /** Base retry delay (multiplied by attempt number for backoff). */
 const STREAM_ZIP_RETRY_DELAY_MS = 400;
 
@@ -528,8 +530,9 @@ const getStreamZipConcurrency = () => {
         ).memory;
         if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
             const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
-
-            console.log(free);
+            if (free > 2000 * 1024 * 1024) return 12;
+            if (free > 1400 * 1024 * 1024) return 10;
+            if (free > 800 * 1024 * 1024) return 8;
             if (free > 400 * 1024 * 1024) return 4;
             if (free > 160 * 1024 * 1024) return 3;
             return 1; // very constrained, stream one at a time
@@ -540,15 +543,88 @@ const getStreamZipConcurrency = () => {
             navigator as Navigator & { deviceMemory?: number }
         ).deviceMemory;
         if (deviceMemory) {
-            if (deviceMemory >= 12) return 4;
-            if (deviceMemory >= 6) return 3;
-            if (deviceMemory >= 4) return 2;
+            if (deviceMemory >= 20) return 12;
+            if (deviceMemory >= 16) return 10;
+            if (deviceMemory >= 12) return 8;
+            if (deviceMemory >= 6) return 4;
+            if (deviceMemory >= 4) return 3;
+            return 2;
         }
     } catch {
         // Ignore and fall back to defaults below.
     }
 
     return 3;
+};
+
+/**
+ * Determine write queue depth; allow more buffering on capable devices.
+ */
+const getStreamZipWriteQueueLimit = () => {
+    try {
+        const memory = (
+            performance as Performance & {
+                memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+            }
+        ).memory;
+        if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
+            const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
+            if (free > 1200 * 1024 * 1024) return 64;
+            if (free > 800 * 1024 * 1024) return 48;
+            if (free > 400 * 1024 * 1024) return 32;
+        }
+
+        const deviceMemory = (
+            navigator as Navigator & { deviceMemory?: number }
+        ).deviceMemory;
+        if (deviceMemory) {
+            if (deviceMemory >= 16) return 64;
+            if (deviceMemory >= 12) return 48;
+            if (deviceMemory >= 8) return 32;
+        }
+    } catch {
+        // fall back
+    }
+    return STREAM_ZIP_BASE_WRITE_QUEUE_LIMIT;
+};
+
+/** Allow more entry streams on capable devices, coupled to prep concurrency. */
+const getStreamZipEntryConcurrency = (prepConcurrency: number) => {
+    const clamp = (value: number) =>
+        Math.max(2, Math.min(value, STREAM_ZIP_MAX_CONCURRENCY));
+    try {
+        const memory = (
+            performance as Performance & {
+                memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+            }
+        ).memory;
+        if (memory?.totalJSHeapSize && memory.usedJSHeapSize >= 0) {
+            const free = memory.totalJSHeapSize - memory.usedJSHeapSize;
+            if (free > 2400 * 1024 * 1024) return clamp(12);
+            if (free > 1600 * 1024 * 1024) return clamp(10);
+            if (free > 1000 * 1024 * 1024) return clamp(8);
+            if (free > 600 * 1024 * 1024)
+                return clamp(Math.max(prepConcurrency + 2, 6));
+            if (free > 300 * 1024 * 1024)
+                return clamp(Math.max(prepConcurrency + 1, 4));
+        }
+
+        const deviceMemory = (
+            navigator as Navigator & { deviceMemory?: number }
+        ).deviceMemory;
+        if (deviceMemory) {
+            if (deviceMemory >= 20) return clamp(12);
+            if (deviceMemory >= 16) return clamp(10);
+            if (deviceMemory >= 12) return clamp(8);
+            if (deviceMemory >= 8)
+                return clamp(Math.max(prepConcurrency + 2, 6));
+            if (deviceMemory >= 6)
+                return clamp(Math.max(prepConcurrency + 1, 4));
+        }
+    } catch {
+        // fall back
+    }
+    return clamp(Math.max(prepConcurrency, 3));
 };
 
 /**
@@ -607,16 +683,23 @@ const streamFilesToZip = async ({
 
     const { stream } = handle;
     const writer = stream.getWriter();
+    const writeQueueLimit = getStreamZipWriteQueueLimit();
 
     let zipError: Error | undefined;
+    let allowWrites = true;
     let writerClosed = false;
+    let writerClosing = false;
+    let shuttingDown = false;
     let writeChain = Promise.resolve();
+    let writeQueueDepth = 0;
 
     const closeWriter = async () => {
-        if (writerClosed) return;
-        writerClosed = true;
+        if (writerClosed || writerClosing) return;
+        shuttingDown = true;
+        writerClosing = true;
         try {
             await writer.close();
+            writerClosed = true;
         } catch (e) {
             log.warn("Failed to close ZIP writer", e);
         }
@@ -624,21 +707,56 @@ const streamFilesToZip = async ({
 
     const abortWriter = () => {
         if (writerClosed) return;
-        writerClosed = true;
+        shuttingDown = true;
+        writerClosing = true;
         try {
             void writer.abort();
+            writerClosed = true;
         } catch (e) {
             log.warn("Failed to abort ZIP writer", e);
         }
     };
 
+    const isClosingError = (err: unknown) => {
+        if (!(err instanceof Error)) return false;
+        const msg = err.message.toLowerCase();
+        return msg.includes("closing") || msg.includes("closed");
+    };
+
+    const flushWrites = async () => {
+        let lastChain: Promise<void> | undefined;
+        do {
+            lastChain = writeChain;
+            await lastChain;
+        } while (lastChain !== writeChain);
+    };
+
+    const waitForWriteWindow = async () => {
+        while (writeQueueDepth >= writeQueueLimit) {
+            if (zipError) throw zipError;
+            try {
+                await writeChain;
+            } catch {
+                // zipError will be picked up on next loop
+            }
+        }
+    };
+
     /** Queue write, serialize through promise chain, capture errors in zipError. */
-    const enqueueWrite = (data: Uint8Array) => {
-        writeChain = writeChain.then(() => writer.write(data));
-        writeChain = writeChain.catch((e: unknown) => {
-            zipError = e instanceof Error ? e : new Error(String(e));
-            throw zipError;
-        });
+    const enqueueWrite = async (data: Uint8Array) => {
+        if (!allowWrites || writerClosed || writerClosing) return;
+        await waitForWriteWindow();
+        writeQueueDepth++;
+        writeChain = writeChain
+            .then(() => writer.write(data))
+            .catch((e: unknown) => {
+                if (shuttingDown && isClosingError(e)) return;
+                zipError = e instanceof Error ? e : new Error(String(e));
+                throw zipError;
+            })
+            .finally(() => {
+                writeQueueDepth = Math.max(0, writeQueueDepth - 1);
+            });
         return writeChain;
     };
 
@@ -675,25 +793,35 @@ const streamFilesToZip = async ({
                 const { imageFileName, imageData, videoFileName, videoData } =
                     await decodeLivePhoto(fileName, blob);
 
-                const imageBytes = new Uint8Array(
-                    imageData instanceof Blob
-                        ? await imageData.arrayBuffer()
-                        : imageData,
-                );
-                const videoBytes = new Uint8Array(
-                    videoData instanceof Blob
-                        ? await videoData.arrayBuffer()
-                        : videoData,
-                );
+                const dataToStream = (
+                    data: Blob | ArrayBuffer | Uint8Array,
+                ) => {
+                    if (data instanceof Blob) {
+                        return new Response(data).body;
+                    }
+                    const view =
+                        data instanceof Uint8Array
+                            ? data
+                            : new Uint8Array(data);
+                    return new ReadableStream<Uint8Array>({
+                        pull(controller) {
+                            controller.enqueue(view);
+                            controller.close();
+                        },
+                        cancel() {
+                            return Promise.resolve();
+                        },
+                    });
+                };
 
                 const entries: PreparedEntry[] = [
                     {
                         name: imageFileName,
-                        getData: () => Promise.resolve(imageBytes),
+                        getData: () => Promise.resolve(dataToStream(imageData)),
                     },
                     {
                         name: videoFileName,
-                        getData: () => Promise.resolve(videoBytes),
+                        getData: () => Promise.resolve(dataToStream(videoData)),
                     },
                 ];
 
@@ -718,57 +846,79 @@ const streamFilesToZip = async ({
     };
 
     const preparedPromises: Promise<PreparedFile | null>[] = [];
-    const concurrency = Math.max(
-        STREAM_ZIP_MIN_CONCURRENCY,
-        Math.min(getStreamZipConcurrency(), STREAM_ZIP_MAX_CONCURRENCY),
-    );
+    const clampConcurrency = (value: number) =>
+        Math.max(
+            STREAM_ZIP_MIN_CONCURRENCY,
+            Math.min(value, STREAM_ZIP_MAX_CONCURRENCY),
+        );
+    const clampEntryConcurrency = (value: number) =>
+        Math.max(2, Math.min(value, STREAM_ZIP_MAX_CONCURRENCY));
 
-    console.log(concurrency);
+    let targetConcurrency = clampConcurrency(getStreamZipConcurrency());
+    let entryConcurrency = clampEntryConcurrency(
+        getStreamZipEntryConcurrency(targetConcurrency),
+    );
+    let lastConcurrencyCheck = 0;
+    let concurrencyCheckTimer: ReturnType<typeof setInterval> | undefined;
+
+    const stopConcurrencyRefresh = () => {
+        if (concurrencyCheckTimer) {
+            clearInterval(concurrencyCheckTimer);
+            concurrencyCheckTimer = undefined;
+        }
+    };
+
+    const refreshConcurrency = (force = false) => {
+        const now = Date.now();
+        if (
+            !force &&
+            now - lastConcurrencyCheck < STREAM_ZIP_CONCURRENCY_REFRESH_MS
+        )
+            return targetConcurrency;
+        lastConcurrencyCheck = now;
+        const next = clampConcurrency(getStreamZipConcurrency());
+        if (next !== targetConcurrency) {
+            targetConcurrency = next;
+            scheduleNext();
+        }
+        entryConcurrency = clampEntryConcurrency(
+            getStreamZipEntryConcurrency(targetConcurrency),
+        );
+        return targetConcurrency;
+    };
+
+    const startConcurrencyRefresh = () => {
+        if (typeof setInterval !== "function") return;
+        concurrencyCheckTimer = setInterval(
+            () => refreshConcurrency(true),
+            STREAM_ZIP_CONCURRENCY_REFRESH_MS,
+        );
+    };
+
     let nextToSchedule = 0;
     let active = 0;
 
     /** Schedule next file prep if under concurrency limit. */
     const scheduleNext = () => {
-        if (nextToSchedule >= files.length || active >= concurrency) return;
-        const index = nextToSchedule++;
-        const file = files[index]!;
-        const promise = prepareFile(file).finally(() => {
-            active--;
-            scheduleNext();
-        });
-        preparedPromises[index] = promise;
-        active++;
-        scheduleNext();
+        const allowed = refreshConcurrency();
+        while (nextToSchedule < files.length && active < allowed) {
+            const index = nextToSchedule++;
+            const file = files[index]!;
+            const promise = prepareFile(file).finally(() => {
+                active--;
+                scheduleNext();
+            });
+            preparedPromises[index] = promise;
+            active++;
+        }
     };
 
+    startConcurrencyRefresh();
     scheduleNext();
 
     let lastCompletedIndex = -1;
 
-    /** Read stream to completion, returning all chunks. */
-    const readStreamFully = async (
-        stream: ReadableStream<Uint8Array>,
-    ): Promise<Uint8Array[]> => {
-        const reader = stream.getReader();
-        const chunks: Uint8Array[] = [];
-        try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                if (signal.aborted) {
-                    void reader.cancel().catch(() => undefined);
-                    throw new DOMException("Aborted", "AbortError");
-                }
-                chunks.push(value);
-            }
-            return chunks;
-        } catch (e) {
-            void reader.cancel().catch(() => undefined);
-            throw e;
-        }
-    };
-
-    /** Add entry to ZIP with retries. Reads full data first for atomic writes. */
+    /** Add entry to ZIP with retries. Streams chunks to avoid buffering full files. */
     const addEntryToZipWithRetry = async (
         file: EnteFile,
         entry: PreparedEntry,
@@ -777,19 +927,36 @@ const streamFilesToZip = async ({
         while (attempt < STREAM_ZIP_MAX_RETRIES) {
             attempt++;
             try {
-                // Read the full entry before adding it to the ZIP so transient
-                // stream errors don't leave a half-written entry behind.
                 const resolvedData = await entry.getData();
-                const chunks =
-                    resolvedData instanceof ReadableStream
-                        ? await readStreamFully(resolvedData)
-                        : [resolvedData];
-
                 const passThrough = new ZipPassThrough(entry.name);
                 zip.add(passThrough);
-                for (const chunk of chunks) {
-                    passThrough.push(chunk);
+                if (resolvedData instanceof ReadableStream) {
+                    const reader = resolvedData.getReader();
+                    let shouldCancel = true;
+                    try {
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            if (signal.aborted) {
+                                void reader.cancel().catch(() => undefined);
+                                throw new DOMException("Aborted", "AbortError");
+                            }
+                            await waitForWriteWindow();
+                            passThrough.push(value);
+                            if (zipError) throw zipError;
+                        }
+                        shouldCancel = false;
+                    } finally {
+                        if (shouldCancel) {
+                            void reader.cancel().catch(() => undefined);
+                        }
+                    }
+                } else {
+                    await waitForWriteWindow();
+                    passThrough.push(resolvedData);
                 }
+
+                await waitForWriteWindow();
                 passThrough.push(new Uint8Array(0), true);
 
                 await writeChain;
@@ -808,11 +975,37 @@ const streamFilesToZip = async ({
         }
     };
 
+    const inFlightEntries = new Set<Promise<void>>();
+    let entryFailure: unknown | null = null;
+
+    const waitForEntrySlot = async () => {
+        while (inFlightEntries.size >= entryConcurrency) {
+            await Promise.race(inFlightEntries);
+        }
+    };
+
+    const startEntry = (file: EnteFile, entry: PreparedEntry) => {
+        let p: Promise<void>;
+        p = addEntryToZipWithRetry(file, entry)
+            .catch((e) => {
+                entryFailure = entryFailure ?? e;
+                throw e;
+            })
+            .finally(() => {
+                inFlightEntries.delete(p);
+            });
+        inFlightEntries.add(p);
+        return p;
+    };
+
+    const fileCompletions: Promise<void>[] = [];
+
     try {
         // Consume prepared files in order; preparation happens with limited concurrency
         for (let i = 0; i < files.length; i++) {
             if (signal.aborted) {
                 abortWriter();
+                stopConcurrencyRefresh();
                 return "cancelled";
             }
 
@@ -823,31 +1016,52 @@ const streamFilesToZip = async ({
             const prepared = await preparedPromise;
             const file = files[i]!;
             if (prepared && !signal.aborted) {
-                try {
-                    for (const entry of prepared.entries) {
-                        await addEntryToZipWithRetry(file, entry);
-                    }
-                    onFileSuccess(file, prepared.entryCount);
-                } catch (e: unknown) {
-                    log.error(`Failed to add file ${file.id} to ZIP`, e);
-                    onFileFailure(file, e);
+                const entryPromises: Promise<void>[] = [];
+                for (const entry of prepared.entries) {
+                    await waitForEntrySlot();
+                    entryPromises.push(startEntry(file, entry));
                 }
+                fileCompletions.push(
+                    Promise.all(entryPromises)
+                        .then(() => onFileSuccess(file, prepared.entryCount))
+                        .catch((e) => {
+                            log.error(
+                                `Failed to add file ${file.id} to ZIP`,
+                                e,
+                            );
+                            onFileFailure(file, e);
+                        }),
+                );
             }
-            lastCompletedIndex = i;
 
             if (zipError) {
                 throw zipError;
             }
         }
 
+        // Drain remaining in-flight entry writes and file completions
+        if (inFlightEntries.size) {
+            await Promise.allSettled([...inFlightEntries]);
+        }
+        if (fileCompletions.length) {
+            await Promise.allSettled(fileCompletions);
+        }
+        lastCompletedIndex = files.length - 1;
+        if (entryFailure) {
+            throw entryFailure;
+        }
+
         // Finalize the ZIP
         zip.end();
 
         // Wait for all pending writes to flush and close the writer
-        await writeChain;
+        await flushWrites();
         if (zipError) throw zipError;
 
+        allowWrites = false;
+
         await closeWriter();
+        stopConcurrencyRefresh();
 
         return "success";
     } catch (e) {
@@ -861,6 +1075,7 @@ const streamFilesToZip = async ({
 
         log.error("Streaming ZIP creation failed", e);
         abortWriter();
+        stopConcurrencyRefresh();
         return signal.aborted ? "cancelled" : "error";
     }
 };
