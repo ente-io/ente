@@ -449,7 +449,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     _logger.info(
       'Opening add-to dialog for ${files.length} file(s); fetching collections.',
     );
-    final allCollections = await CollectionService.instance.getCollections();
+
+    final allCollections =
+        await CollectionService.instance.getCollectionsForUI();
     final dedupedCollections = uniqueCollectionsById(allCollections);
     _logger.info(
       'Presenting ${dedupedCollections.length} unique collection option(s) '
