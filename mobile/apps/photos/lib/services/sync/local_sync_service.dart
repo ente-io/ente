@@ -275,6 +275,24 @@ class LocalSyncService {
         backupPreferenceService.isOnlyNewBackupEnabled;
   }
 
+  /// Checks if device collections exist and marks first import as complete.
+  /// Call this when permission is granted to handle edge cases like:
+  /// - Permission granted after initial skip
+  /// - App restart after partial sync
+  /// Only marks complete if permission is granted AND device folders exist.
+  Future<void> checkAndMarkFirstImportDone() async {
+    if (hasCompletedFirstImport()) return;
+    if (!permissionService.hasGrantedPermissions()) return;
+
+    final devicePathIDs = await _db.getDevicePathIDs();
+    if (devicePathIDs.isNotEmpty) {
+      _prefs.setBool(kHasCompletedFirstImportKey, true).ignore();
+      _logger.info(
+        "First import marked complete: ${devicePathIDs.length} device folders exist",
+      );
+    }
+  }
+
   // Warning: resetLocalSync should only be used for testing imported related
   // changes
   Future<void> resetLocalSync() async {

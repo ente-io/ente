@@ -1,4 +1,5 @@
 import "package:photo_manager/photo_manager.dart";
+import "package:photos/services/sync/local_sync_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class PermissionService {
@@ -34,5 +35,8 @@ class PermissionService {
   Future<void> onUpdatePermission(PermissionState state) async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
     await _prefs.setString(kPermissionStateKey, state.toString());
+    // Check if device folders exist and mark first import done if so.
+    // This handles edge cases like permission granted after initial skip.
+    LocalSyncService.instance.checkAndMarkFirstImportDone().ignore();
   }
 }
