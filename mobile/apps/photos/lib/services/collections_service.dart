@@ -1035,6 +1035,14 @@ class CollectionsService {
         },
       );
       collection.setName(newName);
+      _collectionIDToCollections[collection.id] = collection;
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collection.id,
+          <EnteFile>[],
+          "rename_collection",
+        ),
+      );
       sync().ignore();
     } catch (e, s) {
       _logger.warning("failed to rename collection", e, s);
