@@ -1161,8 +1161,9 @@ class _CrossedOutDay extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final background =
         isDark ? colorScheme.backgroundElevated : const Color(0xFFF3F3F3);
-    final stroke =
-        isDark ? colorScheme.strokeFaint : Colors.black.withValues(alpha: 0.08);
+    final stroke = isDark
+        ? colorScheme.backgroundElevated2
+        : Colors.black.withValues(alpha: 0.08);
     return Center(
       child: SizedBox(
         width: size,
